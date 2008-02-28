@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'XMPPStream' target in the 'XMPPStream' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
