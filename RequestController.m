@@ -1,6 +1,7 @@
 #import "RequestController.h"
 #import "RosterController.h"
-#import "XMPPStream.h"
+#import "XMPP.h"
+
 
 @implementation RequestController
 
@@ -16,6 +17,8 @@
 
 - (void)awakeFromNib
 {
+	[xmppClient addDelegate:self];
+	
 	NSRect visibleFrame = [[window screen] visibleFrame];
 	NSRect windowFrame = [window frame];
 	
@@ -34,10 +37,31 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Implementation
+// Helper Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)handleBuddyRequest:(NSString *)jid
+- (void)nextRequest
+{
+	if(++jidIndex < [jids count])
+	{
+		XMPPJID *jid = [jids objectAtIndex:jidIndex];
+		
+		[jidField setStringValue:[jid bare]];
+		[xofyField setStringValue:[NSString stringWithFormat:@"%i of %i", (jidIndex+1), [jids count]]];
+	}
+	else
+	{
+		[jids removeAllObjects];
+		jidIndex = -1;
+		[window close];
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// XMPPClient Delegate Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppClient:(XMPPClient *)sender didReceiveBuddyRequest:(XMPPJID *)jid
 {
 	if(![jids containsObject:jid])
 	{
@@ -47,7 +71,7 @@
 		{
 			jidIndex = 0;
 			
-			[jidField setStringValue:jid];
+			[jidField setStringValue:[jid bare]];
 			[xofyField setHidden:YES];
 			
 			[window setAlphaValue:0.85];
@@ -61,69 +85,64 @@
 	}
 }
 
-- (void)nextRequest
+- (void)xmppClientDidUpdateRoster:(XMPPClient *)sender
 {
-	if(++jidIndex < [jids count])
+	// Often times XMPP servers send presence requests prior to sending the roster.
+	// That is, after you authenticate, they immediately send you presence requests,
+	// meaning that we receive them before we've had a chance to request and receive our roster.
+	// The result is that we may not know, upon receiving a presence request,
+	// if we've already requested this person to be our buddy.
+	// We make up for that by fixing our mistake as soon as possible.
+	
+	NSArray *roster = [xmppClient sortedUsersByAvailabilityName];
+	
+	int i;
+	for(i = 0; i < [roster count]; i++)
 	{
-		[jidField setStringValue:[jids objectAtIndex:jidIndex]];
-		[xofyField setStringValue:[NSString stringWithFormat:@"%i of %i", (jidIndex+1), [jids count]]];
-	}
-	else
-	{
-		[jids removeAllObjects];
-		jidIndex = -1;
-		[window close];
+		XMPPUser *user = [roster objectAtIndex:i];
+		
+		int index = [jids indexOfObject:[user jid]];
+		
+		if(index != NSNotFound)
+		{
+			[xmppClient acceptBuddyRequest:[user jid]];
+			
+			[jids removeObjectAtIndex:index];
+			
+			// Call nextRequest, but we don't actually want to increment jidIndex
+			jidIndex--;
+			[self nextRequest];
+		}
 	}
 }
 
+- (void)xmppClientDidDisconnect:(XMPPClient *)sender
+{
+	// We can't accept or reject any requests when we're disconnected from the server.
+	// We may as well close the window.
+	
+	[jids removeAllObjects];
+	jidIndex = -1;
+	[window close];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Interface Builder Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (IBAction)accept:(id)sender
 {
-	NSString *jid = [jids objectAtIndex:jidIndex];
+	XMPPJID *jid = [jids objectAtIndex:jidIndex];
+	[xmppClient acceptBuddyRequest:jid];
 	
-	// Send presence response
-	NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-	[response addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:jid]];
-	[response addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribed"]];
-	
-	[[rosterController xmppStream] sendElement:response];
-	
-	// Add user to our roster
-	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:jid]];
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
-	[query addChild:item];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
-	[iq addChild:query];
-	
-	[[rosterController xmppStream] sendElement:iq];
-	
-	// Subscribe to the user's presence
-	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:jid]];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribe"]];
-	
-	[[rosterController xmppStream] sendElement:presence];
-	
-	// Process the next request
 	[self nextRequest];
 }
 
 - (IBAction)reject:(id)sender
 {
-	NSString *jid = [jids objectAtIndex:jidIndex];
+	XMPPJID *jid = [jids objectAtIndex:jidIndex];
+	[xmppClient rejectBuddyRequest:jid];
 	
-	// Send presence response
-	NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-	[response addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:jid]];
-	[response addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"unsubscribed"]];
-	
-	[[rosterController xmppStream] sendElement:response];
-	
-	// Process the next request
 	[self nextRequest];
 }
 

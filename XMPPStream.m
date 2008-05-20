@@ -1,4 +1,8 @@
 #import "XMPPStream.h"
+#import "XMPPIQ.h"
+#import "XMPPMessage.h"
+#import "XMPPPresence.h"
+#import "NSXMLElementAdditions.h"
 #import "AsyncSocket.h"
 
 #import <SSCrypto/SSCrypto.h>
@@ -166,7 +170,7 @@
  * connection. This may be OK in some cases, but some servers require it to start a connection.
 **/
 - (void)connectToHost:(NSString *)hostName
-			   onPort:(int)portNumber
+			   onPort:(UInt16)portNumber
 	  withVirtualHost:(NSString *)vHostName
 {
 	if(state == STATE_DISCONNECTED)
@@ -184,7 +188,7 @@
 		state = STATE_CONNECTING;
 		
 		// If the given port number is zero, use the default port number for XMPP communication
-		int myPortNumber = (portNumber > 0) ? portNumber : 5222;
+		UInt16 myPortNumber = (portNumber > 0) ? portNumber : 5222;
 		
 		// Connect to the host
 		[asyncSocket connectToHost:hostName onPort:myPortNumber error:nil];
@@ -201,7 +205,7 @@
  * connection. This may be OK in some cases, but some servers require it to start a connection.
 **/
 - (void)connectToSecureHost:(NSString *)hostName
-					 onPort:(int)portNumber
+					 onPort:(UInt16)portNumber
 			withVirtualHost:(NSString *)vHostName
 {
 	if(state == STATE_DISCONNECTED)
@@ -232,6 +236,13 @@
 - (void)disconnect
 {
 	[asyncSocket disconnect];
+	
+	// Note: The state is updated automatically in the onSocketDidDisconnect: method.
+}
+
+- (void)disconnectAfterSending
+{
+	[asyncSocket disconnectAfterWriting];
 	
 	// Note: The state is updated automatically in the onSocketDidDisconnect: method.
 }
@@ -396,11 +407,7 @@
 			// authcid: authentication identity (username)
 			// passwd : password for authcid
 			
-			// The string below uses embedded NUL terminators
-			// This is what it's supposed to do according the the RFC
-			// To turn off warnings for this in Xcode, use -Wno-nonportable-cfstrings
-			
-			NSString *payload = [NSString stringWithFormat:@"\0%@\0%@", username, password];
+			NSString *payload = [NSString stringWithFormat:@"%C%@%C%@", 0, username, 0, password];
 			NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] encodeBase64WithNewlines:NO];
 			
 			NSXMLElement *auth = [NSXMLElement elementWithName:@"auth"];
@@ -514,6 +521,27 @@
 		[asyncSocket writeData:[elementStr dataUsingEncoding:NSUTF8StringEncoding]
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_STREAM];
+	}
+}
+
+/**
+ * This method handles sending an XML fragment.
+ * If the XMPPStream is not connected, this method does nothing.
+ * 
+ * After the element has been successfully sent, the xmppStream:didSendElementWithTag: delegate method is called.
+**/
+- (void)sendElement:(NSXMLElement *)element andNotifyMe:(long)tag
+{
+	if(state == STATE_CONNECTED)
+	{
+		NSString *elementStr = [element XMLString];
+		
+		if(DEBUG_SEND) {
+			NSLog(@"SEND: %@", elementStr);
+		}
+		[asyncSocket writeData:[elementStr dataUsingEncoding:NSUTF8StringEncoding]
+				   withTimeout:TIMEOUT_WRITE
+						   tag:tag];
 	}
 }
 
@@ -730,11 +758,11 @@
 		// Revert back to connected state (from authenticating state)
 		state = STATE_CONNECTED;
 		
-		if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
-			[delegate xmppStream:self didReceiveError:response];
+		if([delegate respondsToSelector:@selector(xmppStream:didNotRegister:)]) {
+			[delegate xmppStream:self didNotRegister:response];
 		}
 		else if(DEBUG_DELEGATE) {
-			NSLog(@"xmppStream:%p didReceiveError:%@", self, [response XMLString]);
+			NSLog(@"xmppStream:%p didNotRegister:%@", self, [response XMLString]);
 		}
 	}
 	else
@@ -770,11 +798,11 @@
 			// Revert back to connected state (from authenticating state)
 			state = STATE_CONNECTED;
 			
-			if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
-				[delegate xmppStream:self didReceiveError:response];
+			if([delegate respondsToSelector:@selector(xmppStream:didNotAuthenticate:)]) {
+				[delegate xmppStream:self didNotAuthenticate:response];
 			}
 			else if(DEBUG_DELEGATE) {
-				NSLog(@"xmppStream:%p didReceiveError:%@", self, [response XMLString]);
+				NSLog(@"xmppStream:%p didNotAuthenticate:%@", self, [response XMLString]);
 			}
 		}
 		else
@@ -823,11 +851,11 @@
 			// Revert back to connected state (from authenticating state)
 			state = STATE_CONNECTED;
 			
-			if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
-				[delegate xmppStream:self didReceiveError:response];
+			if([delegate respondsToSelector:@selector(xmppStream:didNotAuthenticate:)]) {
+				[delegate xmppStream:self didNotAuthenticate:response];
 			}
 			else if(DEBUG_DELEGATE) {
-				NSLog(@"xmppStream:%p didReceiveError:%@", self, [response XMLString]);
+				NSLog(@"xmppStream:%p didNotAuthenticate:%@", self, [response XMLString]);
 			}
 		}
 		else
@@ -848,11 +876,11 @@
 			// Revert back to connected state (from authenticating state)
 			state = STATE_CONNECTED;
 			
-			if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
-				[delegate xmppStream:self didReceiveError:response];
+			if([delegate respondsToSelector:@selector(xmppStream:didNotAuthenticate:)]) {
+				[delegate xmppStream:self didNotAuthenticate:response];
 			}
 			else if(DEBUG_DELEGATE) {
-				NSLog(@"xmppStream:%p didReceiveError:%@", self, [response XMLString]);
+				NSLog(@"xmppStream:%p didNotAuthenticate:%@", self, [response XMLString]);
 			}
 		}
 		else
@@ -891,11 +919,11 @@
 			// Revert back to connected state (from authenticating state)
 			state = STATE_CONNECTED;
 			
-			if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
-				[delegate xmppStream:self didReceiveError:response];
+			if([delegate respondsToSelector:@selector(xmppStream:didNotAuthenticate:)]) {
+				[delegate xmppStream:self didNotAuthenticate:response];
 			}
 			else if(DEBUG_DELEGATE) {
-				NSLog(@"xmppStream:%p didReceiveError:%@", self, [response XMLString]);
+				NSLog(@"xmppStream:%p didNotAuthenticate:%@", self, [response XMLString]);
 			}
 		}
 		else
@@ -933,11 +961,11 @@
 		// Revert back to connected state (from authenticating state)
 		state = STATE_CONNECTED;
 		
-		if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
-			[delegate xmppStream:self didReceiveError:response];
+		if([delegate respondsToSelector:@selector(xmppStream:didNotAuthenticate:)]) {
+			[delegate xmppStream:self didNotAuthenticate:response];
 		}
 		else if(DEBUG_DELEGATE) {
-			NSLog(@"xmppStream:%p didReceiveError:%@", self, [response XMLString]);
+			NSLog(@"xmppStream:%p didNotAuthenticate:%@", self, [response XMLString]);
 		}
 	}
 }
@@ -1037,11 +1065,11 @@
 		// Revert back to connected state (from start session state)
 		state = STATE_CONNECTED;
 		
-		if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
-			[delegate xmppStream:self didReceiveError:response];
+		if([delegate respondsToSelector:@selector(xmppStream:didNotAuthenticate:)]) {
+			[delegate xmppStream:self didNotAuthenticate:response];
 		}
 		else if(DEBUG_DELEGATE) {
-			NSLog(@"xmppStream:%p didReceiveError:%@", self, [response XMLString]);
+			NSLog(@"xmppStream:%p didNotAuthenticate:%@", self, [response XMLString]);
 		}
 	}
 }
@@ -1088,8 +1116,6 @@
 **/
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
-	NSLog(@"onSocket:didConnectToHost:%@ port:%hu", host, port);
-	
 	// We're now connected with a TCP stream, so it's time to initialize the XML stream
 	[self sendOpeningNegotiation];
 	
@@ -1236,7 +1262,7 @@
 	else if([[element name] isEqualToString:@"iq"])
 	{
 		if([delegate respondsToSelector:@selector(xmppStream:didReceiveIQ:)]) {
-			[delegate xmppStream:self didReceiveIQ:element];
+			[delegate xmppStream:self didReceiveIQ:[XMPPIQ iqFromElement:element]];
 		}
 		else if(DEBUG_DELEGATE) {
 			NSLog(@"xmppStream:%p didReceiveIQ:%@", self, [element XMLString]);
@@ -1245,7 +1271,7 @@
 	else if([[element name] isEqualToString:@"message"])
 	{
 		if([delegate respondsToSelector:@selector(xmppStream:didReceiveMessage:)]) {
-			[delegate xmppStream:self didReceiveMessage:element];
+			[delegate xmppStream:self didReceiveMessage:[XMPPMessage messageFromElement:element]];
 		}
 		else if(DEBUG_DELEGATE) {
 			NSLog(@"xmppStream:%p didReceiveMessage:%@", self, [element XMLString]);
@@ -1254,7 +1280,7 @@
 	else if([[element name] isEqualToString:@"presence"])
 	{
 		if([delegate respondsToSelector:@selector(xmppStream:didReceivePresence:)]) {
-			[delegate xmppStream:self didReceivePresence:element];
+			[delegate xmppStream:self didReceivePresence:[XMPPPresence presenceFromElement:element]];
 		}
 		else if(DEBUG_DELEGATE) {
 			NSLog(@"xmppStream:%p didReceivePresence:%@", self, [element XMLString]);
@@ -1278,6 +1304,20 @@
 	if([asyncSocket isConnected])
 	{
 		[asyncSocket readDataToData:terminator withTimeout:TIMEOUT_READ_STREAM tag:TAG_READ_STREAM];
+	}
+}
+
+/**
+ * Called after data with the given tag has been successfully sent.
+**/
+- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
+{
+	if((tag != TAG_WRITE_STREAM) && (tag != TAG_WRITE_START))
+	{
+		if([delegate respondsToSelector:@selector(xmppStream:didSendElementWithTag:)])
+		{
+			[delegate xmppStream:self didSendElementWithTag:tag];
+		}
 	}
 }
 
@@ -1346,92 +1386,6 @@
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_STREAM];
 	}
-}
-
-@end
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@implementation NSXMLElement (XMPPStreamAdditions)
-
-/**
- * This method returns the first child element for the given name (as an NSXMLElement).
- * If no child elements exist for the given name, nil is returned.
-**/
-- (NSXMLElement *)elementForName:(NSString *)name
-{
-	NSArray *elements = [self elementsForName:name];
-	if([elements count] > 0)
-	{
-		return [elements objectAtIndex:0];
-	}
-	else
-	{
-		// There is a bug in the NSXMLElement elementsForName: method.
-		// Consider the following XML fragment:
-		// 
-		// <query xmlns="jabber:iq:private">
-		//   <x xmlns="some:other:namespace"></x>
-		// </query>
-		// 
-		// Calling [query elementsForName:@"x"] results in an empty array!
-		// 
-		// However, it will work properly if you use the following:
-		// [query elementsForLocalName:@"x" URI:@"some:other:namespace"]
-		// 
-		// The trouble with this is that we may not always know the xmlns in advance,
-		// so in this particular case there is no way to access the element without looping through the children.
-		// 
-		// This bug was submitted to apple on June 1st, 2007 and was classified as "serious".
-		
-		return nil;
-	}
-}
-
-/**
- * This method returns the first child element for the given name and given xmlns (as an NSXMLElement).
- * If no child elements exist for the given name and given xmlns, nil is returned.
-**/
-- (NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns
-{
-	NSArray *elements = [self elementsForLocalName:name URI:xmlns];
-	if([elements count] > 0)
-	{
-		return [elements objectAtIndex:0];
-	}
-	else
-	{
-		return nil;
-	}
-}
-
-/**
- * Returns the common xmlns "attribute", which is only accessible via the namespace methods.
- * The xmlns value is often used in jabber elements.
-**/
-- (NSString *)xmlns
-{
-	return [[self namespaceForPrefix:@""] stringValue];
-}
-
-/**
- * Returns all the attributes in a dictionary.
-**/
-- (NSDictionary *)attributesAsDictionary
-{
-	NSArray *attributes = [self attributes];
-	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithCapacity:[attributes count]];
-	
-	int i;
-	for(i = 0; i < [attributes count]; i++)
-	{
-		NSXMLNode *node = [attributes objectAtIndex:i];
-		
-		[result setObject:[node stringValue] forKey:[node name]];
-	}
-	return result;
 }
 
 @end
@@ -1560,18 +1514,9 @@
 	NSString *HA1str = [NSString stringWithFormat:@"%@:%@:%@", username, realm, password];
 	NSString *HA2str = [NSString stringWithFormat:@"AUTHENTICATE:%@", digestURI];
 	
-	NSLog(@"HA1str: %@", HA1str);
-	
 	[crypto setClearTextWithString:HA1str];
 	NSData *HA1dataA = [crypto digest:@"MD5"];
 	NSData *HA1dataB = [[NSString stringWithFormat:@":%@:%@", nonce, cnonce] dataUsingEncoding:NSUTF8StringEncoding];
-	
-	///////////////////////////////////////////////////////
-	NSLog(@"HA1dataA: %@", HA1dataA);
-	
-	NSData *temp = [[HA1dataA hexval] dataUsingEncoding:NSUTF8StringEncoding];
-	NSLog(@"temp    : %@", temp);
-	///////////////////////////////////////////////////////
 	
 	NSMutableData *HA1data = [NSMutableData dataWithCapacity:([HA1dataA length] + [HA1dataB length])];
 	[HA1data appendData:HA1dataA];

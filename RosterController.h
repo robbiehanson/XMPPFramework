@@ -1,32 +1,21 @@
 #import <Cocoa/Cocoa.h>
-@class  XMPPStream;
+@class  XMPPJID;
+@class  XMPPClient;
+
 
 @interface RosterController : NSObject
 {
-	XMPPStream *xmppStream;
+	BOOL isRegistering;
+	BOOL isAuthenticating;
 	
-	NSMutableDictionary *roster;
-	NSArray *rosterKeys;
+	NSArray *roster;
 	
-	BOOL shouldSignIn;
-	BOOL shouldRegister;
-	
-	int xmpp_port;
-	BOOL usesSSL;
-	BOOL allowsSelfSignedCertificates;
-	NSString *xmpp_hostname;
-	NSString *xmpp_username;
-	NSString *xmpp_vhostname;
-	NSString *xmpp_password;
-	NSString *xmpp_resource;
-	
-    IBOutlet id buddyField;
+	IBOutlet id buddyField;
     IBOutlet id jidField;
     IBOutlet id messageField;
     IBOutlet id passwordField;
     IBOutlet id portField;
     IBOutlet id registerButton;
-    IBOutlet id requestController;
     IBOutlet id resourceField;
     IBOutlet id rosterTable;
     IBOutlet id selfSignedButton;
@@ -35,6 +24,7 @@
     IBOutlet id signInSheet;
     IBOutlet id sslButton;
     IBOutlet id window;
+	IBOutlet id xmppClient;
 }
 
 - (IBAction)addBuddy:(id)sender;
@@ -43,7 +33,5 @@
 - (IBAction)createAccount:(id)sender;
 - (IBAction)removeBuddy:(id)sender;
 - (IBAction)signIn:(id)sender;
-
-- (XMPPStream *)xmppStream;
 
 @end

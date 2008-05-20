@@ -1,20 +1,19 @@
 #import <Cocoa/Cocoa.h>
 
+
 @interface RequestController : NSObject
 {
 	NSMutableArray *jids;
 	int jidIndex;
 	
-    IBOutlet id jidField;
-	IBOutlet id rosterController;
+	IBOutlet id jidField;
     IBOutlet id window;
+	IBOutlet id xmppClient;
     IBOutlet id xofyField;
 }
 
 - (IBAction)accept:(id)sender;
 - (IBAction)reject:(id)sender;
-
-- (void)handleBuddyRequest:(NSString *)jid;
 
 @end
 

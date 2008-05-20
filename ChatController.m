@@ -1,29 +1,26 @@
 #import "ChatController.h"
-#import "XMPPStream.h"
-#import "XMPPUser.h"
+#import "XMPP.h"
 
 
 @implementation ChatController
 
-- (id)initWithXMPPStream:(XMPPStream *)stream forXMPPUser:(XMPPUser *)user
+- (id)initWithXMPPClient:(XMPPClient *)client jid:(XMPPJID *)fullJID
 {
 	if(self = [super initWithWindowNibName:@"ChatWindow"])
 	{
-		xmppStream = [stream retain];
-		xmppUser = [user retain];
+		xmppClient = [client retain];
+		jid = [fullJID retain];
 	}
 	return self;
 }
 
 - (void)awakeFromNib
 {
+	[xmppClient addDelegate:self];
+	
 	[messageView setString:@""];
 	
-	if([xmppUser name])
-		[[self window] setTitle:[xmppUser name]];
-	else
-		[[self window] setTitle:[xmppUser jid]];
-	
+	[[self window] setTitle:[jid full]];
 	[[self window] makeFirstResponder:messageField];
 }
 
@@ -35,6 +32,9 @@
 **/
 - (void)windowWillClose:(NSNotification *)aNotification
 {
+	NSLog(@"ChatController: windowWillClose");
+	
+	[xmppClient removeDelegate:self];
 	[self autorelease];
 }
 
@@ -42,32 +42,61 @@
 {
 	NSLog(@"Destroying self: %@", self);
 	
-	[xmppUser release];
+	[xmppClient release];
+	[jid release];
 	[super dealloc];
 }
 
-- (XMPPUser *)xmppUser
+- (XMPPJID *)jid
 {
-	return xmppUser;
+	return jid;
 }
 
-- (void)receiveMessage:(NSXMLElement *)message
+- (void)scrollToBottom
 {
-	NSString *messageStr = [[message elementForName:@"body"] stringValue];
+	NSScrollView *scrollView = [messageView enclosingScrollView];
+	NSPoint newScrollOrigin;
 	
-	NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
+	if ([[scrollView documentView] isFlipped])
+		newScrollOrigin = NSMakePoint(0.0, NSMaxY([[scrollView documentView] frame]));
+	else
+		newScrollOrigin = NSMakePoint(0.0, 0.0);
 	
-	NSMutableParagraphStyle *mps = [[[NSMutableParagraphStyle alloc] init] autorelease];
-	[mps setAlignment:NSLeftTextAlignment];
+	[[scrollView documentView] scrollPoint:newScrollOrigin];
+}
+
+- (void)xmppClientDidAuthenticate:(XMPPClient *)sender
+{
+	[messageField setEnabled:YES];
+}
+
+- (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message
+{
+	if(![jid isEqual:[message from]]) return;
 	
-	NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithCapacity:2];
-	[attributes setObject:mps forKey:NSParagraphStyleAttributeName];
-	[attributes setObject:[NSColor colorWithCalibratedRed:250 green:250 blue:250 alpha:1] forKey:NSBackgroundColorAttributeName];
-	
-	NSAttributedString *as = [[NSAttributedString alloc] initWithString:paragraph attributes:attributes];
-	[as autorelease];
-	
-	[[messageView textStorage] appendAttributedString:as];
+	if([message isChatMessageWithBody])
+	{
+		NSString *messageStr = [[message elementForName:@"body"] stringValue];
+		
+		NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
+		
+		NSMutableParagraphStyle *mps = [[[NSMutableParagraphStyle alloc] init] autorelease];
+		[mps setAlignment:NSLeftTextAlignment];
+		
+		NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithCapacity:2];
+		[attributes setObject:mps forKey:NSParagraphStyleAttributeName];
+		[attributes setObject:[NSColor colorWithCalibratedRed:250 green:250 blue:250 alpha:1] forKey:NSBackgroundColorAttributeName];
+		
+		NSAttributedString *as = [[NSAttributedString alloc] initWithString:paragraph attributes:attributes];
+		[as autorelease];
+		
+		[[messageView textStorage] appendAttributedString:as];
+	}
+}
+
+- (void)xmppClientDidDisconnect:(XMPPClient *)sender
+{
+	[messageField setEnabled:NO];
 }
 
 - (IBAction)sendMessage:(id)sender
@@ -81,10 +110,10 @@
 		
 		NSXMLElement *message = [NSXMLElement elementWithName:@"message"];
 		[message addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"chat"]];
-		[message addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[xmppUser jid]]];
+		[message addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[jid full]]];
 		[message addChild:body];
 		
-		[xmppStream sendElement:message];
+		[xmppClient sendElement:message];
 		
 		NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
 		
@@ -99,15 +128,7 @@
 		
 		[[messageView textStorage] appendAttributedString:as];
 		
-		NSScrollView *scrollView = [messageView enclosingScrollView];
-		NSPoint newScrollOrigin;
-		
-		if ([[scrollView documentView] isFlipped])
-			newScrollOrigin = NSMakePoint(0.0, NSMaxY([[scrollView documentView] frame]));
-		else
-			newScrollOrigin = NSMakePoint(0.0, 0.0);
-		
-		[[scrollView documentView] scrollPoint:newScrollOrigin];
+		[self scrollToBottom];
 		
 		[messageField setStringValue:@""];
 		[[self window] makeFirstResponder:messageField];

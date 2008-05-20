@@ -64,9 +64,6 @@ typedef enum AsyncSocketError AsyncSocketError;
  * 
  * If the connectToHost:onPort:error: method was called, the delegate will be able to access and configure the
  * CFReadStream and CFWriteStream as desired prior to connection.
- *
- * If the connectToAddress:error: method was called, the delegate will be able to access and configure the
- * CFSocket and CFSocketNativeHandle (BSD socket) as desired prior to connection.
 **/
 - (BOOL)onSocketWillConnect:(AsyncSocket *)sock;
 
@@ -155,7 +152,6 @@ typedef enum AsyncSocketError AsyncSocketError;
 - (BOOL)acceptOnPort:(UInt16)port error:(NSError **)errPtr;
 - (BOOL)acceptOnAddress:(NSString *)hostaddr port:(UInt16)port error:(NSError **)errPtr;
 - (BOOL)connectToHost:(NSString*)hostname onPort:(UInt16)port error:(NSError **)errPtr;
-- (BOOL)connectToAddress:(struct sockaddr_in *)remoteAddr error:(NSError **)errPtr;
 
 /**
  * Disconnects immediately. Any pending reads or writes are dropped.
@@ -182,9 +178,16 @@ typedef enum AsyncSocketError AsyncSocketError;
 - (NSString *) localHost;
 - (UInt16) localPort;
 
-/* The following methods won't block. To not time out, use a negative time interval. If they time out, "onSocket:disconnectWithError:" is called. The tag is for your convenience. You can use it as an array index, step number, state id, pointer, etc., just like the socket's user data. */
+/**
+ * The following methods won't block. To not time out, use a negative time interval.
+ * If they time out, "onSocket:disconnectWithError:" is called. The tag is for your convenience.
+ * You can use it as an array index, step number, state id, pointer, etc., just like the socket's user data.
+**/
 
-/* This will read a certain number of bytes, and call the delegate method when those bytes have been read. If there is an error, partially read data is lost. If the length is 0, this method does nothing and the delegate is not called. */
+/**
+ * This will read a certain number of bytes, and call the delegate method when those bytes have been read.
+ * If there is an error, partially read data is lost. If the length is 0, this method does nothing and the delegate is not called.
+**/
 - (void) readDataToLength:(CFIndex)length withTimeout:(NSTimeInterval)timeout tag:(long)tag;
 
 /**
