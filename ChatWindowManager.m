@@ -1,33 +1,50 @@
 #import "ChatWindowManager.h"
 #import "ChatController.h"
-#import "XMPPStream.h"
-#import "XMPPUser.h"
+#import "XMPP.h"
+
 
 @implementation ChatWindowManager
 
-+ (ChatController *)chatControllerForXMPPUser:(XMPPUser *)user
++ (ChatController *)chatControllerForJID:(XMPPJID *)jid matchResource:(BOOL)matchResource
 {
 	// Loop through all the open windows, and see if any of them are the one we want...
 	NSArray *windows = [NSApp windows];
-	
+
 	int i;
 	for(i = 0; i < [windows count]; i++)
 	{
 		NSWindow *currentWindow = [windows objectAtIndex:i];
 		ChatController *currentWC = [currentWindow windowController];
 		
-		if([currentWC isKindOfClass:[ChatController class]] && [[currentWC xmppUser] isEqual:user])
+		if([currentWC isKindOfClass:[ChatController class]])
 		{
-			return currentWC;
+			if(matchResource)
+			{
+				XMPPJID *currentJID = [currentWC jid];
+				
+				if([currentJID isEqual:jid])
+				{
+					return currentWC;
+				}
+			}
+			else
+			{
+				XMPPJID *currentJID = [[currentWC jid] bareJID];
+				
+				if([currentJID isEqual:[jid bareJID]])
+				{
+					return currentWC;
+				}
+			}
 		}
 	}
 	
 	return nil;
 }
 
-+ (void)openChatWindowWithXMPPStream:(XMPPStream *)stream forXMPPUser:(XMPPUser *)user
++ (void)openChatWindowWithXMPPClient:(XMPPClient *)client forXMPPUser:(XMPPUser *)user
 {
-	ChatController *cc = [[self class] chatControllerForXMPPUser:user];
+	ChatController *cc = [[self class] chatControllerForJID:[user jid] matchResource:NO];
 	
 	if(cc)
 	{
@@ -36,30 +53,32 @@
 	else
 	{
 		// Create Manual Sync Window
-		ChatController *temp = [[ChatController alloc] initWithXMPPStream:stream forXMPPUser:user];
+		XMPPJID *jid = [[user primaryResource] jid];
+		
+		ChatController *temp = [[ChatController alloc] initWithXMPPClient:client jid:jid];
 		[temp showWindow:self];
 		
 		// Note: MSWController will automatically release itself when the user closes the window
 	}
 }
 
-+ (void)handleChatMessage:(NSXMLElement *)message withXMPPStream:(XMPPStream *)stream fromXMPPUser:(XMPPUser *)user
++ (void)handleChatMessage:(XMPPMessage *)message withXMPPClient:(XMPPClient *)client
 {
-	ChatController *cc = [[self class] chatControllerForXMPPUser:user];
+	NSLog(@"ChatWindowManager: handleChatMessage");
 	
-	if(cc)
-	{
-		[cc receiveMessage:message];
-	}
-	else
+	ChatController *cc = [[self class] chatControllerForJID:[message from] matchResource:YES];
+	
+	if(!cc)
 	{
 		// Create new chat window
-		ChatController *newCC = [[ChatController alloc] initWithXMPPStream:stream forXMPPUser:user];
+		XMPPJID *jid = [message from];
+		
+		ChatController *newCC = [[ChatController alloc] initWithXMPPClient:client jid:jid];
 		[newCC showWindow:self];
 		
-		// Note: ChatController will automatically release itself when the user closes the window
+		// Note: ChatController will automatically release itself when the user closes the window.
 		
-		[newCC receiveMessage:message];
+		// Note: The ChatController will receive the message immediately b/c it immediately adds itself as a delegate.
 	}
 }
 

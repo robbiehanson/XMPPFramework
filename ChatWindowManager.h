@@ -1,11 +1,13 @@
 #import <Cocoa/Cocoa.h>
-@class   XMPPStream;
+@class   XMPPClient;
 @class   XMPPUser;
+@class   XMPPMessage;
+
 
 @interface ChatWindowManager : NSObject
 
-+ (void)openChatWindowWithXMPPStream:(XMPPStream *)stream forXMPPUser:(XMPPUser *)user;
++ (void)openChatWindowWithXMPPClient:(XMPPClient *)xc forXMPPUser:(XMPPUser *)user;
 
-+ (void)handleChatMessage:(NSXMLElement *)message withXMPPStream:(XMPPStream *)stream fromXMPPUser:(XMPPUser *)user;
++ (void)handleChatMessage:(XMPPMessage *)message withXMPPClient:(XMPPClient *)client;
 
 @end

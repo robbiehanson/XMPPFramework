@@ -1,34 +1,40 @@
 #import <Cocoa/Cocoa.h>
+@class  XMPPJID;
+@class  XMPPIQ;
+@class  XMPPPresence;
+@class  XMPPResource;
 
 
 @interface XMPPUser : NSObject
 {
-	NSMutableDictionary *itemAttributes;
+	NSMutableDictionary *resources;
 	
-	NSString *presence_type;
-	NSString *presence_show;
-	NSString *presence_status;
+	XMPPJID *jid;
+	
+	NSMutableDictionary *itemAttributes;
+	XMPPResource *primaryResource;
 }
 
 - (id)initWithItem:(NSXMLElement *)item;
 
+- (XMPPJID *)jid;
+- (NSString *)nickname;
+
+- (NSString *)displayName;
+
 - (BOOL)isOnline;
 - (BOOL)isPendingApproval;
 
-- (NSString *)jid;
-- (NSString *)name;
-- (NSString *)show;
-- (NSString *)status;
+- (XMPPResource *)primaryResource;
+- (NSArray *)sortedResources;
 
-- (void)updateWithItem:(NSXMLElement *)iq;
-- (void)updateWithPresence:(NSXMLElement *)presence;
+- (void)updateWithItem:(NSXMLElement *)item;
+- (void)updateWithPresence:(XMPPPresence *)presence;
 
-- (void)setAsOffline;
+- (NSComparisonResult)compareByName:(XMPPUser *)another;
+- (NSComparisonResult)compareByName:(XMPPUser *)another options:(NSStringCompareOptions)mask;
 
-- (NSComparisonResult)compareByName:(XMPPUser *)user;
-- (NSComparisonResult)compareByName:(XMPPUser *)user options:(unsigned)mask;
-
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)user;
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)user options:(unsigned)mask;
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another;
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another options:(NSStringCompareOptions)mask;
 
 @end

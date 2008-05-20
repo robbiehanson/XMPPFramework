@@ -5,6 +5,14 @@
 	<key>IBClasses</key>
 	<array>
 		<dict>
+			<key>CLASS</key>
+			<string>XMPPClient</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>addBuddy</key>
@@ -56,6 +64,21 @@
 				<string>id</string>
 				<key>window</key>
 				<string>id</string>
+				<key>xmppClient</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>XMPPStream</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
@@ -69,6 +92,31 @@
 			<string>NSObject</string>
 		</dict>
 		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>xmppClientConnecting</key>
+				<string>XMPPClient</string>
+				<key>xmppClientDidAuthenticate</key>
+				<string>XMPPClient</string>
+				<key>xmppClientDidConnect</key>
+				<string>XMPPClient</string>
+				<key>xmppClientDidDisconnect</key>
+				<string>XMPPClient</string>
+				<key>xmppClientDidNotConnect</key>
+				<string>XMPPClient</string>
+				<key>xmppClientDidRegister</key>
+				<string>XMPPClient</string>
+				<key>xmppClientDidUpdateRoster</key>
+				<string>XMPPClient</string>
+				<key>xmppStreamDidAuthenticate</key>
+				<string>XMPPStream</string>
+				<key>xmppStreamDidClose</key>
+				<string>XMPPStream</string>
+				<key>xmppStreamDidOpen</key>
+				<string>XMPPStream</string>
+				<key>xmppStreamDidRegister</key>
+				<string>XMPPStream</string>
+			</dict>
 			<key>CLASS</key>
 			<string>NSObject</string>
 			<key>LANGUAGE</key>
@@ -93,6 +141,8 @@
 				<key>rosterController</key>
 				<string>id</string>
 				<key>window</key>
+				<string>id</string>
+				<key>xmppClient</key>
 				<string>id</string>
 				<key>xofyField</key>
 				<string>id</string>

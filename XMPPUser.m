@@ -1,5 +1,10 @@
 #import "XMPPUser.h"
-#import "XMPPStream.h"
+#import "XMPPJID.h"
+#import "XMPPIQ.h"
+#import "XMPPPresence.h"
+#import "XMPPResource.h"
+#import "NSXMLElementAdditions.h"
+
 
 @implementation XMPPUser
 
@@ -7,72 +12,108 @@
 {
 	if(self = [super init])
 	{
-		NSArray *attributes = [item attributes];
-		itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:[attributes count]];
+		// Example item:
+		// <item subscription='both' name='Johnathan' jid='robbiehanson15@deusty.com'/>
 		
-		int i;
-		for(i = 0; i < [attributes count]; i++)
-		{
-			NSXMLNode *node = [attributes objectAtIndex:i];
-			[itemAttributes setObject:[node stringValue] forKey:[node name]];
-		}
+		NSString *jidStr = [[item attributeForName:@"jid"] stringValue];
+		jid = [[XMPPJID jidWithString:jidStr] retain];
 		
-		presence_type   = @"unavailable";
-		presence_show   = @"normal";
-		presence_status = @"";
+		itemAttributes = [[item attributesAsDictionary] mutableCopy];
+		
+		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
+	[resources release];
+	[jid release];
 	[itemAttributes release];
-	[presence_type release];
-	[presence_show release];
-	[presence_status release];
+	[primaryResource release];
 	[super dealloc];
+}
+
+- (XMPPJID *)jid
+{
+	return jid;
+}
+
+- (NSString *)nickname
+{
+	return (NSString *)[itemAttributes objectForKey:@"name"];
+}
+
+- (NSString *)displayName
+{
+	NSString *nickname = [self nickname];
+	if(nickname)
+		return nickname;
+	else
+		return [jid bare];
 }
 
 - (BOOL)isOnline
 {
-	return [presence_type isEqualToString:@"available"];
+	return (primaryResource != nil);
 }
 
 - (BOOL)isPendingApproval
 {
-	NSString *subscription = (NSString *)[itemAttributes objectForKey:@"subscription"];
-	if([subscription isEqualToString:@"none"])
-		return YES;
-	if([subscription isEqualToString:@"from"])
-		return YES;
+	// Either of the following mean we're waiting to have our presence subscription approved:
+	// <item ask='subscribe' subscription='none' jid='robbie@robbiehanson.com'/>
+	// <item ask='subscribe' subscription='from' jid='robbie@robbiehanson.com'/>
+	
+	NSString *subscription = [itemAttributes objectForKey:@"subscription"];
+	NSString *ask = [itemAttributes objectForKey:@"ask"];
+	
+	if([subscription isEqualToString:@"none"] || [subscription isEqualToString:@"from"])
+	{
+		if([ask isEqualToString:@"subscribe"])
+		{
+			return YES;
+		}
+	}
 	
 	return NO;
 }
 
-- (NSString *)jid {
-	return (NSString *)[itemAttributes objectForKey:@"jid"];
-}
-- (NSString *)name {
-	return (NSString *)[itemAttributes objectForKey:@"name"];
+- (XMPPResource *)primaryResource
+{
+	return primaryResource;
 }
 
-- (NSString *)show {
-	return presence_show;
+- (NSArray *)sortedResources
+{
+	return [[resources allValues] sortedArrayUsingSelector:@selector(compare:)];
 }
-- (NSString *)status {
-	return presence_status;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Helper Methods:
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)recalculatePrimaryResource
+{
+	[primaryResource release];
+	primaryResource = nil;
+	
+	NSArray *sortedResources = [self sortedResources];
+	if([sortedResources count] > 0)
+	{
+		XMPPResource *possiblePrimary = [sortedResources objectAtIndex:0];
+		
+		// Primary resource must have a positive priority
+		if([[possiblePrimary presence] priority] > 0)
+		{
+			primaryResource = [possiblePrimary retain];
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Update Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * This method updates the user information with the info from the given iq element.
- * It is assumed the given item element has the same JID as this user.
- * 
- * Item elements come from query elements inside IQ elements.
-**/
 - (void)updateWithItem:(NSXMLElement *)item
 {
 	NSArray *attributes = [item attributes];
@@ -81,78 +122,41 @@
 	for(i = 0; i < [attributes count]; i++)
 	{
 		NSXMLNode *node = [attributes objectAtIndex:i];
-		[itemAttributes setObject:[node stringValue] forKey:[node name]];
+		NSString *key   = [node name];
+		NSString *value = [node stringValue];
+		
+		if(![value isEqualToString:[itemAttributes objectForKey:key]])
+		{
+			[itemAttributes setObject:value forKey:key];
+		}
 	}
 }
 
-/**
- * This method updates the user information with the info from the given presence element.
- * It is assumed the given presence element has the same JID as this user.
-**/
-- (void)updateWithPresence:(NSXMLElement *)presence
+- (void)updateWithPresence:(XMPPPresence *)presence
 {
-	// Extract the value of the type attribute, if available
-	NSXMLNode *typeAttribute = [presence attributeForName:@"type"];
-	if(typeAttribute)
+	NSLog(@"---------- XMPPUser: updateWithPresence:");
+	
+	if([[presence type] isEqualToString:@"unavailable"])
 	{
-		[presence_type release];
-		presence_type = [[typeAttribute stringValue] retain];
+		[resources removeObjectForKey:[presence from]];
 	}
 	else
 	{
-		// If no type attribute is specified, then the value of available is assumed
-		[presence_type release];
-		presence_type = @"available";
+		XMPPJID *key = [presence from];
+		XMPPResource *resource = [resources objectForKey:key];
+		
+		if(resource)
+		{
+			[resource updateWithPresence:presence];
+		}
+		else
+		{
+			XMPPResource *newResource = [[XMPPResource alloc] initWithPresence:presence];
+			[resources setObject:newResource forKey:key];
+		}
 	}
 	
-	// Extract the value of the show element, if available
-	// By convention will be one of the following: away, chat, dnd, normal, or xa.
-	NSXMLElement *showElement = [presence elementForName:@"show"];
-	if(showElement)
-	{
-		[presence_show release];
-		presence_show = [[showElement stringValue] retain];
-	}
-	else
-	{
-		// If no <show/> tag is specified in an available <presence/> element, a value of normal is assumed
-		[presence_show release];
-		presence_show = @"normal";
-	}
-	
-	// Extract the value of the status element, if available
-	// These are custom messages, such as an away message
-	NSXMLElement *status = [presence elementForName:@"status"];
-	if(status)
-	{
-		[presence_status release];
-		presence_status = [[status stringValue] retain];
-	}
-	else
-	{
-		// Custom status messages do not have a default value (obviously)
-		[presence_status release];
-		presence_status = @"";
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Low-Level Access:
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * This method allows for quickly marking the user as offline.
- * Calling this method will not result in any notifications being posted by the XMPPUser object.
-**/
-- (void)setAsOffline
-{
-	[presence_type autorelease];
-	[presence_show autorelease];
-	[presence_status autorelease];
-	
-	presence_type   = @"unavailable";
-	presence_show   = @"";
-	presence_status = @"";
+	[self recalculatePrimaryResource];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,9 +166,9 @@
 /**
  * Returns the result of invoking compareByName:options: with no options.
 **/
-- (NSComparisonResult)compareByName:(XMPPUser *)user
+- (NSComparisonResult)compareByName:(XMPPUser *)another
 {
-	return [self compareByName:user options:0];
+	return [self compareByName:another options:0];
 }
 
 /**
@@ -175,25 +179,20 @@
  * NSCaseInsensitiveSearch, NSLiteralSearch, NSNumericSearch.
  * See "String Programming Guide for Cocoa" for details on these options.
 **/
-- (NSComparisonResult)compareByName:(XMPPUser *)user options:(unsigned)mask
+- (NSComparisonResult)compareByName:(XMPPUser *)another options:(NSStringCompareOptions)mask
 {
-	NSString *selfName = [self name];
-	if([selfName length] == 0)
-		selfName = [self jid];
+	NSString *myName = [self displayName];
+	NSString *theirName = [another displayName];
 	
-	NSString *userName = [user name];
-	if([userName length] == 0)
-		userName = [user jid];
-	
-	return [selfName compare:userName options:mask];
+	return [myName compare:theirName options:mask];
 }
 
 /**
  * Returns the result of invoking compareByAvailabilityName:options: with no options.
 **/
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)user
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another
 {
-	return [self compareByAvailabilityName:user options:0];
+	return [self compareByAvailabilityName:another options:0];
 }
 
 /**
@@ -202,28 +201,22 @@
  * If both users are available, or both users are not available,
  * this method follows the same functionality as the compareByName:options: as documented above.
 **/
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)user options:(unsigned)mask
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another options:(NSStringCompareOptions)mask
 {
 	if([self isOnline])
 	{
-		if(![user isOnline])
+		if([another isOnline])
+			return [self compareByName:another options:mask];
+		else
 			return NSOrderedAscending;
 	}
 	else
 	{
-		if([user isOnline])
+		if([another isOnline])
 			return NSOrderedDescending;
+		else
+			return [self compareByName:another options:mask];
 	}
-	
-	NSString *selfName = [self name];
-	if([selfName length] == 0)
-		selfName = [self jid];
-	
-	NSString *userName = [user name];
-	if([userName length] == 0)
-		userName = [user jid];
-	
-	return [selfName compare:userName options:mask];
 }
 
 @end

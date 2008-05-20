@@ -1,5 +1,9 @@
 #import <Cocoa/Cocoa.h>
 @class  AsyncSocket;
+@class  XMPPIQ;
+@class  XMPPMessage;
+@class  XMPPPresence;
+
 
 @interface XMPPStream : NSObject
 {
@@ -37,10 +41,11 @@
 - (BOOL)isDisconnected;
 - (BOOL)isConnected;
 - (BOOL)isSecure;
-- (void)connectToHost:(NSString *)hostName onPort:(int)portNumber withVirtualHost:(NSString *)vHostName;
-- (void)connectToSecureHost:(NSString *)hostName onPort:(int)portNumber withVirtualHost:(NSString *)vHostName;
+- (void)connectToHost:(NSString *)hostName onPort:(UInt16)portNumber withVirtualHost:(NSString *)vHostName;
+- (void)connectToSecureHost:(NSString *)hostName onPort:(UInt16)portNumber withVirtualHost:(NSString *)vHostName;
 
 - (void)disconnect;
+- (void)disconnectAfterSending;
 
 - (BOOL)supportsInBandRegistration;
 - (void)registerUser:(NSString *)username withPassword:(NSString *)password;
@@ -56,11 +61,12 @@
 - (NSXMLElement *)rootElement;
 
 - (void)sendElement:(NSXMLElement *)element;
+- (void)sendElement:(NSXMLElement *)element andNotifyMe:(long)tag;
 
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Delegate Methods:
+#pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @interface NSObject (XMPPStreamDelegate)
@@ -71,26 +77,36 @@
  * and after the stream features have been received, and any required features have been fullfilled.
  * At this point it's safe to begin communication with the server.
 **/
-- (void)xmppStreamDidOpen:(XMPPStream *)xs;
+- (void)xmppStreamDidOpen:(XMPPStream *)sender;
 
 /**
  * This method is called after registration of a new user has successfully finished.
- * If registration fails for some reason, the xmppStream:didReceiveError: method will be called instead.
+ * If registration fails for some reason, the xmppStream:didNotRegister: method will be called instead.
 **/
-- (void)xmppStreamDidRegister:(XMPPStream *)xs;
+- (void)xmppStreamDidRegister:(XMPPStream *)sender;
+
+/**
+ * This method is called if registration fails.
+**/
+- (void)xmppStream:(XMPPStream *)sender didNotRegister:(NSXMLElement *)error;
 
 /**
  * This method is called after authentication has successfully finished.
- * If authentication fails for some reason, the xmppStream:didReceiveError: method will be called instead.
+ * If authentication fails for some reason, the xmppStream:didNotAuthenticate: method will be called instead.
 **/
-- (void)xmppStreamDidAuthenticate:(XMPPStream *)xs;
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender;
+
+/**
+ * This method is called if authentication fails.
+**/
+- (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;
 
 /**
  * These methods are called after their respective XML elements are received on the stream.
 **/
-- (void)xmppStream:(XMPPStream *)xs didReceiveIQ:(NSXMLElement *)iq;
-- (void)xmppStream:(XMPPStream *)xs didReceiveMessage:(NSXMLElement *)message;
-- (void)xmppStream:(XMPPStream *)xs didReceivePresence:(NSXMLElement *)presence;
+- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq;
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message;
+- (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence;
 
 /**
  * There are two types of errors: TCP errors and XMPP errors.
@@ -100,30 +116,22 @@
  * Note that standard errors (<iq type='error'/> for example) are delivered normally,
  * via the other didReceive...: methods.
 **/
-- (void)xmppStream:(XMPPStream *)xs didReceiveError:(id)error;
+- (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error;
+
+/**
+ * This method is called for every sendElement:andNotifyMe: method.
+**/
+- (void)xmppStream:(XMPPStream *)sender didSendElementWithTag:(long)tag;
 
 /**
  * This method is called after the stream is closed.
 **/
-- (void)xmppStreamDidClose:(XMPPStream *)xs;
+- (void)xmppStreamDidClose:(XMPPStream *)sender;
 
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// NSXMLElement Category:
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@interface NSXMLElement (XMPPStreamAdditions)
-
-- (NSXMLElement *)elementForName:(NSString *)name;
-- (NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns;
-- (NSString *)xmlns;
-- (NSDictionary *)attributesAsDictionary;
-
-@end
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DIGEST ACCESS AUTHENTICATION
+#pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @interface XMPPDigestAuthentication : NSObject

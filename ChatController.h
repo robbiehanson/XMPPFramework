@@ -1,20 +1,20 @@
 #import <Cocoa/Cocoa.h>
-@class   XMPPStream;
-@class   XMPPUser;
+@class   XMPPClient;
+@class   XMPPJID;
+
 
 @interface ChatController : NSWindowController
 {
-	XMPPStream *xmppStream;
-	XMPPUser *xmppUser;
+	XMPPClient *xmppClient;
+	XMPPJID *jid;
 	
     IBOutlet id messageField;
     IBOutlet id messageView;
 }
 
-- (id)initWithXMPPStream:(XMPPStream *)stream forXMPPUser:(XMPPUser *)user;
+- (id)initWithXMPPClient:(XMPPClient *)client jid:(XMPPJID *)fullJID;
 
-- (XMPPUser *)xmppUser;
-- (void)receiveMessage:(NSXMLElement *)message;
+- (XMPPJID *)jid;
 
 - (IBAction)sendMessage:(id)sender;
 

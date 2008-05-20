@@ -1,22 +1,7 @@
 #import "RosterController.h"
 #import "RequestController.h"
-#import "XMPPStream.h"
-#import "XMPPUser.h"
+#import "XMPP.h"
 #import "ChatWindowManager.h"
-
-@interface RosterController (PrivateAPI)
-
-- (BOOL)isRoster:(NSXMLElement *)iq;
-- (void)updateRosterWithIQ:(NSXMLElement *)iq;
-
-- (BOOL)isChatMessage:(NSXMLElement *)message;
-- (void)handleChatMessage:(NSXMLElement *)message;
-
-- (BOOL)isBuddyRequest:(NSXMLElement *)presence;
-- (void)handleBuddyRequest:(NSXMLElement *)presence;
-- (void)updateRosterWithPresence:(NSXMLElement *)presence;
-
-@end
 
 
 @implementation RosterController
@@ -29,13 +14,17 @@
 {
 	if(self = [super init])
 	{
-		xmppStream = [[XMPPStream alloc] init];
-		[xmppStream setDelegate:self];
-		
-		roster = [[NSMutableDictionary alloc] initWithCapacity:5];
-		rosterKeys = [[NSArray alloc] init];
+		// Nothing to do here
 	}
 	return self;
+}
+
+- (void)awakeFromNib
+{
+	[xmppClient addDelegate:self];
+	[xmppClient setAutoLogin:NO];
+	[xmppClient setAutoRoster:YES];
+	[xmppClient setAutoPresence:YES];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -54,102 +43,67 @@
 
 - (void)updateAccountInfo
 {
-	[xmpp_hostname release];  xmpp_hostname  = nil;
-	[xmpp_username release];  xmpp_username  = nil;
-	[xmpp_vhostname release]; xmpp_vhostname = nil;
-	[xmpp_password release];  xmpp_password  = nil;
-	[xmpp_resource release];  xmpp_resource  = nil;
-	
-	xmpp_hostname = [[serverField stringValue] copy];
-	if([xmpp_hostname length] == 0)
+	NSString *domain = [serverField stringValue];
+	if([domain length] == 0)
 	{
-		[xmpp_hostname release];
-		xmpp_hostname = [[serverField placeholderString] copy];
+		domain = [[serverField cell] placeholderString];
+	}
+	[xmppClient setDomain:domain];
+	
+	[xmppClient setPort:[portField intValue]];
+	
+	BOOL usesSSL = ([sslButton state] == NSOnState);
+	BOOL allowsSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
+	
+	[xmppClient setUsesOldStyleSSL:usesSSL];
+	[xmppClient setAllowsSelfSignedCertificates:allowsSelfSignedCertificates];
+	
+	NSString *resource = [resourceField stringValue];
+	if([resource length] == 0)
+	{
+		resource = [(NSString *)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
 	}
 	
-	xmpp_port = [portField intValue];
+	XMPPJID *jid = [XMPPJID jidWithString:[jidField stringValue] resource:resource];
 	
-	usesSSL = ([sslButton state] == NSOnState);
-	allowsSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
+	[xmppClient setMyJID:jid];
 	
-	NSArray *components = [[jidField stringValue] componentsSeparatedByString:@"@"];
-	xmpp_username  = [[components objectAtIndex:0] copy];
-	xmpp_vhostname = [[components objectAtIndex:1] copy];
+	[xmppClient setPassword:[passwordField stringValue]];
+}
+
+- (IBAction)createAccount:(id)sender
+{
+	[self updateAccountInfo];
 	
-	xmpp_password = [[passwordField stringValue] copy];
+	isRegistering = YES;
+	[signInButton setEnabled:NO];
+	[registerButton setEnabled:NO];
 	
-	xmpp_resource = [[resourceField stringValue] copy];
-	if([xmpp_resource length] == 0)
+	if(![xmppClient isConnected])
 	{
-		[xmpp_resource release];
-		xmpp_resource = (NSString *)SCDynamicStoreCopyComputerName(NULL, NULL);
+		[xmppClient connect];
+	}
+	else
+	{
+		[xmppClient registerUser];
 	}
 }
 
 - (IBAction)signIn:(id)sender
 {
-	// Update our variables from the form
 	[self updateAccountInfo];
 	
-	shouldSignIn = YES;
+	isAuthenticating = YES;
 	[signInButton setEnabled:NO];
 	[registerButton setEnabled:NO];
 	
-	if(![xmppStream isConnected])
+	if(![xmppClient isConnected])
 	{
-		[xmppStream setAllowsSelfSignedCertificates:allowsSelfSignedCertificates];
-		
-		if(usesSSL)
-		{
-			[xmppStream connectToSecureHost:xmpp_hostname
-									 onPort:xmpp_port
-							withVirtualHost:xmpp_vhostname];
-		}
-		else
-		{
-			[xmppStream connectToHost:xmpp_hostname
-							   onPort:xmpp_port
-					  withVirtualHost:xmpp_vhostname];
-		}
+		[xmppClient connect];
 	}
 	else
 	{
-		[xmppStream authenticateUser:xmpp_username
-						withPassword:xmpp_password
-							resource:xmpp_resource];
-	}
-}
-
-- (IBAction)createAccount:(id)sender
-{
-	// Update our variables from the form
-	[self updateAccountInfo];
-	
-	shouldRegister = YES;
-	[signInButton setEnabled:NO];
-	[registerButton setEnabled:NO];
-	
-	if(![xmppStream isConnected])
-	{
-		[xmppStream setAllowsSelfSignedCertificates:allowsSelfSignedCertificates];
-
-		if(usesSSL)
-		{
-			[xmppStream connectToSecureHost:xmpp_hostname
-									 onPort:xmpp_port
-							withVirtualHost:xmpp_vhostname];
-		}
-		else
-		{
-			[xmppStream connectToHost:xmpp_hostname
-							   onPort:xmpp_port
-					  withVirtualHost:xmpp_vhostname];
-		}
-	}
-	else
-	{
-		[xmppStream registerUser:xmpp_username
-					withPassword:xmpp_password];
+		[xmppClient authenticateUser];
 	}
 }
 
@@ -161,22 +115,11 @@
 {
 	if([[sender titleOfSelectedItem] isEqualToString:@"Offline"])
 	{
-		NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-		[presence addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"unavailable"]];
-		
-		[xmppStream sendElement:presence];
-		
-		// We don't receive presence notifications when we're unavailable
-		// Change the status of all users in roster to unavailable
-		// When we become available again, we'll receive every presence notification again
-		
-		
+		[xmppClient goOffline];
 	}
 	else
 	{
-		NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-		
-		[xmppStream sendElement:presence];
+		[xmppClient goOnline];
 	}
 }
 
@@ -186,29 +129,9 @@
 
 - (IBAction)addBuddy:(id)sender
 {
-	// Get the JID entered by the user
-	NSString *jid = [buddyField stringValue];
-		
-	// Add the buddy to our roster
-	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:jid]];
+	XMPPJID *jid = [XMPPJID jidWithString:[buddyField stringValue]];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
-	[query addChild:item];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
-	
-	// Subscribe to the buddy's presence
-	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:jid]];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribe"]];
-	
-	[xmppStream sendElement:presence];
+	[xmppClient addBuddy:jid withNickname:nil];
 	
 	// Clear buddy text field
 	[buddyField setStringValue:@""];
@@ -216,27 +139,9 @@
 
 - (IBAction)removeBuddy:(id)sender
 {
-	// Get the JID entered by the user
-	NSString *jid = [buddyField stringValue];
+	XMPPJID *jid = [XMPPJID jidWithString:[buddyField stringValue]];
 	
-	// Remove the buddy from our roster
-	// Unsubscribe from presence
-	// And revoke contact's subscription to our presence
-	// ...all in one step
-	
-	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:jid]];
-	[item addAttribute:[NSXMLNode attributeWithName:@"subscription" stringValue:@"remove"]];
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
-	[query addChild:item];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
+	[xmppClient removeBuddy:jid];
 	
 	// Clear buddy text field
 	[buddyField setStringValue:@""];
@@ -252,15 +157,10 @@
 	
 	if(selectedRow >= 0)
 	{
-		XMPPUser *user = [roster objectForKey:[rosterKeys objectAtIndex:selectedRow]];
+		XMPPUser *user = [roster objectAtIndex:selectedRow];
 		
-		[ChatWindowManager openChatWindowWithXMPPStream:xmppStream forXMPPUser:user];
+		[ChatWindowManager openChatWindowWithXMPPClient:xmppClient forXMPPUser:user];
 	}
-}
-
-- (XMPPStream *)xmppStream
-{
-	return xmppStream;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -269,17 +169,19 @@
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView
 {
-	return [rosterKeys count];
+	return [roster count];
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex
 {
-	XMPPUser *user = [roster objectForKey:[rosterKeys objectAtIndex:rowIndex]];
+	XMPPUser *user = [roster objectAtIndex:rowIndex];
 	
 	if([[tableColumn identifier] isEqualToString:@"name"])
-		return [user name];
+		return [user nickname];
 	else
 		return [user jid];
+	
+	return nil;
 }
 
 - (void)tableView:(NSTableView *)tableView
@@ -287,22 +189,10 @@
    forTableColumn:(NSTableColumn *)tableColumn
 			  row:(int)rowIndex
 {
-	XMPPUser *user = [roster objectForKey:[rosterKeys objectAtIndex:rowIndex]];
+	XMPPUser *user = [roster objectAtIndex:rowIndex];
 	NSString *newName = (NSString *)anObject;
 	
-	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:[user jid]]];
-	[item addAttribute:[NSXMLNode attributeWithName:@"name" stringValue:newName]];
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
-	[query addChild:item];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
+	[xmppClient setNickname:newName forBuddy:[user jid]];
 }
 
 - (void)tableView:(NSTableView *)tableView
@@ -310,7 +200,7 @@
    forTableColumn:(NSTableColumn *)tableColumn 
 			  row:(int)rowIndex
 {
-	XMPPUser *user = [roster objectForKey:[rosterKeys objectAtIndex:rowIndex]];
+	XMPPUser *user = [roster objectAtIndex:rowIndex];
 	
 	BOOL isRowSelected = ([tableView isRowSelected:rowIndex]);
 	BOOL isFirstResponder = [[[tableView window] firstResponder] isEqual:tableView];
@@ -336,28 +226,40 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPStream Delegate Methods:
+#pragma mark XMPPClient Delegate Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppStreamDidOpen:(XMPPStream *)xs
+- (void)xmppClientDidConnect:(XMPPClient *)sender
 {
-	if(shouldSignIn)
-	{
-		[xmppStream authenticateUser:xmpp_username
-						withPassword:xmpp_password
-							resource:xmpp_resource];
-	}
-	else if(shouldRegister)
-	{
-		[xmppStream registerUser:xmpp_username
-					withPassword:xmpp_password];
-	}
+	if(isRegistering)
+		[xmppClient registerUser];
+	else
+		[xmppClient authenticateUser];
 }
 
-- (void)xmppStreamDidRegister:(XMPPStream *)xs
+- (void)xmppClientDidNotConnect:(XMPPClient *)sender
+{
+	NSLog(@"---------- xmppClientDidNotConnect ----------");
+	
+	// Update tracking variables
+	isRegistering = NO;
+	isAuthenticating = NO;
+	
+	// Update GUI
+	[signInButton setEnabled:YES];
+	[registerButton setEnabled:YES];
+	[messageField setStringValue:@"Cannot connect to server"];
+}
+
+- (void)xmppClientDidDisconnect:(XMPPClient *)sender
+{
+	NSLog(@"---------- xmppClientDidDisconnect ----------");
+}
+
+- (void)xmppClientDidRegister:(XMPPClient *)sender
 {
 	// Update tracking variables
-	shouldRegister = NO;
+	isRegistering = NO;
 	
 	// Update GUI
 	[signInButton setEnabled:YES];
@@ -365,260 +267,59 @@
 	[messageField setStringValue:@"Registered new user"];
 }
 
-- (void)xmppStreamDidAuthenticate:(XMPPStream *)xs
+- (void)xmppClient:(XMPPClient *)sender didNotRegister:(NSXMLElement *)error
 {
 	// Update tracking variables
-	shouldSignIn = NO;
+	isRegistering = NO;
+	
+	// Update GUI
+	[signInButton setEnabled:YES];
+	[registerButton setEnabled:YES];
+	[messageField setStringValue:@"Username is taken"];
+}
+
+- (void)xmppClientDidAuthenticate:(XMPPClient *)sender
+{
+	// Update tracking variables
+	isAuthenticating = NO;
 	
 	// Close the sheet
 	[signInSheet orderOut:self];
 	[NSApp endSheet:signInSheet];
+}
+
+- (void)xmppClient:(XMPPClient *)sender didNotAuthenticate:(NSXMLElement *)error
+{
+	// Update tracking variables
+	isAuthenticating = NO;
 	
-	// Fetch roster
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"get"]];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
+	// Update GUI
+	[signInButton setEnabled:YES];
+	[registerButton setEnabled:YES];
+	[messageField setStringValue:@"Invalid username/password"];
 }
 
-- (void)xmppStream:(XMPPStream *)xs didReceiveError:(id)error
+- (void)xmppClientDidUpdateRoster:(XMPPClient *)sender
 {
-	if(shouldSignIn)
-	{
-		// Update tracking variables
-		shouldSignIn = NO;
-		
-		// Update GUI
-		[signInButton setEnabled:YES];
-		[registerButton setEnabled:YES];
-		[messageField setStringValue:@"Invalid username/password"];
-	}
-	else if(shouldRegister)
-	{
-		// Update tracking variables
-		shouldRegister = NO;
-		
-		// Update GUI
-		[signInButton setEnabled:YES];
-		[registerButton setEnabled:YES];
-		[messageField setStringValue:@"Username is taken"];
-	}
-	else
-	{
-		NSLog(@"--- Unknown Error ---");
-	}
-}
-
-- (void)xmppStream:(XMPPStream *)xs didReceiveIQ:(NSXMLElement *)iq
-{
-	if([self isRoster:iq])
-	{
-		[self updateRosterWithIQ:iq];
-	}
-	else
-	{
-		NSLog(@"--- Unknown IQ ---");
-	}
-}
-
-- (void)xmppStream:(XMPPStream *)xs didReceiveMessage:(NSXMLElement *)message
-{
-	if([self isChatMessage:message])
-	{
-		[self handleChatMessage:message];
-	}
-	else
-	{
-		NSLog(@"--- Unknown Message ---");
-	}
-}
-
-- (void)xmppStream:(XMPPStream *)xs didReceivePresence:(NSXMLElement *)presence
-{
-	if([self isBuddyRequest:presence])
-	{
-		[self handleBuddyRequest:presence];
-	}
-	else
-	{
-		[self updateRosterWithPresence:presence];
-	}
-}
-
-- (void)xmppStreamDidClose:(XMPPStream *)xs
-{
-	// Clear our roster
-	[roster removeAllObjects];
-	[rosterKeys release];
-	rosterKeys = [[NSArray alloc] init];
-	
-	// Display the sign in sheet
-	[NSApp beginSheet:signInSheet
-	   modalForWindow:window
-		modalDelegate:self
-	   didEndSelector:nil
-		  contextInfo:nil];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Private API - IQ:
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Returns whether or not the given IQ element is in the "jabber:iq:roster" namespace,
- * and thus represents a roster update.
-**/
-- (BOOL)isRoster:(NSXMLElement *)iq
-{
-	NSXMLElement *query = [iq elementForName:@"query"];
-	return [[query xmlns] isEqualToString:@"jabber:iq:roster"];
-}
-
-/**
- * For some bizarre reason (in my opinion), when you request your roster,
- * the server will return JID's NOT in your roster. These are the JID's of users who have requested
- * to be alerted to our presence.  After we sign in, we'll again be notified, via the normal presence request objects.
- * It's redundant, and annoying, and just plain incorrect to include these JID's when we request our personal roster.
- * So now, we have to go to the extra effort to filter out these JID's, which is exactly what this method does.
- *
- * Someone please correct me if I'm wrong about this.
-**/
-- (BOOL)isRosterItem:(NSXMLElement *)item
-{
-	NSXMLNode *subscription = [item attributeForName:@"subscription"];
-	if([[subscription stringValue] isEqualToString:@"none"])
-	{
-		NSXMLNode *ask = [item attributeForName:@"ask"];
-		if([[ask stringValue] isEqualToString:@"subscribe"]) {
-			return YES;
-		}
-		else {
-			return NO;
-		}
-	}
-	return YES;
-}
-
-/**
- * Given a roster IQ element, this method updates the roster accordingly for any included users.
- * This method assumes the IQ element is a proper roster element. This can be tested using the isRoster: method.
-**/
-- (void)updateRosterWithIQ:(NSXMLElement *)iq
-{
-	NSArray *items = [[iq elementForName:@"query"] elementsForName:@"item"];
-	
-	int i;
-	for(i = 0; i < [items count]; i++)
-	{
-		NSXMLElement *item = (NSXMLElement *)[items objectAtIndex:i];
-		
-		// Filter out presence requests. We just want to get our roster. (Like we requested...)
-		if([self isRosterItem:item])
-		{
-			NSString *jidKey = [[[item attributeForName:@"jid"] stringValue] lowercaseString];
-				
-			XMPPUser *user = [roster objectForKey:jidKey];
-			if(user)
-				[user updateWithItem:item];
-			else
-			{
-				user = [[[XMPPUser alloc] initWithItem:item] autorelease];
-				[roster setObject:user forKey:jidKey];
-			}
-		}
-	}
-	
-	[rosterKeys release];
-	rosterKeys = [[roster keysSortedByValueUsingSelector:@selector(compareByAvailabilityName:)] retain];
+	[roster release];
+	roster = [[xmppClient sortedUsersByAvailabilityName] retain];
 	
 	[rosterTable abortEditing];
 	[rosterTable selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
 	[rosterTable reloadData];
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Private API - Message:
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (BOOL)isChatMessage:(NSXMLElement *)message
+- (void)xmppClient:(XMPPClient *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	return [[[message attributeForName:@"type"] stringValue] isEqualToString:@"chat"];
+	NSLog(@"---------- xmppClient:didReceiveIQ: ----------");
 }
 
-- (void)handleChatMessage:(NSXMLElement *)message
+- (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	// Get the JID from the message
-	NSString *jidAndResource = [[message attributeForName:@"from"] stringValue];
-	NSString *jid = [[jidAndResource componentsSeparatedByString:@"/"] objectAtIndex:0];
-	
-	// JID's are case insensitive, so the keys in the dictionary are used accordingly
-	NSString *jidKey = [jid lowercaseString];
-	
-	// Get the corresponding XMPPUser
-	XMPPUser *user = [roster objectForKey:jidKey];
-	
-	[ChatWindowManager handleChatMessage:message withXMPPStream:xmppStream fromXMPPUser:user];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Private API - Presence:
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Returns whether or not the given presence element is a request from another user to be added as a buddy.
-**/
-- (BOOL)isBuddyRequest:(NSXMLElement *)presence
-{
-	return [[[presence attributeForName:@"type"] stringValue] isEqualToString:@"subscribe"];
-}
-
-- (void)handleBuddyRequest:(NSXMLElement *)presence
-{
-	// Get the JID of the user requesting friendship
-	NSString *jidAndResource = [[presence attributeForName:@"from"] stringValue];
-	NSString *jid = [[jidAndResource componentsSeparatedByString:@"/"] objectAtIndex:0];
-	
-	// JID's are case insensitive, so the keys in the dictionary are used accordingly
-	NSString *jidKey = [jid lowercaseString];
-	
-	// If we already requested friendship with the user, automatically accept the request
-	if([roster objectForKey:jidKey])
+	if([message isChatMessageWithBody])
 	{
-		NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-		[response addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:jid]];
-		[response addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribed"]];
-		
-		[xmppStream sendElement:response];
+		[ChatWindowManager handleChatMessage:message withXMPPClient:xmppClient];
 	}
-	else
-	{
-		// The request controller will handle displaying a message
-		[requestController handleBuddyRequest:jid];
-	}
-}
-
-- (void)updateRosterWithPresence:(NSXMLElement *)presence
-{
-	// Get the JID of the user updating presence
-	NSString *jidAndResource = [[presence attributeForName:@"from"] stringValue];
-	NSString *jid = [[jidAndResource componentsSeparatedByString:@"/"] objectAtIndex:0];
-	
-	// JID's are case insensitive, so the keys in the dictionary are used accordingly
-	NSString *jidKey = [jid lowercaseString];
-	
-	XMPPUser *user = [roster objectForKey:jidKey];
-	[user updateWithPresence:presence];
-	
-	[rosterKeys release];
-	rosterKeys = [[roster keysSortedByValueUsingSelector:@selector(compareByAvailabilityName:)] retain];
-	
-	[rosterTable abortEditing];
-	[rosterTable selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
-	[rosterTable reloadData];
 }
 
 @end
