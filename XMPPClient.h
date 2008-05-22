@@ -103,13 +103,18 @@
 - (void)acceptBuddyRequest:(XMPPJID *)jid;
 - (void)rejectBuddyRequest:(XMPPJID *)jid;
 
-- (void)sendElement:(NSXMLElement *)element;
-
 - (NSArray *)sortedUsersByName;
 - (NSArray *)sortedUsersByAvailabilityName;
 
 - (NSArray *)sortedAvailableUsersByName;
-- (NSArray *)sortedUnavailableUserByName;
+- (NSArray *)sortedUnavailableUsersByName;
+
+- (NSArray *)unsortedUsers;
+- (NSArray *)unsortedAvailableUsers;
+- (NSArray *)unsortedUnavailableUsers;
+
+- (void)sendElement:(NSXMLElement *)element;
+- (void)sendElement:(NSXMLElement *)element andNotifyMe:(long)tag;
 
 @end
 

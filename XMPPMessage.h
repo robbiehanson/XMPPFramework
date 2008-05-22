@@ -1,13 +1,10 @@
 #import <Cocoa/Cocoa.h>
-@class  XMPPJID;
+#import "XMPPElement.h"
 
 
-@interface XMPPMessage : NSXMLElement
+@interface XMPPMessage : XMPPElement
 
 + (XMPPMessage *)messageFromElement:(NSXMLElement *)element;
-
-- (XMPPJID *)to;
-- (XMPPJID *)from;
 
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;

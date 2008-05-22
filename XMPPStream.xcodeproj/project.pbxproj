@@ -13,6 +13,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		DC18E9920C9563ED0011DCE5 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */; };
 		DC5247D80BE318AE002F838C /* XMPPUser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5247D60BE318AE002F838C /* XMPPUser.m */; };
+		DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B2BF10DE620B80055F60A /* XMPPElement.m */; };
 		DCAB73F50BDE00C600E828D5 /* SSCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */; };
 		DCAB742A0BDE011100E828D5 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB74290BDE011100E828D5 /* libssl.dylib */; };
 		DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB742B0BDE013000E828D5 /* libcrypto.dylib */; };
@@ -67,6 +68,8 @@
 		DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		DC5247D50BE318AE002F838C /* XMPPUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPUser.h; sourceTree = "<group>"; };
 		DC5247D60BE318AE002F838C /* XMPPUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPUser.m; sourceTree = "<group>"; };
+		DC7B2BF00DE620B80055F60A /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPElement.h; sourceTree = "<group>"; };
+		DC7B2BF10DE620B80055F60A /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
 		DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SSCrypto.framework; sourceTree = "<group>"; };
 		DCAB74290BDE011100E828D5 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
 		DCAB742B0BDE013000E828D5 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
@@ -272,6 +275,8 @@
 				DC5247D60BE318AE002F838C /* XMPPUser.m */,
 				DCB9BA0D0DDB7237002DA335 /* XMPPResource.h */,
 				DCB9BA0E0DDB7237002DA335 /* XMPPResource.m */,
+				DC7B2BF00DE620B80055F60A /* XMPPElement.h */,
+				DC7B2BF10DE620B80055F60A /* XMPPElement.m */,
 				DCB9BA130DDB73CC002DA335 /* XMPPIQ.h */,
 				DCB9BA140DDB73CC002DA335 /* XMPPIQ.m */,
 				DCB9BA190DDB73E6002DA335 /* XMPPMessage.h */,
@@ -371,6 +376,7 @@
 				DCB9BBDE0DDCE75F002DA335 /* stringprep_generic.c in Sources */,
 				DCB9BBDF0DDCE75F002DA335 /* toutf8.c in Sources */,
 				DCB9BBF20DDCEE39002DA335 /* NSXMLElementAdditions.m in Sources */,
+				DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,7 +1,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface XMPPJID : NSObject <NSCopying>
+@interface XMPPJID : NSObject <NSCoding, NSCopying>
 {
 	NSString *user;
 	NSString *domain;

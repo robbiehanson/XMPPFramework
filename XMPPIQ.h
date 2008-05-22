@@ -1,7 +1,8 @@
 #import <Cocoa/Cocoa.h>
+#import "XMPPElement.h"
 
 
-@interface XMPPIQ : NSXMLElement
+@interface XMPPIQ : XMPPElement
 
 + (XMPPIQ *)iqFromElement:(NSXMLElement *)element;
 

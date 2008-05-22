@@ -11,17 +11,17 @@
 
 @interface XMPPClient (PrivateAPI)
 
-- (void)notifyDelegates_Connecting;
-- (void)notifyDelegates_DidConnect;
-- (void)notifyDelegates_DidDisconnect;
-- (void)notifyDelegates_DidRegister;
-- (void)notifyDelegates_DidNotRegister:(NSXMLElement *)error;
-- (void)notifyDelegates_DidAuthenticate;
-- (void)notifyDelegates_DidNotAuthenticate:(NSXMLElement *)error;
-- (void)notifyDelegates_DidUpdateRoster;
-- (void)notifyDelegates_DidReceiveBuddyRequest:(XMPPJID *)jid;
-- (void)notifyDelegates_DidReceiveIQ:(XMPPIQ *)iq;
-- (void)notifyDelegates_DidReceiveMessage:(XMPPMessage *)message;
+- (void)onConnecting;
+- (void)onDidConnect;
+- (void)onDidDisconnect;
+- (void)onDidRegister;
+- (void)onDidNotRegister:(NSXMLElement *)error;
+- (void)onDidAuthenticate;
+- (void)onDidNotAuthenticate:(NSXMLElement *)error;
+- (void)onDidUpdateRoster;
+- (void)onDidReceiveBuddyRequest:(XMPPJID *)jid;
+- (void)onDidReceiveIQ:(XMPPIQ *)iq;
+- (void)onDidReceiveMessage:(XMPPMessage *)message;
 
 @end
 
@@ -64,6 +64,10 @@
 	
 	[super dealloc];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Configuration
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)addDelegate:(id)delegate
 {
@@ -201,9 +205,13 @@
 	autoReconnect = flag;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Connecting, Registering and Authenticating
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)connect
 {
-	[self notifyDelegates_Connecting];
+	[self onConnecting];
 	
 	if(usesOldStyleSSL)
 		[xmppStream connectToSecureHost:domain onPort:port withVirtualHost:[myJID domain]];
@@ -263,6 +271,10 @@
 	return [xmppStream isAuthenticated];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Presence Managment
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)goOnline
 {
 	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
@@ -286,9 +298,13 @@
 	
 	if(didUpdateRoster)
 	{
-		[self notifyDelegates_DidUpdateRoster];
+		[self onDidUpdateRoster];
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Roster Managment
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)fetchRoster
 {
@@ -416,11 +432,6 @@
 	[xmppStream sendElement:response];
 }
 
-- (void)sendElement:(NSXMLElement *)element
-{
-	[xmppStream sendElement:element];
-}
-
 - (NSArray *)sortedUsersByName
 {
 	return [[roster allValues] sortedArrayUsingSelector:@selector(compareByName:)];
@@ -432,6 +443,21 @@
 }
 
 - (NSArray *)sortedAvailableUsersByName
+{
+	return [[self unsortedAvailableUsers] sortedArrayUsingSelector:@selector(compareByName:)];
+}
+
+- (NSArray *)sortedUnavailableUsersByName
+{
+	return [[self unsortedAvailableUsers] sortedArrayUsingSelector:@selector(compareByName:)];
+}
+
+- (NSArray *)unsortedUsers
+{
+	return [roster allValues];
+}
+
+- (NSArray *)unsortedAvailableUsers
 {
 	NSArray *allUsers = [roster allValues];
 	
@@ -447,10 +473,10 @@
 		}
 	}
 	
-	return [result sortedArrayUsingSelector:@selector(compareByName:)];
+	return result;
 }
 
-- (NSArray *)sortedUnavailableUserByName
+- (NSArray *)unsortedUnavailableUsers
 {
 	NSArray *allUsers = [roster allValues];
 	
@@ -466,14 +492,28 @@
 		}
 	}
 	
-	return [result sortedArrayUsingSelector:@selector(compareByName:)];
+	return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Sending Elements:
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)sendElement:(NSXMLElement *)element
+{
+	[xmppStream sendElement:element];
+}
+
+- (void)sendElement:(NSXMLElement *)element andNotifyMe:(long)tag
+{
+	[xmppStream sendElement:element andNotifyMe:tag];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Delegate Helper Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)notifyDelegates_Connecting
+- (void)onConnecting
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -487,7 +527,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidConnect
+- (void)onDidConnect
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -501,7 +541,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidDisconnect
+- (void)onDidDisconnect
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -515,7 +555,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidRegister
+- (void)onDidRegister
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -529,7 +569,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidNotRegister:(NSXMLElement *)error
+- (void)onDidNotRegister:(NSXMLElement *)error
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -543,7 +583,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidAuthenticate
+- (void)onDidAuthenticate
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -557,7 +597,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidNotAuthenticate:(NSXMLElement *)error
+- (void)onDidNotAuthenticate:(NSXMLElement *)error
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -571,10 +611,8 @@
 	}
 }
 
-- (void)notifyDelegates_DidUpdateRoster
+- (void)onDidUpdateRoster
 {
-	NSLog(@"---------- XMPPClient: notifyDelegates_DidUpdateRoster");
-	
 	int i;
 	for(i = 0; i < [delegates count]; i++)
 	{
@@ -587,7 +625,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidReceiveBuddyRequest:(XMPPJID *)jid
+- (void)onDidReceiveBuddyRequest:(XMPPJID *)jid
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -601,7 +639,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidReceiveIQ:(XMPPIQ *)iq
+- (void)onDidReceiveIQ:(XMPPIQ *)iq
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -615,7 +653,7 @@
 	}
 }
 
-- (void)notifyDelegates_DidReceiveMessage:(XMPPMessage *)message
+- (void)onDidReceiveMessage:(XMPPMessage *)message
 {
 	int i;
 	for(i = 0; i < [delegates count]; i++)
@@ -635,7 +673,7 @@
 
 - (void)xmppStreamDidOpen:(XMPPStream *)sender
 {
-	[self notifyDelegates_DidConnect];
+	[self onDidConnect];
 	
 	if(autoLogin)
 	{
@@ -645,17 +683,17 @@
 
 - (void)xmppStreamDidRegister:(XMPPStream *)sender
 {
-	[self notifyDelegates_DidRegister];
+	[self onDidRegister];
 }
 
 - (void)xmppStream:(XMPPStream *)sender didNotRegister:(NSXMLElement *)error
 {
-	[self notifyDelegates_DidNotRegister:error];
+	[self onDidNotRegister:error];
 }
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-	[self notifyDelegates_DidAuthenticate];
+	[self onDidAuthenticate];
 	
 	if(autoRoster)
 	{
@@ -669,7 +707,7 @@
 
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
 {
-	[self notifyDelegates_DidNotAuthenticate:error];
+	[self onDidNotAuthenticate:error];
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
@@ -705,17 +743,17 @@
 			}
 		}
 		
-		[self notifyDelegates_DidUpdateRoster];
+		[self onDidUpdateRoster];
 	}
 	else
 	{
-		[self notifyDelegates_DidReceiveIQ:iq];
+		[self onDidReceiveIQ:iq];
 	}
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	[self notifyDelegates_DidReceiveMessage:message];
+	[self onDidReceiveMessage:message];
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
@@ -739,7 +777,7 @@
 		{
 			// Presence subscription request from someone who's NOT in our roster
 			
-			[self notifyDelegates_DidReceiveBuddyRequest:[presence from]];
+			[self onDidReceiveBuddyRequest:[presence from]];
 		}
 	}
 	else
@@ -747,14 +785,14 @@
 		XMPPUser *user = [roster objectForKey:[[presence from] bareJID]];
 		[user updateWithPresence:presence];
 		
-		[self notifyDelegates_DidUpdateRoster];
+		[self onDidUpdateRoster];
 	}
 }
 
 - (void)xmppStreamDidClose:(XMPPStream *)sender
 {
 	[roster removeAllObjects];
-	[self notifyDelegates_DidDisconnect];
+	[self onDidDisconnect];
 }
 
 @end
