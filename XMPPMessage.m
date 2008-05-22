@@ -12,18 +12,6 @@
 	return result;
 }
 
-- (XMPPJID *)to
-{
-	NSString *str = [[self attributeForName:@"to"] stringValue];
-	return [XMPPJID jidWithString:str];
-}
-
-- (XMPPJID *)from
-{
-	NSString *str = [[self attributeForName:@"from"] stringValue];
-	return [XMPPJID jidWithString:str];
-}
-
 - (BOOL)isChatMessage
 {
 	return [[[self attributeForName:@"type"] stringValue] isEqualToString:@"chat"];

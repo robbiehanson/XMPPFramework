@@ -1,17 +1,13 @@
 #import <Cocoa/Cocoa.h>
-@class  XMPPJID;
+#import "XMPPElement.h"
 
 
-@interface XMPPPresence : NSXMLElement
+@interface XMPPPresence : XMPPElement
 
 + (XMPPPresence *)presenceFromElement:(NSXMLElement *)element;
 
 - (id)initWithType:(NSString *)type to:(XMPPJID *)to;
 
-- (NSString *)elementID;
-
-- (XMPPJID *)to;
-- (XMPPJID *)from;
 - (NSString *)type;
 
 - (NSString *)show;

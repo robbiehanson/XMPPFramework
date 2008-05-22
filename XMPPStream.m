@@ -1,9 +1,9 @@
 #import "XMPPStream.h"
+#import "AsyncSocket.h"
+#import "NSXMLElementAdditions.h"
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
-#import "NSXMLElementAdditions.h"
-#import "AsyncSocket.h"
 
 #import <SSCrypto/SSCrypto.h>
 
@@ -223,7 +223,7 @@
 		state = STATE_CONNECTING;
 		
 		// If the given port number is zero, use the default port number for XMPP communication
-		int myPortNumber = (portNumber > 0) ? portNumber : 5223;
+		UInt16 myPortNumber = (portNumber > 0) ? portNumber : 5223;
 		
 		// Connect to the host
 		[asyncSocket connectToHost:hostName onPort:myPortNumber error:nil];
@@ -1261,37 +1261,45 @@
 	}
 	else if([[element name] isEqualToString:@"iq"])
 	{
-		if([delegate respondsToSelector:@selector(xmppStream:didReceiveIQ:)]) {
+		if([delegate respondsToSelector:@selector(xmppStream:didReceiveIQ:)])
+		{
 			[delegate xmppStream:self didReceiveIQ:[XMPPIQ iqFromElement:element]];
 		}
-		else if(DEBUG_DELEGATE) {
+		else if(DEBUG_DELEGATE)
+		{
 			NSLog(@"xmppStream:%p didReceiveIQ:%@", self, [element XMLString]);
 		}
 	}
 	else if([[element name] isEqualToString:@"message"])
 	{
-		if([delegate respondsToSelector:@selector(xmppStream:didReceiveMessage:)]) {
+		if([delegate respondsToSelector:@selector(xmppStream:didReceiveMessage:)])
+		{
 			[delegate xmppStream:self didReceiveMessage:[XMPPMessage messageFromElement:element]];
 		}
-		else if(DEBUG_DELEGATE) {
+		else if(DEBUG_DELEGATE)
+		{
 			NSLog(@"xmppStream:%p didReceiveMessage:%@", self, [element XMLString]);
 		}
 	}
 	else if([[element name] isEqualToString:@"presence"])
 	{
-		if([delegate respondsToSelector:@selector(xmppStream:didReceivePresence:)]) {
+		if([delegate respondsToSelector:@selector(xmppStream:didReceivePresence:)])
+		{
 			[delegate xmppStream:self didReceivePresence:[XMPPPresence presenceFromElement:element]];
 		}
-		else if(DEBUG_DELEGATE) {
+		else if(DEBUG_DELEGATE)
+		{
 			NSLog(@"xmppStream:%p didReceivePresence:%@", self, [element XMLString]);
 		}
 	}
 	else
 	{
-		if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
+		if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)])
+		{
 			[delegate xmppStream:self didReceiveError:element];
 		}
-		else if(DEBUG_DELEGATE) {
+		else if(DEBUG_DELEGATE)
+		{
 			NSLog(@"xmppStream:%p didReceiveError:%@", self, [element XMLString]);
 		}
 	}

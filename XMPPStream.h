@@ -1,8 +1,9 @@
 #import <Cocoa/Cocoa.h>
-@class  AsyncSocket;
-@class  XMPPIQ;
-@class  XMPPMessage;
-@class  XMPPPresence;
+
+@class AsyncSocket;
+@class XMPPIQ;
+@class XMPPMessage;
+@class XMPPPresence;
 
 
 @interface XMPPStream : NSObject

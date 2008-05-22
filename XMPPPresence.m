@@ -1,6 +1,6 @@
 #import "XMPPPresence.h"
-#import "XMPPJID.h"
 #import "NSXMLElementAdditions.h"
+
 
 @implementation XMPPPresence
 
@@ -19,23 +19,6 @@
 		[self addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[to description]]];
 	}
 	return self;
-}
-
-- (NSString *)elementID
-{
-	return [[self attributeForName:@"id"] stringValue];
-}
-
-- (XMPPJID *)to
-{
-	NSString *str = [[self attributeForName:@"to"] stringValue];
-	return [XMPPJID jidWithString:str];
-}
-
-- (XMPPJID *)from
-{
-	NSString *str = [[self attributeForName:@"from"] stringValue];
-	return [XMPPJID jidWithString:str];
 }
 
 - (NSString *)type
