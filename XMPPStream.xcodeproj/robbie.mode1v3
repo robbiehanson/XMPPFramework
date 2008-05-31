@@ -287,6 +287,7 @@
 								<string>29B97314FDCFA39411CA2CEA</string>
 								<string>080E96DDFE201D6D7F000001</string>
 								<string>DCCE55760BDC8EC8000E2798</string>
+								<string>DCB9BAF80DDC962C002DA335</string>
 								<string>DCCE55630BDC6FBC000E2798</string>
 								<string>DCF8260B0D74A4AE00BFABDE</string>
 								<string>29B97317FDCFA39411CA2CEA</string>
@@ -296,13 +297,11 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>33</integer>
-									<integer>31</integer>
 									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 0}, {273, 626}}</string>
+							<string>{{0, 357}, {273, 626}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -321,7 +320,7 @@
 							<real>273</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>110 135 1155 685 0 0 1680 1028 </string>
+						<string>106 268 1155 685 0 0 1680 1028 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -332,18 +331,30 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>&lt;No Editor&gt;</string>
+								<string>stringprep.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
 									<dict>
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
+										<key>PBXProjectModuleLabel</key>
+										<string>stringprep.h</string>
+										<key>_historyCapacity</key>
+										<integer>10</integer>
+										<key>bookmark</key>
+										<string>DCC1A7090DF0E3DD00D3C1E7</string>
+										<key>history</key>
+										<array>
+											<string>DCC1A7080DF0E3DD00D3C1E7</string>
+										</array>
 									</dict>
 									<key>SplitCount</key>
 									<string>1</string>
@@ -356,7 +367,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {860, 639}}</string>
 								<key>RubberWindowFrame</key>
-								<string>110 135 1155 685 0 0 1680 1028 </string>
+								<string>106 268 1155 685 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -376,7 +387,7 @@
 								<key>Frame</key>
 								<string>{{0, 644}, {860, 0}}</string>
 								<key>RubberWindowFrame</key>
-								<string>110 135 1155 685 0 0 1680 1028 </string>
+								<string>106 268 1155 685 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
@@ -527,7 +538,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>233888579.395044</real>
+	<real>233890781.98660401</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -543,9 +554,10 @@
 	<key>WindowOrderList</key>
 	<array>
 		<string>/Users/robbie/Programs/Google Code/XMPPFramework/XMPPStream.xcodeproj</string>
+		<string>DCF825810D748AB600BFABDE</string>
 	</array>
 	<key>WindowString</key>
-	<string>110 135 1155 685 0 0 1680 1028 </string>
+	<string>106 268 1155 685 0 0 1680 1028 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>
@@ -624,7 +636,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>DCF825810D748AB600BFABDE</string>
-				<string>DCD4F37A0DEE1D41009EF343</string>
+				<string>DCC1A6DE0DF0DE6600D3C1E7</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -635,7 +647,7 @@
 			<key>WindowToolGUID</key>
 			<string>DCF825810D748AB600BFABDE</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>

@@ -25,12 +25,8 @@
 		DCB9BA180DDB73DA002DA335 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BA170DDB73DA002DA335 /* XMPPPresence.m */; };
 		DCB9BA1B0DDB73E6002DA335 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BA1A0DDB73E6002DA335 /* XMPPMessage.m */; };
 		DCB9BB0A0DDC969C002DA335 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BB090DDC969C002DA335 /* LibIDN.m */; };
-		DCB9BBDB0DDCE75F002DA335 /* nfkc.c in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BBD50DDCE75F002DA335 /* nfkc.c */; };
-		DCB9BBDC0DDCE75F002DA335 /* profiles.c in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BBD60DDCE75F002DA335 /* profiles.c */; };
-		DCB9BBDD0DDCE75F002DA335 /* stringprep.c in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BBD70DDCE75F002DA335 /* stringprep.c */; };
-		DCB9BBDE0DDCE75F002DA335 /* stringprep_generic.c in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BBD90DDCE75F002DA335 /* stringprep_generic.c */; };
-		DCB9BBDF0DDCE75F002DA335 /* toutf8.c in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BBDA0DDCE75F002DA335 /* toutf8.c */; };
 		DCB9BBF20DDCEE39002DA335 /* NSXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BBF10DDCEE39002DA335 /* NSXMLElementAdditions.m */; };
+		DCC1A6FF0DF0E3BF00D3C1E7 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC1A6FE0DF0E3BF00D3C1E7 /* libidn.a */; };
 		DCCE55390BDC6290000E2798 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55380BDC6290000E2798 /* AsyncSocket.m */; };
 		DCCE55610BDC6FAC000E2798 /* RosterController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55600BDC6FAC000E2798 /* RosterController.m */; };
 		DCCE55680BDC7030000E2798 /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55670BDC7030000E2798 /* XMPPStream.m */; };
@@ -87,18 +83,12 @@
 		DCB9BA1A0DDB73E6002DA335 /* XMPPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMessage.m; sourceTree = "<group>"; };
 		DCB9BB080DDC969C002DA335 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibIDN.h; sourceTree = "<group>"; };
 		DCB9BB090DDC969C002DA335 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
-		DCB9BBD20DDCE75F002DA335 /* gunicomp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gunicomp.h; path = libidn/gunicomp.h; sourceTree = "<group>"; };
-		DCB9BBD30DDCE75F002DA335 /* gunidecomp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gunidecomp.h; path = libidn/gunidecomp.h; sourceTree = "<group>"; };
-		DCB9BBD40DDCE75F002DA335 /* internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = internal.h; path = libidn/internal.h; sourceTree = "<group>"; };
-		DCB9BBD50DDCE75F002DA335 /* nfkc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nfkc.c; path = libidn/nfkc.c; sourceTree = "<group>"; };
-		DCB9BBD60DDCE75F002DA335 /* profiles.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = profiles.c; path = libidn/profiles.c; sourceTree = "<group>"; };
-		DCB9BBD70DDCE75F002DA335 /* stringprep.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = stringprep.c; path = libidn/stringprep.c; sourceTree = "<group>"; };
 		DCB9BBD80DDCE75F002DA335 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringprep.h; path = libidn/stringprep.h; sourceTree = "<group>"; };
-		DCB9BBD90DDCE75F002DA335 /* stringprep_generic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = stringprep_generic.c; path = libidn/stringprep_generic.c; sourceTree = "<group>"; };
-		DCB9BBDA0DDCE75F002DA335 /* toutf8.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = toutf8.c; path = libidn/toutf8.c; sourceTree = "<group>"; };
 		DCB9BBEF0DDCEDA6002DA335 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPP.h; sourceTree = "<group>"; };
 		DCB9BBF00DDCEE39002DA335 /* NSXMLElementAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSXMLElementAdditions.h; sourceTree = "<group>"; };
 		DCB9BBF10DDCEE39002DA335 /* NSXMLElementAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSXMLElementAdditions.m; sourceTree = "<group>"; };
+		DCC1A6E80DF0E3A300D3C1E7 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "libidn/idn-int.h"; sourceTree = "<group>"; };
+		DCC1A6FE0DF0E3BF00D3C1E7 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = libidn/libidn.a; sourceTree = "<group>"; };
 		DCCE55370BDC6290000E2798 /* AsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AsyncSocket.h; sourceTree = "<group>"; };
 		DCCE55380BDC6290000E2798 /* AsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AsyncSocket.m; sourceTree = "<group>"; };
 		DCCE555F0BDC6FAC000E2798 /* RosterController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = RosterController.h; sourceTree = "<group>"; };
@@ -124,6 +114,7 @@
 				DCAB742A0BDE011100E828D5 /* libssl.dylib in Frameworks */,
 				DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */,
 				DC18E9920C9563ED0011DCE5 /* SystemConfiguration.framework in Frameworks */,
+				DCC1A6FF0DF0E3BF00D3C1E7 /* libidn.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,9 +135,10 @@
 			children = (
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 				DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */,
+				DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */,
 				DCAB74290BDE011100E828D5 /* libssl.dylib */,
 				DCAB742B0BDE013000E828D5 /* libcrypto.dylib */,
-				DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */,
+				DCC1A6FE0DF0E3BF00D3C1E7 /* libidn.a */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -218,25 +210,10 @@
 			children = (
 				DCB9BB080DDC969C002DA335 /* LibIDN.h */,
 				DCB9BB090DDC969C002DA335 /* LibIDN.m */,
-				DCB9BB070DDC9688002DA335 /* libidn */,
+				DCC1A6E80DF0E3A300D3C1E7 /* idn-int.h */,
+				DCB9BBD80DDCE75F002DA335 /* stringprep.h */,
 			);
 			name = Utilities;
-			sourceTree = "<group>";
-		};
-		DCB9BB070DDC9688002DA335 /* libidn */ = {
-			isa = PBXGroup;
-			children = (
-				DCB9BBD20DDCE75F002DA335 /* gunicomp.h */,
-				DCB9BBD30DDCE75F002DA335 /* gunidecomp.h */,
-				DCB9BBD40DDCE75F002DA335 /* internal.h */,
-				DCB9BBD50DDCE75F002DA335 /* nfkc.c */,
-				DCB9BBD60DDCE75F002DA335 /* profiles.c */,
-				DCB9BBD70DDCE75F002DA335 /* stringprep.c */,
-				DCB9BBD80DDCE75F002DA335 /* stringprep.h */,
-				DCB9BBD90DDCE75F002DA335 /* stringprep_generic.c */,
-				DCB9BBDA0DDCE75F002DA335 /* toutf8.c */,
-			);
-			name = libidn;
 			sourceTree = "<group>";
 		};
 		DCB9BBF30DDCEE6B002DA335 /* Categories */ = {
@@ -370,11 +347,6 @@
 				DCB9BA180DDB73DA002DA335 /* XMPPPresence.m in Sources */,
 				DCB9BA1B0DDB73E6002DA335 /* XMPPMessage.m in Sources */,
 				DCB9BB0A0DDC969C002DA335 /* LibIDN.m in Sources */,
-				DCB9BBDB0DDCE75F002DA335 /* nfkc.c in Sources */,
-				DCB9BBDC0DDCE75F002DA335 /* profiles.c in Sources */,
-				DCB9BBDD0DDCE75F002DA335 /* stringprep.c in Sources */,
-				DCB9BBDE0DDCE75F002DA335 /* stringprep_generic.c in Sources */,
-				DCB9BBDF0DDCE75F002DA335 /* toutf8.c in Sources */,
 				DCB9BBF20DDCEE39002DA335 /* NSXMLElementAdditions.m in Sources */,
 				DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */,
 			);
@@ -425,6 +397,11 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/libidn\"";
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -447,6 +424,11 @@
 				GCC_MODEL_TUNING = G5;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libidn\"";
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
