@@ -359,9 +359,53 @@ static void MyCFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType 
 		[NSException raise:AsyncSocketException format:@"Attempting to accept while connected or accepting connections. Disconnect first."];
 
 	// Set up the listen sockaddr structs if needed.
-
+	
 	NSData *address = nil, *address6 = nil;
-	if(hostaddr && ([hostaddr length] != 0))
+	if(hostaddr == nil || ([hostaddr length] == 0))
+	{
+		// Accept on ANY address
+		struct sockaddr_in nativeAddr;
+		nativeAddr.sin_len         = sizeof(struct sockaddr_in);
+		nativeAddr.sin_family      = AF_INET;
+		nativeAddr.sin_port        = htons(port);
+		nativeAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		memset(&(nativeAddr.sin_zero), 0, sizeof(nativeAddr.sin_zero));
+		
+		struct sockaddr_in6 nativeAddr6;
+		nativeAddr6.sin6_len       = sizeof(struct sockaddr_in6);
+		nativeAddr6.sin6_family    = AF_INET6;
+		nativeAddr6.sin6_port      = htons(port);
+		nativeAddr6.sin6_flowinfo  = 0;
+		nativeAddr6.sin6_addr      = in6addr_any;
+		nativeAddr6.sin6_scope_id  = 0;
+		
+		// Wrap the native address structures for CFSocketSetAddress.
+		address = [NSData dataWithBytes:&nativeAddr length:sizeof(nativeAddr)];
+		address6 = [NSData dataWithBytes:&nativeAddr6 length:sizeof(nativeAddr6)];
+	}
+	else if([hostaddr isEqualToString:@"localhost"] || [hostaddr isEqualToString:@"loopback"])
+	{
+		// Accept only on LOOPBACK address
+		struct sockaddr_in nativeAddr;
+		nativeAddr.sin_len         = sizeof(struct sockaddr_in);
+		nativeAddr.sin_family      = AF_INET;
+		nativeAddr.sin_port        = htons(port);
+		nativeAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+		memset(&(nativeAddr.sin_zero), 0, sizeof(nativeAddr.sin_zero));
+	
+		struct sockaddr_in6 nativeAddr6;
+		nativeAddr6.sin6_len       = sizeof(struct sockaddr_in6);
+		nativeAddr6.sin6_family    = AF_INET6;
+		nativeAddr6.sin6_port      = htons(port);
+		nativeAddr6.sin6_flowinfo  = 0;
+		nativeAddr6.sin6_addr      = in6addr_loopback;
+		nativeAddr6.sin6_scope_id  = 0;
+		
+		// Wrap the native address structures for CFSocketSetAddress.
+		address = [NSData dataWithBytes:&nativeAddr length:sizeof(nativeAddr)];
+		address6 = [NSData dataWithBytes:&nativeAddr6 length:sizeof(nativeAddr6)];
+	}
+	else
 	{
 		NSString *portStr = [NSString stringWithFormat:@"%hu", port];
 		
@@ -382,7 +426,7 @@ static void MyCFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType 
 				NSString *errMsg = [NSString stringWithCString:gai_strerror(error) encoding:NSASCIIStringEncoding];
 				NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 				
-				*errPtr = [NSError errorWithDomain:@"kCFStreamErrorDomainNetDB" code:error userInfo:info];
+				if(errPtr) *errPtr = [NSError errorWithDomain:@"kCFStreamErrorDomainNetDB" code:error userInfo:info];
 			}
 			
 			for(res = res0; res; res = res->ai_next)
@@ -404,28 +448,6 @@ static void MyCFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType 
 		}
 		
 		if(!address && !address6) return NO;
-	}
-	else
-	{
-		// Set up the addresses.
-		struct sockaddr_in nativeAddr;
-		nativeAddr.sin_len         = sizeof(struct sockaddr_in);
-		nativeAddr.sin_family      = AF_INET;
-		nativeAddr.sin_port        = htons(port);
-		nativeAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		memset(&(nativeAddr.sin_zero), 0, sizeof(nativeAddr.sin_zero));
-		
-		struct sockaddr_in6 nativeAddr6;
-		nativeAddr6.sin6_len       = sizeof(struct sockaddr_in6);
-		nativeAddr6.sin6_family    = AF_INET6;
-		nativeAddr6.sin6_port      = htons(port);
-		nativeAddr6.sin6_flowinfo  = 0;
-		nativeAddr6.sin6_addr      = in6addr_any;
-		nativeAddr6.sin6_scope_id  = 0;
-
-		// Wrap the native address structures for CFSocketSetAddress.
-		address = [NSData dataWithBytes:&nativeAddr length:sizeof(nativeAddr)];
-		address6 = [NSData dataWithBytes:&nativeAddr6 length:sizeof(nativeAddr6)];
 	}
 
 	// Create the sockets.
@@ -471,7 +493,7 @@ static void MyCFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType 
 		UInt16 chosenPort = [self localPort:theSocket];
 		
 		struct sockaddr_in6 *pSockAddr6 = (struct sockaddr_in6 *)[address6 bytes];
-		pSockAddr6->sin6_port = chosenPort;
+		pSockAddr6->sin6_port = htons(chosenPort);
     }
 	
 	if (theSocket6)
@@ -548,8 +570,10 @@ Failed:;
 										(CFSocketCallBack)&MyCFSocketCallback,  // Callback method
 										&theContext);
 
-	if (socket == NULL && errPtr)
-		*errPtr = [self getSocketError];
+	if(socket == NULL)
+	{
+		if(errPtr) *errPtr = [self getSocketError];
+	}
 	
 	return socket;
 }
@@ -627,7 +651,7 @@ Failed:;
 	if (theReadStream == NULL || theWriteStream == NULL)
 	{
 		NSError *err = [self getStreamError];
-		NSLog (@"AsyncSocket %p couldn't create streams from accepted socket, %@", self, err);
+		NSLog (@"AsyncSocket %p couldn't create streams from accepted socket: %@", self, err);
 		if (errPtr) *errPtr = err;
 		return NO;
 	}
@@ -671,8 +695,13 @@ Failed:;
 		(CFReadStreamClientCallBack)&MyCFReadStreamCallback,
 		(CFStreamClientContext *)(&theContext) ))
 	{
+		NSError *err = [self getStreamError];
+		
 		NSLog (@"AsyncSocket %p couldn't attach read stream to run-loop,", self);
-		goto Failed;
+		NSLog (@"Error: %@", err);
+		
+		if (errPtr) *errPtr = err;
+		return NO;
 	}
 	CFReadStreamScheduleWithRunLoop (theReadStream, theRunLoop, kCFRunLoopDefaultMode);
 
@@ -682,18 +711,18 @@ Failed:;
 		(CFWriteStreamClientCallBack)&MyCFWriteStreamCallback,
 		(CFStreamClientContext *)(&theContext) ))
 	{
+		NSError *err = [self getStreamError];
+		
 		NSLog (@"AsyncSocket %p couldn't attach write stream to run-loop,", self);
-		goto Failed;
+		NSLog (@"Error: %@", err);
+		
+		if (errPtr) *errPtr = err;
+		return NO;
+		
 	}
 	CFWriteStreamScheduleWithRunLoop (theWriteStream, theRunLoop, kCFRunLoopDefaultMode);
 	
 	return YES;
-
-Failed:;
-	NSError *err = [self getStreamError];
-	NSLog (@"%@", err);
-	if (errPtr) *errPtr = err;
-	return NO;
 }
 
 /**
