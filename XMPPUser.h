@@ -5,14 +5,15 @@
 @class  XMPPResource;
 
 
-@interface XMPPUser : NSObject
+@interface XMPPUser : NSObject <NSCoding>
 {
-	NSMutableDictionary *resources;
-	
 	XMPPJID *jid;
-	
 	NSMutableDictionary *itemAttributes;
+	
+	NSMutableDictionary *resources;
 	XMPPResource *primaryResource;
+	
+	NSInteger tag;
 }
 
 - (id)initWithItem:(NSXMLElement *)item;
@@ -27,6 +28,7 @@
 
 - (XMPPResource *)primaryResource;
 - (NSArray *)sortedResources;
+- (NSArray *)unsortedResources;
 
 - (void)updateWithItem:(NSXMLElement *)item;
 - (void)updateWithPresence:(XMPPPresence *)presence;
@@ -36,5 +38,8 @@
 
 - (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another;
 - (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another options:(NSStringCompareOptions)mask;
+
+- (NSInteger)tag;
+- (void)setTag:(NSInteger)anInt;
 
 @end
