@@ -1,11 +1,12 @@
 #import <Cocoa/Cocoa.h>
-@class  XMPPJID;
-@class  XMPPUser;
-@class  XMPPIQ;
-@class  XMPPPresence;
+
+@class XMPPJID;
+@class XMPPUser;
+@class XMPPIQ;
+@class XMPPPresence;
 
 
-@interface XMPPResource : NSObject
+@interface XMPPResource : NSObject <NSCoding>
 {
 	XMPPJID *jid;
 	XMPPPresence *presence;

@@ -21,18 +21,80 @@
 		itemAttributes = [[item attributesAsDictionary] mutableCopy];
 		
 		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+		
+		tag = 0;
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[resources release];
 	[jid release];
 	[itemAttributes release];
+	[resources release];
 	[primaryResource release];
 	[super dealloc];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Encoding, Decoding
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+	if([encoder isBycopy])
+		return self;
+	else
+		return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
+}
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+	if(self = [super init])
+	{
+		if([coder allowsKeyedCoding])
+		{
+			jid             = [[coder decodeObjectForKey:@"jid"] retain];
+			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
+			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
+			primaryResource = [[coder decodeObjectForKey:@"primaryResource"] retain];
+			tag             = [coder decodeIntegerForKey:@"tag"];
+		}
+		else
+		{
+			jid             = [[coder decodeObject] retain];
+			itemAttributes  = [[coder decodeObject] mutableCopy];
+			resources       = [[coder decodeObject] mutableCopy];
+			primaryResource = [[coder decodeObject] retain];
+			tag             = [[coder decodeObject] integerValue];
+		}
+	}
+	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+	if([coder allowsKeyedCoding])
+	{
+		[coder encodeObject:jid             forKey:@"jid"];
+		[coder encodeObject:itemAttributes  forKey:@"itemAttributes"];
+		[coder encodeObject:resources       forKey:@"resources"];
+		[coder encodeObject:primaryResource forKey:@"primaryResource"];
+		[coder encodeInteger:tag            forKey:@"tag"];
+	}
+	else
+	{
+		[coder encodeObject:jid];
+		[coder encodeObject:itemAttributes];
+		[coder encodeObject:resources];
+		[coder encodeObject:primaryResource];
+		[coder encodeObject:[NSNumber numberWithInteger:tag]];
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Standard Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (XMPPJID *)jid
 {
@@ -88,8 +150,13 @@
 	return [[resources allValues] sortedArrayUsingSelector:@selector(compare:)];
 }
 
+- (NSArray *)unsortedResources
+{
+	return [resources allValues];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Helper Methods:
+#pragma mark Helper Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)recalculatePrimaryResource
@@ -111,7 +178,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Update Methods:
+#pragma mark Update Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)updateWithItem:(NSXMLElement *)item
@@ -134,8 +201,6 @@
 
 - (void)updateWithPresence:(XMPPPresence *)presence
 {
-	NSLog(@"---------- XMPPUser: updateWithPresence:");
-	
 	if([[presence type] isEqualToString:@"unavailable"])
 	{
 		[resources removeObjectForKey:[presence from]];
@@ -160,7 +225,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Comparison Methods:
+#pragma mark Comparison Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -217,6 +282,46 @@
 		else
 			return [self compareByName:another options:mask];
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark NSObject Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"XMPPUser: %@", [jid bare]];
+}
+
+- (BOOL)isEqual:(id)anObject
+{
+	if([anObject isMemberOfClass:[self class]])
+	{
+		XMPPUser *another = (XMPPUser *)anObject;
+		
+		return [jid isEqual:[another jid]];
+	}
+	
+	return NO;
+}
+
+- (NSUInteger)hash
+{
+	return [jid hash];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark User Defined Content
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSInteger)tag
+{
+	return tag;
+}
+
+- (void)setTag:(NSInteger)anInt
+{
+	tag = anInt;
 }
 
 @end

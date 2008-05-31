@@ -19,6 +19,66 @@
 	return self;
 }
 
+- (void)dealloc
+{
+	[jid release];
+	[presence release];
+	[presenceReceived release];
+	[super dealloc];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Encoding, Decoding
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+	if([encoder isBycopy])
+		return self;
+	else
+		return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
+}
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+	if(self = [super init])
+	{
+		if([coder allowsKeyedCoding])
+		{
+			jid              = [[coder decodeObjectForKey:@"jid"] retain];
+			presence         = [[coder decodeObjectForKey:@"presence"] retain];
+			presenceReceived = [[coder decodeObjectForKey:@"presenceReceived"] retain];
+		}
+		else
+		{
+			jid              = [[coder decodeObject] retain];
+			presence         = [[coder decodeObject] retain];
+			presenceReceived = [[coder decodeObject] retain];
+		}
+	}
+	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+	if([coder allowsKeyedCoding])
+	{
+		[coder encodeObject:jid              forKey:@"jid"];
+		[coder encodeObject:presence         forKey:@"presence"];
+		[coder encodeObject:presenceReceived forKey:@"presenceReceived"];
+	}
+	else
+	{
+		[coder encodeObject:jid];
+		[coder encodeObject:presence];
+		[coder encodeObject:presenceReceived];
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Standard Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (XMPPJID *)jid
 {
 	return jid;
@@ -34,6 +94,10 @@
 	return presenceReceived;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Update Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)updateWithPresence:(XMPPPresence *)aPresence
 {
 	[presence release];
@@ -42,6 +106,10 @@
 	[presenceReceived release];
 	presenceReceived = [[NSDate alloc] init];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Comparison Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (NSComparisonResult)compare:(XMPPResource *)another
 {
@@ -69,6 +137,32 @@
 	NSDate *ar = [another presenceReceived];
 	
 	return [mr compare:ar];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark NSObject Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"XMPPResource: %@", [jid full]];
+}
+
+- (BOOL)isEqual:(id)anObject
+{
+	if([anObject isMemberOfClass:[self class]])
+	{
+		XMPPResource *another = (XMPPResource *)anObject;
+		
+		return [jid isEqual:[another jid]];
+	}
+	
+	return NO;
+}
+
+- (NSUInteger)hash
+{
+	return [jid hash];
 }
 
 @end
