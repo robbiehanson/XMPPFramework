@@ -27,9 +27,9 @@ extern "C"
 {
 #endif
 
-#include <stddef.h>		/* size_t */
-#include <unistd.h>		/* ssize_t */
-#include <idn-int.h>		/* uint32_t */
+#include <stddef.h>	  /* size_t */
+#include <unistd.h>   /* ssize_t */
+#include "idn-int.h"  /* uint32_t */
 
 #define STRINGPREP_VERSION "1.0"
 
