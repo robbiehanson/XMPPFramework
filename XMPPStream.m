@@ -1,11 +1,11 @@
 #import "XMPPStream.h"
 #import "AsyncSocket.h"
 #import "NSXMLElementAdditions.h"
+#import "NSDataAdditions.h"
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 
-#import <SSCrypto/SSCrypto.h>
 
 // Define the debugging state
 #define DEBUG_SEND      YES
@@ -408,7 +408,7 @@
 			// passwd : password for authcid
 			
 			NSString *payload = [NSString stringWithFormat:@"%C%@%C%@", 0, username, 0, password];
-			NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] encodeBase64WithNewlines:NO];
+			NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] base64Encoded];
 			
 			NSXMLElement *auth = [NSXMLElement elementWithName:@"auth"];
 			[auth addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-sasl"]];
@@ -441,7 +441,7 @@
 			NSString *digestStr = [NSString stringWithFormat:@"%@%@", rootID, password];
 			NSData *digestData = [digestStr dataUsingEncoding:NSUTF8StringEncoding];
 			
-			NSString *digest = [[SSCrypto getSHA1ForData:digestData] hexval];
+			NSString *digest = [[digestData sha1Digest] hexStringValue];
 			
 			NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query"];
 			[queryElement addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:auth"]];
@@ -1409,8 +1409,8 @@
 	if(self = [super init])
 	{
 		// Convert the base 64 encoded data into a string
-		NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSUTF8StringEncoding];
-		NSData *decodedData = [base64Data decodeBase64WithNewLines:NO];
+		NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
+		NSData *decodedData = [base64Data base64Decoded];
 		
 		NSString *authStr = [[[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding] autorelease];
 		
@@ -1517,30 +1517,24 @@
 
 - (NSString *)response
 {
-	SSCrypto *crypto = [[[SSCrypto alloc] init] autorelease];
-	
 	NSString *HA1str = [NSString stringWithFormat:@"%@:%@:%@", username, realm, password];
 	NSString *HA2str = [NSString stringWithFormat:@"AUTHENTICATE:%@", digestURI];
 	
-	[crypto setClearTextWithString:HA1str];
-	NSData *HA1dataA = [crypto digest:@"MD5"];
+	NSData *HA1dataA = [[HA1str dataUsingEncoding:NSUTF8StringEncoding] md5Digest];
 	NSData *HA1dataB = [[NSString stringWithFormat:@":%@:%@", nonce, cnonce] dataUsingEncoding:NSUTF8StringEncoding];
 	
 	NSMutableData *HA1data = [NSMutableData dataWithCapacity:([HA1dataA length] + [HA1dataB length])];
 	[HA1data appendData:HA1dataA];
 	[HA1data appendData:HA1dataB];
 	
-	[crypto setClearTextWithData:HA1data];
-	NSString *HA1 = [[crypto digest:@"MD5"] hexval];
+	NSString *HA1 = [[HA1data md5Digest] hexStringValue];
 	
-	[crypto setClearTextWithString:HA2str];
-	NSString *HA2 = [[crypto digest:@"MD5"] hexval];
+	NSString *HA2 = [[[HA2str dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
 	
 	NSString *responseStr = [NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
 		HA1, nonce, cnonce, HA2];
 	
-	[crypto setClearTextWithString:responseStr];
-	NSString *response = [[crypto digest:@"MD5"] hexval];
+	NSString *response = [[[responseStr dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
 	
 	return response;
 }
@@ -1564,7 +1558,7 @@
 	
 	NSData *utf8data = [buffer dataUsingEncoding:NSUTF8StringEncoding];
 	
-	return [utf8data encodeBase64WithNewlines:NO];
+	return [utf8data base64Encoded];
 }
 
 @end

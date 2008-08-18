@@ -13,7 +13,7 @@
 	if(self = [super init])
 	{
 		// Example item:
-		// <item subscription='both' name='Johnathan' jid='robbiehanson15@deusty.com'/>
+		// <item subscription='both' name='Robbie' jid='robbiehanson@deusty.com'/>
 		
 		NSString *jidStr = [[item attributeForName:@"jid"] stringValue];
 		jid = [[XMPPJID jidWithString:jidStr] retain];
@@ -123,8 +123,8 @@
 - (BOOL)isPendingApproval
 {
 	// Either of the following mean we're waiting to have our presence subscription approved:
-	// <item ask='subscribe' subscription='none' jid='robbie@robbiehanson.com'/>
-	// <item ask='subscribe' subscription='from' jid='robbie@robbiehanson.com'/>
+	// <item ask='subscribe' subscription='none' jid='robbiehanson@deusty.com'/>
+	// <item ask='subscribe' subscription='from' jid='robbiehanson@deusty.com'/>
 	
 	NSString *subscription = [itemAttributes objectForKey:@"subscription"];
 	NSString *ask = [itemAttributes objectForKey:@"ask"];

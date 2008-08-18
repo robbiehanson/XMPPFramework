@@ -1,4 +1,4 @@
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 @class  XMPPStream;
 @class  XMPPJID;
 @class  XMPPUser;
