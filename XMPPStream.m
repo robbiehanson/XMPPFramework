@@ -282,12 +282,12 @@
 		if([self supportsInBandRegistration])
 		{
 			NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query"];
-			[queryElement addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:register"]];
+			[queryElement addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:register"];
 			[queryElement addChild:[NSXMLNode elementWithName:@"username" stringValue:username]];
 			[queryElement addChild:[NSXMLNode elementWithName:@"password" stringValue:password]];
 			
 			NSXMLElement *iqElement = [NSXMLElement elementWithName:@"iq"];
-			[iqElement addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+			[iqElement addAttributeWithName:@"type" stringValue:@"set"];
 			[iqElement addChild:queryElement];
 			
 			if(DEBUG_SEND) {
@@ -411,8 +411,8 @@
 			NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] base64Encoded];
 			
 			NSXMLElement *auth = [NSXMLElement elementWithName:@"auth"];
-			[auth addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-sasl"]];
-			[auth addAttribute:[NSXMLNode attributeWithName:@"mechanism" stringValue:@"PLAIN"]];
+			[auth addAttributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+			[auth addAttributeWithName:@"mechanism" stringValue:@"PLAIN"];
 			[auth setStringValue:base64];
 			
 			if(DEBUG_SEND) {
@@ -444,13 +444,13 @@
 			NSString *digest = [[digestData sha1Digest] hexStringValue];
 			
 			NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query"];
-			[queryElement addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:auth"]];
+			[queryElement addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:auth"];
 			[queryElement addChild:[NSXMLNode elementWithName:@"username" stringValue:username]];
 			[queryElement addChild:[NSXMLNode elementWithName:@"digest" stringValue:digest]];
 			[queryElement addChild:[NSXMLNode elementWithName:@"resource" stringValue:resource]];
 			
 			NSXMLElement *iqElement = [NSXMLElement elementWithName:@"iq"];
-			[iqElement addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+			[iqElement addAttributeWithName:@"type" stringValue:@"set"];
 			[iqElement addChild:queryElement];
 			
 			if(DEBUG_SEND) {
@@ -644,11 +644,11 @@
 			[resource setStringValue:authResource];
 			
 			NSXMLElement *bind = [NSXMLElement elementWithName:@"bind"];
-			[bind addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-bind"]];
+			[bind addAttributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-bind"];
 			[bind addChild:resource];
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-			[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+			[iq addAttributeWithName:@"type" stringValue:@"set"];
 			[iq addChild:bind];
 			
 			if(DEBUG_SEND) {
@@ -663,10 +663,10 @@
 			// The user didn't specify a resource, so we ask the server to bind one for us
 			
 			NSXMLElement *bind = [NSXMLElement elementWithName:@"bind"];
-			[bind addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-bind"]];
+			[bind addAttributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-bind"];
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-			[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+			[iq addAttributeWithName:@"type" stringValue:@"set"];
 			[iq addChild:bind];
 						
 			if(DEBUG_SEND) {
@@ -824,7 +824,7 @@
 			
 			// Create and send challenge response element
 			NSXMLElement *cr = [NSXMLElement elementWithName:@"response"];
-			[cr addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-sasl"]];
+			[cr addAttributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			[cr setStringValue:[auth base64EncodedFullResponse]];
 			
 			if(DEBUG_SEND) {
@@ -934,7 +934,7 @@
 			
 			// Create and send empty challenge response element
 			NSXMLElement *cr = [NSXMLElement elementWithName:@"response"];
-			[cr addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-sasl"]];
+			[cr addAttributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			
 			if(DEBUG_SEND) {
 				NSLog(@"SEND: %@", [cr XMLString]);
@@ -994,10 +994,10 @@
 		if(f_session)
 		{
 			NSXMLElement *session = [NSXMLElement elementWithName:@"session"];
-			[session addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-session"]];
+			[session addAttributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-session"];
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-			[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+			[iq addAttributeWithName:@"type" stringValue:@"set"];
 			[iq addChild:session];
 			
 			if(DEBUG_SEND) {
@@ -1029,10 +1029,10 @@
 		// We'll simply let the server choose then
 		
 		NSXMLElement *bind = [NSXMLElement elementWithName:@"bind"];
-		[bind addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-bind"]];
+		[bind addAttributeWithName:@"xmlns" stringValue:@"urn:ietf:params:xml:ns:xmpp-bind"];
 		
 		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-		[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+		[iq addAttributeWithName:@"type" stringValue:@"set"];
 		[iq addChild:bind];
 		
 		if(DEBUG_SEND) {

@@ -15,8 +15,8 @@
 {
 	if(self = [super initWithName:@"presence"])
 	{
-		[self addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:type]];
-		[self addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[to description]]];
+		[self addAttributeWithName:@"type" stringValue:type];
+		[self addAttributeWithName:@"to" stringValue:[to description]];
 	}
 	return self;
 }
