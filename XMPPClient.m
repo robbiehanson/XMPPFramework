@@ -7,6 +7,7 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 #import "NSXMLElementAdditions.h"
+#import "SCNotificationManager.h"
 
 
 @interface XMPPClient (PrivateAPI)
@@ -40,10 +41,19 @@
 		autoPresence = YES;
 		autoRoster = YES;
 		autoReconnect = YES;
+		shouldReconnect = NO;
 		
 		xmppStream = [[XMPPStream alloc] initWithDelegate:self];
 		
 		roster = [[NSMutableDictionary alloc] initWithCapacity:10];
+		
+		scNotificationManager = [[SCNotificationManager alloc] init];
+		
+		// Register for network notifications from system configuration
+		[[NSNotificationCenter defaultCenter] addObserver:self 
+												 selector:@selector(networkStatusDidChange:) 
+													 name:@"State:/Network/Global/IPv4" 
+												   object:scNotificationManager];
 	}
 	return self;
 }
@@ -61,6 +71,8 @@
 	[xmppStream release];
 	
 	[roster release];
+	
+	[scNotificationManager release];
 	
 	[super dealloc];
 }
@@ -221,6 +233,9 @@
 
 - (void)disconnect
 {
+	// This variable will tell us that we should not automatically attempt to reconnect when the connection closes
+	shouldReconnect = NO;
+	
 	[xmppStream disconnect];
 }
 
@@ -706,6 +721,10 @@
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
+	// We're now connected and properly authenticated
+	// Should we get accidentally disconnected we should automatically reconnect
+	shouldReconnect = YES;
+	
 	[self onDidAuthenticate];
 	
 	if(autoRoster)
@@ -802,10 +821,77 @@
 	}
 }
 
+/**
+ * There are two types of errors: TCP errors and XMPP errors.
+ * If a TCP error is encountered (failure to connect, broken connection, etc) a standard NSError object is passed.
+ * If an XMPP error is encountered (<stream:error> for example) an NSXMLElement object is passed.
+ * 
+ * Note that standard errors (<iq type='error'/> for example) are delivered normally,
+ * via the other didReceive...: methods.
+**/
+- (void)xmppStream:(XMPPStream *)xs didReceiveError:(id)error
+{
+	if([error isKindOfClass:[NSError class]])
+	{
+		if([xmppStream isAuthenticated])
+		{
+			// We were fully connected to the XMPP server, but we've been disconnected for some reason.
+			// We will wait for a few seconds or so, and then attempt to reconnect if possible
+			[self performSelector:@selector(attemptReconnect:) withObject:nil afterDelay:4.0];
+		}
+	}
+}
+
 - (void)xmppStreamDidClose:(XMPPStream *)sender
 {
 	[roster removeAllObjects];
 	[self onDidDisconnect];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Reconnecting
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * This method is invoked a few seconds after a disconnection from the server,
+ * or after we receive notification that we may once again have a working internet connection.
+ * If we are still disconnected, it will attempt to reconnect if the network connection appears to be online.
+**/
+- (void)attemptReconnect:(id)ignore
+{
+	NSLog(@"XMPPClient: attempReconnect method called...");
+	
+	if([xmppStream isDisconnected] && autoReconnect)
+	{
+		SCNetworkConnectionFlags reachabilityStatus;
+		BOOL success = SCNetworkCheckReachabilityByName("www.deusty.com", &reachabilityStatus);
+		
+		if(success && (reachabilityStatus & kSCNetworkFlagsReachable))
+		{
+			[self connect];
+		}
+	}
+}
+
+- (void)networkStatusDidChange:(NSNotification *)notification
+{
+	// The following information needs to be tested using multiple interfaces
+	
+	// If this is a notification of a lost internet connection, there won't be a userInfo
+	// Otherwise, there will be...I think...
+	
+	if([notification userInfo])
+	{
+		// We may have an internet connection now...
+		// 
+		// If we were accidentally disconnected (user didn't tell us to disconnect)
+		// then now would be a good time to attempt to reconnect.
+		if(shouldReconnect)
+		{
+			// We will wait for a few seconds or so, and then attempt to reconnect if possible
+			[self performSelector:@selector(attemptReconnect:) withObject:nil afterDelay:4.0];
+		}
+	}
 }
 
 @end
