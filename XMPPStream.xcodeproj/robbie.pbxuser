@@ -129,6 +129,10 @@
 			DC63EA3F0E6600D60076E6D2 /* PBXTextBookmark */ = DC63EA3F0E6600D60076E6D2 /* PBXTextBookmark */;
 			DC63EA400E6600D60076E6D2 /* PBXTextBookmark */ = DC63EA400E6600D60076E6D2 /* PBXTextBookmark */;
 			DC63EA410E6600D60076E6D2 /* PBXTextBookmark */ = DC63EA410E6600D60076E6D2 /* PBXTextBookmark */;
+			DC63EA6C0E66052F0076E6D2 /* PBXTextBookmark */ = DC63EA6C0E66052F0076E6D2 /* PBXTextBookmark */;
+			DC63EA6D0E66052F0076E6D2 /* PBXTextBookmark */ = DC63EA6D0E66052F0076E6D2 /* PBXTextBookmark */;
+			DC63EA6E0E66052F0076E6D2 /* PBXTextBookmark */ = DC63EA6E0E66052F0076E6D2 /* PBXTextBookmark */;
+			DC63EA6F0E6605310076E6D2 /* PBXTextBookmark */ = DC63EA6F0E6605310076E6D2 /* PBXTextBookmark */;
 			DCF61F660E64721B009BFEE4 = DCF61F660E64721B009BFEE4 /* PBXTextBookmark */;
 			DCF61F6B0E6472DF009BFEE4 = DCF61F6B0E6472DF009BFEE4 /* PBXTextBookmark */;
 		};
@@ -785,6 +789,46 @@
 		vrLen = 1388;
 		vrLoc = 20538;
 	};
+	DC63EA6C0E66052F0076E6D2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = DCCE55380BDC6290000E2798 /* AsyncSocket.m */;
+		name = "AsyncSocket.m: 1383";
+		rLen = 19;
+		rLoc = 43551;
+		rType = 0;
+		vrLen = 776;
+		vrLoc = 43163;
+	};
+	DC63EA6D0E66052F0076E6D2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = DCCE55380BDC6290000E2798 /* AsyncSocket.m */;
+		name = "AsyncSocket.m: 1383";
+		rLen = 19;
+		rLoc = 43551;
+		rType = 0;
+		vrLen = 776;
+		vrLoc = 43163;
+	};
+	DC63EA6E0E66052F0076E6D2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = DCCE55380BDC6290000E2798 /* AsyncSocket.m */;
+		name = "AsyncSocket.m: 1383";
+		rLen = 19;
+		rLoc = 43551;
+		rType = 0;
+		vrLen = 776;
+		vrLoc = 43163;
+	};
+	DC63EA6F0E6605310076E6D2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = DCB9BA0B0DDB71E7002DA335 /* XMPPClient.m */;
+		name = "XMPPClient.m: 920";
+		rLen = 0;
+		rLoc = 22288;
+		rType = 0;
+		vrLen = 1388;
+		vrLoc = 20900;
+	};
 	DC7B2BF00DE620B80055F60A /* XMPPElement.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {799, 607}}";
@@ -816,9 +860,9 @@
 	};
 	DCB9BA0B0DDB71E7002DA335 /* XMPPClient.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {799, 12964}}";
-			sepNavSelRange = "{20924, 0}";
-			sepNavVisRange = "{20538, 1388}";
+			sepNavIntBoundsRect = "{{0, 0}, {799, 12586}}";
+			sepNavSelRange = "{22288, 0}";
+			sepNavVisRange = "{20900, 1388}";
 			sepNavWindowFrame = "{{321, 72}, {797, 720}}";
 		};
 	};

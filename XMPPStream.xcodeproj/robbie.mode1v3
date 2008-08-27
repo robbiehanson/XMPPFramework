@@ -327,7 +327,7 @@
 							<real>273</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>70 284 1155 685 0 0 1680 1028 </string>
+						<string>112 236 1155 685 0 0 1680 1028 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -357,7 +357,7 @@
 										<key>_historyCapacity</key>
 										<integer>20</integer>
 										<key>bookmark</key>
-										<string>DC63EA410E6600D60076E6D2</string>
+										<string>DC63EA6F0E6605310076E6D2</string>
 										<key>history</key>
 										<array>
 											<string>DC3EF8EC0E59206100DB9F06</string>
@@ -417,7 +417,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {860, 639}}</string>
 								<key>RubberWindowFrame</key>
-								<string>70 284 1155 685 0 0 1680 1028 </string>
+								<string>112 236 1155 685 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -437,7 +437,7 @@
 								<key>Frame</key>
 								<string>{{0, 644}, {860, 0}}</string>
 								<key>RubberWindowFrame</key>
-								<string>70 284 1155 685 0 0 1680 1028 </string>
+								<string>112 236 1155 685 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
@@ -588,7 +588,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>241565910.796437</real>
+	<real>241567025.42271301</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -609,7 +609,7 @@
 		<string>/Users/robbie/Programs/Google Code/XMPPFramework/XMPPStream.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>70 284 1155 685 0 0 1680 1028 </string>
+	<string>112 236 1155 685 0 0 1680 1028 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>

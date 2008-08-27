@@ -8,6 +8,19 @@
 
 @implementation XMPPUser
 
+- (id)initWithJID:(XMPPJID *)aJid
+{
+	if(self = [super init])
+	{
+		jid = [[aJid bareJID] retain];
+		itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
+		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+		
+		tag = 0;
+	}
+	return self;
+}
+
 - (id)initWithItem:(NSXMLElement *)item
 {
 	if(self = [super init])
@@ -16,7 +29,7 @@
 		// <item subscription='both' name='Robbie' jid='robbiehanson@deusty.com'/>
 		
 		NSString *jidStr = [[item attributeForName:@"jid"] stringValue];
-		jid = [[XMPPJID jidWithString:jidStr] retain];
+		jid = [[[XMPPJID jidWithString:jidStr] bareJID] retain];
 		
 		itemAttributes = [[item attributesAsDictionary] mutableCopy];
 		
@@ -240,7 +253,7 @@
  * This method compares the two users according to their name.
  * If either of the users has no set name (or has an empty string name), the name is considered to be the JID.
  * 
- * Options for the search â€” you can combine any of the following using a C bitwise OR operator:
+ * Options for the search Ñ you can combine any of the following using a C bitwise OR operator:
  * NSCaseInsensitiveSearch, NSLiteralSearch, NSNumericSearch.
  * See "String Programming Guide for Cocoa" for details on these options.
 **/

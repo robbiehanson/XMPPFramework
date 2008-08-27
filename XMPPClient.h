@@ -32,6 +32,7 @@
 	XMPPStream *xmppStream;
 	
 	NSMutableDictionary *roster;
+	XMPPUser *myUser;
 	
 	SCNotificationManager *scNotificationManager;
 }
@@ -116,6 +117,8 @@
 - (NSArray *)unsortedUsers;
 - (NSArray *)unsortedAvailableUsers;
 - (NSArray *)unsortedUnavailableUsers;
+
+- (XMPPUser *)myUser;
 
 - (void)sendElement:(NSXMLElement *)element;
 - (void)sendElement:(NSXMLElement *)element andNotifyMe:(long)tag;
