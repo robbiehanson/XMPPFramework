@@ -6,6 +6,7 @@
 @class  XMPPIQ;
 @class  XMPPMessage;
 @class  XMPPPresence;
+@class  SCNotificationManager;
 
 
 @interface XMPPClient : NSObject
@@ -26,10 +27,13 @@
 	BOOL autoPresence;
 	BOOL autoRoster;
 	BOOL autoReconnect;
+	BOOL shouldReconnect;
 	
 	XMPPStream *xmppStream;
 	
 	NSMutableDictionary *roster;
+	
+	SCNotificationManager *scNotificationManager;
 }
 
 - (id)init;
