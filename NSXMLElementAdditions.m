@@ -5,7 +5,7 @@
 /**
  * Quick method to create an element
 **/
-+ (NSXMLElement*)elementWithName:(NSString*)name attribute:(NSString*)attribute stringValue:(NSString*)string
++ (NSXMLElement *)elementWithName:(NSString *)name attribute:(NSString *)attribute stringValue:(NSString *)string
 {
 	NSXMLElement *element = [NSXMLElement elementWithName:name];
 	[element addAttributeWithName:attribute stringValue:string];
@@ -76,7 +76,7 @@
  *	Shortcut to avoid having to use NSXMLNode everytime
 **/
 
-- (void)addAttributeWithName:(NSString*)name stringValue:(NSString*)string
+- (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string
 {
 	[self addAttribute:[NSXMLNode attributeWithName:name stringValue:string]];
 }

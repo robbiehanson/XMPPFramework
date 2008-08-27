@@ -116,6 +116,8 @@
 - (void)sendElement:(NSXMLElement *)element;
 - (void)sendElement:(NSXMLElement *)element andNotifyMe:(long)tag;
 
+- (void)sendMessage:(NSString *)message toJID:(XMPPJID *)jid;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
