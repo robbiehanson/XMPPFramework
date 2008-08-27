@@ -909,7 +909,7 @@
 {
 	if([[response name] isEqualToString:@"challenge"])
 	{
-		XMPPDigestAuthentication *auth = [[XMPPDigestAuthentication alloc] initWithChallenge:response];
+		XMPPDigestAuthentication *auth = [[[XMPPDigestAuthentication alloc] initWithChallenge:response] autorelease];
 		
 		if(![auth rspauth])
 		{
