@@ -286,7 +286,7 @@
 {
 	// Send offline presence element
 	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"unavailable"]];
+	[presence addAttributeWithName:@"type" stringValue:@"unavailable"];
 	
 	[xmppStream sendElement:presence];
 	
@@ -309,10 +309,10 @@
 - (void)fetchRoster
 {
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
+	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"get"]];
+	[iq addAttributeWithName:@"type" stringValue:@"get"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -324,26 +324,26 @@
 	
 	// Add the buddy to our roster
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:[jid bare]]];
+	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
 	if(optionalName)
 	{
-		[item addAttribute:[NSXMLNode attributeWithName:@"name" stringValue:optionalName]];
+		[item addAttributeWithName:@"name" stringValue:optionalName];
 	}
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
+	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
 	[query addChild:item];
 		
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+	[iq addAttributeWithName:@"type" stringValue:@"set"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
 	
 	// Subscribe to the buddy's presence
 	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[jid bare]]];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribe"]];
+	[presence addAttributeWithName:@"to" stringValue:[jid bare]];
+	[presence addAttributeWithName:@"type" stringValue:@"subscribe"];
 	
 	[xmppStream sendElement:presence];
 }
@@ -358,15 +358,15 @@
 	// ...all in one step
 	
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:[jid bare]]];
-	[item addAttribute:[NSXMLNode attributeWithName:@"subscription" stringValue:@"remove"]];
+	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
+	[item addAttributeWithName:@"subscription" stringValue:@"remove"];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
+	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+	[iq addAttributeWithName:@"type" stringValue:@"set"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -377,15 +377,15 @@
 	if(jid == nil) return;
 	
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:[jid bare]]];
-	[item addAttribute:[NSXMLNode attributeWithName:@"name" stringValue:nickname]];
+	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
+	[item addAttributeWithName:@"name" stringValue:nickname];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
+	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+	[iq addAttributeWithName:@"type" stringValue:@"set"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -395,29 +395,29 @@
 {
 	// Send presence response
 	NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-	[response addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[jid bare]]];
-	[response addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribed"]];
+	[response addAttributeWithName:@"to" stringValue:[jid bare]];
+	[response addAttributeWithName:@"type" stringValue:@"subscribed"];
 	
 	[xmppStream sendElement:response];
 	
 	// Add user to our roster
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttribute:[NSXMLNode attributeWithName:@"jid" stringValue:[jid bare]]];
+	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttribute:[NSXMLNode attributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"]];
+	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"set"]];
+	[iq addAttributeWithName:@"type" stringValue:@"set"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
 	
 	// Subscribe to the user's presence
 	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[jid bare]]];
-	[presence addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribe"]];
+	[presence addAttributeWithName:@"to" stringValue:[jid bare]];
+	[presence addAttributeWithName:@"type" stringValue:@"subscribe"];
 	
 	[xmppStream sendElement:presence];
 }
@@ -426,8 +426,8 @@
 {
 	// Send presence response
 	NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-	[response addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[jid bare]]];
-	[response addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"unsubscribed"]];
+	[response addAttributeWithName:@"to" stringValue:[jid bare]];
+	[response addAttributeWithName:@"type" stringValue:@"unsubscribed"];
 	
 	[xmppStream sendElement:response];
 }
@@ -768,8 +768,8 @@
 			// Automatically approve
 			
 			NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-			[response addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[[presence from] bare]]];
-			[response addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"subscribed"]];
+			[response addAttributeWithName:@"to" stringValue:[[presence from] bare]];
+			[response addAttributeWithName:@"type" stringValue:@"subscribed"];
 			
 			[xmppStream sendElement:response];
 		}

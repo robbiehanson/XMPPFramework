@@ -109,8 +109,8 @@
 		[body setStringValue:messageStr];
 		
 		NSXMLElement *message = [NSXMLElement elementWithName:@"message"];
-		[message addAttribute:[NSXMLNode attributeWithName:@"type" stringValue:@"chat"]];
-		[message addAttribute:[NSXMLNode attributeWithName:@"to" stringValue:[jid full]]];
+		[message addAttributeWithName:@"type" stringValue:@"chat"];
+		[message addAttributeWithName:@"to" stringValue:[jid full]];
 		[message addChild:body];
 		
 		[xmppClient sendElement:message];

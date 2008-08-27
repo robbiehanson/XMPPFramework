@@ -3,6 +3,16 @@
 @implementation NSXMLElement (XMPPStreamAdditions)
 
 /**
+ * Quick method to create an element
+**/
++ (NSXMLElement*)elementWithName:(NSString*)name attribute:(NSString*)attribute stringValue:(NSString*)string
+{
+	NSXMLElement *element = [NSXMLElement elementWithName:name];
+	[element addAttributeWithName:attribute stringValue:string];
+	return element;
+}
+
+/**
  * This method returns the first child element for the given name (as an NSXMLElement).
  * If no child elements exist for the given name, nil is returned.
 **/
@@ -60,6 +70,15 @@
 - (NSString *)xmlns
 {
 	return [[self namespaceForPrefix:@""] stringValue];
+}
+
+/**
+ *	Shortcut to avoid having to use NSXMLNode everytime
+**/
+
+- (void)addAttributeWithName:(NSString*)name stringValue:(NSString*)string
+{
+	[self addAttribute:[NSXMLNode attributeWithName:name stringValue:string]];
 }
 
 /**
