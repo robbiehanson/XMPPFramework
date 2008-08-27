@@ -771,16 +771,25 @@
 				NSString *jidStr = [[item attributeForName:@"jid"] stringValue];
 				XMPPJID *jid = [XMPPJID jidWithString:jidStr];
 				
-				XMPPUser *user = [roster objectForKey:jid];
-				if(user)
+				NSString *subscription = [[item attributeForName:@"subscription"] stringValue];
+				
+				if([subscription isEqualToString:@"remove"])
 				{
-					[user updateWithItem:item];
+					[roster removeObjectForKey:jid];
 				}
 				else
 				{
-					XMPPUser *newUser = [[XMPPUser alloc] initWithItem:item];
-					[roster setObject:newUser forKey:jid];
-					[newUser release];
+					XMPPUser *user = [roster objectForKey:jid];
+					if(user)
+					{
+						[user updateWithItem:item];
+					}
+					else
+					{
+						XMPPUser *newUser = [[XMPPUser alloc] initWithItem:item];
+						[roster setObject:newUser forKey:jid];
+						[newUser release];
+					}
 				}
 			}
 		}
