@@ -16,6 +16,7 @@
 	NSInteger tag;
 }
 
+- (id)initWithJID:(XMPPJID *)jid;
 - (id)initWithItem:(NSXMLElement *)item;
 
 - (XMPPJID *)jid;

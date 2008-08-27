@@ -71,6 +71,7 @@
 	[xmppStream release];
 	
 	[roster release];
+	[myUser release];
 	
 	[scNotificationManager release];
 	
@@ -510,6 +511,11 @@
 	return result;
 }
 
+- (XMPPUser *)myUser
+{
+	return [[myUser retain] autorelease];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Sending Elements:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -725,6 +731,10 @@
 	// Should we get accidentally disconnected we should automatically reconnect
 	shouldReconnect = YES;
 	
+	// Update myUser
+	[myUser release];
+	myUser = [[XMPPUser alloc] initWithJID:myJID];
+	
 	[self onDidAuthenticate];
 	
 	if(autoRoster)
@@ -814,8 +824,16 @@
 	}
 	else
 	{
-		XMPPUser *user = [roster objectForKey:[[presence from] bareJID]];
-		[user updateWithPresence:presence];
+		XMPPUser *rosterUser = [roster objectForKey:[[presence from] bareJID]];
+		
+		if(rosterUser)
+		{
+			[rosterUser updateWithPresence:presence];
+		}
+		else if([[myJID bareJID] isEqual:[[presence from] bareJID]])
+		{
+			[myUser updateWithPresence:presence];
+		}
 		
 		[self onDidUpdateRoster];
 	}
@@ -845,6 +863,10 @@
 - (void)xmppStreamDidClose:(XMPPStream *)sender
 {
 	[roster removeAllObjects];
+	
+	[myUser release];
+	myUser = nil;
+	
 	[self onDidDisconnect];
 }
 
