@@ -279,4 +279,12 @@
 	return [self full];
 }
 
+- (void)dealloc
+{
+	[user release];
+	[domain release];
+	[resource release];
+	[super dealloc];
+}
+
 @end
