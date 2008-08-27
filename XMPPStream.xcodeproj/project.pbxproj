@@ -13,6 +13,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		DC18E9920C9563ED0011DCE5 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */; };
 		DC5247D80BE318AE002F838C /* XMPPUser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5247D60BE318AE002F838C /* XMPPUser.m */; };
+		DC63E9210E65D5140076E6D2 /* XMPPTransports.m in Sources */ = {isa = PBXBuildFile; fileRef = DC63E9200E65D5140076E6D2 /* XMPPTransports.m */; };
 		DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B2BF10DE620B80055F60A /* XMPPElement.m */; };
 		DCAB73F50BDE00C600E828D5 /* SSCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */; };
 		DCAB742A0BDE011100E828D5 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB74290BDE011100E828D5 /* libssl.dylib */; };
@@ -65,6 +66,8 @@
 		DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		DC5247D50BE318AE002F838C /* XMPPUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPUser.h; sourceTree = "<group>"; };
 		DC5247D60BE318AE002F838C /* XMPPUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPUser.m; sourceTree = "<group>"; };
+		DC63E91F0E65D5140076E6D2 /* XMPPTransports.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPTransports.h; sourceTree = "<group>"; };
+		DC63E9200E65D5140076E6D2 /* XMPPTransports.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPTransports.m; sourceTree = "<group>"; };
 		DC7B2BF00DE620B80055F60A /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPElement.h; sourceTree = "<group>"; };
 		DC7B2BF10DE620B80055F60A /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
 		DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SSCrypto.framework; sourceTree = "<group>"; };
@@ -208,6 +211,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		DC63E91E0E65D4EF0076E6D2 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				DC63E91F0E65D5140076E6D2 /* XMPPTransports.h */,
+				DC63E9200E65D5140076E6D2 /* XMPPTransports.m */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
 		DCB9BAF80DDC962C002DA335 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -265,6 +277,7 @@
 				DCB9BA1A0DDB73E6002DA335 /* XMPPMessage.m */,
 				DCB9BA160DDB73DA002DA335 /* XMPPPresence.h */,
 				DCB9BA170DDB73DA002DA335 /* XMPPPresence.m */,
+				DC63E91E0E65D4EF0076E6D2 /* Extensions */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -355,6 +368,7 @@
 				DCB9BBF20DDCEE39002DA335 /* NSXMLElementAdditions.m in Sources */,
 				DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */,
 				DCB73CC40E58ECCF0086B3DC /* NSDataAdditions.m in Sources */,
+				DC63E9210E65D5140076E6D2 /* XMPPTransports.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

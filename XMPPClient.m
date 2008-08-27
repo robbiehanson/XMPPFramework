@@ -509,6 +509,19 @@
 	[xmppStream sendElement:element andNotifyMe:tag];
 }
 
+- (void)sendMessage:(NSString *)message toJID:(XMPPJID *)jid
+{
+	NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
+	[body setStringValue:message];
+
+	NSXMLElement *element = [NSXMLElement elementWithName:@"message"];
+	[element addAttributeWithName:@"type" stringValue:@"chat"];
+	[element addAttributeWithName:@"to" stringValue:[jid full]];
+	[element addChild:body];
+	
+	[self sendElement:element];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Delegate Helper Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
