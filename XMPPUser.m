@@ -216,7 +216,7 @@
 		}
 		else
 		{
-			XMPPResource *newResource = [[XMPPResource alloc] initWithPresence:presence];
+			XMPPResource *newResource = [[[XMPPResource alloc] initWithPresence:presence] autorelease];
 			[resources setObject:newResource forKey:key];
 		}
 	}
