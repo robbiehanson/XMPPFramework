@@ -293,7 +293,10 @@
 
 - (void)goOnline
 {
+	NSString *priorityStr = [NSString stringWithFormat:@"%i", priority];
+	
 	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+	[presence addChild:[NSXMLElement elementWithName:@"priority" stringValue:priorityStr]];
 	
 	[xmppStream sendElement:presence];
 }
