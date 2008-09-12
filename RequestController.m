@@ -37,11 +37,25 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NSWindow Delegate Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)windowWillClose:(NSNotification *)notification
+{
+	// User chose to ignore requests by closing the window
+	
+	[jids removeAllObjects];
+	jidIndex = -1;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Helper Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)nextRequest
 {
+	NSLog(@"RequestController: nextRequest");
+	
 	if(++jidIndex < [jids count])
 	{
 		XMPPJID *jid = [jids objectAtIndex:jidIndex];
@@ -96,6 +110,10 @@
 	
 	NSArray *roster = [xmppClient sortedUsersByAvailabilityName];
 	
+	// Remember: Our roster contains only those users we've added.
+	// If the server tries to include buddies that we haven't added, but have asked to subscribe to us,
+	// the xmpp client filters them out.
+	
 	int i;
 	for(i = 0; i < [roster count]; i++)
 	{
@@ -105,13 +123,32 @@
 		
 		if(index != NSNotFound)
 		{
-			[xmppClient acceptBuddyRequest:[user jid]];
+			// Now we may be getting a notification of an updated roster due to an accept/reject we just sent.
+			// The simplest way to check is if the index isn't pointing to a jid we've already processed.
 			
-			[jids removeObjectAtIndex:index];
+			if(index >= jidIndex)
+			{
+				NSLog(@"Auto-accepting buddy request, since they already accepted us");
+				
+				[sender acceptBuddyRequest:[user jid]];
 			
-			// Call nextRequest, but we don't actually want to increment jidIndex
-			jidIndex--;
-			[self nextRequest];
+				[jids removeObjectAtIndex:index];
+				
+				// We need to calll nextRequest, but we want jidIndex to remain at it's current jid
+				if(index >= jidIndex)
+				{
+					// Subtract 1, because nextRequest will immediately add 1
+					jidIndex = jidIndex - 1;
+				}
+				else
+				{
+					// Subtract 2, because the current jid will go down 1
+					// and because nextRequest will immediately add 1
+					jidIndex = jidIndex - 2;
+				}
+				
+				[self nextRequest];
+			}
 		}
 	}
 }
