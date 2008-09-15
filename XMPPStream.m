@@ -506,6 +506,16 @@
 }
 
 /**
+ * Returns the version attribute from the servers's <stream:stream/> element.
+ * This should be at least 1.0 to be RFC 3920 compliant.
+ * If no version number was set, the server is not RFC compliant, and 0 is returned.
+**/
+- (float)serverXmppStreamVersionNumber
+{
+	return [[[rootElement attributeForName:@"version"] stringValue] floatValue];
+}
+
+/**
  * This methods handles sending an XML fragment.
  * If the XMPPStream is not connected, this method does nothing.
 **/
@@ -1165,11 +1175,30 @@
 			
 			[buffer setLength:0];
 			
-			// Update state - we're now onto stream negotiations
-			state = STATE_NEGOTIATING;
-			
-			// We need to read in the stream features now
-			[asyncSocket readDataToData:terminator withTimeout:TIMEOUT_READ_STREAM tag:TAG_READ_STREAM];
+			// Check for RFC compliance
+			if([self serverXmppStreamVersionNumber] >= 1.0)
+			{
+				// Update state - we're now onto stream negotiations
+				state = STATE_NEGOTIATING;
+				
+				// We need to read in the stream features now
+				[asyncSocket readDataToData:terminator withTimeout:TIMEOUT_READ_STREAM tag:TAG_READ_STREAM];
+			}
+			else
+			{
+				// The server isn't RFC comliant, and won't be sending any stream features
+				
+				// Update state - we're connected now
+				state = STATE_CONNECTED;
+				
+				// Notify delegate
+				if([delegate respondsToSelector:@selector(xmppStreamDidOpen:)]) {
+					[delegate xmppStreamDidOpen:self];
+				}
+				else if(DEBUG_DELEGATE) {
+					NSLog(@"xmppStreamDidOpen:%p", self);
+				}
+			}
 		}
 		return;
 	}

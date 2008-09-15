@@ -1,8 +1,9 @@
 #import <Foundation/Foundation.h>
-@class  AsyncSocket;
-@class  XMPPIQ;
-@class  XMPPMessage;
-@class  XMPPPresence;
+
+@class AsyncSocket;
+@class XMPPIQ;
+@class XMPPMessage;
+@class XMPPPresence;
 
 
 @interface XMPPStream : NSObject
@@ -59,6 +60,7 @@
 - (NSString *)authenticatedResource;
 
 - (NSXMLElement *)rootElement;
+- (float)serverXmppStreamVersionNumber;
 
 - (void)sendElement:(NSXMLElement *)element;
 - (void)sendElement:(NSXMLElement *)element andNotifyMe:(long)tag;
