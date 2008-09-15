@@ -143,6 +143,7 @@
 #pragma mark Encoding, Decoding:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if ! TARGET_OS_IPHONE
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
 	if([encoder isBycopy])
@@ -150,6 +151,7 @@
 	else
 		return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
 }
+#endif
 
 - (id)initWithCoder:(NSCoder *)coder
 {

@@ -1,12 +1,13 @@
 #import <Foundation/Foundation.h>
-@class  XMPPStream;
-@class  XMPPJID;
-@class  XMPPUser;
-@class  XMPPResource;
-@class  XMPPIQ;
-@class  XMPPMessage;
-@class  XMPPPresence;
-@class  SCNotificationManager;
+
+
+@class XMPPStream;
+@class XMPPJID;
+@class XMPPUser;
+@class XMPPResource;
+@class XMPPIQ;
+@class XMPPMessage;
+@class XMPPPresence;
 
 
 @interface XMPPClient : NSObject

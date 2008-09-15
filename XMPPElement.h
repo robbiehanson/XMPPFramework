@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
-#import "XMPPJID.h"
+
+@class XMPPJID;
 
 
 @interface XMPPElement : NSXMLElement <NSCoding>

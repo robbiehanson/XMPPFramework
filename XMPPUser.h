@@ -1,8 +1,9 @@
 #import <Foundation/Foundation.h>
-@class  XMPPJID;
-@class  XMPPIQ;
-@class  XMPPPresence;
-@class  XMPPResource;
+
+@class XMPPJID;
+@class XMPPIQ;
+@class XMPPPresence;
+@class XMPPResource;
 
 
 @interface XMPPUser : NSObject <NSCoding>
