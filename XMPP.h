@@ -1,3 +1,5 @@
+#import "DDXML.h"
+
 #import "NSXMLElementAdditions.h"
 
 #import "XMPPStream.h"
