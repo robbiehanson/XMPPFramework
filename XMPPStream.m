@@ -6,6 +6,11 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 
+#if TARGET_OS_IPHONE
+// Note: You may need to add the CFNetwork Framework to your project
+#import <CFNetwork/CFNetwork.h>
+#endif
+
 
 // Define the debugging state
 #define DEBUG_SEND      YES
@@ -283,8 +288,8 @@
 		{
 			NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query"];
 			[queryElement addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:register"];
-			[queryElement addChild:[NSXMLNode elementWithName:@"username" stringValue:username]];
-			[queryElement addChild:[NSXMLNode elementWithName:@"password" stringValue:password]];
+			[queryElement addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
+			[queryElement addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
 			
 			NSXMLElement *iqElement = [NSXMLElement elementWithName:@"iq"];
 			[iqElement addAttributeWithName:@"type" stringValue:@"set"];
@@ -445,9 +450,9 @@
 			
 			NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query"];
 			[queryElement addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:auth"];
-			[queryElement addChild:[NSXMLNode elementWithName:@"username" stringValue:username]];
-			[queryElement addChild:[NSXMLNode elementWithName:@"digest" stringValue:digest]];
-			[queryElement addChild:[NSXMLNode elementWithName:@"resource" stringValue:resource]];
+			[queryElement addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
+			[queryElement addChild:[NSXMLElement elementWithName:@"digest" stringValue:digest]];
+			[queryElement addChild:[NSXMLElement elementWithName:@"resource" stringValue:resource]];
 			
 			NSXMLElement *iqElement = [NSXMLElement elementWithName:@"iq"];
 			[iqElement addAttributeWithName:@"type" stringValue:@"set"];
