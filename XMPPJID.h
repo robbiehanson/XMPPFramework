@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "DDXML.h"
 
 
 @interface XMPPJID : NSObject <NSCoding, NSCopying>

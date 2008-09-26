@@ -248,8 +248,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -289,6 +287,7 @@
 								<string>DCD886850E8CE1F100CD15A2</string>
 								<string>DCCE55760BDC8EC8000E2798</string>
 								<string>DCB9BBF30DDCEE6B002DA335</string>
+								<string>DCB9BAF80DDC962C002DA335</string>
 								<string>DCCE55630BDC6FBC000E2798</string>
 								<string>DCF8260B0D74A4AE00BFABDE</string>
 								<string>29B97317FDCFA39411CA2CEA</string>
@@ -301,14 +300,14 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>63</integer>
-									<integer>57</integer>
-									<integer>56</integer>
+									<integer>15</integer>
+									<integer>14</integer>
+									<integer>13</integer>
 									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 497}, {273, 768}}</string>
+							<string>{{0, 0}, {273, 768}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -338,12 +337,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>XMPPPresence.h</string>
+								<string>NSXMLElementAdditions.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -351,31 +352,35 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>XMPPPresence.h</string>
+										<string>NSXMLElementAdditions.h</string>
 										<key>_historyCapacity</key>
 										<integer>10</integer>
 										<key>bookmark</key>
-										<string>DCEFA07F0E8D4895006E145E</string>
+										<string>DC54414D0E8D566300013051</string>
 										<key>history</key>
 										<array>
-											<string>DCEFA04E0E8D46D6006E145E</string>
-											<string>DCEFA04F0E8D46D6006E145E</string>
-											<string>DCEFA0500E8D46D6006E145E</string>
-											<string>DCEFA0510E8D46D6006E145E</string>
-											<string>DCEFA0520E8D46D6006E145E</string>
-											<string>DCEFA0530E8D46D6006E145E</string>
-											<string>DCEFA0540E8D46D6006E145E</string>
-											<string>DCEFA0620E8D46D6006E145E</string>
+											<string>DC54413A0E8D566300013051</string>
+											<string>DC54413B0E8D566300013051</string>
+											<string>DC54413C0E8D566300013051</string>
+											<string>DC54413D0E8D566300013051</string>
+											<string>DC54413E0E8D566300013051</string>
+											<string>DC54413F0E8D566300013051</string>
+											<string>DC5441400E8D566300013051</string>
+											<string>DC5441410E8D566300013051</string>
+											<string>DC5441420E8D566300013051</string>
+											<string>DC5441430E8D566300013051</string>
 										</array>
 										<key>prevStack</key>
 										<array>
-											<string>DCEFA0560E8D46D6006E145E</string>
-											<string>DCEFA0570E8D46D6006E145E</string>
-											<string>DCEFA0580E8D46D6006E145E</string>
-											<string>DCEFA05C0E8D46D6006E145E</string>
-											<string>DCEFA05E0E8D46D6006E145E</string>
-											<string>DCEFA0600E8D46D6006E145E</string>
-											<string>DCEFA0610E8D46D6006E145E</string>
+											<string>DC5441440E8D566300013051</string>
+											<string>DC5441450E8D566300013051</string>
+											<string>DC5441460E8D566300013051</string>
+											<string>DC5441470E8D566300013051</string>
+											<string>DC5441480E8D566300013051</string>
+											<string>DC5441490E8D566300013051</string>
+											<string>DC54414A0E8D566300013051</string>
+											<string>DC54414B0E8D566300013051</string>
+											<string>DC54414C0E8D566300013051</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -433,9 +438,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>DCEFA0780E8D4873006E145E</string>
+				<string>DC54414E0E8D566300013051</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>DCEFA0790E8D4873006E145E</string>
+				<string>DC54414F0E8D566300013051</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -560,7 +565,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>244140181.49034399</real>
+	<real>244143715.415398</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -658,7 +663,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>DCF825810D748AB600BFABDE</string>
-				<string>DCEFA07C0E8D487C006E145E</string>
+				<string>DC5441380E8D565100013051</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
