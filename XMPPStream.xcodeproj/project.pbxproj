@@ -29,10 +29,14 @@
 		DCB9BA1B0DDB73E6002DA335 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BA1A0DDB73E6002DA335 /* XMPPMessage.m */; };
 		DCB9BB0A0DDC969C002DA335 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BB090DDC969C002DA335 /* LibIDN.m */; };
 		DCB9BBF20DDCEE39002DA335 /* NSXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BBF10DDCEE39002DA335 /* NSXMLElementAdditions.m */; };
-		DCC1A6FF0DF0E3BF00D3C1E7 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC1A6FE0DF0E3BF00D3C1E7 /* libidn.a */; };
 		DCCE55390BDC6290000E2798 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55380BDC6290000E2798 /* AsyncSocket.m */; };
 		DCCE55610BDC6FAC000E2798 /* RosterController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55600BDC6FAC000E2798 /* RosterController.m */; };
 		DCCE55680BDC7030000E2798 /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55670BDC7030000E2798 /* XMPPStream.m */; };
+		DCD886930E8CE26A00CD15A2 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD8868B0E8CE26A00CD15A2 /* DDXMLDocument.m */; };
+		DCD886940E8CE26A00CD15A2 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD8868D0E8CE26A00CD15A2 /* DDXMLElement.m */; };
+		DCD886950E8CE26A00CD15A2 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD8868F0E8CE26A00CD15A2 /* DDXMLNode.m */; };
+		DCD886960E8CE26A00CD15A2 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD886920E8CE26A00CD15A2 /* NSStringAdditions.m */; };
+		DCEFA0760E8D4867006E145E /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCEFA0750E8D4867006E145E /* libidn.a */; };
 		DCF825950D748DC000BFABDE /* RequestController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825940D748DC000BFABDE /* RequestController.m */; };
 		DCF825F50D749A5100BFABDE /* ChatController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825F40D749A5100BFABDE /* ChatController.m */; };
 		DCF825F90D749D1800BFABDE /* ChatWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = DCF825F70D749D1800BFABDE /* ChatWindow.nib */; };
@@ -97,13 +101,23 @@
 		DCB9BBF00DDCEE39002DA335 /* NSXMLElementAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSXMLElementAdditions.h; sourceTree = "<group>"; };
 		DCB9BBF10DDCEE39002DA335 /* NSXMLElementAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSXMLElementAdditions.m; sourceTree = "<group>"; };
 		DCC1A6E80DF0E3A300D3C1E7 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "libidn/idn-int.h"; sourceTree = "<group>"; };
-		DCC1A6FE0DF0E3BF00D3C1E7 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = libidn/libidn.a; sourceTree = "<group>"; };
 		DCCE55370BDC6290000E2798 /* AsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AsyncSocket.h; sourceTree = "<group>"; };
 		DCCE55380BDC6290000E2798 /* AsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AsyncSocket.m; sourceTree = "<group>"; };
 		DCCE555F0BDC6FAC000E2798 /* RosterController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = RosterController.h; sourceTree = "<group>"; };
 		DCCE55600BDC6FAC000E2798 /* RosterController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = RosterController.m; sourceTree = "<group>"; };
 		DCCE55660BDC7030000E2798 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
 		DCCE55670BDC7030000E2798 /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
+		DCD886890E8CE26A00CD15A2 /* DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXML.h; path = KissXML/DDXML.h; sourceTree = "<group>"; };
+		DCD8868A0E8CE26A00CD15A2 /* DDXMLDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLDocument.h; path = KissXML/DDXMLDocument.h; sourceTree = "<group>"; };
+		DCD8868B0E8CE26A00CD15A2 /* DDXMLDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLDocument.m; path = KissXML/DDXMLDocument.m; sourceTree = "<group>"; };
+		DCD8868C0E8CE26A00CD15A2 /* DDXMLElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLElement.h; path = KissXML/DDXMLElement.h; sourceTree = "<group>"; };
+		DCD8868D0E8CE26A00CD15A2 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLElement.m; path = KissXML/DDXMLElement.m; sourceTree = "<group>"; };
+		DCD8868E0E8CE26A00CD15A2 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLNode.h; path = KissXML/DDXMLNode.h; sourceTree = "<group>"; };
+		DCD8868F0E8CE26A00CD15A2 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLNode.m; path = KissXML/DDXMLNode.m; sourceTree = "<group>"; };
+		DCD886900E8CE26A00CD15A2 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLPrivate.h; path = KissXML/DDXMLPrivate.h; sourceTree = "<group>"; };
+		DCD886910E8CE26A00CD15A2 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = KissXML/NSStringAdditions.h; sourceTree = "<group>"; };
+		DCD886920E8CE26A00CD15A2 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = KissXML/NSStringAdditions.m; sourceTree = "<group>"; };
+		DCEFA0750E8D4867006E145E /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = libidn/Mac/libidn.a; sourceTree = "<group>"; };
 		DCF825930D748DC000BFABDE /* RequestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestController.h; sourceTree = "<group>"; };
 		DCF825940D748DC000BFABDE /* RequestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestController.m; sourceTree = "<group>"; };
 		DCF825F30D749A5100BFABDE /* ChatController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatController.h; sourceTree = "<group>"; };
@@ -123,7 +137,7 @@
 				DCAB742A0BDE011100E828D5 /* libssl.dylib in Frameworks */,
 				DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */,
 				DC18E9920C9563ED0011DCE5 /* SystemConfiguration.framework in Frameworks */,
-				DCC1A6FF0DF0E3BF00D3C1E7 /* libidn.a in Frameworks */,
+				DCEFA0760E8D4867006E145E /* libidn.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,7 +161,7 @@
 				DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */,
 				DCAB74290BDE011100E828D5 /* libssl.dylib */,
 				DCAB742B0BDE013000E828D5 /* libcrypto.dylib */,
-				DCC1A6FE0DF0E3BF00D3C1E7 /* libidn.a */,
+				DCEFA0750E8D4867006E145E /* libidn.a */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -173,6 +187,7 @@
 		29B97314FDCFA39411CA2CEA /* XMPPStream */ = {
 			isa = PBXGroup;
 			children = (
+				DCD886850E8CE1F100CD15A2 /* KissXML */,
 				DC63E9F70E65FD310076E6D2 /* Utilities */,
 				080E96DDFE201D6D7F000001 /* TCP */,
 				DCCE55760BDC8EC8000E2798 /* XMPP */,
@@ -295,6 +310,39 @@
 			name = XMPP;
 			sourceTree = "<group>";
 		};
+		DCD886850E8CE1F100CD15A2 /* KissXML */ = {
+			isa = PBXGroup;
+			children = (
+				DCD886970E8CE26F00CD15A2 /* Categories */,
+				DCD8869F0E8CE28600CD15A2 /* Private */,
+				DCD8868A0E8CE26A00CD15A2 /* DDXMLDocument.h */,
+				DCD8868B0E8CE26A00CD15A2 /* DDXMLDocument.m */,
+				DCD8868C0E8CE26A00CD15A2 /* DDXMLElement.h */,
+				DCD8868D0E8CE26A00CD15A2 /* DDXMLElement.m */,
+				DCD8868E0E8CE26A00CD15A2 /* DDXMLNode.h */,
+				DCD8868F0E8CE26A00CD15A2 /* DDXMLNode.m */,
+				DCD886890E8CE26A00CD15A2 /* DDXML.h */,
+			);
+			name = KissXML;
+			sourceTree = "<group>";
+		};
+		DCD886970E8CE26F00CD15A2 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				DCD886910E8CE26A00CD15A2 /* NSStringAdditions.h */,
+				DCD886920E8CE26A00CD15A2 /* NSStringAdditions.m */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
+		};
+		DCD8869F0E8CE28600CD15A2 /* Private */ = {
+			isa = PBXGroup;
+			children = (
+				DCD886900E8CE26A00CD15A2 /* DDXMLPrivate.h */,
+			);
+			name = Private;
+			sourceTree = "<group>";
+		};
 		DCF8260B0D74A4AE00BFABDE /* GUI - ChatWindow */ = {
 			isa = PBXGroup;
 			children = (
@@ -383,6 +431,10 @@
 				DCB73CC40E58ECCF0086B3DC /* NSDataAdditions.m in Sources */,
 				DC63E9210E65D5140076E6D2 /* XMPPTransports.m in Sources */,
 				DC63E9FA0E65FD570076E6D2 /* SCNotificationManager.m in Sources */,
+				DCD886930E8CE26A00CD15A2 /* DDXMLDocument.m in Sources */,
+				DCD886940E8CE26A00CD15A2 /* DDXMLElement.m in Sources */,
+				DCD886950E8CE26A00CD15A2 /* DDXMLNode.m in Sources */,
+				DCD886960E8CE26A00CD15A2 /* NSStringAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -434,8 +486,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/libidn\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libidn/Mac\"";
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -461,8 +515,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libidn\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/libidn/Mac\"";
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
@@ -474,7 +530,9 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-lxml2";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
@@ -486,7 +544,9 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-lxml2";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
