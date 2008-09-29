@@ -37,7 +37,7 @@
 	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
 	[element addAttributeWithName:@"to" stringValue:[NSString stringWithFormat:@"%@.%@", service, [client domain]]];
 	[element addAttributeWithName:@"id" stringValue:@"disco1"];
-	[element addChild:[NSXMLElement elementWithName:@"query" attribute:@"xmlns" stringValue:@"http://jabber.org/protocol/disco#info"]];
+	[element addChild:[NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"]];
 	
 	[client sendElement:element];
 }
@@ -49,7 +49,7 @@
 	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
 	[element addAttributeWithName:@"to" stringValue:[client domain]];
 	[element addAttributeWithName:@"id" stringValue:@"agent1"];
-	[element addChild:[NSXMLElement elementWithName:@"query" attribute:@"xmlns" stringValue:@"jabber:iq:agents"]];
+	[element addChild:[NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:agents"]];
 	
 	[client sendElement:element];
 }
@@ -61,14 +61,14 @@
 	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
 	[element addAttributeWithName:@"to" stringValue:[NSString stringWithFormat:@"%@.%@", service, [client domain]]];
 	[element addAttributeWithName:@"id" stringValue:@"reg1"];
-	[element addChild:[NSXMLElement elementWithName:@"query" attribute:@"xmlns" stringValue:@"jabber:iq:register"]];
+	[element addChild:[NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"]];
 	
 	[client sendElement:element];
 }
 
 - (void)registerLegacyService:(NSString *)service userName:(NSString *)userName password:(NSString *)password
 {
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" attribute:@"xmlns" stringValue:@"jabber:iq:register"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
 	[query addChild:[NSXMLElement elementWithName:@"username" stringValue:userName]];
 	[query addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
 	
@@ -88,7 +88,7 @@
 **/
 - (void)unregisterLegacyService:(NSString *)service
 {
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" attribute:@"xmlns" stringValue:@"jabber:iq:register"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
 	[query addChild:[NSXMLElement elementWithName:@"remove"]];
 	
 	NSXMLElement *element = [NSXMLElement elementWithName:@"iq"];

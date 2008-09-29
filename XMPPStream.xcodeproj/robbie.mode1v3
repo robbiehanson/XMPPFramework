@@ -248,8 +248,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -302,6 +300,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
+									<integer>16</integer>
+									<integer>14</integer>
 									<integer>13</integer>
 									<integer>0</integer>
 								</array>
@@ -337,12 +337,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>XMPPStream.m</string>
+								<string>XMPPClient.m</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -350,35 +352,42 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>XMPPStream.m</string>
+										<string>XMPPClient.m</string>
 										<key>_historyCapacity</key>
 										<integer>10</integer>
 										<key>bookmark</key>
-										<string>DC433BAE0E917D4C00F2C4D4</string>
+										<string>DC433C050E9182B900F2C4D4</string>
 										<key>history</key>
 										<array>
-											<string>DC54413B0E8D566300013051</string>
-											<string>DC54413C0E8D566300013051</string>
-											<string>DC54413D0E8D566300013051</string>
 											<string>DC54413E0E8D566300013051</string>
 											<string>DC54413F0E8D566300013051</string>
 											<string>DC5441400E8D566300013051</string>
 											<string>DC5441410E8D566300013051</string>
 											<string>DC5441420E8D566300013051</string>
-											<string>DC5442400E8F331E00013051</string>
-											<string>DC5442430E8F331E00013051</string>
+											<string>DC433BC70E91801900F2C4D4</string>
+											<string>DC433BF40E91828E00F2C4D4</string>
+											<string>DC433BF50E91828E00F2C4D4</string>
+											<string>DC433BF60E91828E00F2C4D4</string>
+											<string>DC433BF70E91828E00F2C4D4</string>
 										</array>
 										<key>prevStack</key>
 										<array>
-											<string>DC5441450E8D566300013051</string>
-											<string>DC5441460E8D566300013051</string>
-											<string>DC5441470E8D566300013051</string>
 											<string>DC5441480E8D566300013051</string>
 											<string>DC5441490E8D566300013051</string>
 											<string>DC54414A0E8D566300013051</string>
 											<string>DC54414B0E8D566300013051</string>
 											<string>DC54414C0E8D566300013051</string>
 											<string>DC5442420E8F331E00013051</string>
+											<string>DC433BCB0E91801900F2C4D4</string>
+											<string>DC433BCC0E91801900F2C4D4</string>
+											<string>DC433BCD0E91801900F2C4D4</string>
+											<string>DC433BF80E91828E00F2C4D4</string>
+											<string>DC433BF90E91828E00F2C4D4</string>
+											<string>DC433BFA0E91828E00F2C4D4</string>
+											<string>DC433BFB0E91828E00F2C4D4</string>
+											<string>DC433BFC0E91828E00F2C4D4</string>
+											<string>DC433BFD0E91828E00F2C4D4</string>
+											<string>DC433BFE0E91828E00F2C4D4</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -563,7 +572,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>244415820.228861</real>
+	<real>244417209.62928399</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -578,10 +587,11 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>1C530D57069F1CE1000CFCEE</string>
+		<string>1C78EAAD065D492600B07095</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>DCF825810D748AB600BFABDE</string>
 		<string>/Users/robbie/Programs/Google Code/XMPPFramework/XMPPStream.xcodeproj</string>
-		<string>1C78EAAD065D492600B07095</string>
 	</array>
 	<key>WindowString</key>
 	<string>64 89 1182 827 0 0 1680 1028 </string>
@@ -614,7 +624,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {1080, 0}}</string>
 								<key>RubberWindowFrame</key>
-								<string>587 91 1080 379 0 0 1680 1028 </string>
+								<string>532 -49 1080 379 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -640,7 +650,7 @@
 								<key>Frame</key>
 								<string>{{0, 5}, {1080, 333}}</string>
 								<key>RubberWindowFrame</key>
-								<string>587 91 1080 379 0 0 1680 1028 </string>
+								<string>532 -49 1080 379 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXBuildResultsModule</string>
@@ -670,7 +680,7 @@
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.buildV3</string>
 			<key>WindowString</key>
-			<string>587 91 1080 379 0 0 1680 1028 </string>
+			<string>532 -49 1080 379 0 0 1680 1028 </string>
 			<key>WindowToolGUID</key>
 			<string>DCF825810D748AB600BFABDE</string>
 			<key>WindowToolIsVisible</key>
@@ -821,7 +831,7 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CDD528C0622207200134675</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>XMPPUser.m</string>
+										<string>XMPPStream.m</string>
 										<key>StatusBarVisibility</key>
 										<true/>
 									</dict>
@@ -879,8 +889,8 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C530D57069F1CE1000CFCEE</string>
-				<string>DCEFA0070E8D442B006E145E</string>
-				<string>DCEFA0080E8D442B006E145E</string>
+				<string>DC433BBC0E91800D00F2C4D4</string>
+				<string>DC433BBD0E91800D00F2C4D4</string>
 				<string>1CDD528C0622207200134675</string>
 				<string>1CD0528E0623707200166675</string>
 			</array>
@@ -957,7 +967,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C78EAAD065D492600B07095</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>Identifier</key>

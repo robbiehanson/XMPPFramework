@@ -5,10 +5,10 @@
 /**
  * Quick method to create an element
 **/
-+ (NSXMLElement *)elementWithName:(NSString *)name attribute:(NSString *)attribute stringValue:(NSString *)string
++ (NSXMLElement *)elementWithName:(NSString *)name xmlns:(NSString *)ns
 {
 	NSXMLElement *element = [NSXMLElement elementWithName:name];
-	[element addAttributeWithName:attribute stringValue:string];
+	[element setXmlns:ns];
 	return element;
 }
 
@@ -70,6 +70,14 @@
 - (NSString *)xmlns
 {
 	return [[self namespaceForPrefix:@""] stringValue];
+}
+
+- (void)setXmlns:(NSString *)ns
+{
+	// If we use setURI: then the xmlns won't be displayed in the XMLString.
+	// Adding the namespace this way works properly.
+	
+	[self addNamespace:[NSXMLNode namespaceWithName:@"" stringValue:ns]];
 }
 
 /**
