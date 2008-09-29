@@ -27,11 +27,21 @@ extern "C"
 {
 #endif
 
-#include <stddef.h>	  /* size_t */
+#include <stddef.h>   /* size_t */
 #include <unistd.h>   /* ssize_t */
 #include "idn-int.h"  /* uint32_t */
 
-#define STRINGPREP_VERSION "1.0"
+  /* On Windows, variables that may be in a DLL must be marked
+   * specially.  This is only active when not building libidn itself
+   * (!LIBIDN_BUILDING).  It is only used for MinGW which declare
+   * __DECLSPEC_SUPPORTED or MSVC (_MSC_VER && _DLL). */
+#if !defined (LIBIDN_BUILDING) && (defined(__DECLSPEC_SUPPORTED) || (defined(_MSC_VER) && defined(_DLL)))
+# define IDN_DLL_VAR __declspec (dllimport)
+#else
+# define IDN_DLL_VAR
+#endif
+
+#define STRINGPREP_VERSION "1.9"
 
 /* Error codes. */
   typedef enum
@@ -99,30 +109,30 @@ extern "C"
   };
   typedef struct Stringprep_profiles Stringprep_profiles;
 
-  extern const Stringprep_profiles stringprep_profiles[];
+  extern IDN_DLL_VAR const Stringprep_profiles stringprep_profiles[];
 
 /* Profiles */
-  extern const Stringprep_table_element stringprep_rfc3454_A_1[];
-  extern const Stringprep_table_element stringprep_rfc3454_B_1[];
-  extern const Stringprep_table_element stringprep_rfc3454_B_2[];
-  extern const Stringprep_table_element stringprep_rfc3454_B_3[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_1_1[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_1_2[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_2_1[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_2_2[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_3[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_4[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_5[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_6[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_7[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_8[];
-  extern const Stringprep_table_element stringprep_rfc3454_C_9[];
-  extern const Stringprep_table_element stringprep_rfc3454_D_1[];
-  extern const Stringprep_table_element stringprep_rfc3454_D_2[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_A_1[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_B_1[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_B_2[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_B_3[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_1_1[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_1_2[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_2_1[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_2_2[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_3[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_4[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_5[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_6[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_7[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_8[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_9[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_D_1[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_D_2[];
 
   /* Nameprep */
 
-  extern const Stringprep_profile stringprep_nameprep[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_nameprep[];
 
 #define stringprep_nameprep(in, maxlen)			\
   stringprep(in, maxlen, 0, stringprep_nameprep)
@@ -132,25 +142,25 @@ extern "C"
 
   /* SASL */
 
-  extern const Stringprep_profile stringprep_saslprep[];
-  extern const Stringprep_profile stringprep_plain[];
-  extern const Stringprep_profile stringprep_trace[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_saslprep[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_plain[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_trace[];
 
 #define stringprep_plain(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_plain)
 
   /* Kerberos */
 
-  extern const Stringprep_profile stringprep_kerberos5[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_kerberos5[];
 
 #define stringprep_kerberos5(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_kerberos5)
 
   /* XMPP */
 
-  extern const Stringprep_profile stringprep_xmpp_nodeprep[];
-  extern const Stringprep_profile stringprep_xmpp_resourceprep[];
-  extern const Stringprep_table_element stringprep_xmpp_nodeprep_prohibit[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_xmpp_nodeprep[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_xmpp_resourceprep[];
+  extern IDN_DLL_VAR const Stringprep_table_element stringprep_xmpp_nodeprep_prohibit[];
 
 #define stringprep_xmpp_nodeprep(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_xmpp_nodeprep)
@@ -159,7 +169,7 @@ extern "C"
 
   /* iSCSI */
 
-  extern const Stringprep_profile stringprep_iscsi[];
+  extern IDN_DLL_VAR const Stringprep_profile stringprep_iscsi[];
 
 #define stringprep_iscsi(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_iscsi)

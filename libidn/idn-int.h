@@ -24,6 +24,12 @@
 
 #ifndef _GL_STDINT_H
 
+/* When including a system file that in turn includes <inttypes.h>,
+   use the system <inttypes.h>, not our substitute.  This avoids
+   problems with (for example) VMS, whose <sys/bitypes.h> includes
+   <inttypes.h>.  */
+#define _GL_JUST_INCLUDE_SYSTEM_INTTYPES_H
+
 /* Get those types that are already defined in other system include
    files, so that we can "#define int8_t signed char" below without
    worrying about a later system include file containing a "typedef
@@ -43,8 +49,8 @@
      Include it before <inttypes.h>, since any "#include <stdint.h>"
      in <inttypes.h> would reinclude us, skipping our contents because
      _GL_STDINT_H is defined.
-     The include_next requires a split double-inclusion guard.  */
-# include_next <stdint.h>
+     The include requires a split double-inclusion guard.  */
+# include <stdint.h>
 #endif
 
 #if ! defined _GL_STDINT_H && ! defined _GL_JUST_INCLUDE_SYSTEM_STDINT_H
@@ -67,9 +73,7 @@
   /* In OpenBSD 3.8, <inttypes.h> includes <machine/types.h>, which defines
      int{8,16,32,64}_t, uint{8,16,32,64}_t and __BIT_TYPES_DEFINED__.
      <inttypes.h> also defines intptr_t and uintptr_t.  */
-# define _GL_JUST_INCLUDE_SYSTEM_INTTYPES_H
 # include <inttypes.h>
-# undef _GL_JUST_INCLUDE_SYSTEM_INTTYPES_H
 #elif 0
   /* Solaris 7 <sys/inttypes.h> has the types except the *_fast*_t types, and
      the macros except for *_FAST*_*, INTPTR_MIN, PTRDIFF_MIN, PTRDIFF_MAX.  */
@@ -87,10 +91,13 @@
 
 /* Get WCHAR_MIN, WCHAR_MAX.  */
 # if ! (defined WCHAR_MIN && defined WCHAR_MAX)
-#  include <wchar.h>
+/*  We don't need WCHAR_* in libidn, so to avoid problems with
+    missing wchar.h, don't include wchar.h here.  */
 # endif
 
 #endif
+
+#undef _GL_JUST_INCLUDE_SYSTEM_INTTYPES_H
 
 /* Minimum and maximum values for a integer type under the usual assumption.
    Return an unspecified value if BITS == 0, adding a check to pacify
@@ -102,7 +109,10 @@
 #define _STDINT_MAX(signed, bits, zero) \
   ((signed) \
    ? ~ _STDINT_MIN (signed, bits, zero) \
-   : ((((zero) + 1) << ((bits) ? (bits) - 1 : 0)) - 1) * 2 + 1)
+   : /* The expression for the unsigned case.  The subtraction of (signed) \
+	is a nop in the unsigned case and avoids "signed integer overflow" \
+	warnings in the signed case.  */ \
+     ((((zero) + 1) << ((bits) ? (bits) - 1 - (signed) : 0)) - 1) * 2 + 1)
 
 /* 7.18.1.1. Exact-width integer types */
 
@@ -247,6 +257,11 @@
 #else
 # define uintmax_t unsigned long int
 #endif
+
+/* Verify that intmax_t and uintmax_t have the same size.  Too much code
+   breaks if this is not the case.  If this check fails, the reason is likely
+   to be found in the autoconf macros.  */
+typedef int _verify_intmax_size[2 * (sizeof (intmax_t) == sizeof (uintmax_t)) - 1];
 
 /* 7.18.2. Limits of specified-width integer types */
 
