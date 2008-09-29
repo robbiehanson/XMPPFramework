@@ -327,8 +327,7 @@
 
 - (void)fetchRoster
 {
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
 	[iq addAttributeWithName:@"type" stringValue:@"get"];
@@ -349,8 +348,7 @@
 		[item addAttributeWithName:@"name" stringValue:optionalName];
 	}
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 		
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -380,8 +378,7 @@
 	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
 	[item addAttributeWithName:@"subscription" stringValue:@"remove"];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -399,8 +396,7 @@
 	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
 	[item addAttributeWithName:@"name" stringValue:nickname];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -423,8 +419,7 @@
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query"];
-	[query addAttributeWithName:@"xmlns" stringValue:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
