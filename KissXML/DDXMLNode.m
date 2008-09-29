@@ -50,7 +50,10 @@
 
 + (id)namespaceWithName:(NSString *)name stringValue:(NSString *)stringValue
 {
-	xmlNsPtr ns = xmlNewNs(NULL, [stringValue xmlChar], [name xmlChar]);
+	// If the user passes a nil or empty string name, they are trying to create a default namespace
+	const xmlChar *xmlName = [name length] > 0 ? [name xmlChar] : NULL;
+	
+	xmlNsPtr ns = xmlNewNs(NULL, [stringValue xmlChar], xmlName);
 	
 	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)ns];
 }
@@ -167,7 +170,11 @@
 {
 	if([self isXmlNsPtr])
 	{
-		return [NSString stringWithUTF8String:((const char*)((xmlNsPtr)genericPtr)->prefix)];
+		xmlNsPtr ns = (xmlNsPtr)genericPtr;
+		if(ns->prefix != NULL)
+			return [NSString stringWithUTF8String:((const char*)ns->prefix)];
+		else
+			return @"";
 	}
 	else
 	{
@@ -609,7 +616,11 @@
 	if([self isXmlNsPtr])
 	{
 		// Strangely enough, the localName of a namespace is the prefix, and the prefix is an empty string
-		return [NSString stringWithUTF8String:((const char *)((xmlNsPtr)genericPtr)->prefix)];
+		xmlNsPtr ns = (xmlNsPtr)genericPtr;
+		if(ns->prefix != NULL)
+			return [NSString stringWithUTF8String:((const char *)ns->prefix)];
+		else
+			return @"";
 	}
 	
 	return [[self class] localNameForName:[self name]];
@@ -647,20 +658,16 @@
 		xmlNodePtr node = (xmlNodePtr)genericPtr;
 		if(node->ns != NULL)
 		{
-			if(URI)
-			{
-				xmlFree((xmlChar *)node->ns->href);
-				node->ns->href = xmlStrdup([URI xmlChar]);
-			}
-			else
-			{
-				xmlFreeNs(node->ns);
-				node->ns = NULL;
-			}
+			[[self class] removeNamespace:node->ns fromNode:node];
 		}
-		else if(URI)
+		
+		if(URI)
 		{
-			xmlSetNs(node, xmlNewNs(NULL, [URI xmlChar], NULL));
+			// Create a new xmlNsPtr, add it to the nsDef list, and make ns point to it
+			xmlNsPtr ns = xmlNewNs(NULL, [URI xmlChar], NULL);
+			ns->next = node->nsDef;
+			node->nsDef = ns;
+			node->ns = ns;
 		}
 	}
 }
@@ -1116,6 +1123,11 @@
 	// Nullify pointers
 	ns->next = NULL;
 	
+	if(node->ns == ns)
+	{
+		node->ns = NULL;
+	}
+	
 	// We also have to nullify the nsParentPtr's, which are in the cocoa wrapper objects
 	xmlRetainPtr retainPtr = (xmlRetainPtr)ns->_private;
 	while(retainPtr != NULL)
@@ -1181,6 +1193,7 @@
 	}
 	
 	node->nsDef = NULL;
+	node->ns = NULL;
 }
 
 /**

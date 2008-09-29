@@ -63,6 +63,7 @@ typedef struct _xmlRetain *xmlRetainPtr;
 - (NSArray *)elementsWithName:(NSString *)name uri:(NSString *)URI;
 
 + (DDXMLNode *)resolveNamespaceForPrefix:(NSString *)prefix atNode:(xmlNodePtr)nodePtr;
++ (NSString *)resolvePrefixForURI:(NSString *)uri atNode:(xmlNodePtr)nodePtr;
 
 @end
 

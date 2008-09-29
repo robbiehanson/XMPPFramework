@@ -276,7 +276,9 @@
 	DDCheck([namespace parent] == nil, @"Cannot add a namespace with a parent; detach or copy first");
 	DDCheck([namespace isXmlNsPtr], @"Not a namespace");
 	
-	[self removeNamespaceForPrefix:[namespace prefix]];
+	// Beware: [namespace prefix] does NOT return what you might expect.  Use [namespace name] instead.
+	
+	[self removeNamespaceForPrefix:[namespace name]];
 	
 	xmlNsPtr currentNs = ((xmlNodePtr)genericPtr)->nsDef;
 	if(currentNs == NULL)
@@ -298,6 +300,12 @@
 	
 	// The xmlNs structure doesn't contain a reference to the parent, so we manage our own reference
 	namespace->nsParentPtr = (xmlNodePtr)genericPtr;
+	
+	// Did we just add a default namespace
+	if([[namespace name] isEqualToString:@""])
+	{
+		((xmlNodePtr)genericPtr)->ns = (xmlNsPtr)namespace->genericPtr;
+	}
 }
 
 - (void)removeNamespace:(xmlNsPtr)ns
@@ -312,10 +320,13 @@
 
 - (void)removeNamespaceForPrefix:(NSString *)name
 {
+	// If name is nil or the empty string, the user is wishing to remove the default namespace
+	const xmlChar *xmlName = [name length] > 0 ? [name xmlChar] : NULL;
+	
 	xmlNsPtr ns = ((xmlNodePtr)genericPtr)->nsDef;
 	while(ns != NULL)
 	{
-		if(xmlStrEqual(ns->prefix, [name xmlChar]))
+		if(xmlStrEqual(ns->prefix, xmlName))
 		{
 			[self removeNamespace:ns];
 			break;
@@ -344,7 +355,7 @@
 
 - (DDXMLNode *)namespaceForPrefix:(NSString *)prefix
 {
-	if(prefix == nil) return nil;
+	// If the prefix is nil or the empty string, the user is requesting the default namespace
 	
 	if([prefix length] == 0)
 	{
@@ -409,6 +420,12 @@
 **/
 - (DDXMLNode *)resolveNamespaceForName:(NSString *)name
 {
+	// If the user passes nil or an empty string for name, they're looking for the default namespace.
+	if([name length] == 0)
+	{
+		return [[self class] resolveNamespaceForPrefix:nil atNode:(xmlNodePtr)genericPtr];
+	}
+	
 	NSString *prefix = [[self class] prefixForName:name];
 	
 	if([prefix length] > 0)
@@ -424,20 +441,38 @@
 }
 
 /**
+ * Recursively searches the given node for a namespace with the given URI, and a set prefix.
+**/
++ (NSString *)resolvePrefixForURI:(NSString *)uri atNode:(xmlNodePtr)nodePtr
+{
+	if(nodePtr == NULL) return nil;
+	
+	xmlNsPtr ns = nodePtr->nsDef;
+	while(ns != NULL)
+	{
+		if(xmlStrEqual(ns->href, [uri xmlChar]))
+		{
+			if(ns->prefix != NULL)
+			{
+				return [NSString stringWithUTF8String:((const char *)ns->prefix)];
+			}
+		}
+		ns = ns->next;
+	}
+	
+	return [self resolvePrefixForURI:uri atNode:nodePtr->parent];
+}
+
+/**
  * Returns the prefix associated with the specified URI.
  * Returns a string that is the matching prefix or nil if it finds no matching prefix.
 **/
 - (NSString *)resolvePrefixForNamespaceURI:(NSString *)namespaceURI
 {
-	xmlNodePtr node = (xmlNodePtr)genericPtr;
+	// We can't use xmlSearchNsByHref because it will return xmlNsPtr's with NULL prefixes.
+	// We're looking for a definitive prefix for the given URI.
 	
-	xmlNsPtr ns = xmlSearchNsByHref(node->doc, node, [namespaceURI xmlChar]);
-	if(ns != NULL)
-	{
-		return [NSString stringWithUTF8String:((const char *)ns->prefix)];
-	}
-	
-	return nil;
+	return [[self class] resolvePrefixForURI:namespaceURI atNode:(xmlNodePtr)genericPtr];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
