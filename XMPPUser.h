@@ -6,6 +6,10 @@
 @class XMPPPresence;
 @class XMPPResource;
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+#define NSStringCompareOptions unsigned
+#endif
+
 
 @interface XMPPUser : NSObject <NSCoding>
 {
@@ -15,7 +19,11 @@
 	NSMutableDictionary *resources;
 	XMPPResource *primaryResource;
 	
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+	int tag;
+#else
 	NSInteger tag;
+#endif
 }
 
 - (id)initWithJID:(XMPPJID *)jid;
@@ -42,7 +50,12 @@
 - (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another;
 - (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another options:(NSStringCompareOptions)mask;
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+- (int)tag;
+- (void)setTag:(int)anInt;
+#else
 - (NSInteger)tag;
 - (void)setTag:(NSInteger)anInt;
+#endif
 
 @end

@@ -260,10 +260,17 @@
 #pragma mark NSObject Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+- (unsigned)hash
+{
+	return [[self full] hash];
+}
+#else
 - (NSUInteger)hash
 {
 	return [[self full] hash];
 }
+#endif
 
 - (BOOL)isEqual:(id)anObject
 {
