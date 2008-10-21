@@ -22,9 +22,4 @@
 - (NSString *)bare;
 - (NSString *)full;
 
-- (NSUInteger)hash;
-- (BOOL)isEqual:(id)anObject;
-
-- (NSString *)description;
-
 @end

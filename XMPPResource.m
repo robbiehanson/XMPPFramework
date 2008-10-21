@@ -145,10 +145,17 @@
 #pragma mark NSObject Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)description
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+- (unsigned)hash
 {
-	return [NSString stringWithFormat:@"XMPPResource: %@", [jid full]];
+	return [jid hash];
 }
+#else
+- (NSUInteger)hash
+{
+	return [jid hash];
+}
+#endif
 
 - (BOOL)isEqual:(id)anObject
 {
@@ -162,9 +169,9 @@
 	return NO;
 }
 
-- (NSUInteger)hash
+- (NSString *)description
 {
-	return [jid hash];
+	return [NSString stringWithFormat:@"XMPPResource: %@", [jid full]];
 }
 
 @end

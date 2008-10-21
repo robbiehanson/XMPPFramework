@@ -350,7 +350,7 @@
 										<key>_historyCapacity</key>
 										<integer>10</integer>
 										<key>bookmark</key>
-										<string>DC0E7D4F0EADD85D00B81D90</string>
+										<string>DC0E7D5E0EADDEA000B81D90</string>
 										<key>history</key>
 										<array>
 											<string>DC433BF40E91828E00F2C4D4</string>
@@ -362,7 +362,7 @@
 											<string>DC0E7D450EADD85D00B81D90</string>
 											<string>DC0E7D460EADD85D00B81D90</string>
 											<string>DC0E7D470EADD85D00B81D90</string>
-											<string>DC0E7D480EADD85D00B81D90</string>
+											<string>DC0E7D4F0EADD85D00B81D90</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -372,9 +372,6 @@
 											<string>DC433BFB0E91828E00F2C4D4</string>
 											<string>DC2EA36B0E92257900BB17BF</string>
 											<string>DC2EA36C0E92257900BB17BF</string>
-											<string>DC0E7D490EADD85D00B81D90</string>
-											<string>DC0E7D4A0EADD85D00B81D90</string>
-											<string>DC0E7D4B0EADD85D00B81D90</string>
 											<string>DC0E7D4C0EADD85D00B81D90</string>
 											<string>DC0E7D4D0EADD85D00B81D90</string>
 											<string>DC0E7D4E0EADD85D00B81D90</string>
@@ -435,9 +432,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>DC0E7D500EADD85D00B81D90</string>
+				<string>DC0E7D5F0EADDEA000B81D90</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>DC0E7D510EADD85D00B81D90</string>
+				<string>DC0E7D600EADDEA000B81D90</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -562,7 +559,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>246274141.31928501</real>
+	<real>246275740.642658</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -577,9 +574,6 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>DCF825810D748AB600BFABDE</string>
-		<string>1C530D57069F1CE1000CFCEE</string>
-		<string>1CD10A99069EF8BA00B06720</string>
 		<string>/Users/robbie/Programs/Google Code/XMPPFramework/XMPPStream.xcodeproj</string>
 	</array>
 	<key>WindowString</key>

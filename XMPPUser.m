@@ -73,7 +73,12 @@
 			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
 			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
 			primaryResource = [[coder decodeObjectForKey:@"primaryResource"] retain];
+			
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+			tag             = [coder decodeIntForKey:@"tag"];
+#else
 			tag             = [coder decodeIntegerForKey:@"tag"];
+#endif
 		}
 		else
 		{
@@ -81,7 +86,12 @@
 			itemAttributes  = [[coder decodeObject] mutableCopy];
 			resources       = [[coder decodeObject] mutableCopy];
 			primaryResource = [[coder decodeObject] retain];
+			
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+			tag             = [[coder decodeObject] intValue];
+#else
 			tag             = [[coder decodeObject] integerValue];
+#endif
 		}
 	}
 	return self;
@@ -95,7 +105,12 @@
 		[coder encodeObject:itemAttributes  forKey:@"itemAttributes"];
 		[coder encodeObject:resources       forKey:@"resources"];
 		[coder encodeObject:primaryResource forKey:@"primaryResource"];
+		
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+		[coder encodeInt:tag                forKey:@"tag"];
+#else
 		[coder encodeInteger:tag            forKey:@"tag"];
+#endif
 	}
 	else
 	{
@@ -103,7 +118,12 @@
 		[coder encodeObject:itemAttributes];
 		[coder encodeObject:resources];
 		[coder encodeObject:primaryResource];
+		
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+		[coder encodeObject:[NSNumber numberWithInt:tag]];
+#else
 		[coder encodeObject:[NSNumber numberWithInteger:tag]];
+#endif
 	}
 }
 
@@ -303,10 +323,17 @@
 #pragma mark NSObject Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)description
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+- (unsigned)hash
 {
-	return [NSString stringWithFormat:@"XMPPUser: %@", [jid bare]];
+	return [jid hash];
 }
+#else
+- (NSUInteger)hash
+{
+	return [jid hash];
+}
+#endif
 
 - (BOOL)isEqual:(id)anObject
 {
@@ -320,23 +347,37 @@
 	return NO;
 }
 
-- (NSUInteger)hash
+- (NSString *)description
 {
-	return [jid hash];
+	return [NSString stringWithFormat:@"XMPPUser: %@", [jid bare]];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark User Defined Content
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+- (int)tag
+{
+	return tag;
+}
+#else
 - (NSInteger)tag
 {
 	return tag;
 }
+#endif
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+- (void)setTag:(int)anInt
+{
+	tag = anInt;
+}
+#else
 - (void)setTag:(NSInteger)anInt
 {
 	tag = anInt;
 }
+#endif
 
 @end
