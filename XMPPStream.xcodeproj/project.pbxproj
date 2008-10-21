@@ -11,15 +11,14 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		DC0E7D320EADD7DE00B81D90 /* SSCrypto.m in Sources */ = {isa = PBXBuildFile; fileRef = DC0E7D310EADD7DE00B81D90 /* SSCrypto.m */; };
 		DC18E9920C9563ED0011DCE5 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */; };
 		DC5247D80BE318AE002F838C /* XMPPUser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5247D60BE318AE002F838C /* XMPPUser.m */; };
 		DC63E9210E65D5140076E6D2 /* XMPPTransports.m in Sources */ = {isa = PBXBuildFile; fileRef = DC63E9200E65D5140076E6D2 /* XMPPTransports.m */; };
 		DC63E9FA0E65FD570076E6D2 /* SCNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DC63E9F90E65FD570076E6D2 /* SCNotificationManager.m */; };
 		DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B2BF10DE620B80055F60A /* XMPPElement.m */; };
-		DCAB73F50BDE00C600E828D5 /* SSCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */; };
 		DCAB742A0BDE011100E828D5 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB74290BDE011100E828D5 /* libssl.dylib */; };
 		DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB742B0BDE013000E828D5 /* libcrypto.dylib */; };
-		DCAB74350BDE018000E828D5 /* SSCrypto.framework in Copy Internal Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */; };
 		DCB73CC40E58ECCF0086B3DC /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB73CC30E58ECCF0086B3DC /* NSDataAdditions.m */; };
 		DCB9BA0C0DDB71E7002DA335 /* XMPPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BA0B0DDB71E7002DA335 /* XMPPClient.m */; };
 		DCB9BA0F0DDB7237002DA335 /* XMPPResource.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BA0E0DDB7237002DA335 /* XMPPResource.m */; };
@@ -50,7 +49,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				DCAB74350BDE018000E828D5 /* SSCrypto.framework in Copy Internal Frameworks */,
 			);
 			name = "Copy Internal Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -68,6 +66,8 @@
 		32CA4F630368D1EE00C91783 /* XMPPStream_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* XMPPStream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XMPPStream.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DC0E7D300EADD7DE00B81D90 /* SSCrypto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSCrypto.h; sourceTree = "<group>"; };
+		DC0E7D310EADD7DE00B81D90 /* SSCrypto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSCrypto.m; sourceTree = "<group>"; };
 		DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
 		DC5247D50BE318AE002F838C /* XMPPUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPUser.h; sourceTree = "<group>"; };
 		DC5247D60BE318AE002F838C /* XMPPUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPUser.m; sourceTree = "<group>"; };
@@ -77,7 +77,6 @@
 		DC63E9F90E65FD570076E6D2 /* SCNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCNotificationManager.m; sourceTree = "<group>"; };
 		DC7B2BF00DE620B80055F60A /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPElement.h; sourceTree = "<group>"; };
 		DC7B2BF10DE620B80055F60A /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
-		DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SSCrypto.framework; sourceTree = "<group>"; };
 		DCAB74290BDE011100E828D5 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
 		DCAB742B0BDE013000E828D5 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		DCB73CC20E58ECCF0086B3DC /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataAdditions.h; sourceTree = "<group>"; };
@@ -133,7 +132,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				DCAB73F50BDE00C600E828D5 /* SSCrypto.framework in Frameworks */,
 				DCAB742A0BDE011100E828D5 /* libssl.dylib in Frameworks */,
 				DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */,
 				DC18E9920C9563ED0011DCE5 /* SystemConfiguration.framework in Frameworks */,
@@ -157,7 +155,6 @@
 			isa = PBXGroup;
 			children = (
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-				DCAB73F40BDE00C600E828D5 /* SSCrypto.framework */,
 				DC18E9910C9563ED0011DCE5 /* SystemConfiguration.framework */,
 				DCAB74290BDE011100E828D5 /* libssl.dylib */,
 				DCAB742B0BDE013000E828D5 /* libcrypto.dylib */,
@@ -244,6 +241,8 @@
 			children = (
 				DC63E9F80E65FD570076E6D2 /* SCNotificationManager.h */,
 				DC63E9F90E65FD570076E6D2 /* SCNotificationManager.m */,
+				DC0E7D300EADD7DE00B81D90 /* SSCrypto.h */,
+				DC0E7D310EADD7DE00B81D90 /* SSCrypto.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -435,6 +434,7 @@
 				DCD886940E8CE26A00CD15A2 /* DDXMLElement.m in Sources */,
 				DCD886950E8CE26A00CD15A2 /* DDXMLNode.m in Sources */,
 				DCD886960E8CE26A00CD15A2 /* NSStringAdditions.m in Sources */,
+				DC0E7D320EADD7DE00B81D90 /* SSCrypto.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
