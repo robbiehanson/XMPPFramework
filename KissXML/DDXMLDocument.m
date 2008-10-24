@@ -46,6 +46,17 @@ void MyErrorHandler(void * userData, xmlErrorPtr error)
  * Returns an initialized DDXMLDocument object, or nil if initialization fails
  * because of parsing errors or other reasons.
 **/
+- (id)initWithXMLString:(NSString *)string options:(NSUInteger)mask error:(NSError **)error
+{
+	return [self initWithData:[string dataUsingEncoding:NSUTF8StringEncoding] options:mask error:error];
+}
+
+/**
+ * Initializes and returns a DDXMLDocument object created from an NSData object.
+ * 
+ * Returns an initialized DDXMLDocument object, or nil if initialization fails
+ * because of parsing errors or other reasons.
+**/
 - (id)initWithData:(NSData *)data options:(NSUInteger)mask error:(NSError **)error
 {
 	if(data == nil || [data length] == 0)

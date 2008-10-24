@@ -139,6 +139,53 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Copying
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	if([self isXmlDocPtr])
+	{
+		xmlDocPtr copyDocPtr = xmlCopyDoc((xmlDocPtr)genericPtr, 1);
+		
+		return [[DDXMLDocument alloc] initWithPrimitive:(xmlKindPtr)copyDocPtr];
+	}
+	
+	if([self isXmlNodePtr])
+	{
+		xmlNodePtr copyNodePtr = xmlCopyNode((xmlNodePtr)genericPtr, 1);
+		
+		if([self isKindOfClass:[DDXMLElement class]])
+			return [[DDXMLElement alloc] initWithPrimitive:(xmlKindPtr)copyNodePtr];
+		else
+			return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyNodePtr];
+	}
+	
+	if([self isXmlAttrPtr])
+	{
+		xmlAttrPtr copyAttrPtr = xmlCopyProp(NULL, (xmlAttrPtr)genericPtr);
+		
+		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyAttrPtr];
+	}
+	
+	if([self isXmlNsPtr])
+	{
+		xmlNsPtr copyNsPtr = xmlCopyNamespace((xmlNsPtr)genericPtr);
+		
+		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyNsPtr nsParent:nil];
+	}
+	
+	if([self isXmlDtdPtr])
+	{
+		xmlDtdPtr copyDtdPtr = xmlCopyDtd((xmlDtdPtr)genericPtr);
+		
+		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyDtdPtr];
+	}
+	
+	return nil;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -453,8 +500,8 @@
 /**
  * Returns the previous DDXMLNode object that is a sibling node to the receiver.
  * 
- * This object will have an index value that is one less than the receiverâ€™s.
- * If there are no more previous siblings (that is, other child nodes of the receiverâ€™s parent) the method returns nil.
+ * This object will have an index value that is one less than the receiverÕs.
+ * If there are no more previous siblings (that is, other child nodes of the receiverÕs parent) the method returns nil.
 **/
 - (DDXMLNode *)previousSibling
 {
@@ -471,8 +518,8 @@
 /**
  * Returns the next DDXMLNode object that is a sibling node to the receiver.
  * 
- * This object will have an index value that is one more than the receiverâ€™s.
- * If there are no more subsequent siblings (that is, other child nodes of the receiverâ€™s parent) the
+ * This object will have an index value that is one more than the receiverÕs.
+ * If there are no more subsequent siblings (that is, other child nodes of the receiverÕs parent) the
  * method returns nil.
 **/
 - (DDXMLNode *)nextSibling
@@ -490,7 +537,7 @@
 /**
  * Returns the previous DDXMLNode object in document order.
  * 
- * You use this method to â€œwalkâ€ backward through the tree structure representing an XML document or document section.
+ * You use this method to ÒwalkÓ backward through the tree structure representing an XML document or document section.
  * (Use nextNode to traverse the tree in the opposite direction.) Document order is the natural order that XML
  * constructs appear in markup text. If you send this message to the first node in the tree (that is, the root element),
  * nil is returned. DDXMLNode bypasses namespace and attribute nodes when it traverses a tree in document order.
@@ -532,7 +579,7 @@
 /**
  * Returns the next DDXMLNode object in document order.
  * 
- * You use this method to â€œwalkâ€ forward through the tree structure representing an XML document or document section.
+ * You use this method to ÒwalkÓ forward through the tree structure representing an XML document or document section.
  * (Use previousNode to traverse the tree in the opposite direction.) Document order is the natural order that XML
  * constructs appear in markup text. If you send this message to the last node in the tree, nil is returned.
  * DDXMLNode bypasses namespace and attribute nodes when it traverses a tree in document order.
@@ -609,7 +656,7 @@
  * Returns the local name of the receiver.
  * 
  * The local name is the part of a node name that follows a namespace-qualifying colon or the full name if
- * there is no colon. For example, â€œchapterâ€ is the local name in the qualified name â€œacme:chapterâ€.
+ * there is no colon. For example, ÒchapterÓ is the local name in the qualified name Òacme:chapterÓ.
 **/
 - (NSString *)localName
 {
@@ -627,11 +674,11 @@
 }
 
 /**
- * Returns the prefix of the receiverâ€™s name.
+ * Returns the prefix of the receiverÕs name.
  * 
  * The prefix is the part of a namespace-qualified name that precedes the colon.
- * For example, â€œacmeâ€ is the local name in the qualified name â€œacme:chapterâ€.
- * This method returns an empty string if the receiverâ€™s name is not qualified by a namespace.
+ * For example, ÒacmeÓ is the local name in the qualified name Òacme:chapterÓ.
+ * This method returns an empty string if the receiverÕs name is not qualified by a namespace.
 **/
 - (NSString *)prefix
 {
@@ -675,7 +722,7 @@
 /**
  * Returns the URI associated with the receiver.
  * 
- * A nodeâ€™s URI is derived from its namespace or a documentâ€™s URI; for documents, the URI comes either from the
+ * A nodeÕs URI is derived from its namespace or a documentÕs URI; for documents, the URI comes either from the
  * parsed XML or is explicitly set. You cannot change the URI for a particular node other for than a namespace
  * or document node.
 **/
@@ -836,11 +883,12 @@
 	xmlElementType type = kindPtr->type;
 	switch(type)
 	{
-		case XML_ELEMENT_NODE :
-		case XML_PI_NODE      : 
-		case XML_COMMENT_NODE : 
-		case XML_TEXT_NODE    : return YES;
-		default               : return NO;
+		case XML_ELEMENT_NODE       :
+		case XML_PI_NODE            : 
+		case XML_COMMENT_NODE       : 
+		case XML_TEXT_NODE          : 
+		case XML_CDATA_SECTION_NODE : return YES;
+		default                     : return NO;
 	}
 }
 
@@ -986,7 +1034,7 @@
 **/
 + (void)nodeFree:(xmlNodePtr)node
 {
-	NSAssert([self isXmlNodePtr:(xmlKindPtr)node], @"Wrong kind of node passed to nodeFree");
+	NSAssert1([self isXmlNodePtr:(xmlKindPtr)node], @"Wrong kind of node passed to nodeFree: %i", node->type);
 	
 	if(node->_private == NULL)
 	{

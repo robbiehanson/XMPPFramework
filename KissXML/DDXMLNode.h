@@ -65,7 +65,7 @@ struct _xmlStd {
 };
 typedef struct _xmlStd *xmlStdPtr;
 
-@interface DDXMLNode : NSObject
+@interface DDXMLNode : NSObject <NSCopying>
 {
 	// Every DDXML object is simply a wrapper around an underlying libxml node
 	xmlKindPtr genericPtr;
