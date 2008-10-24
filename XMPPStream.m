@@ -69,6 +69,9 @@
 		state = STATE_DISCONNECTED;
 		asyncSocket = [[AsyncSocket alloc] initWithDelegate:self];
 		
+		// Enable pre-buffering on the socket to improve readDataToData performance
+		[asyncSocket enablePreBuffering];
+		
 		// Initialize configuration
 		isSecure = NO;
 		isAuthenticated = NO;
@@ -1187,6 +1190,9 @@
 				
 				// Update state - we're connected now
 				state = STATE_CONNECTED;
+				
+				// Continue reading for XML fragments
+				[asyncSocket readDataToData:terminator withTimeout:TIMEOUT_READ_STREAM tag:TAG_READ_STREAM];
 				
 				// Notify delegate
 				if([delegate respondsToSelector:@selector(xmppStreamDidOpen:)]) {
