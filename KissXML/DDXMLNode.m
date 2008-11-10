@@ -96,12 +96,27 @@
 		return nil;
 	}
 	
+	BOOL maybeIsaSwizzle = [self isMemberOfClass:[DDXMLNode class]];
+	
 	if(self = [super init])
 	{
 		genericPtr = nodePtr;
 		nsParentPtr = NULL;
 		[self nodeRetain];
 	}
+	
+	if(maybeIsaSwizzle)
+	{
+		if(nodePtr->type == XML_ELEMENT_NODE)
+		{
+			self->isa = [DDXMLElement class];
+		}
+		else if(nodePtr->type == XML_DOCUMENT_NODE)
+		{
+			self->isa = [DDXMLDocument class];
+		}
+	}
+	
 	return self;
 }
 
@@ -118,12 +133,27 @@
 		return nil;
 	}
 	
+	BOOL maybeIsaSwizzle = [self isMemberOfClass:[DDXMLNode class]];
+	
 	if(self = [super init])
 	{
 		genericPtr = nodePtr;
 		nsParentPtr = parentPtr;
 		[self nodeRetain];
 	}
+	
+	if(maybeIsaSwizzle)
+	{
+		if(nodePtr->type == XML_ELEMENT_NODE)
+		{
+			self->isa = [DDXMLElement class];
+		}
+		else if(nodePtr->type == XML_DOCUMENT_NODE)
+		{
+			self->isa = [DDXMLDocument class];
+		}
+	}
+	
 	return self;
 }
 
@@ -697,11 +727,8 @@
 **/
 - (void)setURI:(NSString *)URI
 {
-	if([self isXmlAttrPtr] || [self isXmlNodePtr])
+	if([self isXmlNodePtr])
 	{
-		// Note: xmlAttrPtr and xmlNodePtr both have the same ns pointer, so
-		// in this case it's safe to cast a xmlAttrPtr to a xmlNodePtr.
-		
 		xmlNodePtr node = (xmlNodePtr)genericPtr;
 		if(node->ns != NULL)
 		{
@@ -715,6 +742,25 @@
 			ns->next = node->nsDef;
 			node->nsDef = ns;
 			node->ns = ns;
+		}
+	}
+	else if([self isXmlAttrPtr])
+	{
+		xmlAttrPtr attr = (xmlAttrPtr)genericPtr;
+		if(attr->ns != NULL)
+		{
+			// An attribute can only have a single namespace attached to it.
+			// In addition, this namespace can only be accessed via the URI method.
+			// There is no way, within the API, to get a DDXMLNode wrapper for the attribute's namespace.
+			xmlFreeNs(attr->ns);
+			attr->ns = NULL;
+		}
+		
+		if(URI)
+		{
+			// Create a new xmlNsPtr, and make ns point to it
+			xmlNsPtr ns = xmlNewNs(NULL, [URI xmlChar], NULL);
+			attr->ns = ns;
 		}
 	}
 }
@@ -948,6 +994,22 @@
 	return [[self class] isXmlNsPtr:genericPtr];
 }
 
+/**
+ * Returns whether or not the node has a parent.
+ * Use this method instead of parent when you only need to ensure parent is nil.
+ * This prevents the unnecessary creation of a parent node wrapper.
+**/
+- (BOOL)hasParent
+{
+	if([self isXmlNsPtr])
+	{
+		return (nsParentPtr != NULL);
+	}
+	
+	xmlStdPtr node = (xmlStdPtr)genericPtr;
+	
+	return (node->parent != NULL);
+}
 
 /**
  * - - - - - - - - - - R E A D   M E - - - - - - - - - -
