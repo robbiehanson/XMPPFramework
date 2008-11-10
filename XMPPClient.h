@@ -8,12 +8,13 @@
 @class XMPPIQ;
 @class XMPPMessage;
 @class XMPPPresence;
+@class MulticastDelegate;
 @class SCNotificationManager;
 
 
 @interface XMPPClient : NSObject
 {
-	NSMutableArray *delegates;
+	MulticastDelegate *multicastDelegate;
 	
 	NSString *domain;
 	UInt16 port;
