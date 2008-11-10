@@ -178,7 +178,7 @@
 - (void)addAttribute:(DDXMLNode *)attribute
 {
 	// NSXML version uses this same assertion
-	DDCheck([attribute parent] == nil, @"Cannot add an attribute with a parent; detach or copy first");
+	DDCheck([attribute hasParent] == NO, @"Cannot add an attribute with a parent; detach or copy first");
 	DDCheck([attribute isXmlAttrPtr], @"Not an attribute");
 	
 	// xmlNodePtr xmlAddChild(xmlNodePtr parent, xmlNodePtr cur)
@@ -273,7 +273,7 @@
 - (void)addNamespace:(DDXMLNode *)namespace
 {
 	// NSXML version uses this same assertion
-	DDCheck([namespace parent] == nil, @"Cannot add a namespace with a parent; detach or copy first");
+	DDCheck([namespace hasParent] == NO, @"Cannot add a namespace with a parent; detach or copy first");
 	DDCheck([namespace isXmlNsPtr], @"Not a namespace");
 	
 	// Beware: [namespace prefix] does NOT return what you might expect.  Use [namespace name] instead.
@@ -305,6 +305,8 @@
 	if([[namespace name] isEqualToString:@""])
 	{
 		((xmlNodePtr)genericPtr)->ns = (xmlNsPtr)namespace->genericPtr;
+		
+		// Note: The removeNamespaceForPrefix method above properly handled removing any previous default namespace
 	}
 }
 
@@ -333,6 +335,8 @@
 		}
 		ns = ns->next;
 	}
+	
+	// Note: The removeNamespace method properly handles the situation where the namespace is the default namespace
 }
 
 - (NSArray *)namespaces
@@ -514,7 +518,7 @@
 - (void)addChild:(DDXMLNode *)child
 {
 	// NSXML version uses these same assertions
-	DDCheck([child parent] == nil, @"Cannot add a child that has a parent; detach or copy first");
+	DDCheck([child hasParent] == NO, @"Cannot add a child that has a parent; detach or copy first");
 	DDCheck([child isXmlNodePtr], @"Elements can only have text, elements, processing instructions, and comments as children");
 	
 	xmlAddChild((xmlNodePtr)genericPtr, (xmlNodePtr)child->genericPtr);

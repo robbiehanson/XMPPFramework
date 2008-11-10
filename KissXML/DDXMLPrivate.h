@@ -36,6 +36,8 @@ typedef struct _xmlRetain *xmlRetainPtr;
 + (BOOL)isXmlNsPtr:(xmlKindPtr)kindPtr;
 - (BOOL)isXmlNsPtr;
 
+- (BOOL)hasParent;
+
 + (void)detachAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node;
 + (void)removeAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node;
 + (void)removeAllAttributesFromNode:(xmlNodePtr)node;
