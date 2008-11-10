@@ -73,12 +73,10 @@
 		// Create new chat window
 		XMPPJID *jid = [message from];
 		
-		ChatController *newCC = [[ChatController alloc] initWithXMPPClient:client jid:jid];
+		ChatController *newCC = [[ChatController alloc] initWithXMPPClient:client jid:jid message:message];
 		[newCC showWindow:self];
 		
 		// Note: ChatController will automatically release itself when the user closes the window.
-		
-		// Note: The ChatController will receive the message immediately b/c it immediately adds itself as a delegate.
 	}
 }
 

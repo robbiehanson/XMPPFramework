@@ -6,10 +6,17 @@
 
 - (id)initWithXMPPClient:(XMPPClient *)client jid:(XMPPJID *)fullJID
 {
+	return [self initWithXMPPClient:client jid:fullJID message:nil];
+}
+
+- (id)initWithXMPPClient:(XMPPClient *)client jid:(XMPPJID *)fullJID message:(XMPPMessage *)message
+{
 	if(self = [super initWithWindowNibName:@"ChatWindow"])
 	{
 		xmppClient = [client retain];
 		jid = [fullJID retain];
+		
+		firstMessage = [message retain];
 	}
 	return self;
 }
@@ -22,6 +29,13 @@
 	
 	[[self window] setTitle:[jid full]];
 	[[self window] makeFirstResponder:messageField];
+	
+	if(firstMessage)
+	{
+		[self xmppClient:xmppClient didReceiveMessage:firstMessage];
+		[firstMessage release];
+		firstMessage  = nil;
+	}
 }
 
 /**
@@ -44,6 +58,7 @@
 	
 	[xmppClient release];
 	[jid release];
+	[firstMessage release];
 	[super dealloc];
 }
 

@@ -19,6 +19,7 @@
 		DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B2BF10DE620B80055F60A /* XMPPElement.m */; };
 		DCAB742A0BDE011100E828D5 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB74290BDE011100E828D5 /* libssl.dylib */; };
 		DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB742B0BDE013000E828D5 /* libcrypto.dylib */; };
+		DCAF51130EC8C3CD00445B85 /* MulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCAF51120EC8C3CD00445B85 /* MulticastDelegate.m */; };
 		DCB73CC40E58ECCF0086B3DC /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB73CC30E58ECCF0086B3DC /* NSDataAdditions.m */; };
 		DCB9BA0C0DDB71E7002DA335 /* XMPPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BA0B0DDB71E7002DA335 /* XMPPClient.m */; };
 		DCB9BA0F0DDB7237002DA335 /* XMPPResource.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB9BA0E0DDB7237002DA335 /* XMPPResource.m */; };
@@ -79,6 +80,8 @@
 		DC7B2BF10DE620B80055F60A /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
 		DCAB74290BDE011100E828D5 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
 		DCAB742B0BDE013000E828D5 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
+		DCAF51110EC8C3CD00445B85 /* MulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MulticastDelegate.h; sourceTree = "<group>"; };
+		DCAF51120EC8C3CD00445B85 /* MulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MulticastDelegate.m; sourceTree = "<group>"; };
 		DCB73CC20E58ECCF0086B3DC /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataAdditions.h; sourceTree = "<group>"; };
 		DCB73CC30E58ECCF0086B3DC /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataAdditions.m; sourceTree = "<group>"; };
 		DCB9BA0A0DDB71E7002DA335 /* XMPPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPClient.h; sourceTree = "<group>"; };
@@ -250,6 +253,8 @@
 		DCB9BAF80DDC962C002DA335 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				DCAF51110EC8C3CD00445B85 /* MulticastDelegate.h */,
+				DCAF51120EC8C3CD00445B85 /* MulticastDelegate.m */,
 				DCB9BB080DDC969C002DA335 /* LibIDN.h */,
 				DCB9BB090DDC969C002DA335 /* LibIDN.m */,
 				DCC1A6E80DF0E3A300D3C1E7 /* idn-int.h */,
@@ -435,6 +440,7 @@
 				DCD886950E8CE26A00CD15A2 /* DDXMLNode.m in Sources */,
 				DCD886960E8CE26A00CD15A2 /* NSStringAdditions.m in Sources */,
 				DC0E7D320EADD7DE00B81D90 /* SSCrypto.m in Sources */,
+				DCAF51130EC8C3CD00445B85 /* MulticastDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

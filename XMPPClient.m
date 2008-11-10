@@ -7,6 +7,7 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 #import "NSXMLElementAdditions.h"
+#import "MulticastDelegate.h"
 #import "SCNotificationManager.h"
 
 
@@ -32,7 +33,7 @@
 {
 	if(self = [super init])
 	{
-		delegates = [[NSMutableArray alloc] initWithCapacity:1];
+		multicastDelegate = [[MulticastDelegate alloc] init];
 		
 		priority = 1;
 		
@@ -60,7 +61,7 @@
 
 - (void)dealloc
 {
-	[delegates release];
+	[multicastDelegate release];
 	
 	[domain release];
 	[myJID release];
@@ -84,12 +85,12 @@
 
 - (void)addDelegate:(id)delegate
 {
-	[delegates addObject:delegate];
+	[multicastDelegate addDelegate:delegate];
 }
 
 - (void)removeDelegate:(id)delegate
 {
-	[delegates removeObject:delegate];
+	[multicastDelegate removeDelegate:delegate];
 }
 
 - (NSString *)domain
@@ -547,156 +548,57 @@
 
 - (void)onConnecting
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClientConnecting:)])
-		{
-			[currentDelegate xmppClientConnecting:self];
-		}
-	}
+	[multicastDelegate xmppClientConnecting:self];
 }
 
 - (void)onDidConnect
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClientDidConnect:)])
-		{
-			[currentDelegate xmppClientDidConnect:self];
-		}
-	}
+	[multicastDelegate xmppClientDidConnect:self];
 }
 
 - (void)onDidDisconnect
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClientDidDisconnect:)])
-		{
-			[currentDelegate xmppClientDidDisconnect:self];
-		}
-	}
+	[multicastDelegate xmppClientDidDisconnect:self];
 }
 
 - (void)onDidRegister
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClientDidRegister:)])
-		{
-			[currentDelegate xmppClientDidRegister:self];
-		}
-	}
+	[multicastDelegate xmppClientDidRegister:self];
 }
 
 - (void)onDidNotRegister:(NSXMLElement *)error
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClient:didNotRegister:)])
-		{
-			[currentDelegate xmppClient:self didNotRegister:error];
-		}
-	}
+	[multicastDelegate xmppClient:self didNotRegister:error];
 }
 
 - (void)onDidAuthenticate
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClientDidAuthenticate:)])
-		{
-			[currentDelegate xmppClientDidAuthenticate:self];
-		}
-	}
+	[multicastDelegate xmppClientDidAuthenticate:self];
 }
 
 - (void)onDidNotAuthenticate:(NSXMLElement *)error
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClient:didNotAuthenticate:)])
-		{
-			[currentDelegate xmppClient:self didNotAuthenticate:error];
-		}
-	}
+	[multicastDelegate xmppClient:self didNotAuthenticate:error];
 }
 
 - (void)onDidUpdateRoster
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClientDidUpdateRoster:)])
-		{
-			[currentDelegate xmppClientDidUpdateRoster:self];
-		}
-	}
+	[multicastDelegate xmppClientDidUpdateRoster:self];
 }
 
 - (void)onDidReceiveBuddyRequest:(XMPPJID *)jid
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClient:didReceiveBuddyRequest:)])
-		{
-			[currentDelegate xmppClient:self didReceiveBuddyRequest:jid];
-		}
-	}
+	[multicastDelegate xmppClient:self didReceiveBuddyRequest:jid];
 }
 
 - (void)onDidReceiveIQ:(XMPPIQ *)iq
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClient:didReceiveIQ:)])
-		{
-			[currentDelegate xmppClient:self didReceiveIQ:iq];
-		}
-	}
+	[multicastDelegate xmppClient:self didReceiveIQ:iq];
 }
 
 - (void)onDidReceiveMessage:(XMPPMessage *)message
 {
-	int i;
-	for(i = 0; i < [delegates count]; i++)
-	{
-		id currentDelegate = [delegates objectAtIndex:i];
-		
-		if([currentDelegate respondsToSelector:@selector(xmppClient:didReceiveMessage:)])
-		{
-			[currentDelegate xmppClient:self didReceiveMessage:message];
-		}
-	}
+	[multicastDelegate xmppClient:self didReceiveMessage:message];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
