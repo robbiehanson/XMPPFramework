@@ -38,6 +38,7 @@
 - (BOOL)isPendingApproval;
 
 - (XMPPResource *)primaryResource;
+- (XMPPResource *)resourceForJID:(XMPPJID *)jid;
 - (NSArray *)sortedResources;
 - (NSArray *)unsortedResources;
 

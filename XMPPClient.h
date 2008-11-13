@@ -121,6 +121,9 @@
 - (NSArray *)unsortedAvailableUsers;
 - (NSArray *)unsortedUnavailableUsers;
 
+- (XMPPUser *)userForJID:(XMPPJID *)jid;
+- (XMPPResource *)resourceForJID:(XMPPJID *)jid;
+
 - (XMPPUser *)myUser;
 
 - (void)sendElement:(NSXMLElement *)element;

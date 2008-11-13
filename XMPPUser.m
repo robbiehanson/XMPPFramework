@@ -180,6 +180,11 @@
 	return primaryResource;
 }
 
+- (XMPPResource *)resourceForJID:(XMPPJID *)aJid
+{
+	return [resources objectForKey:aJid];
+}
+
 - (NSArray *)sortedResources
 {
 	return [[resources allValues] sortedArrayUsingSelector:@selector(compare:)];
