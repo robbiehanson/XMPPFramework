@@ -510,6 +510,18 @@
 	return result;
 }
 
+- (XMPPUser *)userForJID:(XMPPJID *)jid
+{
+	return [roster objectForKey:[jid bareJID]];
+}
+
+- (XMPPResource *)resourceForJID:(XMPPJID *)jid
+{
+	XMPPUser *user = [roster objectForKey:[jid bareJID]];
+	
+	return [user resourceForJID:jid];
+}
+
 - (XMPPUser *)myUser
 {
 	return [[myUser retain] autorelease];
