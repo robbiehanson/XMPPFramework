@@ -119,8 +119,6 @@
 
 - (void)forwardInvocation:(NSInvocation *)anInvocation
 {
-	NSLog(@"MulticastDelegate: forwardInvocation:");
-	
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	// Here are the rules:
