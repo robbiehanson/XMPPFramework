@@ -512,12 +512,24 @@
 
 - (XMPPUser *)userForJID:(XMPPJID *)jid
 {
-	return [roster objectForKey:[jid bareJID]];
+	XMPPUser *result = [roster objectForKey:[jid bareJID]];
+	
+	if(result)
+	{
+		return result;
+	}
+	
+	if([[jid bareJID] isEqual:[myJID bareJID]])
+	{
+		return myUser;
+	}
+	
+	return nil;
 }
 
 - (XMPPResource *)resourceForJID:(XMPPJID *)jid
 {
-	XMPPUser *user = [roster objectForKey:[jid bareJID]];
+	XMPPUser *user = [self userForJID:jid];
 	
 	return [user resourceForJID:jid];
 }
