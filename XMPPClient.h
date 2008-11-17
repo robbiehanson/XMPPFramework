@@ -33,6 +33,7 @@
 	BOOL shouldReconnect;
 	
 	XMPPStream *xmppStream;
+	NSError *streamError;
 	
 	NSMutableDictionary *roster;
 	XMPPUser *myUser;
@@ -69,6 +70,8 @@
 - (BOOL)isDisconnected;
 - (BOOL)isConnected;
 - (BOOL)isSecure;
+
+- (NSError *)streamError;
 
 - (BOOL)autoLogin;
 - (void)setAutoLogin:(BOOL)flag;
