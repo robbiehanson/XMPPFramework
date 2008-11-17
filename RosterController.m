@@ -2,6 +2,7 @@
 #import "RequestController.h"
 #import "XMPP.h"
 #import "ChatWindowManager.h"
+#import <SystemConfiguration/SystemConfiguration.h>
 
 
 @implementation RosterController
@@ -30,6 +31,14 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
 	// Display the sign in sheet
+	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
+	[serverField setObjectValue:[dflts objectForKey:@"Account.Server"]];
+	[resourceField setObjectValue:[dflts objectForKey:@"Account.Resource"]];
+	[portField setObjectValue:[dflts objectForKey:@"Account.Port"]];
+	[jidField setObjectValue:[dflts objectForKey:@"Account.JID"]];
+	[sslButton setObjectValue:[dflts objectForKey:@"Account.UseSSL"]];
+	[selfSignedButton setObjectValue:[dflts objectForKey:@"Account.AllowSelfSignedCert"]];
+
 	[NSApp beginSheet:signInSheet
 	   modalForWindow:window
 		modalDelegate:self
@@ -50,7 +59,8 @@
 	}
 	[xmppClient setDomain:domain];
 	
-	[xmppClient setPort:[portField intValue]];
+	int port = [portField intValue];
+	[xmppClient setPort:port];
 	
 	BOOL usesSSL = ([sslButton state] == NSOnState);
 	BOOL allowsSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
@@ -69,6 +79,21 @@
 	[xmppClient setMyJID:jid];
 	
 	[xmppClient setPassword:[passwordField stringValue]];
+    
+	// Update persistent defaults:
+	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
+	[dflts setObject:domain forKey:@"Account.Server"];
+	[dflts setObject:[resourceField stringValue]
+			  forKey:@"Account.Resource"];
+	[dflts setObject:(port ? [NSNumber numberWithInt:port] : nil)
+			  forKey:@"Account.Port"];
+	[dflts setObject:[jidField stringValue]
+			  forKey:@"Account.JID"];
+	[dflts setBool:usesSSL 
+			forKey:@"Account.UseSSL"];
+	[dflts setBool:allowsSelfSignedCertificates 
+			forKey:@"Account.AllowSelfSignedCert"];
+	[dflts synchronize];
 }
 
 - (IBAction)createAccount:(id)sender
@@ -240,6 +265,10 @@
 - (void)xmppClientDidNotConnect:(XMPPClient *)sender
 {
 	NSLog(@"---------- xmppClientDidNotConnect ----------");
+	if([sender streamError])
+	{
+		NSLog(@"           error: %@", [sender streamError]);
+	}
 	
 	// Update tracking variables
 	isRegistering = NO;
@@ -254,6 +283,14 @@
 - (void)xmppClientDidDisconnect:(XMPPClient *)sender
 {
 	NSLog(@"---------- xmppClientDidDisconnect ----------");
+	if ([sender streamError])
+	{
+		NSLog(@"           error: %@", [sender streamError]);
+	}
+	
+	[signInButton setEnabled:YES];
+	[registerButton setEnabled:YES];
+	[messageField setStringValue:@"Unexpectedly disconnected from server"];
 }
 
 - (void)xmppClientDidRegister:(XMPPClient *)sender

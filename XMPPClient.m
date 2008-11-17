@@ -70,6 +70,7 @@
 	[xmppStream setDelegate:nil];
 	[xmppStream disconnect];
 	[xmppStream release];
+	[streamError release];
 	
 	[roster release];
 	[myUser release];
@@ -286,6 +287,11 @@
 - (BOOL)isAuthenticated
 {
 	return [xmppStream isAuthenticated];
+}
+
+- (NSError *)streamError
+{
+    return streamError;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -784,6 +790,9 @@
 {
 	if([error isKindOfClass:[NSError class]])
 	{
+		[streamError autorelease];
+		streamError = [(NSError *)error copy];
+		
 		if([xmppStream isAuthenticated])
 		{
 			// We were fully connected to the XMPP server, but we've been disconnected for some reason.

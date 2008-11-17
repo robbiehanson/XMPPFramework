@@ -168,25 +168,19 @@
 	return isSecure;
 }
 
-/**
- * Connects to the given host on the given port number.
- * If you pass a port number of 0, the default port number for XMPP traffic (5222) is used.
- * The virtual host name is the name of the XMPP host at the given address that we should communicate with.
- * This is generally the domain identifier of the JID. IE: "gmail.com"
- * 
- * If the virtual host name is nil, or an empty string, a virtual host will not be specified in the XML stream
- * connection. This may be OK in some cases, but some servers require it to start a connection.
-**/
 - (void)connectToHost:(NSString *)hostName
-			   onPort:(UInt16)portNumber
-	  withVirtualHost:(NSString *)vHostName
-{
+               onPort:(UInt16)portNumber
+      withVirtualHost:(NSString *)vHostName
+               secure:(BOOL)secure
+{    
 	if(state == STATE_DISCONNECTED)
 	{
 		// Store configuration information
-		isSecure = NO;
+		isSecure = secure;
 		isAuthenticated = NO;
 		
+		[serverHostName autorelease];
+		serverHostName = [hostName copy];
 		[xmppHostName autorelease];
 		xmppHostName = [vHostName copy];
 		
@@ -196,11 +190,27 @@
 		state = STATE_CONNECTING;
 		
 		// If the given port number is zero, use the default port number for XMPP communication
-		UInt16 myPortNumber = (portNumber > 0) ? portNumber : 5222;
+		UInt16 myPortNumber = (portNumber > 0) ? portNumber : (secure ? 5223 : 5222);
 		
 		// Connect to the host
 		[asyncSocket connectToHost:hostName onPort:myPortNumber error:nil];
 	}
+}
+
+/**
+ * Connects to the given host on the given port number.
+ * If you pass a port number of 0, the default port number for XMPP traffic (5222) is used.
+ * The virtual host name is the name of the XMPP host at the given address that we should communicate with.
+ * This is generally the domain identifier of the JID. IE: "gmail.com"
+ * 
+ * If the virtual host name is nil, or an empty string, a virtual host will not be specified in the XML stream
+ * connection. This may be OK in some cases, but some servers require it to start a connection.
+ **/
+- (void)connectToHost:(NSString *)hostName
+			   onPort:(UInt16)portNumber
+	  withVirtualHost:(NSString *)vHostName
+{
+	[self connectToHost:hostName onPort:portNumber withVirtualHost:vHostName secure:NO];
 }
 
 /**
@@ -216,26 +226,7 @@
 					 onPort:(UInt16)portNumber
 			withVirtualHost:(NSString *)vHostName
 {
-	if(state == STATE_DISCONNECTED)
-	{
-		// Store configuration information
-		isSecure = YES;
-		isAuthenticated = NO;
-		
-		[xmppHostName autorelease];
-		xmppHostName = [vHostName copy];
-		
-		// Update state
-		// Note that we do this before connecting to the host,
-		// because the delegate methods will be called before the method returns
-		state = STATE_CONNECTING;
-		
-		// If the given port number is zero, use the default port number for XMPP communication
-		UInt16 myPortNumber = (portNumber > 0) ? portNumber : 5223;
-		
-		// Connect to the host
-		[asyncSocket connectToHost:hostName onPort:myPortNumber error:nil];
-	}
+	[self connectToHost:hostName onPort:portNumber withVirtualHost:vHostName secure:YES];
 }
 
 /**

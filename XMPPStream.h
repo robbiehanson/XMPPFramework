@@ -17,6 +17,7 @@
 	BOOL isSecure;
 	BOOL isAuthenticated;
 	BOOL allowsSelfSignedCertificates;
+	NSString *serverHostName;
 	NSString *xmppHostName;
 	
 	NSMutableData *buffer;
