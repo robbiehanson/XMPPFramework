@@ -1,0 +1,15 @@
+# XMPP.exp -- list of exports for XMPP.framework
+
+.objc_class_name_XMPPClient
+.objc_class_name_XMPPDigestAuthentication
+.objc_class_name_XMPPElement
+#.objc_class_name_XMPPIQ
+.objc_class_name_XMPPJID
+.objc_class_name_XMPPMessage
+.objc_class_name_XMPPPresence
+.objc_class_name_XMPPResource
+.objc_class_name_XMPPStream
+.objc_class_name_XMPPTransports
+.objc_class_name_XMPPUser
+
+.objc_category_name_NSXMLElement_XMPPStreamAdditions
