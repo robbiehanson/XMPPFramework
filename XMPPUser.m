@@ -209,8 +209,8 @@
 	{
 		XMPPResource *possiblePrimary = [sortedResources objectAtIndex:0];
 		
-		// Primary resource must have a positive priority
-		if([[possiblePrimary presence] priority] > 0)
+		// Primary resource must have a non-negative priority
+		if([[possiblePrimary presence] priority] >= 0)
 		{
 			primaryResource = [possiblePrimary retain];
 		}
