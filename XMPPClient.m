@@ -470,7 +470,7 @@
 
 - (NSArray *)sortedUnavailableUsersByName
 {
-	return [[self unsortedAvailableUsers] sortedArrayUsingSelector:@selector(compareByName:)];
+	return [[self unsortedUnavailableUsers] sortedArrayUsingSelector:@selector(compareByName:)];
 }
 
 - (NSArray *)unsortedUsers
@@ -514,6 +514,41 @@
 	}
 	
 	return result;
+}
+
+- (NSArray *)sortedResources:(BOOL)includeResourcesForMyUserExcludingMyself
+{
+	// Add all the resouces from all the available users in the roster
+	NSArray *availableUsers = [self unsortedAvailableUsers];
+	
+	NSMutableArray *result = [NSMutableArray arrayWithCapacity:[availableUsers count]];
+	
+	NSUInteger i;
+	for(i = 0; i < [availableUsers count]; i++)
+	{
+		XMPPUser *user = [availableUsers objectAtIndex:i];
+		
+		[result addObjectsFromArray:[user unsortedResources]];
+	}
+	
+	if(includeResourcesForMyUserExcludingMyself)
+	{
+		// Now add all the available resources from our own user account (excluding ourselves)
+		
+		NSArray *myResources = [myUser unsortedResources];
+		
+		for(i = 0; i < [myResources count]; i++)
+		{
+			XMPPResource *resource = [myResources objectAtIndex:i];
+			
+			if(![myJID isEqual:[resource jid]])
+			{
+				[result addObject:resource];
+			}
+		}
+	}
+	
+	return [result sortedArrayUsingSelector:@selector(compare:)];
 }
 
 - (XMPPUser *)userForJID:(XMPPJID *)jid
