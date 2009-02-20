@@ -124,6 +124,8 @@
 - (NSArray *)unsortedAvailableUsers;
 - (NSArray *)unsortedUnavailableUsers;
 
+- (NSArray *)sortedResources:(BOOL)includeResourcesForMyUserExcludingMyself;
+
 - (XMPPUser *)userForJID:(XMPPJID *)jid;
 - (XMPPResource *)resourceForJID:(XMPPJID *)jid;
 
