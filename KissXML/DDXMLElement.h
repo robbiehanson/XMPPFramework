@@ -38,7 +38,7 @@
 
 #pragma mark --- Children ---
 
-//- (void)insertChild:(DDXMLNode *)child atIndex:(NSUInteger)index;
+- (void)insertChild:(DDXMLNode *)child atIndex:(NSUInteger)index;
 //- (void)insertChildren:(NSArray *)children atIndex:(NSUInteger)index;
 - (void)removeChildAtIndex:(NSUInteger)index;
 - (void)setChildren:(NSArray *)children;

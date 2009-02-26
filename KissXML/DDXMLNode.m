@@ -4,8 +4,31 @@
 #import "NSStringAdditions.h"
 #import "DDXMLPrivate.h"
 
+#import <libxml/xpath.h>
+#import <libxml/xpathInternals.h>
+
 
 @implementation DDXMLNode
+
+static void MyErrorHandler(void * userData, xmlErrorPtr error);
+
++ (void)initialize
+{
+	static BOOL initialized = NO;
+	if(!initialized)
+	{
+		// Redirect error output to our own function (don't clog up the console)
+		initGenericErrorDefaultFunc(NULL);
+		xmlSetStructuredErrorFunc(NULL, MyErrorHandler);
+		
+		// Tell libxml not to keep ignorable whitespace (such as node indentation, formatting, etc).
+		// NSXML ignores such whitespace.
+		// This also has the added benefit of taking up less RAM when parsing formatted XML documents.
+		xmlKeepBlanksDefault(0);
+		
+		initialized = YES;
+	}
+}
 
 + (id)elementWithName:(NSString *)name
 {
@@ -92,7 +115,7 @@
 {
 	if(nodePtr == NULL)
 	{
-		[super dealloc];
+		[self release];
 		return nil;
 	}
 	
@@ -129,7 +152,7 @@
 {
 	if(nodePtr == NULL)
 	{
-		[super dealloc];
+		[self release];
 		return nil;
 	}
 	
@@ -160,7 +183,7 @@
 - (void)dealloc
 {
 	// Check if genericPtr is NULL
-	// This may be the case if, eg, DDXMLElement calls [super dealloc] from it's init method
+	// This may be the case if, eg, DDXMLElement calls [self release] from it's init method
 	if(genericPtr != NULL)
 	{
 		[self nodeRelease];
@@ -255,7 +278,12 @@
 	}
 	else
 	{
-		return [NSString stringWithUTF8String:((const char *)((xmlStdPtr)genericPtr)->name)];
+		const char *name = (const char *)((xmlStdPtr)genericPtr)->name;
+		
+		if(name == NULL)
+			return nil;
+		else
+			return [NSString stringWithUTF8String:name];
 	}
 }
 
@@ -364,17 +392,19 @@
 		}
 		return 0;
 	}
-	
-	xmlStdPtr currentNode = ((xmlStdPtr)genericPtr)->prev;
-	
-	NSUInteger result = 0;
-	while(currentNode != NULL)
+	else
 	{
-		result++;
-		currentNode = currentNode->prev;
+		xmlStdPtr node = ((xmlStdPtr)genericPtr)->prev;
+		
+		NSUInteger result = 0;
+		while(node != NULL)
+		{
+			result++;
+			node = node->prev;
+		}
+		
+		return result;
 	}
-	
-	return result;
 }
 
 /**
@@ -581,7 +611,9 @@
 	
 	// Note: Try to accomplish this task without creating dozens of intermediate wrapper objects
 	
-	xmlStdPtr previousSibling = ((xmlStdPtr)genericPtr)->prev;
+	xmlStdPtr node = (xmlStdPtr)genericPtr;
+	xmlStdPtr previousSibling = node->prev;
+	
 	if(previousSibling != NULL)
 	{
 		if(previousSibling->last != NULL)
@@ -603,7 +635,12 @@
 	
 	// If there are no previous siblings, then the previous node is simply the parent
 	
-	return [self parent];
+	// Note: rootNode.parent == docNode
+	
+	if(node->parent == NULL || node->parent->type == XML_DOCUMENT_NODE)
+		return nil;
+	else
+		return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->parent];
 }
 
 /**
@@ -676,6 +713,76 @@
 	{
 		[[self class] detachChild:(xmlNodePtr)node fromNode:node->parent];
 	}
+}
+
+- (NSString *)XPath
+{
+	NSMutableString *result = [NSMutableString stringWithCapacity:25];
+	
+	// Examples:
+	// /rootElement[1]/subElement[4]/thisNode[2]
+	// topElement/thisNode[2]
+	
+	xmlStdPtr node = NULL;
+	
+	if([self isXmlNsPtr])
+	{
+		node = (xmlStdPtr)nsParentPtr;
+		
+		if(node == NULL)
+			[result appendFormat:@"namespace::%@", [self name]];
+		else
+			[result appendFormat:@"/namespace::%@", [self name]];
+	}
+	else if([self isXmlAttrPtr])
+	{
+		node = (xmlStdPtr)(((xmlAttrPtr)genericPtr)->parent);
+		
+		if(node == NULL)
+			[result appendFormat:@"@%@", [self name]];
+		else
+			[result appendFormat:@"/@%@", [self name]];
+	}
+	else
+	{
+		node = (xmlStdPtr)genericPtr;
+	}
+	
+	// Note: rootNode.parent == docNode
+		
+	while((node != NULL) && (node->type != XML_DOCUMENT_NODE))
+	{
+		if((node->parent == NULL) && (node->doc == NULL))
+		{
+			// We're at the top of the heirarchy, and there is no xml document.
+			// Thus we don't use a leading '/', and we don't need an index.
+			
+			[result insertString:[NSString stringWithFormat:@"%s", node->name] atIndex:0];
+		}
+		else
+		{
+			// Find out what index this node is.
+			// If it's the first node with this name, the index is 1.
+			// If there are previous siblings with the same name, the index is greater than 1.
+			
+			int index = 1;
+			xmlStdPtr prevNode = node->prev;
+			while(prevNode != NULL)
+			{
+				if(xmlStrEqual(node->name, prevNode->name))
+				{
+					index++;
+				}
+				prevNode = prevNode->prev;
+			}
+			
+			[result insertString:[NSString stringWithFormat:@"/%s[%i]", node->name, index] atIndex:0];
+		}
+		
+		node = (xmlStdPtr)node->parent;
+	}
+	
+	return [[result copy] autorelease];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -899,6 +1006,104 @@
 		
 		return result;
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XPath/XQuery
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-(NSArray *)nodesForXPath:(NSString *)xpath error:(NSError **)error
+{
+	xmlXPathContextPtr xpathCtx;
+	xmlXPathObjectPtr xpathObj;
+	
+	BOOL isTempDoc = NO;
+	xmlDocPtr doc;
+	
+	if([DDXMLNode isXmlDocPtr:genericPtr])
+	{
+		doc = (xmlDocPtr)genericPtr;
+	}
+	else if([DDXMLNode isXmlNodePtr:genericPtr])
+	{
+		doc = ((xmlNodePtr)genericPtr)->doc;
+		
+		if(doc == NULL)
+		{
+			isTempDoc = YES;
+			
+			doc = xmlNewDoc(NULL);
+			xmlDocSetRootElement(doc, (xmlNodePtr)genericPtr);
+		}
+	}
+	else
+	{
+		return nil;
+	}
+	
+	xpathCtx = xmlXPathNewContext(doc);
+	xpathCtx->node = (xmlNodePtr)genericPtr;
+		
+	xmlNodePtr rootNode = (doc)->children;
+	if(rootNode != NULL)
+	{
+		xmlNsPtr ns = rootNode->nsDef;
+		while(ns != NULL)
+		{
+			xmlXPathRegisterNs(xpathCtx, ns->prefix, ns->href);
+			
+			ns = ns->next;
+		}
+	}
+	
+	xpathObj = xmlXPathEvalExpression([xpath xmlChar], xpathCtx);
+	
+	NSArray *result;
+	
+	if(xpathObj == NULL)
+	{
+		if(error) *error = [[self class] lastError];
+		result = nil;
+	}
+	else
+	{
+		if(error) *error = nil;
+		
+		int count = xmlXPathNodeSetGetLength(xpathObj->nodesetval);
+		
+		if(count == 0)
+		{
+			result = [NSArray array];
+		}
+		else
+		{
+			NSMutableArray *mResult = [NSMutableArray arrayWithCapacity:count];
+			
+			int i;
+			for (i = 0; i < count; i++)
+			{
+				xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
+				
+				[mResult addObject:[DDXMLNode nodeWithPrimitive:(xmlKindPtr)node]];
+			}
+			
+			result = mResult;
+		}
+	}
+	
+	if(xpathObj) xmlXPathFreeObject(xpathObj);
+	if(xpathCtx) xmlXPathFreeContext(xpathCtx);
+	
+	if(isTempDoc)
+	{
+		xmlUnlinkNode((xmlNodePtr)genericPtr);
+		xmlFreeDoc(doc);
+		
+		// xmlUnlinkNode doesn't remove the doc ptr
+		[[self class] recursiveStripDocPointersFromNode:(xmlNodePtr)genericPtr];
+	}
+	
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1410,10 +1615,45 @@
 /**
  * Removes the root element from the given document.
 **/
-+ (void)removeRootElementFromDoc:(xmlDocPtr)doc
++ (void)removeAllChildrenFromDoc:(xmlDocPtr)doc
 {
-	// It's safe to cast a xmlDocPtr to a xmlNodePtr in this particular case
-	[self removeAllChildrenFromNode:(xmlNodePtr)doc];
+	xmlNodePtr child = doc->children;
+	
+	while(child != NULL)
+	{
+		xmlNodePtr nextChild = child->next;
+		
+		if(child->type == XML_ELEMENT_NODE)
+		{
+			// Remove child from list of children
+			if(child->prev != NULL)
+			{
+				child->prev->next = child->next;
+			}
+			if(child->next != NULL)
+			{
+				child->next->prev = child->prev;
+			}
+			if(doc->children == child)
+			{
+				doc->children = child->next;
+			}
+			if(doc->last == child)
+			{
+				doc->last = child->prev;
+			}
+			
+			// Free the child recursively if it's no longer in use
+			[self nodeFree:child];
+		}
+		else
+		{
+			// Leave comments and DTD's embedded in the doc's child list.
+			// They will get freed in xmlFreeDoc.
+		}
+		
+		child = nextChild;
+	}
 }
 
 /**
@@ -1529,7 +1769,7 @@
 				}
 				else if([self isXmlDocPtr])
 				{
-					[[self class] removeRootElementFromDoc:(xmlDocPtr)genericPtr];
+					[[self class] removeAllChildrenFromDoc:(xmlDocPtr)genericPtr];
 					xmlFreeDoc((xmlDocPtr)genericPtr);
 				}
 				else
@@ -1546,6 +1786,51 @@
 		{
 			// There is a wrapper with a reference to this node somewhere
 		}
+	}
+}
+
+/**
+ * Returns the last error encountered by libxml.
+ * Errors are caught in the MyErrorHandler method within DDXMLDocument.
+**/
++ (NSError *)lastError
+{
+	NSValue *lastErrorValue = [[[NSThread currentThread] threadDictionary] objectForKey:DDLastErrorKey];
+	if(lastErrorValue)
+	{
+		xmlError lastError;
+		[lastErrorValue getValue:&lastError];
+		
+		int errCode = lastError.code;
+		NSString *errMsg = [[NSString stringWithFormat:@"%s", lastError.message] trimWhitespace];
+		
+		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			
+		return [NSError errorWithDomain:@"DDXMLErrorDomain" code:errCode userInfo:info];
+	}
+	else
+	{
+		return nil;
+	}
+}
+
+static void MyErrorHandler(void * userData, xmlErrorPtr error)
+{
+	// This method is called by libxml when an error occurs.
+	// We register for this error in the initialize method below.
+	
+	// Extract error message and store in the current thread's dictionary.
+	// This ensure's thread safey, and easy access for all other DDXML classes.
+	
+	if(error == NULL)
+	{
+		[[[NSThread currentThread] threadDictionary] removeObjectForKey:DDLastErrorKey];
+	}
+	else
+	{
+		NSValue *errorValue = [NSValue valueWithBytes:error objCType:@encode(xmlError)];
+		
+		[[[NSThread currentThread] threadDictionary] setObject:errorValue forKey:DDLastErrorKey];
 	}
 }
 

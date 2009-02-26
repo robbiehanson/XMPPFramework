@@ -55,8 +55,8 @@ typedef NSUInteger DDXMLDocumentContentKind;
 
 //- (void)replaceChildAtIndex:(NSUInteger)index withNode:(DDXMLNode *)node;
 
-//- (NSData *)XMLData;
-//- (NSData *)XMLDataWithOptions:(NSUInteger)options;
+- (NSData *)XMLData;
+- (NSData *)XMLDataWithOptions:(NSUInteger)options;
 
 //- (id)objectByApplyingXSLT:(NSData *)xslt arguments:(NSDictionary *)arguments error:(NSError **)error;
 //- (id)objectByApplyingXSLTString:(NSString *)xslt arguments:(NSDictionary *)arguments error:(NSError **)error;
