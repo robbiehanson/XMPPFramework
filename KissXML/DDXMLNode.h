@@ -140,7 +140,7 @@ typedef struct _xmlStd *xmlStdPtr;
 
 - (void)detach;
 
-//- (NSString *)XPath;
+- (NSString *)XPath;
 
 #pragma mark --- QNames ---
 
@@ -163,7 +163,7 @@ typedef struct _xmlStd *xmlStdPtr;
 
 #pragma mark --- XPath/XQuery ---
 
-//- (NSArray *)nodesForXPath:(NSString *)xpath error:(NSError **)error;
+- (NSArray *)nodesForXPath:(NSString *)xpath error:(NSError **)error;
 //- (NSArray *)objectsForXQuery:(NSString *)xquery constants:(NSDictionary *)constants error:(NSError **)error;
 //- (NSArray *)objectsForXQuery:(NSString *)xquery error:(NSError **)error;
 

@@ -47,7 +47,7 @@
 {
 	if(nodePtr == NULL || nodePtr->type != XML_ELEMENT_NODE)
 	{
-		[super dealloc];
+		[self release];
 		return nil;
 	}
 	
@@ -522,6 +522,41 @@
 	DDCheck([child isXmlNodePtr], @"Elements can only have text, elements, processing instructions, and comments as children");
 	
 	xmlAddChild((xmlNodePtr)genericPtr, (xmlNodePtr)child->genericPtr);
+}
+
+- (void)insertChild:(DDXMLNode *)child atIndex:(NSUInteger)index
+{
+	// NSXML version uses these same assertions
+	DDCheck([child hasParent] == NO, @"Cannot add a child that has a parent; detach or copy first");
+	DDCheck([child isXmlNodePtr], @"Elements can only have text, elements, processing instructions, and comments as children");
+	
+	NSUInteger i = 0;
+	
+	xmlNodePtr childNodePtr = ((xmlNodePtr)genericPtr)->children;
+	while(childNodePtr != NULL)
+	{
+		// Ignore all but element, comment, text, or processing instruction nodes
+		if([[self class] isXmlNodePtr:(xmlKindPtr)childNodePtr])
+		{
+			if(i == index)
+			{
+				xmlAddPrevSibling(childNodePtr, (xmlNodePtr)child->genericPtr);
+				return;
+			}
+			
+			i++;
+		}
+		childNodePtr = childNodePtr->next;
+	}
+	
+	if(i == index)
+	{
+		xmlAddChild((xmlNodePtr)genericPtr, (xmlNodePtr)child->genericPtr);
+		return;
+	}
+	
+	// NSXML version uses this same assertion
+	DDCheck(NO, @"index (%u) beyond bounds (%u)", (unsigned)index, (unsigned)++i);
 }
 
 - (void)setChildren:(NSArray *)children

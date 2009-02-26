@@ -6,6 +6,7 @@
 // Our API contract requires us to keep these assertions intact.
 #define DDCheck(condition, desc, ...)  { if(!(condition)) { [[NSAssertionHandler currentHandler] handleFailureInMethod:_cmd object:self file:[NSString stringWithUTF8String:__FILE__] lineNumber:__LINE__ description:(desc), ##__VA_ARGS__]; } }
 
+#define DDLastErrorKey @"DDXML:LastError"
 
 struct _xmlRetain {
 	void * retainee;
@@ -38,6 +39,8 @@ typedef struct _xmlRetain *xmlRetainPtr;
 
 - (BOOL)hasParent;
 
++ (void)recursiveStripDocPointersFromNode:(xmlNodePtr)node;
+
 + (void)detachAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node;
 + (void)removeAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node;
 + (void)removeAllAttributesFromNode:(xmlNodePtr)node;
@@ -50,10 +53,12 @@ typedef struct _xmlRetain *xmlRetainPtr;
 + (void)removeChild:(xmlNodePtr)child fromNode:(xmlNodePtr)node;
 + (void)removeAllChildrenFromNode:(xmlNodePtr)node;
 
-+ (void)removeRootElementFromDoc:(xmlDocPtr)doc;
++ (void)removeAllChildrenFromDoc:(xmlDocPtr)doc;
 
 - (void)nodeRetain;
 - (void)nodeRelease;
+
++ (NSError *)lastError;
 
 @end
 

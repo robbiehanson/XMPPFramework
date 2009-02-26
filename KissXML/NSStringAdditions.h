@@ -9,4 +9,6 @@
 **/
 - (const xmlChar *)xmlChar;
 
+- (NSString *)trimWhitespace;
+
 @end

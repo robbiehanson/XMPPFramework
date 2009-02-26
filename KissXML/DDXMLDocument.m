@@ -5,24 +5,6 @@
 
 @implementation DDXMLDocument
 
-void MyErrorHandler(void * userData, xmlErrorPtr error)
-{
-	// Here we could extract the information from xmlError struct
-}
-
-+ (void)initialize
-{
-	static BOOL initialized = NO;
-	if(!initialized)
-	{
-		// Redirect error output to our own function (don't clog up the console)
-		initGenericErrorDefaultFunc(NULL);
-		xmlSetStructuredErrorFunc(NULL, MyErrorHandler);
-		
-		initialized = YES;
-	}
-}
-
 + (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
 {
 	return [[[DDXMLDocument alloc] initWithPrimitive:nodePtr] autorelease];
@@ -32,7 +14,7 @@ void MyErrorHandler(void * userData, xmlErrorPtr error)
 {
 	if(nodePtr == NULL || nodePtr->type != XML_DOCUMENT_NODE)
 	{
-		[super dealloc];
+		[self release];
 		return nil;
 	}
 	
@@ -63,7 +45,7 @@ void MyErrorHandler(void * userData, xmlErrorPtr error)
 	{
 		if(error) *error = [NSError errorWithDomain:@"DDXMLErrorDomain" code:0 userInfo:nil];
 		
-		[super dealloc];
+		[self release];
 		return nil;
 	}
 	
@@ -72,7 +54,7 @@ void MyErrorHandler(void * userData, xmlErrorPtr error)
 	{
 		if(error) *error = [NSError errorWithDomain:@"DDXMLErrorDomain" code:1 userInfo:nil];
 		
-		[super dealloc];
+		[self release];
 		return nil;
 	}
 	
@@ -84,12 +66,26 @@ void MyErrorHandler(void * userData, xmlErrorPtr error)
 **/
 - (DDXMLElement *)rootElement
 {
-	xmlDocPtr docPtr = (xmlDocPtr)genericPtr;
+	xmlDocPtr doc = (xmlDocPtr)genericPtr;
 	
-	if(docPtr->children == NULL)
-		return nil;
+	// doc->children is a list containing possibly comments, DTDs, etc...
+	
+	xmlNodePtr rootNode = xmlDocGetRootElement(doc);
+	
+	if(rootNode != NULL)
+		return [DDXMLElement nodeWithPrimitive:(xmlKindPtr)(rootNode)];
 	else
-		return [DDXMLElement nodeWithPrimitive:(xmlKindPtr)(docPtr->children)];
+		return nil;
+}
+
+- (NSData *)XMLData
+{
+	return [[self XMLString] dataUsingEncoding:NSUTF8StringEncoding];
+}
+
+- (NSData *)XMLDataWithOptions:(NSUInteger)options
+{
+	return [[self XMLStringWithOptions:options] dataUsingEncoding:NSUTF8StringEncoding];
 }
 
 @end
