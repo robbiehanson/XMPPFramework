@@ -38,6 +38,22 @@
 	return result;
 }
 
+- (id)initWithXMLString:(NSString *)string error:(NSError **)error
+{
+	DDXMLDocument *doc = [[DDXMLDocument alloc] initWithXMLString:string options:0 error:error];
+	
+	if(doc == nil)
+	{
+		return nil;
+	}
+	
+	DDXMLNode *result = [doc rootElement];
+	[result detach];
+	[doc release];
+	
+	return [result retain];
+}
+
 + (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
 {
 	return [[[DDXMLElement alloc] initWithPrimitive:nodePtr] autorelease];
