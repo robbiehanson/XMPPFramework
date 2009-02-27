@@ -49,6 +49,13 @@
 		return nil;
 	}
 	
+	// Even though xmlKeepBlanksDefault(0) is called in DDXMLNode's initialize method,
+	// it has been documented that this call seems to get reset on the iPhone:
+	// http://code.google.com/p/kissxml/issues/detail?id=8
+	// 
+	// Therefore, we call it again here just to be safe.
+	xmlKeepBlanksDefault(0);
+	
 	xmlDocPtr doc = xmlParseMemory([data bytes], [data length]);
 	if(doc == NULL)
 	{
