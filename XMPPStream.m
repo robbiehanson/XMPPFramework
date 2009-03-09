@@ -730,7 +730,10 @@
 				 forKey:(NSString *)kCFStreamSSLLevel];
 	
 	// Set the peer name
-	[settings setObject:xmppHostName forKey:(NSString *)kCFStreamSSLPeerName];
+	if([xmppHostName length] > 0)
+		[settings setObject:xmppHostName forKey:(NSString *)kCFStreamSSLPeerName];
+	else
+		[settings setObject:serverHostName forKey:(NSString *)kCFStreamSSLPeerName];
 	
 	// Allow self-signed certificates if needed
 	if(allowsSelfSignedCertificates)
@@ -818,10 +821,18 @@
 			// Sometimes the realm isn't specified
 			// In this case I believe the realm is implied as the virtual host name
 			if(![auth realm])
-				[auth setRealm:xmppHostName];
+			{
+				if([xmppHostName length] > 0)
+					[auth setRealm:xmppHostName];
+				else
+					[auth setRealm:serverHostName];
+			}
 			
 			// Set digest-uri
-			[auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", xmppHostName]];
+			if([xmppHostName length] > 0)
+				[auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", xmppHostName]];
+			else
+				[auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", serverHostName]];
 			
 			// Set username and password
 			[auth setUsername:authUsername password:tempPassword];
@@ -974,7 +985,7 @@
 
 - (void)handleBinding:(NSXMLElement *)response
 {
-	NSXMLElement *r_bind = [response elementForName:@"bind"];
+	NSXMLElement *r_bind = [response elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
 	NSXMLElement *r_jid = [r_bind elementForName:@"jid"];
 	
 	if(r_jid)
@@ -1095,7 +1106,10 @@
 					 forKey:(NSString *)kCFStreamSSLLevel];
 		
 		// Set the peer name
-		[settings setObject:xmppHostName forKey:(NSString *)kCFStreamSSLPeerName];
+		if([xmppHostName length] > 0)
+			[settings setObject:xmppHostName forKey:(NSString *)kCFStreamSSLPeerName];
+		else
+			[settings setObject:serverHostName forKey:(NSString *)kCFStreamSSLPeerName];
 		
 		// Allow self-signed certificates if needed
 		if(allowsSelfSignedCertificates)
@@ -1454,16 +1468,23 @@
 			NSRange separator = [component rangeOfString:@"="];
 			if(separator.location != NSNotFound)
 			{
-				NSString *key = [component substringToIndex:separator.location];
-				NSString *value = [component substringFromIndex:separator.location+1];
+				NSMutableString *key = [[component substringToIndex:separator.location] mutableCopy];
+				NSMutableString *value = [[component substringFromIndex:separator.location+1] mutableCopy];
+				
+				if(key) CFStringTrimWhitespace((CFMutableStringRef)key);
+				if(value) CFStringTrimWhitespace((CFMutableStringRef)value);
 				
 				if([value hasPrefix:@"\""] && [value hasSuffix:@"\""] && [value length] > 2)
 				{
 					// Strip quotes from value
-					value = [value substringWithRange:NSMakeRange(1,([value length]-2))];
+					[value deleteCharactersInRange:NSMakeRange(0, 1)];
+					[value deleteCharactersInRange:NSMakeRange([value length]-1, 1)];
 				}
 				
 				[auth setObject:value forKey:key];
+				
+				[value release];
+				[key release];
 			}
 		}
 		
