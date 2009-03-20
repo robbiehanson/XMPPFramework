@@ -700,7 +700,16 @@
 	[myUser release];
 	myUser = [[XMPPUser alloc] initWithJID:myJID];
 	
-	[self onDidAuthenticate];
+	// Note: Order matters in the calls below.
+	// We request the roster FIRST, because if we start receiving presence notifications from buddies in our roster
+	// before we even have our roster, the presence notifications will get lost as they can't be applied to anyone
+	// in our empty roster.
+	// AFTER we've requested our roster, we can go online. Remember that we won't get
+	// presence notifications from other users unless we're online ourselves.
+	// And LASTLY we notify the delegate(s). This is because delegates may be sending their own custom
+	// presence packets (and have set autoPresence to NO). The logical place for them to do so is in the
+	// onDidAuthenticate method, so we make certain that we've requested the roster before they start
+	// sending any presence packets.
 	
 	if(autoRoster)
 	{
@@ -710,6 +719,8 @@
 	{
 		[self goOnline];
 	}
+	
+	[self onDidAuthenticate];
 }
 
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
