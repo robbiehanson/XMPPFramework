@@ -63,6 +63,9 @@
 		DC63E9210E65D5140076E6D2 /* XMPPTransports.m in Sources */ = {isa = PBXBuildFile; fileRef = DC63E9200E65D5140076E6D2 /* XMPPTransports.m */; };
 		DC63E9FA0E65FD570076E6D2 /* SCNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DC63E9F90E65FD570076E6D2 /* SCNotificationManager.m */; };
 		DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B2BF10DE620B80055F60A /* XMPPElement.m */; };
+		DC839B430F741484000F2C7F /* XMPPPing.h in Headers */ = {isa = PBXBuildFile; fileRef = DC839B410F741484000F2C7F /* XMPPPing.h */; };
+		DC839B440F741484000F2C7F /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC839B420F741484000F2C7F /* XMPPPing.m */; };
+		DC839B450F741484000F2C7F /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC839B420F741484000F2C7F /* XMPPPing.m */; };
 		DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB742B0BDE013000E828D5 /* libcrypto.dylib */; };
 		DCAF51130EC8C3CD00445B85 /* MulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCAF51120EC8C3CD00445B85 /* MulticastDelegate.m */; };
 		DCB73CC40E58ECCF0086B3DC /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB73CC30E58ECCF0086B3DC /* NSDataAdditions.m */; };
@@ -135,6 +138,8 @@
 		DC63E9F90E65FD570076E6D2 /* SCNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCNotificationManager.m; sourceTree = "<group>"; };
 		DC7B2BF00DE620B80055F60A /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPElement.h; sourceTree = "<group>"; };
 		DC7B2BF10DE620B80055F60A /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
+		DC839B410F741484000F2C7F /* XMPPPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPing.h; sourceTree = "<group>"; };
+		DC839B420F741484000F2C7F /* XMPPPing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPing.m; sourceTree = "<group>"; };
 		DCAB742B0BDE013000E828D5 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		DCAF51110EC8C3CD00445B85 /* MulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MulticastDelegate.h; sourceTree = "<group>"; };
 		DCAF51120EC8C3CD00445B85 /* MulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MulticastDelegate.m; sourceTree = "<group>"; };
@@ -321,6 +326,8 @@
 			children = (
 				DC63E91F0E65D5140076E6D2 /* XMPPTransports.h */,
 				DC63E9200E65D5140076E6D2 /* XMPPTransports.m */,
+				DC839B410F741484000F2C7F /* XMPPPing.h */,
+				DC839B420F741484000F2C7F /* XMPPPing.m */,
 			);
 			name = Extensions;
 			sourceTree = "<group>";
@@ -472,6 +479,7 @@
 				276248140ED3D6930028C301 /* XMPPStream.h in Headers */,
 				276248160ED3D6960028C301 /* XMPPTransports.h in Headers */,
 				276248180ED3D69A0028C301 /* XMPPUser.h in Headers */,
+				DC839B430F741484000F2C7F /* XMPPPing.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -605,6 +613,7 @@
 				276248150ED3D6950028C301 /* XMPPStream.m in Sources */,
 				276248170ED3D6980028C301 /* XMPPTransports.m in Sources */,
 				276248190ED3D69A0028C301 /* XMPPUser.m in Sources */,
+				DC839B440F741484000F2C7F /* XMPPPing.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -646,6 +655,7 @@
 				DC63E9FA0E65FD570076E6D2 /* SCNotificationManager.m in Sources */,
 				DC0E7D320EADD7DE00B81D90 /* SSCrypto.m in Sources */,
 				DCAF51130EC8C3CD00445B85 /* MulticastDelegate.m in Sources */,
+				DC839B450F741484000F2C7F /* XMPPPing.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
