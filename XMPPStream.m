@@ -1427,7 +1427,7 @@
 {
 	if(state == STATE_CONNECTED)
 	{
-		[asyncSocket writeData:[@" "dataUsingEncoding:NSUTF8StringEncoding]
+		[asyncSocket writeData:[@" " dataUsingEncoding:NSUTF8StringEncoding]
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_STREAM];
 	}

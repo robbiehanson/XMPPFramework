@@ -11,4 +11,7 @@
 - (XMPPJID *)to;
 - (XMPPJID *)from;
 
+- (NSString *)toStr;
+- (NSString *)fromStr;
+
 @end
