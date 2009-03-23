@@ -6,17 +6,22 @@
 #import "SCNotificationManager.h"
 
 
-void _SCNotificationCallback( SCDynamicStoreRef store, CFArrayRef changedKeys, void *info )
+void _SCNotificationCallback(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSEnumerator *keysE = [(NSArray *)changedKeys objectEnumerator];
 	NSString *key = nil;
 	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 	
-	while ( key = [keysE nextObject] ) {		
+	while(key = [keysE nextObject])
+	{		
 		[nc postNotificationName:key 
 						  object:(id)info 
 		                userInfo:[(NSDictionary *)SCDynamicStoreCopyValue(store, (CFStringRef) key) autorelease]];
 	}
+	
+	[pool release];
 }
 
 
@@ -35,16 +40,12 @@ void _SCNotificationCallback( SCDynamicStoreRef store, CFArrayRef changedKeys, v
 			&context
 		);
 		
-		
-		// I have no idea what this code does, or why it's needed
-		// <magic>
-		rlSrc = SCDynamicStoreCreateRunLoopSource(NULL,dynStore,0);
+		// Add to runloop to receive automatic callbacks to our SCNotificationCallback method
+		rlSrc = SCDynamicStoreCreateRunLoopSource(NULL, dynStore, 0);
 		CFRunLoopAddSource([[NSRunLoop currentRunLoop] getCFRunLoop], rlSrc, kCFRunLoopCommonModes);
-		// </magic>
-
+		
 		SCDynamicStoreSetNotificationKeys(
 			dynStore, 
-			// more ugly hacks... unintelligible oneliners are cool
 			(CFArrayRef) [(NSArray *)SCDynamicStoreCopyKeyList(dynStore, CFSTR(".*")) autorelease], 
 			NULL
 		);
@@ -56,8 +57,8 @@ void _SCNotificationCallback( SCDynamicStoreRef store, CFArrayRef changedKeys, v
 {
 	CFRunLoopRemoveSource([[NSRunLoop currentRunLoop] getCFRunLoop], rlSrc, kCFRunLoopCommonModes);
 
-	CFRelease(rlSrc);
-	CFRelease(dynStore);
+	if(rlSrc) CFRelease(rlSrc);
+	if(dynStore) CFRelease(dynStore);
 
 	[super dealloc];
 }

@@ -56,16 +56,24 @@
 	return [[self attributeForName:@"id"] stringValue];
 }
 
+- (NSString *)toStr
+{
+	return [[self attributeForName:@"to"] stringValue];
+}
+
+- (NSString *)fromStr
+{
+	return [[self attributeForName:@"from"] stringValue];;
+}
+
 - (XMPPJID *)to
 {
-	NSString *str = [[self attributeForName:@"to"] stringValue];
-	return [XMPPJID jidWithString:str];
+	return [XMPPJID jidWithString:[self toStr]];
 }
 
 - (XMPPJID *)from
 {
-	NSString *str = [[self attributeForName:@"from"] stringValue];
-	return [XMPPJID jidWithString:str];
+	return [XMPPJID jidWithString:[self fromStr]];
 }
 
 @end
