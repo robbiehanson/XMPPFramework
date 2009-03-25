@@ -11,6 +11,18 @@
 #import "SCNotificationManager.h"
 
 
+enum XMPPClientFlags
+{
+	kUsesOldStyleSSL      = 1 << 0,  // If set, TLS is established prior to any communication (no StartTLS)
+	kAutoLogin            = 1 << 1,  // If set, client automatically attempts login after connection is established
+	kAllowsPlaintextAuth  = 1 << 2,  // If set, client allows plaintext authentication
+	kAutoRoster           = 1 << 3,  // If set, client automatically request roster after authentication
+	kAutoPresence         = 1 << 4,  // If set, client automatically becaomes available after authentication
+	kAutoReconnect        = 1 << 5,  // If set, client automatically attempts to reconnect after a disconnection
+	kShouldReconnect      = 1 << 6,  // If set, disconnection was accidental, and autoReconnect may be used
+	kHasRoster            = 1 << 7,  // If set, client has received the roster
+};
+
 @interface XMPPClient (PrivateAPI)
 
 - (void)onConnecting;
@@ -36,17 +48,19 @@
 		multicastDelegate = [[MulticastDelegate alloc] init];
 		
 		priority = 1;
+		flags = 0;
 		
-		autoLogin = YES;
-		allowsPlaintextAuth = YES;
-		autoPresence = YES;
-		autoRoster = YES;
-		autoReconnect = YES;
-		shouldReconnect = NO;
+		[self setAutoLogin:YES];
+		[self setAllowsPlaintextAuth:YES];
+		[self setAutoPresence:YES];
+		[self setAutoRoster:YES];
+		[self setAutoReconnect:YES];
 		
 		xmppStream = [[XMPPStream alloc] initWithDelegate:self];
 		
 		roster = [[NSMutableDictionary alloc] initWithCapacity:10];
+		
+		earlyPresenceElements = [[NSMutableArray alloc] initWithCapacity:2];
 		
 		scNotificationManager = [[SCNotificationManager alloc] init];
 		
@@ -74,6 +88,8 @@
 	
 	[roster release];
 	[myUser release];
+	
+	[earlyPresenceElements release];
 	
 	[scNotificationManager release];
 	
@@ -118,11 +134,14 @@
 
 - (BOOL)usesOldStyleSSL
 {
-	return usesOldStyleSSL;
+	return (flags & kUsesOldStyleSSL);
 }
 - (void)setUsesOldStyleSSL:(BOOL)flag
 {
-	usesOldStyleSSL = flag;
+	if(flag)
+		flags |= kUsesOldStyleSSL;
+	else
+		flags &= ~kUsesOldStyleSSL;
 }
 
 - (XMPPJID *)myJID
@@ -186,38 +205,74 @@
 
 - (BOOL)autoLogin
 {
-	return autoLogin;
+	return (flags & kAutoLogin);
 }
 - (void)setAutoLogin:(BOOL)flag
 {
-	autoLogin = flag;
-}
-
-- (BOOL)autoPresence
-{
-	return autoPresence;
-}
-- (void)setAutoPresence:(BOOL)flag
-{
-	autoPresence = flag;
+	if(flag)
+		flags |= kAutoLogin;
+	else
+		flags &= ~kAutoLogin;
 }
 
 - (BOOL)autoRoster
 {
-	return autoRoster;
+	return (flags & kAutoRoster);
 }
 - (void)setAutoRoster:(BOOL)flag
 {
-	autoRoster = flag;
+	if(flag)
+		flags |= kAutoRoster;
+	else
+		flags &= ~kAutoRoster;
+}
+
+- (BOOL)autoPresence
+{
+	return (flags & kAutoPresence);
+}
+- (void)setAutoPresence:(BOOL)flag
+{
+	if(flag)
+		flags |= kAutoPresence;
+	else
+		flags &= ~kAutoPresence;
 }
 
 - (BOOL)autoReconnect
 {
-	return autoReconnect;
+	return (flags & kAutoReconnect);
 }
 - (void)setAutoReconnect:(BOOL)flag
 {
-	autoReconnect = flag;
+	if(flag)
+		flags |= kAutoReconnect;
+	else
+		flags &= ~kAutoReconnect;
+}
+
+- (BOOL)shouldReconnect
+{
+	return (flags & kShouldReconnect);
+}
+- (void)setShouldReconnect:(BOOL)flag
+{
+	if(flag)
+		flags |= kShouldReconnect;
+	else
+		flags &= ~kShouldReconnect;
+}
+
+- (BOOL)hasRoster
+{
+	return (flags & kHasRoster);
+}
+- (void)setHasRoster:(BOOL)flag
+{
+	if(flag)
+		flags |= kHasRoster;
+	else
+		flags &= ~kHasRoster;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +283,7 @@
 {
 	[self onConnecting];
 	
-	if(usesOldStyleSSL)
+	if([self usesOldStyleSSL])
 		[xmppStream connectToSecureHost:domain onPort:port withVirtualHost:[myJID domain]];
 	else
 		[xmppStream connectToHost:domain onPort:port withVirtualHost:[myJID domain]];
@@ -236,8 +291,9 @@
 
 - (void)disconnect
 {
-	// This variable will tell us that we should not automatically attempt to reconnect when the connection closes
-	shouldReconnect = NO;
+	// Turn off the shouldReconnect flag.
+	// This flag will tell us that we should not automatically attempt to reconnect when the connection closes.
+	[self setShouldReconnect:NO];
 	
 	[xmppStream disconnect];
 }
@@ -263,16 +319,19 @@
 
 - (BOOL)allowsPlaintextAuth
 {
-	return allowsPlaintextAuth;
+	return (flags & kAllowsPlaintextAuth);
 }
 - (void)setAllowsPlaintextAuth:(BOOL)flag
 {
-	allowsPlaintextAuth = flag;
+	if(flag)
+		flags |= kAllowsPlaintextAuth;
+	else
+		flags &= ~kAllowsPlaintextAuth;
 }
 
 - (void)authenticateUser
 {
-	if(!allowsPlaintextAuth)
+	if(![self allowsPlaintextAuth])
 	{
 		if(![xmppStream isSecure] && ![xmppStream supportsDigestMD5Authentication])
 		{
@@ -321,6 +380,7 @@
 	
 	BOOL didUpdateRoster = ([roster count] > 0);
 	[roster removeAllObjects];
+	[self setHasRoster:NO];
 	
 	if(didUpdateRoster)
 	{
@@ -674,7 +734,7 @@
 {
 	[self onDidConnect];
 	
-	if(autoLogin)
+	if([self autoLogin])
 	{
 		[self authenticateUser];
 	}
@@ -693,29 +753,31 @@
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
 	// We're now connected and properly authenticated
-	// Should we get accidentally disconnected we should automatically reconnect
-	shouldReconnect = YES;
+	// Should we get accidentally disconnected we should automatically reconnect (if kAutoReconnect is set)
+	[self setShouldReconnect:YES];
 	
 	// Update myUser
 	[myUser release];
 	myUser = [[XMPPUser alloc] initWithJID:myJID];
 	
 	// Note: Order matters in the calls below.
-	// We request the roster FIRST, because if we start receiving presence notifications from buddies in our roster
-	// before we even have our roster, the presence notifications will get lost as they can't be applied to anyone
-	// in our empty roster.
-	// AFTER we've requested our roster, we can go online. Remember that we won't get
-	// presence notifications from other users unless we're online ourselves.
-	// And LASTLY we notify the delegate(s). This is because delegates may be sending their own custom
+	// We request the roster FIRST, because we need the roster before we can process any presence notifications.
+	// We shouldn't receive any presence notification until we've set our presence to available.
+	// 
+	// We notify the delegate(s) LAST because delegates may be sending their own custom
 	// presence packets (and have set autoPresence to NO). The logical place for them to do so is in the
-	// onDidAuthenticate method, so we make certain that we've requested the roster before they start
+	// onDidAuthenticate method, so we try to request the roster before they start
 	// sending any presence packets.
+	// 
+	// In the event that we do receive any presence elements prior to receiving our roster,
+	// we'll be forced to store them in the earlyPresenceElements array, and process them after we finally
+	// get our roster list.
 	
-	if(autoRoster)
+	if([self autoRoster])
 	{
 		[self fetchRoster];
 	}
-	if(autoPresence)
+	if([self autoPresence])
 	{
 		[self goOnline];
 	}
@@ -771,6 +833,19 @@
 		}
 		
 		[self onDidUpdateRoster];
+		
+		if(![self hasRoster])
+		{
+			// We should have our roster now
+			[self setHasRoster:YES];
+			
+			// Which means we can process any premature presence elements we received
+			for(i = 0; i < [earlyPresenceElements count]; i++)
+			{
+				[self xmppStream:xmppStream didReceivePresence:[earlyPresenceElements objectAtIndex:i]];
+			}
+			[earlyPresenceElements removeAllObjects];
+		}
 	}
 	else
 	{
@@ -785,11 +860,20 @@
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
+	if(![self hasRoster])
+	{
+		// We received a presence notification, but we don't have a roster to apply it to yet.
+		// We store the presence element until we get our roster.
+		[earlyPresenceElements addObject:presence];
+		
+		return;
+	}
+	
 	if([[presence type] isEqualToString:@"subscribe"])
 	{
 		XMPPUser *user = [roster objectForKey:[[presence from] bareJID]];
 		
-		if(user && autoRoster)
+		if(user && [self autoRoster])
 		{
 			// Presence subscription request from someone who's already in our roster
 			// Automatically approve
@@ -851,6 +935,7 @@
 - (void)xmppStreamDidClose:(XMPPStream *)sender
 {
 	[roster removeAllObjects];
+	[self setHasRoster:NO];
 	
 	[myUser release];
 	myUser = nil;
@@ -871,7 +956,7 @@
 {
 	NSLog(@"XMPPClient: attempReconnect method called...");
 	
-	if([xmppStream isDisconnected] && autoReconnect)
+	if([xmppStream isDisconnected] && [self autoReconnect] && [self shouldReconnect])
 	{
 		SCNetworkConnectionFlags reachabilityStatus;
 		BOOL success = SCNetworkCheckReachabilityByName("www.deusty.com", &reachabilityStatus);
@@ -896,7 +981,7 @@
 		// 
 		// If we were accidentally disconnected (user didn't tell us to disconnect)
 		// then now would be a good time to attempt to reconnect.
-		if(shouldReconnect)
+		if([self shouldReconnect])
 		{
 			// We will wait for a few seconds or so, and then attempt to reconnect if possible
 			[self performSelector:@selector(attemptReconnect:) withObject:nil afterDelay:4.0];

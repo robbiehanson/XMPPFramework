@@ -19,24 +19,19 @@
 	NSString *domain;
 	UInt16 port;
 	
-	BOOL usesOldStyleSSL;
-	
 	XMPPJID *myJID;
 	NSString *password;
 	int priority;
 	
-	BOOL autoLogin;
-	BOOL allowsPlaintextAuth;
-	BOOL autoPresence;
-	BOOL autoRoster;
-	BOOL autoReconnect;
-	BOOL shouldReconnect;
+	Byte flags;
 	
 	XMPPStream *xmppStream;
 	NSError *streamError;
 	
 	NSMutableDictionary *roster;
 	XMPPUser *myUser;
+	
+	NSMutableArray *earlyPresenceElements;
 	
 	SCNotificationManager *scNotificationManager;
 }
@@ -76,11 +71,11 @@
 - (BOOL)autoLogin;
 - (void)setAutoLogin:(BOOL)flag;
 
-- (BOOL)autoPresence;
-- (void)setAutoPresence:(BOOL)flag;
-
 - (BOOL)autoRoster;
 - (void)setAutoRoster:(BOOL)flag;
+
+- (BOOL)autoPresence;
+- (void)setAutoPresence:(BOOL)flag;
 
 - (BOOL)autoReconnect;
 - (void)setAutoReconnect:(BOOL)flag;
