@@ -24,13 +24,16 @@
 	if([[subscription stringValue] isEqualToString:@"none"])
 	{
 		NSXMLNode *ask = [item attributeForName:@"ask"];
-		if([[ask stringValue] isEqualToString:@"subscribe"]) {
+		if([[ask stringValue] isEqualToString:@"subscribe"])
+		{
 			return YES;
 		}
-		else {
+		else
+		{
 			return NO;
 		}
 	}
+	
 	return YES;
 }
 
@@ -40,8 +43,14 @@
 **/
 - (BOOL)isRosterQuery
 {
-	NSXMLElement *query = [self elementForName:@"query"];
-	return [[query xmlns] isEqualToString:@"jabber:iq:roster"];
+	// Note: Some jabber servers send an iq element with a xmlns.
+	// Because of the bug in Apple's NSXML (documented in our elementForName method),
+	// it is important we specify the xmlns for the query.
+	
+	NSXMLElement *query = [self elementForName:@"query" xmlns:@"jabber:iq:roster"];
+	
+	return (query != nil);
+
 }
 
 @end
