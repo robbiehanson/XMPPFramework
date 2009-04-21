@@ -407,6 +407,12 @@ enum XMPPClientFlags
 {
 	if(jid == nil) return;
 	
+	if([[myJID bare] isEqualToString:[jid bare]])
+	{
+		// No, you don't need to add yourself
+		return;
+	}
+	
 	// Add the buddy to our roster
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
@@ -435,6 +441,12 @@ enum XMPPClientFlags
 - (void)removeBuddy:(XMPPJID *)jid
 {
 	if(jid == nil) return;
+	
+	if([[myJID bare] isEqualToString:[jid bare]])
+	{
+		// No, you shouldn't remove yourself
+		return;
+	}
 	
 	// Remove the buddy from our roster
 	// Unsubscribe from presence
@@ -794,7 +806,11 @@ enum XMPPClientFlags
 {
 	if([iq isRosterQuery])
 	{
-		NSXMLElement *query = [iq elementForName:@"query"];
+		// Note: Some jabber servers send an iq element with a xmlns.
+		// Because of the bug in Apple's NSXML (documented in our elementForName method),
+		// it is important we specify the xmlns for the query.
+		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:roster"];
 		NSArray *items = [query elementsForName:@"item"];
 		
 		int i;
