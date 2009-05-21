@@ -58,7 +58,7 @@
 		ChatController *temp = [[ChatController alloc] initWithXMPPClient:client jid:jid];
 		[temp showWindow:self];
 		
-		// Note: MSWController will automatically release itself when the user closes the window
+		// Note: ChatController will automatically release itself when the user closes the window
 	}
 }
 
