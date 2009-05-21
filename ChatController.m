@@ -11,7 +11,7 @@
 
 - (id)initWithXMPPClient:(XMPPClient *)client jid:(XMPPJID *)fullJID message:(XMPPMessage *)message
 {
-	if(self = [super initWithWindowNibName:@"ChatWindow"])
+	if((self = [super initWithWindowNibName:@"ChatWindow"]))
 	{
 		xmppClient = [client retain];
 		jid = [fullJID retain];
@@ -73,9 +73,9 @@
 	NSPoint newScrollOrigin;
 	
 	if ([[scrollView documentView] isFlipped])
-		newScrollOrigin = NSMakePoint(0.0, NSMaxY([[scrollView documentView] frame]));
+		newScrollOrigin = NSMakePoint(0.0F, NSMaxY([[scrollView documentView] frame]));
 	else
-		newScrollOrigin = NSMakePoint(0.0, 0.0);
+		newScrollOrigin = NSMakePoint(0.0F, 0.0F);
 	
 	[[scrollView documentView] scrollPoint:newScrollOrigin];
 }

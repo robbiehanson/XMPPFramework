@@ -155,7 +155,7 @@
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		if([coder allowsKeyedCoding])
 		{

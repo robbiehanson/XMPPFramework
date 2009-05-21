@@ -60,7 +60,7 @@
 **/
 - (id)initWithDelegate:(id)aDelegate
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		// Store reference to delegate
 		delegate = aDelegate;
@@ -1443,7 +1443,7 @@
 
 - (id)initWithChallenge:(NSXMLElement *)challenge
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		// Convert the base 64 encoded data into a string
 		NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
