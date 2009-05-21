@@ -12,6 +12,6 @@
 - (void)setXmlns:(NSString *)ns;
 
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
-- (NSDictionary *)attributesAsDictionary;
+- (NSMutableDictionary *)attributesAsDictionary;
 
 @end
