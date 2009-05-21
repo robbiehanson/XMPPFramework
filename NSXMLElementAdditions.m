@@ -92,12 +92,12 @@
 /**
  * Returns all the attributes in a dictionary.
 **/
-- (NSDictionary *)attributesAsDictionary
+- (NSMutableDictionary *)attributesAsDictionary
 {
 	NSArray *attributes = [self attributes];
 	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithCapacity:[attributes count]];
 	
-	int i;
+	NSUInteger i;
 	for(i = 0; i < [attributes count]; i++)
 	{
 		NSXMLNode *node = [attributes objectAtIndex:i];
