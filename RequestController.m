@@ -7,7 +7,7 @@
 
 - (id)init
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		jids = [[NSMutableArray alloc] init];
 		jidIndex = -1;
@@ -88,7 +88,7 @@
 			[jidField setStringValue:[jid bare]];
 			[xofyField setHidden:YES];
 			
-			[window setAlphaValue:0.85];
+			[window setAlphaValue:0.85F];
 			[window makeKeyAndOrderFront:self];
 		}
 		else
@@ -114,28 +114,28 @@
 	// If the server tries to include buddies that we haven't added, but have asked to subscribe to us,
 	// the xmpp client filters them out.
 	
-	int i;
+	NSUInteger i;
 	for(i = 0; i < [roster count]; i++)
 	{
 		XMPPUser *user = [roster objectAtIndex:i];
 		
-		int index = [jids indexOfObject:[user jid]];
+		NSUInteger currentIndex = [jids indexOfObject:[user jid]];
 		
-		if(index != NSNotFound)
+		if(currentIndex != NSNotFound)
 		{
 			// Now we may be getting a notification of an updated roster due to an accept/reject we just sent.
 			// The simplest way to check is if the index isn't pointing to a jid we've already processed.
 			
-			if(index >= jidIndex)
+			if(currentIndex >= jidIndex)
 			{
 				NSLog(@"Auto-accepting buddy request, since they already accepted us");
 				
 				[sender acceptBuddyRequest:[user jid]];
 			
-				[jids removeObjectAtIndex:index];
+				[jids removeObjectAtIndex:currentIndex];
 				
 				// We need to calll nextRequest, but we want jidIndex to remain at it's current jid
-				if(index >= jidIndex)
+				if(currentIndex >= jidIndex)
 				{
 					// Subtract 1, because nextRequest will immediately add 1
 					jidIndex = jidIndex - 1;

@@ -14,7 +14,7 @@ void _SCNotificationCallback(SCDynamicStoreRef store, CFArrayRef changedKeys, vo
 	NSString *key = nil;
 	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 	
-	while(key = [keysE nextObject])
+	while((key = [keysE nextObject]))
 	{		
 		[nc postNotificationName:key 
 						  object:(id)info 
@@ -29,7 +29,7 @@ void _SCNotificationCallback(SCDynamicStoreRef store, CFArrayRef changedKeys, vo
 
 - (id)init
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		SCDynamicStoreContext context = { 0, (void *)self, NULL, NULL, NULL };
 		

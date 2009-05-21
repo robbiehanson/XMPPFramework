@@ -13,7 +13,7 @@
 
 - (id)init
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		// Nothing to do here
 	}
@@ -242,9 +242,15 @@
 	{
 		NSColor *grayColor;
 		if(isRowHighlighted)
-			grayColor = [NSColor colorWithCalibratedRed:(184/255.0) green:(175/255.0) blue:(184/255.0) alpha:1.0];
+			grayColor = [NSColor colorWithCalibratedRed:(184.0F / 255.0F)
+												  green:(175.0F / 255.0F)
+												   blue:(184.0F / 255.0F)
+												  alpha:1.0F];
 		else
-			grayColor = [NSColor colorWithCalibratedRed:(134/255.0) green:(125/255.0) blue:(134/255.0) alpha:1.0];
+			grayColor = [NSColor colorWithCalibratedRed:(134.0F / 255.0F)
+												  green:(125.0F / 255.0F)
+												   blue:(134.0F / 255.0F)
+												  alpha:1.0F];
 			
 		[cell setTextColor:grayColor];
 	}

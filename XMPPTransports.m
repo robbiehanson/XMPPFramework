@@ -8,7 +8,7 @@
 
 - (id)initWithXMPPClient:(XMPPClient*)xmppClient
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		client = [xmppClient retain];
 	}

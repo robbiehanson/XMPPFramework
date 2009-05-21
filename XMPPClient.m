@@ -45,7 +45,7 @@ enum XMPPClientFlags
 
 - (id)init
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		multicastDelegate = [[MulticastDelegate alloc] init];
 		

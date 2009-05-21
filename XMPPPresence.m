@@ -13,7 +13,7 @@
 
 - (id)initWithType:(NSString *)type to:(XMPPJID *)to
 {
-	if(self = [super initWithName:@"presence"])
+	if((self = [super initWithName:@"presence"]))
 	{
 		[self addAttributeWithName:@"type" stringValue:type];
 		[self addAttributeWithName:@"to" stringValue:[to description]];

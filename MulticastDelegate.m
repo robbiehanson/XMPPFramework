@@ -8,7 +8,7 @@
 
 - (id)init
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		currentInvocationIndex = 0;
 	}
@@ -31,7 +31,7 @@
 - (void)removeDelegate:(id)delegate
 {
 	MulticastDelegateListNode *node = delegateList;
-	NSUInteger index = 0;
+	NSUInteger nodeIndex = 0;
 	
 	while(node != nil)
 	{
@@ -51,14 +51,14 @@
 			[node clearDelegate];
 			[node release];
 			
-			if(index < currentInvocationIndex)
+			if(nodeIndex < currentInvocationIndex)
 			{
 				currentInvocationIndex--;
 			}
 			break;
 		}
 		
-		index++;
+		nodeIndex++;
 		node = [node next];
 	}
 }
@@ -182,7 +182,7 @@
 
 - (id)initWithDelegate:(id)aDelegate
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		delegate = aDelegate;
 	}

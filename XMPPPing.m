@@ -6,7 +6,7 @@
 
 - (id)initWithXMPPClient:(XMPPClient *)xmppClient delegate:(id)aDelegate
 {
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		delegate = aDelegate;
 		
@@ -112,10 +112,10 @@
 		
 		NSString *pingID = [iq elementID];
 		
-		NSUInteger index = [pingIDs indexOfObject:pingID];
-		if(index != NSNotFound)
+		NSUInteger pingIndex = [pingIDs indexOfObject:pingID];
+		if(pingIndex != NSNotFound)
 		{
-			[pingIDs removeObjectAtIndex:index];
+			[pingIDs removeObjectAtIndex:pingIndex];
 			
 			if([delegate respondsToSelector:@selector(xmppPing:didReceivePong:)])
 			{
