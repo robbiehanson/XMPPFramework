@@ -38,6 +38,7 @@
 	[jidField setObjectValue:[dflts objectForKey:@"Account.JID"]];
 	[sslButton setObjectValue:[dflts objectForKey:@"Account.UseSSL"]];
 	[selfSignedButton setObjectValue:[dflts objectForKey:@"Account.AllowSelfSignedCert"]];
+	[mismatchButton setObjectValue:[dflts objectForKey:@"Account.AllowSSLHostNameMismatch"]];
 
 	[NSApp beginSheet:signInSheet
 	   modalForWindow:window
@@ -64,9 +65,11 @@
 	
 	BOOL usesSSL = ([sslButton state] == NSOnState);
 	BOOL allowsSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
+	BOOL allowsSSLHostNameMismatch = ([mismatchButton state] == NSOnState);
 	
 	[xmppClient setUsesOldStyleSSL:usesSSL];
 	[xmppClient setAllowsSelfSignedCertificates:allowsSelfSignedCertificates];
+	[xmppClient setAllowsSSLHostNameMismatch:allowsSSLHostNameMismatch];
 	
 	NSString *resource = [resourceField stringValue];
 	if([resource length] == 0)
@@ -93,6 +96,8 @@
 			forKey:@"Account.UseSSL"];
 	[dflts setBool:allowsSelfSignedCertificates 
 			forKey:@"Account.AllowSelfSignedCert"];
+	[dflts setBool:allowsSSLHostNameMismatch 
+			forKey:@"Account.AllowSSLHostNameMismatch"];
 	[dflts synchronize];
 }
 

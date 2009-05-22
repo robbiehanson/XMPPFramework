@@ -42,6 +42,14 @@
 #define STATE_START_SESSION    9
 #define STATE_CONNECTED       10
 
+enum XMPPStreamFlags
+{
+	kAllowsSelfSignedCertificates = 1 << 0,  // If set, self-signed certificates are allowed during TLS negotiation
+	kAllowsSSLHostNameMismatch    = 1 << 1,  // If set, the certificate name will not be checked during TLS negotiation
+	kIsSecure                     = 1 << 2,  // If set, connection has been secured via SSL/TLS
+	kAllowsPlaintextAuth          = 1 << 3,  // If set, client allows plaintext authentication
+	kIsAuthenticated              = 1 << 4,  // If set, authentication has succeeded
+};
 
 @implementation XMPPStream
 
@@ -73,9 +81,7 @@
 		[asyncSocket enablePreBuffering];
 		
 		// Initialize configuration
-		isSecure = NO;
-		isAuthenticated = NO;
-		allowsSelfSignedCertificates = NO;
+		flags = 0;
 		
 		// We initialize an empty buffer of data to store data as it arrives
 		buffer = [[NSMutableData alloc] initWithCapacity:100];
@@ -129,11 +135,33 @@
  * If you are connecting to a server with a self-signed certificate, and you would like to automatically accept it,
  * then call set this value to YES method prior to connecting.  The default value is NO.
 **/
-- (BOOL)allowsSelfSignedCertificates {
-	return allowsSelfSignedCertificates;
+- (BOOL)allowsSelfSignedCertificates
+{
+	return (flags & kAllowsSelfSignedCertificates);
 }
-- (void)setAllowsSelfSignedCertificates:(BOOL)flag {
-	allowsSelfSignedCertificates = flag;
+- (void)setAllowsSelfSignedCertificates:(BOOL)flag
+{
+	if(flag)
+		flags |= kAllowsSelfSignedCertificates;
+	else
+		flags &= ~kAllowsSelfSignedCertificates;
+}
+
+/**
+ * For some servers the name on the SSL certificate does not match the domain name.
+ * An good example is google talk servers that use a gmail certificate, but host many different virtual servers,
+ * such as google.com, or any business account that uses google apps.
+**/
+- (BOOL)allowsSSLHostNameMismatch
+{
+	return (flags & kAllowsSSLHostNameMismatch);
+}
+- (void)setAllowsSSLHostNameMismatch:(BOOL)flag
+{
+	if(flag)
+		flags |= kAllowsSSLHostNameMismatch;
+	else
+		flags &= ~kAllowsSSLHostNameMismatch;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +193,14 @@
 **/
 - (BOOL)isSecure
 {
-	return isSecure;
+	return (flags & kIsSecure);
+}
+- (void)setIsSecure:(BOOL)flag
+{
+	if(flag)
+		flags |= kIsSecure;
+	else
+		flags &= ~kIsSecure;
 }
 
 - (void)connectToHost:(NSString *)hostName
@@ -176,8 +211,7 @@
 	if(state == STATE_DISCONNECTED)
 	{
 		// Store configuration information
-		isSecure = secure;
-		isAuthenticated = NO;
+		[self setIsSecure:secure];
 		
 		[serverHostName autorelease];
 		serverHostName = [hostName copy];
@@ -471,7 +505,14 @@
 
 - (BOOL)isAuthenticated
 {
-	return isAuthenticated;
+	return (flags & kIsAuthenticated);
+}
+- (void)setIsAuthenticated:(BOOL)flag
+{
+	if(flag)
+		flags |= kIsAuthenticated;
+	else
+		flags &= ~kIsAuthenticated;
 }
 
 - (NSString *)authenticatedUsername
@@ -600,6 +641,43 @@
 }
 
 /**
+ * This method handles starting TLS negotiation on the socket, using the proper settings.
+**/
+- (void)startTLS
+{
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithCapacity:3];
+	
+	// Use the highest possible security
+	[settings setObject:(NSString *)kCFStreamSocketSecurityLevelNegotiatedSSL
+				 forKey:(NSString *)kCFStreamSSLLevel];
+	
+	// Set the peer name
+	if([self allowsSSLHostNameMismatch])
+	{
+		[settings setObject:[NSNull null] forKey:(NSString *)kCFStreamSSLPeerName];
+	}
+	else
+	{
+		if([xmppHostName length] > 0)
+			[settings setObject:xmppHostName forKey:(NSString *)kCFStreamSSLPeerName];
+		else
+			[settings setObject:serverHostName forKey:(NSString *)kCFStreamSSLPeerName];
+	}
+	
+	// Allow self-signed certificates if needed
+	if([self allowsSelfSignedCertificates])
+	{
+		[settings setObject:[NSNumber numberWithBool:YES]
+					 forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
+	}
+	
+	[asyncSocket startTLS:settings];
+	
+	// Note: We don't need to wait for asyncSocket to complete TLS negotiation.
+	// We can just continue reading/writing to the socket, and it will handle queueing everything for us!
+}
+
+/**
  * This method is called anytime we receive the server's stream features.
  * This method looks at the stream features, and handles any requirements so communication can continue.
 **/
@@ -688,7 +766,7 @@
 	// It looks like all has gone well, and the connection should be ready to use now
 	state = STATE_CONNECTED;
 	
-	if(!isAuthenticated)
+	if(![self isAuthenticated])
 	{
 		// Setup keep alive timer
 		[keepAliveTimer invalidate];
@@ -722,33 +800,11 @@
 		return;
 	}
 	
-	// Connecting to a secure server
-	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithCapacity:3];
-	
-	// Use the highest possible security
-	[settings setObject:(NSString *)kCFStreamSocketSecurityLevelNegotiatedSSL
-				 forKey:(NSString *)kCFStreamSSLLevel];
-	
-	// Set the peer name
-	if([xmppHostName length] > 0)
-		[settings setObject:xmppHostName forKey:(NSString *)kCFStreamSSLPeerName];
-	else
-		[settings setObject:serverHostName forKey:(NSString *)kCFStreamSSLPeerName];
-	
-	// Allow self-signed certificates if needed
-	if(allowsSelfSignedCertificates)
-	{
-		[settings setObject:[NSNumber numberWithBool:YES]
-					 forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
-	}
-	
-	CFReadStreamSetProperty([asyncSocket getCFReadStream],
-							kCFStreamPropertySSLSettings, (CFDictionaryRef)settings);
-	CFWriteStreamSetProperty([asyncSocket getCFWriteStream],
-							 kCFStreamPropertySSLSettings, (CFDictionaryRef)settings);
+	// Start TLS negotiation
+	[self startTLS];
 	
 	// Make a note of the switch to TLS
-	isSecure = YES;
+	[self setIsSecure:YES];
 	
 	// Now we start our negotiation over again...
 	[self sendOpeningNegotiation];
@@ -875,7 +931,7 @@
 		else
 		{
 			// We are successfully authenticated (via sasl:plain)
-			isAuthenticated = YES;
+			[self setIsAuthenticated:YES];
 			
 			// Now we start our negotiation over again...
 			[self sendOpeningNegotiation];
@@ -901,7 +957,7 @@
 		{
 			// We are successfully authenticated (via non-sasl:digest)
 			// And we've binded our resource as well
-			isAuthenticated = YES;
+			[self setIsAuthenticated:YES];
 			
 			// Revert back to connected state (from authenticating state)
 			state = STATE_CONNECTED;
@@ -962,7 +1018,7 @@
 	else if([[response name] isEqualToString:@"success"])
 	{
 		// We are successfully authenticated (via sasl:digest-md5)
-		isAuthenticated = YES;
+		[self setIsAuthenticated:YES];
 		
 		// Now we start our negotiation over again...
 		[self sendOpeningNegotiation];
@@ -1091,50 +1147,26 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Called when a socket is about to connect. This method should return YES to continue, or NO to abort.
- * If aborted, will result in AsyncSocketCanceledError.
-**/
-- (BOOL)onSocketWillConnect:(AsyncSocket *)sock
-{
-	if(isSecure)
-	{
-		// Connecting to a secure server
-		NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithCapacity:3];
-		
-		// Use the highest possible security
-		[settings setObject:(NSString *)kCFStreamSocketSecurityLevelNegotiatedSSL
-					 forKey:(NSString *)kCFStreamSSLLevel];
-		
-		// Set the peer name
-		if([xmppHostName length] > 0)
-			[settings setObject:xmppHostName forKey:(NSString *)kCFStreamSSLPeerName];
-		else
-			[settings setObject:serverHostName forKey:(NSString *)kCFStreamSSLPeerName];
-		
-		// Allow self-signed certificates if needed
-		if(allowsSelfSignedCertificates)
-		{
-			[settings setObject:[NSNumber numberWithBool:YES]
-						 forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
-		}
-		
-		CFReadStreamSetProperty([asyncSocket getCFReadStream],
-								kCFStreamPropertySSLSettings, (CFDictionaryRef)settings);
-		CFWriteStreamSetProperty([asyncSocket getCFWriteStream],
-								 kCFStreamPropertySSLSettings, (CFDictionaryRef)settings);
-	}
-	return YES;
-}
-
-/**
  * Called when a socket connects and is ready for reading and writing. "host" will be an IP address, not a DNS name.
 **/
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
-	// We're now connected with a TCP stream, so it's time to initialize the XML stream
+	// The TCP connection is now established
+	
+	// Are we using old-style SSL? (Not the upgrade to TLS technique specified in the XMPP RFC)
+	if([self isSecure])
+	{
+		// The connection must be secured immediately (just like with HTTPS)
+		[self startTLS];
+		
+		// Note: We don't need to wait for asyncSocket to complete TLS negotiation.
+		// We can just continue reading/writing to the socket, and it will handle queueing everything for us!
+	}
+	
+	// Initialize the XML stream
 	[self sendOpeningNegotiation];
 	
-	// Now start reading in the server's XML stream
+	// And start reading in the server's XML stream
 	[asyncSocket readDataToData:terminator withTimeout:TIMEOUT_READ_START tag:TAG_READ_START];
 }
 
@@ -1391,8 +1423,8 @@
 	state = STATE_DISCONNECTED;
 	
 	// Update configuration
-	isSecure = NO;
-	isAuthenticated = NO;
+	[self setIsSecure:NO];
+	[self setIsAuthenticated:NO];
 	
 	// Clear the buffer
 	[buffer setLength:0];

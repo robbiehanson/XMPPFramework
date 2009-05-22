@@ -14,9 +14,8 @@
 	int state;
 	AsyncSocket *asyncSocket;
 	
-	BOOL isSecure;
-	BOOL isAuthenticated;
-	BOOL allowsSelfSignedCertificates;
+	Byte flags;
+	
 	NSString *serverHostName;
 	NSString *xmppHostName;
 	
@@ -40,6 +39,9 @@
 
 - (BOOL)allowsSelfSignedCertificates;
 - (void)setAllowsSelfSignedCertificates:(BOOL)flag;
+
+- (BOOL)allowsSSLHostNameMismatch;
+- (void)setAllowsSSLHostNameMismatch:(BOOL)flag;
 
 - (BOOL)isDisconnected;
 - (BOOL)isConnected;
