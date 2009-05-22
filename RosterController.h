@@ -13,6 +13,7 @@
 	IBOutlet id buddyField;
     IBOutlet id jidField;
     IBOutlet id messageField;
+	IBOutlet id mismatchButton;
     IBOutlet id passwordField;
     IBOutlet id portField;
     IBOutlet id registerButton;

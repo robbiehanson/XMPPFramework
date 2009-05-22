@@ -3,19 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>IBFramework Version</key>
-	<string>670</string>
+	<string>677</string>
 	<key>IBLastKnownRelativeProjectPath</key>
 	<string>../XMPPStream.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>29</integer>
-		<integer>332</integer>
-		<integer>2</integer>
+		<integer>266</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>9E17</string>
+	<string>9J61</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>

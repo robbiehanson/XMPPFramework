@@ -66,6 +66,9 @@
 - (BOOL)allowsSelfSignedCertificates;
 - (void)setAllowsSelfSignedCertificates:(BOOL)flag;
 
+- (BOOL)allowsSSLHostNameMismatch;
+- (void)setAllowsSSLHostNameMismatch:(BOOL)flag;
+
 - (BOOL)isDisconnected;
 - (BOOL)isConnected;
 - (BOOL)isSecure;

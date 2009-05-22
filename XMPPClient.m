@@ -194,6 +194,15 @@ enum XMPPClientFlags
 	[xmppStream setAllowsSelfSignedCertificates:flag];
 }
 
+- (BOOL)allowsSSLHostNameMismatch
+{
+	return [xmppStream allowsSSLHostNameMismatch];
+}
+- (void)setAllowsSSLHostNameMismatch:(BOOL)flag
+{
+	[xmppStream setAllowsSSLHostNameMismatch:flag];
+}
+
 - (BOOL)isDisconnected
 {
 	return [xmppStream isDisconnected];

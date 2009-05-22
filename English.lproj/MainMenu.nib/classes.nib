@@ -40,6 +40,8 @@
 				<string>id</string>
 				<key>messageField</key>
 				<string>id</string>
+				<key>mismatchButton</key>
+				<string>id</string>
 				<key>passwordField</key>
 				<string>id</string>
 				<key>portField</key>
