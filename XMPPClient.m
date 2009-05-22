@@ -346,16 +346,29 @@ enum XMPPClientFlags
 
 - (void)authenticateUser
 {
-	if(![self allowsPlaintextAuth])
+	BOOL secureAuth = NO;
+	
+	if([xmppStream supportsDigestMD5Authentication])
 	{
-		if(![xmppStream isSecure] && ![xmppStream supportsDigestMD5Authentication])
-		{
-			// The only way to login is via plaintext!
-			return;
-		}
+		secureAuth = YES;
+	}
+	else if([xmppStream supportsPlainAuthentication])
+	{
+		secureAuth = [xmppStream isSecure];
+	}
+	else if([xmppStream supportsDeprecatedDigestAuthentication])
+	{
+		secureAuth = YES;
+	}
+	else
+	{
+		secureAuth = [xmppStream isSecure];
 	}
 	
-	[xmppStream authenticateUser:[myJID user] withPassword:password resource:[myJID resource]];
+	if(secureAuth || [self allowsPlaintextAuth])
+	{
+		[xmppStream authenticateUser:[myJID user] withPassword:password resource:[myJID resource]];
+	}
 }
 
 - (BOOL)isAuthenticated
