@@ -47,8 +47,7 @@ enum XMPPStreamFlags
 	kAllowsSelfSignedCertificates = 1 << 0,  // If set, self-signed certificates are allowed during TLS negotiation
 	kAllowsSSLHostNameMismatch    = 1 << 1,  // If set, the certificate name will not be checked during TLS negotiation
 	kIsSecure                     = 1 << 2,  // If set, connection has been secured via SSL/TLS
-	kAllowsPlaintextAuth          = 1 << 3,  // If set, client allows plaintext authentication
-	kIsAuthenticated              = 1 << 4,  // If set, authentication has succeeded
+	kIsAuthenticated              = 1 << 3,  // If set, authentication has succeeded
 };
 
 @implementation XMPPStream
@@ -369,6 +368,8 @@ enum XMPPStreamFlags
 /**
  * This method checks the stream features of the connected server to determine if digest authentication is supported.
  * If we are not connected to a server, this method simply returns NO.
+ * 
+ * This is the preferred authentication technique, and will be used if the server supports it.
 **/
 - (BOOL)supportsDigestMD5Authentication
 {
@@ -389,6 +390,78 @@ enum XMPPStreamFlags
 				return YES;
 			}
 		}
+	}
+	return NO;
+}
+
+/**
+ * This method only applies to servers that don't support XMPP version 1.0, as defined in RFC 3920.
+ * With these servers, we attempt to discover supported authentication modes jia the jabber:iq:auth namespace.
+**/
+- (BOOL)supportsDeprecatedPlainAuthentication
+{
+	if(state > STATE_STARTTLS)
+	{
+		// Search for an iq element within the rootElement.
+		// Recall that some servers might stupidly add a "jabber:client" namespace which might cause problems
+		// if we simply used the elementForName method.
+		
+		NSXMLElement *iq = nil;
+		
+		NSUInteger i, count = [rootElement childCount];
+		for(i = 0; i < count; i++)
+		{
+			NSXMLNode *childNode = [rootElement childAtIndex:i];
+			
+			if([childNode kind] == NSXMLElementKind)
+			{
+				if([[childNode name] isEqualToString:@"iq"])
+				{
+					iq = (NSXMLElement *)childNode;
+				}
+			}
+		}
+		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:auth"];
+		NSXMLElement *plain = [query elementForName:@"password"];
+		
+		return (plain != nil);
+	}
+	return NO;
+}
+
+/**
+ * This method only applies to servers that don't support XMPP version 1.0, as defined in RFC 3920.
+ * With these servers, we attempt to discover supported authentication modes jia the jabber:iq:auth namespace.
+**/
+- (BOOL)supportsDeprecatedDigestAuthentication
+{
+	if(state > STATE_STARTTLS)
+	{
+		// Search for an iq element within the rootElement.
+		// Recall that some servers might stupidly add a "jabber:client" namespace which might cause problems
+		// if we simply used the elementForName method.
+		
+		NSXMLElement *iq = nil;
+		
+		NSUInteger i, count = [rootElement childCount];
+		for(i = 0; i < count; i++)
+		{
+			NSXMLNode *childNode = [rootElement childAtIndex:i];
+			
+			if([childNode kind] == NSXMLElementKind)
+			{
+				if([[childNode name] isEqualToString:@"iq"])
+				{
+					iq = (NSXMLElement *)childNode;
+				}
+			}
+		}
+		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:auth"];
+		NSXMLElement *digest = [query elementForName:@"digest"];
+		
+		return (digest != nil);
 	}
 	return NO;
 }
@@ -468,16 +541,24 @@ enum XMPPStreamFlags
 			// The server does not appear to support SASL authentication (at least any type we can use)
 			// So we'll revert back to the old fashioned jabber:iq:auth mechanism
 			
-			NSString *rootID = [[[self rootElement] attributeForName:@"id"] stringValue];
-			NSString *digestStr = [NSString stringWithFormat:@"%@%@", rootID, password];
-			NSData *digestData = [digestStr dataUsingEncoding:NSUTF8StringEncoding];
-			
-			NSString *digest = [[digestData sha1Digest] hexStringValue];
-			
 			NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
 			[queryElement addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
-			[queryElement addChild:[NSXMLElement elementWithName:@"digest" stringValue:digest]];
 			[queryElement addChild:[NSXMLElement elementWithName:@"resource" stringValue:resource]];
+			
+			if([self supportsDeprecatedDigestAuthentication])
+			{
+				NSString *rootID = [[[self rootElement] attributeForName:@"id"] stringValue];
+				NSString *digestStr = [NSString stringWithFormat:@"%@%@", rootID, password];
+				NSData *digestData = [digestStr dataUsingEncoding:NSUTF8StringEncoding];
+				
+				NSString *digest = [[digestData sha1Digest] hexStringValue];
+				
+				[queryElement addChild:[NSXMLElement elementWithName:@"digest" stringValue:digest]];
+			}
+			else
+			{
+				[queryElement addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
+			}
 			
 			NSXMLElement *iqElement = [NSXMLElement elementWithName:@"iq"];
 			[iqElement addAttributeWithName:@"type" stringValue:@"set"];
@@ -1223,21 +1304,29 @@ enum XMPPStreamFlags
 			}
 			else
 			{
-				// The server isn't RFC comliant, and won't be sending any stream features
+				// The server isn't RFC comliant, and won't be sending any stream features.
 				
-				// Update state - we're connected now
-				state = STATE_CONNECTED;
+				// We would still like to know what authentication features it supports though,
+				// so we'll use the jabber:iq:auth namespace, which was used prior to the RFC spec.
 				
-				// Continue reading for XML fragments
+				// Update state - we're onto psuedo negotiation
+				state = STATE_NEGOTIATING;
+				
+				NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
+				
+				NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+				[iq addAttributeWithName:@"type" stringValue:@"get"];
+				[iq addChild:query];
+				
+				if(DEBUG_SEND) {
+					NSLog(@"SEND: %@", [iq XMLString]);
+				}
+				[asyncSocket writeData:[[iq XMLString] dataUsingEncoding:NSUTF8StringEncoding]
+						   withTimeout:TIMEOUT_WRITE
+								   tag:TAG_WRITE_STREAM];
+				
+				// Read the response IQ
 				[asyncSocket readDataToData:terminator withTimeout:TIMEOUT_READ_STREAM tag:TAG_READ_STREAM];
-				
-				// Notify delegate
-				if([delegate respondsToSelector:@selector(xmppStreamDidOpen:)]) {
-					[delegate xmppStreamDidOpen:self];
-				}
-				else if(DEBUG_DELEGATE) {
-					NSLog(@"xmppStreamDidOpen:%p", self);
-				}
 			}
 		}
 		return;

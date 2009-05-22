@@ -57,6 +57,8 @@
 
 - (BOOL)supportsPlainAuthentication;
 - (BOOL)supportsDigestMD5Authentication;
+- (BOOL)supportsDeprecatedPlainAuthentication;
+- (BOOL)supportsDeprecatedDigestAuthentication;
 - (void)authenticateUser:(NSString *)username withPassword:(NSString *)password resource:(NSString *)resource;
 
 - (BOOL)isAuthenticated;
