@@ -95,6 +95,43 @@
 	return count;
 }
 
+/**
+ * Forwarding fast path.
+ * Available in 10.5+ (Not properly declared in NSOject until 10.6)
+**/
+- (id)forwardingTargetForSelector:(SEL)aSelector
+{
+	// We can take advantage of this if we only have one delegate (a common case),
+	// or simply one delegate that responds to this selector.
+	
+	MulticastDelegateListNode *foundNode = nil;
+	
+	MulticastDelegateListNode *node = delegateList;
+	while(node)
+	{
+		if([[node delegate] respondsToSelector:aSelector])
+		{
+			if(foundNode)
+			{
+				// There are multiple delegates for this selector.
+				// We can't take advantage of the forwarding fast path.
+				return nil;
+			}
+			
+			foundNode = node;
+		}
+		
+		node = [node next];
+	}
+	
+	if(foundNode)
+	{
+		return [foundNode delegate];
+	}
+	
+	return nil;
+}
+
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
 {
 	MulticastDelegateListNode *node;
