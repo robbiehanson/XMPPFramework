@@ -45,7 +45,7 @@ struct _xmlKind {
 	void * ignore;
 	xmlElementType type;
 };
-typedef struct _xmlKind *xmlKindPtr;
+typedef struct _xmlKind * xmlKindPtr;
 
 /**
  * Most xml types all start with this standard structure. In fact, all do except the xmlNsPtr.
@@ -63,7 +63,7 @@ struct _xmlStd {
 	struct _xmlStd *prev;
 	struct _xmlDoc *doc;
 };
-typedef struct _xmlStd *xmlStdPtr;
+typedef struct _xmlStd * xmlStdPtr;
 
 @interface DDXMLNode : NSObject <NSCopying>
 {

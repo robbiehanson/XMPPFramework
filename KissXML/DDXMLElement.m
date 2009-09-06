@@ -72,6 +72,9 @@
 
 + (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
 {
+	// Note: We don't simply call the init methods blindly.
+	// Doing so might cause an unnecessary alloc followed by an immediate release.
+	
 	if(nodePtr == NULL || nodePtr->type != XML_ELEMENT_NODE)
 	{
 		return nil;
