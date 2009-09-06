@@ -7,10 +7,19 @@
 
 + (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
 {
-	return [[[DDXMLDocument alloc] initWithPrimitive:nodePtr] autorelease];
+	if(nodePtr == NULL || nodePtr->type != XML_DOCUMENT_NODE)
+	{
+		return nil;
+	}
+	
+	xmlDocPtr doc = (xmlDocPtr)nodePtr;
+	if(doc->_private == NULL)
+		return [[[DDXMLDocument alloc] initWithCheckedPrimitive:nodePtr] autorelease];
+	else
+		return [[((DDXMLDocument *)(doc->_private)) retain] autorelease];
 }
 
-- (id)initWithPrimitive:(xmlKindPtr)nodePtr
+- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr
 {
 	if(nodePtr == NULL || nodePtr->type != XML_DOCUMENT_NODE)
 	{
@@ -18,7 +27,21 @@
 		return nil;
 	}
 	
-	self = [super initWithPrimitive:nodePtr];
+	xmlDocPtr doc = (xmlDocPtr)nodePtr;
+	if(doc->_private == NULL)
+	{
+		return [self initWithCheckedPrimitive:nodePtr];
+	}
+	else
+	{
+		[self release];
+		return [((DDXMLDocument *)(doc->_private)) retain];
+	}
+}
+
+- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr
+{
+	self = [super initWithCheckedPrimitive:nodePtr];
 	return self;
 }
 
@@ -65,7 +88,7 @@
 		return nil;
 	}
 	
-	return [self initWithPrimitive:(xmlKindPtr)doc];
+	return [self initWithCheckedPrimitive:(xmlKindPtr)doc];
 }
 
 /**
