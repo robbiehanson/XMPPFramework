@@ -58,14 +58,18 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 {
 	xmlAttrPtr attr = xmlNewProp(NULL, [name xmlChar], [stringValue xmlChar]);
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)attr];
+	if(attr == NULL) return nil;
+	
+	return [[[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)attr] autorelease];
 }
 
 + (id)attributeWithName:(NSString *)name URI:(NSString *)URI stringValue:(NSString *)stringValue
 {
 	xmlAttrPtr attr = xmlNewProp(NULL, [name xmlChar], [stringValue xmlChar]);
 	
-	DDXMLNode *result = [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)attr] autorelease];
+	if(attr == NULL) return nil;
+	
+	DDXMLNode *result = [[[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)attr] autorelease];
 	[result setURI:URI];
 	
 	return result;
@@ -78,40 +82,77 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	
 	xmlNsPtr ns = xmlNewNs(NULL, [stringValue xmlChar], xmlName);
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)ns];
+	if(ns == NULL) return nil;
+	
+	return [[[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)ns] autorelease];
 }
 
 + (id)processingInstructionWithName:(NSString *)name stringValue:(NSString *)stringValue
 {
 	xmlNodePtr procInst = xmlNewPI([name xmlChar], [stringValue xmlChar]);
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)procInst];
+	if(procInst == NULL) return nil;
+	
+	return [[[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)procInst] autorelease];
 }
 
 + (id)commentWithStringValue:(NSString *)stringValue
 {
 	xmlNodePtr comment = xmlNewComment([stringValue xmlChar]);
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)comment];
+	if(comment == NULL) return nil;
+	
+	return [[[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)comment] autorelease];
 }
 
 + (id)textWithStringValue:(NSString *)stringValue
 {
 	xmlNodePtr text = xmlNewText([stringValue xmlChar]);
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)text];
+	if(text == NULL) return nil;
+	
+	return [[[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)text] autorelease];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Init, Dealloc
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * If the wrapper object already exists, it is retained/autoreleased and returned.
+ * Otherwise a new object is alloc/init/autoreleased and returned.
+**/
 + (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
 {
-	return [[[DDXMLNode alloc] initWithPrimitive:nodePtr] autorelease];
+	if(nodePtr == NULL)
+	{
+		return nil;
+	}
+	
+	// Warning: The _private variable is in a different location in the xmlNsPtr
+	
+	if([[self class] isXmlNsPtr:nodePtr])
+	{
+		xmlNsPtr ns = (xmlNsPtr)nodePtr;
+		if(ns->_private != NULL)
+		{
+			return [[((DDXMLNode *)(ns->_private)) retain] autorelease];
+		}
+	}
+	else
+	{
+		xmlStdPtr node = (xmlStdPtr)nodePtr;
+		if(node->_private != NULL)
+		{
+			return [[((DDXMLNode *)(node->_private)) retain] autorelease];
+		}
+	}
+	
+	return [[[DDXMLNode alloc] initWithCheckedPrimitive:nodePtr] autorelease];
 }
 
-- (id)initWithPrimitive:(xmlKindPtr)nodePtr
+- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr
 {
 	if(nodePtr == NULL)
 	{
@@ -119,16 +160,42 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 		return nil;
 	}
 	
+	// Warning: The _private variable is in a different location in the xmlNsPtr
+	
+	if([[self class] isXmlNsPtr:nodePtr])
+	{
+		xmlNsPtr ns = (xmlNsPtr)nodePtr;
+		if(ns->_private != NULL)
+		{
+			[self release];
+			return [((DDXMLNode *)(ns->_private)) retain];
+		}
+	}
+	else
+	{
+		xmlStdPtr node = (xmlStdPtr)nodePtr;
+		if(node->_private != NULL)
+		{
+			[self release];
+			return [((DDXMLNode *)(node->_private)) retain];
+		}
+	}
+	
+	return [self initWithCheckedPrimitive:nodePtr];
+}
+
+- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr
+{
 	BOOL maybeIsaSwizzle = [self isMemberOfClass:[DDXMLNode class]];
 	
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		genericPtr = nodePtr;
 		nsParentPtr = NULL;
 		[self nodeRetain];
 	}
 	
-	if(maybeIsaSwizzle)
+	if(self && maybeIsaSwizzle)
 	{
 		if(nodePtr->type == XML_ELEMENT_NODE)
 		{
@@ -145,20 +212,43 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 
 + (id)nodeWithPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr
 {
-	return [[[DDXMLNode alloc] initWithPrimitive:nodePtr nsParent:parentPtr] autorelease];
+	if(nodePtr == NULL || nodePtr->type != XML_NAMESPACE_DECL)
+	{
+		return nil;
+	}
+	
+	xmlNsPtr ns = (xmlNsPtr)nodePtr;
+	if(ns->_private == NULL)
+		return [[[DDXMLNode alloc] initWithCheckedPrimitive:nodePtr nsParent:parentPtr] autorelease];
+	else
+		return [[((DDXMLNode *)(ns->_private)) retain] autorelease];
 }
 
-- (id)initWithPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr
+- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr
 {
-	if(nodePtr == NULL)
+	if(nodePtr == NULL || nodePtr->type != XML_NAMESPACE_DECL)
 	{
 		[self release];
 		return nil;
 	}
 	
+	xmlNsPtr ns = (xmlNsPtr)nodePtr;
+	if(ns->_private == NULL)
+	{
+		return [self initWithCheckedPrimitive:nodePtr nsParent:parentPtr];
+	}
+	else
+	{
+		[self release];
+		return [((DDXMLNode *)(ns->_private)) retain];
+	}
+}
+
+- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr
+{
 	BOOL maybeIsaSwizzle = [self isMemberOfClass:[DDXMLNode class]];
 	
-	if(self = [super init])
+	if((self = [super init]))
 	{
 		genericPtr = nodePtr;
 		nsParentPtr = parentPtr;
@@ -197,11 +287,14 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 
 - (id)copyWithZone:(NSZone *)zone
 {
+	// Todo: Do these copied object have the same _private ptr?
+	// If so, the pointer needs to be reset.
+	
 	if([self isXmlDocPtr])
 	{
 		xmlDocPtr copyDocPtr = xmlCopyDoc((xmlDocPtr)genericPtr, 1);
 		
-		return [[DDXMLDocument alloc] initWithPrimitive:(xmlKindPtr)copyDocPtr];
+		return [[DDXMLDocument alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyDocPtr];
 	}
 	
 	if([self isXmlNodePtr])
@@ -209,30 +302,30 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 		xmlNodePtr copyNodePtr = xmlCopyNode((xmlNodePtr)genericPtr, 1);
 		
 		if([self isKindOfClass:[DDXMLElement class]])
-			return [[DDXMLElement alloc] initWithPrimitive:(xmlKindPtr)copyNodePtr];
+			return [[DDXMLElement alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyNodePtr];
 		else
-			return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyNodePtr];
+			return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyNodePtr];
 	}
 	
 	if([self isXmlAttrPtr])
 	{
 		xmlAttrPtr copyAttrPtr = xmlCopyProp(NULL, (xmlAttrPtr)genericPtr);
 		
-		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyAttrPtr];
+		return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyAttrPtr];
 	}
 	
 	if([self isXmlNsPtr])
 	{
 		xmlNsPtr copyNsPtr = xmlCopyNamespace((xmlNsPtr)genericPtr);
 		
-		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyNsPtr nsParent:nil];
+		return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyNsPtr nsParent:nil];
 	}
 	
 	if([self isXmlDtdPtr])
 	{
 		xmlDtdPtr copyDtdPtr = xmlCopyDtd((xmlDtdPtr)genericPtr);
 		
-		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyDtdPtr];
+		return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyDtdPtr];
 	}
 	
 	return nil;
@@ -442,7 +535,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	else
 		node = (xmlStdPtr)genericPtr;
 	
-	if((node == NULL) || (node->doc == NULL))
+	if(node == NULL)
 		return nil;
 	else
 		return [DDXMLDocument nodeWithPrimitive:(xmlKindPtr)node->doc];
@@ -459,19 +552,12 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 {
 	if([self isXmlNsPtr])
 	{
-		if(nsParentPtr != NULL)
-		{
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)nsParentPtr];
-		}
-		return nil;
+		return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)nsParentPtr];
 	}
 	
 	xmlStdPtr node = (xmlStdPtr)genericPtr;
 	
-	if(node->parent == NULL)
-		return nil;
-	else
-		return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->parent];
+	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->parent];
 }
 
 /**
@@ -506,10 +592,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	xmlNodePtr child = ((xmlStdPtr)genericPtr)->children;
 	while(child != NULL)
 	{
-		DDXMLNode *childNode = [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)child];
-		
-		[result addObject:childNode];
-		[childNode release];
+		[result addObject:[DDXMLNode nodeWithPrimitive:(xmlKindPtr)child]];
 		
 		child = child->next;
 	}
@@ -560,8 +643,8 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 /**
  * Returns the previous DDXMLNode object that is a sibling node to the receiver.
  * 
- * This object will have an index value that is one less than the receiverÕs.
- * If there are no more previous siblings (that is, other child nodes of the receiverÕs parent) the method returns nil.
+ * This object will have an index value that is one less than the receiverâ€™s.
+ * If there are no more previous siblings (that is, other child nodes of the receiverâ€™s parent) the method returns nil.
 **/
 - (DDXMLNode *)previousSibling
 {
@@ -569,17 +652,14 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	
 	xmlStdPtr node = (xmlStdPtr)genericPtr;
 	
-	if(node->prev == NULL)
-		return nil;
-	else
-		return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->prev];
+	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->prev];
 }
 
 /**
  * Returns the next DDXMLNode object that is a sibling node to the receiver.
  * 
- * This object will have an index value that is one more than the receiverÕs.
- * If there are no more subsequent siblings (that is, other child nodes of the receiverÕs parent) the
+ * This object will have an index value that is one more than the receiverâ€™s.
+ * If there are no more subsequent siblings (that is, other child nodes of the receiverâ€™s parent) the
  * method returns nil.
 **/
 - (DDXMLNode *)nextSibling
@@ -588,16 +668,13 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	
 	xmlStdPtr node = (xmlStdPtr)genericPtr;
 	
-	if(node->next == NULL)
-		return nil;
-	else
-		return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->next];
+	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->next];
 }
 
 /**
  * Returns the previous DDXMLNode object in document order.
  * 
- * You use this method to ÒwalkÓ backward through the tree structure representing an XML document or document section.
+ * You use this method to â€œwalkâ€ backward through the tree structure representing an XML document or document section.
  * (Use nextNode to traverse the tree in the opposite direction.) Document order is the natural order that XML
  * constructs appear in markup text. If you send this message to the first node in the tree (that is, the root element),
  * nil is returned. DDXMLNode bypasses namespace and attribute nodes when it traverses a tree in document order.
@@ -646,7 +723,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 /**
  * Returns the next DDXMLNode object in document order.
  * 
- * You use this method to ÒwalkÓ forward through the tree structure representing an XML document or document section.
+ * You use this method to â€œwalkâ€ forward through the tree structure representing an XML document or document section.
  * (Use previousNode to traverse the tree in the opposite direction.) Document order is the natural order that XML
  * constructs appear in markup text. If you send this message to the last node in the tree, nil is returned.
  * DDXMLNode bypasses namespace and attribute nodes when it traverses a tree in document order.
@@ -793,7 +870,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
  * Returns the local name of the receiver.
  * 
  * The local name is the part of a node name that follows a namespace-qualifying colon or the full name if
- * there is no colon. For example, ÒchapterÓ is the local name in the qualified name Òacme:chapterÓ.
+ * there is no colon. For example, â€œchapterâ€ is the local name in the qualified name â€œacme:chapterâ€.
 **/
 - (NSString *)localName
 {
@@ -811,11 +888,11 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 }
 
 /**
- * Returns the prefix of the receiverÕs name.
+ * Returns the prefix of the receiverâ€™s name.
  * 
  * The prefix is the part of a namespace-qualified name that precedes the colon.
- * For example, ÒacmeÓ is the local name in the qualified name Òacme:chapterÓ.
- * This method returns an empty string if the receiverÕs name is not qualified by a namespace.
+ * For example, â€œacmeâ€ is the local name in the qualified name â€œacme:chapterâ€.
+ * This method returns an empty string if the receiverâ€™s name is not qualified by a namespace.
 **/
 - (NSString *)prefix
 {
@@ -875,7 +952,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 /**
  * Returns the URI associated with the receiver.
  * 
- * A nodeÕs URI is derived from its namespace or a documentÕs URI; for documents, the URI comes either from the
+ * A nodeâ€™s URI is derived from its namespace or a documentâ€™s URI; for documents, the URI comes either from the
  * parsed XML or is explicitly set. You cannot change the URI for a particular node other for than a namespace
  * or document node.
 **/
@@ -1238,15 +1315,13 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
  * So the first question is, how do we know if a libxml node is being referenced by a cocoa wrapper?
  * In order to accomplish this, we take advantage of the node's _private variable.
  * If the private variable is NULL, then the node isn't being directly referenced by any cocoa wrapper objects.
- * If the private variable is NON-NULL, then the private variable points to a xmlRetain structure.
- * This xmlRetain structure is defined in DDXMLPrivate.h, and is simply a pointer to the cocoa wrapper object,
- * and a pointer to the next xmlRetain structure. So it's a linked list of the cocoa wrapper objects.
- * When a cocoa wrapper object is created, it adds itself to the retain list (via nodeRetain), and when it's
- * dealloced it removes itself from the retain list (via nodeRelease).
+ * If the private variable is NON-NULL, then the private variable points to the cocoa wrapper object.
+ * When a cocoa wrapper object is created, it points the private variable to itself (via nodeRetain),
+ * and when it's dealloced it sets the private variable back to NULL (via nodeRelease).
  * 
- * With this structure in place, then given any libxml node, we can easily determine if it's still needed,
+ * With this simple technique, then given any libxml node, we can easily determine if it's still needed,
  * or if we can free it:
- * Are there any cocoa wrapper objects still directly referring to the node?
+ * Is there a cocoa wrapper objects still directly referring to the node?
  * If so, we can't free the node.
  * Otherwise, does the node still have a parent?
  * If so, then the node is still part of a heirarchy, and we can't free the node.
@@ -1254,12 +1329,12 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
  * To fully understand the parent restriction, consider the following scenario:
  * Imagine the user extracts the level1 DDXMLElement from the root.
  * The user reads the data, and the level1 DDXMLElement is autoreleased. The root is still retained.
- * When the level1 DDXMLElement is dealloced, nodeRelease will be called, and the retain list will become empty.
+ * When the level1 DDXMLElement is dealloced, nodeRelease will be called, and the private variable will be set to NULL.
  * Can we free the level1 node at this point?
  * Of course not, because it's still within the root heirarchy, and the user is still using the root element.
  * 
  * The following should be spelled out:
- * If you call xmlFreeNode, this method will free all linked attributes and children.
+ * If you call libxml's xmlFreeNode(), this method will free all linked attributes and children.
  * So you can't blindly call this method, because you can't free nodes that are still being referenced.
 **/
 
@@ -1443,14 +1518,11 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 		node->ns = NULL;
 	}
 	
-	// We also have to nullify the nsParentPtr's, which are in the cocoa wrapper objects
-	xmlRetainPtr retainPtr = (xmlRetainPtr)ns->_private;
-	while(retainPtr != NULL)
+	// We also have to nullify the nsParentPtr, which is in the cocoa wrapper object (if one exists)
+	if(ns->_private != NULL)
 	{
-		DDXMLNode *node = (DDXMLNode *)retainPtr->retainee;
+		DDXMLNode *node = (DDXMLNode *)ns->_private;
 		node->nsParentPtr = NULL;
-		
-		retainPtr = retainPtr->next;
 	}
 }
 
@@ -1484,14 +1556,11 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	{
 		xmlNsPtr nextNs = ns->next;
 		
-		// We manage the nsParent pointers, which are in the cocoa wrapper objects, so we have to nullify them ourself
-		xmlRetainPtr retainPtr = (xmlRetainPtr)ns->_private;
-		while(retainPtr != NULL)
+		// We manage the nsParent pointer, which is in the cocoa wrapper object, so we have to nullify it ourself
+		if(ns->_private != NULL)
 		{
-			DDXMLNode *node = (DDXMLNode *)retainPtr->next;
+			DDXMLNode *node = (DDXMLNode *)ns->_private;
 			node->nsParentPtr = NULL;
-			
-			retainPtr = retainPtr->next;
 		}
 		
 		// Free the ns if it's no longer in use
@@ -1664,20 +1733,10 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 {
 	// Warning: The _private variable is in a different location in the xmlNsPtr
 	
-	xmlRetainPtr first;
 	if([self isXmlNsPtr])
-		first = (xmlRetainPtr)((xmlNsPtr)genericPtr)->_private;
+		((xmlNsPtr)genericPtr)->_private = self;
 	else
-		first = (xmlRetainPtr)((xmlStdPtr)genericPtr)->_private;
-	
-	xmlRetainPtr myPtr = malloc(sizeof(struct _xmlRetain));
-	myPtr->retainee = self;
-	myPtr->next = first;
-	
-	if([self isXmlNsPtr])
-		((xmlNsPtr)genericPtr)->_private = myPtr;
-	else
-		((xmlStdPtr)genericPtr)->_private = myPtr;
+		((xmlStdPtr)genericPtr)->_private = self;
 }
 
 /**
@@ -1688,103 +1747,53 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 **/
 - (void)nodeRelease
 {
-	// Warning: The _private variable is in a different location in the xmlNsPtr
-	
-	void **privatePtrPtr;
-	if([self isXmlNsPtr])
-		privatePtrPtr = &(((xmlNsPtr)genericPtr)->_private);
-	else
-		privatePtrPtr = &(((xmlStdPtr)genericPtr)->_private);
-	
-	xmlRetainPtr previousRetainPtr = NULL;
-	xmlRetainPtr currentRetainPtr = (xmlRetainPtr)(*privatePtrPtr);
-	
-	// WTF is going on here?
-	// 
-	// We've created a pointer to a pointer.
-	// The variable privatePtrPtr points to the "void * _private" variable.
-	// This way, to update the private variable, we can simply dereference the privatePtrPtr.
-	// 
-	// void **privatePtrPtr -> void * _private -> struct _xmlRetain
-	
-	while(currentRetainPtr != NULL)
-	{
-		if(currentRetainPtr->retainee == self)
-		{
-			if(previousRetainPtr == NULL)
-			{
-				*privatePtrPtr = currentRetainPtr->next;
-			}
-			else
-			{
-				previousRetainPtr->next = currentRetainPtr->next;
-			}
-			
-			free(currentRetainPtr);
-			break;
-		}
-		
-		previousRetainPtr = currentRetainPtr;
-		currentRetainPtr = currentRetainPtr->next;
-	}
-	
-	// Now check to see if the node can be released
+	// Check to see if the node can be released.
 	// Did you read the giant readme comment section above?
+	
+	// Warning: The _private variable is in a different location in the xmlNsPtr
 	
 	if([self isXmlNsPtr])
 	{
 		xmlNsPtr ns = (xmlNsPtr)genericPtr;
+		ns->_private = NULL;
 		
-		if(ns->_private == NULL)
+		if(nsParentPtr == NULL)
 		{
-			if(nsParentPtr == NULL)
-			{
-				xmlFreeNs(ns);
-			}
-			else
-			{
-				// The node still has a parent, so it's still in use
-			}
+			xmlFreeNs(ns);
 		}
 		else
 		{
-			// There is a wrapper with a reference to this node somewhere
+			// The node still has a parent, so it's still in use
 		}
 	}
 	else
 	{
 		xmlStdPtr node = (xmlStdPtr)genericPtr;
+		node->_private = NULL;
 		
-		if(node->_private == NULL)
+		if(node->parent == NULL)
 		{
-			if(node->parent == NULL)
+			if([self isXmlAttrPtr])
 			{
-				if([self isXmlAttrPtr])
-				{
-					xmlFreeProp((xmlAttrPtr)genericPtr);
-				}
-				else if([self isXmlDtdPtr])
-				{
-					xmlFreeDtd((xmlDtdPtr)genericPtr);
-				}
-				else if([self isXmlDocPtr])
-				{
-					[[self class] removeAllChildrenFromDoc:(xmlDocPtr)genericPtr];
-					xmlFreeDoc((xmlDocPtr)genericPtr);
-				}
-				else
-				{
-					[[self class] nodeFree:(xmlNodePtr)genericPtr];
-				}
+				xmlFreeProp((xmlAttrPtr)genericPtr);
+			}
+			else if([self isXmlDtdPtr])
+			{
+				xmlFreeDtd((xmlDtdPtr)genericPtr);
+			}
+			else if([self isXmlDocPtr])
+			{
+				[[self class] removeAllChildrenFromDoc:(xmlDocPtr)genericPtr];
+				xmlFreeDoc((xmlDocPtr)genericPtr);
 			}
 			else
 			{
-				// The node still has a parent, so it's still in use
+				[[self class] nodeFree:(xmlNodePtr)genericPtr];
 			}
 		}
 		else
 		{
-			// There is a wrapper with a reference to this node somewhere
+			// The node still has a parent, so it's still in use
 		}
 	}
 }
