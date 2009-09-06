@@ -2,10 +2,17 @@
 #import "DDXML.h"
 
 @class AsyncSocket;
+@class XMPPParser;
 @class XMPPIQ;
 @class XMPPMessage;
 @class XMPPPresence;
 
+// Please read the XMPPParser header file before changing these values
+#if TARGET_OS_IPHONE
+  #define USE_XMPP_PARSER 1
+#else
+  #define USE_XMPP_PARSER 0
+#endif
 
 @interface XMPPStream : NSObject
 {
@@ -14,15 +21,19 @@
 	int state;
 	AsyncSocket *asyncSocket;
 	
+#if USE_XMPP_PARSER
+	XMPPParser *parser;
+#else
+	NSMutableData *buffer;
+	NSData *terminator;
+#endif
+	
 	Byte flags;
 	
 	NSString *serverHostName;
 	NSString *xmppHostName;
 	
-	NSMutableData *buffer;
 	NSXMLElement *rootElement;
-	
-	NSData *terminator;
 	
 	NSString *authUsername;
 	NSString *authResource;
