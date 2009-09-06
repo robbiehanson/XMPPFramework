@@ -171,15 +171,6 @@
 		DCCE55660BDC7030000E2798 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
 		DCCE55670BDC7030000E2798 /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DCD886890E8CE26A00CD15A2 /* DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXML.h; path = KissXML/DDXML.h; sourceTree = "<group>"; };
-		DCD8868A0E8CE26A00CD15A2 /* DDXMLDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLDocument.h; path = KissXML/DDXMLDocument.h; sourceTree = "<group>"; };
-		DCD8868B0E8CE26A00CD15A2 /* DDXMLDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLDocument.m; path = KissXML/DDXMLDocument.m; sourceTree = "<group>"; };
-		DCD8868C0E8CE26A00CD15A2 /* DDXMLElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLElement.h; path = KissXML/DDXMLElement.h; sourceTree = "<group>"; };
-		DCD8868D0E8CE26A00CD15A2 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLElement.m; path = KissXML/DDXMLElement.m; sourceTree = "<group>"; };
-		DCD8868E0E8CE26A00CD15A2 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLNode.h; path = KissXML/DDXMLNode.h; sourceTree = "<group>"; };
-		DCD8868F0E8CE26A00CD15A2 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLNode.m; path = KissXML/DDXMLNode.m; sourceTree = "<group>"; };
-		DCD886900E8CE26A00CD15A2 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLPrivate.h; path = KissXML/DDXMLPrivate.h; sourceTree = "<group>"; };
-		DCD886910E8CE26A00CD15A2 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = KissXML/NSStringAdditions.h; sourceTree = "<group>"; };
-		DCD886920E8CE26A00CD15A2 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = KissXML/NSStringAdditions.m; sourceTree = "<group>"; };
 		DCEFA0750E8D4867006E145E /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = libidn/Mac/libidn.a; sourceTree = "<group>"; };
 		DCF825930D748DC000BFABDE /* RequestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestController.h; sourceTree = "<group>"; };
 		DCF825940D748DC000BFABDE /* RequestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestController.m; sourceTree = "<group>"; };
@@ -416,37 +407,12 @@
 		DCD886850E8CE1F100CD15A2 /* KissXML */ = {
 			isa = PBXGroup;
 			children = (
-				DCD886970E8CE26F00CD15A2 /* Categories */,
-				DCD8869F0E8CE28600CD15A2 /* Private */,
-				DCD8868A0E8CE26A00CD15A2 /* DDXMLDocument.h */,
-				DCD8868B0E8CE26A00CD15A2 /* DDXMLDocument.m */,
-				DCD8868C0E8CE26A00CD15A2 /* DDXMLElement.h */,
-				DCD8868D0E8CE26A00CD15A2 /* DDXMLElement.m */,
-				DCD8868E0E8CE26A00CD15A2 /* DDXMLNode.h */,
-				DCD8868F0E8CE26A00CD15A2 /* DDXMLNode.m */,
 				DCD886890E8CE26A00CD15A2 /* DDXML.h */,
 			);
 			name = KissXML;
 			sourceTree = "<group>";
 			tabWidth = 4;
 			usesTabs = 1;
-		};
-		DCD886970E8CE26F00CD15A2 /* Categories */ = {
-			isa = PBXGroup;
-			children = (
-				DCD886910E8CE26A00CD15A2 /* NSStringAdditions.h */,
-				DCD886920E8CE26A00CD15A2 /* NSStringAdditions.m */,
-			);
-			name = Categories;
-			sourceTree = "<group>";
-		};
-		DCD8869F0E8CE28600CD15A2 /* Private */ = {
-			isa = PBXGroup;
-			children = (
-				DCD886900E8CE26A00CD15A2 /* DDXMLPrivate.h */,
-			);
-			name = Private;
-			sourceTree = "<group>";
 		};
 		DCF8260B0D74A4AE00BFABDE /* GUI - ChatWindow */ = {
 			isa = PBXGroup;
