@@ -22,9 +22,6 @@
 	unsigned depth;
 	
 	xmlParserCtxt *parserCtxt;
-	
-	startElementNsSAX2Func domStartElementNs;
-	endElementNsSAX2Func   domEndElementNs;
 }
 
 - (id)initWithDelegate:(id)delegate;
