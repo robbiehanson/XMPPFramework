@@ -1,8 +1,50 @@
 #import "MulticastDelegate.h"
 
-@interface MulticastDelegateListNode (PrivateAPI)
+/**
+ * How does this class work?
+ * 
+ * In theory, this class is very straight-forward.
+ * It provides a way for multiple delegates to be called.
+ * So any delegate method call to this class will get forwarded to each delegate in the list.
+ * 
+ * In practice it's fairly easy as well, but there are two small complications.
+ * 
+ * Complication 1:
+ * A class must not retain its delegate.
+ * That is, if you call [client setDelegate:self], "client" should NOT be retaining "self".
+ * This means we should avoid storing all the delegates in an NSArray, or other such class that retains its objects.
+ * 
+ * Complication 2:
+ * A delegate must be allowed to add/remove itself at any time.
+ * This includes removing itself in the middle of a delegate callback without any unintended complications.
+ * 
+ * We solve these complications by using a simple linked list.
+**/
+
+@interface MulticastDelegateListNode : NSObject
+{
+	id delegate;
+	
+	MulticastDelegateListNode *prev;
+	MulticastDelegateListNode *next;
+}
+
+- (id)initWithDelegate:(id)delegate;
+
+- (id)delegate;
 - (void)clearDelegate;
+
+- (MulticastDelegateListNode *)prev;
+- (void)setPrev:(MulticastDelegateListNode *)prev;
+
+- (MulticastDelegateListNode *)next;
+- (void)setNext:(MulticastDelegateListNode *)next;
+
 @end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation MulticastDelegate
 
@@ -18,6 +60,10 @@
 - (void)addDelegate:(id)delegate
 {
 	MulticastDelegateListNode *node = [[MulticastDelegateListNode alloc] initWithDelegate:delegate];
+	
+	// Remember: The delegateList is a linked list of MulticastDelegateListNode objects.
+	// Each node object is allocated and placed in the list.
+	// It is not deallocated until it is later removed from the linked list.
 	
 	if(delegateList != nil)
 	{
@@ -73,7 +119,13 @@
 		
 		[node setPrev:nil];
 		[node setNext:nil];
-		[node release];
+		
+		// Remember: The list of delegates is a linked list, where each link is a MulticastDelegateListNode object.
+		// The objects are allocated, and inserted into the list with their retainCount at 1.
+		// Insertion and deletion from this linked list structure does not retain/release the objects.
+		// Thus we explictly release the node at this point.
+		
+		[node release]; /* This is not a bug */
 		
 		node = next;
 	}
@@ -160,12 +212,23 @@
 	
 	// Here are the rules:
 	// If a delegate is added during this method, it should NOT be invoked.
-	// If a delegate is removed during this method that has not already been invoked, it should not be invoked.
+	// If a delegate is removed during this method that has not already been invoked, it should NOT be invoked.
 	// 
 	// The first rule is the reason for the currentInvocationIndex variable.
 	
 	MulticastDelegateListNode *node = delegateList;
 	currentInvocationIndex = 0;
+	
+	// First we loop through the linked list so we can:
+	// - Get a count of the number of delegates
+	// - Get a reference to the last delegate in the list
+	// 
+	// Recall that new delegates are added to the beginning of the linked list.
+	// The last delegate in the list is the first delegate that was added, so it will be the first that's invoked.
+	// We're going to be moving backwards through the linked list as we invoke the delegates.
+	// 
+	// The currentInvocationIndex variable prevents us from invoking a delegate that
+	// was added in the middle of our invocation loop below.
 	
 	while([node next] != nil)
 	{
