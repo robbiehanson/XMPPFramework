@@ -16,23 +16,3 @@
 - (NSUInteger)count;
 
 @end
-
-@interface MulticastDelegateListNode : NSObject
-{
-	id delegate;
-	
-	MulticastDelegateListNode *prev;
-	MulticastDelegateListNode *next;
-}
-
-- (id)initWithDelegate:(id)delegate;
-
-- (id)delegate;
-
-- (MulticastDelegateListNode *)prev;
-- (void)setPrev:(MulticastDelegateListNode *)prev;
-
-- (MulticastDelegateListNode *)next;
-- (void)setNext:(MulticastDelegateListNode *)next;
-
-@end
