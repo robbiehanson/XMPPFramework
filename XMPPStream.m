@@ -21,8 +21,8 @@
 #define DEBUG_RECV      YES
 #define DEBUG_DELEGATE  YES
 
-#define DDLogSend(format, ...)    if(DEBUG_SEND)  NSLog((format), ##__VA_ARGS__)
-#define DDLogRecv(format, ...)    if(DEBUG_RECV)  NSLog((format), ##__VA_ARGS__)
+#define DDLogSend(format, ...)    do{ if(DEBUG_SEND)  NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogRecv(format, ...)    do{ if(DEBUG_RECV)  NSLog((format), ##__VA_ARGS__); }while(0)
 
 // Define the various timeouts (in seconds) for retreiving various parts of the XML stream
 #define TIMEOUT_WRITE         10
@@ -1736,6 +1736,14 @@ enum XMPPStreamFlags
 
 - (void)xmppParser:(XMPPParser *)sender didFail:(NSError *)error
 {
+	// Notify delegate
+	if([delegate respondsToSelector:@selector(xmppStream:didReceiveError:)]) {
+		[delegate xmppStream:self didReceiveError:error];
+	}
+	else if(DEBUG_DELEGATE) {
+		NSLog(@"xmppStream:%p didReceiveError:%@", self, error);
+	}
+	
 	[asyncSocket disconnect];
 }
 
