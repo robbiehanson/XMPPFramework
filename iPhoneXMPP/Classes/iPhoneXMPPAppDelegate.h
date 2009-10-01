@@ -8,7 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface iPhoneXMPPAppDelegate : NSObject <UIApplicationDelegate> {
+@class XMPPClient;
+
+
+@interface iPhoneXMPPAppDelegate : NSObject <UIApplicationDelegate>
+{
+	XMPPClient *xmppClient;
     
     UIWindow *window;
     UINavigationController *navigationController;
