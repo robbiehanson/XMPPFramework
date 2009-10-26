@@ -1,24 +1,15 @@
-//
-//  iPhoneXMPPAppDelegate.m
-//  iPhoneXMPP
-//
-//  Created by Robbie Hanson on 5/26/09.
-//  Copyright Deusty Designs, LLC. 2009. All rights reserved.
-//
-
 #import "iPhoneXMPPAppDelegate.h"
-#import "RootViewController.h"
 #import "XMPP.h"
+
 
 @implementation iPhoneXMPPAppDelegate
 
 @synthesize window;
-@synthesize navigationController;
 
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application
-{
-	xmppClient = [[XMPPClient alloc] init];
+- (void)applicationDidFinishLaunching:(UIApplication *)application {    
+
+    xmppClient = [[XMPPClient alloc] init];
 	[xmppClient addDelegate:self];
 	
 	// Replace me with the proper domain and port.
@@ -37,22 +28,15 @@
 	
 	// Uncomment me when the proper information has been entered above.
 //	[xmppClient connect];
-	
-	// Configure and show the window
-	[window addSubview:[navigationController view]];
-	[window makeKeyAndVisible];
-}
-
-
-- (void)applicationWillTerminate:(UIApplication *)application {
-	// Save data if appropriate
+    
+    // Override point for customization after application launch
+    [window makeKeyAndVisible];
 }
 
 
 - (void)dealloc {
-	[navigationController release];
-	[window release];
-	[super dealloc];
+    [window release];
+    [super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
