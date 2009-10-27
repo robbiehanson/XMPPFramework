@@ -21,32 +21,26 @@
  * We solve these complications by using a simple linked list.
 **/
 
-@interface MulticastDelegateListNode : NSObject
-{
-	id delegate;
-	
-	MulticastDelegateListNode *prev;
-	MulticastDelegateListNode *next;
-}
-
-- (id)initWithDelegate:(id)delegate;
-
-- (id)delegate;
-- (void)clearDelegate;
-
-- (MulticastDelegateListNode *)prev;
-- (void)setPrev:(MulticastDelegateListNode *)prev;
-
-- (MulticastDelegateListNode *)next;
-- (void)setNext:(MulticastDelegateListNode *)next;
-
-@end
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation MulticastDelegate
+
+void MulticastDelegateListNodeRetain(MulticastDelegateListNode *node)
+{
+    node->retainCount++;
+}
+
+void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
+{
+    node->retainCount--;
+    
+    if(node->retainCount == 0)
+    {
+        free(node);
+    }
+}
 
 - (id)init
 {
@@ -59,7 +53,9 @@
 
 - (void)addDelegate:(id)delegate
 {
-	MulticastDelegateListNode *node = [[MulticastDelegateListNode alloc] initWithDelegate:delegate];
+	MulticastDelegateListNode *node = malloc(sizeof(node));
+    node->delegate = delegate;
+    node->retainCount = 1;
 	
 	// Remember: The delegateList is a linked list of MulticastDelegateListNode objects.
 	// Each node object is allocated and placed in the list.
@@ -67,9 +63,15 @@
 	
 	if(delegateList != nil)
 	{
-		[node setNext:delegateList];
-		[[node next] setPrev:node];
+        node->prev = nil;
+		node->next = delegateList;
+		node->next->prev = node;
 	}
+    else
+    {
+        node->prev = nil;
+        node->next = nil;
+    }
 	
 	delegateList = node;
 }
@@ -81,21 +83,33 @@
 	
 	while(node != nil)
 	{
-		if(delegate == [node delegate])
+		if(delegate == node->delegate)
 		{
-			if([node prev] == nil)
-				delegateList = [node next];
+            // Remove the node from the list.
+            // This is done by editing the pointers of the node's neighbors to skip it.
+            // 
+            // In other words:
+            // node->prev->next = node->next
+            // node->next->prev = node->prev
+            // 
+            // We also want to properly update our delegateList pointer,
+            // which always points to the "first" element in the list. (Most recently added.)
+            
+			if(node->prev != nil)
+				node->prev->next = node->next;
 			else
-				[[node prev] setNext:[node next]];
+				delegateList = node->next;
 			
-			[[node next] setPrev:[node prev]];
+			if(node->next != nil)
+				node->next->prev = node->prev;
 			
 			// We do NOT change the prev/next pointers of the node.
 			// If it's in use within forwardInvocation, these pointers are still needed.
 			// However, if multiple delegates are removed in the middle of a delegate callback,
 			// we still need to be sure not to invoke any delegates that were removed.
-			[node clearDelegate];
-			[node release];
+            
+            node->delegate = nil;
+            MulticastDelegateListNodeRelease(node);
 			
 			if(nodeIndex < currentInvocationIndex)
 			{
@@ -105,7 +119,7 @@
 		}
 		
 		nodeIndex++;
-		node = [node next];
+		node = node->next;
 	}
 }
 
@@ -115,17 +129,12 @@
 	
 	while(node != nil)
 	{
-		MulticastDelegateListNode *next = [node next];
+		MulticastDelegateListNode *next = node->next;
 		
-		[node setPrev:nil];
-		[node setNext:nil];
+		node->prev = nil;
+		node->next = nil;
 		
-		// Remember: The list of delegates is a linked list, where each link is a MulticastDelegateListNode object.
-		// The objects are allocated, and inserted into the list with their retainCount at 1.
-		// Insertion and deletion from this linked list structure does not retain/release the objects.
-		// Thus we explictly release the node at this point.
-		
-		[node release]; /* This is not a bug */
+        MulticastDelegateListNodeRelease(node);
 		
 		node = next;
 	}
@@ -139,7 +148,7 @@
 	NSUInteger count = 0;
 	
 	MulticastDelegateListNode *node;
-	for(node = delegateList; node != nil; node = [node next])
+	for(node = delegateList; node != nil; node = node->next)
 	{
 		count++;
 	}
@@ -161,7 +170,7 @@
 	MulticastDelegateListNode *node = delegateList;
 	while(node)
 	{
-		if([[node delegate] respondsToSelector:aSelector])
+		if([node->delegate respondsToSelector:aSelector])
 		{
 			if(foundNode)
 			{
@@ -173,12 +182,12 @@
 			foundNode = node;
 		}
 		
-		node = [node next];
+		node = node->next;
 	}
 	
 	if(foundNode)
 	{
-		return [foundNode delegate];
+		return foundNode->delegate;
 	}
 	
 	return nil;
@@ -187,9 +196,9 @@
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
 {
 	MulticastDelegateListNode *node;
-	for(node = delegateList; node != nil; node = [node next])
+	for(node = delegateList; node != nil; node = node->next)
 	{
-		NSMethodSignature *result = [[node delegate] methodSignatureForSelector:aSelector];
+		NSMethodSignature *result = [node->delegate methodSignatureForSelector:aSelector];
 		
 		if(result != nil)
 		{
@@ -230,9 +239,9 @@
 	// The currentInvocationIndex variable prevents us from invoking a delegate that
 	// was added in the middle of our invocation loop below.
 	
-	while([node next] != nil)
+	while(node->next != nil)
 	{
-		node = [node next];
+		node = node->next;
 		currentInvocationIndex++;
 	}
 	
@@ -242,14 +251,14 @@
 		// We do this because the delegate might remove itself from the delegate list within the invoked method.
 		// And we don't want to get the previous node now, because it may also be
 		// removed from the list within the invoked method.
-		[[node retain] autorelease];
+		MulticastDelegateListNodeRetain(node);
 		
-		if([[node delegate] respondsToSelector:[anInvocation selector]])
+		if([node->delegate respondsToSelector:[anInvocation selector]])
 		{
-			[anInvocation invokeWithTarget:[node delegate]];
+			[anInvocation invokeWithTarget:node->delegate];
 		}
 		
-		node = [node prev];
+		node = node->prev;
 		if(currentInvocationIndex > 0)
 			currentInvocationIndex--;
 		else
@@ -270,58 +279,6 @@
 {
 	[self removeAllDelegates];
 	[super dealloc];
-}
-
-@end
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@implementation MulticastDelegateListNode
-
-- (id)initWithDelegate:(id)aDelegate
-{
-	if((self = [super init]))
-	{
-		delegate = aDelegate;
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	[super dealloc];
-}
-
-- (id)delegate
-{
-	return delegate;
-}
-
-- (void)clearDelegate
-{
-	delegate = nil;
-}
-
-- (MulticastDelegateListNode *)prev
-{
-	return prev;
-}
-
-- (void)setPrev:(MulticastDelegateListNode *)newPrev
-{
-	prev = newPrev;
-}
-
-- (MulticastDelegateListNode *)next
-{
-	return next;
-}
-
-- (void)setNext:(MulticastDelegateListNode *)newNext
-{
-	next = newNext;
 }
 
 @end
