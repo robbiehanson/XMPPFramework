@@ -88,7 +88,8 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface NSObject (XMPPStreamDelegate)
+@protocol XMPPStreamDelegate
+@optional
 
 /**
  * This method is called after an XML stream has been opened.

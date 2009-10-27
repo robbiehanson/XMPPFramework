@@ -41,7 +41,8 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface NSObject (XMPPParserDelegate)
+@protocol XMPPParserDelegate
+@optional
 
 - (void)xmppParser:(XMPPParser *)sender didReadRoot:(DDXMLElement *)root;
 

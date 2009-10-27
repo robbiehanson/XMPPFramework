@@ -1,5 +1,4 @@
 #import "XMPPClient.h"
-#import "XMPPStream.h"
 #import "XMPPJID.h"
 #import "XMPPUser.h"
 #import "XMPPResource.h"
@@ -7,7 +6,6 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 #import "NSXMLElementAdditions.h"
-#import "MulticastDelegate.h"
 
 #if !TARGET_OS_IPHONE
 #import "SCNotificationManager.h"
@@ -766,6 +764,11 @@ enum XMPPClientFlags
 	[multicastDelegate xmppClient:self didReceiveMessage:message];
 }
 
+- (void)onDidReceiveError:(NSXMLElement *)error
+{
+	[multicastDelegate xmppClient:self didReceiveError:error];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -973,6 +976,11 @@ enum XMPPClientFlags
 			// We will wait for a few seconds or so, and then attempt to reconnect if possible
 			[self performSelector:@selector(attemptReconnect:) withObject:nil afterDelay:4.0];
 		}
+	}
+	else
+	{
+		// We received a <stream:error> element.
+		[self onDidReceiveError:error];
 	}
 }
 

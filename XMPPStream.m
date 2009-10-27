@@ -21,8 +21,8 @@
 #define DEBUG_RECV      YES
 #define DEBUG_DELEGATE  YES
 
-#define DDLogSend(format, ...)    do{ if(DEBUG_SEND)  NSLog((format), ##__VA_ARGS__); }while(0)
-#define DDLogRecv(format, ...)    do{ if(DEBUG_RECV)  NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogSend(format, ...)    do{ if(DEBUG_SEND) NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogRecv(format, ...)    do{ if(DEBUG_RECV) NSLog((format), ##__VA_ARGS__); }while(0)
 
 // Define the various timeouts (in seconds) for retreiving various parts of the XML stream
 #define TIMEOUT_WRITE         10
@@ -646,7 +646,7 @@ enum XMPPStreamFlags
 **/
 - (float)serverXmppStreamVersionNumber
 {
-	return [[[rootElement attributeForName:@"version"] stringValue] floatValue];
+	return [rootElement attributeFloatValueForName:@"version" withDefaultValue:0.0F];
 }
 
 /**
