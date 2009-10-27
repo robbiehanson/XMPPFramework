@@ -417,7 +417,7 @@
 **/
 - (NSString *)clearTextAsString
 {
-    return [[[NSString alloc] initWithData:[self clearTextAsData] encoding:[NSString defaultCStringEncoding]] autorelease];
+    return [[[NSString alloc] initWithData:[self clearTextAsData] encoding:NSUTF8StringEncoding] autorelease];
 }
 
 /**
@@ -470,7 +470,7 @@
 **/
 - (NSString *)cipherTextAsString
 {
-    return [[[NSString alloc] initWithData:[self cipherTextAsData] encoding:[NSString defaultCStringEncoding]] autorelease];
+    return [[[NSString alloc] initWithData:[self cipherTextAsData] encoding:NSUTF8StringEncoding] autorelease];
 }
 
 /**
@@ -1156,6 +1156,31 @@
     free(buffer);
     
     return randData;
+}
+
+// PBKDF2 support functions
+// Thanks to Chris Benedict (chrisbdaemon@gmail.com) for the code
++ (NSData *)getKeyDataWithLength:(int)length fromPassword:(NSString *)pass withSalt:(NSString *)salt
+{
+	return [SSCrypto getKeyDataWithLength:length fromPassword:pass withSalt:salt withIterations:1000];
+}
+
++ (NSData *)getKeyDataWithLength:(int)length fromPassword:(NSString *)pass withSalt:(NSString *)salt withIterations:(int)count
+{
+	NSData *key = nil;
+	unsigned char *buffer = (unsigned char *)calloc(length, sizeof(unsigned char));
+    NSAssert((buffer != NULL), @"Cannot calloc memory for buffer.");
+	const char *password = [pass UTF8String];
+    const char *saltVal = [salt UTF8String];
+
+	if(!PKCS5_PBKDF2_HMAC_SHA1(password, [pass length], (unsigned char *)saltVal, [salt length], count, length, buffer)) {
+		return nil;
+	}
+
+	key = [NSData dataWithBytes:buffer length:length];
+	free(buffer);
+	
+	return key;
 }
 
 + (NSData *)getSHA1ForData:(NSData *)d
