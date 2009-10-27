@@ -25,7 +25,8 @@
 
 @end
 
-@interface NSObject (XMPPPingDelegate)
+@protocol XMPPPingDelegate
+@optional
 
 - (void)xmppPing:(XMPPPing *)sender didReceivePong:(XMPPIQ *)pong;
 
