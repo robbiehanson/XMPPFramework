@@ -1,5 +1,12 @@
 #import <Foundation/Foundation.h>
-@class MulticastDelegateListNode;
+
+struct MulticastDelegateListNode {
+	id delegate;
+	struct MulticastDelegateListNode * prev;
+    struct MulticastDelegateListNode * next;
+    NSUInteger retainCount;
+};
+typedef struct MulticastDelegateListNode MulticastDelegateListNode;
 
 
 @interface MulticastDelegate : NSObject
