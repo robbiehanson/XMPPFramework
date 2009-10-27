@@ -139,7 +139,7 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
                                        const xmlChar **attributes)
 {
 	int i, j;
-	xmlNsPtr lastAddedNs;
+	xmlNsPtr lastAddedNs = NULL;
 	
 	xmlParserCtxt *ctxt = (xmlParserCtxt *)ctx;
 	
@@ -183,7 +183,7 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
 		{
 			newNode->nsDef = lastAddedNs = newNs;
 		}
-		else
+		else if(lastAddedNs)
 		{
 			lastAddedNs->next = newNs;
 			lastAddedNs = newNs;

@@ -1,22 +1,24 @@
 #import <Foundation/Foundation.h>
-#import "DDXML.h"
+#import "XMPPStream.h"
+#import "MulticastDelegate.h"
 
-@class XMPPStream;
 @class XMPPJID;
 @class XMPPUser;
 @class XMPPResource;
 @class XMPPIQ;
 @class XMPPMessage;
 @class XMPPPresence;
-@class MulticastDelegate;
 
 #if !TARGET_OS_IPHONE
-  @class SCNotificationManager;
+@class SCNotificationManager;
 #endif
 
-@interface XMPPClient : NSObject
+@protocol XMPPClientDelegate;
+
+
+@interface XMPPClient : NSObject <XMPPStreamDelegate>
 {
-	MulticastDelegate *multicastDelegate;
+	MulticastDelegate <XMPPClientDelegate> *multicastDelegate;
 	
 	NSString *domain;
 	UInt16 port;
@@ -144,7 +146,8 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface NSObject (XMPPClientDelegate)
+@protocol XMPPClientDelegate
+@optional
 
 - (void)xmppClientConnecting:(XMPPClient *)sender;
 - (void)xmppClientDidConnect:(XMPPClient *)sender;
@@ -163,5 +166,7 @@
 
 - (void)xmppClient:(XMPPClient *)sender didReceiveIQ:(XMPPIQ *)iq;
 - (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message;
+
+- (void)xmppClient:(XMPPClient *)sender didReceiveError:(NSXMLElement *)error;
 
 @end

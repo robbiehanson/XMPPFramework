@@ -41,6 +41,8 @@
 		// so in this particular case there is no way to access the element without looping through the children.
 		// 
 		// This bug was submitted to apple on June 1st, 2007 and was classified as "serious".
+		// 
+		// --!!-- This bug does NOT exist in DDXML --!!--
 		
 		return nil;
 	}
@@ -83,10 +85,65 @@
 /**
  *	Shortcut to avoid having to use NSXMLNode everytime
 **/
-
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string
 {
 	[self addAttribute:[NSXMLNode attributeWithName:name stringValue:string]];
+}
+
+/**
+ * The following methods return the corresponding value of the attribute with the given name.
+**/
+
+- (int)attributeIntValueForName:(NSString *)name
+{
+	return [[self attributeStringValueForName:name] intValue];
+}
+- (BOOL)attributeBoolValueForName:(NSString *)name
+{
+	return [[self attributeStringValueForName:name] boolValue];
+}
+- (float)attributeFloatValueForName:(NSString *)name
+{
+	return [[self attributeStringValueForName:name] floatValue];
+}
+- (double)attributeDoubleValueForName:(NSString *)name
+{
+	return [[self attributeStringValueForName:name] doubleValue];
+}
+- (NSString *)attributeStringValueForName:(NSString *)name
+{
+	return [[self attributeForName:name] stringValue];
+}
+
+/**
+ * The following methods return the corresponding value of the attribute with the given name.
+ * If the attribute does not exist, the given defaultValue is returned.
+**/
+
+- (int)attributeIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue
+{
+	NSXMLNode *attr = [self attributeForName:name];
+	return (attr) ? [[attr stringValue] intValue] : defaultValue;
+}
+- (BOOL)attributeBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue
+{
+	NSXMLNode *attr = [self attributeForName:name];
+	return (attr) ? [[attr stringValue] boolValue] : defaultValue;
+}
+- (float)attributeFloatValueForName:(NSString *)name withDefaultValue:(float)defaultValue
+{
+	NSXMLNode *attr = [self attributeForName:name];
+	return (attr) ? [[attr stringValue] floatValue] : defaultValue;
+}
+- (double)attributeDoubleValueForName:(NSString *)name withDefaultValue:(double)defaultValue
+{
+	NSXMLNode *attr = [self attributeForName:name];
+	return (attr) ? [[attr stringValue] doubleValue] : defaultValue;
+}
+- (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue
+{
+    NSXMLNode *attr = [self attributeForName:name];
+    return (attr) ? [attr stringValue] : defaultValue;
 }
 
 /**
