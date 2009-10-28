@@ -1,5 +1,4 @@
 #import <Cocoa/Cocoa.h>
-@class  XMPPJID;
 @class  XMPPClient;
 
 
@@ -25,14 +24,21 @@
     IBOutlet id signInSheet;
     IBOutlet id sslButton;
     IBOutlet id window;
-	IBOutlet id xmppClient;
+	
+	IBOutlet XMPPClient *xmppClient;
 }
 
-- (IBAction)addBuddy:(id)sender;
+- (void)displaySignInSheet;
+
+- (IBAction)jidDidChange:(id)sender;
+- (IBAction)createAccount:(id)sender;
+- (IBAction)signIn:(id)sender;
+
 - (IBAction)changePresence:(id)sender;
 - (IBAction)chat:(id)sender;
-- (IBAction)createAccount:(id)sender;
+- (IBAction)addBuddy:(id)sender;
 - (IBAction)removeBuddy:(id)sender;
-- (IBAction)signIn:(id)sender;
+
+- (IBAction)connectViaXEP65:(id)sender;
 
 @end
