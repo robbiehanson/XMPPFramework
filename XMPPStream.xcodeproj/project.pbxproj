@@ -62,6 +62,16 @@
 		DC5247D80BE318AE002F838C /* XMPPUser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5247D60BE318AE002F838C /* XMPPUser.m */; };
 		DC63E9210E65D5140076E6D2 /* XMPPTransports.m in Sources */ = {isa = PBXBuildFile; fileRef = DC63E9200E65D5140076E6D2 /* XMPPTransports.m */; };
 		DC63E9FA0E65FD570076E6D2 /* SCNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DC63E9F90E65FD570076E6D2 /* SCNotificationManager.m */; };
+		DC6E92F91090E31000070ADE /* DDNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = DC6E92F71090E31000070ADE /* DDNumber.h */; };
+		DC6E92FA1090E31000070ADE /* DDNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E92F81090E31000070ADE /* DDNumber.m */; };
+		DC6E92FB1090E31000070ADE /* DDNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E92F81090E31000070ADE /* DDNumber.m */; };
+		DC6E92FE1090E34900070ADE /* TURNSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DC6E92FC1090E34900070ADE /* TURNSocket.h */; };
+		DC6E92FF1090E34900070ADE /* TURNSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E92FD1090E34900070ADE /* TURNSocket.m */; };
+		DC6E93001090E34900070ADE /* TURNSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E92FD1090E34900070ADE /* TURNSocket.m */; };
+		DC6E93041090E41300070ADE /* DDLog.h in Headers */ = {isa = PBXBuildFile; fileRef = DC6E93031090E41300070ADE /* DDLog.h */; };
+		DC6E98EB1098A4C700070ADE /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = DC6E98E91098A4C700070ADE /* AppDelegate.h */; };
+		DC6E98EC1098A4C700070ADE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E98EA1098A4C700070ADE /* AppDelegate.m */; };
+		DC6E98ED1098A4C700070ADE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E98EA1098A4C700070ADE /* AppDelegate.m */; };
 		DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B2BF10DE620B80055F60A /* XMPPElement.m */; };
 		DC839B430F741484000F2C7F /* XMPPPing.h in Headers */ = {isa = PBXBuildFile; fileRef = DC839B410F741484000F2C7F /* XMPPPing.h */; };
 		DC839B440F741484000F2C7F /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC839B420F741484000F2C7F /* XMPPPing.m */; };
@@ -136,6 +146,13 @@
 		DC63E9200E65D5140076E6D2 /* XMPPTransports.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPTransports.m; sourceTree = "<group>"; };
 		DC63E9F80E65FD570076E6D2 /* SCNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCNotificationManager.h; sourceTree = "<group>"; };
 		DC63E9F90E65FD570076E6D2 /* SCNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCNotificationManager.m; sourceTree = "<group>"; };
+		DC6E92F71090E31000070ADE /* DDNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDNumber.h; sourceTree = "<group>"; };
+		DC6E92F81090E31000070ADE /* DDNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDNumber.m; sourceTree = "<group>"; };
+		DC6E92FC1090E34900070ADE /* TURNSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TURNSocket.h; sourceTree = "<group>"; };
+		DC6E92FD1090E34900070ADE /* TURNSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TURNSocket.m; sourceTree = "<group>"; };
+		DC6E93031090E41300070ADE /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		DC6E98E91098A4C700070ADE /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		DC6E98EA1098A4C700070ADE /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		DC7B2BF00DE620B80055F60A /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPElement.h; sourceTree = "<group>"; };
 		DC7B2BF10DE620B80055F60A /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
 		DC839B410F741484000F2C7F /* XMPPPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPing.h; sourceTree = "<group>"; };
@@ -315,6 +332,7 @@
 		DC63E91E0E65D4EF0076E6D2 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				DC6E92F61090E2F200070ADE /* XEP-0065 */,
 				DC63E91F0E65D5140076E6D2 /* XMPPTransports.h */,
 				DC63E9200E65D5140076E6D2 /* XMPPTransports.m */,
 				DC839B410F741484000F2C7F /* XMPPPing.h */,
@@ -335,6 +353,18 @@
 			sourceTree = "<group>";
 			tabWidth = 4;
 			usesTabs = 1;
+		};
+		DC6E92F61090E2F200070ADE /* XEP-0065 */ = {
+			isa = PBXGroup;
+			children = (
+				DC6E93031090E41300070ADE /* DDLog.h */,
+				DC6E92F71090E31000070ADE /* DDNumber.h */,
+				DC6E92F81090E31000070ADE /* DDNumber.m */,
+				DC6E92FC1090E34900070ADE /* TURNSocket.h */,
+				DC6E92FD1090E34900070ADE /* TURNSocket.m */,
+			);
+			name = "XEP-0065";
+			sourceTree = "<group>";
 		};
 		DCB9BAF80DDC962C002DA335 /* Utilities */ = {
 			isa = PBXGroup;
@@ -363,6 +393,8 @@
 		DCCE55630BDC6FBC000E2798 /* GUI - MainMenu */ = {
 			isa = PBXGroup;
 			children = (
+				DC6E98E91098A4C700070ADE /* AppDelegate.h */,
+				DC6E98EA1098A4C700070ADE /* AppDelegate.m */,
 				DCCE555F0BDC6FAC000E2798 /* RosterController.h */,
 				DCCE55600BDC6FAC000E2798 /* RosterController.m */,
 				DCF825930D748DC000BFABDE /* RequestController.h */,
@@ -446,6 +478,10 @@
 				276248160ED3D6960028C301 /* XMPPTransports.h in Headers */,
 				276248180ED3D69A0028C301 /* XMPPUser.h in Headers */,
 				DC839B430F741484000F2C7F /* XMPPPing.h in Headers */,
+				DC6E92F91090E31000070ADE /* DDNumber.h in Headers */,
+				DC6E92FE1090E34900070ADE /* TURNSocket.h in Headers */,
+				DC6E93041090E41300070ADE /* DDLog.h in Headers */,
+				DC6E98EB1098A4C700070ADE /* AppDelegate.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -580,6 +616,9 @@
 				276248170ED3D6980028C301 /* XMPPTransports.m in Sources */,
 				276248190ED3D69A0028C301 /* XMPPUser.m in Sources */,
 				DC839B440F741484000F2C7F /* XMPPPing.m in Sources */,
+				DC6E92FA1090E31000070ADE /* DDNumber.m in Sources */,
+				DC6E92FF1090E34900070ADE /* TURNSocket.m in Sources */,
+				DC6E98EC1098A4C700070ADE /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -622,6 +661,9 @@
 				DC0E7D320EADD7DE00B81D90 /* SSCrypto.m in Sources */,
 				DCAF51130EC8C3CD00445B85 /* MulticastDelegate.m in Sources */,
 				DC839B450F741484000F2C7F /* XMPPPing.m in Sources */,
+				DC6E92FB1090E31000070ADE /* DDNumber.m in Sources */,
+				DC6E93001090E34900070ADE /* TURNSocket.m in Sources */,
+				DC6E98ED1098A4C700070ADE /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
