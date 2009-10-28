@@ -2,6 +2,7 @@
 #import "RequestController.h"
 #import "XMPP.h"
 #import "ChatWindowManager.h"
+
 #import <SystemConfiguration/SystemConfiguration.h>
 
 
@@ -11,45 +12,75 @@
 // Setup:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id)init
-{
-	if((self = [super init]))
-	{
-		// Nothing to do here
-	}
-	return self;
-}
-
 - (void)awakeFromNib
 {
-	[xmppClient addDelegate:self];
 	[xmppClient setAutoLogin:NO];
 	[xmppClient setAutoRoster:YES];
 	[xmppClient setAutoPresence:YES];
+	
+	[xmppClient addDelegate:self];
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
-{
-	// Display the sign in sheet
-	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
-	[serverField setObjectValue:[dflts objectForKey:@"Account.Server"]];
-	[resourceField setObjectValue:[dflts objectForKey:@"Account.Resource"]];
-	[portField setObjectValue:[dflts objectForKey:@"Account.Port"]];
-	[jidField setObjectValue:[dflts objectForKey:@"Account.JID"]];
-	[sslButton setObjectValue:[dflts objectForKey:@"Account.UseSSL"]];
-	[selfSignedButton setObjectValue:[dflts objectForKey:@"Account.AllowSelfSignedCert"]];
-	[mismatchButton setObjectValue:[dflts objectForKey:@"Account.AllowSSLHostNameMismatch"]];
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Sign In Sheet
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)displaySignInSheet
+{
+	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
+	
+	[serverField      setObjectValue:[dflts objectForKey:@"Account.Server"]];
+	[resourceField    setObjectValue:[dflts objectForKey:@"Account.Resource"]];
+	[portField        setObjectValue:[dflts objectForKey:@"Account.Port"]];
+	[jidField         setObjectValue:[dflts objectForKey:@"Account.JID"]];
+	[sslButton        setObjectValue:[dflts objectForKey:@"Account.UseSSL"]];
+	[selfSignedButton setObjectValue:[dflts objectForKey:@"Account.AllowSelfSignedCert"]];
+	[mismatchButton   setObjectValue:[dflts objectForKey:@"Account.AllowSSLHostNameMismatch"]];
+	
 	[NSApp beginSheet:signInSheet
 	   modalForWindow:window
-		modalDelegate:self
+	    modalDelegate:self
 	   didEndSelector:nil
-		  contextInfo:nil];
+	      contextInfo:nil];
+	
+	if([[serverField stringValue] length] > 0)
+	{
+		if([[portField stringValue] length] > 0)
+		{
+			if([[jidField stringValue] length] > 0)
+			{
+				[signInSheet makeFirstResponder:passwordField];
+			}
+			else
+			{
+				[signInSheet makeFirstResponder:jidField];
+			}
+		}
+		else
+		{
+			[signInSheet makeFirstResponder:portField];
+		}
+	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Account Management:
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (IBAction)jidDidChange:(id)sender
+{
+	// People often forget to type in the full JID.
+	// In other words, they type in "username" instead of "username@domain.tld"
+	// 
+	// This method is here to automatically append a domain to the JID.
+	
+	NSString *jidStr = [jidField stringValue];
+	
+	if(([jidStr length] > 0) && ([jidStr rangeOfString:@"@"].location == NSNotFound))
+	{
+		NSString *domain = [serverField stringValue];
+		if([domain length] > 0)
+		{
+			[jidField setStringValue:[jidStr stringByAppendingFormat:@"@%@", domain]];
+		}
+	}
+}
 
 - (void)updateAccountInfo
 {
@@ -138,7 +169,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Presence Management:
+#pragma mark Presence Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (IBAction)changePresence:(id)sender
@@ -154,7 +185,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Buddy Management:
+#pragma mark Buddy Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (IBAction)addBuddy:(id)sender
@@ -184,7 +215,6 @@
 - (IBAction)chat:(id)sender
 {
 	int selectedRow = [rosterTable selectedRow];
-	
 	if(selectedRow >= 0)
 	{
 		XMPPUser *user = [roster objectAtIndex:selectedRow];
@@ -193,8 +223,20 @@
 	}
 }
 
+- (IBAction)connectViaXEP65:(id)sender
+{
+	int selectedRow = [rosterTable selectedRow];
+	if(selectedRow >= 0)
+	{
+		XMPPUser *user = [roster objectAtIndex:selectedRow];
+		XMPPResource *resource = [user primaryResource];
+		
+		[[NSApp delegate] connectViaXEP65:[resource jid]];
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Roster Table Data Source:
+#pragma mark Roster Table Data Source
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView
@@ -262,7 +304,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPClient Delegate Methods:
+#pragma mark XMPPClient Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppClientDidConnect:(XMPPClient *)sender
@@ -355,11 +397,6 @@
 	[rosterTable abortEditing];
 	[rosterTable selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
 	[rosterTable reloadData];
-}
-
-- (void)xmppClient:(XMPPClient *)sender didReceiveIQ:(XMPPIQ *)iq
-{
-	NSLog(@"---------- xmppClient:didReceiveIQ: ----------");
 }
 
 - (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message
