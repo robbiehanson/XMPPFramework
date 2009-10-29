@@ -27,7 +27,7 @@
 	NSString *password;
 	int priority;
 	
-	Byte flags;
+	UInt16 flags;
 	
 	XMPPStream *xmppStream;
 	NSError *streamError;
