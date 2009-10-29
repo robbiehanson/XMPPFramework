@@ -20,10 +20,19 @@ enum XMPPClientFlags
 	kAutoPresence         = 1 << 4,  // If set, client automatically becaomes available after authentication
 	kAutoReconnect        = 1 << 5,  // If set, client automatically attempts to reconnect after a disconnection
 	kShouldReconnect      = 1 << 6,  // If set, disconnection was accidental, and autoReconnect may be used
-	kHasRoster            = 1 << 7,  // If set, client has received the roster
+	kRequestedRoster      = 1 << 7,  // If set, client has requested the roster
+	kHasRoster            = 1 << 8,  // If set, client has received the roster
 };
 
 @interface XMPPClient (PrivateAPI)
+
+- (BOOL)requestedRoster;
+- (void)setRequestedRoster:(BOOL)flag;
+
+- (BOOL)hasRoster;
+- (void)setHasRoster:(BOOL)flag;
+
+- (void)clearRoster;
 
 - (void)onConnecting;
 - (void)onDidConnect;
@@ -38,6 +47,10 @@ enum XMPPClientFlags
 - (void)onDidReceiveMessage:(XMPPMessage *)message;
 
 @end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation XMPPClient
 
@@ -138,7 +151,7 @@ enum XMPPClientFlags
 
 - (BOOL)usesOldStyleSSL
 {
-	return (flags & kUsesOldStyleSSL);
+	return (BOOL)(flags & kUsesOldStyleSSL);
 }
 - (void)setUsesOldStyleSSL:(BOOL)flag
 {
@@ -218,7 +231,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoLogin
 {
-	return (flags & kAutoLogin);
+	return (BOOL)(flags & kAutoLogin);
 }
 - (void)setAutoLogin:(BOOL)flag
 {
@@ -230,7 +243,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoRoster
 {
-	return (flags & kAutoRoster);
+	return (BOOL)(flags & kAutoRoster);
 }
 - (void)setAutoRoster:(BOOL)flag
 {
@@ -242,7 +255,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoPresence
 {
-	return (flags & kAutoPresence);
+	return (BOOL)(flags & kAutoPresence);
 }
 - (void)setAutoPresence:(BOOL)flag
 {
@@ -254,7 +267,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoReconnect
 {
-	return (flags & kAutoReconnect);
+	return (BOOL)(flags & kAutoReconnect);
 }
 - (void)setAutoReconnect:(BOOL)flag
 {
@@ -266,7 +279,7 @@ enum XMPPClientFlags
 
 - (BOOL)shouldReconnect
 {
-	return (flags & kShouldReconnect);
+	return (BOOL)(flags & kShouldReconnect);
 }
 - (void)setShouldReconnect:(BOOL)flag
 {
@@ -274,18 +287,6 @@ enum XMPPClientFlags
 		flags |= kShouldReconnect;
 	else
 		flags &= ~kShouldReconnect;
-}
-
-- (BOOL)hasRoster
-{
-	return (flags & kHasRoster);
-}
-- (void)setHasRoster:(BOOL)flag
-{
-	if(flag)
-		flags |= kHasRoster;
-	else
-		flags &= ~kHasRoster;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,7 +333,7 @@ enum XMPPClientFlags
 
 - (BOOL)allowsPlaintextAuth
 {
-	return (flags & kAllowsPlaintextAuth);
+	return (BOOL)(flags & kAllowsPlaintextAuth);
 }
 - (void)setAllowsPlaintextAuth:(BOOL)flag
 {
@@ -405,8 +406,8 @@ enum XMPPClientFlags
 	// We don't receive presence notifications when we're offline.
 	
 	BOOL didUpdateRoster = ([roster count] > 0);
-	[roster removeAllObjects];
-	[self setHasRoster:NO];
+	
+	[self clearRoster];
 	
 	if(didUpdateRoster)
 	{
@@ -418,8 +419,38 @@ enum XMPPClientFlags
 #pragma mark Roster Managment
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (BOOL)requestedRoster
+{
+	return (BOOL)(flags & kRequestedRoster);
+}
+- (void)setRequestedRoster:(BOOL)flag
+{
+	if(flag)
+		flags |= kRequestedRoster;
+	else
+		flags &= ~kRequestedRoster;
+}
+
+- (BOOL)hasRoster
+{
+	return (BOOL)(flags & kHasRoster);
+}
+- (void)setHasRoster:(BOOL)flag
+{
+	if(flag)
+		flags |= kHasRoster;
+	else
+		flags &= ~kHasRoster;
+}
+
 - (void)fetchRoster
 {
+	if([self requestedRoster])
+	{
+		// We've already requested the roster from the server.
+		return;
+	}
+
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -427,6 +458,18 @@ enum XMPPClientFlags
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
+	
+	[self setRequestedRoster:YES];
+}
+
+- (void)clearRoster
+{
+	[roster removeAllObjects];
+	
+	[self setRequestedRoster:NO];
+	[self setHasRoster:NO];
+	
+	[earlyPresenceElements removeAllObjects];
 }
 
 - (void)addBuddy:(XMPPJID *)jid withNickname:(NSString *)optionalName
@@ -679,7 +722,7 @@ enum XMPPClientFlags
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Sending Elements:
+#pragma mark Sending Elements
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)sendElement:(NSXMLElement *)element
@@ -706,7 +749,7 @@ enum XMPPClientFlags
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Delegate Helper Methods:
+#pragma mark Delegate Helper Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)onConnecting
@@ -770,7 +813,7 @@ enum XMPPClientFlags
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPStream Delegate Methods:
+#pragma mark XMPPStream Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppStreamDidOpen:(XMPPStream *)sender
@@ -910,8 +953,23 @@ enum XMPPClientFlags
 	if(![self hasRoster])
 	{
 		// We received a presence notification, but we don't have a roster to apply it to yet.
-		// We store the presence element until we get our roster.
-		[earlyPresenceElements addObject:presence];
+		if([self requestedRoster])
+		{
+			// We store the presence element until we get our roster.
+			[earlyPresenceElements addObject:presence];
+		}
+		else
+		{
+			// The user has not requested the roster.
+			// 
+			// Since the default autoRoster value is YES,
+			// this means the user explicitly indicated they didn't want to automatically fetch the roster.
+			// Furthermore, they haven't bothered to call the fetchRoster method,
+			// but they've obviously set their presence since we're getting presence messages.
+			// 
+			// This means the user is probably not going to be using the roster features,
+			// and so we can safely ignore this presence element.
+		}
 		
 		return;
 	}
@@ -986,8 +1044,7 @@ enum XMPPClientFlags
 
 - (void)xmppStreamDidClose:(XMPPStream *)sender
 {
-	[roster removeAllObjects];
-	[self setHasRoster:NO];
+	[self clearRoster];
 	
 	[myUser release];
 	myUser = nil;
