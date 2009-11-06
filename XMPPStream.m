@@ -173,7 +173,7 @@ enum XMPPStreamFlags
 **/
 - (BOOL)allowsSSLHostNameMismatch
 {
-	return (flags & kAllowsSSLHostNameMismatch);
+	return (flags & kAllowsSSLHostNameMismatch) ? YES : NO;
 }
 - (void)setAllowsSSLHostNameMismatch:(BOOL)flag
 {
@@ -212,7 +212,7 @@ enum XMPPStreamFlags
 **/
 - (BOOL)isSecure
 {
-	return (flags & kIsSecure);
+	return (flags & kIsSecure) ? YES : NO;
 }
 - (void)setIsSecure:(BOOL)flag
 {
@@ -602,7 +602,7 @@ enum XMPPStreamFlags
 
 - (BOOL)isAuthenticated
 {
-	return (flags & kIsAuthenticated);
+	return (flags & kIsAuthenticated) ? YES : NO;
 }
 - (void)setIsAuthenticated:(BOOL)flag
 {
