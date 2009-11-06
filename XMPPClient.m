@@ -151,7 +151,7 @@ enum XMPPClientFlags
 
 - (BOOL)usesOldStyleSSL
 {
-	return (BOOL)(flags & kUsesOldStyleSSL);
+	return (flags & kUsesOldStyleSSL) ? YES : NO;
 }
 - (void)setUsesOldStyleSSL:(BOOL)flag
 {
@@ -231,7 +231,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoLogin
 {
-	return (BOOL)(flags & kAutoLogin);
+	return (flags & kAutoLogin) ? YES : NO;
 }
 - (void)setAutoLogin:(BOOL)flag
 {
@@ -243,7 +243,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoRoster
 {
-	return (BOOL)(flags & kAutoRoster);
+	return (flags & kAutoRoster) ? YES : NO;
 }
 - (void)setAutoRoster:(BOOL)flag
 {
@@ -255,7 +255,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoPresence
 {
-	return (BOOL)(flags & kAutoPresence);
+	return (flags & kAutoPresence) ? YES : NO;
 }
 - (void)setAutoPresence:(BOOL)flag
 {
@@ -267,7 +267,7 @@ enum XMPPClientFlags
 
 - (BOOL)autoReconnect
 {
-	return (BOOL)(flags & kAutoReconnect);
+	return (flags & kAutoReconnect) ? YES : NO;
 }
 - (void)setAutoReconnect:(BOOL)flag
 {
@@ -279,7 +279,7 @@ enum XMPPClientFlags
 
 - (BOOL)shouldReconnect
 {
-	return (BOOL)(flags & kShouldReconnect);
+	return (flags & kShouldReconnect) ? YES : NO;
 }
 - (void)setShouldReconnect:(BOOL)flag
 {
@@ -333,7 +333,7 @@ enum XMPPClientFlags
 
 - (BOOL)allowsPlaintextAuth
 {
-	return (BOOL)(flags & kAllowsPlaintextAuth);
+	return (flags & kAllowsPlaintextAuth) ? YES : NO;
 }
 - (void)setAllowsPlaintextAuth:(BOOL)flag
 {
@@ -421,7 +421,7 @@ enum XMPPClientFlags
 
 - (BOOL)requestedRoster
 {
-	return (BOOL)(flags & kRequestedRoster);
+	return (flags & kRequestedRoster) ? YES : NO;
 }
 - (void)setRequestedRoster:(BOOL)flag
 {
@@ -433,7 +433,7 @@ enum XMPPClientFlags
 
 - (BOOL)hasRoster
 {
-	return (BOOL)(flags & kHasRoster);
+	return (flags & kHasRoster) ? YES : NO;
 }
 - (void)setHasRoster:(BOOL)flag
 {
