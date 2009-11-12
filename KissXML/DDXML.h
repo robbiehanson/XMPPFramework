@@ -54,4 +54,17 @@
   #define NSXMLNotationDeclarationKind DDXMLNotationDeclarationKind
 #endif
 
+#ifndef NSXMLNodeOptionsNone
+  #define NSXMLNodeOptionsNone DDXMLNodeOptionsNone
+#endif
+#ifndef NSXMLNodeExpandEmptyElement
+  #define NSXMLNodeExpandEmptyElement DDXMLNodeExpandEmptyElement
+#endif
+#ifndef NSXMLNodeCompactEmptyElement
+  #define NSXMLNodeCompactEmptyElement DDXMLNodeCompactEmptyElement
+#endif
+#ifndef NSXMLNodePrettyPrint
+  #define NSXMLNodePrettyPrint DDXMLNodePrettyPrint
+#endif
+
 #endif
