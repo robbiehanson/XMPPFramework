@@ -61,16 +61,16 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	// Each node object is allocated and placed in the list.
 	// It is not deallocated until it is later removed from the linked list.
 	
-	if(delegateList != nil)
+	if(delegateList != NULL)
 	{
-        node->prev = nil;
+        node->prev = NULL;
 		node->next = delegateList;
 		node->next->prev = node;
 	}
     else
     {
-        node->prev = nil;
-        node->next = nil;
+        node->prev = NULL;
+        node->next = NULL;
     }
 	
 	delegateList = node;
@@ -81,7 +81,7 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	MulticastDelegateListNode *node = delegateList;
 	NSUInteger nodeIndex = 0;
 	
-	while(node != nil)
+	while(node != NULL)
 	{
 		if(delegate == node->delegate)
 		{
@@ -95,12 +95,12 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
             // We also want to properly update our delegateList pointer,
             // which always points to the "first" element in the list. (Most recently added.)
             
-			if(node->prev != nil)
+			if(node->prev != NULL)
 				node->prev->next = node->next;
 			else
 				delegateList = node->next;
 			
-			if(node->next != nil)
+			if(node->next != NULL)
 				node->next->prev = node->prev;
 			
 			// We do NOT change the prev/next pointers of the node.
@@ -127,12 +127,12 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 {
 	MulticastDelegateListNode *node = delegateList;
 	
-	while(node != nil)
+	while(node != NULL)
 	{
 		MulticastDelegateListNode *next = node->next;
 		
-		node->prev = nil;
-		node->next = nil;
+		node->prev = NULL;
+		node->next = NULL;
 		
         MulticastDelegateListNodeRelease(node);
 		
@@ -140,7 +140,7 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	}
 	
 	currentInvocationIndex = 0;
-	delegateList = nil;
+	delegateList = NULL;
 }
 
 - (NSUInteger)count
@@ -148,7 +148,7 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	NSUInteger count = 0;
 	
 	MulticastDelegateListNode *node;
-	for(node = delegateList; node != nil; node = node->next)
+	for(node = delegateList; node != NULL; node = node->next)
 	{
 		count++;
 	}
@@ -165,10 +165,10 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	// We can take advantage of this if we only have one delegate (a common case),
 	// or simply one delegate that responds to this selector.
 	
-	MulticastDelegateListNode *foundNode = nil;
+	MulticastDelegateListNode *foundNode = NULL;
 	
 	MulticastDelegateListNode *node = delegateList;
-	while(node)
+	while(node != NULL)
 	{
 		if([node->delegate respondsToSelector:aSelector])
 		{
@@ -196,7 +196,7 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
 {
 	MulticastDelegateListNode *node;
-	for(node = delegateList; node != nil; node = node->next)
+	for(node = delegateList; node != NULL; node = node->next)
 	{
 		NSMethodSignature *result = [node->delegate methodSignatureForSelector:aSelector];
 		
@@ -239,13 +239,13 @@ void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	// The currentInvocationIndex variable prevents us from invoking a delegate that
 	// was added in the middle of our invocation loop below.
 	
-	while(node->next != nil)
+	while((node != NULL) && (node->next != NULL))
 	{
 		node = node->next;
 		currentInvocationIndex++;
 	}
 	
-	while(node != nil)
+	while(node != NULL)
 	{
 		// Retain the node before we invoke the delegate.
 		// We do this because the delegate might remove itself from the delegate list within the invoked method.
