@@ -1,10 +1,300 @@
 #import "XMPPParser.h"
-#import "DDXMLPrivate.h"
+
+#if TARGET_OS_IPHONE
+  #import "DDXMLPrivate.h"
+#endif
 
 #define CHECK_FOR_NULL(value) do { if(value == NULL) { xmlAbortDueToMemoryShortage(ctxt); return; } } while(false)
 
+#if !TARGET_OS_IPHONE
+  static void recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode);
+#endif
+
 
 @implementation XMPPParser
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark iPhone
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if TARGET_OS_IPHONE
+
+static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
+{
+	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
+	{
+		// We first copy the root node.
+		// We do this to allow the delegate to retain and make changes to the reported root
+		// without affecting the underlying xmpp parser.
+		
+		// xmlCopyNode(const xmlNodePtr node, int extended)
+		// 
+		// node:
+		//   the node to copy
+		// extended:
+		//   if 1 do a recursive copy (properties, namespaces and children when applicable)
+		//   if 2 copy properties and namespaces (when applicable)
+		
+		xmlNodePtr rootCopy = xmlCopyNode(root, 2);
+		DDXMLElement *rootCopyWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)rootCopy];
+		
+		[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
+		
+		// Note: DDXMLElement will properly free the rootCopy when it's deallocated.
+	}
+}
+
+static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
+{
+	DDXMLElement *childWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)child];
+	[childWrapper detach];
+	
+	// Note: We want to detach the child from the root even if the delegate method isn't setup.
+	// This prevents the doc from growing infinitely large.
+	
+	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
+	{
+		[parser->delegate xmppParser:parser didReadElement:childWrapper];
+	}
+	
+	// Note: DDXMLElement will properly free the child when it's deallocated.
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Mac
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#else
+
+static void setName(NSXMLElement *element, xmlNodePtr node)
+{
+	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
+	
+	if(node->name == NULL)
+	{
+		[element setName:@""];
+		return;
+	}
+	
+	if((node->ns != NULL) && (node->ns->prefix != NULL))
+	{
+		// E.g: <deusty:element xmlns:deusty="deusty.com"/>
+		
+		NSString *prefix = [[NSString alloc] initWithUTF8String:(const char *)node->ns->prefix];
+		NSString *name   = [[NSString alloc] initWithUTF8String:(const char *)node->name];
+		
+		NSString *elementName = [[NSString alloc] initWithFormat:@"%@:%@", prefix, name];
+		[element setName:elementName];
+		[elementName release];
+		
+		[name release];
+		[prefix release];
+	}
+	else
+	{
+		NSString *elementName = [[NSString alloc] initWithUTF8String:(const char *)node->name];
+		[element setName:elementName];
+		[elementName release];
+	}
+}
+
+static void addNamespaces(NSXMLElement *element, xmlNodePtr node)
+{
+	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
+	
+	xmlNsPtr nsNode = node->nsDef;
+	while(nsNode != NULL)
+	{
+		if(nsNode->href == NULL)
+		{
+			// Namespace doesn't have a value!
+		}
+		else
+		{
+			NSXMLNode *ns = [[NSXMLNode alloc] initWithKind:NSXMLNamespaceKind];
+			
+			if(nsNode->prefix != NULL)
+			{
+				NSString *nsName = [[NSString alloc] initWithUTF8String:(const char *)nsNode->prefix];
+				[ns setName:nsName];
+				[nsName release];
+			}
+			else
+			{
+				// Default namespace.
+				// E.g: xmlns="deusty.com"
+				
+				[ns setName:@""];
+			}
+			
+			NSString *nsValue = [[NSString alloc] initWithUTF8String:(const char *)nsNode->href];
+			[ns setStringValue:nsValue];
+			[nsValue release];
+			
+			[element addNamespace:ns];
+			[ns release];
+		}
+		
+		nsNode = nsNode->next;
+	}
+}
+
+static void addChildren(NSXMLElement *element, xmlNodePtr node)
+{
+	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
+	
+	xmlNodePtr childNode = node->children;
+	while(childNode != NULL)
+	{
+		if(childNode->type == XML_ELEMENT_NODE)
+		{
+			recursiveAddChild(element, childNode);
+		}
+		else if(childNode->type == XML_TEXT_NODE)
+		{
+			if(childNode->content != NULL)
+			{
+				NSString *value = [[NSString alloc] initWithUTF8String:(const char *)childNode->content];
+				[element setStringValue:value];
+				[value release];
+			}
+		}
+		
+		childNode = childNode->next;
+	}
+}
+
+static void addAttributes(NSXMLElement *element, xmlNodePtr node)
+{
+	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
+	
+	xmlAttrPtr attrNode = node->properties;
+	while(attrNode != NULL)
+	{
+		if(attrNode->name == NULL)
+		{
+			// Attribute doesn't have a name!
+		}
+		else if(attrNode->children == NULL)
+		{
+			// Attribute doesn't have a value node!
+		}
+		else if(attrNode->children->content == NULL)
+		{
+			// Attribute doesn't have a value!
+		}
+		else
+		{
+			NSXMLNode *attr = [[NSXMLNode alloc] initWithKind:NSXMLAttributeKind];
+			
+			if((attrNode->ns != NULL) && (attrNode->ns->prefix != NULL))
+			{
+				// E.g: <element xmlns:deusty="deusty.com" deusty:attr="value"/>
+				
+				NSString *prefix = [[NSString alloc] initWithUTF8String:(const char *)attrNode->ns->prefix];
+				NSString *name   = [[NSString alloc] initWithUTF8String:(const char *)attrNode->name];
+				
+				NSString *attrName = [[NSString alloc] initWithFormat:@"%@:%@", prefix, name];
+				[attr setName:attrName];
+				[attrName release];
+				
+				[name release];
+				[prefix release];
+			}
+			else
+			{
+				NSString *attrName = [[NSString alloc] initWithUTF8String:(const char *)attrNode->name];
+				[attr setName:attrName];
+				[attrName release];
+			}
+			
+			NSString *attrValue = [[NSString alloc] initWithUTF8String:(const char *)attrNode->children->content];
+			[attr setStringValue:attrValue];
+			[attrValue release];
+			
+			[element addAttribute:attr];
+			[attr release];
+		}
+		
+		attrNode = attrNode->next;
+	}
+}
+
+/**
+ * Recursively adds all the child elements to the given parent.
+ * 
+ * Note: This method is almost the same as nsxmlFromLibxml, with one important difference.
+ * It doen't add any objects to the autorelease pool.
+**/
+static void recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode)
+{
+	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
+	
+	NSXMLElement *child = [[NSXMLElement alloc] initWithKind:NSXMLElementKind];
+	
+	setName(child, childNode);
+	
+	addNamespaces(child, childNode);
+	
+	addChildren(child, childNode);
+	addAttributes(child, childNode);
+	
+	[parent addChild:child];
+	[child release];
+}
+
+/**
+ * Creates and returns an NSXMLElement from the given node.
+ * Use this method after finding the root element, or root.child element.
+**/
+static NSXMLElement* nsxmlFromLibxml(xmlNodePtr rootNode)
+{
+	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
+	
+	NSXMLElement *root = [[NSXMLElement alloc] initWithKind:NSXMLElementKind];
+	
+	setName(root, rootNode);
+	
+	addNamespaces(root, rootNode);
+	
+	addChildren(root, rootNode);
+	addAttributes(root, rootNode);
+	
+	return [root autorelease];
+}
+
+static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
+{
+	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
+	{
+		NSXMLElement *nsRoot = nsxmlFromLibxml(root);
+		
+		[parser->delegate xmppParser:parser didReadRoot:nsRoot];
+	}
+}
+
+static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
+{
+	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
+	{
+		NSXMLElement *nsChild = nsxmlFromLibxml(child);
+		
+		[parser->delegate xmppParser:parser didReadElement:nsChild];
+	}
+	
+	// Note: We want to detach the child from the root even if the delegate method isn't setup.
+	// This prevents the doc from growing infinitely large.
+	
+	// Detach and free child to keep memory footprint small
+	xmlUnlinkNode(child);
+	xmlFreeNode(child);
+}
+
+#endif
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Common
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * This method is called at the end of the xmlStartElement method.
@@ -24,27 +314,7 @@ static void postStartElement(xmlParserCtxt *ctxt)
 			xmlNodePtr root = xmlDocGetRootElement(ctxt->myDoc);
 			if(root)
 			{
-				if([parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
-				{
-					// We first copy the root node.
-					// We do this to allow the delegate to retain and make changes to the reported root
-					// without affecting the underlying xmpp parser.
-					
-					// xmlCopyNode(const xmlNodePtr node, int extended)
-					// 
-					// node:
-					//   the node to copy
-					// extended:
-					//   if 1 do a recursive copy (properties, namespaces and children when applicable)
-					//   if 2 copy properties and namespaces (when applicable)
-					
-					xmlNodePtr rootCopy = xmlCopyNode(root, 2);
-					DDXMLElement *rootCopyWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)rootCopy];
-					
-					[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
-					
-					// Note: DDXMLElement will properly free the rootCopy when it's deallocated.
-				}
+				onDidReadRoot(parser, root);
 				
 				parser->hasReportedRoot = YES;
 			}
@@ -75,19 +345,9 @@ static void postEndElement(xmlParserCtxt *ctxt)
 		{
 			if(child->type == XML_ELEMENT_NODE)
 			{
-				DDXMLElement *childWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)child];
-				[childWrapper detach];
+				onDidReadElement(parser, child);
 				
-				// Note: We want to detach the child from the root even if the delegate method isn't setup.
-				// This prevents the doc from growing infinitely large.
-				
-				if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
-				{
-					[parser->delegate xmppParser:parser didReadElement:childWrapper];
-				}
-				
-				// Note: DDXMLElement will properly free the child when it's deallocated.
-				
+				// Exit while loop
 				break;
 			}
 			

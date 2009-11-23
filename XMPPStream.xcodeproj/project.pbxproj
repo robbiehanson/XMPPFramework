@@ -90,6 +90,9 @@
 		DCCE55390BDC6290000E2798 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55380BDC6290000E2798 /* AsyncSocket.m */; };
 		DCCE55610BDC6FAC000E2798 /* RosterController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55600BDC6FAC000E2798 /* RosterController.m */; };
 		DCCE55680BDC7030000E2798 /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55670BDC7030000E2798 /* XMPPStream.m */; };
+		DCD8D35510BA21BE00C71631 /* XMPPParser.h in Headers */ = {isa = PBXBuildFile; fileRef = DCD8D35310BA21BE00C71631 /* XMPPParser.h */; };
+		DCD8D35610BA21BE00C71631 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD8D35410BA21BE00C71631 /* XMPPParser.m */; };
+		DCD8D35710BA21BE00C71631 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD8D35410BA21BE00C71631 /* XMPPParser.m */; };
 		DCEFA0760E8D4867006E145E /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCEFA0750E8D4867006E145E /* libidn.a */; };
 		DCF825950D748DC000BFABDE /* RequestController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825940D748DC000BFABDE /* RequestController.m */; };
 		DCF825F50D749A5100BFABDE /* ChatController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825F40D749A5100BFABDE /* ChatController.m */; };
@@ -188,6 +191,8 @@
 		DCCE55660BDC7030000E2798 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
 		DCCE55670BDC7030000E2798 /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DCD886890E8CE26A00CD15A2 /* DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXML.h; path = KissXML/DDXML.h; sourceTree = "<group>"; };
+		DCD8D35310BA21BE00C71631 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
+		DCD8D35410BA21BE00C71631 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		DCEFA0750E8D4867006E145E /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = libidn/Mac/libidn.a; sourceTree = "<group>"; };
 		DCF825930D748DC000BFABDE /* RequestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestController.h; sourceTree = "<group>"; };
 		DCF825940D748DC000BFABDE /* RequestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestController.m; sourceTree = "<group>"; };
@@ -411,6 +416,8 @@
 				DCB9BBF30DDCEE6B002DA335 /* Categories */,
 				DCB9BAF80DDC962C002DA335 /* Utilities */,
 				DCB9BBEF0DDCEDA6002DA335 /* XMPP.h */,
+				DCD8D35310BA21BE00C71631 /* XMPPParser.h */,
+				DCD8D35410BA21BE00C71631 /* XMPPParser.m */,
 				DCCE55660BDC7030000E2798 /* XMPPStream.h */,
 				DCCE55670BDC7030000E2798 /* XMPPStream.m */,
 				DCB9BA0A0DDB71E7002DA335 /* XMPPClient.h */,
@@ -482,6 +489,7 @@
 				DC6E92FE1090E34900070ADE /* TURNSocket.h in Headers */,
 				DC6E93041090E41300070ADE /* DDLog.h in Headers */,
 				DC6E98EB1098A4C700070ADE /* AppDelegate.h in Headers */,
+				DCD8D35510BA21BE00C71631 /* XMPPParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -619,6 +627,7 @@
 				DC6E92FA1090E31000070ADE /* DDNumber.m in Sources */,
 				DC6E92FF1090E34900070ADE /* TURNSocket.m in Sources */,
 				DC6E98EC1098A4C700070ADE /* AppDelegate.m in Sources */,
+				DCD8D35610BA21BE00C71631 /* XMPPParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,6 +673,7 @@
 				DC6E92FB1090E31000070ADE /* DDNumber.m in Sources */,
 				DC6E93001090E34900070ADE /* TURNSocket.m in Sources */,
 				DC6E98ED1098A4C700070ADE /* AppDelegate.m in Sources */,
+				DCD8D35710BA21BE00C71631 /* XMPPParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -892,7 +902,9 @@
 				GCC_WARN_MISSING_PARENTHESES = NO;
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH)";
+				OTHER_LDFLAGS = "-lxml2";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
@@ -910,6 +922,8 @@
 				GCC_WARN_MISSING_PARENTHESES = NO;
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				OTHER_LDFLAGS = "-lxml2";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 			};
