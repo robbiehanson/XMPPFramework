@@ -1,18 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <libxml2/libxml/parser.h>
+#import "DDXML.h"
 
-@class DDXMLElement;
-
-/**
- * This class was designed specifically for the iPhone
- * and ties in with libxml and the KissXML framework (which is the NSXML replacement for the iPhone SDK).
- * 
- * The result is a huge performance boost, especially when parsing large xmpp fragments.
- * For example, when parsing large rosters or big IQ responses.
- * 
- * You should NOT use this class on non-iPhone platforms.
- * Another separate XMPPParser is planned for Mac OS X platforms.
-**/
 
 @interface XMPPParser : NSObject
 {
@@ -44,9 +33,9 @@
 @protocol XMPPParserDelegate
 @optional
 
-- (void)xmppParser:(XMPPParser *)sender didReadRoot:(DDXMLElement *)root;
+- (void)xmppParser:(XMPPParser *)sender didReadRoot:(NSXMLElement *)root;
 
-- (void)xmppParser:(XMPPParser *)sender didReadElement:(DDXMLElement *)element;
+- (void)xmppParser:(XMPPParser *)sender didReadElement:(NSXMLElement *)element;
 
 - (void)xmppParserDidEnd:(XMPPParser *)sender;
 

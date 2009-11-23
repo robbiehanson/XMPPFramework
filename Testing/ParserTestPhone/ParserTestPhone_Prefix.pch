@@ -1,0 +1,8 @@
+//
+// Prefix header for all source files of the 'ParserTestPhone' target in the 'ParserTestPhone' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+#endif
