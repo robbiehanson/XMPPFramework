@@ -31,9 +31,11 @@
 NSString *const AsyncSocketException = @"AsyncSocketException";
 NSString *const AsyncSocketErrorDomain = @"AsyncSocketErrorDomain";
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 // Mutex lock used by all instances of AsyncSocket, to protect getaddrinfo.
-// The man page says it is not thread-safe. (As of Mac OS X 10.4.7, and possibly earlier)
+// Prior to Mac OS X 10.5 this method was not thread-safe.
 static NSString *getaddrinfoLock = @"lock";
+#endif
 
 enum AsyncSocketFlags
 {
@@ -129,7 +131,7 @@ enum AsyncSocketFlags
 
 // Security
 - (void)maybeStartTLS;
-- (void)onTLSStarted:(BOOL)flag;
+- (void)onTLSHandshakeSuccessful;
 
 // Callbacks
 - (void)doCFCallback:(CFSocketCallBackType)type forSocket:(CFSocketRef)sock withAddress:(NSData *)address withData:(const void *)pData;
@@ -768,10 +770,16 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 - (BOOL)acceptOnAddress:(NSString *)hostaddr port:(UInt16)port error:(NSError **)errPtr
 {
 	if (theDelegate == NULL)
-		[NSException raise:AsyncSocketException format:@"Attempting to accept without a delegate. Set a delegate first."];
+    {
+		[NSException raise:AsyncSocketException
+		            format:@"Attempting to accept without a delegate. Set a delegate first."];
+    }
 	
 	if (theSocket4 != NULL || theSocket6 != NULL)
-		[NSException raise:AsyncSocketException format:@"Attempting to accept while connected or accepting connections. Disconnect first."];
+    {
+		[NSException raise:AsyncSocketException
+		            format:@"Attempting to accept while connected or accepting connections. Disconnect first."];
+    }
 
 	// Set up the listen sockaddr structs if needed.
 	
@@ -823,8 +831,10 @@ static void MyCFWriteStreamCallback(CFWriteStreamRef stream, CFStreamEventType t
 	else
 	{
 		NSString *portStr = [NSString stringWithFormat:@"%hu", port];
-		
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 		@synchronized (getaddrinfoLock)
+#endif
 		{
 			struct addrinfo hints, *res, *res0;
 			
@@ -970,14 +980,14 @@ Failed:
 {
 	if(theDelegate == NULL)
 	{
-		NSString *message = @"Attempting to connect without a delegate. Set a delegate first.";
-		[NSException raise:AsyncSocketException format:message];
+		[NSException raise:AsyncSocketException
+		            format:@"Attempting to connect without a delegate. Set a delegate first."];
 	}
 
 	if(theSocket4 != NULL || theSocket6 != NULL)
 	{
-		NSString *message = @"Attempting to connect while connected or accepting connections. Disconnect first.";
-		[NSException raise:AsyncSocketException format:message];
+		[NSException raise:AsyncSocketException
+		            format:@"Attempting to connect while connected or accepting connections. Disconnect first."];
 	}
 	
 	if(![self createStreamsToHost:hostname onPort:port error:errPtr]) goto Failed;
@@ -1018,14 +1028,14 @@ Failed:
 {
 	if (theDelegate == NULL)
 	{
-		NSString *message = @"Attempting to connect without a delegate. Set a delegate first.";
-		[NSException raise:AsyncSocketException format:message];
+		[NSException raise:AsyncSocketException
+		            format:@"Attempting to connect without a delegate. Set a delegate first."];
 	}
 	
 	if (theSocket4 != NULL || theSocket6 != NULL)
 	{
-		NSString *message = @"Attempting to connect while connected or accepting connections. Disconnect first.";
-		[NSException raise:AsyncSocketException format:message];
+		[NSException raise:AsyncSocketException
+		            format:@"Attempting to connect while connected or accepting connections. Disconnect first."];
 	}
 	
 	if(![self createSocketForAddress:remoteAddr error:errPtr])   goto Failed;
@@ -1462,13 +1472,13 @@ Failed:
 			return;
 		}
 		
+        // Stop the connection attempt timeout timer
+		[self endConnectTimeout];
+        
 		if ([theDelegate respondsToSelector:@selector(onSocket:didConnectToHost:port:)])
 		{
 			[theDelegate onSocket:self didConnectToHost:[self connectedHost] port:[self connectedPort]];
 		}
-		
-		// Stop the connection attempt timeout timer
-		[self endConnectTimeout];
 		
 		// Immediately deal with any already-queued requests.
 		[self maybeDequeueRead];
@@ -1550,14 +1560,19 @@ Failed:
 // Prepare partially read data for recovery.
 - (void)recoverUnreadData
 {
-	if((theCurrentRead != nil) && (theCurrentRead->bytesDone > 0))
+	if(theCurrentRead != nil)
 	{
 		// We never finished the current read.
-		// We need to move its data into the front of the partial read buffer.
+		// Check to see if it's a normal read packet (not AsyncSpecialPacket) and if it had read anything yet.
 		
-		[partialReadBuffer replaceBytesInRange:NSMakeRange(0, 0)
-									 withBytes:[theCurrentRead->buffer bytes]
-										length:theCurrentRead->bytesDone];
+		if(([theCurrentRead isKindOfClass:[AsyncReadPacket class]]) && (theCurrentRead->bytesDone > 0))
+		{
+			// We need to move its data into the front of the partial read buffer.
+			
+			[partialReadBuffer replaceBytesInRange:NSMakeRange(0, 0)
+										 withBytes:[theCurrentRead->buffer bytes]
+											length:theCurrentRead->bytesDone];
+		}
 	}
 	
 	[self emptyQueues];
@@ -2818,7 +2833,18 @@ Failed:
 
 - (void)startTLS:(NSDictionary *)tlsSettings
 {
-	if([tlsSettings count] == 0) return;
+	if(tlsSettings == nil)
+    {
+        // Passing nil/NULL to CFReadStreamSetProperty will appear to work the same as passing an empty dictionary,
+        // but causes problems if we later try to fetch the remote host's certificate.
+        // 
+        // To be exact, it causes the following to return NULL instead of the normal result:
+        // CFReadStreamCopyProperty(readStream, kCFStreamPropertySSLPeerCertificates)
+        // 
+        // So we use an empty dictionary instead, which works perfectly.
+        
+        tlsSettings = [NSDictionary dictionary];
+    }
 	
 	AsyncSpecialPacket *packet = [[AsyncSpecialPacket alloc] initWithTLSSettings:tlsSettings];
 	
@@ -2843,28 +2869,28 @@ Failed:
 	{
 		AsyncSpecialPacket *tlsPacket = (AsyncSpecialPacket *)theCurrentRead;
 		
-		BOOL didSecureReadStream = CFReadStreamSetProperty(theReadStream, kCFStreamPropertySSLSettings,
+		BOOL didStartOnReadStream = CFReadStreamSetProperty(theReadStream, kCFStreamPropertySSLSettings,
 														   (CFDictionaryRef)tlsPacket->tlsSettings);
-		BOOL didSecureWriteStream = CFWriteStreamSetProperty(theWriteStream, kCFStreamPropertySSLSettings,
+		BOOL didStartOnWriteStream = CFWriteStreamSetProperty(theWriteStream, kCFStreamPropertySSLSettings,
 															 (CFDictionaryRef)tlsPacket->tlsSettings);
 		
-		if(!didSecureReadStream || !didSecureWriteStream)
+		if(!didStartOnReadStream || !didStartOnWriteStream)
 		{
-			[self onTLSStarted:NO];
+            [self closeWithError:[self getSocketError]];
 		}
 	}
 }
 
-- (void)onTLSStarted:(BOOL)flag
+- (void)onTLSHandshakeSuccessful
 {
 	if((theFlags & kStartingReadTLS) && (theFlags & kStartingWriteTLS))
 	{
 		theFlags &= ~kStartingReadTLS;
 		theFlags &= ~kStartingWriteTLS;
 		
-		if([theDelegate respondsToSelector:@selector(onSocket:didSecure:)])
+		if([theDelegate respondsToSelector:@selector(onSocketDidSecure:)])
 		{
-			[theDelegate onSocket:self didSecure:flag];
+			[theDelegate onSocketDidSecure:self];
 		}
 		
 		[self endCurrentRead];
@@ -2917,7 +2943,7 @@ Failed:
 			break;
 		case kCFStreamEventHasBytesAvailable:
 			if(theFlags & kStartingReadTLS)
-				[self onTLSStarted:YES];
+				[self onTLSHandshakeSuccessful];
 			else
 				[self doBytesAvailable];
 			break;
@@ -2944,7 +2970,7 @@ Failed:
 			break;
 		case kCFStreamEventCanAcceptBytes:
 			if(theFlags & kStartingWriteTLS)
-				[self onTLSStarted:YES];
+				[self onTLSHandshakeSuccessful];
 			else
 				[self doSendBytes];
 			break;
