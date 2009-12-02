@@ -130,10 +130,13 @@ typedef enum AsyncSocketError AsyncSocketError;
 				 bytesDone:(CFIndex)length;
 
 /**
- * Called after the socket has completed SSL/TLS negotiation.
+ * Called after the socket has successfully completed SSL/TLS negotiation.
  * This method is not called unless you use the provided startTLS method.
+ * 
+ * If a SSL/TLS negotiation fails (invalid certificate, etc) then the socket will immediately close,
+ * and the onSocket:willDisconnectWithError: delegate method will be called with the specific SSL error code.
 **/
-- (void)onSocket:(AsyncSocket *)sock didSecure:(BOOL)flag;
+- (void)onSocketDidSecure:(AsyncSocket *)sock;
 
 @end
 
@@ -403,7 +406,23 @@ typedef enum AsyncSocketError AsyncSocketError;
  * 
  * Please refer to Apple's documentation for associated values, as well as other possible keys.
  * 
- * If you pass in nil or an empty dictionary, this method does nothing and the delegate will not be called.
+ * If you pass in nil or an empty dictionary, the default settings will be used.
+ * 
+ * The default settings will check to make sure the remote party's certificate is signed by a
+ * trusted 3rd party certificate agency (e.g. verisign) and that the certificate is not expired.
+ * However it will not verify the name on the certificate unless you
+ * give it a name to verify against via the kCFStreamSSLPeerName key.
+ * The security implications of this are important to understand.
+ * Imagine you are attempting to create a secure connection to MySecureServer.com,
+ * but your socket gets directed to MaliciousServer.com because of a hacked DNS server.
+ * If you simply use the default settings, and MaliciousServer.com has a valid certificate,
+ * the default settings will not detect any problems since the certificate is valid.
+ * To properly secure your connection in this particular scenario you
+ * should set the kCFStreamSSLPeerName property to "MySecureServer.com".
+ * If you do not know the peer name of the remote host in advance (for example, you're not sure
+ * if it will be "domain.com" or "www.domain.com"), then you can use the default settings to validate the
+ * certificate, and then use the X509Certificate class to verify the issuer after the socket has been secured.
+ * The X509Certificate class is part of the CocoaAsyncSocket open source project.
 **/
 - (void)startTLS:(NSDictionary *)tlsSettings;
 
@@ -417,7 +436,7 @@ typedef enum AsyncSocketError AsyncSocketError;
  * The default pre-buffering state is controlled by the DEFAULT_PREBUFFERING definition.
  * It is highly recommended one leave this set to YES.
  * 
- * This method exists in case pre-buffering needs to be disabled by default for some reason.
+ * This method exists in case pre-buffering needs to be disabled by default for some unforeseen reason.
  * In that case, this method exists to allow one to easily enable pre-buffering when ready.
 **/
 - (void)enablePreBuffering;
