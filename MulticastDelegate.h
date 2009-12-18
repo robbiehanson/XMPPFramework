@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 
+@class MulticastDelegateEnumerator;
+
 struct MulticastDelegateListNode {
 	id delegate;
 	struct MulticastDelegateListNode * prev;
@@ -11,7 +13,6 @@ typedef struct MulticastDelegateListNode MulticastDelegateListNode;
 
 @interface MulticastDelegate : NSObject
 {
-	NSUInteger currentInvocationIndex;
 	MulticastDelegateListNode *delegateList;
 }
 
@@ -21,5 +22,19 @@ typedef struct MulticastDelegateListNode MulticastDelegateListNode;
 - (void)removeAllDelegates;
 
 - (NSUInteger)count;
+
+- (MulticastDelegateEnumerator *)delegateEnumerator;
+
+@end
+
+@interface MulticastDelegateEnumerator : NSObject
+{
+	NSUInteger numDelegates;
+	NSUInteger currentDelegateIndex;
+	MulticastDelegateListNode **delegates;
+}
+
+- (id)nextDelegate;
+- (id)nextDelegateForSelector:(SEL)selector;
 
 @end
