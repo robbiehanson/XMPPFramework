@@ -1,4 +1,6 @@
 #import <Foundation/Foundation.h>
+#import <SystemConfiguration/SystemConfiguration.h>
+
 #import "XMPPStream.h"
 #import "MulticastDelegate.h"
 
@@ -9,11 +11,8 @@
 @class XMPPMessage;
 @class XMPPPresence;
 
-#if !TARGET_OS_IPHONE
-@class SCNotificationManager;
-#endif
-
 @protocol XMPPClientDelegate;
+
 
 
 @interface XMPPClient : NSObject <XMPPStreamDelegate>
@@ -37,13 +36,19 @@
 	
 	NSMutableArray *earlyPresenceElements;
 	
-#if !TARGET_OS_IPHONE	
-	SCNotificationManager *scNotificationManager;
-#endif
+	SCNetworkReachabilityRef reachability;
 }
 
 - (id)init;
 
+/**
+ * The XMPPClient use a multicast delegate.
+ * This allows one to add multiple delegates to a single XMPPClient instance,
+ * which makes it easier to separate various components and extensions.
+ * 
+ * For example, if you were implementing two different custom extensions on top of XMPP,
+ * you could put them in separate classes, and simply add each as a delegate.
+**/
 - (void)addDelegate:(id)delegate;
 - (void)removeDelegate:(id)delegate;
 
@@ -168,5 +173,17 @@
 - (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message;
 
 - (void)xmppClient:(XMPPClient *)sender didReceiveError:(NSXMLElement *)error;
+
+/**
+ * When autoReconnect is enabled, this method may be used to fine tune when the XMPPClient
+ * should and should not attempt an auto reconnect.
+ * 
+ * For example, if on the iPhone, on may want to prevent auto reconnect when WiFi is not available.
+**/
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
+- (BOOL)xmppClient:(XMPPClient *)sender shouldAttemptAutoReconnect:(SCNetworkConnectionFlags)connectionFlags;
+#else
+- (BOOL)xmppClient:(XMPPClient *)sender shouldAttemptAutoReconnect:(SCNetworkReachabilityFlags)reachabilityFlags;
+#endif
 
 @end

@@ -7,10 +7,6 @@
 #import "XMPPPresence.h"
 #import "NSXMLElementAdditions.h"
 
-#if !TARGET_OS_IPHONE
-#import "SCNotificationManager.h"
-#endif
-
 enum XMPPClientFlags
 {
 	kUsesOldStyleSSL      = 1 << 0,  // If set, TLS is established prior to any communication (no StartTLS)
@@ -23,6 +19,11 @@ enum XMPPClientFlags
 	kRequestedRoster      = 1 << 7,  // If set, client has requested the roster
 	kHasRoster            = 1 << 8,  // If set, client has received the roster
 };
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
+  // SCNetworkConnectionFlags was renamed to SCNetworkReachabilityFlags in 10.6
+  typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
+#endif
 
 @interface XMPPClient (PrivateAPI)
 
@@ -45,6 +46,11 @@ enum XMPPClientFlags
 - (void)onDidReceiveBuddyRequest:(XMPPJID *)jid;
 - (void)onDidReceiveIQ:(XMPPIQ *)iq;
 - (void)onDidReceiveMessage:(XMPPMessage *)message;
+- (BOOL)onShouldAttemptAutoReconnect:(SCNetworkReachabilityFlags)reachabilityFlags;
+
+- (void)maybeSetupNetworkMonitoring;
+- (void)teardownNetworkMonitoring;
+- (void)maybeAttemptReconnectWithReachabilityFlags:(SCNetworkReachabilityFlags)flags;
 
 @end
 
@@ -74,16 +80,6 @@ enum XMPPClientFlags
 		roster = [[NSMutableDictionary alloc] initWithCapacity:10];
 		
 		earlyPresenceElements = [[NSMutableArray alloc] initWithCapacity:2];
-		
-#if !TARGET_OS_IPHONE		
-		scNotificationManager = [[SCNotificationManager alloc] init];
-		
-		// Register for network notifications from system configuration
-		[[NSNotificationCenter defaultCenter] addObserver:self 
-												 selector:@selector(networkStatusDidChange:) 
-													 name:@"State:/Network/Global/IPv4" 
-												   object:scNotificationManager];
-#endif
 	}
 	return self;
 }
@@ -105,10 +101,8 @@ enum XMPPClientFlags
 	[myUser release];
 	
 	[earlyPresenceElements release];
-
-#if !TARGET_OS_IPHONE	
-	[scNotificationManager release];
-#endif
+	
+	[self teardownNetworkMonitoring];
 	
 	[super dealloc];
 }
@@ -275,6 +269,11 @@ enum XMPPClientFlags
 		flags |= kAutoReconnect;
 	else
 		flags &= ~kAutoReconnect;
+    
+    if(flag)
+        [self maybeSetupNetworkMonitoring];
+    else
+        [self teardownNetworkMonitoring];
 }
 
 - (BOOL)shouldReconnect
@@ -296,6 +295,10 @@ enum XMPPClientFlags
 - (void)connect
 {
 	[self onConnecting];
+    
+    // Clear any previously stored stream error
+    [streamError release];
+    streamError = nil;
 	
 	if([self usesOldStyleSSL])
 		[xmppStream connectToSecureHost:domain onPort:port withVirtualHost:[myJID domain]];
@@ -308,6 +311,9 @@ enum XMPPClientFlags
 	// Turn off the shouldReconnect flag.
 	// This flag will tell us that we should not automatically attempt to reconnect when the connection closes.
 	[self setShouldReconnect:NO];
+	
+	// And we can stop monitoring the network for auto-reconnect now.
+	[self teardownNetworkMonitoring];
 	
 	[xmppStream disconnect];
 }
@@ -812,6 +818,26 @@ enum XMPPClientFlags
 	[multicastDelegate xmppClient:self didReceiveError:error];
 }
 
+- (BOOL)onShouldAttemptAutoReconnect:(SCNetworkReachabilityFlags)reachabilityFlags
+{
+	// If ALL of the delegates return YES, then the result is YES.
+	// If ANY of the delegates returns NO, then the result is NO.
+	// If there are no delegates, the default answer is YES.
+	
+	SEL selector = @selector(xmppClient:shouldAttemptAutoReconnect:);
+	BOOL result = YES;
+	
+	MulticastDelegateEnumerator *delegateEnum = [multicastDelegate delegateEnumerator];
+	id delegate;
+	
+	while(result && (delegate = [delegateEnum nextDelegateForSelector:selector]))
+	{
+		result = [delegate xmppClient:self shouldAttemptAutoReconnect:reachabilityFlags];
+	}
+	
+	return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -839,9 +865,12 @@ enum XMPPClientFlags
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
 	// We're now connected and properly authenticated
-	// Should we get accidentally disconnected we should automatically reconnect (if kAutoReconnect is set)
+	// Should we get accidentally disconnected we should automatically reconnect (if autoReconnect is set)
 	[self setShouldReconnect:YES];
-	
+    
+    // Setup network monitoring (if autoReconnect is set)
+	[self maybeSetupNetworkMonitoring];
+    
 	// Update myUser
 	[myUser release];
 	myUser = [[XMPPUser alloc] initWithJID:myJID];
@@ -1032,7 +1061,7 @@ enum XMPPClientFlags
 		{
 			// We were fully connected to the XMPP server, but we've been disconnected for some reason.
 			// We will wait for a few seconds or so, and then attempt to reconnect if possible
-			[self performSelector:@selector(attemptReconnect:) withObject:nil afterDelay:4.0];
+			[self performSelector:@selector(maybeAttemptReconnectPostDisconnect) withObject:nil afterDelay:4.0];
 		}
 	}
 	else
@@ -1056,48 +1085,72 @@ enum XMPPClientFlags
 #pragma mark Reconnecting
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+//	PrintReachabilityFlags(flags);
+	
+	XMPPClient *client = (XMPPClient *)info;
+	[client maybeAttemptReconnectWithReachabilityFlags:flags];
+	
+	[pool release];
+}
+
+- (void)maybeSetupNetworkMonitoring
+{
+	if ([self autoReconnect] && [self shouldReconnect] && (reachability == NULL))
+	{
+		reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [domain UTF8String]);
+		
+		if (reachability)
+		{
+			SCNetworkReachabilityScheduleWithRunLoop(reachability, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+
+			SCNetworkReachabilityContext context = {0, self, NULL, NULL, NULL};
+			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
+		}
+	}
+}
+
+- (void)teardownNetworkMonitoring
+{
+	if (reachability)
+	{
+		SCNetworkReachabilityUnscheduleFromRunLoop(reachability, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+		CFRelease(reachability);
+		reachability = NULL;
+	}
+}
+
 /**
  * This method is invoked a few seconds after a disconnection from the server,
  * or after we receive notification that we may once again have a working internet connection.
  * If we are still disconnected, it will attempt to reconnect if the network connection appears to be online.
 **/
-- (void)attemptReconnect:(id)ignore
+- (void)maybeAttemptReconnectPostDisconnect
 {
-	NSLog(@"XMPPClient: attempReconnect method called...");
-	
-	if([xmppStream isDisconnected] && [self autoReconnect] && [self shouldReconnect])
+	if (reachability)
 	{
-#if TARGET_OS_IPHONE
-		[self connect];
-#else
-		SCNetworkConnectionFlags reachabilityStatus;
-		BOOL success = SCNetworkCheckReachabilityByName("www.deusty.com", &reachabilityStatus);
-		
-		if(success && (reachabilityStatus & kSCNetworkFlagsReachable))
+		SCNetworkReachabilityFlags reachabilityFlags;
+		if (SCNetworkReachabilityGetFlags(reachability, &reachabilityFlags))
 		{
-			[self connect];
+		//	PrintReachabilityFlags(reachabilityFlags);
+
+			[self maybeAttemptReconnectWithReachabilityFlags:reachabilityFlags];
 		}
-#endif
 	}
 }
 
-- (void)networkStatusDidChange:(NSNotification *)notification
+- (void)maybeAttemptReconnectWithReachabilityFlags:(SCNetworkReachabilityFlags)reachabilityFlags
 {
-	// The following information needs to be tested using multiple interfaces
-	
-	// If this is a notification of a lost internet connection, there won't be a userInfo
-	// Otherwise, there will be...I think...
-	
-	if([notification userInfo])
+	if ([xmppStream isDisconnected] && [self autoReconnect] && [self shouldReconnect])
 	{
-		// We may have an internet connection now...
-		// 
-		// If we were accidentally disconnected (user didn't tell us to disconnect)
-		// then now would be a good time to attempt to reconnect.
-		if([self shouldReconnect])
+		// Ask the delegate(s) if it's OK to attempt an auto-reconnect.
+		
+		if ([self onShouldAttemptAutoReconnect:reachabilityFlags])
 		{
-			// We will wait for a few seconds or so, and then attempt to reconnect if possible
-			[self performSelector:@selector(attemptReconnect:) withObject:nil afterDelay:4.0];
+			[self connect];
 		}
 	}
 }
