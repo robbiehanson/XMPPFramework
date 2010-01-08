@@ -5,6 +5,36 @@
 
 @implementation DDXMLElement
 
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ * 
+ * If the wrapper object already exists, it is retained/autoreleased and returned.
+ * Otherwise a new wrapper object is alloc/init/autoreleased and returned.
+**/
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr
+{
+	// If a wrapper object already exists, the _private variable is pointing to it.
+	
+	xmlNodePtr node = (xmlNodePtr)kindPtr;
+	if(node->_private == NULL)
+		return [[[DDXMLElement alloc] initWithCheckedPrimitive:kindPtr] autorelease];
+	else
+		return [[((DDXMLElement *)(node->_private)) retain] autorelease];
+}
+
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ *
+ * The given node is checked, meaning a wrapper object for it does not already exist.
+**/
+- (id)initWithCheckedPrimitive:(xmlKindPtr)kindPtr
+{
+	self = [super initWithCheckedPrimitive:kindPtr];
+	return self;
+}
+
 - (id)initWithName:(NSString *)name
 {
 	// Note: Make every guarantee that genericPtr is not null
@@ -68,49 +98,6 @@
 	
 	[self release];
 	return [result retain];
-}
-
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
-{
-	// Note: We don't simply call the init methods blindly.
-	// Doing so might cause an unnecessary alloc followed by an immediate release.
-	
-	if(nodePtr == NULL || nodePtr->type != XML_ELEMENT_NODE)
-	{
-		return nil;
-	}
-	
-	xmlNodePtr node = (xmlNodePtr)nodePtr;
-	if(node->_private == NULL)
-		return [[[DDXMLElement alloc] initWithCheckedPrimitive:nodePtr] autorelease];
-	else
-		return [[((DDXMLElement *)(node->_private)) retain] autorelease];
-}
-
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr
-{
-	if(nodePtr == NULL || nodePtr->type != XML_ELEMENT_NODE)
-	{
-		[self release];
-		return nil;
-	}
-	
-	xmlNodePtr node = (xmlNodePtr)nodePtr;
-	if(node->_private == NULL)
-	{
-		return [self initWithCheckedPrimitive:nodePtr];
-	}
-	else
-	{
-		[self release];
-		return [((DDXMLElement *)(node->_private)) retain];
-	}	
-}
-
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr
-{
-	self = [super initWithCheckedPrimitive:nodePtr];
-	return self;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +385,7 @@
 	xmlNsPtr ns = ((xmlNodePtr)genericPtr)->nsDef;
 	while(ns != NULL)
 	{
-		[result addObject:[DDXMLNode nodeWithPrimitive:(xmlKindPtr)ns nsParent:(xmlNodePtr)genericPtr]];
+		[result addObject:[DDXMLNode nodeWithPrimitive:ns nsParent:(xmlNodePtr)genericPtr]];
 		
 		ns = ns->next;
 	}
@@ -416,7 +403,7 @@
 		xmlNsPtr ns = ((xmlNodePtr)genericPtr)->ns;
 		if(ns != NULL)
 		{
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)ns nsParent:(xmlNodePtr)genericPtr];
+			return [DDXMLNode nodeWithPrimitive:ns nsParent:(xmlNodePtr)genericPtr];
 		}
 	}
 	else
@@ -426,7 +413,7 @@
 		{
 			if(xmlStrEqual(ns->prefix, [prefix xmlChar]))
 			{
-				return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)ns nsParent:(xmlNodePtr)genericPtr];
+				return [DDXMLNode nodeWithPrimitive:ns nsParent:(xmlNodePtr)genericPtr];
 			}
 			ns = ns->next;
 		}
@@ -459,7 +446,7 @@
 	{
 		if(xmlStrEqual(ns->prefix, [prefix xmlChar]))
 		{
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)ns nsParent:nodePtr];
+			return [DDXMLNode nodeWithPrimitive:ns nsParent:nodePtr];
 		}
 		ns = ns->next;
 	}

@@ -8,7 +8,13 @@
 	return (const xmlChar *)[self UTF8String];
 }
 
-- (NSString *)trimWhitespace
+#ifdef GNUSTEP
+- (NSString *)stringByTrimming
+{
+	return [self stringByTrimmingSpaces];
+}
+#else
+- (NSString *)stringByTrimming
 {
 	NSMutableString *mStr = [self mutableCopy];
 	CFStringTrimWhitespace((CFMutableStringRef)mStr);
@@ -18,5 +24,6 @@
 	[mStr release];
 	return [result autorelease];
 }
+#endif
 
 @end
