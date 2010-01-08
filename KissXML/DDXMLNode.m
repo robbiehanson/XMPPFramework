@@ -118,26 +118,37 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 #pragma mark Init, Dealloc
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
++ (id)nodeWithUnknownPrimitive:(xmlKindPtr)kindPtr
+{
+	if(kindPtr->type == XML_DOCUMENT_NODE)
+	{
+		return [DDXMLDocument nodeWithPrimitive:kindPtr];
+	}
+	else if(kindPtr->type == XML_ELEMENT_NODE)
+	{
+		return [DDXMLElement nodeWithPrimitive:kindPtr];
+	}
+	else
+	{
+		return [DDXMLNode nodeWithPrimitive:kindPtr];
+	}
+}
+
 /**
  * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ * 
  * If the wrapper object already exists, it is retained/autoreleased and returned.
- * Otherwise a new object is alloc/init/autoreleased and returned.
+ * Otherwise a new wrapper object is alloc/init/autoreleased and returned.
 **/
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr
 {
-	// Note: We don't simply call the init methods blindly.
-	// Doing so might cause an unnecessary alloc followed by an immediate release.
-	
-	if(nodePtr == NULL)
-	{
-		return nil;
-	}
-	
+	// If a wrapper object already exists, the _private variable is pointing to it.
 	// Warning: The _private variable is in a different location in the xmlNsPtr
 	
-	if([[self class] isXmlNsPtr:nodePtr])
+	if([self isXmlNsPtr:kindPtr])
 	{
-		xmlNsPtr ns = (xmlNsPtr)nodePtr;
+		xmlNsPtr ns = (xmlNsPtr)kindPtr;
 		if(ns->_private != NULL)
 		{
 			return [[((DDXMLNode *)(ns->_private)) retain] autorelease];
@@ -145,134 +156,64 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	}
 	else
 	{
-		xmlStdPtr node = (xmlStdPtr)nodePtr;
+		xmlStdPtr node = (xmlStdPtr)kindPtr;
 		if(node->_private != NULL)
 		{
 			return [[((DDXMLNode *)(node->_private)) retain] autorelease];
 		}
 	}
 	
-	return [[[DDXMLNode alloc] initWithCheckedPrimitive:nodePtr] autorelease];
+	return [[[DDXMLNode alloc] initWithCheckedPrimitive:kindPtr] autorelease];
 }
 
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ * 
+ * The given node is checked, meaning a wrapper object for it does not already exist.
+**/
+- (id)initWithCheckedPrimitive:(xmlKindPtr)kindPtr
 {
-	if(nodePtr == NULL)
-	{
-		[self release];
-		return nil;
-	}
-	
-	// Warning: The _private variable is in a different location in the xmlNsPtr
-	
-	if([[self class] isXmlNsPtr:nodePtr])
-	{
-		xmlNsPtr ns = (xmlNsPtr)nodePtr;
-		if(ns->_private != NULL)
-		{
-			[self release];
-			return [((DDXMLNode *)(ns->_private)) retain];
-		}
-	}
-	else
-	{
-		xmlStdPtr node = (xmlStdPtr)nodePtr;
-		if(node->_private != NULL)
-		{
-			[self release];
-			return [((DDXMLNode *)(node->_private)) retain];
-		}
-	}
-	
-	return [self initWithCheckedPrimitive:nodePtr];
-}
-
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr
-{
-	BOOL maybeIsaSwizzle = [self isMemberOfClass:[DDXMLNode class]];
-	
 	if((self = [super init]))
 	{
-		genericPtr = nodePtr;
+		genericPtr = kindPtr;
 		nsParentPtr = NULL;
 		[self nodeRetain];
 	}
-	
-	if(self && maybeIsaSwizzle)
-	{
-		if(nodePtr->type == XML_ELEMENT_NODE)
-		{
-			self->isa = [DDXMLElement class];
-		}
-		else if(nodePtr->type == XML_DOCUMENT_NODE)
-		{
-			self->isa = [DDXMLDocument class];
-		}
-	}
-	
 	return self;
 }
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ * 
+ * If the wrapper object already exists, it is retained/autoreleased and returned.
+ * Otherwise a new wrapper object is alloc/init/autoreleased and returned.
+**/
++ (id)nodeWithPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent
 {
-	// Note: We don't simply call the init methods blindly.
-	// Doing so might cause an unnecessary alloc followed by an immediate release.
+	// If a wrapper object already exists, the _private variable is pointing to it.
 	
-	if(nodePtr == NULL || nodePtr->type != XML_NAMESPACE_DECL)
-	{
-		return nil;
-	}
-	
-	xmlNsPtr ns = (xmlNsPtr)nodePtr;
 	if(ns->_private == NULL)
-		return [[[DDXMLNode alloc] initWithCheckedPrimitive:nodePtr nsParent:parentPtr] autorelease];
+		return [[[DDXMLNode alloc] initWithCheckedPrimitive:ns nsParent:parent] autorelease];
 	else
 		return [[((DDXMLNode *)(ns->_private)) retain] autorelease];
 }
 
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ * 
+ * The given node is checked, meaning a wrapper object for it does not already exist.
+**/
+- (id)initWithCheckedPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent
 {
-	if(nodePtr == NULL || nodePtr->type != XML_NAMESPACE_DECL)
-	{
-		[self release];
-		return nil;
-	}
-	
-	xmlNsPtr ns = (xmlNsPtr)nodePtr;
-	if(ns->_private == NULL)
-	{
-		return [self initWithCheckedPrimitive:nodePtr nsParent:parentPtr];
-	}
-	else
-	{
-		[self release];
-		return [((DDXMLNode *)(ns->_private)) retain];
-	}
-}
-
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr
-{
-	BOOL maybeIsaSwizzle = [self isMemberOfClass:[DDXMLNode class]];
-	
 	if((self = [super init]))
 	{
-		genericPtr = nodePtr;
-		nsParentPtr = parentPtr;
+		genericPtr = (xmlKindPtr)ns;
+		nsParentPtr = parent;
 		[self nodeRetain];
 	}
-	
-	if(maybeIsaSwizzle)
-	{
-		if(nodePtr->type == XML_ELEMENT_NODE)
-		{
-			self->isa = [DDXMLElement class];
-		}
-		else if(nodePtr->type == XML_DOCUMENT_NODE)
-		{
-			self->isa = [DDXMLDocument class];
-		}
-	}
-	
 	return self;
 }
 
@@ -293,45 +234,52 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 
 - (id)copyWithZone:(NSZone *)zone
 {
-	// Todo: Do these copied object have the same _private ptr?
-	// If so, the pointer needs to be reset.
-	
 	if([self isXmlDocPtr])
 	{
 		xmlDocPtr copyDocPtr = xmlCopyDoc((xmlDocPtr)genericPtr, 1);
 		
-		return [[DDXMLDocument alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyDocPtr];
+		if(copyDocPtr == NULL) return nil;
+		
+		return [[DDXMLDocument alloc] initWithCheckedPrimitive:(xmlKindPtr)copyDocPtr];
 	}
 	
 	if([self isXmlNodePtr])
 	{
 		xmlNodePtr copyNodePtr = xmlCopyNode((xmlNodePtr)genericPtr, 1);
 		
+		if(copyNodePtr == NULL) return nil;
+		
 		if([self isKindOfClass:[DDXMLElement class]])
-			return [[DDXMLElement alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyNodePtr];
+			return [[DDXMLElement alloc] initWithCheckedPrimitive:(xmlKindPtr)copyNodePtr];
 		else
-			return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyNodePtr];
+			return [[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)copyNodePtr];
 	}
 	
 	if([self isXmlAttrPtr])
 	{
 		xmlAttrPtr copyAttrPtr = xmlCopyProp(NULL, (xmlAttrPtr)genericPtr);
 		
-		return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyAttrPtr];
+		if(copyAttrPtr == NULL) return nil;
+		
+		return [[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)copyAttrPtr];
 	}
 	
 	if([self isXmlNsPtr])
 	{
 		xmlNsPtr copyNsPtr = xmlCopyNamespace((xmlNsPtr)genericPtr);
 		
-		return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyNsPtr nsParent:nil];
+		if(copyNsPtr == NULL) return nil;
+		
+		return [[DDXMLNode alloc] initWithCheckedPrimitive:copyNsPtr nsParent:NULL];
 	}
 	
 	if([self isXmlDtdPtr])
 	{
 		xmlDtdPtr copyDtdPtr = xmlCopyDtd((xmlDtdPtr)genericPtr);
 		
-		return [[DDXMLNode alloc] initWithUncheckedPrimitive:(xmlKindPtr)copyDtdPtr];
+		if(copyDtdPtr == NULL) return nil;
+		
+		return [[DDXMLNode alloc] initWithCheckedPrimitive:(xmlKindPtr)copyDtdPtr];
 	}
 	
 	return nil;
@@ -541,7 +489,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	else
 		node = (xmlStdPtr)genericPtr;
 	
-	if(node == NULL)
+	if(node == NULL || node->doc == NULL)
 		return nil;
 	else
 		return [DDXMLDocument nodeWithPrimitive:(xmlKindPtr)node->doc];
@@ -558,12 +506,16 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 {
 	if([self isXmlNsPtr])
 	{
-		return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)nsParentPtr];
+		if(nsParentPtr == NULL) return nil;
+		
+		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)nsParentPtr];
 	}
 	
 	xmlStdPtr node = (xmlStdPtr)genericPtr;
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->parent];
+	if(node->parent == NULL) return nil;
+	
+	return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->parent];
 }
 
 /**
@@ -598,7 +550,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	xmlNodePtr child = ((xmlStdPtr)genericPtr)->children;
 	while(child != NULL)
 	{
-		[result addObject:[DDXMLNode nodeWithPrimitive:(xmlKindPtr)child]];
+		[result addObject:[DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)child]];
 		
 		child = child->next;
 	}
@@ -633,7 +585,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	{
 		if(i == index)
 		{
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)child];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)child];
 		}
 		
 		i++;
@@ -658,7 +610,9 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	
 	xmlStdPtr node = (xmlStdPtr)genericPtr;
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->prev];
+	if(node->prev == NULL) return nil;
+	
+	return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->prev];
 }
 
 /**
@@ -674,7 +628,9 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	
 	xmlStdPtr node = (xmlStdPtr)genericPtr;
 	
-	return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->next];
+	if(node->next == NULL) return nil;
+	
+	return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->next];
 }
 
 /**
@@ -707,12 +663,12 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 				lastChild = lastChild->last;
 			}
 			
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)lastChild];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)lastChild];
 		}
 		else
 		{
 			// The previous sibling has no children, so the previous node is simply the previous sibling
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)previousSibling];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)previousSibling];
 		}
 	}
 	
@@ -723,7 +679,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	if(node->parent == NULL || node->parent->type == XML_DOCUMENT_NODE)
 		return nil;
 	else
-		return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)node->parent];
+		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->parent];
 }
 
 /**
@@ -759,7 +715,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	{
 		xmlNodePtr parentNextSibling = parent->next;
 		if(parentNextSibling != NULL)
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)parentNextSibling];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)parentNextSibling];
 		else
 			parent = parent->parent;
 	}
@@ -1082,8 +1038,8 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 	}
 	else
 	{
-		NSMutableString *result = [NSMutableString stringWithUTF8String:(const char *)bufferPtr->content];
-		CFStringTrimWhitespace((CFMutableStringRef)result);
+		NSMutableString *resTmp = [NSMutableString stringWithUTF8String:(const char *)bufferPtr->content];
+		NSString *result = [resTmp stringByTrimming];
 		
 		xmlBufferFree(bufferPtr);
 		
@@ -1167,7 +1123,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 			{
 				xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
 				
-				[mResult addObject:[DDXMLNode nodeWithPrimitive:(xmlKindPtr)node]];
+				[mResult addObject:[DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node]];
 			}
 			
 			result = mResult;
@@ -1817,7 +1773,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error);
 		[lastErrorValue getValue:&lastError];
 		
 		int errCode = lastError.code;
-		NSString *errMsg = [[NSString stringWithFormat:@"%s", lastError.message] trimWhitespace];
+		NSString *errMsg = [[NSString stringWithFormat:@"%s", lastError.message] stringByTrimming];
 		
 		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			

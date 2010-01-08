@@ -5,46 +5,33 @@
 
 @implementation DDXMLDocument
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ * 
+ * If the wrapper object already exists, it is retained/autoreleased and returned.
+ * Otherwise a new wrapper object is alloc/init/autoreleased and returned.
+**/
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr
 {
-	// Note: We don't simply call the init methods blindly.
-	// Doing so might cause an unnecessary alloc followed by an immediate release.
+	// If a wrapper object already exists, the _private variable is pointing to it.
 	
-	if(nodePtr == NULL || nodePtr->type != XML_DOCUMENT_NODE)
-	{
-		return nil;
-	}
-	
-	xmlDocPtr doc = (xmlDocPtr)nodePtr;
+	xmlDocPtr doc = (xmlDocPtr)kindPtr;
 	if(doc->_private == NULL)
-		return [[[DDXMLDocument alloc] initWithCheckedPrimitive:nodePtr] autorelease];
+		return [[[DDXMLDocument alloc] initWithCheckedPrimitive:kindPtr] autorelease];
 	else
 		return [[((DDXMLDocument *)(doc->_private)) retain] autorelease];
 }
 
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr
+/**
+ * Returns a DDXML wrapper object for the given primitive node.
+ * The given node MUST be non-NULL and of the proper type.
+ * 
+ * The given node is checked, meaning a wrapper object for it does not already exist.
+**/
+- (id)initWithCheckedPrimitive:(xmlKindPtr)kindPtr
 {
-	if(nodePtr == NULL || nodePtr->type != XML_DOCUMENT_NODE)
-	{
-		[self release];
-		return nil;
-	}
-	
-	xmlDocPtr doc = (xmlDocPtr)nodePtr;
-	if(doc->_private == NULL)
-	{
-		return [self initWithCheckedPrimitive:nodePtr];
-	}
-	else
-	{
-		[self release];
-		return [((DDXMLDocument *)(doc->_private)) retain];
-	}
-}
-
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr
-{
-	self = [super initWithCheckedPrimitive:nodePtr];
+	self = [super initWithCheckedPrimitive:kindPtr];
 	return self;
 }
 
@@ -106,7 +93,7 @@
 	xmlNodePtr rootNode = xmlDocGetRootElement(doc);
 	
 	if(rootNode != NULL)
-		return [DDXMLElement nodeWithPrimitive:(xmlKindPtr)(rootNode)];
+		return [DDXMLElement nodeWithPrimitive:(xmlKindPtr)rootNode];
 	else
 		return nil;
 }

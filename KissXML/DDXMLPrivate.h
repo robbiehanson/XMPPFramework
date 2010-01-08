@@ -11,13 +11,13 @@
 
 @interface DDXMLNode (PrivateAPI)
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr;
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr;
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr;
++ (id)nodeWithUnknownPrimitive:(xmlKindPtr)kindPtr;
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr;
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr;
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr nsParent:(xmlNodePtr)parentPtr;
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr;
+- (id)initWithCheckedPrimitive:(xmlKindPtr)kindPtr;
+
++ (id)nodeWithPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent;
+- (id)initWithCheckedPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent;
 
 + (BOOL)isXmlAttrPtr:(xmlKindPtr)kindPtr;
 - (BOOL)isXmlAttrPtr;
@@ -61,9 +61,8 @@
 
 @interface DDXMLElement (PrivateAPI)
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr;
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr;
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr;
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr;
+- (id)initWithCheckedPrimitive:(xmlKindPtr)kindPtr;
 
 - (NSArray *)elementsWithName:(NSString *)name uri:(NSString *)URI;
 
@@ -74,8 +73,7 @@
 
 @interface DDXMLDocument (PrivateAPI)
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)nodePtr;
-- (id)initWithCheckedPrimitive:(xmlKindPtr)nodePtr;
-- (id)initWithUncheckedPrimitive:(xmlKindPtr)nodePtr;
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr;
+- (id)initWithCheckedPrimitive:(xmlKindPtr)kindPtr;
 
 @end
