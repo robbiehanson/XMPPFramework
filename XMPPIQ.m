@@ -1,7 +1,7 @@
 #import "XMPPIQ.h"
 #import "NSXMLElementAdditions.h"
 
-#import <objc/objc-runtime.h>
+#import <objc/runtime.h>
 
 
 @implementation XMPPIQ
