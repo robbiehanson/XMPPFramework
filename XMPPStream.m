@@ -2,10 +2,11 @@
 #import "AsyncSocket.h"
 #import "NSXMLElementAdditions.h"
 #import "NSDataAdditions.h"
+#import "XMPPParser.h"
+#import "XMPPJID.h"
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
-#import "XMPPParser.h"
 
 #if TARGET_OS_IPHONE
   // Note: You may need to add the CFNetwork Framework to your project
@@ -48,10 +49,12 @@
 
 enum XMPPStreamFlags
 {
-	kAllowsSelfSignedCertificates = 1 << 0,  // If set, self-signed certificates are allowed during TLS negotiation
-	kAllowsSSLHostNameMismatch    = 1 << 1,  // If set, the certificate name will not be checked during TLS negotiation
-	kIsSecure                     = 1 << 2,  // If set, connection has been secured via SSL/TLS
-	kIsAuthenticated              = 1 << 3,  // If set, authentication has succeeded
+    kP2PMode                      = 1 << 0,  // If set, the XMPPStream was initialized in P2P mode
+    kP2PInitiator                 = 1 << 1,  // If set, we are the P2P initializer
+	kAllowsSelfSignedCertificates = 1 << 2,  // If set, self-signed certificates are allowed during TLS negotiation
+	kAllowsSSLHostNameMismatch    = 1 << 3,  // If set, the certificate name will not be checked during TLS negotiation
+	kIsSecure                     = 1 << 4,  // If set, connection has been secured via SSL/TLS
+	kIsAuthenticated              = 1 << 5,  // If set, authentication has succeeded
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,11 +90,20 @@ enum XMPPStreamFlags
 
 @end
 
+@interface XMPPStream (PrivateAPI)
+
+- (void)sendOpeningNegotiation;
+
+@end
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation XMPPStream
+
+@synthesize delegate;
+@synthesize tag = userTag;
 
 /**
  * Initializes an XMPPStream with no delegate.
@@ -129,6 +141,26 @@ enum XMPPStreamFlags
 	return self;
 }
 
+- (id)initP2PFrom:(XMPPJID *)jid
+{
+    if((self = [super init]))
+    {
+		myJID = [jid copy];
+		
+        // Initialize state.
+		state = STATE_DISCONNECTED;
+        
+        // We do not initialize the socket, since the connectP2PWithSocket: method might be used.
+        
+        // Initialize configuration
+        flags = kP2PMode;
+        
+        // Initialize xmpp parser
+		parser = [[XMPPParser alloc] initWithDelegate:self];
+    }
+	return self;
+}
+
 /**
  * The standard deallocation method.
  * Every object variable declared in the header file should be released here.
@@ -156,16 +188,6 @@ enum XMPPStreamFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Configuration:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * The standard delegate methods.
-**/
-- (id)delegate {
-	return delegate;
-}
-- (void)setDelegate:(id)newDelegate {
-	delegate = newDelegate;
-}
 
 /**
  * If connecting to a secure server, Mac OS X will automatically verify the authenticity of the TLS certificate.
@@ -203,8 +225,27 @@ enum XMPPStreamFlags
 		flags &= ~kAllowsSSLHostNameMismatch;
 }
 
+- (BOOL)isP2P
+{
+    return (flags & kP2PMode) ? YES : NO;
+}
+
+- (BOOL)isP2PInitiator
+{
+    return (flags & (kP2PMode | kP2PInitiator)) ? YES : NO;
+}
+
+- (BOOL)isP2PRecipient
+{
+    if (flags & kP2PMode)
+    {
+        return (flags & kP2PInitiator) ? NO : YES;
+    }
+    return NO;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Connection Methods:
+#pragma mark Connection State
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -242,11 +283,21 @@ enum XMPPStreamFlags
 		flags &= ~kIsSecure;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark C2S Connection
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)connectToHost:(NSString *)hostName
                onPort:(UInt16)portNumber
       withVirtualHost:(NSString *)vHostName
                secure:(BOOL)secure
-{    
+{
+    if([self isP2P])
+    {
+        NSLog(@"P2P XMPPStreams must use one of the connectTo:... methods.");
+		return;
+    }
+    
 	if(state == STATE_DISCONNECTED)
 	{
 		// Store configuration information
@@ -258,8 +309,6 @@ enum XMPPStreamFlags
 		xmppHostName = [vHostName copy];
 		
 		// Update state
-		// Note that we do this before connecting to the host,
-		// because the delegate methods will be called before the method returns
 		state = STATE_CONNECTING;
 		
 		// If the given port number is zero, use the default port number for XMPP communication
@@ -270,15 +319,6 @@ enum XMPPStreamFlags
 	}
 }
 
-/**
- * Connects to the given host on the given port number.
- * If you pass a port number of 0, the default port number for XMPP traffic (5222) is used.
- * The virtual host name is the name of the XMPP host at the given address that we should communicate with.
- * This is generally the domain identifier of the JID. IE: "gmail.com"
- * 
- * If the virtual host name is nil, or an empty string, a virtual host will not be specified in the XML stream
- * connection. This may be OK in some cases, but some servers require it to start a connection.
- **/
 - (void)connectToHost:(NSString *)hostName
 			   onPort:(UInt16)portNumber
 	  withVirtualHost:(NSString *)vHostName
@@ -286,21 +326,79 @@ enum XMPPStreamFlags
 	[self connectToHost:hostName onPort:portNumber withVirtualHost:vHostName secure:NO];
 }
 
-/**
- * Connects to the given host on the given port number, using a secure SSL/TLS connection.
- * If you pass a port number of 0, the default port number for secure XMPP traffic (5223) is used.
- * The virtual host name is the name of the XMPP host at the given address that we should communicate with.
- * This is generally the domain identifier of the JID. IE: "gmail.com"
- * 
- * If the virtual host name is nil, or an empty string, a virtual host will not be specified in the XML stream
- * connection. This may be OK in some cases, but some servers require it to start a connection.
-**/
 - (void)connectToSecureHost:(NSString *)hostName
 					 onPort:(UInt16)portNumber
 			withVirtualHost:(NSString *)vHostName
 {
 	[self connectToHost:hostName onPort:portNumber withVirtualHost:vHostName secure:YES];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark P2P Connection
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)connectTo:(XMPPJID *)jid withAddress:(NSData *)remoteAddr
+{
+    if(![self isP2P])
+    {
+        NSLog(@"Non P2P XMPPStreams must use one of the connectToHost:... methods.");
+		return;
+    }
+    
+    if(state == STATE_DISCONNECTED)
+    {
+        [remoteJID release];
+        remoteJID = [jid copy];
+        
+		NSAssert((asyncSocket == nil), @"Forgot to release the previous asyncSocket instance.");
+		
+        asyncSocket = [[AsyncSocket alloc] initWithDelegate:self];
+        
+        // Update state
+		state = STATE_CONNECTING;
+        flags |= kP2PInitiator;
+        
+        // Connect to the given address
+        [asyncSocket connectToAddress:remoteAddr error:nil];
+    }
+}
+
+- (void)connectP2PWithSocket:(AsyncSocket *)acceptedSocket
+{
+    if(![self isP2P])
+    {
+        NSLog(@"Non P2P XMPPStreams must use one of the connectToHost:... methods.");
+		return;
+    }
+    
+    if(state == STATE_DISCONNECTED)
+    {
+		NSAssert((asyncSocket == nil), @"Forgot to release the previous asyncSocket instance.");
+		
+        asyncSocket = [acceptedSocket retain];
+		[asyncSocket setDelegate:self];
+		
+		// Update state
+		state = STATE_CONNECTING;
+		
+		if([acceptedSocket isConnected])
+		{
+			// Initialize the XML stream
+			[self sendOpeningNegotiation];
+			
+			// And start reading in the server's XML stream
+			[asyncSocket readDataWithTimeout:TIMEOUT_READ_START tag:TAG_READ_START];
+		}
+		else
+		{
+			// We'll wait for the onSocket:didConnectToHost:onPort: method which will handle everything for us.
+		}
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Disconnect
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Closes the connection to the remote host.
@@ -669,6 +767,16 @@ enum XMPPStreamFlags
 	return [rootElement attributeFloatValueForName:@"version" withDefaultValue:0.0F];
 }
 
+- (XMPPJID *)myJID
+{
+	return myJID;
+}
+
+- (XMPPJID *)remoteJID
+{
+	return remoteJID;
+}
+
 /**
  * This methods handles sending an XML fragment.
  * If the XMPPStream is not connected, this method does nothing.
@@ -745,17 +853,43 @@ enum XMPPStreamFlags
 	NSString *xmlns = @"jabber:client";
 	NSString *xmlns_stream = @"http://etherx.jabber.org/streams";
 	
-	NSString *temp, *s2;
-	if([xmppHostName length] > 0)
-	{
-		temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' to='%@'>";
-		s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, xmppHostName];
-	}
-	else
-	{
-		temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0'>";
-		s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream];
-	}
+     NSString *temp, *s2;
+    if([self isP2P])
+    {
+		if(myJID && remoteJID)
+		{
+			temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' from='%@' to='%@'>";
+			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID bare], [remoteJID bare]];
+		}
+		else if(myJID)
+		{
+			temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' from='%@'>";
+			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID bare]];
+		}
+		else if(remoteJID)
+		{
+			temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' to='%@'>";
+			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [remoteJID bare]];
+		}
+		else
+		{
+			temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0'>";
+			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream];
+		}
+    }
+    else
+    {
+        if([xmppHostName length] > 0)
+        {
+            temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' to='%@'>";
+            s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, xmppHostName];
+        }
+        else
+        {
+            temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0'>";
+            s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream];
+        }
+    }
 	
 	DDLogSend(@"SEND: %@", s2);
 	
@@ -1301,8 +1435,9 @@ enum XMPPStreamFlags
 	
 	[parser parseData:data];
 	
-	// Continue reading for XML elements
-	// Double-check to make sure we're still connected first though - the delegate could have called disconnect
+	// Continue reading for XML elements.
+	// Double-check to make sure the socket is still connected first though.
+	// The delegate could have called disconnect in one of the delegate methods (invoked during parseData above).
 	if([asyncSocket isConnected])
 	{
 		if(state == STATE_OPENING)
@@ -1401,38 +1536,89 @@ enum XMPPStreamFlags
 	[rootElement release];
 	rootElement = [root retain];
 	
-	// Check for RFC compliance
-	if([self serverXmppStreamVersionNumber] >= 1.0)
-	{
-		// Update state - we're now onto stream negotiations
-		state = STATE_NEGOTIATING;
-		
-		// Note: We're waiting for the <stream:features> now
-	}
-	else
-	{
-		// The server isn't RFC comliant, and won't be sending any stream features.
-		
-		// We would still like to know what authentication features it supports though,
-		// so we'll use the jabber:iq:auth namespace, which was used prior to the RFC spec.
-		
-		// Update state - we're onto psuedo negotiation
-		state = STATE_NEGOTIATING;
-		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
-		
-		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-		[iq addAttributeWithName:@"type" stringValue:@"get"];
-		[iq addChild:query];
-		
-		DDLogSend(@"SEND: %@", [iq compactXMLString]);
-		
-		[asyncSocket writeData:[[iq compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
-				   withTimeout:TIMEOUT_WRITE
-						   tag:TAG_WRITE_STREAM];
-		
-		// Now wait for the response IQ
-	}
+    if([self isP2P])
+    {
+        // XEP-0174 specifies that <stream:features/> SHOULD be sent by the receiver.
+        // In other words, if we're the recipient we will now send our features.
+        // But if we're the initiator, we can't depend on receiving their features.
+        
+        // Either way, we're connected at this point.
+        state = STATE_CONNECTED;
+        
+        if([self isP2PRecipient])
+        {
+			// Extract the remoteJID:
+			// 
+			// <stream:stream ... from='<remoteJID>' to='<myJID>'>
+			
+			NSString *from = [[rootElement attributeForName:@"from"] stringValue];
+			remoteJID = [[XMPPJID jidWithString:from] retain];
+			
+			// Send our stream features.
+			// To do so we need to ask the delegate to fill it out for us.
+			
+            NSXMLElement *streamFeatures = [NSXMLElement elementWithName:@"stream:features"];
+            
+			if([delegate respondsToSelector:@selector(xmppStream:willSendP2PFeatures:)])
+			{
+				[delegate xmppStream:self willSendP2PFeatures:streamFeatures];
+			}
+			
+            DDLogSend(@"SEND: %@", [streamFeatures compactXMLString]);
+            
+            [asyncSocket writeData:[[streamFeatures compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+                       withTimeout:TIMEOUT_WRITE
+                               tag:TAG_WRITE_STREAM];
+            
+        }
+        
+        // Make sure the delegate didn't disconnect us in the xmppStream:willSendP2PFeatures: method.
+        
+        if([self isConnected])
+        {
+            if([delegate respondsToSelector:@selector(xmppStreamDidOpen:)]) {
+                [delegate xmppStreamDidOpen:self];
+            }
+            else if(DEBUG_DELEGATE) {
+                NSLog(@"xmppStreamDidOpen:%p", self);
+            }
+        }
+    }
+    else
+    {
+        // Check for RFC compliance
+        if([self serverXmppStreamVersionNumber] >= 1.0)
+        {
+            // Update state - we're now onto stream negotiations
+            state = STATE_NEGOTIATING;
+            
+            // Note: We're waiting for the <stream:features> now
+        }
+        else
+        {
+            // The server isn't RFC comliant, and won't be sending any stream features.
+            
+            // We would still like to know what authentication features it supports though,
+            // so we'll use the jabber:iq:auth namespace, which was used prior to the RFC spec.
+            
+            // Update state - we're onto psuedo negotiation
+            state = STATE_NEGOTIATING;
+            
+            NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
+            
+            NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+            [iq addAttributeWithName:@"type" stringValue:@"get"];
+            [iq addChild:query];
+            
+            DDLogSend(@"SEND: %@", [iq compactXMLString]);
+            
+            [asyncSocket writeData:[[iq compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+                       withTimeout:TIMEOUT_WRITE
+                               tag:TAG_WRITE_STREAM];
+            
+            // Now wait for the response IQ
+        }
+    }
 }
 
 - (void)xmppParser:(XMPPParser *)sender didReadElement:(NSXMLElement *)element
@@ -1511,6 +1697,13 @@ enum XMPPStreamFlags
 			else if(DEBUG_DELEGATE)
 			{
 				NSLog(@"xmppStream:%p didReceivePresence:%@", self, [element compactXMLString]);
+			}
+		}
+		else if([self isP2P] && [elementName isEqualToString:@"stream:features"])
+		{
+			if([delegate respondsToSelector:@selector(xmppStream:didReceiveP2PFeatures:)])
+			{
+				[delegate xmppStream:self didReceiveP2PFeatures:element];
 			}
 		}
 		else
