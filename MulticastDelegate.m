@@ -262,41 +262,44 @@ static void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 		// Note: The node variable is now pointing to the last node in the list.
 	}
 	
-	// We're now going to create an array of all the nodes.
-	// This gives us a quick and easy snapshot of the current list,
-	// which will allow delegates to be added/removed from the list while we're enumerating it,
-	// all without bothering us, and without violating any of the rules listed above.
-	// 
-	// Note: We're creating an array of pointers.
-	// Each pointer points to the dynamically allocated struct.
-	// If we copied the struct, we might violate rule number two.
-	// So we also retain each node, to prevent it from disappearing while we're enumerating the list.
-	
-	MulticastDelegateListNode *nodes[nodeCount];
-	
-	NSUInteger i;
-	for(i = 0; i < nodeCount; i++)
+	if(nodeCount > 0)
 	{
-		nodes[i] = node;
-		MulticastDelegateListNodeRetain(node);
+		// We're now going to create an array of all the nodes.
+		// This gives us a quick and easy snapshot of the current list,
+		// which will allow delegates to be added/removed from the list while we're enumerating it,
+		// all without bothering us, and without violating any of the rules listed above.
+		// 
+		// Note: We're creating an array of pointers.
+		// Each pointer points to the dynamically allocated struct.
+		// If we copied the struct, we might violate rule number two.
+		// So we also retain each node, to prevent it from disappearing while we're enumerating the list.
 		
-		node = node->prev;
-	}
-	
-	// We now have an array of all the nodes that we're going to possibly invoke.
-	// Instead of using the prev/next pointers, we're going to simply enumerate this array.
-	// This allows us to pass rule number one.
-	// If a delegate is removed while we're enumerating, its delegate pointer will be set to nil.
-	// This allows us to pass rule number two.
-	
-	for(i = 0; i < nodeCount; i++)
-	{
-		if([nodes[i]->delegate respondsToSelector:[anInvocation selector]])
+		MulticastDelegateListNode *nodes[nodeCount];
+		
+		NSUInteger i;
+		for(i = 0; i < nodeCount; i++)
 		{
-			[anInvocation invokeWithTarget:nodes[i]->delegate];
+			nodes[i] = node;
+			MulticastDelegateListNodeRetain(node);
+			
+			node = node->prev;
 		}
 		
-		MulticastDelegateListNodeRelease(nodes[i]);
+		// We now have an array of all the nodes that we're going to possibly invoke.
+		// Instead of using the prev/next pointers, we're going to simply enumerate this array.
+		// This allows us to pass rule number one.
+		// If a delegate is removed while we're enumerating, its delegate pointer will be set to nil.
+		// This allows us to pass rule number two.
+		
+		for(i = 0; i < nodeCount; i++)
+		{
+			if([nodes[i]->delegate respondsToSelector:[anInvocation selector]])
+			{
+				[anInvocation invokeWithTarget:nodes[i]->delegate];
+			}
+			
+			MulticastDelegateListNodeRelease(nodes[i]);
+		}
 	}
 	
 	[pool release];
@@ -393,12 +396,15 @@ static void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 
 - (id)nextDelegate
 {
-	if(currentDelegateIndex < numDelegates)
+	while(currentDelegateIndex < numDelegates)
 	{
 		MulticastDelegateListNode *node = *(delegates + currentDelegateIndex);
-		
 		currentDelegateIndex++;
-		return node->delegate;
+		
+		if (node->delegate)
+		{
+			return node->delegate;
+		}
 	}
 	
 	return nil;
@@ -409,15 +415,11 @@ static void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	while(currentDelegateIndex < numDelegates)
 	{
 		MulticastDelegateListNode *node = *(delegates + currentDelegateIndex);
+		currentDelegateIndex++;
 		
 		if([node->delegate respondsToSelector:selector])
 		{
-			currentDelegateIndex++;
 			return node->delegate;
-		}
-		else
-		{
-			currentDelegateIndex++;
 		}
 	}
 	
@@ -429,7 +431,8 @@ static void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	NSUInteger i;
 	for(i = 0; i < numDelegates; i++)
 	{
-		MulticastDelegateListNodeRetain(*(delegates + 1));
+		MulticastDelegateListNode *node = *(delegates + i);
+		MulticastDelegateListNodeRelease(node);
 	}
 	
 	free(delegates);
