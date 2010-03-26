@@ -2,7 +2,7 @@
 #import "XMPP.h"
 
 @interface ChatController (PrivateAPI)
-- (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message;
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message;
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,16 +11,19 @@
 
 @implementation ChatController
 
-- (id)initWithXMPPClient:(XMPPClient *)client jid:(XMPPJID *)fullJID
+@synthesize xmppStream;
+@synthesize jid;
+
+- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)fullJID
 {
-	return [self initWithXMPPClient:client jid:fullJID message:nil];
+	return [self initWithStream:stream jid:fullJID message:nil];
 }
 
-- (id)initWithXMPPClient:(XMPPClient *)client jid:(XMPPJID *)fullJID message:(XMPPMessage *)message
+- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)fullJID message:(XMPPMessage *)message
 {
 	if((self = [super initWithWindowNibName:@"ChatWindow"]))
 	{
-		xmppClient = [client retain];
+		xmppStream = [stream retain];
 		jid = [fullJID retain];
 		
 		firstMessage = [message retain];
@@ -30,7 +33,7 @@
 
 - (void)awakeFromNib
 {
-	[xmppClient addDelegate:self];
+	[xmppStream addDelegate:self];
 	
 	[messageView setString:@""];
 	
@@ -39,7 +42,7 @@
 	
 	if(firstMessage)
 	{
-		[self xmppClient:xmppClient didReceiveMessage:firstMessage];
+		[self xmppStream:xmppStream didReceiveMessage:firstMessage];
 		[firstMessage release];
 		firstMessage  = nil;
 	}
@@ -55,7 +58,7 @@
 {
 	NSLog(@"ChatController: windowWillClose");
 	
-	[xmppClient removeDelegate:self];
+	[xmppStream removeDelegate:self];
 	[self autorelease];
 }
 
@@ -63,15 +66,11 @@
 {
 	NSLog(@"Destroying self: %@", self);
 	
-	[xmppClient release];
+	[xmppStream release];
 	[jid release];
 	[firstMessage release];
+	
 	[super dealloc];
-}
-
-- (XMPPJID *)jid
-{
-	return jid;
 }
 
 - (void)scrollToBottom
@@ -87,12 +86,12 @@
 	[[scrollView documentView] scrollPoint:newScrollOrigin];
 }
 
-- (void)xmppClientDidAuthenticate:(XMPPClient *)sender
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
 	[messageField setEnabled:YES];
 }
 
-- (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
 	if(![jid isEqual:[message from]]) return;
 	
@@ -116,7 +115,7 @@
 	}
 }
 
-- (void)xmppClientDidDisconnect:(XMPPClient *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
 	[messageField setEnabled:NO];
 }
@@ -135,7 +134,7 @@
 		[message addAttributeWithName:@"to" stringValue:[jid full]];
 		[message addChild:body];
 		
-		[xmppClient sendElement:message];
+		[xmppStream sendElement:message];
 		
 		NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
 		

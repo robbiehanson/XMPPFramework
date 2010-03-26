@@ -1,5 +1,9 @@
 #import <Foundation/Foundation.h>
-#import "DDXML.h"
+
+#if TARGET_OS_IPHONE
+  #import "DDXML.h"
+#endif
+
 
 @interface NSXMLElement (XMPPStreamAdditions)
 
@@ -28,5 +32,10 @@
 - (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue;
 
 - (NSMutableDictionary *)attributesAsDictionary;
+
+- (void)addNamespaceWithPrefix:(NSString *)prefix stringValue:(NSString *)string;
+
+- (NSString *)namespaceStringValueForPrefix:(NSString *)prefix;
+- (NSString *)namespaceStringValueForPrefix:(NSString *)prefix withDefaultValue:(NSString *)defaultValue;
 
 @end

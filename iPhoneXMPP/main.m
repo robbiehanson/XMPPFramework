@@ -2,8 +2,8 @@
 //  main.m
 //  iPhoneXMPP
 //
-//  Created by Robbie Hanson on 10/26/09.
-//  Copyright __MyCompanyName__ 2009. All rights reserved.
+//  Created by Robbie Hanson on 3/18/10.
+//  Copyright __MyCompanyName__ 2010. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

@@ -1,21 +1,21 @@
 #import <Foundation/Foundation.h>
 
-@class XMPPClient;
+@class XMPPStream;
+
 
 @interface XMPPTransports : NSObject
 {
-@private
-	XMPPClient *client;
+	XMPPStream *xmppStream;
 }
 
-- (id)initWithXMPPClient:(XMPPClient *)xmppClient;
+- (id)initWithStream:(XMPPStream *)xmppStream;
 
-- (XMPPClient *)xmppClient;
+@property (nonatomic, readonly) XMPPStream *xmppStream;
 
 - (void)queryGatewayDiscoveryIdentityForLegacyService:(NSString *)service;
 - (void)queryGatewayAgentInfo;
 - (void)queryRegistrationRequirementsForLegacyService:(NSString *)service;
-- (void)registerLegacyService:(NSString *)service userName:(NSString *)userName password:(NSString *)password;
+- (void)registerLegacyService:(NSString *)service username:(NSString *)username password:(NSString *)password;
 - (void)unregisterLegacyService:(NSString *)service;
 
 @end

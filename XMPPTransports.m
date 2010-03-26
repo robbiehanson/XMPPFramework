@@ -1,85 +1,120 @@
 #import "XMPPTransports.h"
-#import "XMPPClient.h"
-#import "XMPPJID.h"
-#import "NSXMLElementAdditions.h"
+#import "XMPP.h"
 
 
 @implementation XMPPTransports
 
-- (id)initWithXMPPClient:(XMPPClient*)xmppClient
+@synthesize xmppStream;
+
+- (id)initWithStream:(XMPPStream *)stream
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
-		client = [xmppClient retain];
+		xmppStream = [stream retain];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[client release];
+	[xmppStream release];
 	[super dealloc];
 }
 
-- (XMPPClient *)xmppClient
-{
-	return client;
-}
-
 /**
-  * Registration process
-  * @see: http://www.xmpp.org/extensions/xep-0100.html#usecases-jabber-register-pri 
- **/
+ * Registration process
+ * @see: http://www.xmpp.org/extensions/xep-0100.html#usecases-jabber-register-pri 
+**/
+
 - (void)queryGatewayDiscoveryIdentityForLegacyService:(NSString *)service
 {
-	NSXMLElement *element = [NSXMLElement elementWithName:@"iq"];
-	[element addAttributeWithName:@"type" stringValue:@"get"];
-	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
-	[element addAttributeWithName:@"to" stringValue:[NSString stringWithFormat:@"%@.%@", service, [client domain]]];
-	[element addAttributeWithName:@"id" stringValue:@"disco1"];
-	[element addChild:[NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"]];
+	XMPPJID *myJID = xmppStream.myJID;
 	
-	[client sendElement:element];
+	NSString *toValue = [NSString stringWithFormat:@"%@.%@", service, [myJID domain]];
+	
+	// <iq type="get" from="myFullJID" to="service.domain" id="disco1">
+	//   <query xmlns="http://jabber.org/protocol/disco#info"/>
+	// </iq>
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+	
+	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+	[iq addAttributeWithName:@"type" stringValue:@"get"];
+	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq addAttributeWithName:@"to" stringValue:toValue];
+	[iq addAttributeWithName:@"id" stringValue:@"disco1"];
+	[iq addChild:query];
+	
+	[xmppStream sendElement:iq];
 }
 
 - (void)queryGatewayAgentInfo
 {
-	NSXMLElement *element = [NSXMLElement elementWithName:@"iq"];
-	[element addAttributeWithName:@"type" stringValue:@"get"];
-	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
-	[element addAttributeWithName:@"to" stringValue:[client domain]];
-	[element addAttributeWithName:@"id" stringValue:@"agent1"];
-	[element addChild:[NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:agents"]];
+	XMPPJID *myJID = xmppStream.myJID;
 	
-	[client sendElement:element];
+	// <iq type="get" from="myFullJID" to="domain" id="agent1">
+	//   <query xmlns="jabber:iq:agents"/>
+	// </iq>
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:agents"];
+	
+	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+	[iq addAttributeWithName:@"type" stringValue:@"get"];
+	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq addAttributeWithName:@"to" stringValue:[myJID domain]];
+	[iq addAttributeWithName:@"id" stringValue:@"agent1"];
+	[iq addChild:query];
+	
+	[xmppStream sendElement:iq];
 }
 
 - (void)queryRegistrationRequirementsForLegacyService:(NSString *)service
 {
-	NSXMLElement* element = [NSXMLElement elementWithName:@"iq"];
-	[element addAttributeWithName:@"type" stringValue:@"get"];
-	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
-	[element addAttributeWithName:@"to" stringValue:[NSString stringWithFormat:@"%@.%@", service, [client domain]]];
-	[element addAttributeWithName:@"id" stringValue:@"reg1"];
-	[element addChild:[NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"]];
+	XMPPJID *myJID = xmppStream.myJID;
 	
-	[client sendElement:element];
+	NSString *toValue = [NSString stringWithFormat:@"%@.%@", service, [myJID domain]];
+	
+	// <iq type="get" from="myFullJID" to="service.domain" id="reg1">
+	//   <query xmlns="jabber:iq:register"/>
+	// </iq>
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
+	
+	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+	[iq addAttributeWithName:@"type" stringValue:@"get"];
+	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq addAttributeWithName:@"to" stringValue:toValue];
+	[iq addAttributeWithName:@"id" stringValue:@"reg1"];
+	[iq addChild:query];
+	
+	[xmppStream sendElement:iq];
 }
 
-- (void)registerLegacyService:(NSString *)service userName:(NSString *)userName password:(NSString *)password
+- (void)registerLegacyService:(NSString *)service username:(NSString *)username password:(NSString *)password
 {
+	XMPPJID *myJID = xmppStream.myJID;
+	
+	NSString *toValue = [NSString stringWithFormat:@"%@.%@", service, [myJID domain]];
+	
+	// <iq type="set" from="myFullJID" to="service.domain" id="reg2">
+	//   <query xmlns="jabber:iq:register">
+	//     <username>username</username>
+	//     <password>password</password>
+	//   </query>
+	// </iq>
+	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
-	[query addChild:[NSXMLElement elementWithName:@"username" stringValue:userName]];
+	[query addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
 	[query addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
 	
-	NSXMLElement *element = [NSXMLElement elementWithName:@"iq"];
-	[element addAttributeWithName:@"type" stringValue:@"set"];
-	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
-	[element addAttributeWithName:@"to" stringValue:[NSString stringWithFormat:@"%@.%@", service, [client domain]]];
-	[element addAttributeWithName:@"id" stringValue:@"reg2"];
-	[element addChild:query];
+	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+	[iq addAttributeWithName:@"type" stringValue:@"set"];
+	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq addAttributeWithName:@"to" stringValue:toValue];
+	[iq addAttributeWithName:@"id" stringValue:@"reg2"];
+	[iq addChild:query];
 	
-	[client sendElement:element];
+	[xmppStream sendElement:iq];
 }
 
 /**
@@ -88,17 +123,27 @@
 **/
 - (void)unregisterLegacyService:(NSString *)service
 {
+	XMPPJID *myJID = xmppStream.myJID;
+	
+	NSString *toValue = [NSString stringWithFormat:@"%@.%@", service, [myJID domain]];
+	
+	// <iq type="set" from="myFullJID" to="service.domain" id="unreg1">
+	//   <query xmlns="jabber:iq:register">
+	//     <remove/>
+	//   </query>
+	// </iq>
+	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
 	[query addChild:[NSXMLElement elementWithName:@"remove"]];
 	
-	NSXMLElement *element = [NSXMLElement elementWithName:@"iq"];
-	[element addAttributeWithName:@"type" stringValue:@"set"];
-	[element addAttributeWithName:@"from" stringValue:[[client myJID] full]];
-	[element addAttributeWithName:@"to" stringValue:[NSString stringWithFormat:@"%@.%@", service, [client domain]]];
-	[element addAttributeWithName:@"id" stringValue:@"unreg1"];
-	[element addChild:query];
+	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+	[iq addAttributeWithName:@"type" stringValue:@"set"];
+	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq addAttributeWithName:@"to" stringValue:toValue];
+	[iq addAttributeWithName:@"id" stringValue:@"unreg1"];
+	[iq addChild:query];
 	
-	[client sendElement:element];
+	[xmppStream sendElement:iq];
 }
 
 @end

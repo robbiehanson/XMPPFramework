@@ -1,130 +1,210 @@
 #import "iPhoneXMPPAppDelegate.h"
-#import "XMPP.h"
+#import "RootViewController.h"
 
+#import "XMPP.h"
+#import "XMPPRosterCoreDataStorage.h"
+
+#import <CFNetwork/CFNetwork.h>
 
 @implementation iPhoneXMPPAppDelegate
 
+@synthesize xmppStream;
+@synthesize xmppRoster;
+@synthesize xmppRosterStorage;
+
 @synthesize window;
+@synthesize navigationController;
 
-
-- (void)applicationDidFinishLaunching:(UIApplication *)application {    
-
-    xmppClient = [[XMPPClient alloc] init];
-	[xmppClient addDelegate:self];
+- (void)applicationDidFinishLaunching:(UIApplication *)application
+{
+	xmppStream = [[XMPPStream alloc] init];
+	xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] init];
+	xmppRoster = [[XMPPRoster alloc] initWithStream:xmppStream rosterStorage:xmppRosterStorage];
+	
+	[xmppStream addDelegate:self];
+	[xmppRoster addDelegate:self];
+	
+	[xmppRoster setAutoRoster:YES];
 	
 	// Replace me with the proper domain and port.
 	// The example below is setup for a typical google talk account.
-//	[xmppClient setDomain:@"talk.google.com"];
-//	[xmppClient setPort:5222];
+//	[xmppStream setHostName:@"talk.google.com"];
+//	[xmppStream setHostPort:5222];
 	
 	// Replace me with the proper JID and password
-//	[xmppClient setMyJID:[XMPPJID jidWithString:@"username@gmail.com/iPhoneTest"]];
-//	[xmppClient setPassword:@"password"];
+//	[xmppStream setMyJID:[XMPPJID jidWithString:@"user@gmail.com/iPhoneTest"]];
+//	password = @"password";
 	
-	[xmppClient setAutoLogin:YES];
-	[xmppClient setAllowsPlaintextAuth:NO];
-	[xmppClient setAutoPresence:YES];
-	[xmppClient setAutoRoster:YES];
+	// You may need to alter these settings depending on the server you're connecting to
+	allowSelfSignedCertificates = NO;
+	allowSSLHostNameMismatch = NO;
 	
 	// Uncomment me when the proper information has been entered above.
-//	[xmppClient connect];
-    
-    // Override point for customization after application launch
-    [window makeKeyAndVisible];
+//	NSError *error = nil;
+//	if (![xmppStream connect:&error])
+//	{
+//		NSLog(@"Error connecting: %@", error);
+//	}
+	
+	[window addSubview:[navigationController view]];
+	[window makeKeyAndVisible];
 }
 
-
-- (void)dealloc {
-    [window release];
-    [super dealloc];
+- (void)dealloc
+{
+	[xmppStream removeDelegate:self];
+	[xmppRoster removeDelegate:self];
+	
+	[xmppStream disconnect];
+	[xmppStream release];
+	[xmppRoster release];
+	
+	[password release];
+	
+	[navigationController release];
+	[window release];
+	
+	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPClient Delegate Methods:
+#pragma mark Custom
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppClientConnecting:(XMPPClient *)sender
+// It's easy to create XML elments to send and to read received XML elements.
+// You have the entire NSXMLElement and NSXMLNode API's.
+// 
+// In addition to this, the NSXMLElementAdditions class provides some very handy methods for working with XMPP.
+// 
+// On the iPhone, Apple chose not to include the full NSXML suite.
+// No problem - we use the KissXML library as a drop in replacement.
+// 
+// For more information on working with XML elements, see the Wiki article:
+// http://code.google.com/p/xmppframework/wiki/WorkingWithElements
+
+- (void)goOnline
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClientConnecting");
-	NSLog(@"==============================================================");
+	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+	
+	[[self xmppStream] sendElement:presence];
 }
 
-- (void)xmppClientDidConnect:(XMPPClient *)sender
+- (void)goOffline
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClientDidConnect");
-	NSLog(@"==============================================================");
+	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+	[presence addAttributeWithName:@"type" stringValue:@"unavailable"];
+	
+	[[self xmppStream] sendElement:presence];
 }
 
-- (void)xmppClientDidNotConnect:(XMPPClient *)sender
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPStream Delegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClientDidNotConnect");
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStream:willSecureWithSettings: ----------");
+	
+	if (allowSelfSignedCertificates)
+	{
+		[settings setObject:[NSNumber numberWithBool:YES] forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
+	}
+	
+	if (allowSSLHostNameMismatch)
+	{
+		[settings setObject:[NSNull null] forKey:(NSString *)kCFStreamSSLPeerName];
+	}
+	else
+	{
+		// Google does things incorrectly (does not conform to RFC).
+		// Because so many people ask questions about this (assume xmpp framework is broken),
+		// I've explicitly added code that shows how other xmpp clients "do the right thing"
+		// when connecting to a google server (gmail, or google apps for domains).
+		
+		NSString *expectedCertName = nil;
+		
+		NSString *serverDomain = xmppStream.hostName;
+		NSString *virtualDomain = [xmppStream.myJID domain];
+		
+		if ([serverDomain isEqualToString:@"talk.google.com"])
+		{
+			if ([virtualDomain isEqualToString:@"gmail.com"])
+			{
+				expectedCertName = virtualDomain;
+			}
+			else
+			{
+				expectedCertName = serverDomain;
+			}
+		}
+		else
+		{
+			expectedCertName = serverDomain;
+		}
+		
+		[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
+	}
 }
 
-- (void)xmppClientDidDisconnect:(XMPPClient *)sender
+- (void)xmppStreamDidSecure:(XMPPStream *)sender
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClientDidDisconnect");
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStreamDidSecure: ----------");
 }
 
-- (void)xmppClientDidRegister:(XMPPClient *)sender
+- (void)xmppStreamDidOpen:(XMPPStream *)sender
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClientDidRegister");
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStreamDidOpen: ----------");
+	
+	isOpen = YES;
+	
+	NSError *error = nil;
+	
+	if (![[self xmppStream] authenticateWithPassword:password error:&error])
+	{
+		NSLog(@"Error authenticating: %@", error);
+	}
 }
 
-- (void)xmppClient:(XMPPClient *)sender didNotRegister:(NSXMLElement *)error
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClient:didNotRegister: %@", error);
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStreamDidAuthenticate: ----------");
+	
+	[self goOnline];
 }
 
-- (void)xmppClientDidAuthenticate:(XMPPClient *)sender
+- (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClientDidAuthenticate");
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStream:didNotAuthenticate: ----------");
 }
 
-- (void)xmppClient:(XMPPClient *)sender didNotAuthenticate:(NSXMLElement *)error
+- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClient:didNotAuthenticate: %@", error);
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStream:didReceiveIQ: ----------");
 }
 
-- (void)xmppClientDidUpdateRoster:(XMPPClient *)sender
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClientDidUpdateRoster");
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStream:didReceiveMessage: ----------");
 }
 
-- (void)xmppClient:(XMPPClient *)sender didReceiveBuddyRequest:(XMPPJID *)jid
+- (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClient:didReceiveBuddyRequest: %@", jid);
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStream:didReceivePresence: ----------");
 }
 
-- (void)xmppClient:(XMPPClient *)sender didReceiveIQ:(XMPPIQ *)iq
+- (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClient:didReceiveIQ: %@", iq);
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStream:didReceiveError: ----------");
 }
 
-- (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message
+- (void)xmppStreamDidClose:(XMPPStream *)sender
 {
-	NSLog(@"==============================================================");
-	NSLog(@"iPhoneXMPPAppDelegate: xmppClient:didReceiveMessage: %@", message);
-	NSLog(@"==============================================================");
+	NSLog(@"---------- xmppStreamDidClose: ----------");
+	
+	if (!isOpen)
+	{
+		NSLog(@"Unable to connect to server. Check xmppStream.hostName");
+	}
 }
 
 @end

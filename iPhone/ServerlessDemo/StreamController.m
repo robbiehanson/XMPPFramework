@@ -170,10 +170,11 @@ static StreamController *sharedInstance;
 		id tag = [self nextXMPPStreamTag];
 		
 		XMPPStream *xmppStream = [[XMPPStream alloc] initP2PFrom:[self myJID]];
-		xmppStream.delegate = self;
+		
+		[xmppStream addDelegate:self];
 		xmppStream.tag = tag;
 		
-		[xmppStream connectP2PWithSocket:sock];
+		[xmppStream connectP2PWithSocket:sock error:nil];
 		
 		[xmppStreams addObject:xmppStream];
 		[serviceDict setObject:[service objectID] forKey:tag];
