@@ -1,6 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <libxml2/libxml/parser.h>
-#import "DDXML.h"
+
+#if TARGET_OS_IPHONE
+  #import "DDXML.h"
+#endif
 
 
 @interface XMPPParser : NSObject

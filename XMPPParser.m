@@ -38,7 +38,18 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 		xmlNodePtr rootCopy = xmlCopyNode(root, 2);
 		DDXMLElement *rootCopyWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)rootCopy];
 		
-		[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
+	//	@try
+	//	{
+			// If the delegate throws an exception that we don't catch,
+			// this would cause our parser to abort,
+			// and ignore the rest of the data that was passed to us in parseData.
+			// 
+			// The end result is that our parser will likely barf the next time it tries to parse data.
+			// Probably with a "EndTag: '</' not found" error.
+			
+			[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
+	//	}
+	//	@catch (id exception) { /* Ignore */ }
 		
 		// Note: DDXMLElement will properly free the rootCopy when it's deallocated.
 	}
@@ -54,7 +65,18 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 	
 	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
 	{
-		[parser->delegate xmppParser:parser didReadElement:childWrapper];
+	//	@try
+	//	{
+			// If the delegate throws an exception that we don't catch,
+			// this would cause our parser to abort,
+			// and ignore the rest of the data that was passed to us in parseData.
+			// 
+			// The end result is that our parser will likely barf the next time it tries to parse data.
+			// Probably with a "EndTag: '</' not found" error.
+			
+			[parser->delegate xmppParser:parser didReadElement:childWrapper];
+	//	}
+	//	@catch (id exception) { /* Ignore */ }
 	}
 	
 	// Note: DDXMLElement will properly free the child when it's deallocated.
@@ -269,7 +291,18 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 	{
 		NSXMLElement *nsRoot = nsxmlFromLibxml(root);
 		
-		[parser->delegate xmppParser:parser didReadRoot:nsRoot];
+	//	@try
+	//	{
+			// If the delegate throws an exception that we don't catch,
+			// this would cause our parser to abort,
+			// and ignore the rest of the data that was passed to us in parseData.
+			// 
+			// The end result is that our parser will likely barf the next time it tries to parse data.
+			// Probably with a "EndTag: '</' not found" error.
+			
+			[parser->delegate xmppParser:parser didReadRoot:nsRoot];
+	//	}
+	//	@catch (id exception) { /* Ignore */ }
 	}
 }
 
@@ -279,7 +312,18 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 	{
 		NSXMLElement *nsChild = nsxmlFromLibxml(child);
 		
-		[parser->delegate xmppParser:parser didReadElement:nsChild];
+	//	@try
+	//	{
+			// If the delegate throws an exception that we don't catch,
+			// this would cause our parser to abort,
+			// and ignore the rest of the data that was passed to us in parseData.
+			// 
+			// The end result is that our parser will likely barf the next time it tries to parse data.
+			// Probably with a "EndTag: '</' not found" error.
+			
+			[parser->delegate xmppParser:parser didReadElement:nsChild];
+	//	}
+	//	@catch (id exception) { /* Ignore */ }
 	}
 	
 	// Note: We want to detach the child from the root even if the delegate method isn't setup.

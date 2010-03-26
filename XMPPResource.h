@@ -1,29 +1,17 @@
 #import <Foundation/Foundation.h>
-#import "DDXML.h"
 
 @class XMPPJID;
-@class XMPPUser;
 @class XMPPIQ;
 @class XMPPPresence;
 
 
-@interface XMPPResource : NSObject <NSCoding>
-{
-	XMPPJID *jid;
-	XMPPPresence *presence;
-	
-	NSDate *presenceReceived;
-}
-
-- (id)initWithPresence:(XMPPPresence *)presence;
+@protocol XMPPResource
 
 - (XMPPJID *)jid;
 - (XMPPPresence *)presence;
 
-- (NSDate *)presenceReceived;
+- (NSDate *)presenceDate;
 
-- (void)updateWithPresence:(XMPPPresence *)presence;
-
-- (NSComparisonResult)compare:(XMPPResource *)another;
+- (NSComparisonResult)compare:(id <XMPPResource>)another;
 
 @end

@@ -4,14 +4,16 @@
 
 @implementation XMPPPing
 
-- (id)initWithXMPPClient:(XMPPClient *)xmppClient delegate:(id)aDelegate
+@synthesize xmppStream;
+
+- (id)initWithStream:(XMPPStream *)stream
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
-		delegate = aDelegate;
+		xmppStream = [stream retain];
+		[xmppStream addDelegate:self];
 		
-		client = [xmppClient retain];
-		[client addDelegate:self];
+		multicastDelegate = [[MulticastDelegate alloc] init];
 		
 		pingIDs = [[NSMutableArray alloc] initWithCapacity:5];
 	}
@@ -20,34 +22,32 @@
 
 - (void)dealloc
 {
-	[client removeDelegate:self];
-	[client release];
+	[xmppStream removeDelegate:self];
+	[xmppStream release];
+	
+	[multicastDelegate release];
+	
 	[pingIDs release];
+	
 	[super dealloc];
 }
 
-- (XMPPClient *)xmppClient
+- (void)addDelegate:(id)delegate
 {
-	return client;
+	[multicastDelegate addDelegate:delegate];
 }
 
-- (id)delegate
+- (void)removeDelegate:(id)delegate
 {
-	return delegate;
-}
-
-- (void)setDelegate:(id)newDelegate
-{
-	delegate = newDelegate;
+	[multicastDelegate removeDelegate:delegate];
 }
 
 - (NSString *)generatePingID
 {
 	// Generate unique ID for Ping packet
 	// It's important the ID be unique as the ID is the only thing that distinguishes a pong packet
-	CFUUIDRef uuid = CFUUIDCreate(NULL);
-	NSString *pingID = [NSMakeCollectable(CFUUIDCreateString(NULL, uuid)) autorelease];
-	CFRelease(uuid);
+	
+	NSString *pingID = [xmppStream generateUUID];
 	
 	// Add ping ID to list so we'll recognize it when we get a response
 	[pingIDs addObject:pingID];
@@ -75,6 +75,11 @@
 	NSString *pingID = [self generatePingID];
 	
 	// Send ping packet
+	// 
+	// <iq type="get" id="pingID">
+	//   <ping xmlns="urn:xmpp:ping"/>
+	// </iq>
+	
 	NSXMLElement *ping = [NSXMLElement elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -82,63 +87,67 @@
 	[iq addAttributeWithName:@"id" stringValue:pingID];
 	[iq addChild:ping];
 	
-	[client sendElement:iq];
+	[xmppStream sendElement:iq];
 }
 
-- (void)sendPingToResource:(XMPPResource *)resource
+- (void)sendPingToJID:(XMPPJID *)jid
 {
 	NSString *pingID = [self generatePingID];
 	
-	// Send ping packet
+	// Send ping element
+	// 
+	// <iq to="fullJID" type="get" id="pingID">
+	//   <ping xmlns="urn:xmpp:ping"/>
+	// </iq>
+	
 	NSXMLElement *ping = [NSXMLElement elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"to" stringValue:[[resource jid] full]];
+	[iq addAttributeWithName:@"to" stringValue:[jid full]];
 	[iq addAttributeWithName:@"type" stringValue:@"get"];
 	[iq addAttributeWithName:@"id" stringValue:pingID];
 	[iq addChild:ping];
 	
-	[client sendElement:iq];
+	[xmppStream sendElement:iq];
 }
 
-- (void)xmppClient:(XMPPClient *)sender didReceiveIQ:(XMPPIQ *)iq
+- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	NSString *type = [[iq attributeForName:@"type"] stringValue];
 	
-	if([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
+	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
 	{
 		// Example:
-		// <iq from="deusty.com" to="robbiehanson@deusty.com/work" id="abc123" type="result">
+		// 
+		// <iq from="deusty.com" to="robbiehanson@deusty.com/work" id="abc123" type="result"/>
 		
 		NSString *pingID = [iq elementID];
 		
 		NSUInteger pingIndex = [pingIDs indexOfObject:pingID];
-		if(pingIndex != NSNotFound)
+		if (pingIndex != NSNotFound)
 		{
 			[pingIDs removeObjectAtIndex:pingIndex];
 			
-			if([delegate respondsToSelector:@selector(xmppPing:didReceivePong:)])
-			{
-				[delegate xmppPing:self didReceivePong:iq];
-			}
+			[multicastDelegate xmppPing:self didReceivePong:iq];
 		}
 	}
-	else if([type isEqualToString:@"get"])
+	else if ([type isEqualToString:@"get"])
 	{
 		// Example:
+		// 
 		// <iq from="deusty.com" to="robbiehanson@deusty.com/work" id="zhq325" type="get">
 		//   <ping xmlns="urn:xmpp:ping"/>
 		// </iq>
 		
 		NSXMLElement *ping = [iq elementForName:@"ping" xmlns:@"urn:xmpp:ping"];
-		if(ping)
+		if (ping)
 		{
 			NSXMLElement *pong = [NSXMLElement elementWithName:@"iq"];
 			[pong addAttributeWithName:@"to" stringValue:[iq fromStr]];
 			[pong addAttributeWithName:@"type" stringValue:@"result"];
 			[pong addAttributeWithName:@"id" stringValue:[iq elementID]];
 			
-			[client sendElement:pong];
+			[sender sendElement:pong];
 		}
 	}
 }

@@ -1,11 +1,8 @@
-#import "XMPPResource.h"
-#import "XMPPJID.h"
-#import "XMPPUser.h"
-#import "XMPPIQ.h"
-#import "XMPPPresence.h"
+#import "XMPPResourceMemoryStorage.h"
+#import "XMPP.h"
 
 
-@implementation XMPPResource
+@implementation XMPPResourceMemoryStorage
 
 - (id)initWithPresence:(XMPPPresence *)aPresence
 {
@@ -14,7 +11,11 @@
 		jid = [[aPresence from] retain];
 		presence = [aPresence retain];
 		
-		presenceReceived = [[NSDate alloc] init];
+		presenceDate = [[presence delayedDeliveryDate] retain];
+		if (presenceDate == nil)
+		{
+			presenceDate = [[NSDate alloc] init];
+		}
 	}
 	return self;
 }
@@ -23,7 +24,7 @@
 {
 	[jid release];
 	[presence release];
-	[presenceReceived release];
+	[presenceDate release];
 	[super dealloc];
 }
 
@@ -47,15 +48,15 @@
 	{
 		if([coder allowsKeyedCoding])
 		{
-			jid              = [[coder decodeObjectForKey:@"jid"] retain];
-			presence         = [[coder decodeObjectForKey:@"presence"] retain];
-			presenceReceived = [[coder decodeObjectForKey:@"presenceReceived"] retain];
+			jid          = [[coder decodeObjectForKey:@"jid"] retain];
+			presence     = [[coder decodeObjectForKey:@"presence"] retain];
+			presenceDate = [[coder decodeObjectForKey:@"presenceDate"] retain];
 		}
 		else
 		{
-			jid              = [[coder decodeObject] retain];
-			presence         = [[coder decodeObject] retain];
-			presenceReceived = [[coder decodeObject] retain];
+			jid          = [[coder decodeObject] retain];
+			presence     = [[coder decodeObject] retain];
+			presenceDate = [[coder decodeObject] retain];
 		}
 	}
 	return self;
@@ -65,15 +66,15 @@
 {
 	if([coder allowsKeyedCoding])
 	{
-		[coder encodeObject:jid              forKey:@"jid"];
-		[coder encodeObject:presence         forKey:@"presence"];
-		[coder encodeObject:presenceReceived forKey:@"presenceReceived"];
+		[coder encodeObject:jid          forKey:@"jid"];
+		[coder encodeObject:presence     forKey:@"presence"];
+		[coder encodeObject:presenceDate forKey:@"presenceDate"];
 	}
 	else
 	{
 		[coder encodeObject:jid];
 		[coder encodeObject:presence];
-		[coder encodeObject:presenceReceived];
+		[coder encodeObject:presenceDate];
 	}
 }
 
@@ -91,9 +92,9 @@
 	return presence;
 }
 
-- (NSDate *)presenceReceived
+- (NSDate *)presenceDate
 {
-	return presenceReceived;
+	return presenceDate;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,63 +106,63 @@
 	[presence release];
 	presence = [aPresence retain];
 	
-	[presenceReceived release];
-	presenceReceived = [[NSDate alloc] init];
+	[presenceDate release];
+	presenceDate = [[presence delayedDeliveryDate] retain];
+	if (presenceDate == nil)
+	{
+		presenceDate = [[NSDate alloc] init];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Comparison Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSComparisonResult)compare:(XMPPResource *)another
+- (NSComparisonResult)compare:(id <XMPPResource>)another
 {
-	int mp = [[self presence] priority];
-	int ap = [[another presence] priority];
+	XMPPPresence *mp = [self presence];
+	XMPPPresence *ap = [another presence];
 	
-	if(mp < ap)
+	int mpp = [mp priority];
+	int app = [ap priority];
+	
+	if(mpp < app)
 		return NSOrderedDescending;
-	if(mp > ap)
+	if(mpp > app)
 		return NSOrderedAscending;
 	
 	// Priority is the same.
 	// Determine who is more available based on their show.
-	int ms = [[self presence] intShow];
-	int as = [[another presence] intShow];
+	int mps = [mp intShow];
+	int aps = [ap intShow];
 	
-	if(ms < as)
+	if(mps < aps)
 		return NSOrderedDescending;
-	if(ms > as)
+	if(mps > aps)
 		return NSOrderedAscending;
 	
 	// Priority and Show are the same.
 	// Determine based on who was the last to receive a presence element.
-	NSDate *mr = [self presenceReceived];
-	NSDate *ar = [another presenceReceived];
+	NSDate *mpd = [self presenceDate];
+	NSDate *apd = [another presenceDate];
 	
-	return [mr compare:ar];
+	return [mpd compare:apd];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark NSObject Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-- (unsigned)hash
-{
-	return [jid hash];
-}
-#else
 - (NSUInteger)hash
 {
 	return [jid hash];
 }
-#endif
 
 - (BOOL)isEqual:(id)anObject
 {
 	if([anObject isMemberOfClass:[self class]])
 	{
-		XMPPResource *another = (XMPPResource *)anObject;
+		XMPPResourceMemoryStorage *another = (XMPPResourceMemoryStorage *)anObject;
 		
 		return [jid isEqual:[another jid]];
 	}

@@ -47,9 +47,9 @@
 
 - (NSString *)type
 {
-	NSString *type = [[self attributeForName:@"type"] stringValue];
+	NSString *type = [self attributeStringValueForName:@"type"];
 	if(type)
-		return type;
+		return [type lowercaseString];
 	else
 		return @"available";
 }

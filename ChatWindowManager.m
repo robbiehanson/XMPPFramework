@@ -42,7 +42,7 @@
 	return nil;
 }
 
-+ (void)openChatWindowWithXMPPClient:(XMPPClient *)client forXMPPUser:(XMPPUser *)user
++ (void)openChatWindowWithStream:(XMPPStream *)xmppStream forUser:(id <XMPPUser>)user
 {
 	ChatController *cc = [[self class] chatControllerForJID:[user jid] matchResource:NO];
 	
@@ -55,14 +55,14 @@
 		// Create Manual Sync Window
 		XMPPJID *jid = [[user primaryResource] jid];
 		
-		ChatController *temp = [[ChatController alloc] initWithXMPPClient:client jid:jid];
+		ChatController *temp = [[ChatController alloc] initWithStream:xmppStream jid:jid];
 		[temp showWindow:self];
 		
 		// Note: ChatController will automatically release itself when the user closes the window
 	}
 }
 
-+ (void)handleChatMessage:(XMPPMessage *)message withXMPPClient:(XMPPClient *)client
++ (void)handleChatMessage:(XMPPMessage *)message withStream:(XMPPStream *)xmppStream
 {
 	NSLog(@"ChatWindowManager: handleChatMessage");
 	
@@ -73,7 +73,7 @@
 		// Create new chat window
 		XMPPJID *jid = [message from];
 		
-		ChatController *newCC = [[ChatController alloc] initWithXMPPClient:client jid:jid message:message];
+		ChatController *newCC = [[ChatController alloc] initWithStream:xmppStream jid:jid message:message];
 		[newCC showWindow:self];
 		
 		// Note: ChatController will automatically release itself when the user closes the window.

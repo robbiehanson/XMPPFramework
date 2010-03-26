@@ -3,7 +3,7 @@
 
 @implementation XMPPJID
 
-+ (BOOL)validateUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
++ (BOOL)validateDomain:(NSString *)domain
 {
 	// Domain is the only required part of a JID
 	if((domain == nil) || ([domain length] == 0)) return NO;
@@ -12,8 +12,22 @@
 	NSRange invalidAtRange = [domain rangeOfString:@"@"];
 	if(invalidAtRange.location != NSNotFound) return NO;
 	
+	return YES;
+}
+
++ (BOOL)validateResource:(NSString *)resource
+{
 	// Can't use an empty string resource name
 	if((resource != nil) && ([resource length] == 0)) return NO;
+	
+	return YES;
+}
+
++ (BOOL)validateUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
+{
+	if(![self validateDomain:domain]) return NO;
+	
+	if(![self validateResource:resource]) return NO;
 	
 	return YES;
 }
@@ -23,9 +37,9 @@
 	outDomain:(NSString **)domain
   outResource:(NSString **)resource
 {
-	*user = nil;
-	*domain = nil;
-	*resource = nil;
+	if(user)     *user = nil;
+	if(domain)   *domain = nil;
+	if(resource) *resource = nil;
 	
 	NSString *rawUser = nil;
 	NSString *rawDomain = nil;
@@ -72,9 +86,9 @@
 	
 	if([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
 	{
-		*user = prepUser;
-		*domain = prepDomain;
-		*resource = prepResource;
+		if(user)     *user = prepUser;
+		if(domain)   *domain = prepDomain;
+		if(resource) *resource = prepResource;
 		
 		return YES;
 	}
@@ -103,11 +117,12 @@
 
 + (XMPPJID *)jidWithString:(NSString *)jidStr resource:(NSString *)resource
 {
+	if(![self validateResource:resource]) return nil;
+	
 	NSString *user;
 	NSString *domain;
-	NSString *ignore;
 	
-	if([XMPPJID parse:jidStr outUser:&user outDomain:&domain outResource:&ignore])
+	if([XMPPJID parse:jidStr outUser:&user outDomain:&domain outResource:nil])
 	{
 		XMPPJID *jid = [[XMPPJID alloc] init];
 		jid->user = [user copy];
@@ -254,6 +269,11 @@
 		else
 			return domain;
 	}
+}
+
+- (BOOL)isFull
+{
+	return (resource != nil);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

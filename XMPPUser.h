@@ -1,33 +1,16 @@
 #import <Foundation/Foundation.h>
-#import "DDXML.h"
+
+#if TARGET_OS_IPHONE
+  #import "DDXML.h"
+#endif
 
 @class XMPPJID;
 @class XMPPIQ;
 @class XMPPPresence;
-@class XMPPResource;
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-  #define NSStringCompareOptions unsigned
-#endif
+@protocol XMPPResource;
 
 
-@interface XMPPUser : NSObject <NSCoding>
-{
-	XMPPJID *jid;
-	NSMutableDictionary *itemAttributes;
-	
-	NSMutableDictionary *resources;
-	XMPPResource *primaryResource;
-	
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-	int tag;
-#else
-	NSInteger tag;
-#endif
-}
-
-- (id)initWithJID:(XMPPJID *)jid;
-- (id)initWithItem:(NSXMLElement *)item;
+@protocol XMPPUser
 
 - (XMPPJID *)jid;
 - (NSString *)nickname;
@@ -37,26 +20,16 @@
 - (BOOL)isOnline;
 - (BOOL)isPendingApproval;
 
-- (XMPPResource *)primaryResource;
-- (XMPPResource *)resourceForJID:(XMPPJID *)jid;
+- (id <XMPPResource>)primaryResource;
+- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
+
 - (NSArray *)sortedResources;
 - (NSArray *)unsortedResources;
 
-- (void)updateWithItem:(NSXMLElement *)item;
-- (void)updateWithPresence:(XMPPPresence *)presence;
+- (NSComparisonResult)compareByName:(id <XMPPUser>)another;
+- (NSComparisonResult)compareByName:(id <XMPPUser>)another options:(NSStringCompareOptions)mask;
 
-- (NSComparisonResult)compareByName:(XMPPUser *)another;
-- (NSComparisonResult)compareByName:(XMPPUser *)another options:(NSStringCompareOptions)mask;
-
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another;
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUser *)another options:(NSStringCompareOptions)mask;
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-- (int)tag;
-- (void)setTag:(int)anInt;
-#else
-- (NSInteger)tag;
-- (void)setTag:(NSInteger)anInt;
-#endif
+- (NSComparisonResult)compareByAvailabilityName:(id <XMPPUser>)another;
+- (NSComparisonResult)compareByAvailabilityName:(id <XMPPUser>)another options:(NSStringCompareOptions)mask;
 
 @end
