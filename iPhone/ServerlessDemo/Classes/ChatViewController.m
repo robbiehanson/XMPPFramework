@@ -651,8 +651,8 @@
 		
 		xmppStream = [[XMPPStream alloc] initP2PFrom:myJID];
 		
-		[xmppStream setDelegate:self];
-		[xmppStream connectTo:serviceJID withAddress:address];
+		[xmppStream addDelegate:self];
+		[xmppStream connectTo:serviceJID withAddress:address error:nil];
 	}
 	
 	[ns stop];
@@ -738,7 +738,7 @@
 	[netService stop];
 	[netService release];
 	
-	[xmppStream setDelegate:nil];
+	[xmppStream removeDelegate:nil];
 	[xmppStream disconnect];
 	[xmppStream release];
 	

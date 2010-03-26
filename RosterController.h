@@ -1,9 +1,13 @@
 #import <Cocoa/Cocoa.h>
-@class  XMPPClient;
 
 
 @interface RosterController : NSObject
 {
+	BOOL useSSL;
+	BOOL allowSelfSignedCertificates;
+	BOOL allowSSLHostNameMismatch;
+	
+	BOOL isOpen;
 	BOOL isRegistering;
 	BOOL isAuthenticating;
 	
@@ -24,8 +28,6 @@
     IBOutlet id signInSheet;
     IBOutlet id sslButton;
     IBOutlet id window;
-	
-	IBOutlet XMPPClient *xmppClient;
 }
 
 - (void)displaySignInSheet;

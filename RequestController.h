@@ -8,7 +8,6 @@
 	
 	IBOutlet id jidField;
     IBOutlet id window;
-	IBOutlet id xmppClient;
     IBOutlet id xofyField;
 }
 

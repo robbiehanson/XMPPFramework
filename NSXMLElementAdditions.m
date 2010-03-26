@@ -172,4 +172,27 @@
 	return result;
 }
 
+/**
+ *	Shortcut to avoid having to use NSXMLNode everytime
+**/
+- (void)addNamespaceWithPrefix:(NSString *)prefix stringValue:(NSString *)string
+{
+	[self addNamespace:[NSXMLNode namespaceWithName:prefix stringValue:string]];
+}
+
+/**
+ * Just to make your code look a little bit cleaner.
+**/
+
+- (NSString *)namespaceStringValueForPrefix:(NSString *)prefix
+{
+	return [[self namespaceForPrefix:prefix] stringValue];
+}
+
+- (NSString *)namespaceStringValueForPrefix:(NSString *)prefix withDefaultValue:(NSString *)defaultValue
+{
+	NSXMLNode *namespace = [self namespaceForPrefix:prefix];
+	return (namespace) ? [namespace stringValue] : defaultValue;
+}
+
 @end

@@ -1,7 +1,7 @@
 #import "RosterController.h"
 #import "RequestController.h"
-#import "XMPP.h"
 #import "ChatWindowManager.h"
+#import "AppDelegate.h"
 
 #import <SystemConfiguration/SystemConfiguration.h>
 
@@ -12,13 +12,27 @@
 // Setup:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (XMPPStream *)xmppStream
+{
+	return [[NSApp delegate] xmppStream];
+}
+
+- (XMPPRoster *)xmppRoster
+{
+	return [[NSApp delegate] xmppRoster];
+}
+
+- (XMPPRosterMemoryStorage *)xmppRosterStorage
+{
+	return [[NSApp delegate] xmppRosterStorage];
+}
+
 - (void)awakeFromNib
 {
-	[xmppClient setAutoLogin:NO];
-	[xmppClient setAutoRoster:YES];
-	[xmppClient setAutoPresence:YES];
+	[[self xmppRoster] setAutoRoster:YES];
 	
-	[xmppClient addDelegate:self];
+	[[self xmppStream] addDelegate:self];
+	[[self xmppRoster] addDelegate:self];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +96,34 @@
 	}
 }
 
+- (void)enableSignInUI:(BOOL)enabled
+{
+	[serverField setEnabled:enabled];
+	[portField setEnabled:enabled];
+	
+	[sslButton setEnabled:enabled];
+	[selfSignedButton setEnabled:enabled];
+	[mismatchButton setEnabled:enabled];
+	
+	[jidField setEnabled:enabled];
+	[passwordField setEnabled:enabled];
+	
+	[resourceField setEnabled:enabled];
+	
+	[signInButton setEnabled:enabled];
+	[registerButton setEnabled:enabled];
+}
+
+- (void)lockSignInUI
+{
+	[self enableSignInUI:NO];
+}
+
+- (void)unlockSignInUI
+{
+	[self enableSignInUI:YES];
+}
+
 - (void)updateAccountInfo
 {
 	NSString *domain = [serverField stringValue];
@@ -89,18 +131,14 @@
 	{
 		domain = [[serverField cell] placeholderString];
 	}
-	[xmppClient setDomain:domain];
+	[[self xmppStream] setHostName:domain];
 	
 	int port = [portField intValue];
-	[xmppClient setPort:port];
+	[[self xmppStream] setHostPort:port];
 	
-	BOOL usesSSL = ([sslButton state] == NSOnState);
-	BOOL allowsSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
-	BOOL allowsSSLHostNameMismatch = ([mismatchButton state] == NSOnState);
-	
-	[xmppClient setUsesOldStyleSSL:usesSSL];
-	[xmppClient setAllowsSelfSignedCertificates:allowsSelfSignedCertificates];
-	[xmppClient setAllowsSSLHostNameMismatch:allowsSSLHostNameMismatch];
+	useSSL = ([sslButton state] == NSOnState);
+	allowSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
+	allowSSLHostNameMismatch = ([mismatchButton state] == NSOnState);
 	
 	NSString *resource = [resourceField stringValue];
 	if([resource length] == 0)
@@ -110,9 +148,7 @@
 	
 	XMPPJID *jid = [XMPPJID jidWithString:[jidField stringValue] resource:resource];
 	
-	[xmppClient setMyJID:jid];
-	
-	[xmppClient setPassword:[passwordField stringValue]];
+	[[self xmppStream] setMyJID:jid];
     
 	// Update persistent defaults:
 	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
@@ -123,11 +159,11 @@
 			  forKey:@"Account.Port"];
 	[dflts setObject:[jidField stringValue]
 			  forKey:@"Account.JID"];
-	[dflts setBool:usesSSL 
+	[dflts setBool:useSSL 
 			forKey:@"Account.UseSSL"];
-	[dflts setBool:allowsSelfSignedCertificates 
+	[dflts setBool:allowSelfSignedCertificates 
 			forKey:@"Account.AllowSelfSignedCert"];
-	[dflts setBool:allowsSSLHostNameMismatch 
+	[dflts setBool:allowSSLHostNameMismatch 
 			forKey:@"Account.AllowSSLHostNameMismatch"];
 	[dflts synchronize];
 }
@@ -136,17 +172,31 @@
 {
 	[self updateAccountInfo];
 	
-	isRegistering = YES;
-	[signInButton setEnabled:NO];
-	[registerButton setEnabled:NO];
+	NSError *error = nil;
+	BOOL success;
 	
-	if(![xmppClient isConnected])
+	if(![[self xmppStream] isConnected])
 	{
-		[xmppClient connect];
+		if (useSSL)
+			success = [[self xmppStream] oldSchoolSecureConnect:&error];
+		else
+			success = [[self xmppStream] connect:&error];
 	}
 	else
 	{
-		[xmppClient registerUser];
+		NSString *password = [passwordField stringValue];
+		
+		success = [[self xmppStream] registerWithPassword:password error:&error];
+	}
+	
+	if (success)
+	{
+		isRegistering = YES;
+		[self lockSignInUI];
+	}
+	else
+	{
+		[messageField setStringValue:[error localizedDescription]];
 	}
 }
 
@@ -154,17 +204,31 @@
 {
 	[self updateAccountInfo];
 	
-	isAuthenticating = YES;
-	[signInButton setEnabled:NO];
-	[registerButton setEnabled:NO];
+	NSError *error = nil;
+	BOOL success;
 	
-	if(![xmppClient isConnected])
+	if(![[self xmppStream] isConnected])
 	{
-		[xmppClient connect];
+		if (useSSL)
+			success = [[self xmppStream] oldSchoolSecureConnect:&error];
+		else
+			success = [[self xmppStream] connect:&error];
 	}
 	else
 	{
-		[xmppClient authenticateUser];
+		NSString *password = [passwordField stringValue];
+		
+		success = [[self xmppStream] authenticateWithPassword:password error:&error];
+	}
+	
+	if (success)
+	{
+		isAuthenticating = YES;
+		[self lockSignInUI];
+	}
+	else
+	{
+		[messageField setStringValue:[error localizedDescription]];
 	}
 }
 
@@ -172,15 +236,30 @@
 #pragma mark Presence Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)goOnline
+{
+	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+	
+	[[self xmppStream] sendElement:presence];
+}
+
+- (void)goOffline
+{
+	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+	[presence addAttributeWithName:@"type" stringValue:@"unavailable"];
+	
+	[[self xmppStream] sendElement:presence];
+}
+
 - (IBAction)changePresence:(id)sender
 {
 	if([[sender titleOfSelectedItem] isEqualToString:@"Offline"])
 	{
-		[xmppClient goOffline];
+		[self goOffline];
 	}
 	else
 	{
-		[xmppClient goOnline];
+		[self goOnline];
 	}
 }
 
@@ -192,7 +271,7 @@
 {
 	XMPPJID *jid = [XMPPJID jidWithString:[buddyField stringValue]];
 	
-	[xmppClient addBuddy:jid withNickname:nil];
+	[[self xmppRoster] addBuddy:jid withNickname:nil];
 	
 	// Clear buddy text field
 	[buddyField setStringValue:@""];
@@ -202,7 +281,7 @@
 {
 	XMPPJID *jid = [XMPPJID jidWithString:[buddyField stringValue]];
 	
-	[xmppClient removeBuddy:jid];
+	[[self xmppRoster] removeBuddy:jid];
 	
 	// Clear buddy text field
 	[buddyField setStringValue:@""];
@@ -217,9 +296,10 @@
 	int selectedRow = [rosterTable selectedRow];
 	if(selectedRow >= 0)
 	{
-		XMPPUser *user = [roster objectAtIndex:selectedRow];
+		XMPPStream *stream = [self xmppStream];
+		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
 		
-		[ChatWindowManager openChatWindowWithXMPPClient:xmppClient forXMPPUser:user];
+		[ChatWindowManager openChatWindowWithStream:stream forUser:user];
 	}
 }
 
@@ -228,8 +308,8 @@
 	int selectedRow = [rosterTable selectedRow];
 	if(selectedRow >= 0)
 	{
-		XMPPUser *user = [roster objectAtIndex:selectedRow];
-		XMPPResource *resource = [user primaryResource];
+		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
+		id <XMPPResource> resource = [user primaryResource];
 		
 		[[NSApp delegate] connectViaXEP65:[resource jid]];
 	}
@@ -246,7 +326,7 @@
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex
 {
-	XMPPUser *user = [roster objectAtIndex:rowIndex];
+	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
 	
 	if([[tableColumn identifier] isEqualToString:@"name"])
 		return [user nickname];
@@ -261,10 +341,10 @@
    forTableColumn:(NSTableColumn *)tableColumn
 			  row:(int)rowIndex
 {
-	XMPPUser *user = [roster objectAtIndex:rowIndex];
+	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
 	NSString *newName = (NSString *)anObject;
 	
-	[xmppClient setNickname:newName forBuddy:[user jid]];
+	[[self xmppRoster] setNickname:newName forBuddy:[user jid]];
 }
 
 - (void)tableView:(NSTableView *)tableView
@@ -272,7 +352,7 @@
    forTableColumn:(NSTableColumn *)tableColumn 
 			  row:(int)rowIndex
 {
-	XMPPUser *user = [roster objectAtIndex:rowIndex];
+	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
 	
 	BOOL isRowSelected = ([tableView isRowSelected:rowIndex]);
 	BOOL isFirstResponder = [[[tableView window] firstResponder] isEqual:tableView];
@@ -307,104 +387,177 @@
 #pragma mark XMPPClient Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppClientDidConnect:(XMPPClient *)sender
+- (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
 {
-	if(isRegistering)
-		[xmppClient registerUser];
+	NSLog(@"---------- xmppStream:willSecureWithSettings: ----------");
+	
+	if (allowSelfSignedCertificates)
+	{
+		[settings setObject:[NSNumber numberWithBool:YES] forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
+	}
+	
+	if (allowSSLHostNameMismatch)
+	{
+		[settings setObject:[NSNull null] forKey:(NSString *)kCFStreamSSLPeerName];
+	}
 	else
-		[xmppClient authenticateUser];
+	{
+		// Google does things incorrectly (does not conform to RFC).
+		// Because so many people ask questions about this (assume xmpp framework is broken),
+		// I've explicitly added code that shows how other xmpp clients "do the right thing"
+		// when connecting to a google server (gmail, or google apps for domains).
+		
+		NSString *expectedCertName = nil;
+		
+		NSString *serverHostName = [sender hostName];
+		NSString *virtualHostName = [[sender myJID] domain];
+		
+		if ([serverHostName isEqualToString:@"talk.google.com"])
+		{
+			if ([virtualHostName isEqualToString:@"gmail.com"])
+			{
+				expectedCertName = virtualHostName;
+			}
+			else
+			{
+				expectedCertName = serverHostName;
+			}
+		}
+		else
+		{
+			expectedCertName = serverHostName;
+		}
+		
+		[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
+	}
 }
 
-- (void)xmppClientDidNotConnect:(XMPPClient *)sender
+- (void)xmppStreamDidSecure:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppClientDidNotConnect ----------");
-	if([sender streamError])
+	NSLog(@"---------- xmppStreamDidSecure ----------");
+}
+
+- (void)xmppStreamDidOpen:(XMPPStream *)sender
+{
+	NSLog(@"---------- xmppStreamDidOpen ----------");
+	
+	isOpen = YES;
+	
+	NSString *password = [passwordField stringValue];
+	
+	NSError *error = nil;
+	BOOL success;
+	
+	if(isRegistering)
 	{
-		NSLog(@"           error: %@", [sender streamError]);
+		success = [[self xmppStream] registerWithPassword:password error:&error];
 	}
+	else
+	{
+		success = [[self xmppStream] authenticateWithPassword:password error:&error];
+	}
+	
+	if (!success)
+	{
+		[messageField setStringValue:[error localizedDescription]];
+	}
+}
+
+- (void)xmppStreamDidRegister:(XMPPStream *)sender
+{
+	NSLog(@"---------- xmppStreamDidRegister ----------");
 	
 	// Update tracking variables
 	isRegistering = NO;
-	isAuthenticating = NO;
 	
 	// Update GUI
-	[signInButton setEnabled:YES];
-	[registerButton setEnabled:YES];
-	[messageField setStringValue:@"Cannot connect to server"];
-}
-
-- (void)xmppClientDidDisconnect:(XMPPClient *)sender
-{
-	NSLog(@"---------- xmppClientDidDisconnect ----------");
-	if ([sender streamError])
-	{
-		NSLog(@"           error: %@", [sender streamError]);
-	}
-	
-	[signInButton setEnabled:YES];
-	[registerButton setEnabled:YES];
-	[messageField setStringValue:@"Unexpectedly disconnected from server"];
-}
-
-- (void)xmppClientDidRegister:(XMPPClient *)sender
-{
-	// Update tracking variables
-	isRegistering = NO;
-	
-	// Update GUI
-	[signInButton setEnabled:YES];
-	[registerButton setEnabled:YES];
+	[self unlockSignInUI];
 	[messageField setStringValue:@"Registered new user"];
 }
 
-- (void)xmppClient:(XMPPClient *)sender didNotRegister:(NSXMLElement *)error
+- (void)xmppStream:(XMPPStream *)sender didNotRegister:(NSXMLElement *)error
 {
+	NSLog(@"---------- xmppStream:didNotRegister: ----------");
+	
 	// Update tracking variables
 	isRegistering = NO;
 	
 	// Update GUI
-	[signInButton setEnabled:YES];
-	[registerButton setEnabled:YES];
+	[self unlockSignInUI];
 	[messageField setStringValue:@"Username is taken"];
 }
 
-- (void)xmppClientDidAuthenticate:(XMPPClient *)sender
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
+	NSLog(@"---------- xmppStreamDidAuthenticate ----------");
+	
 	// Update tracking variables
 	isAuthenticating = NO;
 	
 	// Close the sheet
 	[signInSheet orderOut:self];
 	[NSApp endSheet:signInSheet];
+	
+	// Send presence
+	[self goOnline];
 }
 
-- (void)xmppClient:(XMPPClient *)sender didNotAuthenticate:(NSXMLElement *)error
+- (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
 {
+	NSLog(@"---------- xmppStream:didNotAuthenticate: ----------");
+	
 	// Update tracking variables
 	isAuthenticating = NO;
 	
 	// Update GUI
-	[signInButton setEnabled:YES];
-	[registerButton setEnabled:YES];
+	[self unlockSignInUI];
 	[messageField setStringValue:@"Invalid username/password"];
 }
 
-- (void)xmppClientDidUpdateRoster:(XMPPClient *)sender
+- (void)xmppRosterDidChange:(XMPPRosterMemoryStorage *)sender
 {
+	NSLog(@"---------- xmppRosterDidChange ----------");
+	
 	[roster release];
-	roster = [[xmppClient sortedUsersByAvailabilityName] retain];
+	roster = [[sender sortedUsersByAvailabilityName] retain];
 	
 	[rosterTable abortEditing];
 	[rosterTable selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
 	[rosterTable reloadData];
 }
 
-- (void)xmppClient:(XMPPClient *)sender didReceiveMessage:(XMPPMessage *)message
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
+	NSLog(@"---------- xmppStream:didReceiveMessage: ----------");
+	
 	if([message isChatMessageWithBody])
 	{
-		[ChatWindowManager handleChatMessage:message withXMPPClient:xmppClient];
+		[ChatWindowManager handleChatMessage:message withStream:sender];
 	}
+}
+
+- (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
+{
+	NSLog(@"---------- xmppStream:didReceiveError: ----------");
+	NSLog(@"%@", error);
+}
+
+- (void)xmppStreamDidClose:(XMPPStream *)sender
+{
+	NSLog(@"---------- xmppStreamDidClose ----------");
+	
+	if (!isOpen)
+	{
+		[messageField setStringValue:@"Cannot connect to server"];
+	}
+	
+	// Update tracking variables
+	isOpen = NO;
+	isRegistering = NO;
+	isAuthenticating = NO;
+	
+	// Update GUI
+	[self unlockSignInUI];
 }
 
 @end

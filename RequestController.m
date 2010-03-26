@@ -1,6 +1,6 @@
 #import "RequestController.h"
 #import "RosterController.h"
-#import "XMPP.h"
+#import "AppDelegate.h"
 
 
 @implementation RequestController
@@ -15,9 +15,20 @@
 	return self;
 }
 
+- (XMPPStream *)xmppStream
+{
+	return [[NSApp delegate] xmppStream];
+}
+
+- (XMPPRoster *)xmppRoster
+{
+	return [[NSApp delegate] xmppRoster];
+}
+
 - (void)awakeFromNib
 {
-	[xmppClient addDelegate:self];
+	[[self xmppStream] addDelegate:self];
+	[[self xmppRoster] addDelegate:self];
 	
 	NSRect visibleFrame = [[window screen] visibleFrame];
 	NSRect windowFrame = [window frame];
@@ -31,8 +42,11 @@
 
 - (void)dealloc
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[self xmppStream] removeDelegate:self];
+	[[self xmppRoster] removeDelegate:self];
+	
 	[jids release];
+	
 	[super dealloc];
 }
 
@@ -75,8 +89,10 @@
 // XMPPClient Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppClient:(XMPPClient *)sender didReceiveBuddyRequest:(XMPPJID *)jid
+- (void)xmppRoster:(XMPPRoster *)sender didReceiveBuddyRequest:(XMPPPresence *)presence
 {
+	XMPPJID *jid = [presence from];
+	
 	if(![jids containsObject:jid])
 	{
 		[jids addObject:jid];
@@ -99,7 +115,7 @@
 	}
 }
 
-- (void)xmppClientDidUpdateRoster:(XMPPClient *)sender
+- (void)xmppRosterDidChange:(XMPPRosterMemoryStorage *)sender
 {
 	// Often times XMPP servers send presence requests prior to sending the roster.
 	// That is, after you authenticate, they immediately send you presence requests,
@@ -108,7 +124,7 @@
 	// if we've already requested this person to be our buddy.
 	// We make up for that by fixing our mistake as soon as possible.
 	
-	NSArray *roster = [xmppClient sortedUsersByAvailabilityName];
+	NSArray *roster = [sender sortedUsersByAvailabilityName];
 	
 	// Remember: Our roster contains only those users we've added.
 	// If the server tries to include buddies that we haven't added, but have asked to subscribe to us,
@@ -117,7 +133,7 @@
 	NSUInteger i;
 	for(i = 0; i < [roster count]; i++)
 	{
-		XMPPUser *user = [roster objectAtIndex:i];
+		id <XMPPUser> user = [roster objectAtIndex:i];
 		
 		NSUInteger currentIndex = [jids indexOfObject:[user jid]];
 		
@@ -130,7 +146,7 @@
 			{
 				NSLog(@"Auto-accepting buddy request, since they already accepted us");
 				
-				[sender acceptBuddyRequest:[user jid]];
+				[[self xmppRoster] acceptBuddyRequest:[user jid]];
 			
 				[jids removeObjectAtIndex:currentIndex];
 				
@@ -153,7 +169,7 @@
 	}
 }
 
-- (void)xmppClientDidDisconnect:(XMPPClient *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
 	// We can't accept or reject any requests when we're disconnected from the server.
 	// We may as well close the window.
@@ -170,7 +186,8 @@
 - (IBAction)accept:(id)sender
 {
 	XMPPJID *jid = [jids objectAtIndex:jidIndex];
-	[xmppClient acceptBuddyRequest:jid];
+	
+	[[self xmppRoster] acceptBuddyRequest:jid];
 	
 	[self nextRequest];
 }
@@ -178,7 +195,8 @@
 - (IBAction)reject:(id)sender
 {
 	XMPPJID *jid = [jids objectAtIndex:jidIndex];
-	[xmppClient rejectBuddyRequest:jid];
+	
+	[[self xmppRoster] rejectBuddyRequest:jid];
 	
 	[self nextRequest];
 }

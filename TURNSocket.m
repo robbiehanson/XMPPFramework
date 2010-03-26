@@ -130,20 +130,6 @@ static NSMutableDictionary *existingTurnSockets;
 	return [NSArray arrayWithObject:@"jabber.org"];
 }
 
-/**
- * Generates and returns a new autoreleased UUID.
-**/
-+ (NSString *)generateUUID
-{
-	NSString *result = nil;
-	
-	CFUUIDRef theUUID = CFUUIDCreate(NULL);
-	result = [NSMakeCollectable(CFUUIDCreateString(NULL, theUUID)) autorelease];
-	CFRelease(theUUID);
-	
-	return result;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Init, Dealloc
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,12 +138,12 @@ static NSMutableDictionary *existingTurnSockets;
  * Initializes a new TURN socket to create a TCP connection by routing through a proxy.
  * This constructor configures the object to be the client connecting to a server.
 **/
-- (id)initWithXMPPClient:(XMPPClient *)aXmppClient toJID:(XMPPJID *)aJid
+- (id)initWithStream:(XMPPStream *)stream toJID:(XMPPJID *)aJid
 {
 	if((self = [super init]))
 	{
 		// Store references
-		xmppClient = [aXmppClient retain];
+		xmppStream = [stream retain];
 		jid = [aJid retain];
 		
 		// Create a uuid to be used as the id for all messages in the stun communication.
@@ -165,7 +151,7 @@ static NSMutableDictionary *existingTurnSockets;
 		// Relying only on JID's is troublesome, because client A could be initiating a connection to server B,
 		// while at the same time client B could be initiating a connection to server A.
 		// So an incoming connection from JID clientB@deusty.com/home would be for which turn socket?
-		uuid = [[[self class] generateUUID] retain];
+		uuid = [[xmppStream generateUUID] retain];
 		
 		// Setup initial state for a client connection
 		state = STATE_INIT;
@@ -185,12 +171,12 @@ static NSMutableDictionary *existingTurnSockets;
  * Initializes a new TURN socket to create a TCP connection by routing through a proxy.
  * This constructor configures the object to be the server accepting a connection from a client.
 **/
-- (id)initWithXMPPClient:(XMPPClient *)aXmppClient incomingTURNRequest:(XMPPIQ *)iq
+- (id)initWithStream:(XMPPStream *)stream incomingTURNRequest:(XMPPIQ *)iq
 {
 	if((self = [super init]))
 	{
 		// Store references
-		xmppClient = [aXmppClient retain];
+		xmppStream = [stream retain];
 		jid = [[iq from] retain];
 		
 		// Store a copy of the ID (which will be our uuid)
@@ -229,6 +215,7 @@ static NSMutableDictionary *existingTurnSockets;
 {
 	DDLogVerbose(@"TURNSocket: dealloc: %p", self);
 	
+	[xmppStream release];
 	[jid release];
 	[uuid release];
 	
@@ -276,7 +263,7 @@ static NSMutableDictionary *existingTurnSockets;
 	delegate = theDelegate;
 	
 	// Add self as xmpp delegate so we'll get message responses
-	[xmppClient addDelegate:self];
+	[xmppStream addDelegate:self];
 	
 	// Start the timer to calculate how long the procedure takes
 	startTime = [[NSDate alloc] init];
@@ -358,7 +345,7 @@ static NSMutableDictionary *existingTurnSockets;
 	[iq addAttributeWithName:@"id" stringValue:uuid];
 	[iq addChild:query];
 	
-	[xmppClient sendElement:iq];
+	[xmppStream sendElement:iq];
 	
 	// Update state
 	state = STATE_REQUEST_SENT;
@@ -390,7 +377,7 @@ static NSMutableDictionary *existingTurnSockets;
 	[iq addAttributeWithName:@"id" stringValue:uuid];
 	[iq addChild:query];
 	
-	[xmppClient sendElement:iq];
+	[xmppStream sendElement:iq];
 }
 
 /**
@@ -413,7 +400,7 @@ static NSMutableDictionary *existingTurnSockets;
 	[iq addAttributeWithName:@"id" stringValue:uuid];
 	[iq addChild:query];
 	
-	[xmppClient sendElement:iq];
+	[xmppStream sendElement:iq];
 	
 	// Update state
 	state = STATE_ACTIVATE_SENT;
@@ -445,14 +432,14 @@ static NSMutableDictionary *existingTurnSockets;
 	[iq addAttributeWithName:@"id" stringValue:uuid];
 	[iq addChild:error];
 	
-	[xmppClient sendElement:iq];
+	[xmppStream sendElement:iq];
 }
 
 /**
  * Invoked by XMPPClient when an IQ is received.
  * We can determine if the IQ applies to us by checking its element ID.
 **/
-- (void)xmppClient:(XMPPClient *)sender didReceiveIQ:(XMPPIQ *)iq
+- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	// Disco queries (sent to jabber server) use id=discoUUID
 	// P2P queries (sent to other Mojo app) use id=uuid
@@ -474,7 +461,7 @@ static NSMutableDictionary *existingTurnSockets;
 		}
 	}
 	
-	DDLogVerbose(@"xmppClient:didReceiveIQ: state(%i)", state);
+	DDLogVerbose(@"xmppStream:didReceiveIQ: state(%i)", state);
 	
 	if(state == STATE_PROXY_DISCO_ITEMS)
 	{
@@ -706,7 +693,7 @@ static NSMutableDictionary *existingTurnSockets;
 - (void)updateDiscoUUID
 {
 	[discoUUID release];
-	discoUUID = [[[self class] generateUUID] retain];
+	discoUUID = [[xmppStream generateUUID] retain];
 }
 
 /**
@@ -753,7 +740,7 @@ static NSMutableDictionary *existingTurnSockets;
 		[iq addAttributeWithName:@"id" stringValue:discoUUID];
 		[iq addChild:query];
 		
-		[xmppClient sendElement:iq];
+		[xmppStream sendElement:iq];
 		
 		[discoTimer invalidate];
 		[discoTimer release];
@@ -835,7 +822,7 @@ static NSMutableDictionary *existingTurnSockets;
 		[iq addAttributeWithName:@"id" stringValue:discoUUID];
 		[iq addChild:query];
 		
-		[xmppClient sendElement:iq];
+		[xmppStream sendElement:iq];
 		
 		[discoTimer invalidate];
 		[discoTimer release];
@@ -873,7 +860,7 @@ static NSMutableDictionary *existingTurnSockets;
 	[iq addAttributeWithName:@"id" stringValue:discoUUID];
 	[iq addChild:query];
 	
-	[xmppClient sendElement:iq];
+	[xmppStream sendElement:iq];
 	
 	[discoTimer invalidate];
 	[discoTimer release];
@@ -1019,7 +1006,7 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)socksConnect
 {
-	XMPPJID *myJID = [xmppClient myJID];
+	XMPPJID *myJID = [xmppStream myJID];
 	
 	// From XEP-0065:
 	// 
@@ -1338,7 +1325,7 @@ static NSMutableDictionary *existingTurnSockets;
 	DDLogVerbose(@"TURNSocket: cleanup");
 	
 	// Remove self as xmpp delegate
-	[xmppClient removeDelegate:self];
+	[xmppStream removeDelegate:self];
 	
 	// Remove self from existingStuntSockets dictionary so we can be deallocated
 	[existingTurnSockets removeObjectForKey:uuid];

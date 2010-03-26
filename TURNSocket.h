@@ -2,7 +2,7 @@
 
 @class XMPPIQ;
 @class XMPPJID;
-@class XMPPClient;
+@class XMPPStream;
 @class AsyncSocket;
 
 /**
@@ -16,7 +16,7 @@
 	int state;
 	BOOL isClient;
 	
-	XMPPClient *xmppClient;
+	XMPPStream *xmppStream;
 	XMPPJID *jid;
 	NSString *uuid;
 	
@@ -45,8 +45,8 @@
 
 + (BOOL)isNewStartTURNRequest:(XMPPIQ *)iq;
 
-- (id)initWithXMPPClient:(XMPPClient *)xmppClient toJID:(XMPPJID *)jid;
-- (id)initWithXMPPClient:(XMPPClient *)xmppClient incomingTURNRequest:(XMPPIQ *)iq;
+- (id)initWithStream:(XMPPStream *)xmppStream toJID:(XMPPJID *)jid;
+- (id)initWithStream:(XMPPStream *)xmppStream incomingTURNRequest:(XMPPIQ *)iq;
 
 - (void)start:(id)delegate;
 

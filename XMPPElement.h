@@ -1,5 +1,8 @@
 #import <Foundation/Foundation.h>
-#import "DDXML.h"
+
+#if TARGET_OS_IPHONE
+  #import "DDXML.h"
+#endif
 
 @class XMPPJID;
 
@@ -13,5 +16,8 @@
 
 - (NSString *)toStr;
 - (NSString *)fromStr;
+
+- (BOOL)wasDelayed;
+- (NSDate *)delayedDeliveryDate;
 
 @end

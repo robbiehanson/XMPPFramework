@@ -1,27 +1,29 @@
 #import <Foundation/Foundation.h>
+#import "MulticastDelegate.h"
 
-@class XMPPClient;
-@class XMPPResource;
+@class XMPPJID;
+@class XMPPStream;
 @class XMPPIQ;
+@protocol XMPPPingDelegate;
 
 
 @interface XMPPPing : NSObject
 {
-	id delegate;
+	XMPPStream *xmppStream;
+	MulticastDelegate <XMPPPingDelegate> *multicastDelegate;
 	
-	XMPPClient *client;
 	NSMutableArray *pingIDs;
 }
 
-- (id)initWithXMPPClient:(XMPPClient *)xmppClient delegate:(id)delegate;
+- (id)initWithStream:(XMPPStream *)xmppStream;
 
-- (XMPPClient *)xmppClient;
+@property (nonatomic, readonly) XMPPStream *xmppStream;
 
-- (id)delegate;
-- (void)setDelegate:(id)delegate;
+- (void)addDelegate:(id)delegate;
+- (void)removeDelegate:(id)delegate;
 
 - (void)sendPingToServer;
-- (void)sendPingToResource:(XMPPResource *)resource;
+- (void)sendPingToJID:(XMPPJID *)jid;
 
 @end
 
