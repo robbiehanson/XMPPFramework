@@ -437,8 +437,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		}
 	}
 	
-//	NSLog(@"XMPPCapabilities: s: %@", s);
-	
 	NSData *data = [s dataUsingEncoding:NSUTF8StringEncoding];
 	NSData *hash = [data sha1Digest];
 	
@@ -491,8 +489,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)fetchCapabilitiesForJID:(XMPPJID *)jid
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
-	
 	if (![jid isFull])
 	{
 		// Invalid JID - Must be a full JID (i.e. it must include the resource)
@@ -620,8 +616,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handlePresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
-	DDLogTrace();
-	
 	// <presence from="romeo@montague.lit/orchard">
 	//   <c xmlns="http://jabber.org/protocol/caps"
 	//       hash="sha-1"
@@ -650,8 +644,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	// Remember: hash="sha-1" ver="ABC-Actual-Hash-DEF".
 	// It's a bit confusing as it was designed this way for backwards compatibility with v 1.4 and below.
 	
-	DDLogVerbose(@"%@: JID(%@) broadcasting capabilities hash(%@)", THIS_FILE, jid, ver);
-	
 	BOOL areCapabilitiesKnown = [xmppCapabilitiesStorage setCapabilitiesNode:node
 	                                                                     ver:ver
 	                                                                     ext:nil
@@ -660,8 +652,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	                                                                  forJID:jid];
 	if (areCapabilitiesKnown)
 	{
-		DDLogVerbose(@"%@: We already know the capabilites for this hash", THIS_FILE);
-		
 		// The capabilities for this hash are already known
 		return;
 	}
@@ -670,8 +660,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (!self.autoFetchHashedCapabilities)
 	{
-		DDLogVerbose(@"%@: autoFetchHashedCapabilities disabled", THIS_FILE);
-		
 		return;
 	}
 	
@@ -682,8 +670,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (jids)
 	{
-		DDLogVerbose(@"%@: We're already fetching the capabilities for this hash", THIS_FILE);
-		
 		// Is the jid already included in this list?
 		// 
 		// There are actually two ways we can answer this question.
@@ -758,10 +744,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleLegacyPresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
-	DDLogTrace();
-	
-	DDLogVerbose(@"%@: JID(%@) broadcasting legacy capabilities", THIS_FILE, jid);
-	
 	NSString *node = [c attributeStringValueForName:@"node"];
 	NSString *ver  = [c attributeStringValueForName:@"ver"];
 	NSString *ext  = [c attributeStringValueForName:@"ext"];
@@ -786,8 +768,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	                                                                  forJID:jid];
 	if (areCapabilitiesKnown)
 	{
-		DDLogVerbose(@"%@: We already know the capabilites for this jid", THIS_FILE);
-		
 		// The capabilities for this jid are already known
 		return;
 	}
@@ -796,8 +776,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (!self.autoFetchNonHashedCapabilities)
 	{
-		DDLogVerbose(@"%@: autoFetchNonHashedCapabilities disabled", THIS_FILE);
-		
 		return;
 	}
 	
@@ -805,8 +783,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if ([discoRequestJidSet containsObject:jid])
 	{
-		DDLogVerbose(@"%@: We're already fetching the capabilities for this jid", THIS_FILE);
-		
 		// We've already sent a disco request to this jid.
 		return;
 	}
@@ -846,8 +822,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleDiscoRequest:(XMPPIQ *)iqRequest
 {
-	DDLogTrace();
-	
 	// <iq to="jid" id="id" type="result">
 	//   <query xmlns="http://jabber.org/protocol/disco#info">
 	//     <feature var="http://jabber.org/protocol/caps"/>
@@ -878,8 +852,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleDiscoResponse:(XMPPIQ *)iq
 {
-	DDLogTrace();
-	
 	XMPPJID *jid = [iq from];
 	
 	NSString *hash = nil;
@@ -1000,8 +972,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
-	DDLogTrace();
-	
 	// XEP-0115 presence:
 	// 
 	// <presence from="romeo@montague.lit/orchard">
@@ -1040,8 +1010,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 			}
 		}
 	}
-	
-	DDLogVerbose(@"%@: %@ - Done", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
@@ -1189,8 +1157,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)processTimeoutWithHashKey:(NSString *)key
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, key);
-	
 	// Get the list of jids that have the same capabilities hash
 	
 	NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
@@ -1218,8 +1184,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (requestIndex < [jids count])
 	{
-		DDLogVerbose(@"");
-		
 		XMPPJID *jid = [jids objectAtIndex:requestIndex];
 		
 		NSString *node = nil;
@@ -1285,8 +1249,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)processTimeoutWithJID:(XMPPJID *)jid
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
-	
 	// We queried the jid for its capabilities, but it didn't answer us.
 	// Nothing left to do now but wait.
 	// 
@@ -1303,8 +1265,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)discoTimeout:(NSTimer *)timer
 {
-	DDLogTrace();
-	
 	id timerInfo = [timer userInfo];
 	
 	if ([timerInfo isKindOfClass:[NSString class]])
