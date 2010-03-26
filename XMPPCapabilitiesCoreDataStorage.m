@@ -3,10 +3,6 @@
 #import "XMPPCapsResourceCoreDataStorageObject.h"
 #import "XMPP.h"
 
-// Debug levels: 0-off, 1-error, 2-warn, 3-info, 4-verbose
-#define DEBUG_LEVEL 4
-#include "DDLog.h"
-
 
 @implementation XMPPCapabilitiesCoreDataStorage
 
@@ -42,8 +38,6 @@
 	{
 		[fileManager createDirectoryAtPath:result withIntermediateDirectories:YES attributes:nil error:nil];
 	}
-	
-	NSLog(@"persistentStoreDirectory: %@", result);
 	
     return result;
 }
@@ -139,8 +133,6 @@
 
 - (XMPPCapsResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
-	
 	if (jid == nil) return nil;
 	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
@@ -161,18 +153,14 @@
 	{
 		XMPPCapsResourceCoreDataStorageObject *resource = [results lastObject];
 		
-		DDLogVerbose(@"%@: %@ - Done", THIS_FILE, THIS_METHOD);
 		return resource;
 	}
 	
-	DDLogVerbose(@"%@: %@ - Done", THIS_FILE, THIS_METHOD);
 	return nil;
 }
 
 - (XMPPCapsCoreDataStorageObject *)capsForHash:(NSString *)hash algorithm:(NSString *)hashAlg
 {
-	DDLogTrace();
-	
 	if (hash == nil) return nil;
 	if (hashAlg == nil) return nil;
 	
@@ -206,22 +194,9 @@
 
 - (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
-	
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 	
-	if (resource.caps != nil)
-	{
-		DDLogVerbose(@"%@: %@ - Done (YES)", THIS_FILE, THIS_METHOD);
-		return YES;
-	}
-	else
-	{
-		DDLogVerbose(@"%@: %@ - Done (NO)", THIS_FILE, THIS_METHOD);
-		return NO;
-	}
-	
-//	return (resource.caps != nil);
+	return (resource.caps != nil);
 }
 
 - (BOOL)setCapabilitiesNode:(NSString *)node
@@ -231,8 +206,6 @@
                   algorithm:(NSString *)hashAlg
                      forJID:(XMPPJID *)jid
 {
-	DDLogTrace();
-	
 	BOOL hashChange = NO;
 	
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
@@ -288,8 +261,6 @@
 
 - (BOOL)getCapabilitiesHash:(NSString **)hashPtr algorithm:(NSString **)hashAlgPtr forJID:(XMPPJID *)jid
 {
-	DDLogTrace();
-	
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 	if (resource)
 	{
@@ -373,8 +344,6 @@
 
 - (void)setCapabilities:(XMPPIQ *)iq forHash:(NSString *)hash algorithm:(NSString *)hashAlg
 {
-	DDLogTrace();
-	
 	if (hash == nil) return;
 	if (hashAlg == nil) return;
 	
@@ -414,8 +383,6 @@
 
 - (void)setCapabilities:(XMPPIQ *)iq forJID:(XMPPJID *)jid
 {
-	DDLogTrace();
-	
 	if (jid == nil) return;
 	
 	XMPPCapsCoreDataStorageObject *caps;
@@ -439,15 +406,11 @@
 
 - (XMPPIQ *)capabilitiesForJID:(XMPPJID *)jid
 {
-	DDLogTrace();
-	
 	return [self capabilitiesForJID:jid ext:nil];
 }
 
 - (XMPPIQ *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr
 {
-	DDLogTrace();
-	
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 	
 	if (resource == nil)
@@ -465,16 +428,12 @@
 
 - (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid
 {
-	DDLogTrace();
-	
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 	resource.haveFailed = YES;
 }
 
 - (void)clearAllNonPersistentCapabilities
 {
-	DDLogTrace();
-	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
@@ -501,13 +460,10 @@
 
 - (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
-	
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 	
 	if (resource == nil)
 	{
-		DDLogVerbose(@"%@: %@ - Done", THIS_FILE, THIS_METHOD);
 		return;
 	}
 	
@@ -527,8 +483,6 @@
 	
 	[[self managedObjectContext] deleteObject:resource];
 	[[self managedObjectContext] save:nil];
-	
-	DDLogVerbose(@"%@: %@ - Done", THIS_FILE, THIS_METHOD);
 }
 
 @end
