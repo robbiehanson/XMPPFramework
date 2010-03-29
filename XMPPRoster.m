@@ -299,7 +299,7 @@ enum XMPPRosterFlags
 	}
 }
 
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	// Note: Some jabber servers send an iq element with an xmlns.
 	// Because of the bug in Apple's NSXML (documented in our elementForName method),
@@ -337,6 +337,8 @@ enum XMPPRosterFlags
 			[earlyPresenceElements removeAllObjects];
 		}
 	}
+	
+	return NO;
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence

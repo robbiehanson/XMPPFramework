@@ -16,4 +16,15 @@
 // Converts an NSXMLElement to an XMPPIQ element in place (no memory allocations or copying)
 + (XMPPIQ *)iqFromElement:(NSXMLElement *)element;
 
+- (NSString *)type;
+
+- (NSXMLElement *)queryElement;
+
+- (BOOL)isGetIQ;
+- (BOOL)isSetIQ;
+- (BOOL)isResultIQ;
+- (BOOL)isErrorIQ;
+
+- (BOOL)requiresResponse;
+
 @end

@@ -677,9 +677,11 @@
 	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	return NO;
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
