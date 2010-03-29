@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "MulticastDelegate.h"
+#import "XMPPModule.h"
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
@@ -12,12 +12,9 @@
 @protocol XMPPCapabilitiesDelegate;
 
 
-@interface XMPPCapabilities : NSObject
+@interface XMPPCapabilities : XMPPModule
 {
-	XMPPStream *xmppStream;
 	id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
-	
-	MulticastDelegate <XMPPCapabilitiesDelegate> *multicastDelegate;
 	
 	NSMutableSet *discoRequestJidSet;
 	NSMutableDictionary *discoRequestHashDict;
@@ -33,7 +30,6 @@
 
 - (id)initWithStream:(XMPPStream *)xmppStream capabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
 
-@property (nonatomic, readonly) XMPPStream *xmppStream;
 @property (nonatomic, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
 
 /**
@@ -65,16 +61,6 @@
  * You may always fetch the capabilities (if/when needed) via the fetchCapabilitiesForJID method.
 **/
 @property (nonatomic, assign) BOOL autoFetchNonHashedCapabilities;
-
-/**
- * Standard multicast delegate pattern.
- * 
- * Modules that wish to advertise their features (via disco response or within presence via XEP-0115)
- * should plug into this module and implement the xmppCapabilities:willSendMyCapabilities: delegate method.
-**/
-
-- (void)addDelegate:(id)delegate;
-- (void)removeDelegate:(id)delegate;
 
 /**
  * Manually fetch the capabilities for the given jid.

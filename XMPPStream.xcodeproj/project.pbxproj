@@ -83,6 +83,9 @@
 		DC6E98EB1098A4C700070ADE /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = DC6E98E91098A4C700070ADE /* AppDelegate.h */; };
 		DC6E98EC1098A4C700070ADE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E98EA1098A4C700070ADE /* AppDelegate.m */; };
 		DC6E98ED1098A4C700070ADE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E98EA1098A4C700070ADE /* AppDelegate.m */; };
+		DC7B17EE1160EA23000D4C29 /* XMPPModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B17ED1160EA23000D4C29 /* XMPPModule.m */; };
+		DC7B17EF1160EA23000D4C29 /* XMPPModule.h in Headers */ = {isa = PBXBuildFile; fileRef = DC7B17EC1160EA23000D4C29 /* XMPPModule.h */; };
+		DC7B17F01160EA23000D4C29 /* XMPPModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B17ED1160EA23000D4C29 /* XMPPModule.m */; };
 		DC7B2BF20DE620B80055F60A /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7B2BF10DE620B80055F60A /* XMPPElement.m */; };
 		DC839B430F741484000F2C7F /* XMPPPing.h in Headers */ = {isa = PBXBuildFile; fileRef = DC839B410F741484000F2C7F /* XMPPPing.h */; };
 		DC839B440F741484000F2C7F /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC839B420F741484000F2C7F /* XMPPPing.m */; };
@@ -187,6 +190,8 @@
 		DC6E93031090E41300070ADE /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
 		DC6E98E91098A4C700070ADE /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		DC6E98EA1098A4C700070ADE /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		DC7B17EC1160EA23000D4C29 /* XMPPModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPModule.h; sourceTree = "<group>"; };
+		DC7B17ED1160EA23000D4C29 /* XMPPModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPModule.m; sourceTree = "<group>"; };
 		DC7B2BF00DE620B80055F60A /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPElement.h; sourceTree = "<group>"; };
 		DC7B2BF10DE620B80055F60A /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
 		DC839B410F741484000F2C7F /* XMPPPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPing.h; sourceTree = "<group>"; };
@@ -460,6 +465,8 @@
 				DCB9BA170DDB73DA002DA335 /* XMPPPresence.m */,
 				DC8BA28B114165EA0031C1F6 /* XMPPReconnect.h */,
 				DC8BA28C114165EA0031C1F6 /* XMPPReconnect.m */,
+				DC7B17EC1160EA23000D4C29 /* XMPPModule.h */,
+				DC7B17ED1160EA23000D4C29 /* XMPPModule.m */,
 			);
 			name = Core;
 			sourceTree = "<group>";
@@ -610,6 +617,7 @@
 				DC1C5CA9115BA97C00F84438 /* XMPPCapsCoreDataStorageObject.h in Headers */,
 				DC1C5CAB115BA97C00F84438 /* XMPPCapsResourceCoreDataStorageObject.h in Headers */,
 				DC1C5CC6115BAA4D00F84438 /* XMPPCapabilitiesCoreDataStorage.h in Headers */,
+				DC7B17EF1160EA23000D4C29 /* XMPPModule.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -754,6 +762,7 @@
 				DC1C5CAA115BA97C00F84438 /* XMPPCapsCoreDataStorageObject.m in Sources */,
 				DC1C5CAC115BA97C00F84438 /* XMPPCapsResourceCoreDataStorageObject.m in Sources */,
 				DC1C5CC7115BAA4D00F84438 /* XMPPCapabilitiesCoreDataStorage.m in Sources */,
+				DC7B17F01160EA23000D4C29 /* XMPPModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -806,6 +815,7 @@
 				DC1C5CAD115BA97C00F84438 /* XMPPCapsCoreDataStorageObject.m in Sources */,
 				DC1C5CAE115BA97C00F84438 /* XMPPCapsResourceCoreDataStorageObject.m in Sources */,
 				DC1C5CC5115BAA4D00F84438 /* XMPPCapabilitiesCoreDataStorage.m in Sources */,
+				DC7B17EE1160EA23000D4C29 /* XMPPModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

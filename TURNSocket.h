@@ -60,7 +60,8 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface NSObject (TURNSocketDelegate)
+@protocol TURNSocketDelegate
+@optional
 
 - (void)turnSocket:(TURNSocket *)sender didSucceed:(AsyncSocket *)socket;
 

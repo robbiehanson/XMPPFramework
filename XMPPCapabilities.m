@@ -3,7 +3,7 @@
 #import "NSDataAdditions.h"
 
 // Debug levels: 0-off, 1-error, 2-warn, 3-info, 4-verbose
-#define DEBUG_LEVEL 4
+#define DEBUG_LEVEL 2
 #include "DDLog.h"
 
 /**
@@ -40,21 +40,15 @@
 
 @implementation XMPPCapabilities
 
-@synthesize xmppStream;
 @synthesize xmppCapabilitiesStorage;
 @synthesize autoFetchHashedCapabilities;
 @synthesize autoFetchNonHashedCapabilities;
 
 - (id)initWithStream:(XMPPStream *)aXmppStream capabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage
 {
-	if ((self = [super init]))
+	if ((self = [super initWithStream:aXmppStream]))
 	{
-		xmppStream = [aXmppStream retain];
-		[xmppStream addDelegate:self];
-		
 		xmppCapabilitiesStorage = [storage retain];
-		
-		multicastDelegate = [[MulticastDelegate alloc] init];
 		
 		// discoRequestJidSet:
 		// 
@@ -87,8 +81,7 @@
 
 - (void)dealloc
 {
-	[xmppStream removeDelegate:self];
-	[xmppStream release];
+	[xmppCapabilitiesStorage release];
 	
 	[discoRequestJidSet release];
 	[discoRequestHashDict release];
@@ -100,16 +93,6 @@
 	[discoTimerJidDict release];
 	
 	[super dealloc];
-}
-
-- (void)addDelegate:(id)delegate
-{
-	[multicastDelegate addDelegate:delegate];
-}
-
-- (void)removeDelegate:(id)delegate
-{
-	[multicastDelegate removeDelegate:delegate];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -616,6 +599,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handlePresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
+	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
+	
 	// <presence from="romeo@montague.lit/orchard">
 	//   <c xmlns="http://jabber.org/protocol/caps"
 	//       hash="sha-1"
@@ -652,6 +637,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	                                                                  forJID:jid];
 	if (areCapabilitiesKnown)
 	{
+		DDLogVerbose(@"Capabilities already known for jid(%@) with hash(%@)", jid, ver);
+		
 		// The capabilities for this hash are already known
 		return;
 	}
@@ -670,6 +657,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (jids)
 	{
+		DDLogVerbose(@"We're already fetching capabilities for hash(%@)", ver);
+		
 		// Is the jid already included in this list?
 		// 
 		// There are actually two ways we can answer this question.
@@ -744,6 +733,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleLegacyPresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
+	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
+	
 	NSString *node = [c attributeStringValueForName:@"node"];
 	NSString *ver  = [c attributeStringValueForName:@"ver"];
 	NSString *ext  = [c attributeStringValueForName:@"ext"];
@@ -768,6 +759,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	                                                                  forJID:jid];
 	if (areCapabilitiesKnown)
 	{
+		DDLogVerbose(@"Capabilities already known for jid(%@)", jid);
+		
 		// The capabilities for this jid are already known
 		return;
 	}
@@ -783,6 +776,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if ([discoRequestJidSet containsObject:jid])
 	{
+		DDLogVerbose(@"We're already fetching capabilities for jid(%@)", jid);
+		
 		// We've already sent a disco request to this jid.
 		return;
 	}
@@ -852,6 +847,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleDiscoResponse:(XMPPIQ *)iq
 {
+	DDLogTrace();
+	
 	XMPPJID *jid = [iq from];
 	
 	NSString *hash = nil;
@@ -861,6 +858,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (hashResponse)
 	{
+		DDLogVerbose(@"%@: %@ - Hash response...", THIS_FILE, THIS_METHOD);
+		
 		// Standard version 1.5+
 		
 		NSString *key = [self keyFromHash:hash algorithm:hashAlg];
@@ -869,6 +868,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		
 		if ([calculatedHash isEqualToString:hash])
 		{
+			DDLogVerbose(@"%@: %@ - Hash matches!", THIS_FILE, THIS_METHOD);
+			
 			// Store the capabilities (associated with the hash)
 			[xmppCapabilitiesStorage setCapabilities:iq forHash:hash algorithm:hashAlg];
 			
@@ -916,6 +917,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	}
 	else
 	{
+		DDLogVerbose(@"%@: %@ - Non-Hash response", THIS_FILE, THIS_METHOD);
+		
 		// Store the capabilities (associated with the jid)		
 		[xmppCapabilitiesStorage setCapabilities:iq forJID:jid];
 		
@@ -932,6 +935,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)handleDiscoErrorResponse:(XMPPIQ *)iq
 {
+	DDLogTrace();
+	
 	XMPPJID *jid = [iq from];
 	
 	NSString *hash = nil;
@@ -1073,6 +1078,9 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		[query addChild:feature];
 		
 		[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
+		
+		DDLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
+					 [query XMLStringWithOptions:(NSXMLNodePrettyPrint | NSXMLNodeCompactEmptyElement)]);
 		
 		NSString *hash = [self hashCapabilitiesFromQuery:query];
 		

@@ -1,20 +1,14 @@
 #import "XMPPPing.h"
 #import "XMPP.h"
+#import "XMPPCapabilities.h"
 
 
 @implementation XMPPPing
 
-@synthesize xmppStream;
-
-- (id)initWithStream:(XMPPStream *)stream
+- (id)initWithStream:(XMPPStream *)aXmppStream
 {
-	if ((self = [super init]))
+	if ((self = [super initWithStream:aXmppStream]))
 	{
-		xmppStream = [stream retain];
-		[xmppStream addDelegate:self];
-		
-		multicastDelegate = [[MulticastDelegate alloc] init];
-		
 		pingIDs = [[NSMutableArray alloc] initWithCapacity:5];
 	}
 	return self;
@@ -22,24 +16,9 @@
 
 - (void)dealloc
 {
-	[xmppStream removeDelegate:self];
-	[xmppStream release];
-	
-	[multicastDelegate release];
-	
 	[pingIDs release];
 	
 	[super dealloc];
-}
-
-- (void)addDelegate:(id)delegate
-{
-	[multicastDelegate addDelegate:delegate];
-}
-
-- (void)removeDelegate:(id)delegate
-{
-	[multicastDelegate removeDelegate:delegate];
 }
 
 - (NSString *)generatePingID
@@ -150,6 +129,23 @@
 			[sender sendElement:pong];
 		}
 	}
+}
+
+/**
+ * If an XMPPCapabilites instance is used we want to advertise our support for ping.
+**/
+- (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query
+{
+	// <query xmlns="http://jabber.org/protocol/disco#info">
+	//   ...
+	//   <feature var="urn:xmpp:ping"/>
+	//   ...
+	// </query>
+	
+	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
+	[feature addAttributeWithName:@"var" stringValue:@"urn:xmpp:ping"];
+	
+	[query addChild:feature];
 }
 
 @end
