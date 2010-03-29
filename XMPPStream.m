@@ -6,6 +6,7 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
+#import "XMPPModule.h"
 #import "NSDataAdditions.h"
 #import "NSXMLElementAdditions.h"
 
@@ -109,6 +110,7 @@ enum XMPPStreamFlags
 @synthesize hostPort;
 @synthesize myJID;
 @synthesize keepAliveInterval;
+@synthesize registeredModules;
 @synthesize tag = userTag;
 
 /**
@@ -124,6 +126,8 @@ enum XMPPStreamFlags
 	
 	hostPort = 5222;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
+	
+	registeredModules = [[MulticastDelegate alloc] init];
 }
 
 /**
@@ -194,6 +198,8 @@ enum XMPPStreamFlags
 	
 	[keepAliveTimer invalidate];
 	[keepAliveTimer release];
+	
+	[registeredModules release];
 	
 	[super dealloc];
 }
@@ -1907,6 +1913,20 @@ enum XMPPStreamFlags
 - (NSString *)generateUUID
 {
 	return [[self class] generateUUID];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Module Plug-In System
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)registerModule:(XMPPModule *)module
+{
+	[registeredModules addDelegate:module];
+}
+
+- (void)unregisterModule:(XMPPModule *)module
+{
+	[registeredModules removeDelegate:module];
 }
 
 @end

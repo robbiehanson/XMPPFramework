@@ -11,6 +11,7 @@
 @class XMPPIQ;
 @class XMPPMessage;
 @class XMPPPresence;
+@class XMPPModule;
 @protocol XMPPStreamDelegate;
 
 #if TARGET_OS_IPHONE
@@ -55,6 +56,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	
 	NSTimeInterval keepAliveInterval;
 	NSTimer *keepAliveTimer;
+	
+	id registeredModules;
 	
 	id userTag;
 }
@@ -164,6 +167,14 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * To disable keepalive, set the interval to zero.
 **/
 @property (nonatomic, readwrite, assign) NSTimeInterval keepAliveInterval;
+
+/**
+ * For use by subclasses of XMPPModule.
+ * Allows modules to communicate with each other automatically.
+ * That is, modules can simply implment the proper delegate methods for notifications and inter-module communication,
+ * and there is no need for modules to manually add each other as delegates.
+**/
+@property (nonatomic, readonly) id registeredModules;
 
 /**
  * The tag property allows you to associated user defined information with the stream.
@@ -413,6 +424,13 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 **/
 + (NSString *)generateUUID;
 - (NSString *)generateUUID;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Module Plug-In System
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)registerModule:(XMPPModule *)module;
+- (void)unregisterModule:(XMPPModule *)module;
 
 @end
 

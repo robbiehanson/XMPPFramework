@@ -410,14 +410,30 @@ static void MulticastDelegateListNodeRelease(MulticastDelegateListNode *node)
 	return nil;
 }
 
-- (id)nextDelegateForSelector:(SEL)selector
+- (id)nextDelegateOfClass:(Class)aClass
 {
 	while(currentDelegateIndex < numDelegates)
 	{
 		MulticastDelegateListNode *node = *(delegates + currentDelegateIndex);
 		currentDelegateIndex++;
 		
-		if([node->delegate respondsToSelector:selector])
+		if([node->delegate isKindOfClass:aClass])
+		{
+			return node->delegate;
+		}
+	}
+	
+	return nil;
+}
+
+- (id)nextDelegateForSelector:(SEL)aSelector
+{
+	while(currentDelegateIndex < numDelegates)
+	{
+		MulticastDelegateListNode *node = *(delegates + currentDelegateIndex);
+		currentDelegateIndex++;
+		
+		if([node->delegate respondsToSelector:aSelector])
 		{
 			return node->delegate;
 		}
