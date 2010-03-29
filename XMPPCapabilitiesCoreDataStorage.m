@@ -77,11 +77,6 @@
 	NSString *storePath = [docsPath stringByAppendingPathComponent:@"Locations.sqlite"];
 	if (storePath)
 	{
-		if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
-		{
-			[[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
-		}
-		
 		// If storePath is nil, then NSURL will throw an exception
 		
 		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
@@ -122,6 +117,8 @@
 	{
 		managedObjectContext = [[NSManagedObjectContext alloc] init];
 		[managedObjectContext setPersistentStoreCoordinator:coordinator];
+		
+		[self clearAllNonPersistentCapabilities];
 	}
 	
 	return managedObjectContext;
@@ -450,12 +447,18 @@
 	for (XMPPCapsResourceCoreDataStorageObject *resource in results)
 	{
 		XMPPCapsCoreDataStorageObject *caps = resource.caps;
+		if (caps)
+		{
+			[[self managedObjectContext] deleteObject:caps];
+		}
 		
-		[[self managedObjectContext] deleteObject:caps];
 		[[self managedObjectContext] deleteObject:resource];
 	}
 	
-	[[self managedObjectContext] save:nil];
+	if ([[self managedObjectContext] hasChanges])
+	{
+		[[self managedObjectContext] save:nil];
+	}
 }
 
 - (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid
@@ -477,8 +480,10 @@
 	else
 	{
 		XMPPCapsCoreDataStorageObject *caps = resource.caps;
-		
-		[[self managedObjectContext] deleteObject:caps];
+		if (caps)
+		{
+			[[self managedObjectContext] deleteObject:caps];
+		}
 	}
 	
 	[[self managedObjectContext] deleteObject:resource];
