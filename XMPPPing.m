@@ -90,7 +90,7 @@
 	[xmppStream sendElement:iq];
 }
 
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	NSString *type = [[iq attributeForName:@"type"] stringValue];
 	
@@ -127,8 +127,12 @@
 			[pong addAttributeWithName:@"id" stringValue:[iq elementID]];
 			
 			[sender sendElement:pong];
+			
+			return YES;
 		}
 	}
+	
+	return NO;
 }
 
 /**

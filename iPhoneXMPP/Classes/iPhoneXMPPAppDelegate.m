@@ -177,9 +177,11 @@
 	NSLog(@"---------- xmppStream:didNotAuthenticate: ----------");
 }
 
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	NSLog(@"---------- xmppStream:didReceiveIQ: ----------");
+	
+	return NO;
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
