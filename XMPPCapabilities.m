@@ -1017,7 +1017,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	}
 }
 
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	// Disco Request:
 	// 
@@ -1037,7 +1037,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	NSXMLElement *query = [iq elementForName:@"query"];
 	if (![[query xmlns] isEqualToString:@"http://jabber.org/protocol/disco#info"])
 	{
-		return;
+		return NO;
 	}
 	
 	NSString *type = [[iq attributeStringValueForName:@"type"] lowercaseString];
@@ -1053,6 +1053,12 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	{
 		[self handleDiscoErrorResponse:iq];
 	}
+	else
+	{
+		return NO;
+	}
+	
+	return YES;
 }
 
 - (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence

@@ -70,7 +70,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	[turnSocket release];
 }
 
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	NSLog(@"---------- xmppStream:didReceiveIQ: ----------");
 	
@@ -82,7 +82,11 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		
 		[turnSocket start:self];
 		[turnSocket release];
+		
+		return YES;
 	}
+	
+	return NO;
 }
 
 - (void)turnSocket:(TURNSocket *)sender didSucceed:(AsyncSocket *)socket

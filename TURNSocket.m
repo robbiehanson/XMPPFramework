@@ -439,7 +439,7 @@ static NSMutableDictionary *existingTurnSockets;
  * Invoked by XMPPClient when an IQ is received.
  * We can determine if the IQ applies to us by checking its element ID.
 **/
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	// Disco queries (sent to jabber server) use id=discoUUID
 	// P2P queries (sent to other Mojo app) use id=uuid
@@ -449,7 +449,7 @@ static NSMutableDictionary *existingTurnSockets;
 		if(![discoUUID isEqualToString:[iq elementID]])
 		{
 			// Doesn't apply to us, or is a delayed response that we've decided to ignore
-			return;
+			return NO;
 		}
 	}
 	else
@@ -457,7 +457,7 @@ static NSMutableDictionary *existingTurnSockets;
 		if(![uuid isEqualToString:[iq elementID]])
 		{
 			// Doesn't apply to us
-			return;
+			return NO;
 		}
 	}
 	
@@ -483,6 +483,8 @@ static NSMutableDictionary *existingTurnSockets;
 	{
 		[self processActivateResponse:iq];
 	}
+	
+	return YES;
 }
 
 - (void)processDiscoItemsResponse:(XMPPIQ *)iq

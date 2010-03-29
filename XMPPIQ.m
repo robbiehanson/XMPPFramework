@@ -35,20 +35,54 @@
 	return (XMPPIQ *)element;
 }
 
-/**
- * Returns whether or not the IQ element is in the "jabber:iq:roster" namespace,
- * and thus represents a roster update.
-**/
-- (BOOL)isRosterQuery
+- (NSString *)type
 {
-	// Note: Some jabber servers send an iq element with a xmlns.
-	// Because of the bug in Apple's NSXML (documented in our elementForName method),
-	// it is important we specify the xmlns for the query.
-	
-	NSXMLElement *query = [self elementForName:@"query" xmlns:@"jabber:iq:roster"];
-	
-	return (query != nil);
+	return [[self attributeStringValueForName:@"type"] lowercaseString];
+}
 
+- (NSXMLElement *)queryElement
+{
+#if TARGET_OS_IPHONE
+	return [self elementForName:@"query"];
+#else
+	NSArray *children = [self children];
+	for (NSXMLElement *child in children)
+	{
+		if ([[child name] isEqualToString:@"query"])
+		{
+			return child;
+		}
+	}
+	return nil;
+#endif
+}
+
+- (BOOL)isGetIQ
+{
+	return [[self type] isEqualToString:@"get"];
+}
+
+- (BOOL)isSetIQ
+{
+	return [[self type] isEqualToString:@"set"];
+}
+
+- (BOOL)isResultIQ
+{
+	return [[self type] isEqualToString:@"result"];
+}
+
+- (BOOL)isErrorIQ
+{
+	return [[self type] isEqualToString:@"error"];
+}
+
+- (BOOL)requiresResponse
+{
+	// An entity that receives an IQ request of type "get" or "set" MUST reply with an IQ response
+	// of type "result" or "error" (the response MUST preserve the 'id' attribute of the request).
+	
+	return [self isGetIQ] || [self isSetIQ];
 }
 
 @end

@@ -518,8 +518,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * These methods are called after their respective XML elements are received on the stream.
+ * 
+ * In the case of an IQ, the delegate method should return YES if it has or will respond to the given IQ.
+ * If the IQ is of type 'get' or 'set', and no delegates respond to the IQ,
+ * then xmpp stream will automatically send an error response.
 **/
-- (void)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq;
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq;
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message;
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence;
 

@@ -603,7 +603,7 @@ enum XMPPStreamFlags
 
 /**
  * This method attempts to register a new user on the server using the given username and password.
- * The result of this action will be returned via the delegate method xmppStream:didReceiveIQ:
+ * The result of this action will be returned via the delegate methods.
  * 
  * If the XMPPStream is not connected, or the server doesn't support in-band registration, this method does nothing.
 **/
@@ -1816,7 +1816,67 @@ enum XMPPStreamFlags
 		
 		if([elementName isEqualToString:@"iq"])
 		{
-			[multicastDelegate xmppStream:self didReceiveIQ:[XMPPIQ iqFromElement:element]];
+			XMPPIQ *iq = [XMPPIQ iqFromElement:element];
+			
+			BOOL responded = NO;
+			
+			MulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+			id delegate;
+			SEL selector = @selector(xmppStream:didReceiveIQ:);
+			
+			while((delegate = [delegateEnumerator nextDelegateForSelector:selector]))
+			{
+				BOOL delegateDidRespond = [delegate xmppStream:self didReceiveIQ:iq];
+				
+				responded = responded || delegateDidRespond;
+			}
+			
+			// An entity that receives an IQ request of type "get" or "set" MUST reply
+			// with an IQ response of type "result" or "error".
+			// 
+			// The response MUST preserve the 'id' attribute of the request.
+			
+			if (!responded && [iq requiresResponse])
+			{
+				// Return error message:
+				// 
+				// <iq to="jid" type="error" id="id">
+				//   <query xmlns="ns"/>
+				//   <error type="cancel" code="501">
+				//     <feature-not-implemented xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"/>
+				//   </error>
+				// </iq>
+				
+				NSXMLElement *reason = [NSXMLElement elementWithName:@"feature-not-implemented"
+				                                               xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
+				
+				NSXMLElement *error = [NSXMLElement elementWithName:@"error"];
+				[error addAttributeWithName:@"type" stringValue:@"cancel"];
+				[error addAttributeWithName:@"code" stringValue:@"501"];
+				[error addChild:reason];
+				
+				NSXMLElement *queryResponse = [NSXMLElement elementWithName:@"query"];
+				
+				NSString *xmlns = [[iq queryElement] xmlns];
+				if (xmlns)
+				{
+					[queryResponse setXmlns:xmlns];
+				}
+				
+				NSXMLElement *iqResponse = [NSXMLElement elementWithName:@"iq"];
+				[iqResponse addAttributeWithName:@"to" stringValue:[iq fromStr]];
+				[iqResponse addAttributeWithName:@"type" stringValue:@"error"];
+				[iqResponse addChild:queryResponse];
+				[iqResponse addChild:error];
+				
+				NSString *elementID = [iq elementID];
+				if (elementID)
+				{
+					[iqResponse addAttributeWithName:@"id" stringValue:elementID];
+				}
+				
+				[self sendElement:iqResponse];
+			}
 		}
 		else if([elementName isEqualToString:@"message"])
 		{
