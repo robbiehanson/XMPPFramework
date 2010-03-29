@@ -5,6 +5,7 @@
 #import "XMPPRosterMemoryStorage.h"
 #import "XMPPCapabilities.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
+#import "XMPPPing.h"
 
 @class  RosterController;
 
@@ -17,6 +18,7 @@
 	XMPPRosterMemoryStorage *xmppRosterStorage;
 	XMPPCapabilities *xmppCapabilities;
 	XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
+	XMPPPing *xmppPing;
 	
 	NSMutableArray *turnSockets;
 	
@@ -29,6 +31,7 @@
 @property (nonatomic, readonly) XMPPRosterMemoryStorage *xmppRosterStorage;
 @property (nonatomic, readonly) XMPPCapabilities *xmppCapabilities;
 @property (nonatomic, readonly) XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
+@property (nonatomic, readonly) XMPPPing *xmppPing;
 
 - (void)connectViaXEP65:(XMPPJID *)jid;
 

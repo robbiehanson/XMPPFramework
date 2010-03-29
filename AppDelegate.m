@@ -16,6 +16,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 @synthesize xmppRosterStorage;
 @synthesize xmppCapabilities;
 @synthesize xmppCapabilitiesStorage;
+@synthesize xmppPing;
 
 - (id)init
 {
@@ -34,7 +35,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		                                        capabilitiesStorage:xmppCapabilitiesStorage];
 		
 		xmppCapabilities.autoFetchHashedCapabilities = YES;
-		xmppCapabilities.autoFetchNonHashedCapabilities = YES;
+		xmppCapabilities.autoFetchNonHashedCapabilities = NO;
+		
+		xmppPing = [[XMPPPing alloc] initWithStream:xmppStream];
 		
 		turnSockets = [[NSMutableArray alloc] init];
 	}

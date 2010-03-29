@@ -35,6 +35,7 @@ typedef struct MulticastDelegateListNode MulticastDelegateListNode;
 }
 
 - (id)nextDelegate;
-- (id)nextDelegateForSelector:(SEL)selector;
+- (id)nextDelegateOfClass:(Class)aClass;
+- (id)nextDelegateForSelector:(SEL)aSelector;
 
 @end
