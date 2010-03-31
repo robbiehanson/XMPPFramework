@@ -1860,7 +1860,9 @@ enum XMPPStreamFlags
 				NSXMLElement *iqChild = [iq childElement];
 				if (iqChild)
 				{
-					[iqResponse addChild:iqChild];
+					NSXMLNode *iqChildCopy = [iqChild copy];
+					[iqResponse insertChild:iqChildCopy atIndex:0];
+					[iqChildCopy release];
 				}
 				
 				[self sendElement:iqResponse];
