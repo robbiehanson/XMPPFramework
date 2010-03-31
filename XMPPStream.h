@@ -245,13 +245,13 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * The disconnect method is synchronous.
  * Meaning that the disconnect will happen immediately, even if there are pending elements yet to be sent.
- * The xmppStreamDidClose: method will be invoked before the disconnect method returns.
+ * The xmppStreamDidDisconnect: method will be invoked before the disconnect method returns.
  * 
  * The disconnectAfterSending method is asynchronous.
  * The disconnect will happen after all pending elements have been sent.
  * Attempting to send elements after this method is called will not result in the elements getting sent.
  * The disconnectAfterSending method will return immediately,
- * and the xmppStreamDidClose: delegate method will be invoked at a later time.
+ * and the xmppStreamDidDisconnect: delegate method will be invoked at a later time.
 **/
 - (void)disconnect;
 - (void)disconnectAfterSending;
@@ -510,12 +510,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStreamDidSecure:(XMPPStream *)sender;
 
 /**
- * This method is called after an XML stream has been opened.
+ * This method is called after the XML stream has been fully opened.
  * More precisely, this method is called after an opening <xml/> and <stream:stream/> tag have been sent and received,
  * and after the stream features have been received, and any required features have been fullfilled.
  * At this point it's safe to begin communication with the server.
 **/
-- (void)xmppStreamDidOpen:(XMPPStream *)sender;
+- (void)xmppStreamDidConnect:(XMPPStream *)sender;
 
 /**
  * This method is called after registration of a new user has successfully finished.
@@ -578,12 +578,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * This method is called if the disconnect method is called.
  * It may be used to determine if a disconnection was purposeful, or due to an error.
 **/
-- (void)xmppStreamWasToldToClose:(XMPPStream *)sender;
+- (void)xmppStreamWasToldToDisconnect:(XMPPStream *)sender;
 
 /**
  * This method is called after the stream is closed.
 **/
-- (void)xmppStreamDidClose:(XMPPStream *)sender;
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender;
 
 /**
  * This method is only used in P2P mode when the connectTo:withAddress: method was used.

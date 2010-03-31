@@ -484,7 +484,7 @@ enum XMPPStreamFlags
 **/
 - (void)disconnect
 {
-	[multicastDelegate xmppStreamWasToldToClose:self];
+	[multicastDelegate xmppStreamWasToldToDisconnect:self];
 	[asyncSocket disconnect];
 	
 	// Note: The state is updated automatically in the onSocketDidDisconnect: method.
@@ -492,7 +492,7 @@ enum XMPPStreamFlags
 
 - (void)disconnectAfterSending
 {
-	[multicastDelegate xmppStreamWasToldToClose:self];
+	[multicastDelegate xmppStreamWasToldToDisconnect:self];
 	[asyncSocket disconnectAfterWriting];
 	
 	// Note: The state is updated automatically in the onSocketDidDisconnect: method.
@@ -1261,7 +1261,7 @@ enum XMPPStreamFlags
 		[self setupKeepAliveTimer];
 		
 		// Notify delegates
-		[multicastDelegate xmppStreamDidOpen:self];
+		[multicastDelegate xmppStreamDidConnect:self];
 	}
 }
 
@@ -1675,7 +1675,7 @@ enum XMPPStreamFlags
 	keepAliveTimer = nil;
 	
 	// Notify delegate
-	[multicastDelegate xmppStreamDidClose:self];
+	[multicastDelegate xmppStreamDidDisconnect:self];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1731,7 +1731,7 @@ enum XMPPStreamFlags
         
         if([self isConnected])
         {
-			[multicastDelegate xmppStreamDidOpen:self];
+			[multicastDelegate xmppStreamDidConnect:self];
         }
     }
     else
