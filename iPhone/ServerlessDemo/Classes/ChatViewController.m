@@ -662,7 +662,7 @@
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppStreamDidOpen:(XMPPStream *)sender
+- (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
 	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
@@ -715,7 +715,7 @@
 	NSLog(@"%@: %@ %@", THIS_FILE, THIS_METHOD, error);
 }
 
-- (void)xmppStreamDidClose:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
 	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
 }

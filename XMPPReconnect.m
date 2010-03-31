@@ -170,7 +170,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppStreamDidOpen:(XMPPStream *)sender
+- (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
 	// The stream is up so we can stop our reconnect attempts now.
 	// 
@@ -197,13 +197,13 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	[self setShouldReconnect:YES];
 }
 
-- (void)xmppStreamWasToldToClose:(XMPPStream *)sender
+- (void)xmppStreamWasToldToDisconnect:(XMPPStream *)sender
 {
 	// We should not automatically attempt to reconnect when the connection closes.
 	[self stop];
 }
 
-- (void)xmppStreamDidClose:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
 	// Setup network monitoring (if autoReconnect and shouldReconnect are set).
 	[self maybeSetupNetworkMonitoring];
@@ -230,7 +230,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		// In other words, the underlying TCP socket is about to disconnect.
 		// 
 		// To be more explicit, the underlying AsyncSocket of the XMPPStream has enountered an error,
-		// and the xmppStreamDidClose: delegate method will be executed before this runloop cycle completes.
+		// and the xmppStreamDidDisconnect: delegate method will be executed before this runloop cycle completes.
 		
 		// Note: It is important we check [xmppStream isAuthenticated] below
 		// as opposed to checking the shouldReconnect flag.

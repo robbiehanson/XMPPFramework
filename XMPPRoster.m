@@ -419,7 +419,7 @@ enum XMPPRosterFlags
 	}
 }
 
-- (void)xmppStreamDidClose:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
 	[xmppRosterStorage clearAllUsersAndResources];
 	
