@@ -58,6 +58,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	NSTimer *keepAliveTimer;
 	
 	id registeredModules;
+	NSMutableDictionary *autoDelegateDict;
 	
 	id userTag;
 }
@@ -169,10 +170,10 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 @property (nonatomic, readwrite, assign) NSTimeInterval keepAliveInterval;
 
 /**
- * For use by subclasses of XMPPModule.
- * Allows modules to communicate with each other automatically.
- * That is, modules can simply implment the proper delegate methods for notifications and inter-module communication,
- * and there is no need for modules to manually add each other as delegates.
+ * Returns a list of all currently registered modules.
+ * That is, instances of xmpp extension classes that subclass XMPPModule.
+ * 
+ * The returned variable is an instance of MulticastDelegate.
 **/
 @property (nonatomic, readonly) id registeredModules;
 
@@ -429,8 +430,30 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 #pragma mark Module Plug-In System
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * The XMPPModule class automatically invokes these methods when it is initialized/deallocated.
+**/
 - (void)registerModule:(XMPPModule *)module;
 - (void)unregisterModule:(XMPPModule *)module;
+
+/**
+ * Automatically registers the given delegate with all current and future registered modules of the given class.
+ * 
+ * That is, the given delegate will be added to the delegate list ([module addDelegate:delegate]) to
+ * all current and future registered modules that respond YES to [module isKindOfClass:aClass].
+ * 
+ * This method is used by modules to automatically integrate with other modules.
+ * For example, a module may auto add itself as a delegate to XMPPCapabilities
+ * so that it can broadcast its implemented features.
+ * 
+ * This may be also useful to clients, for example, to add a delegate to instances of something like XMPPChatRoom,
+ * where there may be multiple instances of the module that get created during the course of an xmpp session.
+ * 
+ * If you auto register for multiple classes, you can remove all registrations with a single
+ * call to removeAutoDelegate:fromModulesOfClass: by passing nil as the 'aClass' parameter.
+**/
+- (void)autoAddDelegate:(id)delegate toModulesOfClass:(Class)aClass;
+- (void)removeAutoDelegate:(id)delegate fromModulesOfClass:(Class)aClass;
 
 @end
 
@@ -577,5 +600,15 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * adding any specific featues the delegate might support.
 **/
 - (void)xmppStream:(XMPPStream *)sender willSendP2PFeatures:(NSXMLElement *)streamFeatures;
+
+/**
+ * These methods are called as xmpp modules are registered and unregistered with the stream.
+ * This generally corresponds to xmpp modules being initailzed and deallocated.
+ * 
+ * The methods may be useful, for example, if a more precise auto delegation mechanism is needed
+ * than what is available with the autoAddDelegate:toModulesOfClass: method.
+**/
+- (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module;
+- (void)xmppStream:(XMPPStream *)sender willUnregisterModule:(id)module;
 
 @end

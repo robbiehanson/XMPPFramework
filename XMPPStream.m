@@ -128,6 +128,7 @@ enum XMPPStreamFlags
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
 	
 	registeredModules = [[MulticastDelegate alloc] init];
+	autoDelegateDict = [[NSMutableDictionary alloc] init];
 }
 
 /**
@@ -200,6 +201,7 @@ enum XMPPStreamFlags
 	[keepAliveTimer release];
 	
 	[registeredModules release];
+	[autoDelegateDict release];
 	
 	[super dealloc];
 }
@@ -1971,12 +1973,130 @@ enum XMPPStreamFlags
 
 - (void)registerModule:(XMPPModule *)module
 {
+	if (module == nil) return;
+	
+	// Register module
+	
 	[registeredModules addDelegate:module];
+	
+	// Add auto delegates (if there are any)
+	
+	NSString *className = NSStringFromClass([module class]);
+	id delegates = [autoDelegateDict objectForKey:className];
+	
+	MulticastDelegateEnumerator *delegatesEnumerator = [delegates delegateEnumerator];
+	id delegate;
+	
+	while ((delegate = [delegatesEnumerator nextDelegate]))
+	{
+		[module addDelegate:delegate];
+	}
+	
+	// Notify our own delegate(s)
+	
+	[multicastDelegate xmppStream:self didRegisterModule:module];
 }
 
 - (void)unregisterModule:(XMPPModule *)module
 {
+	if (module == nil) return;
+	
+	// Notify our own delegate(s)
+	
+	[multicastDelegate xmppStream:self willUnregisterModule:module];
+	
+	// Auto remove delegates (if there are any)
+	
+	NSString *className = NSStringFromClass([module class]);
+	id delegates = [autoDelegateDict objectForKey:className];
+	
+	MulticastDelegateEnumerator *delegatesEnumerator = [delegates delegateEnumerator];
+	id delegate;
+	
+	while ((delegate = [delegatesEnumerator nextDelegate]))
+	{
+		[module removeDelegate:delegate];
+	}
+	
+	// Unregister modules
+	
 	[registeredModules removeDelegate:module];
+}
+
+- (void)autoAddDelegate:(id)delegate toModulesOfClass:(Class)aClass
+{
+	if (aClass == nil) return;
+	
+	NSString *className = NSStringFromClass(aClass);
+	
+	// Add the delegate to all currently registered modules of the given class.
+	
+	MulticastDelegateEnumerator *registeredModulesEnumerator = [registeredModules delegateEnumerator];
+	XMPPModule *module;
+	
+	while ((module = [registeredModulesEnumerator nextDelegateOfClass:aClass]))
+	{
+		[module addDelegate:delegate];
+	}
+	
+	// Add the delegate to list of auto delegates for the given class,
+	// so that it will be added as a delegate to future registered modules of the given class.
+	
+	id delegates = [autoDelegateDict objectForKey:className];
+	
+	if (delegates == nil)
+	{
+		delegates = [[[MulticastDelegate alloc] init] autorelease];
+		
+		[autoDelegateDict setObject:delegates forKey:className];
+	}
+	
+	[delegates addDelegate:delegate];
+}
+
+- (void)removeAutoDelegate:(id)delegate fromModulesOfClass:(Class)aClass
+{
+	if (aClass == nil)
+	{
+		// Remove the delegate from all currently registered modules of any class.
+		
+		[registeredModules removeDelegate:delegate];
+		
+		// Remove the delegate from list of auto delegates for all classes,
+		// so that it will not be auto added as a delegate to future registered modules.
+		
+		NSEnumerator *delegatesEnumerator = [autoDelegateDict objectEnumerator];
+		id delegates;
+		
+		while ((delegates = [delegatesEnumerator nextObject]))
+		{
+			[delegates removeDelegate:self];
+		}
+	}
+	else
+	{
+		NSString *className = NSStringFromClass(aClass);
+		
+		// Remove the delegate from all currently registered modules of the given class.
+		
+		MulticastDelegateEnumerator *registeredModulesEnumerator = [registeredModules delegateEnumerator];
+		XMPPModule *module;
+		
+		while ((module = [registeredModulesEnumerator nextDelegateOfClass:aClass]))
+		{
+			[module removeDelegate:delegate];
+		}
+		
+		// Remove the delegate from list of auto delegates for the given class,
+		// so that it will not be added as a delegate to future registered modules of the given class.
+		
+		id delegates = [autoDelegateDict objectForKey:className];
+		
+		if (delegates != nil)
+		{
+			[delegates removeDelegate:delegate];
+		}
+	}
 }
 
 @end
