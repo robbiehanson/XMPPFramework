@@ -1,7 +1,11 @@
 #import "XMPPPing.h"
 #import "XMPP.h"
-#import "XMPPCapabilities.h"
 
+#define INTEGRATE_WITH_CAPABILITIES 1
+
+#if INTEGRATE_WITH_CAPABILITIES
+  #import "XMPPCapabilities.h"
+#endif
 
 @implementation XMPPPing
 
@@ -10,12 +14,20 @@
 	if ((self = [super initWithStream:aXmppStream]))
 	{
 		pingIDs = [[NSMutableArray alloc] initWithCapacity:5];
+		
+	#if INTEGRATE_WITH_CAPABILITIES
+		[xmppStream autoAddDelegate:self toModulesOfClass:[XMPPCapabilities class]];
+	#endif
 	}
 	return self;
 }
 
 - (void)dealloc
 {
+#if INTEGRATE_WITH_CAPABILITIES
+	[xmppStream removeAutoDelegate:self fromModulesOfClass:[XMPPCapabilities class]];
+#endif
+	
 	[pingIDs release];
 	
 	[super dealloc];
@@ -125,6 +137,7 @@
 	return NO;
 }
 
+#if INTEGRATE_WITH_CAPABILITIES
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for ping.
 **/
@@ -141,5 +154,6 @@
 	
 	[query addChild:feature];
 }
+#endif
 
 @end
