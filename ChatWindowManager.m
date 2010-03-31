@@ -1,6 +1,7 @@
 #import "ChatWindowManager.h"
 #import "ChatController.h"
 #import "XMPP.h"
+#import "XMPPRoster.h"
 
 
 @implementation ChatWindowManager

@@ -1,4 +1,5 @@
 #import "XMPPIQ.h"
+#import "XMPPJID.h"
 #import "NSXMLElementAdditions.h"
 
 #import <objc/runtime.h>
@@ -35,26 +36,38 @@
 	return (XMPPIQ *)element;
 }
 
++ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid
+{
+	return [self iqWithType:type to:jid elementID:nil child:nil];
+}
+
++ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
+{
+	return [self iqWithType:type to:jid elementID:eid child:nil];
+}
+
++ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
+{
+	XMPPIQ *iq = [[XMPPIQ alloc] initWithName:@"iq"];
+	
+	if (type)
+		[iq addAttributeWithName:@"type" stringValue:type];
+	
+	if (jid)
+		[iq addAttributeWithName:@"to" stringValue:[jid full]];
+	
+	if (eid)
+		[iq addAttributeWithName:@"id" stringValue:eid];
+	
+	if (childElement)
+		[iq addChild:childElement];
+	
+	return [iq autorelease];
+}
+
 - (NSString *)type
 {
 	return [[self attributeStringValueForName:@"type"] lowercaseString];
-}
-
-- (NSXMLElement *)queryElement
-{
-#if TARGET_OS_IPHONE
-	return [self elementForName:@"query"];
-#else
-	NSArray *children = [self children];
-	for (NSXMLElement *child in children)
-	{
-		if ([[child name] isEqualToString:@"query"])
-		{
-			return child;
-		}
-	}
-	return nil;
-#endif
 }
 
 - (BOOL)isGetIQ
@@ -83,6 +96,34 @@
 	// of type "result" or "error" (the response MUST preserve the 'id' attribute of the request).
 	
 	return [self isGetIQ] || [self isSetIQ];
+}
+
+- (NSXMLElement *)childElement
+{
+	NSArray *children = [self children];
+	for (NSXMLElement *child in children)
+	{
+		if ([[child name] caseInsensitiveCompare:@"error"] != NSOrderedSame)
+		{
+			return child;
+		}
+	}
+	
+	return nil;
+}
+
+- (NSXMLElement *)childErrorElement
+{
+	NSArray *children = [self children];
+	for (NSXMLElement *child in children)
+	{
+		if ([[child name] caseInsensitiveCompare:@"error"] == NSOrderedSame)
+		{
+			return child;
+		}
+	}
+	
+	return nil;
 }
 
 @end

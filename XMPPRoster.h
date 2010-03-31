@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "MulticastDelegate.h"
+#import "XMPPUser.h"
+#import "XMPPResource.h"
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
@@ -8,8 +10,6 @@
 @class XMPPJID;
 @class XMPPStream;
 @class XMPPPresence;
-@protocol XMPPUser;
-@protocol XMPPResource;
 @protocol XMPPRosterStorage;
 @protocol XMPPRosterDelegate;
 
