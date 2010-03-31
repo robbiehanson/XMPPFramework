@@ -194,7 +194,7 @@ static StreamController *sharedInstance;
 #pragma mark XMPPStream Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppStreamDidOpen:(XMPPStream *)sender
+- (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
 	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
@@ -251,7 +251,7 @@ static StreamController *sharedInstance;
 	NSLog(@"%@: %@ %@", THIS_FILE, THIS_METHOD, error);
 }
 
-- (void)xmppStreamDidClose:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
 	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
 	

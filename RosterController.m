@@ -437,9 +437,9 @@
 	NSLog(@"---------- xmppStreamDidSecure ----------");
 }
 
-- (void)xmppStreamDidOpen:(XMPPStream *)sender
+- (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppStreamDidOpen ----------");
+	NSLog(@"---------- xmppStreamDidConnect ----------");
 	
 	isOpen = YES;
 	
@@ -542,9 +542,9 @@
 	NSLog(@"%@", error);
 }
 
-- (void)xmppStreamDidClose:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppStreamDidClose ----------");
+	NSLog(@"---------- xmppStreamDidDisconnect ----------");
 	
 	if (!isOpen)
 	{

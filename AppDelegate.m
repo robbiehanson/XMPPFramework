@@ -112,7 +112,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #pragma mark Auto Reconnect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppStreamDidClose:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
 	// If we weren't using auto reconnect, we could take this opportunity to display the sign in sheet.
 }
