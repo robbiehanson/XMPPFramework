@@ -1,6 +1,8 @@
 #import "XMPPReconnect.h"
 #import "XMPPStream.h"
 
+#define IMPOSSIBLE_REACHABILITY_FLAGS 0xFFFFFFFF
+
 enum XMPPReconnectFlags
 {
 	kAutoReconnect   = 1 << 0,  // If set, automatically attempts to reconnect after a disconnection
@@ -48,7 +50,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		
 		reconnectDelay = DEFAULT_XMPP_RECONNECT_DELAY;
 		
-		previousReachabilityFlags = 0;
+		previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 	}
 	return self;
 }
@@ -139,7 +141,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)manualStart
 {
-	if ([xmppStream isDisconnected])
+	if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
 	{
 		[self setManuallyStarted:YES];
 		
@@ -297,10 +299,19 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 		
 		if (reachability)
 		{
-			SCNetworkReachabilityScheduleWithRunLoop(reachability, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+			// We have to fetch the initial reachability flags.
+			// If we don't do this then when we schedule in the runloop below,
+			// it will immediately invoke our callback method.
+			// This isn't what we want.
+			// The reconnectDelay handles the initial reconnect attempt (after a proper short delay),
+			// and the network monitoring should only be invoked if the network status changes.
+			SCNetworkReachabilityFlags reachabilityFlags;
+			SCNetworkReachabilityGetFlags(reachability, &reachabilityFlags);
 			
 			SCNetworkReachabilityContext context = {0, self, NULL, NULL, NULL};
 			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
+			
+			SCNetworkReachabilityScheduleWithRunLoop(reachability, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 		}
 	}
 }
@@ -369,7 +380,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 			}
 			else
 			{
-				previousReachabilityFlags = 0;
+				previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 				[self setMultipleReachabilityChanges:NO];
 			}
 		}
