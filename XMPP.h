@@ -6,10 +6,4 @@
 #import "XMPPPresence.h"
 #import "XMPPReconnect.h"
 
-#import "XMPPRoster.h"
-#import "XMPPUser.h"
-#import "XMPPResource.h"
-
-#import "XMPPRosterMemoryStorage.h"
-
 #import "NSXMLElementAdditions.h"

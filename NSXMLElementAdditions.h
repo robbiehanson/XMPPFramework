@@ -24,12 +24,16 @@
 - (float)attributeFloatValueForName:(NSString *)name;
 - (double)attributeDoubleValueForName:(NSString *)name;
 - (NSString *)attributeStringValueForName:(NSString *)name;
+- (NSNumber *)attributeNumberIntValueForName:(NSString *)name;
+- (NSNumber *)attributeNumberBoolValueForName:(NSString *)name;
 
 - (int)attributeIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
 - (BOOL)attributeBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
 - (float)attributeFloatValueForName:(NSString *)name withDefaultValue:(float)defaultValue;
 - (double)attributeDoubleValueForName:(NSString *)name withDefaultValue:(double)defaultValue;
 - (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue;
+- (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
+- (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
 
 - (NSMutableDictionary *)attributesAsDictionary;
 

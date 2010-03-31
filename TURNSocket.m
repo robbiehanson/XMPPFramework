@@ -339,11 +339,7 @@ static NSMutableDictionary *existingTurnSockets;
 		[query addChild:[streamhosts objectAtIndex:i]];
 	}
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	[iq addAttributeWithName:@"id" stringValue:uuid];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:jid elementID:uuid child:query];
 	
 	[xmppStream sendElement:iq];
 	
@@ -371,11 +367,7 @@ static NSMutableDictionary *existingTurnSockets;
 	[query addAttributeWithName:@"sid" stringValue:uuid];
 	[query addChild:streamhostUsed];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"result"];
-	[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	[iq addAttributeWithName:@"id" stringValue:uuid];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:jid elementID:uuid child:query];
 	
 	[xmppStream sendElement:iq];
 }
@@ -394,11 +386,7 @@ static NSMutableDictionary *existingTurnSockets;
 	[query addAttributeWithName:@"sid" stringValue:uuid];
 	[query addChild:activate];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addAttributeWithName:@"to" stringValue:[proxyJID full]];
-	[iq addAttributeWithName:@"id" stringValue:uuid];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:proxyJID elementID:uuid child:query];
 	
 	[xmppStream sendElement:iq];
 	
@@ -426,11 +414,7 @@ static NSMutableDictionary *existingTurnSockets;
 	[error addAttributeWithName:@"type" stringValue:@"cancel"];
 	[error addChild:inf];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"error"];
-	[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	[iq addAttributeWithName:@"id" stringValue:uuid];
-	[iq addChild:error];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"error" to:jid elementID:uuid child:error];
 	
 	[xmppStream sendElement:iq];
 }
@@ -724,23 +708,32 @@ static NSMutableDictionary *existingTurnSockets;
 	// Update state
 	state = STATE_PROXY_DISCO_ITEMS;
 	
-	// We start off with 4 proxy candidates (servers that have been known to be proxy servers in the past).
+	// We start off with multiple proxy candidates (servers that have been known to be proxy servers in the past).
 	// We can stop when we've found at least 2 proxies.
 	
-	proxyCandidateIndex++;
-	if(proxyCandidateIndex < [proxyCandidates count] && [streamhosts count] < 2)
+	XMPPJID *proxyCandidateJID = nil;
+	
+	if([streamhosts count] < 2)
+	{
+		while((proxyCandidateJID == nil) && (++proxyCandidateIndex < [proxyCandidates count]))
+		{
+			NSString *proxyCandidate = [proxyCandidates objectAtIndex:proxyCandidateIndex];
+			proxyCandidateJID = [XMPPJID jidWithString:proxyCandidate];
+			
+			if(proxyCandidateJID == nil)
+			{
+				DDLogWarn(@"Invalid proxy candidate '%@', not a valid JID", proxyCandidate);
+			}
+		}
+	}
+	
+	if(proxyCandidateJID)
 	{
 		[self updateDiscoUUID];
 		
-		NSString *proxyCandidate = [proxyCandidates objectAtIndex:proxyCandidateIndex];
-		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#items"];
 		
-		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-		[iq addAttributeWithName:@"type" stringValue:@"get"];
-		[iq addAttributeWithName:@"to" stringValue:proxyCandidate];
-		[iq addAttributeWithName:@"id" stringValue:discoUUID];
-		[iq addChild:query];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:proxyCandidateJID elementID:discoUUID child:query];
 		
 		[xmppStream sendElement:iq];
 		
@@ -818,11 +811,7 @@ static NSMutableDictionary *existingTurnSockets;
 		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 		
-		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-		[iq addAttributeWithName:@"type" stringValue:@"get"];
-		[iq addAttributeWithName:@"to" stringValue:[candidateJID full]];
-		[iq addAttributeWithName:@"id" stringValue:discoUUID];
-		[iq addChild:query];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:candidateJID elementID:discoUUID child:query];
 		
 		[xmppStream sendElement:iq];
 		
@@ -856,11 +845,7 @@ static NSMutableDictionary *existingTurnSockets;
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addAttributeWithName:@"to" stringValue:[candidateJID full]];
-	[iq addAttributeWithName:@"id" stringValue:discoUUID];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:candidateJID elementID:discoUUID child:query];
 	
 	[xmppStream sendElement:iq];
 	
