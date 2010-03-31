@@ -19,4 +19,8 @@
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;
 
+- (BOOL)hasReceiptRequest;
+- (BOOL)hasReceiptResponse;
+- (XMPPMessage *)receiptResponse;
+
 @end

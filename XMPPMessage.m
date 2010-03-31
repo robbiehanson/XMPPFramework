@@ -53,4 +53,45 @@
 	return NO;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XEP-0184: Message Receipts
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)hasReceiptRequest
+{
+	NSXMLElement *receiptRequest = [self elementForName:@"request" xmlns:@"urn:xmpp:receipts"];
+	
+	return (receiptRequest != nil);
+}
+
+- (BOOL)hasReceiptResponse
+{
+	NSXMLElement *receiptResponse = [self elementForName:@"received" xmlns:@"urn:xmpp:receipts"];
+	
+	return (receiptResponse != nil);
+}
+
+- (XMPPMessage *)receiptResponse
+{
+	NSXMLElement *received = [NSXMLElement elementWithName:@"received" xmlns:@"urn:xmpp:receipts"];
+	
+	NSXMLElement *message = [NSXMLElement elementWithName:@"message"];
+	
+	NSString *to = [self fromStr];
+	if(to)
+	{
+		[message addAttributeWithName:@"to" stringValue:to];
+	}
+	
+	NSString *msgid = [self elementID];
+	if(msgid)
+	{
+		[message addAttributeWithName:@"id" stringValue:msgid];
+	}
+	
+	[message addChild:received];
+	
+	return [[self class] messageFromElement:message];
+}
+
 @end
