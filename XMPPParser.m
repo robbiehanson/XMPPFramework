@@ -4,6 +4,20 @@
   #import "DDXMLPrivate.h"
 #endif
 
+// When the xmpp parser invokes a delegate method, such as xmppParser:didReadElement:,
+// it exposes itself to the possibility of exceptions mid-parse.
+// This aborts the current run loop,
+// and thus causes the parser to lose the rest of the data that was passed to it via the parseData method.
+// 
+// The end result is that our parser will likely barf the next time it tries to parse data.
+// Probably with a "EndTag: '</' not found" error.
+// After this the xmpp stream would be closed.
+// 
+// Now during development, it's probably good to be exposed to these exceptions so they can be tracked down and fixed.
+// But for release, we might not want these exceptions to break the xmpp stream.
+// So for release mode you may consider enabling the try/catch.
+#define USE_TRY_CATCH 0
+
 #define CHECK_FOR_NULL(value) do { if(value == NULL) { xmlAbortDueToMemoryShortage(ctxt); return; } } while(false)
 
 #if !TARGET_OS_IPHONE
@@ -38,8 +52,9 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 		xmlNodePtr rootCopy = xmlCopyNode(root, 2);
 		DDXMLElement *rootCopyWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)rootCopy];
 		
-	//	@try
-	//	{
+#if USE_TRY_CATCH
+		@try
+		{
 			// If the delegate throws an exception that we don't catch,
 			// this would cause our parser to abort,
 			// and ignore the rest of the data that was passed to us in parseData.
@@ -48,9 +63,11 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 			// Probably with a "EndTag: '</' not found" error.
 			
 			[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
-	//	}
-	//	@catch (id exception) { /* Ignore */ }
-		
+		}
+		@catch (id exception) { /* Ignore */ }
+#else
+		[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
+#endif
 		// Note: DDXMLElement will properly free the rootCopy when it's deallocated.
 	}
 }
@@ -65,8 +82,9 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 	
 	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
 	{
-	//	@try
-	//	{
+#if USE_TRY_CATCH
+		@try
+		{
 			// If the delegate throws an exception that we don't catch,
 			// this would cause our parser to abort,
 			// and ignore the rest of the data that was passed to us in parseData.
@@ -75,8 +93,11 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 			// Probably with a "EndTag: '</' not found" error.
 			
 			[parser->delegate xmppParser:parser didReadElement:childWrapper];
-	//	}
-	//	@catch (id exception) { /* Ignore */ }
+		}
+		@catch (id exception) { /* Ignore */ }
+#else
+		[parser->delegate xmppParser:parser didReadElement:childWrapper];
+#endif
 	}
 	
 	// Note: DDXMLElement will properly free the child when it's deallocated.
@@ -291,8 +312,9 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 	{
 		NSXMLElement *nsRoot = nsxmlFromLibxml(root);
 		
-	//	@try
-	//	{
+#if USE_TRY_CATCH
+		@try
+		{
 			// If the delegate throws an exception that we don't catch,
 			// this would cause our parser to abort,
 			// and ignore the rest of the data that was passed to us in parseData.
@@ -301,8 +323,11 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 			// Probably with a "EndTag: '</' not found" error.
 			
 			[parser->delegate xmppParser:parser didReadRoot:nsRoot];
-	//	}
-	//	@catch (id exception) { /* Ignore */ }
+		}
+		@catch (id exception) { /* Ignore */ }
+#else
+		[parser->delegate xmppParser:parser didReadRoot:nsRoot];
+#endif
 	}
 }
 
@@ -312,8 +337,9 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 	{
 		NSXMLElement *nsChild = nsxmlFromLibxml(child);
 		
-	//	@try
-	//	{
+#if USE_TRY_CATCH
+		@try
+		{
 			// If the delegate throws an exception that we don't catch,
 			// this would cause our parser to abort,
 			// and ignore the rest of the data that was passed to us in parseData.
@@ -322,8 +348,11 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 			// Probably with a "EndTag: '</' not found" error.
 			
 			[parser->delegate xmppParser:parser didReadElement:nsChild];
-	//	}
-	//	@catch (id exception) { /* Ignore */ }
+		}
+		@catch (id exception) { /* Ignore */ }
+#else
+		[parser->delegate xmppParser:parser didReadElement:nsChild];
+#endif
 	}
 	
 	// Note: We want to detach the child from the root even if the delegate method isn't setup.
