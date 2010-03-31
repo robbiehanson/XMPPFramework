@@ -1,4 +1,5 @@
 #import "XMPPParser.h"
+#import <libxml/parserInternals.h>
 
 #if TARGET_OS_IPHONE
   #import "DDXMLPrivate.h"
@@ -559,9 +560,17 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
 		const xmlChar *valueBegin = attributes[i++];
 		const xmlChar *valueEnd   = attributes[i++];
 		
-		xmlChar *value = xmlStrndup(valueBegin, valueEnd - valueBegin);
+        // The attribute value might contain character references which need to be decoded.
+        // 
+        // "Franks &#38; Beans" -> "Franks & Beans"
+        
+		xmlChar *value = xmlStringLenDecodeEntities(ctxt,                     // the parser context
+		                                            valueBegin,               // the input string
+		                                            (valueEnd - valueBegin),  // the input string length
+		                                            (XML_SUBSTITUTE_REF),     // what to substitue
+		                                            0, 0, 0);                 // end markers, 0 if none
 		CHECK_FOR_NULL(value);
-		
+        
 		if ((attrPrefix == NULL) && (attrUri == NULL))
 		{
 			// Normal attribute - no associated namespace
