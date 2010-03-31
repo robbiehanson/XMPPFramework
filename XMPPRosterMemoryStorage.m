@@ -185,8 +185,6 @@
 
 - (void)beginRosterPopulation
 {
-	NSLog(@"XMPPRosterMemoryStorage: beginRosterPopulation");
-	
 	isRosterPopulation = YES;
 	
 	XMPPJID *myJID = parent.xmppStream.myJID;
@@ -197,8 +195,6 @@
 
 - (void)handleRosterItem:(NSXMLElement *)item
 {
-	NSLog(@"XMPPRosterMemoryStorage: handleRosterItem:");
-	
 	if ([self isRosterItem:item])
 	{
 		NSString *jidStr = [item attributeStringValueForName:@"jid"];
@@ -235,8 +231,6 @@
 
 - (void)endRosterPopulation
 {
-	NSLog(@"XMPPRosterMemoryStorage: endRosterPopulation");
-	
 	isRosterPopulation = NO;
 	
 	[[self multicastDelegate] xmppRosterDidChange:self];

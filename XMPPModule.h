@@ -8,7 +8,9 @@
  * They automatically get:
  * 
  * - An xmppStream variable, with the corresponding property.
- * - A multicastDelegate that automatically invokes added delegates and other modules.
+ * - A multicastDelegate that automatically invokes added delegates.
+ * 
+ * The module also automatically registers/unregisters itself with the xmpp stream.
 **/
 @interface XMPPModule : NSObject
 {
@@ -23,15 +25,5 @@
 
 - (void)addDelegate:(id)delegate;
 - (void)removeDelegate:(id)delegate;
-
-@end
-
-
-@interface ModuleMulticastDelegate : MulticastDelegate
-{
-	XMPPStream *xmppStream;
-}
-
-- (id)initWithStream:(XMPPStream *)xmppStream;
 
 @end
