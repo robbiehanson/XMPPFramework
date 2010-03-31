@@ -98,11 +98,14 @@
 
 /**
  * Returns the capabilities for the given jid.
+ * The returned element is the <query/> element response to a disco#info request.
 **/
-- (XMPPIQ *)capabilitiesForJID:(XMPPJID *)jid;
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid;
 
 /**
  * Returns the capabilities for the given jid.
+ * The returned element is the <query/> element response to a disco#info request.
+ * 
  * The given jid must be a full jid (must contain a resource).
  * 
  * If the jid has broadcast capabilities via the legacy format of XEP-0115,
@@ -119,7 +122,7 @@
  * You may pass nil for extPtr if you don't care about the legacy attributes,
  * or you could simply use the capabilitiesForJID: method above.
 **/
-- (XMPPIQ *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr;
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr;
 
 // 
 // 
@@ -136,15 +139,18 @@
  * - YES if the capabilities for the given jid are known.
  * - NO if the capabilities for the given jid are NOT known.
  * 
- * Note: If the hash and algorithm are given, and an associated set of capabilities matches the hash/algorithm,
+ * If the hash and algorithm are given, and an associated set of capabilities matches the hash/algorithm,
  * this method should link the jid to the capabilities and return YES.
+ * If this is the first time the capabilities have been linked to the jid,
+ * the newCapabilities parameter shoud be filled out.
 **/
 - (BOOL)setCapabilitiesNode:(NSString *)node
                         ver:(NSString *)ver
                         ext:(NSString *)ext
                        hash:(NSString *)hash
                   algorithm:(NSString *)hashAlg
-                     forJID:(XMPPJID *)jid;
+                     forJID:(XMPPJID *)jid
+      andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr;
 
 /**
  * Fetches the associated capabilities hash for a given jid.
@@ -161,11 +167,9 @@
 - (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid;
 
 /**
- * Combination of areCapabilitiesKnown: and getCapabilitiesHash:algorithm:forJID: methods.
+ * Gets the metadata for the given jid.
  * 
  * If the capabilities are known, the areCapabilitiesKnown boolean should be set to YES.
- * If jid is associated with a hash, the isHashKnown boolean should eb set to YES,
- * and the hash and hashAlg variables should be filled out.
 **/
 - (void)getCapabilitiesKnown:(BOOL *)areCapabilitiesKnownPtr
 					  failed:(BOOL *)haveFailedFetchingBeforePtr
@@ -190,14 +194,13 @@
  * If we receive multiple simultaneous presence elements from
  * multiple jids all broadcasting the same capabilities hash:
  * 
- * - The setCapabilitiesHash:algorithm:forJID: will be invoked for each jid.
  * - A single disco request will be sent to one of the jids.
  * - When the response comes back, the setCapabilities:forHash:algorithm: method will be invoked.
  * 
  * The setCapabilities:forJID: method will NOT be invoked for each corresponding jid.
  * This is by design to allow the storage implementation to optimize itself.
 **/
-- (void)setCapabilities:(XMPPIQ *)iq forHash:(NSString *)hash algorithm:(NSString *)hashAlg;
+- (void)setCapabilities:(NSXMLElement *)caps forHash:(NSString *)hash algorithm:(NSString *)hashAlg;
 
 /**
  * Sets the capabilities for a given jid.
@@ -207,7 +210,7 @@
  * Since the capabilities are NOT linked to a hash,
  * these capabilities should not be persisted between multiple sessions/streams.
 **/
-- (void)setCapabilities:(XMPPIQ *)iq forJID:(XMPPJID *)jid;
+- (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid;
 
 /**
  * Marks the disco fetch request as failed so we know not to bother trying again.
@@ -243,7 +246,9 @@
 
 /**
  * Invoked when capabilities have been discovered for an available JID.
+ * 
+ * The caps element is the <query/> element response to a disco#info request.
 **/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender didDiscoverCapabilities:(XMPPIQ *)caps forJID:(XMPPJID *)jid;
+- (void)xmppCapabilities:(XMPPCapabilities *)sender didDiscoverCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid;
 
 @end

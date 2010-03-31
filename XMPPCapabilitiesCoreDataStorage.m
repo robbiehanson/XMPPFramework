@@ -202,6 +202,7 @@
                        hash:(NSString *)hash
                   algorithm:(NSString *)hashAlg
                      forJID:(XMPPJID *)jid
+      andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr
 {
 	BOOL hashChange = NO;
 	
@@ -238,12 +239,17 @@
 		resource.hashStr = hash;
 		resource.hashAlgorithm = hashAlg;
 		
-		hashChange = (hash || hashAlg);
+		hashChange = ((hash != nil) || (hashAlg != nil));
 	}
 	
 	if (hashChange)
 	{
 		resource.caps = [self capsForHash:hash algorithm:hashAlg];
+		
+		if (newCapabilitiesPtr)
+		{
+			*newCapabilitiesPtr = resource.caps.capabilities;
+		}
 	}
 	
 	if ([[self managedObjectContext] hasChanges])
@@ -339,7 +345,7 @@
 	if (hashAlgPtr) *hashAlgPtr = resource.hashAlgorithm;
 }
 
-- (void)setCapabilities:(XMPPIQ *)iq forHash:(NSString *)hash algorithm:(NSString *)hashAlg
+- (void)setCapabilities:(NSXMLElement *)capabilities forHash:(NSString *)hash algorithm:(NSString *)hashAlg
 {
 	if (hash == nil) return;
 	if (hashAlg == nil) return;
@@ -347,7 +353,7 @@
 	XMPPCapsCoreDataStorageObject *caps = [self capsForHash:hash algorithm:hashAlg];
 	if (caps)
 	{
-		caps.capabilities = iq;
+		caps.capabilities = capabilities;
 	}
 	else
 	{
@@ -356,7 +362,7 @@
 		caps.hashStr = hash;
 		caps.hashAlgorithm = hashAlg;
 		
-		caps.capabilities = iq;
+		caps.capabilities = capabilities;
 	}
 	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
@@ -378,14 +384,14 @@
 	[[self managedObjectContext] save:nil];
 }
 
-- (void)setCapabilities:(XMPPIQ *)iq forJID:(XMPPJID *)jid
+- (void)setCapabilities:(NSXMLElement *)capabilities forJID:(XMPPJID *)jid
 {
 	if (jid == nil) return;
 	
 	XMPPCapsCoreDataStorageObject *caps;
 	caps = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsCoreDataStorageObject"
 	                                     inManagedObjectContext:[self managedObjectContext]];
-	caps.capabilities = iq;
+	caps.capabilities = capabilities;
 	
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 	
@@ -401,12 +407,12 @@
 	[[self managedObjectContext] save:nil];
 }
 
-- (XMPPIQ *)capabilitiesForJID:(XMPPJID *)jid
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid
 {
 	return [self capabilitiesForJID:jid ext:nil];
 }
 
-- (XMPPIQ *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr
 {
 	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 	
@@ -434,11 +440,8 @@
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
-	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ && hashAlgorithm == %@", nil, nil];
-	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
-	[fetchRequest setPredicate:predicate];
 	
 	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 	
@@ -446,10 +449,18 @@
 	
 	for (XMPPCapsResourceCoreDataStorageObject *resource in results)
 	{
-		XMPPCapsCoreDataStorageObject *caps = resource.caps;
-		if (caps)
+		NSString *hash = resource.hashStr;
+		NSString *hashAlg = resource.hashAlgorithm;
+		
+		BOOL nonPersistentCapabilities = ((hash == nil) || (hashAlg == nil));
+		
+		if (nonPersistentCapabilities)
 		{
-			[[self managedObjectContext] deleteObject:caps];
+			XMPPCapsCoreDataStorageObject *caps = resource.caps;
+			if (caps)
+			{
+				[[self managedObjectContext] deleteObject:caps];
+			}
 		}
 		
 		[[self managedObjectContext] deleteObject:resource];
