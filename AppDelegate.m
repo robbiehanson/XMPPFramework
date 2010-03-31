@@ -48,6 +48,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	[xmppStream addDelegate:self];
 	[xmppReconnect addDelegate:self];
+	[xmppCapabilities addDelegate:self];
 	
 	[rosterController displaySignInSheet];
 }
@@ -121,6 +122,17 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	NSLog(@"---------- xmppReconnect:shouldAttemptAutoReconnect: ----------");
 	
 	return YES;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Capabilities
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppCapabilities:(XMPPCapabilities *)sender didDiscoverCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid
+{
+	NSLog(@"---------- xmppCapabilities:didDiscoverCapabilities:forJID: ----------");
+	NSLog(@"jid: %@", jid);
+	NSLog(@"capabilities:\n%@", [caps XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 }
 
 @end
