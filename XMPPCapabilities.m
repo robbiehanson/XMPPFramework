@@ -428,11 +428,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	return [hash base64Encoded];
 }
 
-- (NSString *)hashCapabilitiesFromIQ:(XMPPIQ *)iq
-{
-	return [self hashCapabilitiesFromQuery:[iq childElement]];
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Key Conversions
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -624,15 +619,27 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	// Remember: hash="sha-1" ver="ABC-Actual-Hash-DEF".
 	// It's a bit confusing as it was designed this way for backwards compatibility with v 1.4 and below.
 	
+	NSXMLElement *newCapabilities = nil;
+	
 	BOOL areCapabilitiesKnown = [xmppCapabilitiesStorage setCapabilitiesNode:node
 	                                                                     ver:ver
 	                                                                     ext:nil
 	                                                                    hash:ver
 	                                                               algorithm:hash
-	                                                                  forJID:jid];
+	                                                                  forJID:jid
+													   andGetNewCapabilities:&newCapabilities];
 	if (areCapabilitiesKnown)
 	{
 		DDLogVerbose(@"Capabilities already known for jid(%@) with hash(%@)", jid, ver);
+		
+		if (newCapabilities)
+		{
+			// This is the first time we've linked the jid with the set of capabilities.
+			// We didn't need to do any lookups due to hashing and caching.
+			
+			// Notify the delegate(s)
+			[multicastDelegate xmppCapabilities:self didDiscoverCapabilities:newCapabilities forJID:jid];
+		}
 		
 		// The capabilities for this hash are already known
 		return;
@@ -747,7 +754,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	                                                                     ext:ext
 	                                                                    hash:nil
 	                                                               algorithm:nil
-	                                                                  forJID:jid];
+	                                                                  forJID:jid
+													   andGetNewCapabilities:nil];
 	if (areCapabilitiesKnown)
 	{
 		DDLogVerbose(@"Capabilities already known for jid(%@)", jid);
@@ -831,11 +839,9 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 /**
  * Invoked when we receive a response to one of our previously sent disco requests.
 **/
-- (void)handleDiscoResponse:(XMPPIQ *)iq
+- (void)handleDiscoResponse:(NSXMLElement *)query fromJID:(XMPPJID *)jid
 {
 	DDLogTrace();
-	
-	XMPPJID *jid = [iq from];
 	
 	NSString *hash = nil;
 	NSString *hashAlg = nil;
@@ -850,14 +856,14 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		
 		NSString *key = [self keyFromHash:hash algorithm:hashAlg];
 		
-		NSString *calculatedHash = [self hashCapabilitiesFromIQ:iq];
+		NSString *calculatedHash = [self hashCapabilitiesFromQuery:query];
 		
 		if ([calculatedHash isEqualToString:hash])
 		{
 			DDLogVerbose(@"%@: %@ - Hash matches!", THIS_FILE, THIS_METHOD);
 			
 			// Store the capabilities (associated with the hash)
-			[xmppCapabilitiesStorage setCapabilities:iq forHash:hash algorithm:hashAlg];
+			[xmppCapabilitiesStorage setCapabilities:query forHash:hash algorithm:hashAlg];
 			
 			// Remove the jid(s) from the discoRequest variables
 			NSArray *jids = [discoRequestHashDict objectForKey:key];
@@ -868,6 +874,9 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 				XMPPJID *aJid = [jids objectAtIndex:i];
 				
 				[discoRequestJidSet removeObject:aJid];
+				
+				// Notify the delegate(s)
+				[multicastDelegate xmppCapabilities:self didDiscoverCapabilities:query forJID:jid];
 			}
 			
 			[discoRequestHashDict removeObjectForKey:key];
@@ -885,16 +894,26 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 			[xmppCapabilitiesStorage clearCapabilitiesHashAndAlgorithmForJID:jid];
 			
 			// Now set the capabilities for the jid
-			[xmppCapabilitiesStorage setCapabilities:iq forJID:jid];
+			[xmppCapabilitiesStorage setCapabilities:query forJID:jid];
 			
 			// Remove the jid from the discoRequest variables.
 			// 
-			// We do not need to explicitly remove it from the discoRequestHashDict.
-			// It is no longer associated with the hash in storage,
-			// so if another disco request associated with the hash succeeds,
-			// the storage won't make the connection.
+			// When we remove it from the discoRequestHashDict
+			// we also need to be sure to decrement the requestIndex
+			// so the next jid in the list doesn't get skipped.
 			
 			[discoRequestJidSet removeObject:jid];
+			
+			NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+			NSUInteger requestIndex = [[jids objectAtIndex:0] unsignedIntegerValue];
+			
+			[jids removeObjectAtIndex:requestIndex];
+			
+			requestIndex--;
+			[jids replaceObjectAtIndex:0 withObject:[NSNumber numberWithUnsignedInteger:requestIndex]];
+			
+			// Notify the delegate(s)
+			[multicastDelegate xmppCapabilities:self didDiscoverCapabilities:query forJID:jid];
 			
 			// We'd still like to know what the capabilities are for this hash.
 			// Move onto the next one in the list (if there are more, otherwise stop).
@@ -906,24 +925,22 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		DDLogVerbose(@"%@: %@ - Non-Hash response", THIS_FILE, THIS_METHOD);
 		
 		// Store the capabilities (associated with the jid)		
-		[xmppCapabilitiesStorage setCapabilities:iq forJID:jid];
+		[xmppCapabilitiesStorage setCapabilities:query forJID:jid];
 		
 		// Remove the jid from the discoRequest variable
 		[discoRequestJidSet removeObject:jid];
 		
 		// Cancel the request timeout
 		[self cancelTimeoutForDiscoRequestFromJID:jid];
+		
+		// Notify the delegate(s)
+		[multicastDelegate xmppCapabilities:self didDiscoverCapabilities:query forJID:jid];
 	}
-	
-	// Notify the delegate(s)
-	[multicastDelegate xmppCapabilities:self didDiscoverCapabilities:iq forJID:jid];
 }
 
-- (void)handleDiscoErrorResponse:(XMPPIQ *)iq
+- (void)handleDiscoErrorResponse:(NSXMLElement *)query fromJID:(XMPPJID *)jid
 {
 	DDLogTrace();
-	
-	XMPPJID *jid = [iq from];
 	
 	NSString *hash = nil;
 	NSString *hashAlg = nil;
@@ -1033,11 +1050,11 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	}
 	else if ([type isEqualToString:@"result"])
 	{
-		[self handleDiscoResponse:iq];
+		[self handleDiscoResponse:query fromJID:[iq from]];
 	}
 	else if ([type isEqualToString:@"error"])
 	{
-		[self handleDiscoErrorResponse:iq];
+		[self handleDiscoErrorResponse:query fromJID:[iq from]];
 	}
 	else
 	{
@@ -1072,7 +1089,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
 		
 		DDLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
-					 [query XMLStringWithOptions:(NSXMLNodePrettyPrint | NSXMLNodeCompactEmptyElement)]);
+					 [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 		
 		NSString *hash = [self hashCapabilitiesFromQuery:query];
 		

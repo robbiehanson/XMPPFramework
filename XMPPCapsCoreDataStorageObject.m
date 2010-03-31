@@ -13,14 +13,14 @@
 
 @dynamic resources;
 
-- (XMPPIQ *)capabilities
+- (NSXMLElement *)capabilities
 {
-	return [[[XMPPIQ alloc] initWithXMLString:[self capabilitiesStr] error:nil] autorelease];
+	return [[[NSXMLElement alloc] initWithXMLString:[self capabilitiesStr] error:nil] autorelease];
 }
 
-- (void)setCapabilities:(XMPPIQ *)iq
+- (void)setCapabilities:(NSXMLElement *)caps
 {
-	self.capabilitiesStr = [iq compactXMLString];
+	self.capabilitiesStr = [caps compactXMLString];
 }
 
 @end

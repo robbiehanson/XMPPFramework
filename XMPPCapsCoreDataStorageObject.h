@@ -1,12 +1,15 @@
 #import <CoreData/CoreData.h>
 
+#if TARGET_OS_IPHONE
+  #import "DDXML.h"
+#endif
+
 @class XMPPCapsResourceCoreDataStorageObject;
-@class XMPPIQ;
 
 
 @interface XMPPCapsCoreDataStorageObject : NSManagedObject
 
-@property (nonatomic, retain) XMPPIQ *capabilities;
+@property (nonatomic, retain) NSXMLElement *capabilities;
 
 @property (nonatomic, retain) NSString * hashStr;
 @property (nonatomic, retain) NSString * hashAlgorithm;
