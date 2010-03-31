@@ -122,6 +122,14 @@
 {
 	return [[self attributeForName:name] stringValue];
 }
+- (NSNumber *)attributeNumberIntValueForName:(NSString *)name
+{
+	return [NSNumber numberWithInt:[self attributeIntValueForName:name]];
+}
+- (NSNumber *)attributeNumberBoolValueForName:(NSString *)name
+{
+	return [NSNumber numberWithBool:[self attributeBoolValueForName:name]];
+}
 
 /**
  * The following methods return the corresponding value of the attribute with the given name.
@@ -152,6 +160,14 @@
 {
     NSXMLNode *attr = [self attributeForName:name];
     return (attr) ? [attr stringValue] : defaultValue;
+}
+- (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue
+{
+	return [NSNumber numberWithInt:[self attributeIntValueForName:name withDefaultValue:defaultValue]];
+}
+- (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue
+{
+	return [NSNumber numberWithBool:[self attributeBoolValueForName:name withDefaultValue:defaultValue]];
 }
 
 /**

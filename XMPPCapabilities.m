@@ -294,6 +294,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (NSString *)hashCapabilitiesFromQuery:(NSXMLElement *)query
 {
+	if (query == nil) return nil;
+	
 	NSMutableSet *set = [NSMutableSet set];
 	
 	NSMutableString *s = [NSMutableString string];
@@ -426,12 +428,9 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	return [hash base64Encoded];
 }
 
-- (NSString *)hashCapabilitiesFromIQ:(NSXMLElement *)iq
+- (NSString *)hashCapabilitiesFromIQ:(XMPPIQ *)iq
 {
-	NSXMLElement *query = [iq elementForName:@"query"];
-	if (query == nil) return nil;
-	
-	return [self hashCapabilitiesFromQuery:query];
+	return [self hashCapabilitiesFromQuery:[iq childElement]];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -573,11 +572,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		[query addAttributeWithName:@"node" stringValue:nodeValue];
 	}
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	[iq addAttributeWithName:@"id" stringValue:[xmppStream generateUUID]];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
 	
 	[xmppStream sendElement:iq];
 	
@@ -714,11 +709,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 	[query addAttributeWithName:@"node" stringValue:nodeValue];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	[iq addAttributeWithName:@"id" stringValue:[xmppStream generateUUID]];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
 	
 	[xmppStream sendElement:iq];
 	
@@ -798,11 +789,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 	[query addAttributeWithName:@"node" stringValue:nodeValue];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	[iq addAttributeWithName:@"id" stringValue:[xmppStream generateUUID]];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
 	
 	[xmppStream sendElement:iq];
 	
@@ -833,11 +820,10 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
 	
-	NSXMLElement *iqResponse = [NSXMLElement elementWithName:@"iq"];
-	[iqResponse addAttributeWithName:@"to" stringValue:[iqRequest fromStr]];
-	[iqResponse addAttributeWithName:@"id" stringValue:[iqRequest elementID]];
-	[iqResponse addAttributeWithName:@"type" stringValue:@"result"];
-	[iqResponse addChild:query];
+	XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"result"
+	                                     to:[iqRequest from]
+	                              elementID:[iqRequest elementID]
+	                                  child:query];
 	
 	[xmppStream sendElement:iqResponse];
 }
@@ -994,7 +980,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	}
 	else if ([type isEqualToString:@"available"])
 	{
-		NSXMLElement *c = [presence elementForName:@"c"];
+		NSXMLElement *c = [presence elementForName:@"c" xmlns:@"http://jabber.org/protocol/caps"];
 		if (c == nil)
 		{
 			if (self.autoFetchNonHashedCapabilities)
@@ -1034,8 +1020,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [iq elementForName:@"query"];
-	if (![[query xmlns] isEqualToString:@"http://jabber.org/protocol/disco#info"])
+	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+	if (query == nil)
 	{
 		return NO;
 	}
@@ -1229,10 +1215,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 			[query addAttributeWithName:@"node" stringValue:nodeValue];
 		}
 		
-		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-		[iq addAttributeWithName:@"to" stringValue:[jid full]];
-		[iq addAttributeWithName:@"type" stringValue:@"get"];
-		[iq addChild:query];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
 		
 		[xmppStream sendElement:iq];
 		

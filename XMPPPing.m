@@ -61,10 +61,7 @@
 	
 	NSXMLElement *ping = [NSXMLElement elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addAttributeWithName:@"id" stringValue:pingID];
-	[iq addChild:ping];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:pingID child:ping];
 	
 	[xmppStream sendElement:iq];
 }
@@ -81,11 +78,7 @@
 	
 	NSXMLElement *ping = [NSXMLElement elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
 	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addAttributeWithName:@"id" stringValue:pingID];
-	[iq addChild:ping];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:pingID child:ping];
 	
 	[xmppStream sendElement:iq];
 }
@@ -121,10 +114,7 @@
 		NSXMLElement *ping = [iq elementForName:@"ping" xmlns:@"urn:xmpp:ping"];
 		if (ping)
 		{
-			NSXMLElement *pong = [NSXMLElement elementWithName:@"iq"];
-			[pong addAttributeWithName:@"to" stringValue:[iq fromStr]];
-			[pong addAttributeWithName:@"type" stringValue:@"result"];
-			[pong addAttributeWithName:@"id" stringValue:[iq elementID]];
+			XMPPIQ *pong = [XMPPIQ iqWithType:@"result" to:[iq from] elementID:[iq elementID]];
 			
 			[sender sendElement:pong];
 			

@@ -1855,24 +1855,12 @@ enum XMPPStreamFlags
 				[error addAttributeWithName:@"code" stringValue:@"501"];
 				[error addChild:reason];
 				
-				NSXMLElement *queryResponse = [NSXMLElement elementWithName:@"query"];
+				XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"error" to:[iq from] elementID:[iq elementID] child:error];
 				
-				NSString *xmlns = [[iq queryElement] xmlns];
-				if (xmlns)
+				NSXMLElement *iqChild = [iq childElement];
+				if (iqChild)
 				{
-					[queryResponse setXmlns:xmlns];
-				}
-				
-				NSXMLElement *iqResponse = [NSXMLElement elementWithName:@"iq"];
-				[iqResponse addAttributeWithName:@"to" stringValue:[iq fromStr]];
-				[iqResponse addAttributeWithName:@"type" stringValue:@"error"];
-				[iqResponse addChild:queryResponse];
-				[iqResponse addChild:error];
-				
-				NSString *elementID = [iq elementID];
-				if (elementID)
-				{
-					[iqResponse addAttributeWithName:@"id" stringValue:elementID];
+					[iqResponse addChild:iqChild];
 				}
 				
 				[self sendElement:iqResponse];
