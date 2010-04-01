@@ -26,6 +26,8 @@
 	NSTimeInterval capabilitiesRequestTimeout;
 	
 	NSMutableSet *timers;
+	
+	NSString *lastHash;
 }
 
 - (id)initWithStream:(XMPPStream *)xmppStream capabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
