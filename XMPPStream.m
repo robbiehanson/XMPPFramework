@@ -18,10 +18,12 @@
 
 // Define the debugging state
 #define DEBUG_SEND      YES
-#define DEBUG_RECV      YES
+#define DEBUG_RECV_PRE  YES  // Prints data before going to xmpp parser
+#define DEBUG_RECV_POST NO   // Prints data as it comes out of xmpp parser
 
-#define DDLogSend(format, ...)    do{ if(DEBUG_SEND) NSLog((format), ##__VA_ARGS__); }while(0)
-#define DDLogRecv(format, ...)    do{ if(DEBUG_RECV) NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogSend(format, ...)     do{ if(DEBUG_SEND)      NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogRecvPre(format, ...)  do{ if(DEBUG_RECV_PRE)  NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogRecvPost(format, ...) do{ if(DEBUG_RECV_POST) NSLog((format), ##__VA_ARGS__); }while(0)
 
 // Define the various timeouts (in seconds) for retreiving various parts of the XML stream
 #define TIMEOUT_WRITE         10
@@ -1602,9 +1604,14 @@ enum XMPPStreamFlags
 **/
 - (void)onSocket:(AsyncSocket *)sock didReadData:(NSData*)data withTag:(long)tag
 {
-	NSString *dataAsStr = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-	
-	DDLogRecv(@"RECV: %@", dataAsStr);
+	if (DEBUG_RECV_PRE)
+	{
+		NSString *dataAsStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+		
+		DDLogRecvPre(@"RECV: %@", dataAsStr);
+		
+		[dataAsStr release];
+	}
 	
 	[parser parseData:data];
 	
@@ -1687,6 +1694,8 @@ enum XMPPStreamFlags
 **/
 - (void)xmppParser:(XMPPParser *)sender didReadRoot:(NSXMLElement *)root
 {
+	DDLogRecvPost(@"RECV: %@", [root compactXMLString]);
+	
 	// At this point we've sent our XML stream header, and we've received the response XML stream header.
 	// We save the root element of our stream for future reference.
 	// Digest Access authentication requires us to know the ID attribute from the <stream:stream/> element.
@@ -1773,6 +1782,8 @@ enum XMPPStreamFlags
 
 - (void)xmppParser:(XMPPParser *)sender didReadElement:(NSXMLElement *)element
 {
+	DDLogRecvPost(@"RECV: %@", [element compactXMLString]);
+	
 	if(state == STATE_NEGOTIATING)
 	{
 		// We've just read in the stream features
@@ -2117,7 +2128,10 @@ enum XMPPStreamFlags
 		
 		NSString *authStr = [[[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding] autorelease];
 		
-		DDLogRecv(@"decoded challenge: %@", authStr);
+		if (DEBUG_RECV_PRE || DEBUG_RECV_POST)
+		{
+			NSLog(@"decoded challenge: %@", authStr);
+		}
 		
 		// Extract all the key=value pairs, and put them in a dictionary for easy lookup
 		NSMutableDictionary *auth = [NSMutableDictionary dictionaryWithCapacity:5];
