@@ -92,6 +92,8 @@
 	}
 	[discoTimerJidDict release];
 	
+	[lastHash release];
+	
 	[super dealloc];
 }
 
@@ -991,6 +993,13 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	NSString *type = [presence type];
 	
+	XMPPJID *myJID = xmppStream.myJID;
+	if ([myJID isEqual:[presence from]])
+	{
+		// Our own presence is being reflected back to us.
+		return;
+	}
+	
 	if ([type isEqualToString:@"unavailable"])
 	{
 		[xmppCapabilitiesStorage clearNonPersistentCapabilitiesForJID:[presence from]];
@@ -1102,14 +1111,27 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 			return;
 		}
 		
+		NSString *hashAlg = @"sha-1";
+		NSString *node    = @"http://code.google.com/p/xmppframework";
+		
+		// Cache the hash
+		
+		if (![hash isEqual:lastHash])
+		{
+			[xmppCapabilitiesStorage setCapabilities:query forHash:hash algorithm:hashAlg];
+			
+			[lastHash release];
+			lastHash = [hash copy];
+		}
+		
 		// <c xmlns="http://jabber.org/protocol/caps"
 		//     hash="sha-1"
 		//     node="http://code.google.com/p/xmppframework"
 		//     ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
 		
 		NSXMLElement *c = [NSXMLElement elementWithName:@"c" xmlns:@"http://jabber.org/protocol/caps"];
-		[c addAttributeWithName:@"hash" stringValue:@"sha-1"];
-		[c addAttributeWithName:@"node" stringValue:@"http://code.google.com/p/xmppframework"];
+		[c addAttributeWithName:@"hash" stringValue:hashAlg];
+		[c addAttributeWithName:@"node" stringValue:node];
 		[c addAttributeWithName:@"ver"  stringValue:hash];
 		
 		[presence addChild:c];
@@ -1251,8 +1273,11 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		// This would be handled by the xmppCapabilitiesStorage class,
 		// via the setCapabilitiesForJID method.
 		
-		for (XMPPJID *jid in jids)
+		NSUInteger i;
+		for (i = 1; i < [jids count]; i++)
 		{
+			XMPPJID *jid = [jids objectAtIndex:i];
+			
 			[discoRequestJidSet removeObject:jid];
 			[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid];
 		}
