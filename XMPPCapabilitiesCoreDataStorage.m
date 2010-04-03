@@ -376,6 +376,8 @@
 	
 	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 	
+	[fetchRequest release];
+	
 	for (XMPPCapsResourceCoreDataStorageObject *resource in results)
 	{
 		resource.caps = caps;
