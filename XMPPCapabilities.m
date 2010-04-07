@@ -23,6 +23,13 @@
 **/
 #define CAPABILITIES_REQUEST_TIMEOUT 30.0 // seconds
 
+/**
+ * Application identifier.
+ * According to the XEP it is RECOMMENDED for the value of the 'node' attribute to be an HTTP URL.
+**/
+#define DISCO_NODE @"http://code.google.com/p/xmppframework"
+
+
 @interface XMPPCapabilities (PrivateAPI)
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid;
@@ -814,6 +821,9 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleDiscoRequest:(XMPPIQ *)iqRequest
 {
+	NSXMLElement *queryRequest = [iqRequest childElement];
+	NSString *node = [queryRequest attributeStringValueForName:@"node"];
+	
 	// <iq to="jid" id="id" type="result">
 	//   <query xmlns="http://jabber.org/protocol/disco#info">
 	//     <feature var="http://jabber.org/protocol/caps"/>
@@ -827,6 +837,11 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 	[query addChild:feature];
+	
+	if (node)
+	{
+		[query addAttributeWithName:@"node" stringValue:node];
+	}
 	
 	[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
 	
@@ -1055,7 +1070,16 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	NSString *type = [[iq attributeStringValueForName:@"type"] lowercaseString];
 	if ([type isEqualToString:@"get"])
 	{
-		[self handleDiscoRequest:iq];
+		NSString *node = [query attributeStringValueForName:@"node"];
+		
+		if (node == nil || [node hasPrefix:DISCO_NODE])
+		{
+			[self handleDiscoRequest:iq];
+		}
+		else
+		{
+			return NO;
+		}
 	}
 	else if ([type isEqualToString:@"result"])
 	{
@@ -1112,7 +1136,6 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		}
 		
 		NSString *hashAlg = @"sha-1";
-		NSString *node    = @"http://code.google.com/p/xmppframework";
 		
 		// Cache the hash
 		
@@ -1131,7 +1154,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		
 		NSXMLElement *c = [NSXMLElement elementWithName:@"c" xmlns:@"http://jabber.org/protocol/caps"];
 		[c addAttributeWithName:@"hash" stringValue:hashAlg];
-		[c addAttributeWithName:@"node" stringValue:node];
+		[c addAttributeWithName:@"node" stringValue:DISCO_NODE];
 		[c addAttributeWithName:@"ver"  stringValue:hash];
 		
 		[presence addChild:c];
