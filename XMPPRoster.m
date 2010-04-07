@@ -401,7 +401,7 @@ enum XMPPRosterFlags
 	}
 }
 
-- (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence
+- (void)xmppStream:(XMPPStream *)sender didSendPresence:(XMPPPresence *)presence
 {
 	if ([[presence type] isEqualToString:@"unavailable"])
 	{
