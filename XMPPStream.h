@@ -562,12 +562,21 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * These methods are called before their respective XML elements are sent over the stream.
- * These methods can be used to listen for certain events (such as an unavailable presence being sent),
- * or to customize elements on the fly.  (E.g. add standard information for custom protocols.)
+ * These methods can be used to customize elements on the fly.
+ * (E.g. add standard information for custom protocols.)
 **/
 - (void)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
 - (void)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
 - (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence;
+
+/**
+ * These methods are called after their respective XML elements are sent over the stream.
+ * These methods may be used to listen for certain events (such as an unavailable presence having been sent),
+ * or for general logging purposes. (E.g. a central history logging mechanism).
+**/
+- (void)xmppStream:(XMPPStream *)sender didSendIQ:(XMPPIQ *)iq;
+- (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message;
+- (void)xmppStream:(XMPPStream *)sender didSendPresence:(XMPPPresence *)presence;
 
 /**
  * This method is called for every sendElement:andNotifyMe: method.
