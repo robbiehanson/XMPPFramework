@@ -1022,6 +1022,19 @@ enum XMPPStreamFlags
 	[asyncSocket writeData:[elementStr dataUsingEncoding:NSUTF8StringEncoding]
 	           withTimeout:TIMEOUT_WRITE
 	                   tag:TAG_WRITE_STREAM];
+	
+	if ([element isKindOfClass:[XMPPIQ class]])
+	{
+		[multicastDelegate xmppStream:self didSendIQ:(XMPPIQ *)element];
+	}
+	else if ([element isKindOfClass:[XMPPMessage class]])
+	{
+		[multicastDelegate xmppStream:self didSendMessage:(XMPPMessage *)element];
+	}
+	else if ([element isKindOfClass:[XMPPPresence class]])
+	{
+		[multicastDelegate xmppStream:self didSendPresence:(XMPPPresence *)element];
+	}
 }
 
 /**
