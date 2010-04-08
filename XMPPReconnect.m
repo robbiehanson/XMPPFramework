@@ -18,11 +18,13 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 @interface XMPPReconnect (PrivateAPI)
 
-- (void)maybeSetupNetworkMonitoring;
+- (void)setupReconnectTimer;
+- (void)teardownReconnectTimer;
+
 - (void)setupNetworkMonitoring;
 - (void)teardownNetworkMonitoring;
 
-- (void)maybeAttemptReconnectPostDisconnect;
+- (void)maybeAttemptReconnect:(NSTimer *)timer;
 - (void)maybeAttemptReconnectWithReachabilityFlags:(SCNetworkReachabilityFlags)reachabilityFlags;
 
 @end
@@ -36,6 +38,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 @synthesize xmppStream;
 @dynamic    autoReconnect;
 @synthesize reconnectDelay;
+@synthesize reconnectTimerInterval;
 
 - (id)initWithStream:(XMPPStream *)aXmppStream
 {
@@ -49,6 +52,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		flags = kAutoReconnect;
 		
 		reconnectDelay = DEFAULT_XMPP_RECONNECT_DELAY;
+		reconnectTimerInterval = DEFAULT_XMPP_RECONNECT_TIMER_INTERVAL;
 		
 		previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 	}
@@ -64,6 +68,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	
 	[multicastDelegate release];
 	
+	[self teardownReconnectTimer];
 	[self teardownNetworkMonitoring];
 	
 	[super dealloc];
@@ -145,10 +150,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	{
 		[self setManuallyStarted:YES];
 		
-		[self performSelector:@selector(maybeAttemptReconnectPostDisconnect)
-				   withObject:nil
-				   afterDelay:reconnectDelay];
-		
+		[self setupReconnectTimer];
 		[self setupNetworkMonitoring];
 	}
 }
@@ -163,8 +165,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	// Stop any planned reconnect attempts and stop monitoring the network.
 	
 	[NSObject cancelPreviousPerformRequestsWithTarget:self
-	                                         selector:@selector(maybeAttemptReconnectPostDisconnect)
+	                                         selector:@selector(maybeAttemptReconnect:)
 	                                           object:nil];
+	[self teardownReconnectTimer];
 	[self teardownNetworkMonitoring];
 }
 
@@ -179,6 +182,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	// We essentially want to do the same thing as the stop method with one exception:
 	// We do not want to clear the shouldReconnect flag.
 	// 
+	// Remember the shouldReconnect flag gets set upon authentication.
+	// A combination of this flag and the autoReconnect flag controls the auto reconnect mechanism.
+	// 
 	// It is possible for us to get accidentally disconnected after
 	// the stream opens but prior to authentication completing.
 	// If this happens we still want to abide by the previous shouldReconnect setting.
@@ -187,8 +193,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	[self setManuallyStarted:NO];
 	
 	[NSObject cancelPreviousPerformRequestsWithTarget:self
-	                                         selector:@selector(maybeAttemptReconnectPostDisconnect)
+	                                         selector:@selector(maybeAttemptReconnect:)
 	                                           object:nil];
+	[self teardownReconnectTimer];
 	[self teardownNetworkMonitoring];
 }
 
@@ -207,55 +214,23 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
-	// Setup network monitoring (if autoReconnect and shouldReconnect are set).
-	[self maybeSetupNetworkMonitoring];
+	if ([self autoReconnect] && [self shouldReconnect])
+	{
+		[self setupReconnectTimer];
+		[self setupNetworkMonitoring];
+	}
 	
 	if ([self multipleReachabilityChanges])
 	{
 		// While the previous connection attempt was in progress, the reachability of the xmpp host changed.
 		// This means that while the previous attempt failed, an attempt now might succeed.
 		
-		[self performSelector:@selector(maybeAttemptReconnectPostDisconnect)
+		[self performSelector:@selector(maybeAttemptReconnect:)
 		           withObject:nil
 		           afterDelay:0.0];
 		
 		// Note: We delay the method call until the next runloop cycle.
 		// This allows the other delegates to be notified of the closed stream prior to our reconnect attempt.
-	}
-}
-
-- (void)xmppStream:(XMPPStream *)xs didReceiveError:(id)error
-{
-	if ([error isKindOfClass:[NSError class]])
-	{
-		// The error is a socket error.
-		// In other words, the underlying TCP socket is about to disconnect.
-		// 
-		// To be more explicit, the underlying AsyncSocket of the XMPPStream has enountered an error,
-		// and the xmppStreamDidDisconnect: delegate method will be executed before this runloop cycle completes.
-		
-		// Note: It is important we check [xmppStream isAuthenticated] below
-		// as opposed to checking the shouldReconnect flag.
-		// 
-		// - Stream is accidentally disconnected
-		// - We attempt initial auto reconnect after reconnectDelay
-		// - The attempt fails due to networking error, and this method is called
-		// 
-		// If we checked the shouldReconnect flag we would have an endless loop of
-		// attempting reconnect every reconnectDelay seconds.
-		
-		if ([xmppStream isAuthenticated])
-		{
-			// We were fully connected to the XMPP server,
-			// but we've been disconnected due to some error. (lost WiFi, etc)
-			
-			[self performSelector:@selector(maybeAttemptReconnectPostDisconnect)
-			           withObject:nil
-			           afterDelay:reconnectDelay];
-			
-			// Note: Even if reconnectDelay is zero, the method will not be run until the next runloop cycle.
-			// Thus the method will not be executed until after the xmpp stream is closed.
-		}
 	}
 }
 
@@ -277,11 +252,42 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 #pragma mark Logic
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)maybeSetupNetworkMonitoring
+- (void)setupReconnectTimer
 {
-	if ([self autoReconnect] && [self shouldReconnect])
+	if (reconnectTimer == nil)
 	{
-		[self setupNetworkMonitoring];
+		if ((reconnectDelay <= 0.0) && (reconnectTimerInterval <= 0.0))
+		{
+			// All timed reconnect attempts are disabled
+			return;
+		}
+		
+		NSDate *fireDate;
+		if (reconnectDelay > 0.0)
+			fireDate = [NSDate dateWithTimeIntervalSinceNow:reconnectDelay];
+		else
+			fireDate = [NSDate dateWithTimeIntervalSinceNow:reconnectTimerInterval];
+		
+		BOOL repeats = (reconnectTimerInterval > 0.0);
+		
+		reconnectTimer = [[NSTimer alloc] initWithFireDate:fireDate
+												  interval:reconnectTimerInterval
+													target:self
+												  selector:@selector(maybeAttemptReconnect:)
+												  userInfo:nil
+												   repeats:repeats];
+		
+		[[NSRunLoop currentRunLoop] addTimer:reconnectTimer forMode:NSDefaultRunLoopMode];
+	}
+}
+
+- (void)teardownReconnectTimer
+{
+	if (reconnectTimer)
+	{
+		[reconnectTimer invalidate];
+		[reconnectTimer release];
+		reconnectTimer = nil;
 	}
 }
 
@@ -299,15 +305,6 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 		
 		if (reachability)
 		{
-			// We have to fetch the initial reachability flags.
-			// If we don't do this then when we schedule in the runloop below,
-			// it will immediately invoke our callback method.
-			// This isn't what we want.
-			// The reconnectDelay handles the initial reconnect attempt (after a proper short delay),
-			// and the network monitoring should only be invoked if the network status changes.
-			SCNetworkReachabilityFlags reachabilityFlags;
-			SCNetworkReachabilityGetFlags(reachability, &reachabilityFlags);
-			
 			SCNetworkReachabilityContext context = {0, self, NULL, NULL, NULL};
 			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
 			
@@ -330,11 +327,13 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
  * This method may be invoked after a disconnection from the server.
  * 
  * During auto reconnection it is invoked reconnectDelay seconds after an accidental disconnection.
+ * After that, it is then invoked reconnectTimerInterval seconds.
+ * 
  * This handles disconnections that were not the result of an internet connectivity issue.
  * 
  * It may also be invoked if the reachability changed while a reconnection attempt was in progress.
 **/
-- (void)maybeAttemptReconnectPostDisconnect
+- (void)maybeAttemptReconnect:(NSTimer *)timer
 {
 	if (reachability)
 	{
