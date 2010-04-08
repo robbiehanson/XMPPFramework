@@ -3,6 +3,13 @@
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
 
+@interface XMPPResourceCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
+- (NSDate *)primitivePresenceDate;
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation XMPPResourceCoreDataStorage
 
@@ -85,6 +92,30 @@
 {
 	self.showNum = [NSNumber numberWithInt:intShow];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Compiler Workarounds
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
+
+/**
+ * This method is here to quiet the compiler.
+ * Without it the compiler complains that this method is not implemented as required by the protocol.
+ * This only seems to be a problem when compiling for the device.
+**/
+- (NSDate *)presenceDate 
+{
+    NSDate * tmpValue;
+    
+    [self willAccessValueForKey:@"presenceDate"];
+    tmpValue = [self primitivePresenceDate];
+    [self didAccessValueForKey:@"presenceDate"];
+    
+    return tmpValue;
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates

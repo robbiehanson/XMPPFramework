@@ -112,6 +112,8 @@
 		DC1F98541152CBFC00138A8F /* XMPPUserCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPUserCoreDataStorage.h; path = ../XMPPUserCoreDataStorage.h; sourceTree = SOURCE_ROOT; };
 		DC1F98551152CBFC00138A8F /* XMPPUserCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPUserCoreDataStorage.m; path = ../XMPPUserCoreDataStorage.m; sourceTree = SOURCE_ROOT; };
 		DC1F985C1152CC2B00138A8F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		DC343C07116D886D00571874 /* XMPPResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPResource.h; path = ../XMPPResource.h; sourceTree = SOURCE_ROOT; };
+		DC343C08116D886D00571874 /* XMPPUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPUser.h; path = ../XMPPUser.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -307,6 +309,8 @@
 			children = (
 				DC1F984F1152CBFC00138A8F /* XMPPRoster.h */,
 				DC1F98501152CBFC00138A8F /* XMPPRoster.m */,
+				DC343C08116D886D00571874 /* XMPPUser.h */,
+				DC343C07116D886D00571874 /* XMPPResource.h */,
 				DC1F984B1152CBD300138A8F /* Private */,
 				DC1F985B1152CC0200138A8F /* CoreData */,
 			);
