@@ -3,6 +3,15 @@
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
 
+@interface XMPPUserCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
+- (NSString *)primitiveNickname;
+- (NSString *)primitiveDisplayName;
+- (XMPPResourceCoreDataStorage *)primitivePrimaryResource;
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation XMPPUserCoreDataStorage
 
@@ -39,6 +48,62 @@
 {
 	self.sectionNum = [NSNumber numberWithInt:value];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Compiler Workarounds
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
+
+/**
+ * This method is here to quiet the compiler.
+ * Without it the compiler complains that this method is not implemented as required by the protocol.
+ * This only seems to be a problem when compiling for the device.
+**/
+- (NSString *)displayName 
+{
+    NSString * tmpValue;
+    
+    [self willAccessValueForKey:@"displayName"];
+    tmpValue = [self primitiveDisplayName];
+    [self didAccessValueForKey:@"displayName"];
+    
+    return tmpValue;
+}
+
+/**
+ * This method is here to quiet the compiler.
+ * Without it the compiler complains that this method is not implemented as required by the protocol.
+ * This only seems to be a problem when compiling for the device.
+**/
+- (NSString *)nickname 
+{
+    NSString * tmpValue;
+    
+    [self willAccessValueForKey:@"nickname"];
+    tmpValue = [self primitiveNickname];
+    [self didAccessValueForKey:@"nickname"];
+    
+    return tmpValue;
+}
+
+/**
+ * This method is here to quiet the compiler.
+ * Without it the compiler complains that this method is not implemented as required by the protocol.
+ * This only seems to be a problem when compiling for the device.
+**/
+- (XMPPResourceCoreDataStorage *)primaryResource 
+{
+    id tmpObject;
+    
+    [self willAccessValueForKey:@"primaryResource"];
+    tmpObject = [self primitivePrimaryResource];
+    [self didAccessValueForKey:@"primaryResource"];
+    
+    return tmpObject;
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
