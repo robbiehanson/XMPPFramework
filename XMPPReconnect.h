@@ -4,6 +4,9 @@
 
 #define DEFAULT_XMPP_RECONNECT_DELAY 2.0
 
+#define DEFAULT_XMPP_RECONNECT_TIMER_INTERVAL 20.0
+
+
 @class XMPPStream;
 @protocol XMPPReconnectDelegate;
 
@@ -27,6 +30,9 @@
  * This delay is configurable via the reconnectDelay property.
  * At the same time the class will begin monitoring the network for reachability changes.
  * When the reachability of the xmpp host has changed, a reconnect may be tried again.
+ * In addition to all this, a timer may optionally be used to attempt a reconnect periodically.
+ * The timer is started if the initial reconnect fails.
+ * This reconnect timer is fully configurable (may be enabled/disabled, and it's timeout may be changed).
  * 
  * In all cases, prior to attempting a reconnect, this class will
  * invoke the shouldAttemptAutoReconnect delegate method.
@@ -50,6 +56,9 @@
 	
 	Byte flags;
 	NSTimeInterval reconnectDelay;
+	
+	NSTimer *reconnectTimer;
+	NSTimeInterval reconnectTimerInterval;
 	
 	SCNetworkReachabilityRef reachability;
 	
@@ -89,9 +98,23 @@
  * 
  * The default value is DEFAULT_XMPP_RECONNECT_DELAY (defined at the top of this file).
  * 
+ * To disable this feature, set the value to zero.
+ * 
  * Note: NSTimeInterval is a double that specifies the time in seconds.
 **/
 @property (nonatomic, assign) NSTimeInterval reconnectDelay;
+
+/**
+ * A reconnect timer may optionally be used to attempt a reconnect periodically.
+ * The timer will be started after the initial reconnect delay.
+ * 
+ * The default value is DEFAULT_XMPP_RECONNECT_TIMER_INTERVAL (defined at the top of this file).
+ * 
+ * To disable this feature, set the value to zero.
+ * 
+ * Note: NSTimeInterval is a double that specifies the time in seconds.
+**/
+@property (nonatomic, assign) NSTimeInterval reconnectTimerInterval;
 
 /**
  * As opposed to using autoReconnect, this method may be used to manually start the reconnect process.
