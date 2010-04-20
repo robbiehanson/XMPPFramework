@@ -40,6 +40,9 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	int state;
 	AsyncSocket *asyncSocket;
 	
+	UInt64 numberOfBytesSent;
+	UInt64 numberOfBytesReceived;
+	
 	XMPPParser *parser;
 	
 	Byte flags;
@@ -168,6 +171,28 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * To disable keepalive, set the interval to zero.
 **/
 @property (nonatomic, readwrite, assign) NSTimeInterval keepAliveInterval;
+
+/**
+ * Returns the total number of bytes bytes sent/received by the xmpp stream.
+ * 
+ * By default this is the byte count since the xmpp stream object has been created.
+ * If the stream has connected/disconnected/reconnected multiple times,
+ * the count will be the summation of all connections.
+ * 
+ * The functionality may optionaly be changed to count only the current socket connection.
+ * See the resetByteCountPerConnection property.
+**/
+@property (nonatomic, readonly) UInt64 numberOfBytesSent;
+@property (nonatomic, readonly) UInt64 numberOfBytesReceived;
+
+/**
+ * Affects the funtionality of the byte counter.
+ * 
+ * The default value is NO.
+ * 
+ * If set to YES, the byte count will be reset just prior to a new connection (in the connect methods).
+**/
+@property (nonatomic, readwrite, assign) BOOL resetByteCountPerConnection;
 
 /**
  * Returns a list of all currently registered modules.
