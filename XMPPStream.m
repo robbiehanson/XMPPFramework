@@ -58,6 +58,7 @@ enum XMPPStreamFlags
     kP2PInitiator                 = 1 << 1,  // If set, we are the P2P initializer
 	kIsSecure                     = 1 << 2,  // If set, connection has been secured via SSL/TLS
 	kIsAuthenticated              = 1 << 3,  // If set, authentication has succeeded
+	kResetByteCountPerConnection  = 1 << 4,  // If set, byte count should be reset per connection
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,8 +113,12 @@ enum XMPPStreamFlags
 @synthesize hostPort;
 @synthesize myJID;
 @synthesize keepAliveInterval;
+@synthesize numberOfBytesSent;
+@synthesize numberOfBytesReceived;
 @synthesize registeredModules;
 @synthesize tag = userTag;
+
+@dynamic resetByteCountPerConnection;
 
 /**
  * Shared initialization between the various init methods.
@@ -123,6 +128,9 @@ enum XMPPStreamFlags
 	multicastDelegate = [[MulticastDelegate alloc] init];
 	
 	state = STATE_DISCONNECTED;
+	
+	numberOfBytesSent = 0;
+	numberOfBytesReceived = 0;
 	
 	parser = [[XMPPParser alloc] initWithDelegate:self];
 	
@@ -165,7 +173,7 @@ enum XMPPStreamFlags
 		[self commonInit];
 		
 		// Store JID
-		self.myJID = jid;
+		myJID = [jid retain];
         
         // We do not initialize the socket, since the connectP2PWithSocket: method might be used.
         
@@ -243,6 +251,19 @@ enum XMPPStreamFlags
         return (flags & kP2PInitiator) ? NO : YES;
     }
     return NO;
+}
+
+- (BOOL)resetByteCountPerConnection
+{
+	return (flags & kResetByteCountPerConnection) ? YES : NO;
+}
+
+- (void)setResetByteCountPerConnection:(BOOL)flag
+{
+	if (flag)
+		flags |= kResetByteCountPerConnection;
+	else
+		flags &= ~kResetByteCountPerConnection;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,6 +350,11 @@ enum XMPPStreamFlags
 	{
 		state = STATE_DISCONNECTED;
 	}
+	else if ([self resetByteCountPerConnection])
+	{
+		numberOfBytesSent = 0;
+		numberOfBytesReceived = 0;
+	}
 	
 	return result;
 }
@@ -400,6 +426,11 @@ enum XMPPStreamFlags
 	{
 		state = STATE_DISCONNECTED;
     }
+	else if ([self resetByteCountPerConnection])
+	{
+		numberOfBytesSent = 0;
+		numberOfBytesReceived = 0;
+	}
 	
 	return result;
 }
@@ -460,6 +491,12 @@ enum XMPPStreamFlags
 	
 	// Update state
 	state = STATE_CONNECTING;
+	
+	if ([self resetByteCountPerConnection])
+	{
+		numberOfBytesSent = 0;
+		numberOfBytesReceived = 0;
+	}
 	
 	if ([acceptedSocket isConnected])
 	{
@@ -537,9 +574,12 @@ enum XMPPStreamFlags
 {
 	NSString *starttls = @"<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>";
 	
-	DDLogSend(@"SEND: %@", starttls);
+	NSData *outgoingData = [starttls dataUsingEncoding:NSUTF8StringEncoding];
 	
-	[asyncSocket writeData:[starttls dataUsingEncoding:NSUTF8StringEncoding]
+	DDLogSend(@"SEND: %@", starttls);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
 			   withTimeout:TIMEOUT_WRITE
 					   tag:TAG_WRITE_STREAM];
 }
@@ -659,9 +699,13 @@ enum XMPPStreamFlags
 	[iqElement addAttributeWithName:@"type" stringValue:@"set"];
 	[iqElement addChild:queryElement];
 	
-	DDLogSend(@"SEND: %@", [iqElement compactXMLString]);
+	NSString *outgoingStr = [iqElement compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
-	[asyncSocket writeData:[[iqElement compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+	DDLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
 	           withTimeout:TIMEOUT_WRITE
 	                   tag:TAG_WRITE_STREAM];
 	
@@ -839,9 +883,12 @@ enum XMPPStreamFlags
 	{
 		NSString *auth = @"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>";
 		
-		DDLogSend(@"SEND: %@", auth);
+		NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
 		
-		[asyncSocket writeData:[auth dataUsingEncoding:NSUTF8StringEncoding]
+		DDLogSend(@"SEND: %@", auth);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_STREAM];
 		
@@ -870,9 +917,13 @@ enum XMPPStreamFlags
 		[auth addAttributeWithName:@"mechanism" stringValue:@"PLAIN"];
 		[auth setStringValue:base64];
 		
-		DDLogSend(@"SEND: %@", [auth compactXMLString]);
+		NSString *outgoingStr = [auth compactXMLString];
+		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
-		[asyncSocket writeData:[[auth compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+		DDLogSend(@"SEND: %@", outgoingStr);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_STREAM];
 		
@@ -917,9 +968,13 @@ enum XMPPStreamFlags
 		[iqElement addAttributeWithName:@"type" stringValue:@"set"];
 		[iqElement addChild:queryElement];
 		
-		DDLogSend(@"SEND: %@", [iqElement compactXMLString]);
+		NSString *outgoingStr = [iqElement compactXMLString];
+		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
-		[asyncSocket writeData:[[iqElement compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+		DDLogSend(@"SEND: %@", outgoingStr);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_STREAM];
 		
@@ -1015,11 +1070,13 @@ enum XMPPStreamFlags
 		}
 	}
 	
-	NSString *elementStr = [element compactXMLString];
+	NSString *outgoingStr = [element compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
-	DDLogSend(@"SEND: %@", elementStr);
+	DDLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
 	
-	[asyncSocket writeData:[elementStr dataUsingEncoding:NSUTF8StringEncoding]
+	[asyncSocket writeData:outgoingData
 	           withTimeout:TIMEOUT_WRITE
 	                   tag:TAG_WRITE_STREAM];
 	
@@ -1078,9 +1135,12 @@ enum XMPPStreamFlags
 		// TCP connection was just opened - We need to include the opening XML stanza
 		NSString *s1 = @"<?xml version='1.0'?>";
 		
-		DDLogSend(@"SEND: %@", s1);
+		NSData *outgoingData = [s1 dataUsingEncoding:NSUTF8StringEncoding];
 		
-		[asyncSocket writeData:[s1 dataUsingEncoding:NSUTF8StringEncoding]
+		DDLogSend(@"SEND: %@", s1);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_START];
 	}
@@ -1145,9 +1205,12 @@ enum XMPPStreamFlags
         }
     }
 	
-	DDLogSend(@"SEND: %@", s2);
+	NSData *outgoingData = [s2 dataUsingEncoding:NSUTF8StringEncoding];
 	
-	[asyncSocket writeData:[s2 dataUsingEncoding:NSUTF8StringEncoding]
+	DDLogSend(@"SEND: %@", s2);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
 			   withTimeout:TIMEOUT_WRITE
 					   tag:TAG_WRITE_START];
 	
@@ -1241,9 +1304,13 @@ enum XMPPStreamFlags
 			[iq addAttributeWithName:@"type" stringValue:@"set"];
 			[iq addChild:bind];
 			
-			DDLogSend(@"SEND: %@", [iq compactXMLString]);
+			NSString *outgoingStr = [iq compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
-			[asyncSocket writeData:[[iq compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+			DDLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
 					   withTimeout:TIMEOUT_WRITE
 							   tag:TAG_WRITE_STREAM];
 		}
@@ -1256,10 +1323,14 @@ enum XMPPStreamFlags
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
 			[iq addAttributeWithName:@"type" stringValue:@"set"];
 			[iq addChild:bind];
-						
-			DDLogSend(@"SEND: %@", [iq compactXMLString]);
 			
-			[asyncSocket writeData:[[iq compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+			NSString *outgoingStr = [iq compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+			
+			DDLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
 					   withTimeout:TIMEOUT_WRITE
 							   tag:TAG_WRITE_STREAM];
 		}
@@ -1378,9 +1449,13 @@ enum XMPPStreamFlags
 			NSXMLElement *cr = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			[cr setStringValue:[auth base64EncodedFullResponse]];
 			
-			DDLogSend(@"SEND: %@", [cr compactXMLString]);
+			NSString *outgoingStr = [cr compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
-			[asyncSocket writeData:[[cr compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+			DDLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
 					   withTimeout:TIMEOUT_WRITE
 							   tag:TAG_WRITE_STREAM];
 			
@@ -1465,9 +1540,13 @@ enum XMPPStreamFlags
 			// Create and send empty challenge response element
 			NSXMLElement *cr = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			
-			DDLogSend(@"SEND: %@", [cr compactXMLString]);
+			NSString *outgoingStr = [cr compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
-			[asyncSocket writeData:[[cr compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+			DDLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
 					   withTimeout:TIMEOUT_WRITE
 							   tag:TAG_WRITE_STREAM];
 			
@@ -1523,9 +1602,13 @@ enum XMPPStreamFlags
 			[iq addAttributeWithName:@"type" stringValue:@"set"];
 			[iq addChild:session];
 			
-			DDLogSend(@"SEND: %@", [iq compactXMLString]);
+			NSString *outgoingStr = [iq compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
-			[asyncSocket writeData:[[iq compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+			DDLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
 					   withTimeout:TIMEOUT_WRITE
 							   tag:TAG_WRITE_STREAM];
 			
@@ -1551,9 +1634,13 @@ enum XMPPStreamFlags
 		[iq addAttributeWithName:@"type" stringValue:@"set"];
 		[iq addChild:bind];
 		
-		DDLogSend(@"SEND: %@", [iq compactXMLString]);
+		NSString *outgoingStr = [iq compactXMLString];
+		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
-		[asyncSocket writeData:[[iq compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+		DDLogSend(@"SEND: %@", outgoingStr);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
 				   withTimeout:TIMEOUT_WRITE
 						   tag:TAG_WRITE_STREAM];
 		
@@ -1615,7 +1702,7 @@ enum XMPPStreamFlags
 /**
  * Called when a socket has completed reading the requested data. Not called if there is an error.
 **/
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData*)data withTag:(long)tag
+- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
 	if (DEBUG_RECV_PRE)
 	{
@@ -1625,6 +1712,8 @@ enum XMPPStreamFlags
 		
 		[dataAsStr release];
 	}
+	
+	numberOfBytesReceived += [data length];
 	
 	[parser parseData:data];
 	
@@ -1741,9 +1830,13 @@ enum XMPPStreamFlags
             
 			[multicastDelegate xmppStream:self willSendP2PFeatures:streamFeatures];
 			
-            DDLogSend(@"SEND: %@", [streamFeatures compactXMLString]);
-            
-            [asyncSocket writeData:[[streamFeatures compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+			NSString *outgoingStr = [streamFeatures compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+			
+            DDLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+            [asyncSocket writeData:outgoingData
                        withTimeout:TIMEOUT_WRITE
                                tag:TAG_WRITE_STREAM];
             
@@ -1782,9 +1875,13 @@ enum XMPPStreamFlags
             [iq addAttributeWithName:@"type" stringValue:@"get"];
             [iq addChild:query];
             
-            DDLogSend(@"SEND: %@", [iq compactXMLString]);
-            
-            [asyncSocket writeData:[[iq compactXMLString] dataUsingEncoding:NSUTF8StringEncoding]
+			NSString *outgoingStr = [iq compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+			
+            DDLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+            [asyncSocket writeData:outgoingData
                        withTimeout:TIMEOUT_WRITE
                                tag:TAG_WRITE_STREAM];
             
@@ -1962,7 +2059,11 @@ enum XMPPStreamFlags
 {
 	if (state == STATE_CONNECTED)
 	{
-		[asyncSocket writeData:[@" " dataUsingEncoding:NSUTF8StringEncoding]
+		NSData *outgoingData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
+		
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
 		           withTimeout:TIMEOUT_WRITE
 		                   tag:TAG_WRITE_STREAM];
 	}
