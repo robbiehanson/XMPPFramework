@@ -277,13 +277,32 @@
 
 - (DDXMLNode *)attributeForName:(NSString *)name
 {
+	const xmlChar *attrName = [name xmlChar];
+	
 	xmlAttrPtr attr = ((xmlNodePtr)genericPtr)->properties;
 	while(attr != NULL)
 	{
-		if(xmlStrEqual([name xmlChar], attr->name))
+		if(attr->ns && attr->ns->prefix)
 		{
-			return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)attr];
+			// If the attribute name was originally something like "xml:quack",
+			// then attr->name is "quack" and attr->ns->prefix is "xml".
+			// 
+			// So if the user is searching for "xml:quack" we need to take the prefix into account.
+			// Note that "xml:quack" is what would be printed if we output the attribute.
+			
+			if(xmlStrQEqual(attr->ns->prefix, attr->name, attrName))
+			{
+				return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)attr];
+			}
 		}
+		else
+		{
+			if(xmlStrEqual(attr->name, attrName))
+			{
+				return [DDXMLNode nodeWithPrimitive:(xmlKindPtr)attr];
+			}
+		}
+		
 		attr = attr->next;
 	}
 	return nil;
