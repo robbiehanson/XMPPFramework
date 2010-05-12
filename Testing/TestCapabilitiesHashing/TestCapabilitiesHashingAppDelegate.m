@@ -5,7 +5,12 @@
 
 @implementation TestCapabilitiesHashingAppDelegate
 
-@synthesize window;
+#if TARGET_OS_IPHONE
+  @synthesize window;
+  @synthesize viewController;
+#else
+  @synthesize window;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Hashing
@@ -335,7 +340,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		}
 	}
 	
-//	NSLog(@"XMPPCapabilities: s: %@", s);
+	NSLog(@"Verification string: %@", s);
 	
 	NSData *data = [s dataUsingEncoding:NSUTF8StringEncoding];
 	NSData *hash = [data sha1Digest];
@@ -349,6 +354,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)test1
 {
+	NSLog(@"============================================================");
+	
 	// From XEP-0115, Section 5.2
 	
 	NSMutableString *s = [NSMutableString string];
@@ -367,11 +374,16 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	NSXMLElement *iq = [doc rootElement];
 //	NSLog(@"iq:\n%@", [iq XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 	
-	NSLog(@"test1: %@", [self hashCapabilities:iq]);
+	NSLog(@"test1 result   : %@", [self hashCapabilities:iq]);
+	NSLog(@"expected result: QgayPKawpkPSDYmwT/WM94uAlu0=");
+	
+	NSLog(@"============================================================");
 }
 
 - (void)test2
 {
+	NSLog(@"============================================================");
+	
 	// From XEP-0115, Section 5.3
 	
 	NSMutableString *s = [NSMutableString string];
@@ -412,13 +424,95 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	NSXMLElement *iq = [doc rootElement];
 //	NSLog(@"iq:\n%@", [iq XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 	
-	NSLog(@"test2: %@", [self hashCapabilities:iq]);
+	NSLog(@"test2 result   : %@", [self hashCapabilities:iq]);
+	NSLog(@"expected result: q07IKJEyjvHSyhy//CH0CxmKi8w=");
+	
+	NSLog(@"============================================================");
 }
+
+- (void)test3
+{
+	NSLog(@"============================================================");
+	
+	NSMutableString *s = [NSMutableString string];
+	[s appendString:@"<iq from='benvolio@capulet.lit/230193' type='result'>"];
+	[s appendString:@"  <query node='http://pidgin.im/#WsE3KKs1gYLeYKAn5zQHkTkRnUA='"];
+	[s appendString:@"        xmlns='http://jabber.org/protocol/disco#info'>"];
+	[s appendString:@"    <identity category='client' name='Pidgin' type='pc'/>"];
+	[s appendString:@"    <feature var='jabber:iq:last'/>"];
+	[s appendString:@"    <feature var='jabber:iq:oob'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:time'/>"];
+	[s appendString:@"    <feature var='jabber:iq:version'/>"];
+	[s appendString:@"    <feature var='jabber:x:conference'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/bytestreams'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/caps'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/chatstates'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/disco#info'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/disco#items'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/muc'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/muc#user'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/si'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/si/profile/file-transfer'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/xhtml-im'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:ping'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:bob'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:jingle:1'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:jingle:transports:raw-udp:1'/>"];
+	[s appendString:@"    <feature var='http://www.google.com/xmpp/protocol/session'/>"];
+	[s appendString:@"    <feature var='http://www.google.com/xmpp/protocol/voice/v1'/>"];
+	[s appendString:@"    <feature var='http://www.google.com/xmpp/protocol/video/v1'/>"];
+	[s appendString:@"    <feature var='http://www.google.com/xmpp/protocol/camera/v1'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:jingle:apps:rtp:audio'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:jingle:apps:rtp:video'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:jingle:transports:ice-udp:1'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:avatar:metadata'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:avatar:data'/>"];
+	[s appendString:@"    <feature var='urn:xmpp:avatar:metadata+notify'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/mood'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/mood+notify'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/tune'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/tune+notify'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/nick'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/nick+notify'/>"];
+	[s appendString:@"    <feature var='http://jabber.org/protocol/ibb'/>"];
+	[s appendString:@"  </query>"];
+	[s appendString:@"</iq>"];
+	
+	NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:s options:0 error:nil] autorelease];
+	
+	NSXMLElement *iq = [doc rootElement];
+//	NSLog(@"iq:\n%@", [iq XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
+	
+	NSLog(@"test3 result   : %@", [self hashCapabilities:iq]);
+	NSLog(@"expected result: WsE3KKs1gYLeYKAn5zQHkTkRnUA=");
+	
+	NSLog(@"============================================================");
+}
+
+#if TARGET_OS_IPHONE
+
+- (void)applicationDidFinishLaunching:(UIApplication *)application
+{
+	// IPHONE TEST
+	
+	[self test1];
+	[self test2];
+	[self test3];
+	
+	[window addSubview:viewController.view];
+	[window makeKeyAndVisible];
+}
+
+#else
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+	// MAC TEST
+	
 	[self test1];
 	[self test2];
+	[self test3];
 }
 
+#endif
 @end
