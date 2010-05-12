@@ -2,7 +2,7 @@
 //  main.m
 //  TestCapabilitiesHashing
 //
-//  Created by Robbie Hanson on 3/23/10.
+//  Created by Robbie Hanson on 5/12/10.
 //  Copyright 2010 __MyCompanyName__. All rights reserved.
 //
 
