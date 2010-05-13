@@ -74,7 +74,7 @@
 	persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
 	
 	NSString *docsPath = [self persistentStoreDirectory];
-	NSString *storePath = [docsPath stringByAppendingPathComponent:@"Locations.sqlite"];
+	NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPCapabilities.sqlite"];
 	if (storePath)
 	{
 		// If storePath is nil, then NSURL will throw an exception

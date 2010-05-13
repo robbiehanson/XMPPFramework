@@ -84,7 +84,7 @@
 	persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
 	
 	NSString *docsPath = [self persistentStoreDirectory];
-	NSString *storePath = [docsPath stringByAppendingPathComponent:@"Locations.sqlite"];
+	NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPRoster.sqlite"];
 	if (storePath)
 	{
 		if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
