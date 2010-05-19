@@ -50,12 +50,18 @@
 #define STATE_START_SESSION    9
 #define STATE_CONNECTED       10
 
+#if TARGET_OS_IPHONE
+  #define SOCKET_BUFFER_SIZE 512  // bytes
+#else
+  #define SOCKET_BUFFER_SIZE 1024 // bytes
+#endif
+
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
 
 enum XMPPStreamFlags
 {
-    kP2PMode                      = 1 << 0,  // If set, the XMPPStream was initialized in P2P mode
-    kP2PInitiator                 = 1 << 1,  // If set, we are the P2P initializer
+	kP2PMode                      = 1 << 0,  // If set, the XMPPStream was initialized in P2P mode
+	kP2PInitiator                 = 1 << 1,  // If set, we are the P2P initializer
 	kIsSecure                     = 1 << 2,  // If set, connection has been secured via SSL/TLS
 	kIsAuthenticated              = 1 << 3,  // If set, authentication has succeeded
 	kResetByteCountPerConnection  = 1 << 4,  // If set, byte count should be reset per connection
@@ -194,6 +200,7 @@ enum XMPPStreamFlags
 	[asyncSocket setDelegate:nil];
 	[asyncSocket disconnect];
 	[asyncSocket release];
+	[socketBuffer release];
 	
 	[parser setDelegate:nil];
 	[parser release];
@@ -415,10 +422,11 @@ enum XMPPStreamFlags
 	
 	NSAssert((asyncSocket == nil), @"Forgot to release the previous asyncSocket instance.");
 	
+	// Update state
+	state = STATE_CONNECTING;
+	
 	// Initailize socket
 	asyncSocket = [[AsyncSocket alloc] initWithDelegate:self];
-	
-	state = STATE_CONNECTING;
 	
 	BOOL result = [asyncSocket connectToAddress:remoteAddr error:errPtr];
 	
@@ -503,8 +511,15 @@ enum XMPPStreamFlags
 		// Initialize the XML stream
 		[self sendOpeningNegotiation];
 		
+		// Initialize socket buffer
+		socketBuffer = [[NSMutableData alloc] initWithLength:SOCKET_BUFFER_SIZE];
+		
 		// And start reading in the server's XML stream
-		[asyncSocket readDataWithTimeout:TIMEOUT_READ_START tag:TAG_READ_START];
+		[asyncSocket readDataWithTimeout:TIMEOUT_READ_START
+		                          buffer:socketBuffer
+		                    bufferOffset:0
+		                       maxLength:[socketBuffer length]
+		                             tag:TAG_READ_START];
 	}
 	else
 	{
@@ -1690,8 +1705,18 @@ enum XMPPStreamFlags
 	// Initialize the XML stream
 	[self sendOpeningNegotiation];
 	
+	// Initialize socket buffer
+	if (socketBuffer == nil)
+	{
+		socketBuffer = [[NSMutableData alloc] initWithLength:SOCKET_BUFFER_SIZE];
+	}
+	
 	// And start reading in the server's XML stream
-	[asyncSocket readDataWithTimeout:TIMEOUT_READ_START tag:TAG_READ_START];
+	[asyncSocket readDataWithTimeout:TIMEOUT_READ_START
+	                          buffer:socketBuffer
+	                    bufferOffset:0
+	                       maxLength:[socketBuffer length]
+	                             tag:TAG_READ_START];
 }
 
 - (void)onSocketDidSecure:(AsyncSocket *)sock
@@ -1724,11 +1749,19 @@ enum XMPPStreamFlags
 	{
 		if(state == STATE_OPENING)
 		{
-			[asyncSocket readDataWithTimeout:TIMEOUT_READ_START tag:TAG_READ_START];
+			[asyncSocket readDataWithTimeout:TIMEOUT_READ_START
+			                          buffer:socketBuffer
+			                    bufferOffset:0
+			                       maxLength:[socketBuffer length]
+			                             tag:TAG_READ_START];
 		}
 		else
 		{
-			[asyncSocket readDataWithTimeout:TIMEOUT_READ_STREAM tag:TAG_READ_STREAM];
+			[asyncSocket readDataWithTimeout:TIMEOUT_READ_STREAM
+			                          buffer:socketBuffer
+			                    bufferOffset:0
+			                       maxLength:[socketBuffer length]
+			                             tag:TAG_READ_STREAM];
 		}
 	}
 }
@@ -1745,9 +1778,8 @@ enum XMPPStreamFlags
 }
 
 /**
- * In the event of an error, the socket is closed.  You may call "readDataWithTimeout:tag:" during this call-back to
- * get the last bit of data off the socket.  When connecting, this delegate method may be called
- * before onSocket:didConnectToHost:
+ * In the event of an error, the socket is closed.
+ * When connecting, this delegate method may be called before onSocket:didConnectToHost:
 **/
 - (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
 {
@@ -1762,6 +1794,10 @@ enum XMPPStreamFlags
 {
 	// Update state
 	state = STATE_DISCONNECTED;
+	
+	// Release socket buffer
+	[socketBuffer release];
+	socketBuffer = nil;
 	
 	// Update configuration
 	[self setIsSecure:NO];
