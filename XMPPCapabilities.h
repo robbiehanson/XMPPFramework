@@ -143,8 +143,16 @@
  * 
  * If the hash and algorithm are given, and an associated set of capabilities matches the hash/algorithm,
  * this method should link the jid to the capabilities and return YES.
- * If this is the first time the capabilities have been linked to the jid,
+ * 
+ * If the linked set of capabilities was not previously linked to the jid,
  * the newCapabilities parameter shoud be filled out.
+ * 
+ * This method may be called multiple times for a given jid with the same information.
+ * If this method sets the newCapabilitiesPtr parameter,
+ * the XMPPCapabilities module will invoke the xmppCapabilities:didDiscoverCapabilities:forJID: delegate method.
+ * This delegate method is designed to be invoked only when the capabilities for the given JID have changed.
+ * That is, the capabilities for the jid have been discovered for the first time (jid just signed in)
+ * or the capabilities for the given jid have changed (jid broadcast new capabilities).
 **/
 - (BOOL)setCapabilitiesNode:(NSString *)node
                         ver:(NSString *)ver
@@ -165,6 +173,9 @@
 /**
  * Clears any associated hash from a jid.
  * If the jid is linked to a set of capabilities, it should be unlinked.
+ * 
+ * This method should not clear the actual capabilities information itself.
+ * It should simply unlink the connection between the jid and the capabilities.
 **/
 - (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid;
 
@@ -186,10 +197,10 @@
  * Sets the capabilities associated with a given hash.
  * 
  * Since the capabilities are linked to a hash, these capabilities (and associated hash)
- * may be persisted to disk and/or persisted between multiple sessions/streams.
+ * should be persisted to disk and persisted between multiple sessions/streams.
  * 
  * It is the responsibility of the storage implementation to link the
- * associated jids with this hash to the given set of capabilities.
+ * associated jids (those with the given hash) to the given set of capabilities.
  * 
  * Implementation Note:
  * 
@@ -211,24 +222,44 @@
  * 
  * Since the capabilities are NOT linked to a hash,
  * these capabilities should not be persisted between multiple sessions/streams.
+ * See the various clear methods below.
 **/
 - (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid;
 
 /**
  * Marks the disco fetch request as failed so we know not to bother trying again.
+ * 
+ * This is temporary metadata associated with the jid.
+ * It should be cleared when we go unavailable or offline, or if the given jid goes unavailable.
+ * See the various clear methods below.
 **/
 - (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid;
 
 /**
- * Clear non-persistent capabilities.
- * That is, capabilities that are not associated with a hash.
+ * This method is called when we go unavailable or offline.
  * 
- * The clearAllNonPersistentCapabilities method is called when we go unavailable or offline.
- * The clearNonPersistentCapabilitiesForJID method is called when the given jid goes unavailable.
+ * This method should clear all metadata (node, ver, ext, hash ,algorithm, failed) from all jids in the roster.
+ * All jids should be unlinked from associated capabilities.
  * 
- * These methods should also clear any metadata such as node, ver, ext, hash and algorithm.
+ * If the associated capabilities are persistent, they should not be cleared.
+ * That is, if the associated capabilities are associated with a hash, they should be persisted.
+ * 
+ * Non persistent capabilities (those not associated with a hash)
+ * should be cleared at this point as they will no longer be linked to any users.
 **/
 - (void)clearAllNonPersistentCapabilities;
+
+/**
+ * This method is called when the given jid goes unavailable.
+ * 
+ * This method should clear all metadata (node, ver, ext, hash ,algorithm, failed) from the given jid.
+ * The jid should be unlinked from associated capabilities.
+ * 
+ * If the associated capabilities are persistent, they should not be cleared.
+ * That is, if the associated capabilities are associated with a hash, they should be persisted.
+ * 
+ * Non persistent capabilities (those not associated with a hash) should be cleared.
+**/
 - (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid;
 
 @end
