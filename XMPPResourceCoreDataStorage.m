@@ -38,7 +38,7 @@
 
 - (void)setJid:(XMPPJID *)jid
 {
-	self.jidStr = [jid bare];
+	self.jidStr = [jid full];
 }
 
 - (XMPPPresence *)presence
