@@ -184,6 +184,7 @@
 	{
 		if (resource)
 		{
+			[self removeResourcesObject:resource];
 			[[self managedObjectContext] deleteObject:resource];
 		}
 	}
