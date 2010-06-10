@@ -71,8 +71,21 @@
 	return (receiptResponse != nil);
 }
 
-- (XMPPMessage *)receiptResponse
+- (NSString *)extractReceiptResponseID
 {
+	NSXMLElement *receiptResponse = [self elementForName:@"received" xmlns:@"urn:xmpp:receipts"];
+	
+	return [receiptResponse attributeStringValueForName:@"id"];
+}
+
+- (XMPPMessage *)generateReceiptResponse
+{
+	// Example:
+	// 
+	// <message to="juliet">
+	//   <received xmlns="urn:xmpp:receipts" id="ABC-123"/>
+	// </message>
+	
 	NSXMLElement *received = [NSXMLElement elementWithName:@"received" xmlns:@"urn:xmpp:receipts"];
 	
 	NSXMLElement *message = [NSXMLElement elementWithName:@"message"];
@@ -86,7 +99,7 @@
 	NSString *msgid = [self elementID];
 	if(msgid)
 	{
-		[message addAttributeWithName:@"id" stringValue:msgid];
+		[received addAttributeWithName:@"id" stringValue:msgid];
 	}
 	
 	[message addChild:received];
