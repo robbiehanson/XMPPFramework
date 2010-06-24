@@ -1,6 +1,7 @@
 #import "XMPPStream.h"
 #import "AsyncSocket.h"
 #import "MulticastDelegate.h"
+#import "RFSRVResolver.h"
 #import "XMPPParser.h"
 #import "XMPPJID.h"
 #import "XMPPIQ.h"
@@ -38,17 +39,20 @@
 #define TAG_READ_STREAM      201
 
 // Define the various states we'll use to track our progress
-#define STATE_DISCONNECTED     0
-#define STATE_CONNECTING       1
-#define STATE_OPENING          2
-#define STATE_NEGOTIATING      3
-#define STATE_STARTTLS         4
-#define STATE_REGISTERING      5
-#define STATE_AUTH_1           6
-#define STATE_AUTH_2           7
-#define STATE_BINDING          8
-#define STATE_START_SESSION    9
-#define STATE_CONNECTED       10
+enum {
+	STATE_DISCONNECTED,
+	STATE_RESOLVING_SRV,
+	STATE_CONNECTING,
+	STATE_OPENING,
+	STATE_NEGOTIATING,
+	STATE_STARTTLS,
+	STATE_REGISTERING,
+	STATE_AUTH_1,
+	STATE_AUTH_2,
+	STATE_BINDING,
+	STATE_START_SESSION,
+	STATE_CONNECTED,
+};
 
 #if TARGET_OS_IPHONE
   #define SOCKET_BUFFER_SIZE 512  // bytes
@@ -123,6 +127,7 @@ enum XMPPStreamFlags
 @synthesize numberOfBytesReceived;
 @synthesize registeredModules;
 @synthesize tag = userTag;
+@synthesize srvResolver = _srvResolver;
 
 @dynamic resetByteCountPerConnection;
 
@@ -219,6 +224,7 @@ enum XMPPStreamFlags
 	
 	[registeredModules release];
 	[autoDelegateDict release];
+	[_srvResolver release];
 	
 	[super dealloc];
 }
@@ -301,7 +307,7 @@ enum XMPPStreamFlags
 
 - (BOOL)connect:(NSError **)errPtr
 {
-	if (state != STATE_DISCONNECTED)
+	if (state > STATE_RESOLVING_SRV)
 	{
 		if (errPtr)
 		{
@@ -324,19 +330,7 @@ enum XMPPStreamFlags
 		}
 		return NO;
     }
-	
-	if ([hostName length] == 0)
-	{
-		if (errPtr)
-		{
-			NSString *errMsg = @"You must set the hostName before calling connect.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-			
-			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
-		}
-		return NO;
-	}
-	
+		
 	if (myJID == nil)
 	{
 		if (errPtr)
@@ -346,6 +340,17 @@ enum XMPPStreamFlags
 			
 			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
 		}
+		return NO;
+	}
+
+	if ([hostName length] == 0)
+	{
+		// resolve the hostName via myJID SRV resolution
+		
+		state = STATE_RESOLVING_SRV;
+		
+		self.srvResolver = [RFSRVResolver resolveWithStream:self delegate:self];
+		
 		return NO;
 	}
 	
@@ -1822,6 +1827,39 @@ enum XMPPStreamFlags
 	// Notify delegate
 	[multicastDelegate xmppStreamDidDisconnect:self];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark RFSRVResolver Delegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)srvResolverDidResoveSRV:(RFSRVResolver *)sender {
+	NSError *connectError = nil;
+	BOOL result = NO;
+	
+	for (NSDictionary *srvRecord in sender.results) {
+		[self setHostName:[srvRecord objectForKey:kSRVResolverTarget]];
+		[self setHostPort:[[srvRecord objectForKey:kSRVResolverPort] unsignedIntValue]];
+		
+		result = [self connect:&connectError];
+		
+		// TODO: we should probably break on some connectErrors
+		if (result || 
+			(connectError != nil && [connectError.domain isEqualToString:XMPPStreamErrorDomain])) {
+			break;
+		}
+	}
+	
+	if (!result) {
+		NSLog(@"Error connecting: %@", connectError);
+	}		
+	
+}
+
+- (void)srvResolver:(RFSRVResolver *)sender didNotResolveSRVWithError:(NSError *)error {
+	//NSLog(@"%s %@", __PRETTY_FUNCTION__,error);
+	[multicastDelegate xmppStream:self didNotConnect:error];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPParser Delegate

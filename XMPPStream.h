@@ -6,6 +6,7 @@
 #endif
 
 @class AsyncSocket;
+@class RFSRVResolver;
 @class XMPPParser;
 @class XMPPJID;
 @class XMPPIQ;
@@ -65,6 +66,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	NSMutableDictionary *autoDelegateDict;
 	
 	id userTag;
+	
+	RFSRVResolver *_srvResolver;
 }
 
 /**
@@ -208,6 +211,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Tag values are not used internally, and should not be used by xmpp modules.
 **/
 @property (nonatomic, readwrite, retain) id tag;
+
+@property (nonatomic, readwrite, retain) RFSRVResolver *srvResolver;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark State
@@ -542,6 +547,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * At this point it's safe to begin communication with the server.
 **/
 - (void)xmppStreamDidConnect:(XMPPStream *)sender;
+- (void)xmppStream:(XMPPStream *)sender didNotConnect:(NSError *)error;
 
 /**
  * This method is called after registration of a new user has successfully finished.
