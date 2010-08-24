@@ -42,6 +42,8 @@
 		DC1F98591152CBFC00138A8F /* XMPPRosterCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F98521152CBFC00138A8F /* XMPPRosterCoreDataStorage.m */; };
 		DC1F985A1152CBFC00138A8F /* XMPPUserCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F98551152CBFC00138A8F /* XMPPUserCoreDataStorage.m */; };
 		DC1F985D1152CC2B00138A8F /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F985C1152CC2B00138A8F /* CoreData.framework */; };
+		DCD4943312234A33004BEE1A /* RFSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD4943212234A33004BEE1A /* RFSRVResolver.m */; };
+		DCD4944312234A49004BEE1A /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD4944212234A49004BEE1A /* libresolv.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +116,9 @@
 		DC1F985C1152CC2B00138A8F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		DC343C07116D886D00571874 /* XMPPResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPResource.h; path = ../XMPPResource.h; sourceTree = SOURCE_ROOT; };
 		DC343C08116D886D00571874 /* XMPPUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPUser.h; path = ../XMPPUser.h; sourceTree = SOURCE_ROOT; };
+		DCD4943112234A33004BEE1A /* RFSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RFSRVResolver.h; path = ../RFSRVResolver.h; sourceTree = SOURCE_ROOT; };
+		DCD4943212234A33004BEE1A /* RFSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RFSRVResolver.m; path = ../RFSRVResolver.m; sourceTree = SOURCE_ROOT; };
+		DCD4944212234A49004BEE1A /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +134,7 @@
 				DC1F98181152CB7400138A8F /* libidn.a in Frameworks */,
 				DC1F98371152CBC200138A8F /* SystemConfiguration.framework in Frameworks */,
 				DC1F985D1152CC2B00138A8F /* CoreData.framework in Frameworks */,
+				DCD4944312234A49004BEE1A /* libresolv.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,6 +205,7 @@
 				DC1F98361152CBC200138A8F /* SystemConfiguration.framework */,
 				DC1F97E11152CA2D00138A8F /* libxml2.dylib */,
 				DC1F98171152CB7400138A8F /* libidn.a */,
+				DCD4944212234A49004BEE1A /* libresolv.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -270,6 +277,8 @@
 		DC1F98021152CB0500138A8F /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				DCD4943112234A33004BEE1A /* RFSRVResolver.h */,
+				DCD4943212234A33004BEE1A /* RFSRVResolver.m */,
 				DC1F980F1152CB5000138A8F /* MulticastDelegate.h */,
 				DC1F98101152CB5000138A8F /* MulticastDelegate.m */,
 				DC1F980D1152CB5000138A8F /* LibIDN.h */,
@@ -425,6 +434,7 @@
 				DC1F98581152CBFC00138A8F /* XMPPRoster.m in Sources */,
 				DC1F98591152CBFC00138A8F /* XMPPRosterCoreDataStorage.m in Sources */,
 				DC1F985A1152CBFC00138A8F /* XMPPUserCoreDataStorage.m in Sources */,
+				DCD4943312234A33004BEE1A /* RFSRVResolver.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -475,7 +485,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.1.3;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Debug;
 		};
@@ -489,7 +499,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.1.3;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Release;
 		};
