@@ -10,7 +10,7 @@
 @protocol XMPPResource;
 
 
-@protocol XMPPUser
+@protocol XMPPUser <NSObject>
 
 - (XMPPJID *)jid;
 - (NSString *)nickname;
