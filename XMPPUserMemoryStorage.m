@@ -350,4 +350,12 @@
 	tag = anInt;
 }
 
+#pragma mark -
+#pragma mark KVO compliance methods
+
++ (NSSet *)keyPathsForValuesAffectingIsOnline
+{
+    return [NSSet setWithObject:@"primaryResource"];
+}
+
 @end
