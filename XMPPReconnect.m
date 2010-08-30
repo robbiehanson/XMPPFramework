@@ -218,6 +218,11 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	{
 		[self setupReconnectTimer];
 		[self setupNetworkMonitoring];
+		
+		SCNetworkReachabilityFlags reachabilityFlags = 0;
+		SCNetworkReachabilityGetFlags(reachability, &reachabilityFlags);
+		
+		[multicastDelegate xmppReconnect:self didDetectAccidentalDisconnect:reachabilityFlags];
 	}
 	
 	if ([self multipleReachabilityChanges])
