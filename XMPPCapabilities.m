@@ -473,6 +473,24 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 #pragma mark Logic
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+- (void)addStandardFeaturesToQuery:(NSXMLElement *)query
+{
+	// <query xmlns="http://jabber.org/protocol/disco#info">
+	//   <feature var='http://jabber.org/protocol/disco#info'/>
+	//   <feature var="http://jabber.org/protocol/caps"/>
+	// </query>
+	
+	NSXMLElement *feature1 = [NSXMLElement elementWithName:@"feature"];
+	[feature1 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/disco#info"];
+	
+	NSXMLElement *feature2 = [NSXMLElement elementWithName:@"feature"];
+	[feature2 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/caps"];
+	
+	[query addChild:feature1];
+	[query addChild:feature2];
+}
+
 - (void)fetchCapabilitiesForJID:(XMPPJID *)jid
 {
 	if (![jid isFull])
@@ -826,22 +844,14 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	// <iq to="jid" id="id" type="result">
 	//   <query xmlns="http://jabber.org/protocol/disco#info">
-	//     <feature var='http://jabber.org/protocol/disco#info'/>
-	//     <feature var="http://jabber.org/protocol/caps"/>
 	//     <feature var="feature1"/>
 	//     <feature var="feature2"/>
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *feature1 = [NSXMLElement elementWithName:@"feature"];
-	[feature1 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/caps"];
-
-	NSXMLElement *feature2 = [NSXMLElement elementWithName:@"feature"];
-	[feature2 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/disco#info"];	
-	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
-	[query addChild:feature1];
-	[query addChild:feature2];
+	
+	[self addStandardFeaturesToQuery:query];
 	
 	if (node)
 	{
@@ -1113,16 +1123,13 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	else if ([type isEqualToString:@"available"])
 	{
 		// <query xmlns="http://jabber.org/protocol/disco#info">
-		//   <feature var="http://jabber.org/protocol/caps"/>
 		//   <feature var="feature1"/>
 		//   <feature var="feature2"/>
 		// </query>
 		
-		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-		[feature addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/caps"];
-		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
-		[query addChild:feature];
+		
+		[self addStandardFeaturesToQuery:query];
 		
 		[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
 		
