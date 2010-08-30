@@ -826,17 +826,22 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	// <iq to="jid" id="id" type="result">
 	//   <query xmlns="http://jabber.org/protocol/disco#info">
+	//     <feature var='http://jabber.org/protocol/disco#info'/>
 	//     <feature var="http://jabber.org/protocol/caps"/>
 	//     <feature var="feature1"/>
 	//     <feature var="feature2"/>
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-	[feature addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/caps"];
+	NSXMLElement *feature1 = [NSXMLElement elementWithName:@"feature"];
+	[feature1 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/caps"];
+
+	NSXMLElement *feature2 = [NSXMLElement elementWithName:@"feature"];
+	[feature2 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/disco#info"];	
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
-	[query addChild:feature];
+	[query addChild:feature1];
+	[query addChild:feature2];
 	
 	if (node)
 	{
