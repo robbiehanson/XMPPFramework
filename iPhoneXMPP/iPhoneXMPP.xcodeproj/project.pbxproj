@@ -84,7 +84,7 @@
 		DC1F98101152CB5000138A8F /* MulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MulticastDelegate.m; path = ../MulticastDelegate.m; sourceTree = SOURCE_ROOT; };
 		DC1F98131152CB6200138A8F /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "../libidn/idn-int.h"; sourceTree = SOURCE_ROOT; };
 		DC1F98141152CB6200138A8F /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringprep.h; path = ../libidn/stringprep.h; sourceTree = SOURCE_ROOT; };
-		DC1F98171152CB7400138A8F /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = "/Users/robbie/Programs/Google Code/XMPPFramework/libidn/libidn.a"; sourceTree = "<absolute>"; };
+		DC1F98171152CB7400138A8F /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = ../libidn/libidn.a; sourceTree = SOURCE_ROOT; };
 		DC1F981B1152CB9C00138A8F /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../XMPP.h; sourceTree = SOURCE_ROOT; };
 		DC1F981C1152CB9C00138A8F /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPElement.h; path = ../XMPPElement.h; sourceTree = SOURCE_ROOT; };
 		DC1F981D1152CB9C00138A8F /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPElement.m; path = ../XMPPElement.m; sourceTree = SOURCE_ROOT; };
