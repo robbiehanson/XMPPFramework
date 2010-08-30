@@ -83,6 +83,14 @@
 }
 
 /**
+ * Shortcut to get a pretty (formatted) string representation of the element.
+**/
+- (NSString *)prettyXMLString
+{
+	return [self XMLStringWithOptions:NSXMLNodePrettyPrint];
+}
+
+/**
  * Shortcut to get a compact string representation of the element.
 **/
 - (NSString *)compactXMLString
