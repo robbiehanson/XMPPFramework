@@ -1968,6 +1968,15 @@ enum XMPPStreamFlags
 {
 	DDLogRecvPost(@"RECV: %@", [element compactXMLString]);
 	
+	
+	NSString *elementName = [element name];
+	
+	if([elementName isEqualToString:@"stream:error"] || [elementName isEqualToString:@"error"])
+	{
+		[multicastDelegate xmppStream:self didReceiveError:element];
+		return;
+	}
+	
 	if(state == STATE_NEGOTIATING)
 	{
 		// We've just read in the stream features
@@ -2009,8 +2018,6 @@ enum XMPPStreamFlags
 	}
 	else
 	{
-		NSString *elementName = [element name];
-		
 		if([elementName isEqualToString:@"iq"])
 		{
 			XMPPIQ *iq = [XMPPIQ iqFromElement:element];
@@ -2073,7 +2080,8 @@ enum XMPPStreamFlags
 		{
 			[multicastDelegate xmppStream:self didReceivePresence:[XMPPPresence presenceFromElement:element]];
 		}
-		else if([self isP2P] && [elementName isEqualToString:@"stream:features"])
+		else if([self isP2P] &&
+		       ([elementName isEqualToString:@"stream:features"] || [elementName isEqualToString:@"features"]))
 		{
 			[multicastDelegate xmppStream:self didReceiveP2PFeatures:element];
 		}
