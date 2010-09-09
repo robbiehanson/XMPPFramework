@@ -319,9 +319,16 @@
 #pragma mark -
 #pragma mark KVO compliance methods
 
-+ (NSSet *)keyPathsForValuesAffectingIsOnline
-{
++ (NSSet *)keyPathsForValuesAffectingIsOnline {
     return [NSSet setWithObject:@"primaryResource"];
+}
+
++ (NSSet *)keyPathsForValuesAffectingUnsortedResources {
+    return [NSSet setWithObject:@"resources"];
+}
+
++ (NSSet *)keyPathsForValuesAffectingSortedResources {
+    return [NSSet setWithObject:@"unsortedResources"];
 }
 
 @end
