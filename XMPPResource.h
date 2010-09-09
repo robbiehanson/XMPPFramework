@@ -5,7 +5,7 @@
 @class XMPPPresence;
 
 
-@protocol XMPPResource
+@protocol XMPPResource <NSObject>
 
 - (XMPPJID *)jid;
 - (XMPPPresence *)presence;

@@ -3,7 +3,10 @@
 #import "NSDataAdditions.h"
 
 // Debug levels: 0-off, 1-error, 2-warn, 3-info, 4-verbose
-#define DEBUG_LEVEL 2
+#ifndef DEBUG_LEVEL
+	#define DEBUG_LEVEL 2
+#endif
+
 #include "DDLog.h"
 
 /**
@@ -27,8 +30,9 @@
  * Application identifier.
  * According to the XEP it is RECOMMENDED for the value of the 'node' attribute to be an HTTP URL.
 **/
-#define DISCO_NODE @"http://code.google.com/p/xmppframework"
-
+#ifndef DISCO_NODE
+	#define DISCO_NODE @"http://code.google.com/p/xmppframework"
+#endif
 
 @interface XMPPCapabilities (PrivateAPI)
 
