@@ -49,6 +49,7 @@ enum {
 	STATE_REGISTERING,
 	STATE_AUTH_1,
 	STATE_AUTH_2,
+	STATE_AUTH_3,
 	STATE_BINDING,
 	STATE_START_SESSION,
 	STATE_CONNECTED,
@@ -330,9 +331,23 @@ enum XMPPStreamFlags
 		}
 		return NO;
     }
-		
+	
 	if (myJID == nil)
 	{
+		// Note: If you wish to use anonymous authentication, you should still set myJID prior to calling connect.
+		// You can simply set it to something like "anonymous@<domain>", where "<domain>" is the proper domain.
+		// After the authentication process, you can query the myJID property to see what your assigned JID is.
+		// 
+		// Setting myJID allows the framework to follow the xmpp protocol properly,
+		// and it allows the framework to connect to servers without a DNS entry.
+		// 
+		// For example, one may setup a private xmpp server for internal testing on their local network.
+		// The xmpp domain of the server may be something like "testing.mycompany.com",
+		// but since the server is internal, an IP (192.168.1.22) is used as the hostname to connect.
+		// 
+		// Proper connection requires a TCP connection to the IP (192.168.1.22),
+		// but the xmpp handshake requires the xmpp domain (testing.mycompany.com).
+		
 		if (errPtr)
 		{
 			NSString *errMsg = @"You must set myJID before calling connect.";
@@ -345,7 +360,7 @@ enum XMPPStreamFlags
 
 	if ([hostName length] == 0)
 	{
-		// resolve the hostName via myJID SRV resolution
+		// Resolve the hostName via myJID SRV resolution
 		
 		state = STATE_RESOLVING_SRV;
 		
@@ -740,6 +755,32 @@ enum XMPPStreamFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
+ * This method checks the stream features of the connected server to determine if SASL Anonymous Authentication (XEP-0175)
+ * is supported. If we are not connected to a server, this method simply returns NO.
+ **/
+- (BOOL)supportsAnonymousAuthentication
+{
+	// The root element can be properly queried for authentication mechanisms anytime after the
+	// stream:features are received, and TLS has been setup (if required)
+	if (state > STATE_STARTTLS)
+	{
+		NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+		NSXMLElement *mech = [features elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+		
+		NSArray *mechanisms = [mech elementsForName:@"mechanism"];
+		
+		for (NSXMLElement *mechanism in mechanisms)
+		{
+			if ([[mechanism stringValue] isEqualToString:@"ANONYMOUS"])
+			{
+				return YES;
+			}
+		}
+	}
+	return NO;
+}
+
+/**
  * This method checks the stream features of the connected server to determine if plain authentication is supported.
  * If we are not connected to a server, this method simply returns NO.
 **/
@@ -1001,6 +1042,55 @@ enum XMPPStreamFlags
 		// Update state
 		state = STATE_AUTH_1;
 	}
+	
+	return YES;
+}
+
+/**
+ * This method attempts to sign-in to the using SASL Anonymous Authentication (XEP-0175)
+ **/
+- (BOOL)authenticateAnonymously:(NSError **)errPtr
+{
+	if (state != STATE_CONNECTED)
+	{
+		if (errPtr)
+		{
+			NSString *errMsg = @"Please wait until the stream is connected.";
+			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			
+			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+		}
+		return NO;
+	}
+	
+	if (![self supportsAnonymousAuthentication])
+	{
+		if (errPtr)
+		{
+			NSString *errMsg = @"The server does not support anonymous authentication.";
+			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			
+			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+			
+		}
+		return NO;
+	}
+	
+	NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	[auth addAttributeWithName:@"mechanism" stringValue:@"ANONYMOUS"];
+	
+	NSString *outgoingStr = [auth compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	DDLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_WRITE
+	                   tag:TAG_WRITE_STREAM];
+	
+	// Update state
+	state = STATE_AUTH_3;
 	
 	return YES;
 }
@@ -1592,6 +1682,30 @@ enum XMPPStreamFlags
 	}
 }
 
+/**
+ * This method handles the result of our SASL Anonymous Authentication challenge
+**/
+- (void)handleAuth3:(NSXMLElement *)response
+{
+	// We're expecting a success response
+	// If we get anything else we can safely assume it's the equivalent of a failure response
+	if(![[response name] isEqualToString:@"success"])
+	{
+		// Revert back to connected state (from authenticating state)
+		state = STATE_CONNECTED;
+		
+		[multicastDelegate xmppStream:self didNotAuthenticate:response];
+	}
+	else
+	{
+		// We are successfully authenticated (via sasl:plain)
+		[self setIsAuthenticated:YES];
+		
+		// Now we start our negotiation over again...
+		[self sendOpeningNegotiation];
+	}
+}
+
 - (void)handleBinding:(NSXMLElement *)response
 {
 	NSXMLElement *r_bind = [response elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
@@ -1968,7 +2082,6 @@ enum XMPPStreamFlags
 {
 	DDLogRecvPost(@"RECV: %@", [element compactXMLString]);
 	
-	
 	NSString *elementName = [element name];
 	
 	if([elementName isEqualToString:@"stream:error"] || [elementName isEqualToString:@"error"])
@@ -2005,6 +2118,11 @@ enum XMPPStreamFlags
 	{
 		// The response from our challenge response
 		[self handleAuth2:element];
+	}
+	else if(state == STATE_AUTH_3)
+	{
+		// The response from our authenticateAnonymously challenge
+		[self handleAuth3:element];
 	}
 	else if(state == STATE_BINDING)
 	{

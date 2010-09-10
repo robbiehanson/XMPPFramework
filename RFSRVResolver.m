@@ -453,7 +453,8 @@ static void SDRefSocketCallback(
 			NSUInteger priority = [self priorityFromRecords:self.results atIndex:0];
 			NSUInteger recordWeight;
 			
-			for (NSUInteger index = 0;	
+			NSUInteger index;
+			for (index = 0;	
 				 index < srvResultsCount && [self priorityFromRecords:self.results 
 															  atIndex:index] == priority; 
 				 index++) {
