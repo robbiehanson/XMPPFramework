@@ -55,7 +55,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	NSString *tempPassword;
 	
 	XMPPJID *myJID;
-    XMPPJID *remoteJID;
+	XMPPJID *remoteJID;
 	
 	NSXMLElement *rootElement;
 	
@@ -381,11 +381,13 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * if an acceptable authentication protocol is supported.
 **/
 - (BOOL)isAuthenticated;
+- (BOOL)supportsAnonymousAuthentication;
 - (BOOL)supportsPlainAuthentication;
 - (BOOL)supportsDigestMD5Authentication;
 - (BOOL)supportsDeprecatedPlainAuthentication;
 - (BOOL)supportsDeprecatedDigestAuthentication;
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
+- (BOOL)authenticateAnonymously:(NSError **)errPtr;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Server Info
