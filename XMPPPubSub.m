@@ -101,16 +101,16 @@
  */
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-  // <message from='pubsub.push.bbc.co.uk' to='admin@push.bbc.co.uk'>
+  // <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
   //  <event xmlns='http://jabber.org/protocol/pubsub#event'>
-  //   <items node='/pubsub.livetext.radio1'>
+  //   <items node='/pubsub.foo'>
   //    <item id='5036AA52A152B'>
   //     <text id='724427814855'>Huw Stephens sits in for Greg James and David Garrido takes a look at the sporting week</text>
   //    </item>
   //   </items>
   //  </event>
   // </message>
-  
+	
   NSXMLElement *event = [message elementForName:@"event" xmlns:NS_PUBSUB_EVENT];
   
   if (event) {
