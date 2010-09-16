@@ -1824,6 +1824,9 @@ enum XMPPStreamFlags
 	// Initialize the XML stream
 	[self sendOpeningNegotiation];
 	
+	// Inform delegate that the TCP connection is open, and the stream handshake has begun
+	[multicastDelegate xmppStreamDidStartNegotiation:self];
+	
 	// Initialize socket buffer
 	if (socketBuffer == nil)
 	{
