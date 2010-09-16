@@ -543,6 +543,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStreamDidSecure:(XMPPStream *)sender;
 
 /**
+ * This method is called after a TCP connection has been established with the server,
+ * and the opening XML stream negotiation has started.
+**/
+- (void)xmppStreamDidStartNegotiation:(XMPPStream *)sender;
+
+/**
  * This method is called after the XML stream has been fully opened.
  * More precisely, this method is called after an opening <xml/> and <stream:stream/> tag have been sent and received,
  * and after the stream features have been received, and any required features have been fullfilled.
