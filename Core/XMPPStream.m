@@ -358,6 +358,9 @@ enum XMPPStreamFlags
 		return NO;
 	}
 
+    // Notify delegates
+    [multicastDelegate xmppStreamWillConnect:self];
+
 	if ([hostName length] == 0)
 	{
 		// Resolve the hostName via myJID SRV resolution
@@ -441,7 +444,10 @@ enum XMPPStreamFlags
 	remoteJID = [jid copy];
 	
 	NSAssert((asyncSocket == nil), @"Forgot to release the previous asyncSocket instance.");
-	
+
+    // Notify delegates
+    [multicastDelegate xmppStreamWillConnect:self];
+
 	// Update state
 	state = STATE_CONNECTING;
 	
@@ -517,6 +523,9 @@ enum XMPPStreamFlags
     asyncSocket = [acceptedSocket retain];
 	[asyncSocket setDelegate:self];
 	
+    // Notify delegates
+    [multicastDelegate xmppStreamWillConnect:self];
+
 	// Update state
 	state = STATE_CONNECTING;
 	
@@ -1803,6 +1812,12 @@ enum XMPPStreamFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark AsyncSocket Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)onSocketWillConnect:(AsyncSocket *)socket {
+    [multicastDelegate xmppStream:self socketWillConnect:socket];
+
+	return YES;
+}
 
 /**
  * Called when a socket connects and is ready for reading and writing. "host" will be an IP address, not a DNS name.
