@@ -549,6 +549,21 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStreamDidStartNegotiation:(XMPPStream *)sender;
 
 /**
+ * This method is called before the stream begins the connection process.
+ *
+ * If developing an iOS app that runs in the background, this would be a good place to indicate
+ * that this is a task that needs to continue running in the background.
+**/
+- (void)xmppStreamWillConnect:(XMPPStream *)sender;
+
+/**
+ * This method is called before the socket connects with the remote host.
+ *
+ * If developing an iOS app that runs in the background, this is where you would enable background sockets.
+**/
+- (void)xmppStream:(XMPPStream *)sender socketWillConnect:(AsyncSocket *)socket;
+
+/**
  * This method is called after the XML stream has been fully opened.
  * More precisely, this method is called after an opening <xml/> and <stream:stream/> tag have been sent and received,
  * and after the stream features have been received, and any required features have been fullfilled.
