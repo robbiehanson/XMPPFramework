@@ -1,4 +1,6 @@
 #import "XMPPRoom.h"
+
+#import "XMPPMessage+XEP0045.h"
 #import "XMPPStream.h"
 #import "XMPPJID.h"
 
