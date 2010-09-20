@@ -46,6 +46,12 @@
 - (void)acceptBuddyRequest:(XMPPJID *)jid;
 - (void)rejectBuddyRequest:(XMPPJID *)jid;
 
+- (id <XMPPUser>)myUser;
+- (id <XMPPResource>)myResource;
+
+- (id <XMPPUser>)userForJID:(XMPPJID *)jid;
+- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
