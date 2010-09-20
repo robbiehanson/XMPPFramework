@@ -87,7 +87,8 @@
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSString *today = [df stringFromDate:[NSDate date]];
-	
+	[df release];
+    
 	NSString *dateTimeStr = [NSString stringWithFormat:@"%@T%@", today, timeStr];
 	
 	return [self parseDateTime:dateTimeStr withMandatoryTimeZone:NO];
