@@ -6,6 +6,7 @@
 #import "XMPPCapabilities.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
 #import "XMPPPing.h"
+#import "XMPPTime.h"
 
 @class  RosterController;
 
@@ -19,6 +20,7 @@
 	XMPPCapabilities *xmppCapabilities;
 	XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
 	XMPPPing *xmppPing;
+	XMPPTime *xmppTime;
 	
 	NSMutableArray *turnSockets;
 	
