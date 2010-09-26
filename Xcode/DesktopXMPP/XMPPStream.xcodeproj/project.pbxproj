@@ -50,8 +50,6 @@
 		DC84BAC9124406DF0055A459 /* SSCrypto.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAC6124406DF0055A459 /* SSCrypto.m */; };
 		DC84BAD8124407510055A459 /* idn-int.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BAD6124407510055A459 /* idn-int.h */; };
 		DC84BAD9124407510055A459 /* stringprep.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BAD7124407510055A459 /* stringprep.h */; };
-		DC84BADD124407990055A459 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC84BADC124407990055A459 /* libidn.a */; };
-		DC84BADE124407990055A459 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC84BADC124407990055A459 /* libidn.a */; };
 		DC84BAE4124407B60055A459 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE1124407B60055A459 /* LibIDN.m */; };
 		DC84BAE5124407B60055A459 /* MulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE3124407B60055A459 /* MulticastDelegate.m */; };
 		DC84BAE6124407B60055A459 /* DDLog.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BADF124407B60055A459 /* DDLog.h */; };
@@ -131,6 +129,14 @@
 		DC84BB791244095D0055A459 /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BB781244095D0055A459 /* XMPPPing.m */; };
 		DC84BB7A1244095D0055A459 /* XMPPPing.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BB771244095D0055A459 /* XMPPPing.h */; };
 		DC84BB7B1244095D0055A459 /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BB781244095D0055A459 /* XMPPPing.m */; };
+		DCA614EF1250034B00C75522 /* XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA614EE1250034B00C75522 /* XMPPDateTimeProfiles.m */; };
+		DCA614F01250034B00C75522 /* XMPPDateTimeProfiles.h in Headers */ = {isa = PBXBuildFile; fileRef = DCA614ED1250034B00C75522 /* XMPPDateTimeProfiles.h */; };
+		DCA614F11250034B00C75522 /* XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA614EE1250034B00C75522 /* XMPPDateTimeProfiles.m */; };
+		DCA615071250041300C75522 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCA615061250041300C75522 /* libidn.a */; };
+		DCA615081250041400C75522 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCA615061250041300C75522 /* libidn.a */; };
+		DCA615201250069F00C75522 /* XMPPTime.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA6151F1250069F00C75522 /* XMPPTime.m */; };
+		DCA615211250069F00C75522 /* XMPPTime.h in Headers */ = {isa = PBXBuildFile; fileRef = DCA6151E1250069F00C75522 /* XMPPTime.h */; };
+		DCA615221250069F00C75522 /* XMPPTime.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA6151F1250069F00C75522 /* XMPPTime.m */; };
 		DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB742B0BDE013000E828D5 /* libcrypto.dylib */; };
 		DCCE55610BDC6FAC000E2798 /* RosterController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55600BDC6FAC000E2798 /* RosterController.m */; };
 		DCD493CD1223483B004BEE1A /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD493CC1223483B004BEE1A /* libresolv.dylib */; };
@@ -196,7 +202,6 @@
 		DC84BAC6124406DF0055A459 /* SSCrypto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SSCrypto.m; path = ../../Vendor/SSCrypto/SSCrypto.m; sourceTree = SOURCE_ROOT; };
 		DC84BAD6124407510055A459 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "../../Vendor/libidn/idn-int.h"; sourceTree = SOURCE_ROOT; };
 		DC84BAD7124407510055A459 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringprep.h; path = ../../Vendor/libidn/stringprep.h; sourceTree = SOURCE_ROOT; };
-		DC84BADC124407990055A459 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = ../../Vendor/libidn/libidn.a; sourceTree = SOURCE_ROOT; };
 		DC84BADF124407B60055A459 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDLog.h; path = ../../Utilities/DDLog.h; sourceTree = SOURCE_ROOT; };
 		DC84BAE0124407B60055A459 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../Utilities/LibIDN.h; sourceTree = SOURCE_ROOT; };
 		DC84BAE1124407B60055A459 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
@@ -251,6 +256,11 @@
 		DC84BB621244090D0055A459 /* XMPPCapsResourceCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPCapsResourceCoreDataStorageObject.m; path = "../../Extensions/XEP-0115/XMPPCapsResourceCoreDataStorageObject.m"; sourceTree = SOURCE_ROOT; };
 		DC84BB771244095D0055A459 /* XMPPPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPPing.h; path = "../../Extensions/XEP-0199/XMPPPing.h"; sourceTree = SOURCE_ROOT; };
 		DC84BB781244095D0055A459 /* XMPPPing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPPing.m; path = "../../Extensions/XEP-0199/XMPPPing.m"; sourceTree = SOURCE_ROOT; };
+		DCA614ED1250034B00C75522 /* XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPDateTimeProfiles.h; path = "../../Extensions/XEP-0082/XMPPDateTimeProfiles.h"; sourceTree = SOURCE_ROOT; };
+		DCA614EE1250034B00C75522 /* XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDateTimeProfiles.m; path = "../../Extensions/XEP-0082/XMPPDateTimeProfiles.m"; sourceTree = SOURCE_ROOT; };
+		DCA615061250041300C75522 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = ../../Vendor/libidn/libidn.a; sourceTree = SOURCE_ROOT; };
+		DCA6151E1250069F00C75522 /* XMPPTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPTime.h; path = "../../Extensions/XEP-0202/XMPPTime.h"; sourceTree = SOURCE_ROOT; };
+		DCA6151F1250069F00C75522 /* XMPPTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPTime.m; path = "../../Extensions/XEP-0202/XMPPTime.m"; sourceTree = SOURCE_ROOT; };
 		DCAB742B0BDE013000E828D5 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		DCCE555F0BDC6FAC000E2798 /* RosterController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = RosterController.h; sourceTree = "<group>"; };
 		DCCE55600BDC6FAC000E2798 /* RosterController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = RosterController.m; sourceTree = "<group>"; };
@@ -273,7 +283,7 @@
 				2762481F0ED3D6F60028C301 /* libcrypto.dylib in Frameworks */,
 				DC1B6496115184A9001F0A0A /* libxml2.dylib in Frameworks */,
 				DC1B6497115184AA001F0A0A /* SystemConfiguration.framework in Frameworks */,
-				DC84BADE124407990055A459 /* libidn.a in Frameworks */,
+				DCA615081250041400C75522 /* libidn.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,7 +307,7 @@
 				DC55892A10DFD9040004696B /* SystemConfiguration.framework in Frameworks */,
 				DC1B649111518476001F0A0A /* libxml2.dylib in Frameworks */,
 				DCD493CD1223483B004BEE1A /* libresolv.dylib in Frameworks */,
-				DC84BADD124407990055A459 /* libidn.a in Frameworks */,
+				DCA615071250041300C75522 /* libidn.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,7 +332,7 @@
 				DC55892910DFD9040004696B /* SystemConfiguration.framework */,
 				DCAB742B0BDE013000E828D5 /* libcrypto.dylib */,
 				DC1B649011518476001F0A0A /* libxml2.dylib */,
-				DC84BADC124407990055A459 /* libidn.a */,
+				DCA615061250041300C75522 /* libidn.a */,
 				DCD493CC1223483B004BEE1A /* libresolv.dylib */,
 			);
 			name = "Linked Frameworks";
@@ -431,11 +441,13 @@
 		DC63E91E0E65D4EF0076E6D2 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				DCA614EC1250032B00C75522 /* XEP-0082 */,
 				DC5ED521123A9F3000D647C0 /* XEP-0060 */,
 				DC6E92F61090E2F200070ADE /* XEP-0065 */,
 				DCAD3FB91156DC0700FC568A /* XEP-0100 */,
 				DCAD3FBA1156DC1D00FC568A /* XEP-0115 */,
 				DCAD3FB31156DBE800FC568A /* XEP-0199 */,
+				DCA6151B1250067000C75522 /* XEP-0202 */,
 			);
 			name = Extensions;
 			sourceTree = "<group>";
@@ -529,6 +541,24 @@
 				DC8BA2DB1141A9A50031C1F6 /* MemoryStorage */,
 			);
 			name = Roster;
+			sourceTree = "<group>";
+		};
+		DCA614EC1250032B00C75522 /* XEP-0082 */ = {
+			isa = PBXGroup;
+			children = (
+				DCA614ED1250034B00C75522 /* XMPPDateTimeProfiles.h */,
+				DCA614EE1250034B00C75522 /* XMPPDateTimeProfiles.m */,
+			);
+			name = "XEP-0082";
+			sourceTree = "<group>";
+		};
+		DCA6151B1250067000C75522 /* XEP-0202 */ = {
+			isa = PBXGroup;
+			children = (
+				DCA6151E1250069F00C75522 /* XMPPTime.h */,
+				DCA6151F1250069F00C75522 /* XMPPTime.m */,
+			);
+			name = "XEP-0202";
 			sourceTree = "<group>";
 		};
 		DCAD3FB31156DBE800FC568A /* XEP-0199 */ = {
@@ -680,6 +710,8 @@
 				DC84BB6D1244090D0055A459 /* XMPPCapsCoreDataStorageObject.h in Headers */,
 				DC84BB6F1244090D0055A459 /* XMPPCapsResourceCoreDataStorageObject.h in Headers */,
 				DC84BB7A1244095D0055A459 /* XMPPPing.h in Headers */,
+				DCA614F01250034B00C75522 /* XMPPDateTimeProfiles.h in Headers */,
+				DCA615211250069F00C75522 /* XMPPTime.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -749,7 +781,6 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "XMPPStream" */;
 			compatibilityVersion = "Xcode 2.4";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -834,6 +865,8 @@
 				DC84BB6E1244090D0055A459 /* XMPPCapsCoreDataStorageObject.m in Sources */,
 				DC84BB701244090D0055A459 /* XMPPCapsResourceCoreDataStorageObject.m in Sources */,
 				DC84BB7B1244095D0055A459 /* XMPPPing.m in Sources */,
+				DCA614F11250034B00C75522 /* XMPPDateTimeProfiles.m in Sources */,
+				DCA615221250069F00C75522 /* XMPPTime.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -889,6 +922,8 @@
 				DC84BB661244090D0055A459 /* XMPPCapsCoreDataStorageObject.m in Sources */,
 				DC84BB671244090D0055A459 /* XMPPCapsResourceCoreDataStorageObject.m in Sources */,
 				DC84BB791244095D0055A459 /* XMPPPing.m in Sources */,
+				DCA614EF1250034B00C75522 /* XMPPDateTimeProfiles.m in Sources */,
+				DCA615201250069F00C75522 /* XMPPTime.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -952,12 +987,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libidn\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/Vendor/libidn\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(SRCROOT)/../../Vendor/libidn\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../Vendor/libidn\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = XMPP;
 			};
@@ -987,11 +1018,13 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_5)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libidn/Mac\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/libidn\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(SRCROOT)/Vendor/libidn\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SRCROOT)/../../Vendor/libidn\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_5 = "\"$(SRCROOT)/../../Vendor/libidn\"";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -1074,10 +1107,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Vendor/libidn\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../../Vendor/libidn\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../Vendor/libidn\"";
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1096,10 +1127,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Vendor/libidn\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../../Vendor/libidn\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../Vendor/libidn\"";
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1116,13 +1145,10 @@
 				GCC_WARN_MISSING_PARENTHESES = NO;
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					Vendor/libidn,
-					/usr/include/libxml2,
-				);
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH)";
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
 			};
 			name = Debug;
 		};
@@ -1138,12 +1164,9 @@
 				GCC_WARN_MISSING_PARENTHESES = NO;
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					Vendor/libidn,
-					/usr/include/libxml2,
-				);
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
 			};
 			name = Release;
 		};
