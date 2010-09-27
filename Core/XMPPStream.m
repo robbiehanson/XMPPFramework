@@ -32,8 +32,9 @@
 #define TIMEOUT_READ_STREAM   -1
 
 // Define the various tags we'll use to differentiate what it is we're currently reading or writing
-#define TAG_WRITE_START     -100 // Must be outside UInt16 range
-#define TAG_WRITE_STREAM    -101 // Must be outside UInt16 range
+#define TAG_WRITE_START        -100 // Must be outside UInt16 range
+#define TAG_WRITE_STREAM       -101 // Must be outside UInt16 range
+#define TAG_WRITE_SYNCHRONOUS  -102 // Must be outside UInt16 range
 
 #define TAG_READ_START       200
 #define TAG_READ_STREAM      201
@@ -70,6 +71,7 @@ enum XMPPStreamFlags
 	kIsSecure                     = 1 << 2,  // If set, connection has been secured via SSL/TLS
 	kIsAuthenticated              = 1 << 3,  // If set, authentication has succeeded
 	kResetByteCountPerConnection  = 1 << 4,  // If set, byte count should be reset per connection
+	kSynchronousSendPending       = 1 << 5,  // If set, a synchronous send is in progress
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,6 +228,8 @@ enum XMPPStreamFlags
 	[registeredModules release];
 	[autoDelegateDict release];
 	[_srvResolver release];
+	
+	[synchronousUUID release];
 	
 	[super dealloc];
 }
@@ -1197,7 +1201,7 @@ enum XMPPStreamFlags
 	
 	[asyncSocket writeData:outgoingData
 	           withTimeout:TIMEOUT_WRITE
-	                   tag:TAG_WRITE_STREAM];
+	                   tag:tag];
 	
 	if ([element isKindOfClass:[XMPPIQ class]])
 	{
@@ -1238,6 +1242,47 @@ enum XMPPStreamFlags
 	{
 		[self sendElement:element withTag:tag];
 	}
+}
+
+- (BOOL)synchronouslySendElement:(NSXMLElement *)element
+{
+	if (state == STATE_CONNECTED)
+	{
+		NSString *innerRunLoopMode = @"XMPPStreamSynchronousMode";
+		
+		[self retain];
+		[asyncSocket addRunLoopMode:innerRunLoopMode];
+		
+		flags |= kSynchronousSendPending;
+		[self sendElement:element withTag:TAG_WRITE_SYNCHRONOUS];
+		
+		NSString *uuid = [self generateUUID];
+		
+		[synchronousUUID release];
+		synchronousUUID = [uuid retain];
+		
+		BOOL noError = YES;
+		while (noError && (uuid == synchronousUUID) && (flags & kSynchronousSendPending))
+		{
+			NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+			
+			noError = [[NSRunLoop currentRunLoop] runMode:innerRunLoopMode
+			                                   beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+			[innerPool release];
+		}
+		
+		[asyncSocket removeRunLoopMode:innerRunLoopMode];
+		[self autorelease];
+		
+		BOOL result = noError && (uuid == synchronousUUID);
+		
+		[synchronousUUID release];
+		synchronousUUID = nil;
+		
+		return result;
+	}
+	
+	return NO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1912,6 +1957,10 @@ enum XMPPStreamFlags
 	{
 		[multicastDelegate xmppStream:self didSendElementWithTag:tag];
 	}
+	else if (tag == TAG_WRITE_SYNCHRONOUS)
+	{
+		flags &= ~kSynchronousSendPending;
+	}
 }
 
 /**
@@ -1950,6 +1999,9 @@ enum XMPPStreamFlags
 	
 	// Clear any saved authentication information
 	[tempPassword release]; tempPassword = nil;
+	
+	// Clear any synchronous send attempts
+	[synchronousUUID release]; synchronousUUID = nil;
 	
 	// Stop the keep alive timer
 	[keepAliveTimer invalidate];
