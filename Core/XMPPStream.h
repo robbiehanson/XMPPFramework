@@ -68,6 +68,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	id userTag;
 	
 	RFSRVResolver *_srvResolver;
+	NSString *synchronousUUID;
 }
 
 /**
@@ -441,6 +442,28 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
 - (void)sendElement:(NSXMLElement *)element andNotifyMe:(UInt16)tag;
+
+/**
+ * Just like the sendElement: method above,
+ * but this method does not return until after the element has been sent.
+ * 
+ * It is important to understand what this means.
+ * It does NOT mean the server has received the element.
+ * It only means the data has been queued for sending in the underlying OS socket buffer.
+ * 
+ * So at this point the OS will do everything in its capacity to send the data to the server,
+ * which generally means the server will eventually receive the data.
+ * Unless, of course, something horrible happens such as a network failure,
+ * or a system crash, or the server crashes, etc.
+ * 
+ * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
+ * 
+ * This method should be used sparingly.
+ * In other words, it should be used only when absolutely necessary.
+ * For example, when the system is about to go to sleep,
+ * or when your iOS app is about to be backgrounded, and you need to synchronously send an unavailable presence.
+**/
+- (BOOL)synchronouslySendElement:(NSXMLElement *)element;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
