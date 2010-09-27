@@ -14,27 +14,15 @@
 #import "XMPPStream.h"
 
 
-NSString * kSRVResolverPriority = @"priority";
-NSString * kSRVResolverWeight   = @"weight";
-NSString * kSRVResolverPort     = @"port";
-NSString * kSRVResolverTarget   = @"target";
-
 NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
 
-// Private object to map running sum to SRV result
-@interface RFSRVRecord : NSObject
-{
-	NSUInteger _srvResultsIndex;			// store location so we know where to pop from
-	NSUInteger _sum;
-}
+@interface RFSRVRecord ()
 
-@property(nonatomic,readonly,assign)NSUInteger srvResultsIndex;
-@property(nonatomic,readonly,assign)NSUInteger sum;
+@property(nonatomic, assign) NSUInteger srvResultsIndex;
+@property(nonatomic, assign) NSUInteger sum;
 
-+(RFSRVRecord *)recordFromSRVResults:(NSMutableArray *)srvResults atIndex:(NSUInteger)srvResultsIndex sum:(NSUInteger)sum;
-
--(id)initWithSRVResults:(NSMutableArray *)srvResults atIndex:(NSUInteger)srvResultsIndex sum:(NSUInteger)sum;
+- (NSComparisonResult)compareByPriority:(RFSRVRecord *)aRecord;
 
 @end
 
@@ -44,19 +32,53 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
 @implementation RFSRVRecord
 
-@synthesize srvResultsIndex = _srvResultsIndex;
-@synthesize sum = _sum;
+@synthesize priority;
+@synthesize weight;
+@synthesize port;
+@synthesize target;
 
-+(RFSRVRecord *)recordFromSRVResults:(NSMutableArray *)srvResults atIndex:(NSUInteger)srvResultsIndex sum:(NSUInteger)sum {
-	return [[[RFSRVRecord alloc] initWithSRVResults:srvResults atIndex:srvResultsIndex sum:sum] autorelease];
+@synthesize sum;
+@synthesize srvResultsIndex;
+
+
++ (RFSRVRecord *)recordWithPriority:(UInt16)p1 weight:(UInt16)w port:(UInt16)p2 target:(NSString *)t
+{
+	return [[[RFSRVRecord alloc] initWithPriority:p1 weight:w port:p2 target:t] autorelease];
 }
 
--(id)initWithSRVResults:(NSMutableArray *)srvResults atIndex:(NSUInteger)srvResultsIndex sum:(NSUInteger)sum {
-	if (self = [super init]) {
-		_srvResultsIndex = srvResultsIndex;
-		_sum = sum;
+- (id)initWithPriority:(UInt16)p1 weight:(UInt16)w port:(UInt16)p2 target:(NSString *)t
+{
+	if ((self = [super init]))
+	{
+		priority = p1;
+		weight   = w;
+		port     = p2;
+		target   = [t copy];
+		
+		sum = 0;
+		srvResultsIndex = 0;
 	}
 	return self;
+}
+
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"<%@:%p target(%@) port(%hu) priority(%hu) weight(%hu)>",
+			NSStringFromClass([self class]), self, target, port, priority, weight];
+}
+
+- (NSComparisonResult)compareByPriority:(RFSRVRecord *)aRecord
+{
+	UInt16 mPriority = self.priority;
+	UInt16 aPriority = aRecord.priority;
+	
+	if (mPriority < aPriority)
+		return NSOrderedAscending;
+	
+	if (mPriority > aPriority)
+		return NSOrderedDescending;
+	
+	return NSOrderedSame;
 }
 
 @end
@@ -70,19 +92,13 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
 @property (nonatomic, assign, readwrite, getter=isFinished) BOOL    finished;
 @property (nonatomic, retain, readwrite) NSError *                  error;
-@property (nonatomic, retain, readwrite) NSMutableArray *           results;
+@property (nonatomic, retain, readwrite) NSArray *                  results;
 
 // Forward declarations
 
+- (void)_closeSockets;
 - (void)_start;
-
--(NSDictionary *)popRecordFrom:(NSMutableArray **)results atIndex:(NSUInteger)index;
-
--(NSUInteger)priorityFromRecords:(NSMutableArray *)records atIndex:(NSUInteger)index;
-
--(NSUInteger)weightFromRecords:(NSMutableArray *)records atIndex:(NSUInteger)index;
-
--(void)sortResults;
+- (void)sortResults;
 
 @end
 
@@ -93,16 +109,17 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 @implementation RFSRVResolver
 
 @synthesize xmppStream = _xmppStream;
-@synthesize delegate = _delegate;
+@synthesize delegate   = _delegate;
 
-@synthesize finished = _finished;
-@synthesize error    = _error;
-@synthesize results  = _results;
+@synthesize finished   = _finished;
+@synthesize error      = _error;
+@synthesize results    = _results;
 
 #pragma mark Init methods
 
 + (RFSRVResolver *)resolveWithStream:(XMPPStream *)aXmppStream 
-							delegate:(id)delegate {
+							delegate:(id)delegate
+{
 	RFSRVResolver *srvResolver = [[[RFSRVResolver alloc] initWithStream:aXmppStream] autorelease];
 	srvResolver.delegate = delegate;
 	[srvResolver start];
@@ -120,19 +137,19 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
 - (void)dealloc
 {
-    [self stop];
+    [self _closeSockets];
     [_error release];
     [_results release];
 	[_xmppStream release];
     [super dealloc];
 }
 
-#pragma mark Instance methods
+#pragma mark Public methods
 	 
 - (void)start
 {
     if (self->_sdRef == NULL) {
-		NSLog(@"%s",__PRETTY_FUNCTION__);
+	//	NSLog(@"%s",__PRETTY_FUNCTION__);
         self.error    = nil;            // starting up again, so forget any previous error
         self.finished = NO;
         [self _start];
@@ -141,7 +158,17 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
 - (void)stop
 {
-    if (self->_sdRefSocket != NULL) {
+    [self _closeSockets];
+    self.finished = YES;
+
+	[self sortResults];
+}
+
+#pragma mark Private Methods
+
+- (void)_closeSockets
+{
+	if (self->_sdRefSocket != NULL) {
         CFSocketInvalidate(self->_sdRefSocket);
         CFRelease(self->_sdRefSocket);
         self->_sdRefSocket = NULL;
@@ -150,14 +177,11 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
         DNSServiceRefDeallocate(self->_sdRef);
         self->_sdRef = NULL;
     }
-    self.finished = YES;
-
-	[self sortResults];
 }
 
 - (void)_stopWithError:(NSError *)error
 {
-	NSLog(@"%s %@",__PRETTY_FUNCTION__,error);
+//	NSLog(@"%s %@",__PRETTY_FUNCTION__,error);
 
     // error may be nil
     self.error = error;
@@ -204,17 +228,17 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
     rrData = [NSMutableData data];
     assert(rrData != nil);
     
-    u8 = 0;
-    [rrData appendBytes:&u8 length:sizeof(u8)];
-    u16 = htons(kDNSServiceType_SRV);
-    [rrData appendBytes:&u16 length:sizeof(u16)];
-    u16 = htons(kDNSServiceClass_IN);
-    [rrData appendBytes:&u16 length:sizeof(u16)];
-    u32 = htonl(666);
-    [rrData appendBytes:&u32 length:sizeof(u32)];
-    u16 = htons(rdlen);
-    [rrData appendBytes:&u16 length:sizeof(u16)];
-    [rrData appendBytes:rdata length:rdlen];
+	u8 = 0;
+	[rrData appendBytes:&u8 length:sizeof(u8)];
+	u16 = htons(kDNSServiceType_SRV);
+	[rrData appendBytes:&u16 length:sizeof(u16)];
+	u16 = htons(kDNSServiceClass_IN);
+	[rrData appendBytes:&u16 length:sizeof(u16)];
+	u32 = htonl(666);
+	[rrData appendBytes:&u32 length:sizeof(u32)];
+	u16 = htons(rdlen);
+	[rrData appendBytes:&u16 length:sizeof(u16)];
+	[rrData appendBytes:rdata length:rdlen];
 	
     // Parse the record.
     
@@ -224,27 +248,25 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
     // If the parse is successful, add the results to the array.
     
     if (rr != NULL) {
-        NSString *      target;
+        NSString *target;
         
         target = [NSString stringWithCString:rr->data.SRV->target encoding:NSASCIIStringEncoding];
-        if (target != nil) {
-            NSDictionary *  result;
-            NSIndexSet *    resultIndexSet;
+        if (target != nil)
+		{
+			RFSRVRecord * result;
+			NSIndexSet  * resultIndexSet;
 			
-            result = [NSDictionary dictionaryWithObjectsAndKeys:
-					  [NSNumber numberWithUnsignedInt:rr->data.SRV->priority], kSRVResolverPriority,
-					  [NSNumber numberWithUnsignedInt:rr->data.SRV->weight],   kSRVResolverWeight,
-					  [NSNumber numberWithUnsignedInt:rr->data.SRV->port],     kSRVResolverPort,
-					  target,                                                  kSRVResolverTarget, 
-					  nil
-					  ];
-            assert(result != nil);
+			UInt16 priority = rr->data.SRV->priority;
+			UInt16 weight   = rr->data.SRV->weight;
+			UInt16 port     = rr->data.SRV->port;
+			
+			result = [RFSRVRecord recordWithPriority:priority weight:weight port:port target:target];
             
             resultIndexSet = [NSIndexSet indexSetWithIndex:self.results.count];
             assert(resultIndexSet != nil);
             
             [self willChange:NSKeyValueChangeInsertion valuesAtIndexes:resultIndexSet forKey:@"results"];
-            [self.results addObject:result];
+            [_results addObject:result];
             [self didChange:NSKeyValueChangeInsertion valuesAtIndexes:resultIndexSet forKey:@"results"];			
         }
 		
@@ -346,7 +368,7 @@ static void SDRefSocketCallback(
 	
 	NSString *srvName = [NSString stringWithFormat:@"_xmpp-client._tcp.%@", [[self.xmppStream myJID] domain]];
 	
-	NSLog(@"Looking up %@...",srvName);	
+//	NSLog(@"Looking up %@...",srvName);	
 	
     srvNameCStr = [srvName cStringUsingEncoding:NSASCIIStringEncoding];
     if (srvNameCStr == nil) {
@@ -399,124 +421,129 @@ static void SDRefSocketCallback(
     if (err != kDNSServiceErr_NoError) {
         [self _stopWithDNSServiceError:err];
     }
-}
+}				 
 
-
-#pragma mark -
-#pragma mark Private Methods				 
-
--(void)sortResults {
-	NSLog(@"%s",__PRETTY_FUNCTION__);
-	// sort results
-	NSMutableArray *sortedResults = [NSMutableArray arrayWithCapacity:[self.results count]];
+- (void)sortResults
+{
+//	NSLog(@"%s",__PRETTY_FUNCTION__);
 	
-	//Sort the list by priority (lowest number first)
-	NSSortDescriptor *aSortDescriptor = [[NSSortDescriptor alloc] initWithKey:kSRVResolverPriority ascending:YES];
-	[self.results sortUsingDescriptors:[NSArray arrayWithObject:aSortDescriptor]];	
-	[aSortDescriptor release];
+	// Sort results
+	NSMutableArray *sortedResults = [NSMutableArray arrayWithCapacity:[_results count]];
+	
+	// Sort the list by priority (lowest number first)
+	[_results sortUsingSelector:@selector(compareByPriority:)];
 	
 	/* From RFC 2782
-	 For each distinct priority level
-	 While there are still elements left at this priority
-	 level
-	 
-	 Select an element as specified above, in the
-	 description of Weight in "The format of the SRV
-	 RR" Section, and move it to the tail of the new
-	 list.
-	 
-	 The following
-	 algorithm SHOULD be used to order the SRV RRs of the same
-	 priority:
-	 
+	 * 
+	 * For each distinct priority level
+	 * While there are still elements left at this priority level
+	 * 
+	 * Select an element as specified above, in the
+	 * description of Weight in "The format of the SRV
+	 * RR" Section, and move it to the tail of the new
+	 * list.
+	 * 
+	 * The following algorithm SHOULD be used to order
+	 * the SRV RRs of the same priority:
 	 */
+	
 	NSUInteger srvResultsCount;
 	
-	while ([self.results count] > 0) {
-		srvResultsCount = [self.results count];
+	while ([_results count] > 0)
+	{
+		srvResultsCount = [_results count];
 		
-		if (srvResultsCount > 1) {
+		if (srvResultsCount == 1)
+		{
+			RFSRVRecord *srvRecord = [_results objectAtIndex:0];
+			
+			[sortedResults addObject:srvRecord];
+			[_results removeObjectAtIndex:0];
+		}
+		else // (srvResultsCount > 1)
+		{
 			// more than two records so we need to sort
 			
-			/*
-			 To select a target to be contacted next, arrange all SRV RRs
-			 (that have not been ordered yet) in any order, except that all
-			 those with weight 0 are placed at the beginning of the list.
-			 
-			 Compute the sum of the weights of those RRs, and with each RR
-			 associate the running sum in the selected order.
+			/* To select a target to be contacted next, arrange all SRV RRs
+			 * (that have not been ordered yet) in any order, except that all
+			 * those with weight 0 are placed at the beginning of the list.
+			 * 
+			 * Compute the sum of the weights of those RRs, and with each RR
+			 * associate the running sum in the selected order.
 			 */
 			
 			NSUInteger runningSum = 0;
 			NSMutableArray *samePriorityRecords = [NSMutableArray arrayWithCapacity:srvResultsCount];
 			
-			NSUInteger priority = [self priorityFromRecords:self.results atIndex:0];
-			NSUInteger recordWeight;
+			RFSRVRecord *srvRecord = [_results objectAtIndex:0];
 			
-			NSUInteger index;
-			for (index = 0;	
-				 index < srvResultsCount && [self priorityFromRecords:self.results 
-															  atIndex:index] == priority; 
-				 index++) {
-				recordWeight = [self weightFromRecords:self.results atIndex:index];
-				
-				if (recordWeight == 0) {
+			NSUInteger initialPriority = srvRecord.priority;
+			NSUInteger index = 0;
+			
+			do
+			{
+				if (srvRecord.weight == 0)
+				{
 					// add to front of array
-					[samePriorityRecords insertObject:[RFSRVRecord recordFromSRVResults:self.results atIndex:index sum:0] atIndex:0];
-				} else {
-					// add to end of array and update the running sum
-					runningSum += recordWeight;
-					[samePriorityRecords addObject:[RFSRVRecord recordFromSRVResults:self.results atIndex:index sum:runningSum]];
+					[samePriorityRecords insertObject:srvRecord atIndex:0];
+					
+					srvRecord.srvResultsIndex = index;
+					srvRecord.sum = 0;
 				}
-			}
+				else
+				{
+					// add to end of array and update the running sum
+					[samePriorityRecords addObject:srvRecord];
+					
+					runningSum += srvRecord.weight;
+					
+					srvRecord.srvResultsIndex = index;
+					srvRecord.sum = runningSum;
+				}
+				
+				if (++index < srvResultsCount)
+				{
+					srvRecord = [_results objectAtIndex:index];
+				}
+				else
+				{
+					srvRecord = nil;
+				}
+				
+			} while(srvRecord && (srvRecord.priority == initialPriority));
 			
-			/*
-			 Then choose a uniform random number between 0 and the sum computed
-			 (inclusive), and select the RR whose running sum value is the
-			 first in the selected order which is greater than or equal to
-			 the random number selected.
+			/* Then choose a uniform random number between 0 and the sum computed
+			 * (inclusive), and select the RR whose running sum value is the
+			 * first in the selected order which is greater than or equal to
+			 * the random number selected.
 			 */
 			
 			NSUInteger randomIndex = arc4random() % (runningSum + 1);
 			
-			for (RFSRVRecord *srvRecord in samePriorityRecords) {
-				if (srvRecord.sum >= randomIndex) {
-					/*
-					 The target host specified in the
-					 selected SRV RR is the next one to be contacted by the client.
-					 Remove this SRV RR from the set of the unordered SRV RRs and
-					 apply the described algorithm to the unordered SRV RRs to select
-					 the next target host.  Continue the ordering process until there
-					 are no unordered SRV RRs.  This process is repeated for each
-					 Priority.
+			for (srvRecord in samePriorityRecords)
+			{
+				if (srvRecord.sum >= randomIndex)
+				{
+					/* The target host specified in the
+					 * selected SRV RR is the next one to be contacted by the client.
+					 * Remove this SRV RR from the set of the unordered SRV RRs and
+					 * apply the described algorithm to the unordered SRV RRs to select
+					 * the next target host.  Continue the ordering process until there
+					 * are no unordered SRV RRs.  This process is repeated for each
+					 * Priority.
 					 */
-					[sortedResults addObject:[self popRecordFrom:&_results atIndex:srvRecord.srvResultsIndex]];
+					
+					[sortedResults addObject:srvRecord];
+					[_results removeObjectAtIndex:srvRecord.srvResultsIndex];
+					
 					break;
 				}
 			}
-		} else if (srvResultsCount == 1) {
-			[sortedResults addObject:[self popRecordFrom:&_results atIndex:0]];
-		} else {
-			// no records
-		}		
+		}
 	}
+	
 	self.results = sortedResults;
-	NSLog(@"Sorted results: %@", self.results);
+//	NSLog(@"Sorted results: %@", self.results);
 }
-
--(NSDictionary *)popRecordFrom:(NSMutableArray **)results atIndex:(NSUInteger)index {
-	NSDictionary *record = [*results objectAtIndex:index];
-	[*results removeObjectAtIndex:index];
-	return record;	
-}
-
--(NSUInteger)priorityFromRecords:(NSMutableArray *)records atIndex:(NSUInteger)index {
-	return [(NSNumber *)[(NSDictionary *)[records objectAtIndex:index] objectForKey:kSRVResolverPriority] unsignedIntValue];
-}
-
--(NSUInteger)weightFromRecords:(NSMutableArray *)records atIndex:(NSUInteger)index {
-	return [(NSNumber *)[(NSDictionary *)[records objectAtIndex:index] objectForKey:kSRVResolverWeight] unsignedIntValue];
-}
-
 
 @end

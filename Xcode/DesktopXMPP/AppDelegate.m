@@ -115,8 +115,15 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #pragma mark Auto Reconnect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
+{
+	NSLog(@"xmppStream:didReceiveError: %@", error);
+}
+
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
+	NSLog(@"xmppStreamDidDisconnect:");
+	
 	// If we weren't using auto reconnect, we could take this opportunity to display the sign in sheet.
 }
 
