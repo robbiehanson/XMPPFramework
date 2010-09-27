@@ -7,23 +7,34 @@
 //	Based on SRVResolver by Apple, Inc.
 
 #import <Foundation/Foundation.h>
-
-#include <dns_sd.h>
+#import <dns_sd.h>
 
 #import "XMPPStream.h"
 
 @protocol RFSRVResolverDelegate;
 
-
-// Keys for the dictionaries in the results array:
-
-extern NSString * kSRVResolverPriority;     // NSNumber, host byte order
-extern NSString * kSRVResolverWeight;       // NSNumber, host byte order
-extern NSString * kSRVResolverPort;         // NSNumber, host byte order
-extern NSString * kSRVResolverTarget;       // NSString
-
 extern NSString * kRFSRVResolverErrorDomain;
 
+@interface RFSRVRecord : NSObject {
+	UInt16 priority;
+	UInt16 weight;
+	UInt16 port;
+	NSString *target;
+	
+	NSUInteger sum;
+	NSUInteger srvResultsIndex;
+}
+
++ (RFSRVRecord *)recordWithPriority:(UInt16)priority weight:(UInt16)weight port:(UInt16)port target:(NSString *)target;
+
+- (id)initWithPriority:(UInt16)priority weight:(UInt16)weight port:(UInt16)port target:(NSString *)target;
+
+@property (nonatomic, readonly) UInt16 priority;
+@property (nonatomic, readonly) UInt16 weight;
+@property (nonatomic, readonly) UInt16 port;
+@property (nonatomic, readonly) NSString *target;
+
+@end
 
 @interface RFSRVResolver : NSObject {
 	
@@ -43,7 +54,7 @@ extern NSString * kRFSRVResolverErrorDomain;
 
 @property (nonatomic, assign, readonly, getter=isFinished) BOOL     finished;		// observable
 @property (nonatomic, retain, readonly) NSError *                   error;			// observable
-@property (nonatomic, retain, readonly) NSMutableArray *            results;		// of NSDictionary, observable
+@property (nonatomic, retain, readonly) NSArray *                   results;		// of RFSRVRecord, observable
 
 
 + (RFSRVResolver *)resolveWithStream:(XMPPStream *)xmppStream delegate:(id)delegate;
@@ -59,7 +70,7 @@ extern NSString * kRFSRVResolverErrorDomain;
 
 /**
  * This method is called after myJID domain SRV resolution.
- **/
+**/
 - (void)srvResolverDidResoveSRV:(RFSRVResolver *)sender;
 - (void)srvResolver:(RFSRVResolver *)sender didNotResolveSRVWithError:(NSError *)error;
 

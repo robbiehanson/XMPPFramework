@@ -57,41 +57,57 @@
 	   didEndSelector:nil
 	      contextInfo:nil];
 	
-	if([[serverField stringValue] length] > 0)
+	if ([[portField stringValue] length] > 0)
 	{
-		if([[portField stringValue] length] > 0)
+		if ([[jidField stringValue] length] > 0)
 		{
-			if([[jidField stringValue] length] > 0)
-			{
-				[signInSheet makeFirstResponder:passwordField];
-			}
-			else
-			{
-				[signInSheet makeFirstResponder:jidField];
-			}
+			[signInSheet makeFirstResponder:passwordField];
 		}
 		else
+		{
+			[signInSheet makeFirstResponder:jidField];
+		}
+	}
+	else
+	{
+		if ([[serverField stringValue] length] > 0)
 		{
 			[signInSheet makeFirstResponder:portField];
 		}
 	}
+	
+	[self jidDidChange:nil];
 }
 
 - (IBAction)jidDidChange:(id)sender
 {
-	// People often forget to type in the full JID.
-	// In other words, they type in "username" instead of "username@domain.tld"
-	// 
-	// This method is here to automatically append a domain to the JID.
-	
 	NSString *jidStr = [jidField stringValue];
 	
-	if(([jidStr length] > 0) && ([jidStr rangeOfString:@"@"].location == NSNotFound))
+	if ([jidStr length] > 0)
 	{
 		NSString *domain = [serverField stringValue];
-		if([domain length] > 0)
+		
+		if ([jidStr rangeOfString:@"@"].location == NSNotFound)
 		{
-			[jidField setStringValue:[jidStr stringByAppendingFormat:@"@%@", domain]];
+			// People often forget to type in the full JID.
+			// In other words, they type in "username" instead of "username@domain.tld"
+			// 
+			// So we automatically append a domain to the JID.
+			
+			if ([domain length] > 0)
+			{
+				[jidField setStringValue:[jidStr stringByAppendingFormat:@"@%@", domain]];
+			}
+		}
+		else if ([domain length] == 0)
+		{
+			// Update the domain placeholder string to match the JID domain
+			
+			XMPPJID *jid = [XMPPJID jidWithString:jidStr];
+			if (jid)
+			{
+				[[serverField cell] setPlaceholderString:[jid domain]];
+			}
 		}
 	}
 }
@@ -127,10 +143,6 @@
 - (void)updateAccountInfo
 {
 	NSString *domain = [serverField stringValue];
-	if([domain length] == 0)
-	{
-		domain = [[serverField cell] placeholderString];
-	}
 	[[self xmppStream] setHostName:domain];
 	
 	int port = [portField intValue];

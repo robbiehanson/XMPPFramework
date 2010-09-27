@@ -67,7 +67,10 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	
 	id userTag;
 	
-	RFSRVResolver *_srvResolver;
+	RFSRVResolver *srvResolver;
+	NSArray *srvResults;
+	NSUInteger srvResultsIndex;
+	
 	NSString *synchronousUUID;
 }
 
@@ -117,6 +120,11 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Similarly, you connect to google's servers to sign into xmpp.
  * 
  * In the example above, your hostname is "talk.google.com" and your JID is "me@mydomain.com".
+ * 
+ * This hostName property is optional.
+ * If you do not set the hostName, then the framework will follow the xmpp specification using jid's domain.
+ * That is, it first do an SRV lookup (as specified in the xmpp RFC).
+ * If that fails, it will fall back to simply attempting to connect to the jid's domain.
 **/
 @property (nonatomic, readwrite, copy) NSString *hostName;
 
@@ -212,8 +220,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Tag values are not used internally, and should not be used by xmpp modules.
 **/
 @property (nonatomic, readwrite, retain) id tag;
-
-@property (nonatomic, readwrite, retain) RFSRVResolver *srvResolver;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark State
@@ -521,6 +527,31 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 @optional
 
 /**
+ * This method is called before the stream begins the connection process.
+ *
+ * If developing an iOS app that runs in the background, this would be a good place to indicate
+ * that this is a task that needs to continue running in the background.
+ **/
+- (void)xmppStreamWillConnect:(XMPPStream *)sender;
+
+/**
+ * This method is called before the socket connects with the remote host.
+ * 
+ * If developing an iOS app that runs in the background, this is where you would enable background sockets.
+ * For example:
+ * 
+ * CFReadStreamSetProperty([socket getCFReadStream], kCFStreamNetworkServiceType, kCFStreamNetworkServiceTypeVoIP);
+ * CFWriteStreamSetProperty([socket getCFWriteStream], kCFStreamNetworkServiceType, kCFStreamNetworkServiceTypeVoIP);
+**/
+- (void)xmppStream:(XMPPStream *)sender socketWillConnect:(AsyncSocket *)socket;
+
+/**
+ * This method is called after a TCP connection has been established with the server,
+ * and the opening XML stream negotiation has started.
+**/
+- (void)xmppStreamDidStartNegotiation:(XMPPStream *)sender;
+
+/**
  * This method is called immediately prior to the stream being secured via TLS/SSL.
  * Note that this delegate may be called even if you do not explicitly invoke the startTLS method.
  * Servers have the option of requiring connections to be secured during the opening process.
@@ -566,34 +597,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStreamDidSecure:(XMPPStream *)sender;
 
 /**
- * This method is called after a TCP connection has been established with the server,
- * and the opening XML stream negotiation has started.
-**/
-- (void)xmppStreamDidStartNegotiation:(XMPPStream *)sender;
-
-/**
- * This method is called before the stream begins the connection process.
- *
- * If developing an iOS app that runs in the background, this would be a good place to indicate
- * that this is a task that needs to continue running in the background.
-**/
-- (void)xmppStreamWillConnect:(XMPPStream *)sender;
-
-/**
- * This method is called before the socket connects with the remote host.
- *
- * If developing an iOS app that runs in the background, this is where you would enable background sockets.
-**/
-- (void)xmppStream:(XMPPStream *)sender socketWillConnect:(AsyncSocket *)socket;
-
-/**
  * This method is called after the XML stream has been fully opened.
  * More precisely, this method is called after an opening <xml/> and <stream:stream/> tag have been sent and received,
  * and after the stream features have been received, and any required features have been fullfilled.
  * At this point it's safe to begin communication with the server.
 **/
 - (void)xmppStreamDidConnect:(XMPPStream *)sender;
-- (void)xmppStream:(XMPPStream *)sender didNotConnect:(NSError *)error;
 
 /**
  * This method is called after registration of a new user has successfully finished.
