@@ -130,7 +130,6 @@ enum XMPPStreamFlags
 @synthesize numberOfBytesReceived;
 @synthesize registeredModules;
 @synthesize tag = userTag;
-@synthesize srvResolver = _srvResolver;
 
 @dynamic resetByteCountPerConnection;
 
@@ -227,7 +226,9 @@ enum XMPPStreamFlags
 	
 	[registeredModules release];
 	[autoDelegateDict release];
-	[_srvResolver release];
+	
+	[srvResolver release];
+	[srvResults release];
 	
 	[synchronousUUID release];
 	
@@ -310,6 +311,25 @@ enum XMPPStreamFlags
 #pragma mark C2S Connection
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (BOOL)connectToHost:(NSString *)host onPort:(UInt16)port error:(NSError **)errPtr
+{
+	state = STATE_CONNECTING;
+	
+	BOOL result = [asyncSocket connectToHost:host onPort:port error:errPtr];
+	
+	if (result == NO)
+	{
+		state = STATE_DISCONNECTED;
+	}
+	else if ([self resetByteCountPerConnection])
+	{
+		numberOfBytesSent = 0;
+		numberOfBytesReceived = 0;
+	}
+	
+	return result;
+}
+
 - (BOOL)connect:(NSError **)errPtr
 {
 	if (state > STATE_RESOLVING_SRV)
@@ -371,26 +391,17 @@ enum XMPPStreamFlags
 		
 		state = STATE_RESOLVING_SRV;
 		
-		self.srvResolver = [RFSRVResolver resolveWithStream:self delegate:self];
+		[srvResolver release];
+		srvResolver = [[RFSRVResolver resolveWithStream:self delegate:self] retain];
 		
-		return NO;
+		return YES;
 	}
-	
-	state = STATE_CONNECTING;
-	
-	BOOL result = [asyncSocket connectToHost:hostName onPort:hostPort error:errPtr];
-	
-	if (result == NO)
+	else
 	{
-		state = STATE_DISCONNECTED;
+		// Open TCP connection to the configured hostName.
+		
+		return [self connectToHost:hostName onPort:hostPort error:errPtr];
 	}
-	else if ([self resetByteCountPerConnection])
-	{
-		numberOfBytesSent = 0;
-		numberOfBytesReceived = 0;
-	}
-	
-	return result;
 }
 
 - (BOOL)oldSchoolSecureConnect:(NSError **)errPtr
@@ -1855,6 +1866,68 @@ enum XMPPStreamFlags
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark RFSRVResolver Delegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)tryNextSrvResult
+{
+	NSError *connectError = nil;
+	BOOL success = NO;
+	
+	while (srvResultsIndex < [srvResults count])
+	{
+		RFSRVRecord *srvRecord = [srvResults objectAtIndex:srvResultsIndex];
+		NSString *srvHost = srvRecord.target;
+		UInt16 srvPort    = srvRecord.port;
+		
+		success = [self connectToHost:srvHost onPort:srvPort error:&connectError];
+		
+		if (success)
+		{
+			break;
+		}
+		else
+		{
+			srvResultsIndex++;
+		}
+	}
+	
+	if (!success)
+	{
+		// SRV resolution of the JID domain failed.
+		// As per the RFC:
+		// 
+		// "If the SRV lookup fails, the fallback is a normal IPv4/IPv6 address record resolution
+		// to determine the IP address, using the "xmpp-client" port 5222, registered with the IANA."
+		// 
+		// In other words, just try connecting to the domain specified in the JID.
+		
+		success = [self connectToHost:[myJID domain] onPort:5222 error:&connectError];
+	}
+	
+	if (!success)
+	{
+		state = STATE_DISCONNECTED;
+		
+		[multicastDelegate xmppStream:self didReceiveError:connectError];
+		[multicastDelegate xmppStreamDidDisconnect:self];
+	}
+}
+
+- (void)srvResolverDidResoveSRV:(RFSRVResolver *)sender
+{
+	srvResults = [[sender results] copy];
+	srvResultsIndex = 0;
+	
+	[self tryNextSrvResult];
+}
+
+- (void)srvResolver:(RFSRVResolver *)sender didNotResolveSRVWithError:(NSError *)srvError
+{
+	[self tryNextSrvResult];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark AsyncSocket Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1870,6 +1943,12 @@ enum XMPPStreamFlags
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
 	// The TCP connection is now established
+	
+	[srvResolver release];
+	srvResolver = nil;
+	
+	[srvResults release];
+	srvResults = nil;
 	
 	// Are we using old-style SSL? (Not the upgrade to TLS technique specified in the XMPP RFC)
 	if ([self isSecure])
@@ -1978,72 +2057,50 @@ enum XMPPStreamFlags
 **/
 - (void)onSocketDidDisconnect:(AsyncSocket *)sock
 {
-	// Update state
-	state = STATE_DISCONNECTED;
-	
-	// Release socket buffer
-	[socketBuffer release];
-	socketBuffer = nil;
-	
-	// Update configuration
-	[self setIsSecure:NO];
-	[self setIsAuthenticated:NO];
-	
-	// Release the parser (to free underlying resources)
-	[parser setDelegate:nil];
-	[parser release];
-	parser = nil;
-	
-	// Clear the root element
-	[rootElement release]; rootElement = nil;
-	
-	// Clear any saved authentication information
-	[tempPassword release]; tempPassword = nil;
-	
-	// Clear any synchronous send attempts
-	[synchronousUUID release]; synchronousUUID = nil;
-	
-	// Stop the keep alive timer
-	[keepAliveTimer invalidate];
-	[keepAliveTimer release];
-	keepAliveTimer = nil;
-	
-	// Notify delegate
-	[multicastDelegate xmppStreamDidDisconnect:self];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark RFSRVResolver Delegate
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)srvResolverDidResoveSRV:(RFSRVResolver *)sender {
-	NSError *connectError = nil;
-	BOOL result = NO;
-	
-	for (NSDictionary *srvRecord in sender.results) {
-		[self setHostName:[srvRecord objectForKey:kSRVResolverTarget]];
-		[self setHostPort:[[srvRecord objectForKey:kSRVResolverPort] unsignedIntValue]];
-		
-		result = [self connect:&connectError];
-		
-		// TODO: we should probably break on some connectErrors
-		if (result || 
-			(connectError != nil && [connectError.domain isEqualToString:XMPPStreamErrorDomain])) {
-			break;
-		}
+	if (srvResults && (++srvResultsIndex < [srvResults count]))
+	{
+		[self tryNextSrvResult];
 	}
-	
-	if (!result) {
-		NSLog(@"Error connecting: %@", connectError);
-	}		
-	
+	else
+	{
+		// Update state
+		state = STATE_DISCONNECTED;
+		
+		// Release socket buffer
+		[socketBuffer release];
+		socketBuffer = nil;
+		
+		// Update configuration
+		[self setIsSecure:NO];
+		[self setIsAuthenticated:NO];
+		
+		// Release the parser (to free underlying resources)
+		[parser setDelegate:nil];
+		[parser release];
+		parser = nil;
+		
+		// Clear the root element
+		[rootElement release]; rootElement = nil;
+		
+		// Clear any saved authentication information
+		[tempPassword release]; tempPassword = nil;
+		
+		// Clear srv results
+		[srvResolver release]; srvResolver = nil;
+		[srvResults release];  srvResults = nil;
+		
+		// Clear any synchronous send attempts
+		[synchronousUUID release]; synchronousUUID = nil;
+		
+		// Stop the keep alive timer
+		[keepAliveTimer invalidate];
+		[keepAliveTimer release];
+		keepAliveTimer = nil;
+		
+		// Notify delegate
+		[multicastDelegate xmppStreamDidDisconnect:self];
+	}
 }
-
-- (void)srvResolver:(RFSRVResolver *)sender didNotResolveSRVWithError:(NSError *)error {
-	//NSLog(@"%s %@", __PRETTY_FUNCTION__,error);
-	[multicastDelegate xmppStream:self didNotConnect:error];
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPParser Delegate
