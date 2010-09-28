@@ -10,6 +10,28 @@
 
 #define DEFAULT_TIMEOUT  30.0 // seconds
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface XMPPTimeQueryInfo : NSObject
+{
+	NSDate *timeSent;
+	NSTimeInterval timeout;
+}
+
++ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout;
+
+@property (nonatomic, readonly) NSDate *timeSent;
+@property (nonatomic, readonly) NSTimeInterval timeout;
+
+- (NSTimeInterval)rtt;
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation XMPPTime
 
@@ -19,22 +41,22 @@
 	{
 		queryIDs = [[NSMutableDictionary alloc] initWithCapacity:5];
 		
-		#if INTEGRATE_WITH_CAPABILITIES
+	  #if INTEGRATE_WITH_CAPABILITIES
 		
-			[xmppStream autoAddDelegate:self toModulesOfClass:[XMPPCapabilities class]];
+		[xmppStream autoAddDelegate:self toModulesOfClass:[XMPPCapabilities class]];
 		
-		#endif
+	  #endif
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	#if INTEGRATE_WITH_CAPABILITIES
+  #if INTEGRATE_WITH_CAPABILITIES
 	
-		[xmppStream removeAutoDelegate:self fromModulesOfClass:[XMPPCapabilities class]];
+	[xmppStream removeAutoDelegate:self fromModulesOfClass:[XMPPCapabilities class]];
 	
-	#endif
+  #endif
 	
 	[queryIDs release];
 	
@@ -50,7 +72,8 @@
 	NSString *queryID = [xmppStream generateUUID];
 	
 	// Add query ID to list so we'll recognize it when we get a response
-	[queryIDs setObject:[NSNumber numberWithDouble:timeout] forKey:queryID];
+	[queryIDs setObject:[XMPPTimeQueryInfo queryInfoWithTimeout:timeout]
+	             forKey:queryID];
 	
 	// In case we never get a response, we want to remove the query ID eventually,
 	// or we risk an ever increasing queryIDs array.
@@ -67,14 +90,15 @@
 {
 	NSString *queryID = (NSString *)[aTimer userInfo];
 	
-	NSNumber *timeoutNum = [[queryIDs objectForKey:queryID] retain];
-	if (timeoutNum)
+	XMPPTimeQueryInfo *queryInfo = [queryIDs objectForKey:queryID];
+	if (queryInfo)
 	{
+		[queryInfo retain];
 		[queryIDs removeObjectForKey:queryID];
 		
-		[multicastDelegate xmppTime:self didNotReceiveResponse:queryID dueToTimeout:[timeoutNum doubleValue]];
+		[multicastDelegate xmppTime:self didNotReceiveResponse:queryID dueToTimeout:[queryInfo timeout]];
 		
-		[timeoutNum release];
+		[queryInfo release];
 	}
 }
 
@@ -150,14 +174,15 @@
 		
 		NSString *queryID = [iq elementID];
 		
-		NSNumber *timeoutNum = [[queryIDs objectForKey:queryID] retain];
-		if (timeoutNum)
+		XMPPTimeQueryInfo *queryInfo = [queryIDs objectForKey:queryID];
+		if (queryInfo)
 		{
+			[queryInfo retain];
 			[queryIDs removeObjectForKey:queryID];
 			
-			[multicastDelegate xmppTime:self didReceiveResponse:iq];
+			[multicastDelegate xmppTime:self didReceiveResponse:iq withRTT:[queryInfo rtt]];
 			
-			[timeoutNum release];
+			[queryInfo release];
 		}
 	}
 	else if ([type isEqualToString:@"get"])
@@ -281,6 +306,43 @@
 	[time addChild:utc];
 	
 	return time;
+}
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@implementation XMPPTimeQueryInfo
+
+@synthesize timeSent;
+@synthesize timeout;
+
+- (id)initWithTimeout:(NSTimeInterval)to
+{
+	if ((self = [super init]))
+	{
+		timeSent = [[NSDate alloc] init];
+		timeout = to;
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	[timeSent release];
+	[super dealloc];
+}
+
+- (NSTimeInterval)rtt
+{
+	return [timeSent timeIntervalSinceNow] * -1.0;
+}
+
++ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout
+{
+	return [[[XMPPTimeQueryInfo alloc] initWithTimeout:timeout] autorelease];
 }
 
 @end
