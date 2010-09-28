@@ -59,7 +59,7 @@
 @protocol XMPPTimeDelegate
 @optional
 
-- (void)xmppTime:(XMPPTime *)sender didReceiveResponse:(XMPPIQ *)iq;
+- (void)xmppTime:(XMPPTime *)sender didReceiveResponse:(XMPPIQ *)iq withRTT:(NSTimeInterval)rtt;
 - (void)xmppTime:(XMPPTime *)sender didNotReceiveResponse:(NSString *)queryID dueToTimeout:(NSTimeInterval)timeout;
 
 @end
