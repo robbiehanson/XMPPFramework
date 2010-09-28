@@ -17,7 +17,4 @@
 - (NSString *)toStr;
 - (NSString *)fromStr;
 
-- (BOOL)wasDelayed;
-- (NSDate *)delayedDeliveryDate;
-
 @end

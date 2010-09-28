@@ -36,7 +36,7 @@
 @protocol XMPPPingDelegate
 @optional
 
-- (void)xmppPing:(XMPPPing *)sender didReceivePong:(XMPPIQ *)pong;
+- (void)xmppPing:(XMPPPing *)sender didReceivePong:(XMPPIQ *)pong withRTT:(NSTimeInterval)rtt;
 - (void)xmppPing:(XMPPPing *)sender didNotReceivePong:(NSString *)pingID dueToTimeout:(NSTimeInterval)timeout;
 
 @end
