@@ -352,8 +352,8 @@
 		// Perhaps a better solution would give us a more even spread.
 		// We can do this by calculating the range:
 		// 
-		// 37.000 - 36.750 = +0.25
-		// 37.999 - 36.750 = +1.249
+		// 37.000 - 36.750 = 0.25
+		// 37.999 - 36.750 = 1.249
 		// 
 		// So a better guess of the diff is 0.750 (3/4 of a second):
 		// 
@@ -361,8 +361,8 @@
 		// diff too big   : 50.0% chance
 		// diff too small : 49.9% chance
 		
-		NSTimeInterval diff1 = (remoteTI + 0.000) - localTI;
-		NSTimeInterval diff2 = (remoteTI + 0.999) - localTI;
+		NSTimeInterval diff1 = localTI - (remoteTI + 0.000);
+		NSTimeInterval diff2 = localTI - (remoteTI + 0.999);
 		
 		return ((diff1 + diff2) / 2.0);
 	}
