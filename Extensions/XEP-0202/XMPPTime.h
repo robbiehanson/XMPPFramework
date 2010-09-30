@@ -58,13 +58,13 @@
  * Rather this is the difference between our UTC time, and the remote party's UTC time.
  * If the two clocks are not synchronized, then the result represents the approximate difference.
  * 
- * If the remote clock is ahead of our clock, then the result will be positive.
- * If the remote clock is behind our clock, then the result will be negative.
+ * If our clock is earlier than the remote clock, then the result will be negative.
+ * If our clock is ahead of the remote clock, then the result will be positive.
  * 
- * If you later receive a timestamp from the remote party, you could subtract the diff.
+ * If you later receive a timestamp from the remote party, you could add the diff.
  * For example:
  * 
- * myTime = givenTimeFromRemoteParty - diff;
+ * myTime = [givenTimeFromRemoteParty dateByAddingTimeInterval:diff];
 **/
 + (NSTimeInterval)approximateTimeDifferenceFromResponse:(XMPPIQ *)iq andRTT:(NSTimeInterval)rtt;
 
