@@ -245,6 +245,18 @@
 	}
 }
 
+- (XMPPJID *)domainJID
+{
+	if(user == nil && resource == nil)
+	{
+		return [[self retain] autorelease];
+	}
+	else
+	{
+		return [XMPPJID jidWithUser:nil domain:domain resource:nil];
+	}
+}
+
 - (NSString *)bare
 {
 	if(user)
