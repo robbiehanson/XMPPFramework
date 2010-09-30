@@ -49,6 +49,26 @@
 + (NSTimeInterval)timeZoneOffsetFromResponse:(XMPPIQ *)iq;
 
 /**
+ * Given the returned time response from a remote party, and the approximate round trip time,
+ * calculates the difference between our clock and the remote party's clock.
+ * 
+ * This is NOT a reference to the difference in time zones.
+ * Time zone differences generally shouldn't matter as xmpp standards mandate the use of UTC.
+ * 
+ * Rather this is the difference between our UTC time, and the remote party's UTC time.
+ * If the two clocks are not synchronized, then the result represents the approximate difference.
+ * 
+ * If the remote clock is ahead of our clock, then the result will be positive.
+ * If the remote clock is behind our clock, then the result will be negative.
+ * 
+ * If you later receive a timestamp from the remote party, you could subtract the diff.
+ * For example:
+ * 
+ * myTime = givenTimeFromRemoteParty - diff;
+**/
++ (NSTimeInterval)approximateTimeDifferenceFromResponse:(XMPPIQ *)iq andRTT:(NSTimeInterval)rtt;
+
+/**
  * Creates and returns a time element.
 **/
 + (NSXMLElement *)timeElement;

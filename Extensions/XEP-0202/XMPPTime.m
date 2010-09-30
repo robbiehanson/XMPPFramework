@@ -113,13 +113,16 @@
 	
 	// Send ping packet
 	// 
-	// <iq type="get" id="queryID">
+	// <iq type="get" to="domain" id="queryID">
 	//   <time xmlns="urn:xmpp:time"/>
 	// </iq>
+	// 
+	// Note: Sometimes the to attribute is required. (ejabberd)
 	
 	NSXMLElement *time = [NSXMLElement elementWithName:@"time" xmlns:@"urn:xmpp:time"];
+	XMPPJID *domainJID = [[xmppStream myJID] domainJID];
 	
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:queryID child:time];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:domainJID elementID:queryID child:time];
 	
 	[xmppStream sendElement:iq];
 	
@@ -152,7 +155,7 @@
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSString *type = [[iq attributeForName:@"type"] stringValue];
+	NSString *type = [iq type];
 	
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
 	{
@@ -244,13 +247,28 @@
 	NSString *utc = [[time elementForName:@"utc"] stringValue];
 	if (utc == nil) return nil;
 	
-	NSDate *utcDateInLocalTZO = [XMPPDateTimeProfiles parseDateTime:utc];
+	// Note:
+	// 
+	// NSDate is a very simple class, but can be confusing at times.
+	// NSDate simply stores an NSTimeInterval internally,
+	// which is just a double representing the number seconds since the reference date.
+	// Since it's a double, it can yield sub-millisecond precision.
+	// 
+	// In addition to this, it stores the values in UTC.
+	// However, if you print the value using NSLog via "%@",
+	// it will automatically print the date in the local timezone:
+	// 
+	// NSDate *refDate = [NSDate dateWithTimeIntervalSinceReferenceDate:0.0];
+	// 
+	// NSLog(@"%f", [refDate timeIntervalSinceReferenceDate]);  // Prints: 0.0
+	// NSLog(@"%@", refDate);                                   // Prints: 2000-12-31 19:00:00 -05:00
+	// NSLog(@"%@", [utcDateFormatter stringFromDate:refDate]); // Prints: 2001-01-01 00:00:00 +00:00
+	// 
+	// Now the value we've received from XMPPDateTimeProfiles is correct.
+	// If we print it out using a utcDateFormatter we would see it is correct.
+	// If we printed it out generically using NSLog, then we would see it converted into our local time zone.
 	
-	// Since the date was given in UTC, we need to add/subtract the difference.
-	
-	NSTimeInterval localTZO = [[NSTimeZone systemTimeZone] secondsFromGMT];
-	
-	return [utcDateInLocalTZO dateByAddingTimeInterval:localTZO];
+	return [XMPPDateTimeProfiles parseDateTime:utc];
 }
 
 + (NSTimeInterval)timeZoneOffsetFromResponse:(XMPPIQ *)iq
@@ -271,6 +289,85 @@
 	return [XMPPDateTimeProfiles parseTimeZoneOffset:tzo];
 }
 
++ (NSTimeInterval)approximateTimeDifferenceFromResponse:(XMPPIQ *)iq andRTT:(NSTimeInterval)rtt
+{
+	// First things first, get the current date and time
+	
+	NSDate *localDate = [NSDate date];
+	
+	// Then worry about the calculations
+	
+	NSXMLElement *time = [iq elementForName:@"time" xmlns:@"urn:xmpp:time"];
+	if (time == nil) return 0.0;
+	
+	NSString *utc = [[time elementForName:@"utc"] stringValue];
+	if (utc == nil) return 0.0;
+	
+	NSDate *remoteDate = [XMPPDateTimeProfiles parseDateTime:utc];
+	if (remoteDate == nil) return 0.0;
+	
+	NSTimeInterval localTI  = [localDate timeIntervalSinceReferenceDate];
+	NSTimeInterval remoteTI = [remoteDate timeIntervalSinceReferenceDate] - (rtt / 2.0);
+	
+	// Did the response contain millisecond precision?
+	// This is an important consideration.
+	// Imagine if both computers are perfectly synced,
+	// but the remote response doesn't contain milliseconds.
+	// This could possibly cause us to think the difference is close to a full second.
+	// 
+	// DateTime examples (from XMPPDateTimeProfiles documentation):
+	// 
+	// 1969-07-21T02:56:15
+	// 1969-07-21T02:56:15Z
+	// 1969-07-20T21:56:15-05:00
+	// 1969-07-21T02:56:15.123
+	// 1969-07-21T02:56:15.123Z
+	// 1969-07-20T21:56:15.123-05:00
+	
+	BOOL hasMilliseconds = ([utc length] > 19) && ([utc characterAtIndex:19] == '.');
+	
+	if (hasMilliseconds)
+	{
+		return remoteTI - localTI;
+	}
+	else
+	{
+		// No milliseconds. What to do?
+		// 
+		// We could simply truncate the milliseconds from our time...
+		// But this could make things much worse.
+		// For example:
+		// 
+		// local  = 14:22:36.750
+		// remote = 14:22:37
+		// 
+		// If we truncate the result now we calculate a diff of 1.000 (a full second).
+		// Considering the remote's milliseconds could have been anything from 000 to 999,
+		// this means our calculations are:
+		// 
+		// perfect        :  0.1% chance
+		// diff too big   : 75.0% chance
+		// diff too small : 24.9% chance
+		// 
+		// Perhaps a better solution would give us a more even spread.
+		// We can do this by calculating the range:
+		// 
+		// 37.000 - 36.750 = +0.25
+		// 37.999 - 36.750 = +1.249
+		// 
+		// So a better guess of the diff is 0.750 (3/4 of a second):
+		// 
+		// perfect        :  0.1% chance
+		// diff too big   : 50.0% chance
+		// diff too small : 49.9% chance
+		
+		NSTimeInterval diff1 = (remoteTI + 0.000) - localTI;
+		NSTimeInterval diff2 = (remoteTI + 0.999) - localTI;
+		
+		return ((diff1 + diff2) / 2.0);
+	}
+}
+
 + (NSXMLElement *)timeElement
 {
 	return [self timeElementFromDate:[NSDate date]];
@@ -286,6 +383,7 @@
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
 	[df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
+	[df setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
 	NSString *utcValue = [df stringFromDate:date];
 	
