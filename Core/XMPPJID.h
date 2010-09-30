@@ -17,6 +17,7 @@
 - (NSString *)resource;
 
 - (XMPPJID *)bareJID;
+- (XMPPJID *)domainJID;
 
 - (NSString *)bare;
 - (NSString *)full;
