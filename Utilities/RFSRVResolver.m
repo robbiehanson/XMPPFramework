@@ -302,15 +302,17 @@ static void QueryRecordCallback(
 #pragma unused(interfaceIndex)
     // errorCode looked at below
 #pragma unused(fullname)
-#pragma unused(rrtype)
-    assert(rrtype == kDNSServiceType_SRV);
 #pragma unused(rrclass)
     assert(rrclass == kDNSServiceClass_IN);
     // rdlen and rdata used below
 #pragma unused(ttl)
     // context used above
-	
-    if (errorCode == kDNSServiceErr_NoError) {
+    
+    if (errorCode == kDNSServiceErr_NoError && 
+        rrtype != kDNSServiceType_SRV) {
+        // facebook does a CNAME redirect instead of SRV lookup for _xmpp-client._tcp.chat.facebook.com
+        [obj _stopWithError:nil];
+    } else if (errorCode == kDNSServiceErr_NoError) {
         [obj _processRecord:rdata length:rdlen];
         if ( ! (flags & kDNSServiceFlagsMoreComing) ) {
             [obj _stopWithError:nil];
