@@ -15,6 +15,46 @@
 @class XMPPModule;
 @protocol XMPPStreamDelegate;
 
+// Define the various states we'll use to track our progress
+enum {
+	STATE_DISCONNECTED,
+	STATE_RESOLVING_SRV,
+	STATE_CONNECTING,
+	STATE_OPENING,
+	STATE_NEGOTIATING,
+	STATE_STARTTLS,
+	STATE_REGISTERING,
+	STATE_AUTH_1,
+	STATE_AUTH_2,
+	STATE_AUTH_3,
+	STATE_BINDING,
+	STATE_START_SESSION,
+	STATE_CONNECTED,
+};
+
+// Define the debugging state
+#define DEBUG_SEND      YES
+#define DEBUG_RECV_PRE  YES  // Prints data before going to xmpp parser
+#define DEBUG_RECV_POST NO   // Prints data as it comes out of xmpp parser
+
+#define DDLogSend(format, ...)     do{ if(DEBUG_SEND)      NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogRecvPre(format, ...)  do{ if(DEBUG_RECV_PRE)  NSLog((format), ##__VA_ARGS__); }while(0)
+#define DDLogRecvPost(format, ...) do{ if(DEBUG_RECV_POST) NSLog((format), ##__VA_ARGS__); }while(0)
+
+// Define the various timeouts (in seconds) for retreiving various parts of the XML stream
+#define TIMEOUT_WRITE         10
+#define TIMEOUT_READ_START    10
+#define TIMEOUT_READ_STREAM   -1
+
+// Define the various tags we'll use to differentiate what it is we're currently reading or writing
+#define TAG_WRITE_START        -100 // Must be outside UInt16 range
+#define TAG_WRITE_STREAM       -101 // Must be outside UInt16 range
+#define TAG_WRITE_SYNCHRONOUS  -102 // Must be outside UInt16 range
+
+#define TAG_READ_START       200
+#define TAG_READ_STREAM      201
+
+
 #if TARGET_OS_IPHONE
   #define DEFAULT_KEEPALIVE_INTERVAL 120.0 // 2 Minutes
 #else
@@ -395,6 +435,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (BOOL)supportsDeprecatedDigestAuthentication;
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
 - (BOOL)authenticateAnonymously:(NSError **)errPtr;
+
+- (void)handleAuth1:(NSXMLElement *)response;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Server Info
