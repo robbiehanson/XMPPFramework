@@ -18,10 +18,14 @@
 
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;
+- (BOOL)isErrorMessage;
+- (BOOL)isMessageWithBody;
 
 - (BOOL)hasReceiptRequest;
 - (BOOL)hasReceiptResponse;
 - (NSString *)extractReceiptResponseID;
 - (XMPPMessage *)generateReceiptResponse;
+
+- (NSError *)errorMessage;
 
 @end
