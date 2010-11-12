@@ -16,6 +16,7 @@
 
 NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
+#define RFSRVRESOLVER_TIMEOUT 30.0
 
 @interface RFSRVRecord ()
 
@@ -93,11 +94,14 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 @property (nonatomic, assign, readwrite, getter=isFinished) BOOL    finished;
 @property (nonatomic, retain, readwrite) NSError *                  error;
 @property (nonatomic, retain, readwrite) NSArray *                  results;
+@property (nonatomic, retain, readwrite) NSTimer *                  timeoutTimer;
 
 // Forward declarations
 
 - (void)_closeSockets;
+- (void)_didTimeoutTimer:(NSTimer *)timer;
 - (void)_start;
+- (void)_stopWithDNSServiceError:(DNSServiceErrorType)errorCode;
 - (void)sortResults;
 
 @end
@@ -108,12 +112,13 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
 @implementation RFSRVResolver
 
-@synthesize xmppStream = _xmppStream;
-@synthesize delegate   = _delegate;
+@synthesize xmppStream      = _xmppStream;
+@synthesize delegate        = _delegate;
 
-@synthesize finished   = _finished;
-@synthesize error      = _error;
-@synthesize results    = _results;
+@synthesize finished        = _finished;
+@synthesize error           = _error;
+@synthesize results         = _results;
+@synthesize timeoutTimer    = _timeoutTimer;
 
 #pragma mark Init methods
 
@@ -141,6 +146,10 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
     [_error release];
     [_results release];
 	[_xmppStream release];
+    
+    [_timeoutTimer invalidate];
+    [_timeoutTimer release];
+    
     [super dealloc];
 }
 
@@ -152,6 +161,13 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 	//	NSLog(@"%s",__PRETTY_FUNCTION__);
         self.error    = nil;            // starting up again, so forget any previous error
         self.finished = NO;
+        
+        self.timeoutTimer = [NSTimer scheduledTimerWithTimeInterval:RFSRVRESOLVER_TIMEOUT
+                                                             target:self
+                                                           selector:@selector(_didTimeoutTimer:)
+                                                           userInfo:nil
+                                                            repeats:NO];
+        
         [self _start];
 	}
 }
@@ -159,6 +175,10 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 - (void)stop
 {
     [self _closeSockets];
+    
+    [self.timeoutTimer invalidate];
+    self.timeoutTimer = nil;
+    
     self.finished = YES;
 
 	[self sortResults];
@@ -179,9 +199,16 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
     }
 }
 
+- (void)_didTimeoutTimer:(NSTimer *)timer {
+    DDLogTrace();
+    [self _stopWithDNSServiceError:kDNSServiceErr_Unknown];
+}
+
 - (void)_stopWithError:(NSError *)error
 {
-//	NSLog(@"%s %@",__PRETTY_FUNCTION__,error);
+    if (error != nil) {
+        DDLogError(@"%s %@",__PRETTY_FUNCTION__,error);
+    }
 
     // error may be nil
     self.error = error;
@@ -292,6 +319,8 @@ static void QueryRecordCallback(
 // is done in the -_processRecord:length: method.
 {
     RFSRVResolver *   obj;
+    
+    DDLogVerbose(@"%s",__PRETTY_FUNCTION__);
 	
     obj = (RFSRVResolver *) context;
     assert([obj isKindOfClass:[RFSRVResolver class]]);
@@ -336,6 +365,8 @@ static void SDRefSocketCallback(
     DNSServiceErrorType err;
     RFSRVResolver *       obj;
     
+    DDLogVerbose(@"%s",__PRETTY_FUNCTION__);
+    
 #pragma unused(type)
     assert(type == kCFSocketReadCallBack);
 #pragma unused(address)
@@ -370,8 +401,8 @@ static void SDRefSocketCallback(
 	
 	NSString *srvName = [NSString stringWithFormat:@"_xmpp-client._tcp.%@", [[self.xmppStream myJID] domain]];
 	
-//	NSLog(@"Looking up %@...",srvName);	
-	
+	DDLogVerbose(@"%s Looking up %@...",__PRETTY_FUNCTION__,srvName);	
+    
     srvNameCStr = [srvName cStringUsingEncoding:NSASCIIStringEncoding];
     if (srvNameCStr == nil) {
         err = kDNSServiceErr_BadParam;
@@ -427,7 +458,7 @@ static void SDRefSocketCallback(
 
 - (void)sortResults
 {
-//	NSLog(@"%s",__PRETTY_FUNCTION__);
+    DDLogVerbose(@"%s",__PRETTY_FUNCTION__);
 	
 	// Sort results
 	NSMutableArray *sortedResults = [NSMutableArray arrayWithCapacity:[_results count]];
@@ -545,7 +576,7 @@ static void SDRefSocketCallback(
 	}
 	
 	self.results = sortedResults;
-//	NSLog(@"Sorted results: %@", self.results);
+    DDLogVerbose(@"%s Sorted results: %@",__PRETTY_FUNCTION__, self.results);
 }
 
 @end

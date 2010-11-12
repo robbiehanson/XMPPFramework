@@ -47,6 +47,7 @@ extern NSString * kRFSRVResolverErrorDomain;
     NSMutableArray *        _results;
     DNSServiceRef           _sdRef;
     CFSocketRef             _sdRefSocket;
+    NSTimer *               _timeoutTimer;
 }
 
 @property (nonatomic, retain, readonly) XMPPStream *				xmppStream;
