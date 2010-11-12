@@ -901,7 +901,7 @@ static NSMutableDictionary *existingTurnSockets;
 		
 		if(asyncSocket == nil)
 		{
-			asyncSocket = [[AsyncSocket alloc] initWithDelegate:self];
+			asyncSocket = [(AsyncSocket *)[AsyncSocket alloc] initWithDelegate:self];
 		}
 		
 		DDLogVerbose(@"TURNSocket: targetNextConnect: %@(%@:%hu)", [proxyJID full], proxyHost, proxyPort);
@@ -924,7 +924,7 @@ static NSMutableDictionary *existingTurnSockets;
 {
 	NSAssert(asyncSocket == nil, @"Expecting asyncSocket to be nil");
 	
-	asyncSocket = [[AsyncSocket alloc] initWithDelegate:self];
+	asyncSocket = [(AsyncSocket *)[AsyncSocket alloc] initWithDelegate:self];
 	
 	DDLogVerbose(@"TURNSocket: initiatorConnect: %@(%@:%hu)", [proxyJID full], proxyHost, proxyPort);
 	
