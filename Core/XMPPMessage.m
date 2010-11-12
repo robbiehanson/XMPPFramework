@@ -45,12 +45,32 @@
 {
 	if([self isChatMessage])
 	{
-		NSString *body = [[self elementForName:@"body"] stringValue];
-		
-		return ((body != nil) && ([body length] > 0));
+		return [self isMessageWithBody];
 	}
 	
 	return NO;
+}
+
+- (BOOL)isErrorMessage {
+    return [[[self attributeForName:@"type"] stringValue] isEqualToString:@"error"];
+}
+
+- (NSError *)errorMessage {
+    if (![self isErrorMessage]) {
+        return nil;
+    }
+    
+    NSXMLElement *error = [self elementForName:@"error"];
+    return [NSError errorWithDomain:@"urn:ietf:params:xml:ns:xmpp-stanzas" 
+                               code:[error attributeIntValueForName:@"code"] 
+                           userInfo:[NSDictionary dictionaryWithObject:[error compactXMLString] forKey:NSLocalizedDescriptionKey]];
+
+}
+
+- (BOOL)isMessageWithBody {
+    NSString *body = [[self elementForName:@"body"] stringValue];
+    
+    return ((body != nil) && ([body length] > 0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
