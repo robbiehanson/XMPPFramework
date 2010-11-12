@@ -162,7 +162,7 @@
 		return [self parseData:[param stringValue]];
 	} else {
 		// bad element
-		NSLog(@"%s bad element: %@", __PRETTY_FUNCTION__, [param stringValue]);
+		DDLogWarn(@"%s bad element: %@", __PRETTY_FUNCTION__, [param stringValue]);
 	}
 	return nil;
 }				
