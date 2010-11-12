@@ -257,7 +257,7 @@
         NSError *error;
         if (![self authenticateWithPassword:[resultStr stringByReplacingOccurrencesOfString:@"\"" 
                                                                                  withString:@""] error:&error]) {
-            NSLog(@"authenticateWithPassword: %@ error: %@",resultStr,error);
+            DDLogError(@"authenticateWithPassword: %@ error: %@",resultStr,error);
             
             // Revert back to connected state (from authenticating state)
             state = STATE_CONNECTED;
