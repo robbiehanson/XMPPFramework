@@ -10,6 +10,8 @@
 #import <dns_sd.h>
 
 #import "XMPPStream.h"
+#import "DDLog.h"
+
 
 @protocol RFSRVResolverDelegate;
 
