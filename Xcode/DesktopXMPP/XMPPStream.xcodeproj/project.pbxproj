@@ -139,6 +139,9 @@
 		DCA615221250069F00C75522 /* XMPPTime.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA6151F1250069F00C75522 /* XMPPTime.m */; };
 		DCAB742C0BDE013000E828D5 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCAB742B0BDE013000E828D5 /* libcrypto.dylib */; };
 		DCCE55610BDC6FAC000E2798 /* RosterController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55600BDC6FAC000E2798 /* RosterController.m */; };
+		DCD28630128F7294001E7AEC /* XMPPElement+Delay.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD2862F128F7294001E7AEC /* XMPPElement+Delay.m */; };
+		DCD28631128F7294001E7AEC /* XMPPElement+Delay.h in Headers */ = {isa = PBXBuildFile; fileRef = DCD2862E128F7294001E7AEC /* XMPPElement+Delay.h */; };
+		DCD28632128F7294001E7AEC /* XMPPElement+Delay.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD2862F128F7294001E7AEC /* XMPPElement+Delay.m */; };
 		DCD493CD1223483B004BEE1A /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD493CC1223483B004BEE1A /* libresolv.dylib */; };
 		DCF825950D748DC000BFABDE /* RequestController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825940D748DC000BFABDE /* RequestController.m */; };
 		DCF825F50D749A5100BFABDE /* ChatController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825F40D749A5100BFABDE /* ChatController.m */; };
@@ -264,6 +267,8 @@
 		DCAB742B0BDE013000E828D5 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		DCCE555F0BDC6FAC000E2798 /* RosterController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = RosterController.h; sourceTree = "<group>"; };
 		DCCE55600BDC6FAC000E2798 /* RosterController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = RosterController.m; sourceTree = "<group>"; };
+		DCD2862E128F7294001E7AEC /* XMPPElement+Delay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XMPPElement+Delay.h"; path = "../../Extensions/XEP-0203/XMPPElement+Delay.h"; sourceTree = SOURCE_ROOT; };
+		DCD2862F128F7294001E7AEC /* XMPPElement+Delay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XMPPElement+Delay.m"; path = "../../Extensions/XEP-0203/XMPPElement+Delay.m"; sourceTree = SOURCE_ROOT; };
 		DCD493CC1223483B004BEE1A /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		DCF825930D748DC000BFABDE /* RequestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestController.h; sourceTree = "<group>"; };
 		DCF825940D748DC000BFABDE /* RequestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestController.m; sourceTree = "<group>"; };
@@ -448,6 +453,7 @@
 				DCAD3FBA1156DC1D00FC568A /* XEP-0115 */,
 				DCAD3FB31156DBE800FC568A /* XEP-0199 */,
 				DCA6151B1250067000C75522 /* XEP-0202 */,
+				DCD2862D128F7256001E7AEC /* XEP-0203 */,
 			);
 			name = Extensions;
 			sourceTree = "<group>";
@@ -644,6 +650,15 @@
 			tabWidth = 4;
 			usesTabs = 1;
 		};
+		DCD2862D128F7256001E7AEC /* XEP-0203 */ = {
+			isa = PBXGroup;
+			children = (
+				DCD2862E128F7294001E7AEC /* XMPPElement+Delay.h */,
+				DCD2862F128F7294001E7AEC /* XMPPElement+Delay.m */,
+			);
+			name = "XEP-0203";
+			sourceTree = "<group>";
+		};
 		DCEC5E55115CF48B00CAA66F /* AppDelegate */ = {
 			isa = PBXGroup;
 			children = (
@@ -712,6 +727,7 @@
 				DC84BB7A1244095D0055A459 /* XMPPPing.h in Headers */,
 				DCA614F01250034B00C75522 /* XMPPDateTimeProfiles.h in Headers */,
 				DCA615211250069F00C75522 /* XMPPTime.h in Headers */,
+				DCD28631128F7294001E7AEC /* XMPPElement+Delay.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -868,6 +884,7 @@
 				DC84BB7B1244095D0055A459 /* XMPPPing.m in Sources */,
 				DCA614F11250034B00C75522 /* XMPPDateTimeProfiles.m in Sources */,
 				DCA615221250069F00C75522 /* XMPPTime.m in Sources */,
+				DCD28632128F7294001E7AEC /* XMPPElement+Delay.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -925,6 +942,7 @@
 				DC84BB791244095D0055A459 /* XMPPPing.m in Sources */,
 				DCA614EF1250034B00C75522 /* XMPPDateTimeProfiles.m in Sources */,
 				DCA615201250069F00C75522 /* XMPPTime.m in Sources */,
+				DCD28630128F7294001E7AEC /* XMPPElement+Delay.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,6 @@
 #import "XMPPResourceMemoryStorage.h"
 #import "XMPP.h"
+#import "XMPPElement+Delay.h"
 
 
 @implementation XMPPResourceMemoryStorage
