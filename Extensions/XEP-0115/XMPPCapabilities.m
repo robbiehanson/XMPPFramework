@@ -1,13 +1,11 @@
 #import "XMPP.h"
+#import "XMPPLogging.h"
 #import "XMPPCapabilities.h"
 #import "NSDataAdditions.h"
 
-// Debug levels: 0-off, 1-error, 2-warn, 3-info, 4-verbose
-#ifndef DEBUG_LEVEL
-	#define DEBUG_LEVEL 2
-#endif
-
-#include "DDLog.h"
+// Log levels: off, error, warn, info, verbose
+// Log flags: trace
+static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE; // | XMPP_LOG_FLAG_TRACE;
 
 /**
  * Defines the timeout for a capabilities request.
@@ -34,6 +32,16 @@
 	#define DISCO_NODE @"http://code.google.com/p/xmppframework"
 #endif
 
+@interface GCDTimerWrapper : NSObject
+{
+	dispatch_source_t timer;
+}
+
+- (id)initWithDispatchTimer:(dispatch_source_t)aTimer;
+- (void)cancel;
+
+@end
+
 @interface XMPPCapabilities (PrivateAPI)
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid;
@@ -42,6 +50,7 @@
 - (void)cancelTimeoutForDiscoRequestFromJID:(XMPPJID *)jid;
 
 - (void)processTimeoutWithHashKey:(NSString *)key;
+- (void)processTimeoutWithJID:(XMPPJID *)jid;
 
 @end
 
@@ -51,15 +60,29 @@
 
 @implementation XMPPCapabilities
 
-@synthesize xmppCapabilitiesStorage;
-@synthesize autoFetchHashedCapabilities;
-@synthesize autoFetchNonHashedCapabilities;
+@dynamic xmppCapabilitiesStorage;
+@dynamic autoFetchHashedCapabilities;
+@dynamic autoFetchNonHashedCapabilities;
 
-- (id)initWithStream:(XMPPStream *)aXmppStream capabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage
+- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage
 {
-	if ((self = [super initWithStream:aXmppStream]))
+	return [self initWithCapabilitiesStorage:storage dispatchQueue:NULL];
+}
+
+- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(dispatch_queue_t)queue
+{
+	NSParameterAssert(storage != nil);
+	
+	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		xmppCapabilitiesStorage = [storage retain];
+		if ([storage configureWithParent:self queue:moduleQueue])
+		{
+			xmppCapabilitiesStorage = [storage retain];
+		}
+		else
+		{
+			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
+		}
 		
 		// discoRequestJidSet:
 		// 
@@ -90,6 +113,25 @@
 	return self;
 }
 
+- (BOOL)activate:(XMPPStream *)aXmppStream
+{
+	if ([super activate:aXmppStream])
+	{
+		// Custom code goes here (if needed)
+		
+		return YES;
+	}
+	
+	return NO;
+}
+
+- (void)deactivate
+{
+	// Custom code goes here (if needed)
+	
+	[super deactivate];
+}
+
 - (void)dealloc
 {
 	[xmppCapabilitiesStorage release];
@@ -97,15 +139,80 @@
 	[discoRequestJidSet release];
 	[discoRequestHashDict release];
 	
-	for (NSTimer *timer in discoTimerJidDict)
+	for (GCDTimerWrapper *timerWrapper in discoTimerJidDict)
 	{
-		[timer invalidate];
+		[timerWrapper cancel];
 	}
 	[discoTimerJidDict release];
 	
 	[lastHash release];
 	
 	[super dealloc];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Configuration
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (id <XMPPCapabilitiesStorage>)xmppCapabilitiesStorage
+{
+	return xmppCapabilitiesStorage;
+}
+
+- (BOOL)autoFetchHashedCapabilities
+{
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = autoFetchHashedCapabilities;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoFetchHashedCapabilities:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoFetchHashedCapabilities = flag;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)autoFetchNonHashedCapabilities
+{
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = autoFetchNonHashedCapabilities;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoFetchNonHashedCapabilities:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoFetchNonHashedCapabilities = flag;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,121 +604,140 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)fetchCapabilitiesForJID:(XMPPJID *)jid
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	if (![jid isFull])
 	{
 		// Invalid JID - Must be a full JID (i.e. it must include the resource)
 		return;
 	}
 	
-	if ([discoRequestJidSet containsObject:jid])
-	{
-		// We're already requesting capabilities concerning this JID
-		return;
-	}
-	
-	BOOL areCapabilitiesKnown;
-	BOOL haveFailedFetchingBefore;
-	
-	NSString *node    = nil;
-	NSString *ver     = nil;
-	NSString *hash    = nil;
-	NSString *hashAlg = nil;
-	
-	[xmppCapabilitiesStorage getCapabilitiesKnown:&areCapabilitiesKnown
-	                                       failed:&haveFailedFetchingBefore
-	                                         node:&node
-	                                          ver:&ver
-	                                          ext:nil
-	                                         hash:&hash
-	                                    algorithm:&hashAlg
-	                                       forJID:jid];
-	if (areCapabilitiesKnown)
-	{
-		// We already know the capabilities for this JID
-		return;
-	}
-	if (haveFailedFetchingBefore)
-	{
-		// We've already sent a fetch request to the JID in the past, which failed.
-		return;
-	}
-	
-	NSString *key = nil;
-	
-	if (hash && hashAlg)
-	{
-		// This jid is associated with a capabilities hash.
-		// 
-		// Now, we've verified that the jid is not in the discoRequestJidSet.
-		// But consider the following scenario.
-		// 
-		// - autoFetchCapabilities is false.
-		// - We receive 2 presence elements from 2 different jids, both advertising the same capabilities hash.
-		// - This method is called for the first jid.
-		// - This method is then immediately called for the second jid.
-		// 
-		// Now since autoFetchCapabilities is false, the second jid will not be in the discoRequestJidSet.
-		// However, there is still a disco request that concerns the jid.
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		key = [self keyFromHash:hash algorithm:hashAlg];
-		NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
-		
-		if (jids)
+		if ([discoRequestJidSet containsObject:jid])
 		{
-			// We're already requesting capabilities concerning this JID.
-			// That is, there is another JID with the same hash, and we've already sent a disco request to it.
-			
-			[jids addObject:jid];
-			[discoRequestJidSet addObject:jid];
-			
+			// We're already requesting capabilities concerning this JID
+			[pool drain];
 			return;
 		}
 		
-		// Note: The first object in the jids array is the index of the last jid that we've sent a disco request to.
-		// This is used in case the jid does not respond.
+		BOOL areCapabilitiesKnown;
+		BOOL haveFailedFetchingBefore;
 		
-		NSNumber *requestIndexNum = [NSNumber numberWithUnsignedInteger:1];
-		jids = [NSMutableArray arrayWithObjects:requestIndexNum, jid, nil];
+		NSString *node    = nil;
+		NSString *ver     = nil;
+		NSString *hash    = nil;
+		NSString *hashAlg = nil;
 		
-		[discoRequestHashDict setObject:jids forKey:key];
-		[discoRequestJidSet addObject:jid];
-	}
+		[xmppCapabilitiesStorage getCapabilitiesKnown:&areCapabilitiesKnown
+		                                       failed:&haveFailedFetchingBefore
+		                                         node:&node
+		                                          ver:&ver
+		                                          ext:nil
+		                                         hash:&hash
+		                                    algorithm:&hashAlg
+		                                       forJID:jid];
+		
+		if (areCapabilitiesKnown)
+		{
+			// We already know the capabilities for this JID
+			[pool drain];
+			return;
+		}
+		if (haveFailedFetchingBefore)
+		{
+			// We've already sent a fetch request to the JID in the past, which failed.
+			[pool drain];
+			return;
+		}
+		
+		NSString *key = nil;
+		
+		if (hash && hashAlg)
+		{
+			// This jid is associated with a capabilities hash.
+			// 
+			// Now, we've verified that the jid is not in the discoRequestJidSet.
+			// But consider the following scenario.
+			// 
+			// - autoFetchCapabilities is false.
+			// - We receive 2 presence elements from 2 different jids, both advertising the same capabilities hash.
+			// - This method is called for the first jid.
+			// - This method is then immediately called for the second jid.
+			// 
+			// Now since autoFetchCapabilities is false, the second jid will not be in the discoRequestJidSet.
+			// However, there is still a disco request that concerns the jid.
+			
+			key = [self keyFromHash:hash algorithm:hashAlg];
+			NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+			
+			if (jids)
+			{
+				// We're already requesting capabilities concerning this JID.
+				// That is, there is another JID with the same hash, and we've already sent a disco request to it.
+				
+				[jids addObject:jid];
+				[discoRequestJidSet addObject:jid];
+				
+				[pool drain];
+				return;
+			}
+			
+			// The first object in the jids array is the index of the last jid that we've sent a disco request to.
+			// This is used in case the jid does not respond.
+			
+			NSNumber *requestIndexNum = [NSNumber numberWithUnsignedInteger:1];
+			jids = [NSMutableArray arrayWithObjects:requestIndexNum, jid, nil];
+			
+			[discoRequestHashDict setObject:jids forKey:key];
+			[discoRequestJidSet addObject:jid];
+		}
+		else
+		{
+			[discoRequestJidSet addObject:jid];
+		}
+		
+		// <iq to="romeo@montague.lit/orchard" id="uuid" type="get">
+		//   <query xmlns="http://jabber.org/protocol/disco#info" node="[node]#[ver]"/>
+		// </iq>
+		// 
+		// Note:
+		// Some xmpp clients will return an error if we don't specify the proper query node.
+		// Some xmpp clients will return an error if we don't include an id attribute in the iq.
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+		
+		if (node && ver)
+		{
+			NSString *nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
+			
+			[query addAttributeWithName:@"node" stringValue:nodeValue];
+		}
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
+		
+		[xmppStream sendElement:iq];
+		
+		// Setup request timeout
+		
+		if (key)
+		{
+			[self setupTimeoutForDiscoRequestFromJID:jid withHashKey:key];
+		}
+		else
+		{
+			[self setupTimeoutForDiscoRequestFromJID:jid];
+		}
+		
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
 	else
-	{
-		[discoRequestJidSet addObject:jid];
-	}
-	
-	// <iq to="romeo@montague.lit/orchard" id="uuid" type="get">
-	//   <query xmlns="http://jabber.org/protocol/disco#info" node="[node]#[ver]"/>
-	// </iq>
-	// 
-	// Note:
-	// Some xmpp clients will return an error if we don't specify the proper query node.
-	// Some xmpp clients will return an error if we don't include an id attribute in the iq.
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
-	
-	if (node && ver)
-	{
-		NSString *nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
-		
-		[query addAttributeWithName:@"node" stringValue:nodeValue];
-	}
-	
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
-	
-	[xmppStream sendElement:iq];
-	
-	// Setup request timeout
-	
-	if (key)
-	{
-		[self setupTimeoutForDiscoRequestFromJID:jid withHashKey:key];
-	}
-	else
-	{
-		[self setupTimeoutForDiscoRequestFromJID:jid];
-	}
+		dispatch_async(moduleQueue, block);
 }
 
 /**
@@ -620,7 +746,10 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handlePresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
 	
 	// <presence from="romeo@montague.lit/orchard">
 	//   <c xmlns="http://jabber.org/protocol/caps"
@@ -637,7 +766,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	{
 		// Invalid capabilities node!
 		
-		if (self.autoFetchNonHashedCapabilities)
+		if (autoFetchNonHashedCapabilities)
 		{
 			[self fetchCapabilitiesForJID:jid];
 		}
@@ -661,7 +790,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 													   andGetNewCapabilities:&newCapabilities];
 	if (areCapabilitiesKnown)
 	{
-		DDLogVerbose(@"Capabilities already known for jid(%@) with hash(%@)", jid, ver);
+		XMPPLogVerbose(@"%@: Capabilities already known for jid(%@) with hash(%@)", THIS_FILE, jid, ver);
 		
 		if (newCapabilities)
 		{
@@ -678,7 +807,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	// Should we automatically fetch the capabilities?
 	
-	if (!self.autoFetchHashedCapabilities)
+	if (!autoFetchHashedCapabilities)
 	{
 		return;
 	}
@@ -690,7 +819,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (jids)
 	{
-		DDLogVerbose(@"We're already fetching capabilities for hash(%@)", ver);
+		XMPPLogVerbose(@"%@: We're already fetching capabilities for hash(%@)", THIS_FILE, ver);
 		
 		// Is the jid already included in this list?
 		// 
@@ -762,7 +891,10 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleLegacyPresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
-	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
 	
 	NSString *node = [c attributeStringValueForName:@"node"];
 	NSString *ver  = [c attributeStringValueForName:@"ver"];
@@ -772,7 +904,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	{
 		// Invalid capabilities node!
 		
-		if (self.autoFetchNonHashedCapabilities)
+		if (autoFetchNonHashedCapabilities)
 		{
 			[self fetchCapabilitiesForJID:jid];
 		}
@@ -789,7 +921,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 													   andGetNewCapabilities:nil];
 	if (areCapabilitiesKnown)
 	{
-		DDLogVerbose(@"Capabilities already known for jid(%@)", jid);
+		XMPPLogVerbose(@"%@: Capabilities already known for jid(%@)", THIS_FILE, jid);
 		
 		// The capabilities for this jid are already known
 		return;
@@ -797,7 +929,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	// Should we automatically fetch the capabilities?
 	
-	if (!self.autoFetchNonHashedCapabilities)
+	if (!autoFetchNonHashedCapabilities)
 	{
 		return;
 	}
@@ -806,7 +938,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if ([discoRequestJidSet containsObject:jid])
 	{
-		DDLogVerbose(@"We're already fetching capabilities for jid(%@)", jid);
+		XMPPLogVerbose(@"%@: We're already fetching capabilities for jid(%@)", THIS_FILE, jid);
 		
 		// We've already sent a disco request to this jid.
 		return;
@@ -843,6 +975,11 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleDiscoRequest:(XMPPIQ *)iqRequest
 {
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
 	NSXMLElement *queryRequest = [iqRequest childElement];
 	NSString *node = [queryRequest attributeStringValueForName:@"node"];
 	
@@ -877,7 +1014,10 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 **/
 - (void)handleDiscoResponse:(NSXMLElement *)query fromJID:(XMPPJID *)jid
 {
-	DDLogTrace();
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
 	
 	NSString *hash = nil;
 	NSString *hashAlg = nil;
@@ -886,7 +1026,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	
 	if (hashResponse)
 	{
-		DDLogVerbose(@"%@: %@ - Hash response...", THIS_FILE, THIS_METHOD);
+		XMPPLogVerbose(@"%@: %@ - Hash response...", THIS_FILE, THIS_METHOD);
 		
 		// Standard version 1.5+
 		
@@ -896,7 +1036,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		
 		if ([calculatedHash isEqualToString:hash])
 		{
-			DDLogVerbose(@"%@: %@ - Hash matches!", THIS_FILE, THIS_METHOD);
+			XMPPLogVerbose(@"%@: %@ - Hash matches!", THIS_FILE, THIS_METHOD);
 			
 			// Store the capabilities (associated with the hash)
 			[xmppCapabilitiesStorage setCapabilities:query forHash:hash algorithm:hashAlg];
@@ -922,9 +1062,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		}
 		else
 		{
-			DDLogWarn(@"Hash mismatch!!");
-			DDLogWarn(@"          hash = %@", hash);
-			DDLogWarn(@"calculatedHash = %@", calculatedHash);
+			XMPPLogWarn(@"%@: Hash mismatch! hash(%@) != calculatedHash(%@)", THIS_FILE, hash, calculatedHash);
 			
 			// Revoke the associated hash from the jid
 			[xmppCapabilitiesStorage clearCapabilitiesHashAndAlgorithmForJID:jid];
@@ -958,7 +1096,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	}
 	else
 	{
-		DDLogVerbose(@"%@: %@ - Non-Hash response", THIS_FILE, THIS_METHOD);
+		XMPPLogVerbose(@"%@: %@ - Non-Hash response", THIS_FILE, THIS_METHOD);
 		
 		// Store the capabilities (associated with the jid)		
 		[xmppCapabilitiesStorage setCapabilities:query forJID:jid];
@@ -976,7 +1114,10 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)handleDiscoErrorResponse:(NSXMLElement *)query fromJID:(XMPPJID *)jid
 {
-	DDLogTrace();
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
 	
 	NSString *hash = nil;
 	NSString *hashAlg = nil;
@@ -1016,6 +1157,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
+	// This method is invoked on the moduleQueue.
+	
 	// XEP-0115 presence:
 	// 
 	// <presence from="romeo@montague.lit/orchard">
@@ -1043,7 +1186,7 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		NSXMLElement *c = [presence elementForName:@"c" xmlns:@"http://jabber.org/protocol/caps"];
 		if (c == nil)
 		{
-			if (self.autoFetchNonHashedCapabilities)
+			if (autoFetchNonHashedCapabilities)
 			{
 				[self fetchCapabilitiesForJID:[presence from]];
 			}
@@ -1065,6 +1208,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+	// This method is invoked on the moduleQueue.
+	
 	// Disco Request:
 	// 
 	// <iq from="juliet@capulet.lit/chamber" type="get">
@@ -1118,6 +1263,8 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence
 {
+	// This method is invoked on the moduleQueue.
+	
 	NSString *type = [presence type];
 	
 	if ([type isEqualToString:@"unavailable"])
@@ -1137,17 +1284,16 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 		
 		[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
 		
-		DDLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
+		XMPPLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
 					 [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 		
 		NSString *hash = [self hashCapabilitiesFromQuery:query];
 		
 		if (hash == nil)
 		{
-			DDLogWarn(@"XMPPCapabilities: Unable to hash capabilites (in order to send in presense element)");
-			DDLogWarn(@"Perhaps there are duplicate advertised features...");
-			DDLogWarn(@"%@", [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
-			
+			XMPPLogWarn(@"%@: Unable to hash capabilites (in order to send in presense element)\n",
+			             "Perhaps there are duplicate advertised features...\n%@", THIS_FILE,
+			             [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 			return;
 		}
 		
@@ -1183,65 +1329,109 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
 {
-	// The userInfo for the timer is the jid.
-	// 
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
 	// If the timeout occurs, we will remove the jid from the discoRequestJidSet.
 	// If we eventually get a response (after the timeout) we will still be able to process it.
 	// The timeout simply prevents the set from growing infinitely.
 	
-	NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:CAPABILITIES_REQUEST_TIMEOUT
-	                                                  target:self
-	                                                selector:@selector(discoTimeout:)
-	                                                userInfo:jid
-	                                                 repeats:NO];
+	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
+	
+	dispatch_source_set_event_handler(timer, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		[self processTimeoutWithJID:jid];
+		
+		dispatch_source_cancel(timer);
+		dispatch_release(timer);
+		
+		[pool drain];
+	});
+	
+	dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (CAPABILITIES_REQUEST_TIMEOUT * NSEC_PER_SEC));
+	
+	dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
+	dispatch_resume(timer);
 	
 	// We also keep a reference to the timer in the discoTimerJidDict.
 	// This allows us to cancel the timer when we get a response to the disco request.
 	
-	[discoTimerJidDict setObject:timer forKey:jid];
+	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
+	
+	[discoTimerJidDict setObject:timerWrapper forKey:jid];
+	[timerWrapper release];
 }
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid withHashKey:(NSString *)key
 {
-	// The userInfo for the timer is the hash key.
-	// That is, the key for the discoRequestHashDict.
-	// 
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
 	// If the timeout occurs, we want to send a request to the next jid with the same capabilities hash.
 	// This list of jids is stored in the discoRequestHashDict.
 	// The key will allow us to fetch the jid list.
 		
-	NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:CAPABILITIES_REQUEST_TIMEOUT
-	                                                  target:self
-	                                                selector:@selector(discoTimeout:)
-	                                                userInfo:key
-	                                                 repeats:NO];
+	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
+	
+	dispatch_source_set_event_handler(timer, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		[self processTimeoutWithHashKey:key];
+		
+		dispatch_source_cancel(timer);
+		dispatch_release(timer);
+		
+		[pool drain];
+	});
+	
+	dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (CAPABILITIES_REQUEST_TIMEOUT * NSEC_PER_SEC));
+	
+	dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
+	dispatch_resume(timer);
 	
 	// We also keep a reference to the timer in the discoTimerJidDict.
 	// This allows us to cancel the timer when we get a response to the disco request.
 	
-	[discoTimerJidDict setObject:timer forKey:jid];
+	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
+	
+	[discoTimerJidDict setObject:timerWrapper forKey:jid];
+	[timerWrapper release];
 }
 
 - (void)cancelTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
 {
-	NSTimer *timer = [discoTimerJidDict objectForKey:jid];
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
 	
-	if (timer)
+	XMPPLogTrace();
+	
+	GCDTimerWrapper *timerWrapper = [discoTimerJidDict objectForKey:jid];
+	if (timerWrapper)
 	{
-		[timer invalidate];
+		[timerWrapper cancel];
 		[discoTimerJidDict removeObjectForKey:jid];
 	}
 }
 
 - (void)processTimeoutWithHashKey:(NSString *)key
 {
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
 	// Get the list of jids that have the same capabilities hash
 	
 	NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
 	
 	if (jids == nil)
 	{
-		DDLogWarn(@"%@: %@ - Key doesn't exist in discoRequestHashDict", THIS_FILE, THIS_METHOD);
+		XMPPLogWarn(@"%@: %@ - Key doesn't exist in discoRequestHashDict", THIS_FILE, THIS_METHOD);
 		
 		return;
 	}
@@ -1327,6 +1517,11 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 
 - (void)processTimeoutWithJID:(XMPPJID *)jid
 {
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
 	// We queried the jid for its capabilities, but it didn't answer us.
 	// Nothing left to do now but wait.
 	// 
@@ -1341,22 +1536,38 @@ NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *cont
 	[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid];
 }
 
-- (void)discoTimeout:(NSTimer *)timer
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@implementation GCDTimerWrapper
+
+- (id)initWithDispatchTimer:(dispatch_source_t)aTimer
 {
-	id timerInfo = [timer userInfo];
-	
-	if ([timerInfo isKindOfClass:[NSString class]])
+	if ((self = [super init]))
 	{
-		NSString *key = (NSString *)timerInfo;
-		
-		[self processTimeoutWithHashKey:key];
+		timer = aTimer;
+		dispatch_retain(timer);
 	}
-	else if ([timerInfo isKindOfClass:[XMPPJID class]])
+	return self;
+}
+
+- (void)cancel
+{
+	if (timer)
 	{
-		XMPPJID *jid = (XMPPJID *)timerInfo;
-		
-		[self processTimeoutWithJID:jid];
+		dispatch_source_cancel(timer);
+		dispatch_release(timer);
+		timer = NULL;
 	}
+}
+
+- (void)dealloc
+{
+	[self cancel];
+	[super dealloc];
 }
 
 @end

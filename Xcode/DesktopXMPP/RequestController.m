@@ -27,8 +27,8 @@
 
 - (void)awakeFromNib
 {
-	[[self xmppStream] addDelegate:self];
-	[[self xmppRoster] addDelegate:self];
+	[[self xmppStream] addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[[self xmppRoster] addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
 	NSRect visibleFrame = [[window screen] visibleFrame];
 	NSRect windowFrame = [window frame];

@@ -1,12 +1,12 @@
 #import "TURNSocket.h"
 #import "XMPP.h"
+#import "XMPPLogging.h"
+#import "GCDAsyncSocket.h"
 #import "NSDataAdditions.h"
-#import "AsyncSocket.h"
 #import "DDNumber.h"
 
-// Debug levels: 0-off, 1-error, 2-warn, 3-info, 4-verbose
-#define DEBUG_LEVEL 4
-#include "DDLog.h"
+// Log levels: off, error, warn, info, verbose
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 // Define various states
 #define STATE_INIT                0
@@ -19,7 +19,7 @@
 #define STATE_ACTIVATE_SENT      15
 #define STATE_TARGET_CONNECT     20
 #define STATE_DONE               30
-#define STATE_FAILURE            -1
+#define STATE_FAILURE            31
 
 // Define various socket tags
 #define SOCKS_OPEN             101
@@ -27,7 +27,7 @@
 #define SOCKS_CONNECT_REPLY_1  103
 #define SOCKS_CONNECT_REPLY_2  104
 
-// Define various timeouts
+// Define various timeouts (in seconds)
 #define TIMEOUT_DISCO_ITEMS   8.00
 #define TIMEOUT_DISCO_INFO    8.00
 #define TIMEOUT_DISCO_ADDR    5.00
@@ -51,6 +51,13 @@
 - (void)targetConnect;
 - (void)targetNextConnect;
 - (void)initiatorConnect;
+- (void)setupDiscoTimerForDiscoItems;
+- (void)setupDiscoTimerForDiscoInfo;
+- (void)setupDiscoTimerForDiscoAddress;
+- (void)doDiscoItemsTimeout:(NSString *)uuid;
+- (void)doDiscoInfoTimeout:(NSString *)uuid;
+- (void)doDiscoAddressTimeout:(NSString *)uuid;
+- (void)doTotalTimeout;
 - (void)succeed;
 - (void)fail;
 - (void)cleanup;
@@ -63,6 +70,7 @@
 @implementation TURNSocket
 
 static NSMutableDictionary *existingTurnSockets;
+static NSMutableArray *proxyCandidates;
 
 /**
  * Called automatically (courtesy of Cocoa) before the first method of this class is called.
@@ -71,10 +79,12 @@ static NSMutableDictionary *existingTurnSockets;
 + (void)initialize
 {
 	static BOOL initialized = NO;
-	if(!initialized)
+	if (!initialized)
 	{
 		initialized = YES;
+		
 		existingTurnSockets = [[NSMutableDictionary alloc] init];
+		proxyCandidates = [[NSMutableArray alloc] initWithObjects:@"jabber.org", nil];
 	}
 }
 
@@ -85,6 +95,8 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 + (BOOL)isNewStartTURNRequest:(XMPPIQ *)iq
 {
+	XMPPLogTrace();
+	
 	// An incoming turn request looks like this:
 	// 
 	// <iq type="set" from="[jid full]" id="uuid">
@@ -100,19 +112,22 @@ static NSMutableDictionary *existingTurnSockets;
 	NSString *queryMode = [[query attributeForName:@"mode"] stringValue];
 	
 	BOOL isTcpBytestreamQuery = NO;
-	if(queryMode)
+	if (queryMode)
 	{
 		isTcpBytestreamQuery = [queryMode caseInsensitiveCompare:@"tcp"] == NSOrderedSame;
 	}
 	
-	if(isTcpBytestreamQuery)
+	if (isTcpBytestreamQuery)
 	{
 		NSString *uuid = [iq elementID];
 		
-		if([existingTurnSockets objectForKey:uuid])
-			return NO;
-		else
-			return YES;
+		@synchronized(existingTurnSockets)
+		{
+			if ([existingTurnSockets objectForKey:uuid])
+				return NO;
+			else
+				return YES;
+		}
 	}
 	return NO;
 }
@@ -120,14 +135,31 @@ static NSMutableDictionary *existingTurnSockets;
 /**
  * Returns a list of proxy candidates.
  * 
- * Currently this method simply returns the current xmpp host.
- * You may want to edit me to include NSUserDefaults stuff, or implement your own static/dynamic list.
+ * You may want to configure this to include NSUserDefaults stuff, or implement your own static/dynamic list.
 **/
-+ (NSArray *)generateProxyCandidates
++ (NSArray *)proxyCandidates
 {
-	// Todo: Implement me
+	NSArray *result = nil;
 	
-	return [NSArray arrayWithObject:@"jabber.org"];
+	@synchronized(proxyCandidates)
+	{
+		XMPPLogTrace();
+		
+		result = [[proxyCandidates copy] autorelease];
+	}
+	
+	return result;
+}
+
++ (void)setProxyCandidates:(NSArray *)candidates
+{
+	@synchronized(proxyCandidates)
+	{
+		XMPPLogTrace();
+		
+		[proxyCandidates removeAllObjects];
+		[proxyCandidates addObjectsFromArray:candidates];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,8 +172,10 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (id)initWithStream:(XMPPStream *)stream toJID:(XMPPJID *)aJid
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
+		XMPPLogTrace();
+		
 		// Store references
 		xmppStream = [stream retain];
 		jid = [aJid retain];
@@ -159,7 +193,7 @@ static NSMutableDictionary *existingTurnSockets;
 		
 		// Get list of proxy candidates
 		// Each host in this list will be queried to see if it can be used as a proxy
-		proxyCandidates = [[[self class] generateProxyCandidates] retain];
+		proxyCandidates = [[[self class] proxyCandidates] retain];
 		
 		// Configure everything else
 		[self performPostInitSetup];
@@ -173,8 +207,10 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (id)initWithStream:(XMPPStream *)stream incomingTURNRequest:(XMPPIQ *)iq
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
+		XMPPLogTrace();
+		
 		// Store references
 		xmppStream = [stream retain];
 		jid = [[iq from] retain];
@@ -201,9 +237,17 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)performPostInitSetup
 {
+	// Create dispatch queue.
+	
+	turnQueue = dispatch_queue_create("TURNSocket", NULL);
+	
 	// We want to add this new turn socket to the list of existing sockets.
 	// This gives us a central repository of turn socket objects that we can easily query.
-	[existingTurnSockets setObject:self forKey:uuid];
+	
+	@synchronized(existingTurnSockets)
+	{
+		[existingTurnSockets setObject:self forKey:uuid];
+	}
 }
 
 /**
@@ -213,15 +257,36 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)dealloc
 {
-	DDLogVerbose(@"TURNSocket: dealloc: %p", self);
+	XMPPLogTrace();
+	
+	if ((state > STATE_INIT) && (state < STATE_DONE))
+	{
+		XMPPLogWarn(@"%@: Deallocating prior to completion or cancellation. "
+					@"You should explicitly cancel before releasing.", THIS_FILE);
+	}
+	
+	if (turnQueue)
+		dispatch_release(turnQueue);
 	
 	[xmppStream release];
 	[jid release];
 	[uuid release];
 	
+	if (delegateQueue)
+		dispatch_release(delegateQueue);
+	
+	if (turnTimer)
+	{
+		dispatch_source_cancel(turnTimer);
+		dispatch_release(turnTimer);
+	}
+	
 	[discoUUID release];
-	[discoTimer invalidate];
-	[discoTimer release];
+	if (discoTimer)
+	{
+		dispatch_source_cancel(discoTimer);
+		dispatch_release(discoTimer);
+	}
 	
 	[proxyCandidates release];
 	[candidateJIDs release];
@@ -229,9 +294,9 @@ static NSMutableDictionary *existingTurnSockets;
 	[proxyJID release];
 	[proxyHost release];
 	
-	if([asyncSocket delegate] == self)
+	if ([asyncSocket delegate] == self)
 	{
-		[asyncSocket setDelegate:nil];
+		[asyncSocket setDelegate:nil delegateQueue:NULL];
 		[asyncSocket disconnect];
 	}
 	[asyncSocket release];
@@ -250,37 +315,62 @@ static NSMutableDictionary *existingTurnSockets;
  * Starts the TURNSocket with the given delegate.
  * If the TURNSocket has already been started, this method does nothing, and the existing delegate is not changed.
 **/
-- (void)start:(id)theDelegate
+- (void)startWithDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)aDelegateQueue
 {
-	if(state != STATE_INIT)
-	{
-		// We've already started the turn procedure
-		return;
-	}
+	NSParameterAssert(aDelegate != nil);
+	NSParameterAssert(aDelegateQueue != NULL);
 	
-	// Set reference to delegate
-	// Note that we do NOT retain the delegate
-	delegate = theDelegate;
-	
-	// Add self as xmpp delegate so we'll get message responses
-	[xmppStream addDelegate:self];
-	
-	// Start the timer to calculate how long the procedure takes
-	startTime = [[NSDate alloc] init];
-	
-	// Schedule timeout timer to cancel the turn procedure.
-	// This ensures that, in the event of network error or crash,
-	// the TURNSocket object won't remain in memory forever, and will eventually fail.
-	[NSTimer scheduledTimerWithTimeInterval:TIMEOUT_TOTAL
-									 target:self
-								   selector:@selector(doTotalTimeout:)
-								   userInfo:nil
-									repeats:NO];
-	
-	if(isClient)
-		[self queryProxyCandidates];
-	else
-		[self targetConnect];
+	dispatch_async(turnQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		if (state != STATE_INIT)
+		{
+			XMPPLogWarn(@"%@: Ignoring start request. Turn procedure already started.", THIS_FILE);
+			return;
+		}
+		
+		// Set reference to delegate and delegate's queue.
+		// Note that we do NOT retain the delegate.
+		
+		delegate = aDelegate;
+		
+		delegateQueue = aDelegateQueue;
+		dispatch_retain(delegateQueue);
+		
+		// Add self as xmpp delegate so we'll get message responses
+		[xmppStream addDelegate:self delegateQueue:turnQueue];
+		
+		// Start the timer to calculate how long the procedure takes
+		startTime = [[NSDate alloc] init];
+		
+		// Schedule timer to cancel the turn procedure.
+		// This ensures that, in the event of network error or crash,
+		// the TURNSocket object won't remain in memory forever, and will eventually fail.
+		
+		turnTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, turnQueue);
+		
+		dispatch_source_set_event_handler(turnTimer, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			[self doTotalTimeout];
+			
+			[pool drain];
+		});
+		
+		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (TIMEOUT_TOTAL * NSEC_PER_SEC));
+		
+		dispatch_source_set_timer(turnTimer, tt, DISPATCH_TIME_FOREVER, 0.1);
+		dispatch_resume(turnTimer);
+		
+		// Start the TURN procedure
+		
+		if (isClient)
+			[self queryProxyCandidates];
+		else
+			[self targetConnect];
+		
+		[pool drain];
+	});
 }
 
 /**
@@ -289,6 +379,8 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (BOOL)isClient
 {
+	// Note: The isClient variable is readonly (set in the init method).
+	
 	return isClient;
 }
 
@@ -298,16 +390,28 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)abort
 {
-	if(state != STATE_INIT)
-	{
-		// The only thing we really have to do here is move the state to failure.
-		// This simple act should prevent any further action from being taken in this TUNRSocket object,
-		// since every action is dictated based on the current state.
-		state = STATE_FAILURE;
+	dispatch_block_t block = ^{
 		
-		// And don't forget to cleanup after ourselves
-		[self cleanup];
-	}
+		if ((state > STATE_INIT) && (state < STATE_DONE))
+		{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			// The only thing we really have to do here is move the state to failure.
+			// This simple act should prevent any further action from being taken in this TUNRSocket object,
+			// since every action is dictated based on the current state.
+			state = STATE_FAILURE;
+			
+			// And don't forget to cleanup after ourselves
+			[self cleanup];
+			
+			[pool drain];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == turnQueue)
+		block();
+	else
+		dispatch_async(turnQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -321,6 +425,8 @@ static NSMutableDictionary *existingTurnSockets;
 - (void)sendRequest
 {
 	NSAssert(isClient, @"Only the Initiator sends the request");
+	
+	XMPPLogTrace();
 	
 	// <iq type="set" to="target" id="123">
 	//   <query xmlns="http://jabber.org/protocol/bytestreams" sid="123" mode="tcp">
@@ -354,6 +460,8 @@ static NSMutableDictionary *existingTurnSockets;
 {
 	NSAssert(!isClient, @"Only the Target sends the reply");
 	
+	XMPPLogTrace();
+	
 	// <iq type="result" to="initiator" id="123">
 	//   <query xmlns="http://jabber.org/protocol/bytestreams" sid="123">
 	//     <streamhost-used jid="proxy.domain"/>
@@ -380,6 +488,8 @@ static NSMutableDictionary *existingTurnSockets;
 {
 	NSAssert(isClient, @"Only the Initiator activates the proxy");
 	
+	XMPPLogTrace();
+	
 	NSXMLElement *activate = [NSXMLElement elementWithName:@"activate" stringValue:[jid full]];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
@@ -400,6 +510,8 @@ static NSMutableDictionary *existingTurnSockets;
 - (void)sendError
 {
 	NSAssert(!isClient, @"Only the Target sends the error");
+	
+	XMPPLogTrace();
 	
 	// <iq type="error" to="initiator" id="123">
 	//   <error code="404" type="cancel">
@@ -428,9 +540,9 @@ static NSMutableDictionary *existingTurnSockets;
 	// Disco queries (sent to jabber server) use id=discoUUID
 	// P2P queries (sent to other Mojo app) use id=uuid
 	
-	if(state <= STATE_PROXY_DISCO_ADDR)
+	if (state <= STATE_PROXY_DISCO_ADDR)
 	{
-		if(![discoUUID isEqualToString:[iq elementID]])
+		if (![discoUUID isEqualToString:[iq elementID]])
 		{
 			// Doesn't apply to us, or is a delayed response that we've decided to ignore
 			return NO;
@@ -438,32 +550,32 @@ static NSMutableDictionary *existingTurnSockets;
 	}
 	else
 	{
-		if(![uuid isEqualToString:[iq elementID]])
+		if (![uuid isEqualToString:[iq elementID]])
 		{
 			// Doesn't apply to us
 			return NO;
 		}
 	}
 	
-	DDLogVerbose(@"xmppStream:didReceiveIQ: state(%i)", state);
+	XMPPLogTrace2(@"%@: %@ - state(%i)", THIS_FILE, THIS_METHOD, state);
 	
-	if(state == STATE_PROXY_DISCO_ITEMS)
+	if (state == STATE_PROXY_DISCO_ITEMS)
 	{
 		[self processDiscoItemsResponse:iq];
 	}
-	else if(state == STATE_PROXY_DISCO_INFO)
+	else if (state == STATE_PROXY_DISCO_INFO)
 	{
 		[self processDiscoInfoResponse:iq];
 	}
-	else if(state == STATE_PROXY_DISCO_ADDR)
+	else if (state == STATE_PROXY_DISCO_ADDR)
 	{
 		[self processDiscoAddressResponse:iq];
 	}
-	else if(state == STATE_REQUEST_SENT)
+	else if (state == STATE_REQUEST_SENT)
 	{
 		[self processRequestResponse:iq];
 	}
-	else if(state == STATE_ACTIVATE_SENT)
+	else if (state == STATE_ACTIVATE_SENT)
 	{
 		[self processActivateResponse:iq];
 	}
@@ -473,6 +585,8 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)processDiscoItemsResponse:(XMPPIQ *)iq
 {
+	XMPPLogTrace();
+	
 	// We queried the current proxy candidate for all known JIDs in it's disco list.
 	// 
 	// <iq from="domain.org" to="initiator" id="123" type="result">
@@ -505,6 +619,8 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)processDiscoInfoResponse:(XMPPIQ *)iq
 {
+	XMPPLogTrace();
+	
 	// We queried a potential proxy server to see if it was indeed a proxy.
 	// 
 	// <iq from="domain.org" to="initiator" id="123" type="result">
@@ -573,6 +689,8 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)processDiscoAddressResponse:(XMPPIQ *)iq
 {
+	XMPPLogTrace();
+	
 	// We queried a proxy for its public IP and port.
 	// 
 	// <iq from="domain.org" to="initiator" id="123" type="result">
@@ -602,6 +720,8 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)processRequestResponse:(XMPPIQ *)iq
 {
+	XMPPLogTrace();
+	
 	// Target has replied - hopefully they've been able to connect to one of the streamhosts
 	
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
@@ -651,15 +771,17 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)processActivateResponse:(XMPPIQ *)iq
 {
+	XMPPLogTrace();
+	
 	NSString *type = [[iq attributeForName:@"type"] stringValue];
 	
 	BOOL activated = NO;
-	if(type)
+	if (type)
 	{
 		activated = [type caseInsensitiveCompare:@"result"] == NSOrderedSame;
 	}
 	
-	if(activated) {
+	if (activated) {
 		[self succeed];
 	}
 	else {
@@ -691,6 +813,8 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)queryProxyCandidates
 {
+	XMPPLogTrace();
+	
 	// Prepare the streamhosts array, which will hold all of our results
 	streamhosts = [[NSMutableArray alloc] initWithCapacity:[proxyCandidates count]];
 	
@@ -705,6 +829,8 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)queryNextProxyCandidate
 {
+	XMPPLogTrace();
+	
 	// Update state
 	state = STATE_PROXY_DISCO_ITEMS;
 	
@@ -713,21 +839,21 @@ static NSMutableDictionary *existingTurnSockets;
 	
 	XMPPJID *proxyCandidateJID = nil;
 	
-	if([streamhosts count] < 2)
+	if ([streamhosts count] < 2)
 	{
-		while((proxyCandidateJID == nil) && (++proxyCandidateIndex < [proxyCandidates count]))
+		while ((proxyCandidateJID == nil) && (++proxyCandidateIndex < [proxyCandidates count]))
 		{
 			NSString *proxyCandidate = [proxyCandidates objectAtIndex:proxyCandidateIndex];
 			proxyCandidateJID = [XMPPJID jidWithString:proxyCandidate];
 			
-			if(proxyCandidateJID == nil)
+			if (proxyCandidateJID == nil)
 			{
-				DDLogWarn(@"Invalid proxy candidate '%@', not a valid JID", proxyCandidate);
+				XMPPLogWarn(@"%@: Invalid proxy candidate '%@', not a valid JID", THIS_FILE, proxyCandidate);
 			}
 		}
 	}
 	
-	if(proxyCandidateJID)
+	if (proxyCandidateJID)
 	{
 		[self updateDiscoUUID];
 		
@@ -737,26 +863,24 @@ static NSMutableDictionary *existingTurnSockets;
 		
 		[xmppStream sendElement:iq];
 		
-		[discoTimer invalidate];
-		[discoTimer release];
-		discoTimer = [[NSTimer scheduledTimerWithTimeInterval:TIMEOUT_DISCO_ITEMS
-													   target:self
-													 selector:@selector(doDiscoItemsTimeout:)
-													 userInfo:discoUUID
-													  repeats:NO] retain];
+		[self setupDiscoTimerForDiscoItems];
 	}
 	else
 	{
-		if([streamhosts count] > 0)
+		if ([streamhosts count] > 0)
 		{
 			// We've got a list of potential proxy servers to send to the initiator
-			DDLogVerbose(@"TURNSocket: Streamhosts: \n%@", streamhosts);
+			
+			XMPPLogVerbose(@"%@: Streamhosts: \n%@", THIS_FILE, streamhosts);
+			
 			[self sendRequest];
 		}
 		else
 		{
 			// We were unable to find a single proxy server from our list
-			DDLogError(@"TURNSocket: No proxies found");
+			
+			XMPPLogVerbose(@"%@: No proxies found", THIS_FILE);
+			
 			[self fail];
 		}
 	}
@@ -768,17 +892,19 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)queryCandidateJIDs
 {
+	XMPPLogTrace();
+	
 	// Most of the time, the proxy will have a domain name that includes the word "proxy".
 	// We can speed up the process of discovering the proxy by searching for these domains, and querying them first.
 	
 	NSUInteger i;
-	for(i = 0; i < [candidateJIDs count]; i++)
+	for (i = 0; i < [candidateJIDs count]; i++)
 	{
 		XMPPJID *candidateJID = [candidateJIDs objectAtIndex:i];
 		
 		NSRange proxyRange = [[candidateJID domain] rangeOfString:@"proxy" options:NSCaseInsensitiveSearch];
 		
-		if(proxyRange.length > 0)
+		if (proxyRange.length > 0)
 		{
 			[candidateJID retain];
 			[candidateJIDs removeObjectAtIndex:i];
@@ -786,7 +912,8 @@ static NSMutableDictionary *existingTurnSockets;
 			[candidateJID release];
 		}
 	}
-	DDLogVerbose(@"TURNSocket: CandidateJIDs: \n%@", candidateJIDs);
+	
+	XMPPLogVerbose(@"%@: CandidateJIDs: \n%@", THIS_FILE, candidateJIDs);
 	
 	// Start querying each candidate in order (we can stop when we find one)
 	candidateJIDIndex = -1;
@@ -799,11 +926,13 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)queryNextCandidateJID
 {
+	XMPPLogTrace();
+	
 	// Update state
 	state = STATE_PROXY_DISCO_INFO;
 	
 	candidateJIDIndex++;
-	if(candidateJIDIndex < [candidateJIDs count])
+	if (candidateJIDIndex < [candidateJIDs count])
 	{
 		[self updateDiscoUUID];
 		
@@ -815,13 +944,7 @@ static NSMutableDictionary *existingTurnSockets;
 		
 		[xmppStream sendElement:iq];
 		
-		[discoTimer invalidate];
-		[discoTimer release];
-		discoTimer = [[NSTimer scheduledTimerWithTimeInterval:TIMEOUT_DISCO_INFO
-													   target:self
-													 selector:@selector(doDiscoInfoTimeout:)
-													 userInfo:discoUUID
-													  repeats:NO] retain];
+		[self setupDiscoTimerForDiscoInfo];
 	}
 	else
 	{
@@ -836,6 +959,8 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)queryProxyAddress
 {
+	XMPPLogTrace();
+	
 	// Update state
 	state = STATE_PROXY_DISCO_ADDR;
 	
@@ -849,13 +974,7 @@ static NSMutableDictionary *existingTurnSockets;
 	
 	[xmppStream sendElement:iq];
 	
-	[discoTimer invalidate];
-	[discoTimer release];
-	discoTimer = [[NSTimer scheduledTimerWithTimeInterval:TIMEOUT_DISCO_ADDR
-												   target:self
-												 selector:@selector(doDiscoAddressTimeout:)
-												 userInfo:discoUUID
-												  repeats:NO] retain];
+	[self setupDiscoTimerForDiscoAddress];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -864,7 +983,7 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)targetConnect
 {
-	DDLogVerbose(@"TURNSocket: targetConnect");
+	XMPPLogTrace();
 	
 	// Update state
 	state = STATE_TARGET_CONNECT;
@@ -876,7 +995,7 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)targetNextConnect
 {
-	DDLogVerbose(@"TURNSocket: targetNextConnect");
+	XMPPLogTrace();
 	
 	streamhostIndex++;
 	if(streamhostIndex < [streamhosts count])
@@ -897,19 +1016,19 @@ static NSMutableDictionary *existingTurnSockets;
 		
 		proxyPort = [[[streamhost attributeForName:@"port"] stringValue] intValue];
 		
-		NSAssert(![asyncSocket isConnected], @"Expecting the socket to be disconnected at this point...");
+		NSAssert([asyncSocket isDisconnected], @"Expecting the socket to be disconnected at this point...");
 		
-		if(asyncSocket == nil)
+		if (asyncSocket == nil)
 		{
-			asyncSocket = [(AsyncSocket *)[AsyncSocket alloc] initWithDelegate:self];
+			asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:turnQueue];
 		}
 		
-		DDLogVerbose(@"TURNSocket: targetNextConnect: %@(%@:%hu)", [proxyJID full], proxyHost, proxyPort);
+		XMPPLogVerbose(@"TURNSocket: targetNextConnect: %@(%@:%hu)", [proxyJID full], proxyHost, proxyPort);
 		
 		NSError *err = nil;
-		if(![asyncSocket connectToHost:proxyHost onPort:proxyPort withTimeout:TIMEOUT_CONNECT error:&err])
+		if (![asyncSocket connectToHost:proxyHost onPort:proxyPort withTimeout:TIMEOUT_CONNECT error:&err])
 		{
-			DDLogError(@"TURNSocket: targetNextConnect: err: %@", err);
+			XMPPLogError(@"TURNSocket: targetNextConnect: err: %@", err);
 			[self targetNextConnect];
 		}
 	}
@@ -924,14 +1043,14 @@ static NSMutableDictionary *existingTurnSockets;
 {
 	NSAssert(asyncSocket == nil, @"Expecting asyncSocket to be nil");
 	
-	asyncSocket = [(AsyncSocket *)[AsyncSocket alloc] initWithDelegate:self];
+	asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:turnQueue];
 	
-	DDLogVerbose(@"TURNSocket: initiatorConnect: %@(%@:%hu)", [proxyJID full], proxyHost, proxyPort);
+	XMPPLogVerbose(@"TURNSocket: initiatorConnect: %@(%@:%hu)", [proxyJID full], proxyHost, proxyPort);
 	
 	NSError *err = nil;
-	if(![asyncSocket connectToHost:proxyHost onPort:proxyPort withTimeout:TIMEOUT_CONNECT error:&err])
+	if (![asyncSocket connectToHost:proxyHost onPort:proxyPort withTimeout:TIMEOUT_CONNECT error:&err])
 	{
-		NSLog(@"TURNSocket: initiatorConnect: err: %@", err);
+		XMPPLogError(@"TURNSocket: initiatorConnect: err: %@", err);
 		[self fail];
 	}
 }
@@ -946,6 +1065,8 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)socksOpen
 {
+	XMPPLogTrace();
+	
 	//      +-----+-----------+---------+
 	// NAME | VER | NMETHODS  | METHODS |
 	//      +-----+-----------+---------+
@@ -970,7 +1091,7 @@ static NSMutableDictionary *existingTurnSockets;
 	memcpy(byteBuffer+2, &method, sizeof(method));
 	
 	NSData *data = [NSData dataWithBytesNoCopy:byteBuffer length:3 freeWhenDone:YES];
-	DDLogVerbose(@"TURNSocket: SOCKS_OPEN: %@", data);
+	XMPPLogVerbose(@"TURNSocket: SOCKS_OPEN: %@", data);
 	
 	[asyncSocket writeData:data withTimeout:-1 tag:SOCKS_OPEN];
 	
@@ -993,6 +1114,8 @@ static NSMutableDictionary *existingTurnSockets;
 **/
 - (void)socksConnect
 {
+	XMPPLogTrace();
+	
 	XMPPJID *myJID = [xmppStream myJID];
 	
 	// From XEP-0065:
@@ -1007,9 +1130,9 @@ static NSMutableDictionary *existingTurnSockets;
 	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] sha1Digest];
 	NSData *hash = [[hashRaw hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
 	
-	DDLogVerbose(@"TURNSocket: hashMe : %@", hashMe);
-	DDLogVerbose(@"TURNSocket: hashRaw: %@", hashRaw);
-	DDLogVerbose(@"TURNSocket: hash   : %@", hash);
+	XMPPLogVerbose(@"TURNSocket: hashMe : %@", hashMe);
+	XMPPLogVerbose(@"TURNSocket: hashRaw: %@", hashRaw);
+	XMPPLogVerbose(@"TURNSocket: hash   : %@", hash);
 	
 	//      +-----+-----+-----+------+------+------+
 	// NAME | VER | CMD | RSV | ATYP | ADDR | PORT |
@@ -1050,7 +1173,7 @@ static NSMutableDictionary *existingTurnSockets;
 	memcpy(byteBuffer+5+[hash length], &port, sizeof(port));
 	
 	NSData *data = [NSData dataWithBytesNoCopy:byteBuffer length:byteBufferLength freeWhenDone:YES];
-	DDLogVerbose(@"TURNSocket: SOCKS_CONNECT: %@", data);
+	XMPPLogVerbose(@"TURNSocket: SOCKS_CONNECT: %@", data);
 	
 	[asyncSocket writeData:data withTimeout:-1 tag:SOCKS_CONNECT];
 	
@@ -1080,26 +1203,26 @@ static NSMutableDictionary *existingTurnSockets;
 #pragma mark AsyncSocket Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
+- (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
-	DDLogVerbose(@"TURNSocket: onSocket:didConnectToHost:%@ port:%hu", host, port);
+	XMPPLogTrace();
 	
 	// Start the SOCKS protocol stuff
 	[self socksOpen];
 }
 
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
+- (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
-	DDLogVerbose(@"TURNSocket: onSocket:didReadData:withTag:");
+	XMPPLogTrace();
 	
-	if(tag == SOCKS_OPEN)
+	if (tag == SOCKS_OPEN)
 	{
 		// See socksOpen method for socks reply format
 		
 		UInt8 ver = [NSNumber extractUInt8FromData:data atOffset:0];
 		UInt8 mtd = [NSNumber extractUInt8FromData:data atOffset:1];
 		
-		DDLogVerbose(@"TURNSocket: SOCKS_OPEN: ver(%o) mtd(%o)", ver, mtd);
+		XMPPLogVerbose(@"TURNSocket: SOCKS_OPEN: ver(%o) mtd(%o)", ver, mtd);
 		
 		if(ver == 5 && mtd == 0)
 		{
@@ -1112,16 +1235,16 @@ static NSMutableDictionary *existingTurnSockets;
 			[asyncSocket disconnect];
 		}
 	}
-	else if(tag == SOCKS_CONNECT_REPLY_1)
+	else if (tag == SOCKS_CONNECT_REPLY_1)
 	{
 		// See socksConnect method for socks reply format
 		
-		DDLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_1: %@", data);
+		XMPPLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_1: %@", data);
 		
 		UInt8 ver = [NSNumber extractUInt8FromData:data atOffset:0];
 		UInt8 rep = [NSNumber extractUInt8FromData:data atOffset:1];
 		
-		DDLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_1: ver(%o) rep(%o)", ver, rep);
+		XMPPLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_1: ver(%o) rep(%o)", ver, rep);
 		
 		if(ver == 5 && rep == 0)
 		{
@@ -1136,19 +1259,19 @@ static NSMutableDictionary *existingTurnSockets;
 			
 			UInt8 atyp = [NSNumber extractUInt8FromData:data atOffset:3];
 			
-			if(atyp == 3)
+			if (atyp == 3)
 			{
 				UInt8 addrLength = [NSNumber extractUInt8FromData:data atOffset:4];
 				UInt8 portLength = 2;
 				
-				DDLogVerbose(@"TURNSocket: addrLength: %o", addrLength);
-				DDLogVerbose(@"TURNSocket: portLength: %o", portLength);
+				XMPPLogVerbose(@"TURNSocket: addrLength: %o", addrLength);
+				XMPPLogVerbose(@"TURNSocket: portLength: %o", portLength);
 				
 				[asyncSocket readDataToLength:(addrLength+portLength)
 								  withTimeout:TIMEOUT_READ
 										  tag:SOCKS_CONNECT_REPLY_2];
 			}
-			else if(atyp == 0)
+			else if (atyp == 0)
 			{
 				// The size field was actually the first byte of the port field
 				// We just have to read in that last byte
@@ -1156,7 +1279,7 @@ static NSMutableDictionary *existingTurnSockets;
 			}
 			else
 			{
-				DDLogError(@"TURNSocket: Unknown atyp field in connect reply");
+				XMPPLogError(@"TURNSocket: Unknown atyp field in connect reply");
 				[asyncSocket disconnect];
 			}
 		}
@@ -1166,13 +1289,13 @@ static NSMutableDictionary *existingTurnSockets;
 			[asyncSocket disconnect];
 		}
 	}
-	else if(tag == SOCKS_CONNECT_REPLY_2)
+	else if (tag == SOCKS_CONNECT_REPLY_2)
 	{
 		// See socksConnect method for socks reply format
 		
-		DDLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_2: %@", data);
+		XMPPLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_2: %@", data);
 		
-		if(isClient)
+		if (isClient)
 		{
 			[self sendActivate];
 		}
@@ -1184,20 +1307,15 @@ static NSMutableDictionary *existingTurnSockets;
 	}
 }
 
-- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
+- (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
-	DDLogVerbose(@"TURNSocket: onSocket:willDisconnectWithError: %@", err);
-}
-
-- (void)onSocketDidDisconnect:(AsyncSocket *)sock
-{
-	DDLogVerbose(@"TURNSocket: onSocketDidDisconnect:");
+	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, err);
 	
-	if(state == STATE_TARGET_CONNECT)
+	if (state == STATE_TARGET_CONNECT)
 	{
 		[self targetNextConnect];
 	}
-	else if(state == STATE_INITIATOR_CONNECT)
+	else if (state == STATE_INITIATOR_CONNECT)
 	{
 		[self fail];
 	}
@@ -1207,15 +1325,81 @@ static NSMutableDictionary *existingTurnSockets;
 #pragma mark Timeouts
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)doDiscoItemsTimeout:(NSTimer *)aTimer
+- (void)setupDiscoTimer:(NSTimeInterval)timeout
 {
-	if(state == STATE_PROXY_DISCO_ITEMS)
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	
+	if (discoTimer == NULL)
 	{
-		NSString *timerUUID = [aTimer userInfo];
+		discoTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, turnQueue);
 		
-		if([timerUUID isEqualToString:discoUUID])
+		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
+		
+		dispatch_source_set_timer(discoTimer, tt, DISPATCH_TIME_FOREVER, 0.1);
+		dispatch_resume(discoTimer);
+	}
+	else
+	{
+		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
+		
+		dispatch_source_set_timer(discoTimer, tt, DISPATCH_TIME_FOREVER, 0.1);
+	}
+}
+
+- (void)setupDiscoTimerForDiscoItems
+{
+	XMPPLogTrace();
+	
+	[self setupDiscoTimer:TIMEOUT_DISCO_ITEMS];
+	
+	NSString *theUUID = discoUUID;
+	
+	dispatch_source_set_event_handler(discoTimer, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		[self doDiscoItemsTimeout:theUUID];
+		[pool drain];
+	});
+}
+
+- (void)setupDiscoTimerForDiscoInfo
+{
+	XMPPLogTrace();
+	
+	[self setupDiscoTimer:TIMEOUT_DISCO_INFO];
+	
+	NSString *theUUID = discoUUID;
+	
+	dispatch_source_set_event_handler(discoTimer, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		[self doDiscoInfoTimeout:theUUID];
+		[pool drain];
+	});
+}
+
+- (void)setupDiscoTimerForDiscoAddress
+{
+	XMPPLogTrace();
+	
+	[self setupDiscoTimer:TIMEOUT_DISCO_ADDR];
+	
+	NSString *theUUID = discoUUID;
+	
+	dispatch_source_set_event_handler(discoTimer, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		[self doDiscoAddressTimeout:theUUID];
+		[pool drain];
+	});
+}
+
+- (void)doDiscoItemsTimeout:(NSString *)theUUID
+{
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	
+	if (state == STATE_PROXY_DISCO_ITEMS)
+	{
+		if ([theUUID isEqualToString:discoUUID])
 		{
-			DDLogVerbose(@"TURNSocket: doDiscoItemsTimeout");
+			XMPPLogTrace();
 			
 			// Server isn't responding - server may be offline
 			[self queryNextProxyCandidate];
@@ -1223,15 +1407,15 @@ static NSMutableDictionary *existingTurnSockets;
 	}
 }
 
-- (void)doDiscoInfoTimeout:(NSTimer *)aTimer
+- (void)doDiscoInfoTimeout:(NSString *)theUUID
 {
-	if(state == STATE_PROXY_DISCO_INFO)
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	
+	if (state == STATE_PROXY_DISCO_INFO)
 	{
-		NSString *timerUUID = [aTimer userInfo];
-		
-		if([timerUUID isEqualToString:discoUUID])
+		if ([theUUID isEqualToString:discoUUID])
 		{
-			DDLogVerbose(@"TURNSocket: doDiscoInfoTimeout");
+			XMPPLogTrace();
 			
 			// Move on to the next proxy candidate
 			[self queryNextProxyCandidate];
@@ -1239,15 +1423,15 @@ static NSMutableDictionary *existingTurnSockets;
 	}
 }
 
-- (void)doDiscoAddressTimeout:(NSTimer *)aTimer
+- (void)doDiscoAddressTimeout:(NSString *)theUUID
 {
-	if(state == STATE_PROXY_DISCO_ADDR)
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	
+	if (state == STATE_PROXY_DISCO_ADDR)
 	{
-		NSString *timerUUID = [aTimer userInfo];
-		
-		if([timerUUID isEqualToString:discoUUID])
+		if ([theUUID isEqualToString:discoUUID])
 		{
-			DDLogVerbose(@"TURNSocket: doDiscoAddressTimeout");
+			XMPPLogTrace();
 			
 			// Server is taking a long time to respond to a simple query.
 			// We could jump to the next candidate JID, but we'll take this as a sign of an overloaded server.
@@ -1256,13 +1440,18 @@ static NSMutableDictionary *existingTurnSockets;
 	}
 }
 
-- (void)doTotalTimeout:(NSTimer *)aTimer
+- (void)doTotalTimeout
 {
-	if(state != STATE_DONE && state != STATE_FAILURE)
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	
+	if ((state != STATE_DONE) && (state != STATE_FAILURE))
 	{
+		XMPPLogTrace();
+		
 		// A timeout occured to cancel the entire TURN procedure.
 		// This probably means the other endpoint crashed, or a network error occurred.
 		// In either case, we can consider this a failure, and recycle the memory associated with this object.
+		
 		[self fail];
 	}
 }
@@ -1273,7 +1462,9 @@ static NSMutableDictionary *existingTurnSockets;
 
 - (void)succeed
 {
-	DDLogInfo(@"TURNSocket: SUCCESS");
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
 	
 	// Record finish time
 	finishTime = [[NSDate alloc] init];
@@ -1281,17 +1472,25 @@ static NSMutableDictionary *existingTurnSockets;
 	// Update state
 	state = STATE_DONE;
 	
-	if([delegate respondsToSelector:@selector(turnSocket:didSucceed:)])
-	{
-		[delegate turnSocket:self didSucceed:asyncSocket];
-	}
+	dispatch_async(delegateQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		if ([delegate respondsToSelector:@selector(turnSocket:didSucceed:)])
+		{
+			[delegate turnSocket:self didSucceed:asyncSocket];
+		}
+		
+		[pool drain];
+	});
 	
 	[self cleanup];
 }
 
 - (void)fail
 {
-	DDLogInfo(@"TURNSocket: FAILURE");
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
 	
 	// Record finish time
 	finishTime = [[NSDate alloc] init];
@@ -1299,23 +1498,49 @@ static NSMutableDictionary *existingTurnSockets;
 	// Update state
 	state = STATE_FAILURE;
 	
-	if([delegate respondsToSelector:@selector(turnSocketDidFail:)])
-	{
-		[delegate turnSocketDidFail:self];
-	}
+	dispatch_async(delegateQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		if ([delegate respondsToSelector:@selector(turnSocketDidFail:)])
+		{
+			[delegate turnSocketDidFail:self];
+		}
+		
+		[pool drain];
+	});
 	
 	[self cleanup];
 }
 
 - (void)cleanup
 {
-	DDLogVerbose(@"TURNSocket: cleanup");
+	// This method must be run on the turnQueue
+	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue.");
+	
+	XMPPLogTrace();
+	
+	if (turnTimer)
+	{
+		dispatch_source_cancel(turnTimer);
+		dispatch_release(turnTimer);
+		turnTimer = NULL;
+	}
+	
+	if (discoTimer)
+	{
+		dispatch_source_cancel(discoTimer);
+		dispatch_release(discoTimer);
+		discoTimer = NULL;
+	}
 	
 	// Remove self as xmpp delegate
-	[xmppStream removeDelegate:self];
+	[xmppStream removeDelegate:self delegateQueue:turnQueue];
 	
 	// Remove self from existingStuntSockets dictionary so we can be deallocated
-	[existingTurnSockets removeObjectForKey:uuid];
+	@synchronized(existingTurnSockets)
+	{
+		[existingTurnSockets removeObjectForKey:uuid];
+	}
 }
 
 @end

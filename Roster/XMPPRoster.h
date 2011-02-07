@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "MulticastDelegate.h"
+#import "XMPPModule.h"
 #import "XMPPUser.h"
 #import "XMPPResource.h"
 
@@ -14,27 +14,42 @@
 @protocol XMPPRosterDelegate;
 
 
-@interface XMPPRoster : NSObject
+@interface XMPPRoster : XMPPModule
 {
+/*	Inherited from XMPPModule:
+	
 	XMPPStream *xmppStream;
+ 
+	dispatch_queue_t moduleQueue;
+	id multicastDelegate;
+ */
 	id <XMPPRosterStorage> xmppRosterStorage;
 	
-	MulticastDelegate <XMPPRosterDelegate> *multicastDelegate;
-	
 	Byte flags;
-	
 	NSMutableArray *earlyPresenceElements;
 }
 
-- (id)initWithStream:(XMPPStream *)xmppStream rosterStorage:(id <XMPPRosterStorage>)storage;
+- (id)initWithRosterStorage:(id <XMPPRosterStorage>)storage;
+- (id)initWithRosterStorage:(id <XMPPRosterStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-@property (nonatomic, readonly) XMPPStream *xmppStream;
+/* Inherited from XMPPModule:
+
+- (BOOL)activate:(XMPPStream *)xmppStream;
+- (void)deactivate;
+
+@property (readonly) XMPPStream *xmppStream;
+
+- (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
+- (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
+- (void)removeDelegate:(id)delegate;
+
+- (NSString *)moduleName;
+ 
+*/
+
 @property (nonatomic, readonly) id <XMPPRosterStorage> xmppRosterStorage;
 
 @property (nonatomic, assign) BOOL autoRoster;
-
-- (void)addDelegate:(id)delegate;
-- (void)removeDelegate:(id)delegate;
 
 - (void)fetchRoster;
 
@@ -61,13 +76,27 @@
 @protocol XMPPRosterStorage <NSObject>
 @required
 
-@property (nonatomic, assign) XMPPRoster *parent;
+// 
+// 
+// -- PUBLIC METHODS --
+// 
+// 
+
+@property (nonatomic, readonly) XMPPRoster *parent;
 
 - (id <XMPPUser>)myUser;
 - (id <XMPPResource>)myResource;
 
 - (id <XMPPUser>)userForJID:(XMPPJID *)jid;
 - (id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
+
+// 
+// 
+// -- PRIVATE METHODS --
+// 
+// These methods are designed to be used ONLY by the XMPPRoster class.
+// 
+// 
 
 - (void)beginRosterPopulation;
 - (void)endRosterPopulation;
@@ -77,6 +106,25 @@
 
 - (void)clearAllResources;
 - (void)clearAllUsersAndResources;
+
+/**
+ * Configures the storage class, passing it's parent and parent's dispatch queue.
+ * 
+ * This method is called by the init method of the XMPPRoster class.
+ * This method is designed to inform the storage class of it's parent
+ * and of the dispatch queue the parent will be operating on.
+ * 
+ * It is strongly recommended the storage class operate on the same queue as it's parent
+ * as the majority of the time it will be getting called by the parent.
+ * Thus if both are operating on the same queue, the combination can run faster.
+ * 
+ * This method should return YES if it was configured properly.
+ * A storage class is generally meant to be used once, and only with a single parent at a time.
+ * Thus if you attempt to use a single storage class with multiple parents, this method may return NO.
+ * The XMPPRoster class is configured to ignore the passed
+ * storage class in its init method if this method returns NO.
+**/
+- (BOOL)configureWithParent:(XMPPRoster *)aParent queue:(dispatch_queue_t)queue;
 
 @end
 

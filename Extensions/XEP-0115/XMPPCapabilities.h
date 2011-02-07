@@ -30,7 +30,8 @@
 	NSString *lastHash;
 }
 
-- (id)initWithStream:(XMPPStream *)xmppStream capabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
+- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
+- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 @property (nonatomic, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
 
@@ -46,7 +47,7 @@
  * 
  * The default value is YES.
 **/
-@property (nonatomic, assign) BOOL autoFetchHashedCapabilities;
+@property (assign) BOOL autoFetchHashedCapabilities;
 
 /**
  * Defines fetching behavior for entities NOT using the XEP-0115 standard.
@@ -62,7 +63,7 @@
  * 
  * You may always fetch the capabilities (if/when needed) via the fetchCapabilitiesForJID method.
 **/
-@property (nonatomic, assign) BOOL autoFetchNonHashedCapabilities;
+@property (assign) BOOL autoFetchNonHashedCapabilities;
 
 /**
  * Manually fetch the capabilities for the given jid.
@@ -83,7 +84,7 @@
 @protocol XMPPCapabilitiesStorage <NSObject>
 @required
 
-@property (nonatomic, assign) XMPPCapabilities *parent;
+@property (nonatomic, readonly) XMPPCapabilities *parent;
 
 // 
 // 
@@ -130,9 +131,28 @@
 // 
 // -- PRIVATE METHODS --
 // 
-// These methods are designed to be used only by the XMPPCapabilities class.
+// These methods are designed to be used ONLY by the XMPPCapabilities class.
 // 
 // 
+
+/**
+ * Configures the capabilities storage class, passing it's parent and parent's dispatch queue.
+ * 
+ * This method is called by the init methods of the XMPPCapabilities class.
+ * This method is designed to inform the storage class of it's parent
+ * and of the dispatch queue the parent will be operating on.
+ * 
+ * It is strongly recommended the storage class operate on the same queue as it's parent
+ * as the majority of the time it will be getting called by the parent.
+ * Thus if both are operating on the same queue, the combination can run faster.
+ * 
+ * This method should return YES if it was configured properly.
+ * A storage class is generally meant to be used once, and only with a single parent at a time.
+ * Thus if you attempt to use a single storage class with multiple parents, this method may return NO.
+ * The XMPPCapabilites class is configured to ignore the passed
+ * storage class in it's init method if this method returns NO.
+**/
+- (BOOL)configureWithParent:(XMPPCapabilities *)aParent queue:(dispatch_queue_t)queue;
 
 /**
  * Sets metadata for the given jid.
