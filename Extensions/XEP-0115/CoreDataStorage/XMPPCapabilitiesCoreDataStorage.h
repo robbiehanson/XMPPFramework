@@ -15,9 +15,6 @@
 	NSManagedObjectModel *managedObjectModel;
 	NSPersistentStoreCoordinator *persistentStoreCoordinator;
 	NSManagedObjectContext *managedObjectContext;
-	
-	NSFetchRequest *fr_resourceForJID;
-	NSFetchRequest *fr_capsForHash_algorithm;
 }
 
 @end
