@@ -2,8 +2,12 @@
 #import "RequestController.h"
 #import "ChatWindowManager.h"
 #import "AppDelegate.h"
+#import "DDLog.h"
 
 #import <SystemConfiguration/SystemConfiguration.h>
+
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 @implementation RosterController
@@ -29,10 +33,12 @@
 
 - (void)awakeFromNib
 {
+	DDLogInfo(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
 	[[self xmppRoster] setAutoRoster:YES];
 	
-	[[self xmppStream] addDelegate:self];
-	[[self xmppRoster] addDelegate:self];
+	[[self xmppStream] addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[[self xmppRoster] addDelegate:self delegateQueue:dispatch_get_main_queue()];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -401,7 +407,7 @@
 
 - (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
 {
-	NSLog(@"---------- xmppStream:willSecureWithSettings: ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	if (allowSelfSignedCertificates)
 	{
@@ -446,12 +452,12 @@
 
 - (void)xmppStreamDidSecure:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppStreamDidSecure ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppStreamDidConnect ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	isOpen = YES;
 	
@@ -477,7 +483,7 @@
 
 - (void)xmppStreamDidRegister:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppStreamDidRegister ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	// Update tracking variables
 	isRegistering = NO;
@@ -489,7 +495,7 @@
 
 - (void)xmppStream:(XMPPStream *)sender didNotRegister:(NSXMLElement *)error
 {
-	NSLog(@"---------- xmppStream:didNotRegister: ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	// Update tracking variables
 	isRegistering = NO;
@@ -501,7 +507,7 @@
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppStreamDidAuthenticate ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	// Update tracking variables
 	isAuthenticating = NO;
@@ -516,7 +522,7 @@
 
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
 {
-	NSLog(@"---------- xmppStream:didNotAuthenticate: ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	// Update tracking variables
 	isAuthenticating = NO;
@@ -528,7 +534,7 @@
 
 - (void)xmppRosterDidChange:(XMPPRosterMemoryStorage *)sender
 {
-	NSLog(@"---------- xmppRosterDidChange ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	[roster release];
 	roster = [[sender sortedUsersByAvailabilityName] retain];
@@ -540,7 +546,7 @@
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	NSLog(@"---------- xmppStream:didReceiveMessage: ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	if([message isChatMessageWithBody])
 	{
@@ -550,13 +556,12 @@
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
 {
-	NSLog(@"---------- xmppStream:didReceiveError: ----------");
-	NSLog(@"%@", error);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
-	NSLog(@"---------- xmppStreamDidDisconnect ----------");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	if (!isOpen)
 	{

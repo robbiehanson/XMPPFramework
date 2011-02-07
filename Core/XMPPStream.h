@@ -1,64 +1,28 @@
 #import <Foundation/Foundation.h>
-#import "MulticastDelegate.h"
+#import "GCDMulticastDelegate.h"
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
 #endif
 
-@class AsyncSocket;
+@class GCDAsyncSocket;
 @class RFSRVResolver;
+@class DDList;
 @class XMPPParser;
 @class XMPPJID;
 @class XMPPIQ;
 @class XMPPMessage;
 @class XMPPPresence;
 @class XMPPModule;
+@class XMPPElementReceipt;
 @protocol XMPPStreamDelegate;
 
-// Define the various states we'll use to track our progress
-enum {
-	STATE_DISCONNECTED,
-	STATE_RESOLVING_SRV,
-	STATE_CONNECTING,
-	STATE_OPENING,
-	STATE_NEGOTIATING,
-	STATE_STARTTLS,
-	STATE_REGISTERING,
-	STATE_AUTH_1,
-	STATE_AUTH_2,
-	STATE_AUTH_3,
-	STATE_BINDING,
-	STATE_START_SESSION,
-	STATE_CONNECTED,
-};
-
-// Define the debugging state
-#define DEBUG_SEND      YES
-#define DEBUG_RECV_PRE  YES  // Prints data before going to xmpp parser
-#define DEBUG_RECV_POST NO   // Prints data as it comes out of xmpp parser
-
-#define DDLogSend(format, ...)     do{ if(DEBUG_SEND)      NSLog((format), ##__VA_ARGS__); }while(0)
-#define DDLogRecvPre(format, ...)  do{ if(DEBUG_RECV_PRE)  NSLog((format), ##__VA_ARGS__); }while(0)
-#define DDLogRecvPost(format, ...) do{ if(DEBUG_RECV_POST) NSLog((format), ##__VA_ARGS__); }while(0)
-
-// Define the various timeouts (in seconds) for retreiving various parts of the XML stream
-#define TIMEOUT_WRITE         10
-#define TIMEOUT_READ_START    10
-#define TIMEOUT_READ_STREAM   -1
-
-// Define the various tags we'll use to differentiate what it is we're currently reading or writing
-#define TAG_WRITE_START        -100 // Must be outside UInt16 range
-#define TAG_WRITE_STREAM       -101 // Must be outside UInt16 range
-#define TAG_WRITE_SYNCHRONOUS  -102 // Must be outside UInt16 range
-
-#define TAG_READ_START       200
-#define TAG_READ_STREAM      201
-
-
 #if TARGET_OS_IPHONE
-  #define DEFAULT_KEEPALIVE_INTERVAL 120.0 // 2 Minutes
+  #define MIN_KEEPALIVE_INTERVAL      20.0 // 20 Seconds
+  #define DEFAULT_KEEPALIVE_INTERVAL 120.0 //  2 Minutes
 #else
-  #define DEFAULT_KEEPALIVE_INTERVAL 300.0 // 5 Minutes
+  #define MIN_KEEPALIVE_INTERVAL      10.0 // 10 Seconds
+  #define DEFAULT_KEEPALIVE_INTERVAL 300.0 //  5 Minutes
 #endif
 
 extern NSString *const XMPPStreamErrorDomain;
@@ -76,10 +40,14 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 @interface XMPPStream : NSObject
 {
-	MulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
+	dispatch_queue_t xmppQueue;
+	dispatch_queue_t parserQueue;
+	
+	GCDMulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
 	
 	int state;
-	AsyncSocket *asyncSocket;
+	
+	GCDAsyncSocket *asyncSocket;
 	NSMutableData *socketBuffer;
 	
 	UInt64 numberOfBytesSent;
@@ -88,6 +56,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	XMPPParser *parser;
 	
 	Byte flags;
+	Byte config;
 	
 	NSString *hostName;
 	UInt16 hostPort;
@@ -100,18 +69,22 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	NSXMLElement *rootElement;
 	
 	NSTimeInterval keepAliveInterval;
-	NSTimer *keepAliveTimer;
+	dispatch_source_t keepAliveTimer;
+	dispatch_time_t lastSendReceiveTime;
 	
-	id registeredModules;
+	DDList *registeredModules;
 	NSMutableDictionary *autoDelegateDict;
-	
-	id userTag;
 	
 	RFSRVResolver *srvResolver;
 	NSArray *srvResults;
 	NSUInteger srvResultsIndex;
 	
-	NSString *synchronousUUID;
+	NSMutableArray *receipts;
+	
+	NSThread *xmppUtilityThread;
+	NSRunLoop *xmppUtilityRunLoop;
+	
+	id userTag;
 }
 
 /**
@@ -137,7 +110,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * For example, if you were implementing two different custom extensions on top of XMPP,
  * you could put them in separate classes, and simply add each as a delegate.
 **/
-- (void)addDelegate:(id)delegate;
+- (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
+- (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +140,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * That is, it first do an SRV lookup (as specified in the xmpp RFC).
  * If that fails, it will fall back to simply attempting to connect to the jid's domain.
 **/
-@property (nonatomic, readwrite, copy) NSString *hostName;
+@property (readwrite, copy) NSString *hostName;
 
 /**
  * The port the xmpp server is running on.
@@ -175,7 +149,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * The default port is 5222.
 **/
-@property (nonatomic, readwrite, assign) UInt16 hostPort;
+@property (readwrite, assign) UInt16 hostPort;
 
 /**
  * The JID of the user.
@@ -207,23 +181,29 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * For this reason, you may wish to check the myJID variable after the stream has been connected,
  * just in case the resource was changed by the server.
 **/
-@property (nonatomic, readwrite, copy) XMPPJID *myJID;
+@property (readwrite, copy) XMPPJID *myJID;
 
 /**
  * Only used in P2P streams.
 **/
-@property (nonatomic, readonly) XMPPJID *remoteJID;
+@property (readonly) XMPPJID *remoteJID;
 
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
  * For this reason, the xmpp stream supports sending keep alive data.
  * This is simply whitespace, which is ignored by the xmpp protocol.
  * 
+ * Keepalive data is only sent in the absence of any other data being sent/received.
+ * 
  * The default value is defined in DEFAULT_KEEPALIVE_INTERVAL.
+ * The minimum valud is defined in MIN_KEEPALIVE_INTERVAL.
  * 
  * To disable keepalive, set the interval to zero.
+ * 
+ * The keepalive timer (if enabled) fires every (keepAliveInterval / 4) seconds.
+ * Thus the effective resolution of the keepalive timer is based on the interval.
 **/
-@property (nonatomic, readwrite, assign) NSTimeInterval keepAliveInterval;
+@property (readwrite, assign) NSTimeInterval keepAliveInterval;
 
 /**
  * Returns the total number of bytes bytes sent/received by the xmpp stream.
@@ -235,8 +215,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The functionality may optionaly be changed to count only the current socket connection.
  * See the resetByteCountPerConnection property.
 **/
-@property (nonatomic, readonly) UInt64 numberOfBytesSent;
-@property (nonatomic, readonly) UInt64 numberOfBytesReceived;
+@property (readonly) UInt64 numberOfBytesSent;
+@property (readonly) UInt64 numberOfBytesReceived;
 
 /**
  * Affects the funtionality of the byte counter.
@@ -245,21 +225,13 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * If set to YES, the byte count will be reset just prior to a new connection (in the connect methods).
 **/
-@property (nonatomic, readwrite, assign) BOOL resetByteCountPerConnection;
+@property (readwrite, assign) BOOL resetByteCountPerConnection;
 
 /**
- * Returns a list of all currently registered modules.
- * That is, instances of xmpp extension classes that subclass XMPPModule.
- * 
- * The returned variable is an instance of MulticastDelegate.
-**/
-@property (nonatomic, readonly) id registeredModules;
-
-/**
- * The tag property allows you to associated user defined information with the stream.
+ * The tag property allows you to associate user defined information with the stream.
  * Tag values are not used internally, and should not be used by xmpp modules.
 **/
-@property (nonatomic, readwrite, retain) id tag;
+@property (readwrite, retain) id tag;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark State
@@ -316,7 +288,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The given socket should be a socket that has already been accepted.
  * The remoteJID will be extracted from the opening stream negotiation.
 **/
-- (BOOL)connectP2PWithSocket:(AsyncSocket *)acceptedSocket error:(NSError **)errPtr;
+- (BOOL)connectP2PWithSocket:(GCDAsyncSocket *)acceptedSocket error:(NSError **)errPtr;
 
 /**
  * Disconnects from the remote host by closing the underlying TCP socket connection.
@@ -474,11 +446,23 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * Just like the sendElement: method above,
- * but allows you to receive notification after the element has been sent.
+ * but allows you to receive a receipt that can later be used to verify the element has been sent.
  * 
- * Implement the xmppStream:didSendElementWithTag: delegate method for notification.
+ * If you later want to check to see if the element has been sent:
  * 
- * It is important to understand what the notification means.
+ * if ([receipt wait:0]) {
+ *   // Element has been sent
+ * }
+ * 
+ * If you later want to wait until the element has been sent:
+ * 
+ * if ([receipt wait:-1]) {
+ *   // Element was sent
+ * } else {
+ *   // Element failed to send due to disconnection
+ * }
+ * 
+ * It is important to understand what it means when [receipt wait:timeout] returns YES.
  * It does NOT mean the server has received the element.
  * It only means the data has been queued for sending in the underlying OS socket buffer.
  * 
@@ -489,29 +473,56 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
-- (void)sendElement:(NSXMLElement *)element andNotifyMe:(UInt16)tag;
+- (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt **)receiptPtr;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Module Plug-In System
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Just like the sendElement: method above,
- * but this method does not return until after the element has been sent.
+ * The XMPPModule class automatically invokes these methods when it is activated/deactivated.
  * 
- * It is important to understand what this means.
- * It does NOT mean the server has received the element.
- * It only means the data has been queued for sending in the underlying OS socket buffer.
+ * The registerModule method registers the module with the xmppStream.
+ * If there are any other modules that have requested to be automatically added as delegates to modules of this type,
+ * then those modules are automatically added as delegates during the asynchronous execution of this method.
  * 
- * So at this point the OS will do everything in its capacity to send the data to the server,
- * which generally means the server will eventually receive the data.
- * Unless, of course, something horrible happens such as a network failure,
- * or a system crash, or the server crashes, etc.
+ * The registerModule method is asynchronous.
  * 
- * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
+ * The unregisterModule method unregisters the module with the xmppStream,
+ * and automatically removes it as a delegate of any other module.
  * 
- * This method should be used sparingly.
- * In other words, it should be used only when absolutely necessary.
- * For example, when the system is about to go to sleep,
- * or when your iOS app is about to be backgrounded, and you need to synchronously send an unavailable presence.
+ * The unregisterModule method is fully synchronous.
+ * That is, after this method returns, the module will not be scheduled in any more delegate calls from other modules.
+ * However, if the module was already scheduled in an existing asynchronous delegate call from another module,
+ * the scheduled delegate invocation remains queued and will fire in the near future.
+ * Since the delegate invocation is already queued,
+ * the module's retainCount has been incremented,
+ * and the module will not be deallocated until after the delegate invocation has fired.
 **/
-- (BOOL)synchronouslySendElement:(NSXMLElement *)element;
+- (void)registerModule:(XMPPModule *)module;
+- (void)unregisterModule:(XMPPModule *)module;
+
+/**
+ * Automatically registers the given delegate with all current and future registered modules of the given class.
+ * 
+ * That is, the given delegate will be added to the delegate list ([module addDelegate:delegate delegateQueue:dq]) to
+ * all current and future registered modules that respond YES to [module isKindOfClass:aClass].
+ * 
+ * This method is used by modules to automatically integrate with other modules.
+ * For example, a module may auto-add itself as a delegate to XMPPCapabilities
+ * so that it can broadcast its implemented features.
+ * 
+ * This may also be useful to clients, for example, to add a delegate to instances of something like XMPPChatRoom,
+ * where there may be multiple instances of the module that get created during the course of an xmpp session.
+ * 
+ * If you auto register on multiple queues, you can remove all registrations with a single
+ * call to removeAutoDelegate::: by passing NULL as the 'dq' parameter.
+ * 
+ * If you auto register for multiple classes, you can remove all registrations with a single
+ * call to removeAutoDelegate::: by passing nil as the 'aClass' parameter.
+**/
+- (void)autoAddDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue toModulesOfClass:(Class)aClass;
+- (void)removeAutoDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue fromModulesOfClass:(Class)aClass;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
@@ -530,34 +541,60 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 + (NSString *)generateUUID;
 - (NSString *)generateUUID;
 
+/**
+ * The XMPP Framework is designed to be entirely GCD based.
+ * However, there are various utility classes provided by Apple that are still dependent upon a thread/runloop model.
+ * For example, monitoring a network for changes related to connectivity requires we register a runloop-based delegate.
+ * Thus XMPPStream creates a dedicated thread/runloop for any xmpp classes that may need it.
+ * This provides multiple benefits:
+ * 
+ * - Development is simplified for those transitioning from previous thread/runloop versions.
+ * - Development is simplified for those who rely on utility classes that don't yet support pure GCD,
+ *   as they don't have to setup and maintain a thread/runloop on their own.
+ * - It prevents multiple xmpp classes from creating multiple internal threads (which would be resource costly).
+ * 
+ * Please note:
+ * This thread is designed to be used only if absolutely necessary.
+ * That is, if you MUST use a class that doesn't yet support pure GCD.
+ * If there is a GCD alternative, you should be using it instead.
+ * For example, do NOT use NSTimer. Instead setup a GCD timer using a dispatch_source.
+**/
+- (NSThread *)xmppUtilityThread;
+- (NSRunLoop *)xmppUtilityRunLoop;
+
+@end
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Module Plug-In System
+#pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * The XMPPModule class automatically invokes these methods when it is initialized/deallocated.
-**/
-- (void)registerModule:(XMPPModule *)module;
-- (void)unregisterModule:(XMPPModule *)module;
+@interface XMPPElementReceipt : NSObject
+{
+	BOOL complete;
+	BOOL failed;
+	dispatch_semaphore_t semaphore;
+}
 
 /**
- * Automatically registers the given delegate with all current and future registered modules of the given class.
+ * Element receipts allow you to check to see if the element has been sent.
+ * The timeout parameter allows you to do any of the following:
  * 
- * That is, the given delegate will be added to the delegate list ([module addDelegate:delegate]) to
- * all current and future registered modules that respond YES to [module isKindOfClass:aClass].
+ * - Do an instantaneous check (pass timeout == 0)
+ * - Wait until the element has been sent (pass timeout < 0)
+ * - Wait up to a certain amount of time (pass timeout > 0)
  * 
- * This method is used by modules to automatically integrate with other modules.
- * For example, a module may auto add itself as a delegate to XMPPCapabilities
- * so that it can broadcast its implemented features.
+ * It is important to understand what it means when [receipt wait:timeout] returns YES.
+ * It does NOT mean the server has received the element.
+ * It only means the data has been queued for sending in the underlying OS socket buffer.
  * 
- * This may be also useful to clients, for example, to add a delegate to instances of something like XMPPChatRoom,
- * where there may be multiple instances of the module that get created during the course of an xmpp session.
+ * So at this point the OS will do everything in its capacity to send the data to the server,
+ * which generally means the server will eventually receive the data.
+ * Unless, of course, something horrible happens such as a network failure,
+ * or a system crash, or the server crashes, etc.
  * 
- * If you auto register for multiple classes, you can remove all registrations with a single
- * call to removeAutoDelegate:fromModulesOfClass: by passing nil as the 'aClass' parameter.
+ * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
-- (void)autoAddDelegate:(id)delegate toModulesOfClass:(Class)aClass;
-- (void)removeAutoDelegate:(id)delegate fromModulesOfClass:(Class)aClass;
+- (BOOL)wait:(NSTimeInterval)timeout;
 
 @end
 
@@ -571,21 +608,22 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 /**
  * This method is called before the stream begins the connection process.
  *
- * If developing an iOS app that runs in the background, this would be a good place to indicate
+ * If developing an iOS app that runs in the background, this may be a good place to indicate
  * that this is a task that needs to continue running in the background.
  **/
 - (void)xmppStreamWillConnect:(XMPPStream *)sender;
 
 /**
- * This method is called before the socket connects with the remote host.
+ * This method is called after the socket has connected to the remote host.
  * 
  * If developing an iOS app that runs in the background, this is where you would enable background sockets.
  * For example:
  * 
- * CFReadStreamSetProperty([socket getCFReadStream], kCFStreamNetworkServiceType, kCFStreamNetworkServiceTypeVoIP);
- * CFWriteStreamSetProperty([socket getCFWriteStream], kCFStreamNetworkServiceType, kCFStreamNetworkServiceTypeVoIP);
+ * [socket performBlock:^{
+ *     [socket enableBackgroundingOnSocket];
+ * }];
 **/
-- (void)xmppStream:(XMPPStream *)sender socketWillConnect:(AsyncSocket *)socket;
+- (void)xmppStream:(XMPPStream *)sender socketDidConnect:(GCDAsyncSocket *)socket;
 
 /**
  * This method is called after a TCP connection has been established with the server,
@@ -706,11 +744,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStream:(XMPPStream *)sender didSendIQ:(XMPPIQ *)iq;
 - (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message;
 - (void)xmppStream:(XMPPStream *)sender didSendPresence:(XMPPPresence *)presence;
-
-/**
- * This method is called for every sendElement:andNotifyMe: method.
-**/
-- (void)xmppStream:(XMPPStream *)sender didSendElementWithTag:(UInt16)tag;
 
 /**
  * This method is called if the disconnect method is called.

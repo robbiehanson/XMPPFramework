@@ -3,7 +3,7 @@
 @class XMPPIQ;
 @class XMPPJID;
 @class XMPPStream;
-@class AsyncSocket;
+@class GCDAsyncSocket;
 
 /**
  * TURNSocket is an implementation of XEP-0065: SOCKS5 Bytestreams.
@@ -16,14 +16,19 @@
 	int state;
 	BOOL isClient;
 	
+	dispatch_queue_t turnQueue;
+	
 	XMPPStream *xmppStream;
 	XMPPJID *jid;
 	NSString *uuid;
 	
 	id delegate;
+	dispatch_queue_t delegateQueue;
+	
+	dispatch_source_t turnTimer;
 	
 	NSString *discoUUID;
-	NSTimer *discoTimer;
+	dispatch_source_t discoTimer;
 	
 	NSArray *proxyCandidates;
 	NSUInteger proxyCandidateIndex;
@@ -38,17 +43,20 @@
 	NSString *proxyHost;
 	UInt16 proxyPort;
 	
-	AsyncSocket *asyncSocket;
+	GCDAsyncSocket *asyncSocket;
 	
 	NSDate *startTime, *finishTime;
 }
 
 + (BOOL)isNewStartTURNRequest:(XMPPIQ *)iq;
 
++ (NSArray *)proxyCandidates;
++ (void)setProxyCandidates:(NSArray *)candidates;
+
 - (id)initWithStream:(XMPPStream *)xmppStream toJID:(XMPPJID *)jid;
 - (id)initWithStream:(XMPPStream *)xmppStream incomingTURNRequest:(XMPPIQ *)iq;
 
-- (void)start:(id)delegate;
+- (void)startWithDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)aDelegateQueue;
 
 - (BOOL)isClient;
 
@@ -63,7 +71,7 @@
 @protocol TURNSocketDelegate
 @optional
 
-- (void)turnSocket:(TURNSocket *)sender didSucceed:(AsyncSocket *)socket;
+- (void)turnSocket:(TURNSocket *)sender didSucceed:(GCDAsyncSocket *)socket;
 
 - (void)turnSocketDidFail:(TURNSocket *)sender;
 

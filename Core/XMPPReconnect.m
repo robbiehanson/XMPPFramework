@@ -1,14 +1,19 @@
 #import "XMPPReconnect.h"
 #import "XMPPStream.h"
+#import "XMPPLogging.h"
 
 #define IMPOSSIBLE_REACHABILITY_FLAGS 0xFFFFFFFF
 
+// Log levels: off, error, warn, info, verbose
+static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+
 enum XMPPReconnectFlags
 {
-	kAutoReconnect   = 1 << 0,  // If set, automatically attempts to reconnect after a disconnection
-	kShouldReconnect = 1 << 1,  // If set, disconnection was accidental, and autoReconnect may be used
-	kMultipleChanges = 1 << 2,  // If set, there have been reachability changes during a connection attempt
-	kManuallyStarted = 1 << 3,  // If set, we were started manually via manualStart method
+	kAutoReconnect     = 1 << 0,  // If set, automatically attempts to reconnect after a disconnection
+	kShouldReconnect   = 1 << 1,  // If set, disconnection was accidental, and autoReconnect may be used
+	kMultipleChanges   = 1 << 2,  // If set, there have been reachability changes during a connection attempt
+	kManuallyStarted   = 1 << 3,  // If set, we were started manually via manualStart method
+	kQueryingDelegates = 1 << 4,  // If set, we are awaiting response(s) from the delegate(s)
 };
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
@@ -24,7 +29,8 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 - (void)setupNetworkMonitoring;
 - (void)teardownNetworkMonitoring;
 
-- (void)maybeAttemptReconnect:(NSTimer *)timer;
+- (void)maybeAttemptReconnect;
+- (void)maybeAttemptReconnectWithTicket:(int)ticket;
 - (void)maybeAttemptReconnectWithReachabilityFlags:(SCNetworkReachabilityFlags)reachabilityFlags;
 
 @end
@@ -40,19 +46,21 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 @synthesize reconnectDelay;
 @synthesize reconnectTimerInterval;
 
-- (id)initWithStream:(XMPPStream *)aXmppStream
+- (id)init
 {
-	if ((self = [super init]))
+	return [self initWithDispatchQueue:NULL];
+}
+
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+{
+	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		xmppStream = [aXmppStream retain];
-		[xmppStream addDelegate:self];
-		
-		multicastDelegate = [[MulticastDelegate alloc] init];
-		
 		flags = kAutoReconnect;
 		
 		reconnectDelay = DEFAULT_XMPP_RECONNECT_DELAY;
 		reconnectTimerInterval = DEFAULT_XMPP_RECONNECT_TIMER_INTERVAL;
+		
+		reconnectTicket = 0;
 		
 		previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 	}
@@ -61,13 +69,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)dealloc
 {
-	[NSObject cancelPreviousPerformRequestsWithTarget:self];
-	
-	[xmppStream removeDelegate:self];
-	[xmppStream release];
-	
-	[multicastDelegate release];
-	
 	[self teardownReconnectTimer];
 	[self teardownNetworkMonitoring];
 	
@@ -78,66 +79,145 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #pragma mark Configuration and Flags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)addDelegate:(id)delegate
-{
-	[multicastDelegate addDelegate:delegate];
-}
-
-- (void)removeDelegate:(id)delegate
-{
-	[multicastDelegate removeDelegate:delegate];
-}
-
 - (BOOL)autoReconnect
 {
-	return (flags & kAutoReconnect) ? YES : NO;
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (flags & kAutoReconnect) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
 }
 
 - (void)setAutoReconnect:(BOOL)flag
 {
-	if(flag)
-		flags |= kAutoReconnect;
+	dispatch_block_t block = ^{
+		if (flag)
+			flags |= kAutoReconnect;
+		else
+			flags &= ~kAutoReconnect;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
 	else
-		flags &= ~kAutoReconnect;
+		dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)shouldReconnect
 {
-	return (flags & kShouldReconnect) ? YES : NO;
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (flags & kShouldReconnect) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
 }
 
 - (void)setShouldReconnect:(BOOL)flag
 {
-	if(flag)
-		flags |= kShouldReconnect;
+	dispatch_block_t block = ^{
+		if (flag)
+			flags |= kShouldReconnect;
+		else
+			flags &= ~kShouldReconnect;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
 	else
-		flags &= ~kShouldReconnect;
+		dispatch_sync(moduleQueue, block);
 }
 
 - (BOOL)multipleReachabilityChanges
 {
-	return (flags & kMultipleChanges) ? YES : NO;
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (flags & kMultipleChanges) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
 }
 
 - (void)setMultipleReachabilityChanges:(BOOL)flag
 {
-	if(flag)
-		flags |= kMultipleChanges;
+	dispatch_block_t block = ^{
+		if (flag)
+			flags |= kMultipleChanges;
+		else
+			flags &= ~kMultipleChanges;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
 	else
-		flags &= ~kMultipleChanges;
+		dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)manuallyStarted
 {
-	return (flags & kManuallyStarted) ? YES : NO;
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (flags & kManuallyStarted) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+	
+	return result;
 }
 
 - (void)setManuallyStarted:(BOOL)flag
 {
-	if(flag)
-		flags |= kManuallyStarted;
+	dispatch_block_t block = ^{
+		if (flag)
+			flags |= kManuallyStarted;
+		else
+			flags &= ~kManuallyStarted;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
 	else
-		flags &= ~kManuallyStarted;
+		dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)queryingDelegates
+{
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
+	
+	return (flags & kQueryingDelegates) ? YES : NO;
+}
+
+- (void)setQueryingDelegates:(BOOL)flag
+{
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
+	
+	if (flag)
+		flags |= kQueryingDelegates;
+	else
+		flags &= ~kQueryingDelegates;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,29 +226,50 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)manualStart
 {
-	if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
-	{
-		[self setManuallyStarted:YES];
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		[self setupReconnectTimer];
-		[self setupNetworkMonitoring];
-	}
+		if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
+		{
+			[self setManuallyStarted:YES];
+			
+			[self setupReconnectTimer];
+			[self setupNetworkMonitoring];
+		}
+		
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 - (void)stop
 {
-	// Clear all flags (except the kAutoReconnect flag, which should remain as is)
-	// This is to disable any further reconnect attemts regardless of the state we're in.
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		// Clear all flags (except the kAutoReconnect flag, which should remain as is)
+		// This is to disable any further reconnect attemts regardless of the state we're in.
+		
+		flags &= kAutoReconnect;
+		
+		// Stop any planned reconnect attempts and stop monitoring the network.
+		
+		reconnectTicket++;
+		
+		[self teardownReconnectTimer];
+		[self teardownNetworkMonitoring];
+		
+		[pool drain];
+	};
 	
-	flags &= kAutoReconnect;
-	
-	// Stop any planned reconnect attempts and stop monitoring the network.
-	
-	[NSObject cancelPreviousPerformRequestsWithTarget:self
-	                                         selector:@selector(maybeAttemptReconnect:)
-	                                           object:nil];
-	[self teardownReconnectTimer];
-	[self teardownNetworkMonitoring];
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +278,8 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
+	// This method is executed on our moduleQueue.
+	
 	// The stream is up so we can stop our reconnect attempts now.
 	// 
 	// We essentially want to do the same thing as the stop method with one exception:
@@ -192,15 +295,16 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	[self setMultipleReachabilityChanges:NO];
 	[self setManuallyStarted:NO];
 	
-	[NSObject cancelPreviousPerformRequestsWithTarget:self
-	                                         selector:@selector(maybeAttemptReconnect:)
-	                                           object:nil];
+	reconnectTicket++;
+	
 	[self teardownReconnectTimer];
 	[self teardownNetworkMonitoring];
 }
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
+	// This method is executed on our moduleQueue.
+	
 	// We're now connected and properly authenticated.
 	// Should we get accidentally disconnected we should automatically reconnect (if autoReconnect is set).
 	[self setShouldReconnect:YES];
@@ -208,12 +312,16 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)xmppStreamWasToldToDisconnect:(XMPPStream *)sender
 {
+	// This method is executed on our moduleQueue.
+	
 	// We should not automatically attempt to reconnect when the connection closes.
 	[self stop];
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
+	// This method is executed on our moduleQueue.
+	
 	if ([self autoReconnect] && [self shouldReconnect])
 	{
 		[self setupReconnectTimer];
@@ -230,11 +338,18 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		// While the previous connection attempt was in progress, the reachability of the xmpp host changed.
 		// This means that while the previous attempt failed, an attempt now might succeed.
 		
-		[self performSelector:@selector(maybeAttemptReconnect:)
-		           withObject:nil
-		           afterDelay:0.0];
+		int ticket = ++reconnectTicket;
 		
-		// Note: We delay the method call until the next runloop cycle.
+		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (0.1 * NSEC_PER_SEC));
+		dispatch_after(tt, moduleQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			[self maybeAttemptReconnectWithTicket:ticket];
+			
+			[pool drain];
+		});
+		
+		// Note: We delay the method call.
 		// This allows the other delegates to be notified of the closed stream prior to our reconnect attempt.
 	}
 }
@@ -259,7 +374,9 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 
 - (void)setupReconnectTimer
 {
-	if (reconnectTimer == nil)
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	if (reconnectTimer == NULL)
 	{
 		if ((reconnectDelay <= 0.0) && (reconnectTimerInterval <= 0.0))
 		{
@@ -267,37 +384,53 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 			return;
 		}
 		
-		NSDate *fireDate;
+		reconnectTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
+		
+		dispatch_source_set_event_handler(reconnectTimer, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			[self maybeAttemptReconnect];
+			[pool drain];
+		});
+		
+		dispatch_source_t theReconnectTimer = reconnectTimer;
+		
+		dispatch_source_set_cancel_handler(reconnectTimer, ^{
+			XMPPLogVerbose(@"dispatch_release(reconnectTimer)");
+			dispatch_release(theReconnectTimer);
+		});
+		
+		dispatch_time_t startTime;
 		if (reconnectDelay > 0.0)
-			fireDate = [NSDate dateWithTimeIntervalSinceNow:reconnectDelay];
+			startTime = dispatch_time(DISPATCH_TIME_NOW, (reconnectDelay * NSEC_PER_SEC));
 		else
-			fireDate = [NSDate dateWithTimeIntervalSinceNow:reconnectTimerInterval];
+			startTime = dispatch_time(DISPATCH_TIME_NOW, (reconnectTimerInterval * NSEC_PER_SEC));
 		
-		BOOL repeats = (reconnectTimerInterval > 0.0);
+		uint64_t intervalTime;
+		if (reconnectTimerInterval > 0.0)
+			intervalTime = reconnectTimerInterval * NSEC_PER_SEC;
+		else
+			intervalTime = 0.0;
 		
-		reconnectTimer = [[NSTimer alloc] initWithFireDate:fireDate
-												  interval:reconnectTimerInterval
-													target:self
-												  selector:@selector(maybeAttemptReconnect:)
-												  userInfo:nil
-												   repeats:repeats];
-		
-		[[NSRunLoop currentRunLoop] addTimer:reconnectTimer forMode:NSDefaultRunLoopMode];
+		dispatch_source_set_timer(reconnectTimer, startTime, intervalTime, 0.25);
+		dispatch_resume(reconnectTimer);
 	}
 }
 
 - (void)teardownReconnectTimer
 {
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
 	if (reconnectTimer)
 	{
-		[reconnectTimer invalidate];
-		[reconnectTimer release];
-		reconnectTimer = nil;
+		dispatch_source_cancel(reconnectTimer);
+		reconnectTimer = NULL;
 	}
 }
 
 - (void)setupNetworkMonitoring
 {
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
 	if (reachability == NULL)
 	{
 		NSString *domain = xmppStream.hostName;
@@ -313,33 +446,77 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 			SCNetworkReachabilityContext context = {0, self, NULL, NULL, NULL};
 			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
 			
-			SCNetworkReachabilityScheduleWithRunLoop(reachability, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+			CFRunLoopRef xmppRunLoop = [[xmppStream xmppUtilityRunLoop] getCFRunLoop];
+			if (xmppRunLoop)
+			{
+				SCNetworkReachabilityScheduleWithRunLoop(reachability, xmppRunLoop, kCFRunLoopDefaultMode);
+			}
+			else
+			{
+				XMPPLogWarn(@"%@: %@ - No xmpp run loop available!", THIS_FILE, THIS_METHOD);
+			}
 		}
 	}
 }
 
 - (void)teardownNetworkMonitoring
 {
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
 	if (reachability)
 	{
-		SCNetworkReachabilityUnscheduleFromRunLoop(reachability, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+		CFRunLoopRef xmppRunLoop = [[xmppStream xmppUtilityRunLoop] getCFRunLoop];
+		if (xmppRunLoop)
+		{
+			SCNetworkReachabilityUnscheduleFromRunLoop(reachability, xmppRunLoop, kCFRunLoopDefaultMode);
+		}
+		else
+		{
+			XMPPLogWarn(@"%@: %@ - No xmpp run loop available!", THIS_FILE, THIS_METHOD);
+		}
+		
+		SCNetworkReachabilitySetCallback(reachability, NULL, NULL);
 		CFRelease(reachability);
 		reachability = NULL;
 	}
 }
 
 /**
- * This method may be invoked after a disconnection from the server.
+ * This method may be invoked by the reconnectTimer.
  * 
  * During auto reconnection it is invoked reconnectDelay seconds after an accidental disconnection.
- * After that, it is then invoked reconnectTimerInterval seconds.
+ * After that, it is then invoked every reconnectTimerInterval seconds.
  * 
  * This handles disconnections that were not the result of an internet connectivity issue.
- * 
- * It may also be invoked if the reachability changed while a reconnection attempt was in progress.
 **/
-- (void)maybeAttemptReconnect:(NSTimer *)timer
+- (void)maybeAttemptReconnect
 {
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	if (reachability)
+	{
+		SCNetworkReachabilityFlags reachabilityFlags;
+		if (SCNetworkReachabilityGetFlags(reachability, &reachabilityFlags))
+		{
+			[self maybeAttemptReconnectWithReachabilityFlags:reachabilityFlags];
+		}
+	}
+}
+
+/**
+ * This method is invoked (after a short delay) if the reachability changed while
+ * a reconnection attempt was in progress.
+**/
+- (void)maybeAttemptReconnectWithTicket:(int)ticket
+{
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	if (ticket != reconnectTicket)
+	{
+		// The dispatched task was cancelled.
+		return;
+	}
+	
 	if (reachability)
 	{
 		SCNetworkReachabilityFlags reachabilityFlags;
@@ -352,9 +529,20 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 
 - (void)maybeAttemptReconnectWithReachabilityFlags:(SCNetworkReachabilityFlags)reachabilityFlags
 {
+	if (dispatch_get_current_queue() != moduleQueue)
+	{
+		dispatch_async(moduleQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			[self maybeAttemptReconnectWithReachabilityFlags:reachabilityFlags];
+			[pool drain];
+		});
+		
+		return;
+	}
+	
 	if (([self manuallyStarted]) || ([self autoReconnect] && [self shouldReconnect])) 
 	{
-		if ([xmppStream isDisconnected])
+		if ([xmppStream isDisconnected] && ([self queryingDelegates] == NO))
 		{
 			// The xmpp stream is disconnected, and is not attempting reconnection
 			
@@ -364,29 +552,91 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 			// If ANY of the delegates return NO, then the result is NO.
 			// If there are no delegates, the default answer is YES.
 			
-			BOOL shouldAttemptReconnect = YES;
+			GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+			
 			SEL selector = @selector(xmppReconnect:shouldAttemptAutoReconnect:);
 			
-			MulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
-			id delegate;
+			NSUInteger delegateCount = [delegateEnumerator countForSelector:selector];
+			NSUInteger delegateIndex = 0;
 			
-			while (shouldAttemptReconnect && (delegate = [delegateEnumerator nextDelegateForSelector:selector]))
-			{
-                shouldAttemptReconnect = [delegate xmppReconnect:self shouldAttemptAutoReconnect:reachabilityFlags];
-			}
+			// I tried to use a primitive boolean array here.
+			// But the compiler keeps complaining about it for some reason:
+			//  "__block not allowed on a variable length array declaration"
+			// 
+			// Apparently the workaround is to wrap the primitive array in a struct.
+			// I have no idea why this works.
+			// I'm assuming it is a bug in the compiler?
 			
-			if (shouldAttemptReconnect)
+			__block struct { BOOL a[delegateCount]; }responses;
+			
+			id del;
+			dispatch_queue_t dq;
+			
+			dispatch_group_t delGroup = dispatch_group_create();
+			
+			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 			{
-				[xmppStream connect:nil];
+				dispatch_group_async(delGroup, dq, ^{
+					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+					
+					responses.a[delegateIndex] = [del xmppReconnect:self shouldAttemptAutoReconnect:reachabilityFlags];
+					
+					[innerPool release];
+				});
 				
-				previousReachabilityFlags = reachabilityFlags;
-				[self setMultipleReachabilityChanges:NO];
+				delegateIndex++;
 			}
-			else
-			{
-				previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
-				[self setMultipleReachabilityChanges:NO];
-			}
+			
+			[self setQueryingDelegates:YES];
+			
+			dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+			dispatch_async(concurrentQueue, ^{
+				NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
+				
+				dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
+				
+				// What was the delegate response?
+				
+				BOOL shouldAttemptReconnect = YES;
+				
+				NSUInteger i;
+				for (i = 0; i < delegateCount && shouldAttemptReconnect; i++)
+				{
+					shouldAttemptReconnect = responses.a[i];
+				}
+				
+				dispatch_async(moduleQueue, ^{
+					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+					
+					[self setQueryingDelegates:NO];
+					
+					if (shouldAttemptReconnect)
+					{
+						[self setMultipleReachabilityChanges:NO];
+						previousReachabilityFlags = reachabilityFlags;
+						
+						[xmppStream connect:nil];
+					}
+					else if ([self multipleReachabilityChanges])
+					{
+						[self setMultipleReachabilityChanges:NO];
+						previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
+						
+						[self maybeAttemptReconnect];
+					}
+					else
+					{
+						previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
+					}
+					
+					[innerPool drain];
+				});
+				
+				dispatch_release(delGroup);
+				
+				[outerPool drain];
+			});
+			
 		}
 		else
 		{
@@ -394,7 +644,9 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 			
 			if (reachabilityFlags != previousReachabilityFlags)
 			{
-				// It seems that the reachability of our xmpp host has changed in the middle of a connection attempt.
+				// It seems that the reachability of our xmpp host has changed in the middle of either
+				// a reconnection attempt or while querying our delegates for permission to attempt reconnect.
+				// 
 				// This may mean that the current attempt will fail,
 				// but an another attempt after the failure will succeed.
 				// 

@@ -12,8 +12,6 @@
 	NSMutableDictionary *pingIDs;
 }
 
-- (id)initWithStream:(XMPPStream *)xmppStream;
-
 /**
  * Send pings to the server or a specific JID.
  * The disco module may be used to detect if the target supports ping.
