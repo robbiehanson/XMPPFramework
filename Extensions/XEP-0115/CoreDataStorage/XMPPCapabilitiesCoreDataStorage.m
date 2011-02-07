@@ -146,68 +146,54 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 {
 	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
 	
-	XMPPLogTrace();
+	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
 	
 	if (jid == nil) return nil;
 	
-	if (fr_resourceForJID == nil)
-	{
-		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
-		                                          inManagedObjectContext:[self managedObjectContext]];
-		
-		NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid full]];
-		
-		fr_resourceForJID = [[NSFetchRequest alloc] init];
-		[fr_resourceForJID setEntity:entity];
-		[fr_resourceForJID setPredicate:predicate];
-		[fr_resourceForJID setFetchLimit:1];
-	}
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
+	                                          inManagedObjectContext:[self managedObjectContext]];
 	
-	NSArray *results = [[self managedObjectContext] executeFetchRequest:fr_resourceForJID error:nil];
+	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid full]];
 	
-	if ([results count] > 0)
-	{
-		XMPPCapsResourceCoreDataStorageObject *resource = [results lastObject];
-		
-		return resource;
-	}
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+	[fetchRequest setEntity:entity];
+	[fetchRequest setPredicate:predicate];
+	[fetchRequest setFetchLimit:1];
 	
-	return nil;
+	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+	
+	XMPPCapsResourceCoreDataStorageObject *resource = [results lastObject];
+	
+	XMPPLogVerbose(@"%@: %@ - %@", THIS_FILE, THIS_METHOD, resource);
+	return resource;
 }
 
 - (XMPPCapsCoreDataStorageObject *)capsForHash:(NSString *)hash algorithm:(NSString *)hashAlg
 {
 	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
 	
-	XMPPLogTrace();
+	XMPPLogTrace2(@"%@: capsForHash:%@ algorithm:%@", THIS_FILE, hash, hashAlg);
 	
 	if (hash == nil) return nil;
 	if (hashAlg == nil) return nil;
 	
-	if (fr_capsForHash_algorithm == nil)
-	{
-		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsCoreDataStorageObject"
-		                                          inManagedObjectContext:[self managedObjectContext]];
-		
-		NSPredicate *predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@",
-		                                                           hash, hashAlg];
-		
-		fr_capsForHash_algorithm = [[NSFetchRequest alloc] init];
-		[fr_capsForHash_algorithm setEntity:entity];
-		[fr_capsForHash_algorithm setPredicate:predicate];
-		[fr_capsForHash_algorithm setFetchLimit:1];
-	}
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsCoreDataStorageObject"
+	                                          inManagedObjectContext:[self managedObjectContext]];
 	
-	NSArray *results = [[self managedObjectContext] executeFetchRequest:fr_capsForHash_algorithm error:nil];
+	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@",
+	                                                           hash, hashAlg];
 	
-	if ([results count] > 0)
-	{
-		XMPPCapsCoreDataStorageObject *caps = [results lastObject];
-		
-		return caps;
-	}
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+	[fetchRequest setEntity:entity];
+	[fetchRequest setPredicate:predicate];
+	[fetchRequest setFetchLimit:1];
 	
-	return nil;
+	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+	
+	XMPPCapsCoreDataStorageObject *caps = [results lastObject];
+	
+	XMPPLogVerbose(@"%@: %@ - %@", THIS_FILE, THIS_METHOD, caps);
+	return caps;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -687,9 +673,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	[managedObjectContext release];
 	[persistentStoreCoordinator release];
 	[managedObjectModel release];
-	
-	[fr_resourceForJID release];
-	[fr_capsForHash_algorithm release];
 	
 	[super dealloc];
 }
