@@ -1,13 +1,12 @@
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
-#import "MulticastDelegate.h"
+#import "XMPPModule.h"
 
 #define DEFAULT_XMPP_RECONNECT_DELAY 2.0
 
 #define DEFAULT_XMPP_RECONNECT_TIMER_INTERVAL 20.0
 
 
-@class XMPPStream;
 @protocol XMPPReconnectDelegate;
 
 /**
@@ -34,8 +33,8 @@
  * The timer is started if the initial reconnect fails.
  * This reconnect timer is fully configurable (may be enabled/disabled, and it's timeout may be changed).
  * 
- * In all cases, prior to attempting a reconnect, this class will
- * invoke the shouldAttemptAutoReconnect delegate method.
+ * In all cases, prior to attempting a reconnect,
+ * this class will invoke the shouldAttemptAutoReconnect delegate method.
  * The delegate may use this opportunity to optionally decline the auto reconnect attempt.
  * 
  * Auto reconnect may be disabled at any time via the autoReconnect property.
@@ -49,18 +48,17 @@
  * which will trigger the class into action just as if an accidental disconnect occurred.
 **/
 
-@interface XMPPReconnect : NSObject
+@interface XMPPReconnect : XMPPModule
 {
-	XMPPStream *xmppStream;
-	MulticastDelegate <XMPPReconnectDelegate> *multicastDelegate;
-	
 	Byte flags;
 	NSTimeInterval reconnectDelay;
 	
-	NSTimer *reconnectTimer;
+	dispatch_source_t reconnectTimer;
 	NSTimeInterval reconnectTimerInterval;
 	
 	SCNetworkReachabilityRef reachability;
+	
+	int reconnectTicket;
 	
 #if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
 	SCNetworkConnectionFlags previousReachabilityFlags;
@@ -68,13 +66,6 @@
 	SCNetworkReachabilityFlags previousReachabilityFlags;
 #endif
 }
-
-- (id)initWithStream:(XMPPStream *)xmppStream;
-
-- (void)addDelegate:(id)delegate;
-- (void)removeDelegate:(id)delegate;
-
-@property (nonatomic, readonly) XMPPStream *xmppStream;
 
 /**
  * Whether auto reconnect is enabled or disabled.

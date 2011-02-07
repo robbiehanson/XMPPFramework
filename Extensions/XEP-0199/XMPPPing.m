@@ -34,55 +34,53 @@
 
 @implementation XMPPPing
 
-- (id)initWithStream:(XMPPStream *)aXmppStream
+- (id)init
 {
-	if ((self = [super initWithStream:aXmppStream]))
+	return [self initWithDispatchQueue:NULL];
+}
+
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+{
+	if ((self = [super initWithDispatchQueue:queue]))
 	{
 		pingIDs = [[NSMutableDictionary alloc] initWithCapacity:5];
-		
-	  #if INTEGRATE_WITH_CAPABILITIES
-		[xmppStream autoAddDelegate:self toModulesOfClass:[XMPPCapabilities class]];
-	  #endif
 	}
 	return self;
 }
 
+- (BOOL)activate:(XMPPStream *)aXmppStream
+{
+	if ([super activate:aXmppStream])
+	{
+	
+	#if INTEGRATE_WITH_CAPABILITIES
+		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+	#endif
+		
+		return YES;
+	}
+	
+	return NO;
+}
+
+- (void)deactivate
+{
+#if INTEGRATE_WITH_CAPABILITIES
+	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+#endif
+	
+	[super deactivate];
+}
+
 - (void)dealloc
 {
-  #if INTEGRATE_WITH_CAPABILITIES
-	[xmppStream removeAutoDelegate:self fromModulesOfClass:[XMPPCapabilities class]];
-  #endif
-	
 	[pingIDs release];
-	
 	[super dealloc];
 }
 
-- (NSString *)generatePingIDWithTimeout:(NSTimeInterval)timeout
+- (void)removePingID:(NSString *)pingID
 {
-	// Generate unique ID for Ping packet
-	// It's important the ID be unique as the ID is the only thing that distinguishes a pong packet
-	
-	NSString *pingID = [xmppStream generateUUID];
-	
-	// Add ping ID to list so we'll recognize it when we get a response
-	[pingIDs setObject:[XMPPPingInfo pingInfoWithTimeout:timeout]
-	            forKey:pingID];
-	
-	// In case we never get a response, we want to remove the ping ID eventually,
-	// or we risk an ever increasing pingIDs array.
-	[NSTimer scheduledTimerWithTimeInterval:timeout
-									 target:self
-								   selector:@selector(removePingID:)
-								   userInfo:pingID
-									repeats:NO];
-	
-	return pingID;
-}
-
-- (void)removePingID:(NSTimer *)aTimer
-{
-	NSString *pingID = (NSString *)[aTimer userInfo];
+	// This method is invoked on the moduleQueue.
 	
 	XMPPPingInfo *pingInfo = [pingIDs objectForKey:pingID];
 	if (pingInfo)
@@ -96,13 +94,62 @@
 	}
 }
 
+- (NSString *)generatePingIDWithTimeout:(NSTimeInterval)timeout
+{
+	// This method may be invoked on any thread/queue.
+	
+	// Generate unique ID for Ping packet
+	// It's important the ID be unique as the ID is the only thing that distinguishes a pong packet
+	
+	NSString *pingID = [xmppStream generateUUID];
+	
+	dispatch_async(moduleQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		// Add ping ID to list so we'll recognize it when we get a response
+		[pingIDs setObject:[XMPPPingInfo pingInfoWithTimeout:timeout]
+					forKey:pingID];
+		
+		// In case we never get a response, we want to remove the ping ID eventually,
+		// or we risk an ever increasing pingIDs array.
+		
+		dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
+		
+		dispatch_source_set_event_handler(timer, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			[self removePingID:pingID];
+			
+			dispatch_source_cancel(timer);
+			dispatch_release(timer);
+			
+			[pool drain];
+		});
+		
+		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
+		
+		dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
+		dispatch_resume(timer);
+		
+		[pool release];
+	});
+	
+	return pingID;
+}
+
 - (NSString *)sendPingToServer
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	return [self sendPingToServerWithTimeout:DEFAULT_TIMEOUT];
 }
 
 - (NSString *)sendPingToServerWithTimeout:(NSTimeInterval)timeout
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	NSString *pingID = [self generatePingIDWithTimeout:timeout];
 	
 	// Send ping packet
@@ -122,11 +169,17 @@
 
 - (NSString *)sendPingToJID:(XMPPJID *)jid
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	return [self sendPingToJID:jid withTimeout:DEFAULT_TIMEOUT];
 }
 
 - (NSString *)sendPingToJID:(XMPPJID *)jid withTimeout:(NSTimeInterval)timeout
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	NSString *pingID = [self generatePingIDWithTimeout:timeout];
 	
 	// Send ping element
@@ -146,6 +199,8 @@
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+	// This method is invoked on the moduleQueue.
+	
 	NSString *type = [[iq attributeForName:@"type"] stringValue];
 	
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
@@ -195,6 +250,8 @@
 **/
 - (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query
 {
+	// This method is invoked on the moduleQueue.
+	
 	// <query xmlns="http://jabber.org/protocol/disco#info">
 	//   ...
 	//   <feature var="urn:xmpp:ping"/>

@@ -1,6 +1,10 @@
 #import "XMPPRoster.h"
 #import "XMPP.h"
+#import "XMPPLogging.h"
 
+// Log levels: off, error, warn, info, verbose
+// Log flags: trace
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 enum XMPPRosterFlags
 {
@@ -21,76 +25,137 @@ enum XMPPRosterFlags
 
 @implementation XMPPRoster
 
-@synthesize xmppStream;
-@synthesize xmppRosterStorage;
-@dynamic    autoRoster;
+@dynamic xmppRosterStorage;
+@dynamic autoRoster;
 
-/**
- * Private accessor for XMPPRosterStorage classes, which share the same delegate(s).
-**/
-- (MulticastDelegate *)multicastDelegate
+- (id)init
 {
-	return multicastDelegate;
+	return [self initWithRosterStorage:nil dispatchQueue:NULL];
 }
 
-- (id)initWithStream:(XMPPStream *)stream rosterStorage:(id <XMPPRosterStorage>)storage
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue
 {
-	if ((self = [super init]))
+	return [self initWithRosterStorage:nil dispatchQueue:queue];
+}
+
+- (id)initWithRosterStorage:(id <XMPPRosterStorage>)storage
+{
+	return [self initWithRosterStorage:storage dispatchQueue:NULL];
+}
+
+- (id)initWithRosterStorage:(id <XMPPRosterStorage>)storage dispatchQueue:(dispatch_queue_t)queue
+{
+	NSParameterAssert(storage != nil);
+	
+	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		multicastDelegate = [[MulticastDelegate alloc] init];
+		multicastDelegate = [[GCDMulticastDelegate alloc] init];
 		
-		xmppStream = [stream retain];
-		[xmppStream addDelegate:self];
-		
-		xmppRosterStorage = [storage retain];
-		[xmppRosterStorage setParent:self];
+		if ([storage configureWithParent:self queue:moduleQueue])
+		{
+			xmppRosterStorage = [storage retain];
+		}
+		else
+		{
+			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
+		}
 		
 		flags = 0;
-		
 		earlyPresenceElements = [[NSMutableArray alloc] initWithCapacity:2];
 	}
 	return self;
 }
 
+- (BOOL)activate:(XMPPStream *)aXmppStream
+{
+	XMPPLogTrace();
+	
+	if ([super activate:aXmppStream])
+	{
+		XMPPLogVerbose(@"%@: Activated", THIS_FILE);
+		
+		// Custom code goes here (if needed)
+		
+		return YES;
+	}
+	
+	return NO;
+}
+
+- (void)deactivate
+{
+	XMPPLogTrace();
+	
+	// Custom code goes here (if needed)
+	
+	[super deactivate];
+}
+
 - (void)dealloc
 {
-	[multicastDelegate release];
-	
-	[xmppStream removeDelegate:self];
-	[xmppStream release];
-	
 	[xmppRosterStorage release];
-	
 	[earlyPresenceElements release];
-	
 	[super dealloc];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Internal
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * This method is used by XMPPRosterStorage classes.
+**/
+- (GCDMulticastDelegate *)multicastDelegate
+{
+	return multicastDelegate;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)addDelegate:(id)delegate
+- (NSString *)moduleName
 {
-	[multicastDelegate addDelegate:delegate];
+	return @"XMPPRoster";
 }
 
-- (void)removeDelegate:(id)delegate
+- (id <XMPPRosterStorage>)xmppRosterStorage
 {
-	[multicastDelegate removeDelegate:delegate];
+	// Note: The xmppRosterStorage variable is read-only (set in the init method)
+	
+	return xmppRosterStorage;
 }
 
 - (BOOL)autoRoster
 {
-	return (flags & kAutoRoster) ? YES : NO;
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (flags & kAutoRoster) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
 }
 
 - (void)setAutoRoster:(BOOL)flag
 {
-	if(flag)
-		flags |= kAutoRoster;
+	dispatch_block_t block = ^{
+		
+		if (flag)
+			flags |= kAutoRoster;
+		else
+			flags &= ~kAutoRoster;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
 	else
-		flags &= ~kAutoRoster;
+		dispatch_async(moduleQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,11 +164,14 @@ enum XMPPRosterFlags
 
 - (void)addBuddy:(XMPPJID *)jid withNickname:(NSString *)optionalName
 {
-	if(jid == nil) return;
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
 	
 	XMPPJID *myJID = xmppStream.myJID;
 	
-	if([[myJID bare] isEqualToString:[jid bare]])
+	if ([[myJID bare] isEqualToString:[jid bare]])
 	{
 		// No, you don't need to add yourself
 		return;
@@ -119,7 +187,8 @@ enum XMPPRosterFlags
 	
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
-	if(optionalName)
+	
+	if (optionalName)
 	{
 		[item addAttributeWithName:@"name" stringValue:optionalName];
 	}
@@ -146,11 +215,14 @@ enum XMPPRosterFlags
 
 - (void)removeBuddy:(XMPPJID *)jid
 {
-	if(jid == nil) return;
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
 	
 	XMPPJID *myJID = xmppStream.myJID;
 	
-	if([[myJID bare] isEqualToString:[jid bare]])
+	if ([[myJID bare] isEqualToString:[jid bare]])
 	{
 		// No, you shouldn't remove yourself
 		return;
@@ -183,7 +255,10 @@ enum XMPPRosterFlags
 
 - (void)setNickname:(NSString *)nickname forBuddy:(XMPPJID *)jid
 {
-	if(jid == nil) return;
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
 	
 	// <iq type="set">
 	//   <query xmlns="jabber:iq:roster">
@@ -207,6 +282,9 @@ enum XMPPRosterFlags
 
 - (void)acceptBuddyRequest:(XMPPJID *)jid
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	// Send presence response
 	// 
 	// <presence to="bareJID" type="subscribed"/>
@@ -224,6 +302,9 @@ enum XMPPRosterFlags
 
 - (void)rejectBuddyRequest:(XMPPJID *)jid
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	// Send presence response
 	// 
 	// <presence to="bareJID" type="unsubscribed"/>
@@ -240,12 +321,16 @@ enum XMPPRosterFlags
 
 - (BOOL)requestedRoster
 {
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
 	return (flags & kRequestedRoster) ? YES : NO;
 }
 
 - (void)setRequestedRoster:(BOOL)flag
 {
-	if(flag)
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	if (flag)
 		flags |= kRequestedRoster;
 	else
 		flags &= ~kRequestedRoster;
@@ -253,12 +338,16 @@ enum XMPPRosterFlags
 
 - (BOOL)hasRoster
 {
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
 	return (flags & kHasRoster) ? YES : NO;
 }
 
 - (void)setHasRoster:(BOOL)flag
 {
-	if(flag)
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	if (flag)
 		flags |= kHasRoster;
 	else
 		flags &= ~kHasRoster;
@@ -266,25 +355,39 @@ enum XMPPRosterFlags
 
 - (void)fetchRoster
 {
-	if ([self requestedRoster])
-	{
-		// We've already requested the roster from the server.
-		return;
-	}
+	// This is a public method.
+	// It may be invoked on any thread/queue.
 	
-	// <iq type="get">
-	//   <query xmlns="jabber:iq:roster"/>
-	// </iq>
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		if ([self requestedRoster])
+		{
+			// We've already requested the roster from the server.
+			return;
+		}
+		
+		// <iq type="get">
+		//   <query xmlns="jabber:iq:roster"/>
+		// </iq>
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+		
+		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+		[iq addAttributeWithName:@"type" stringValue:@"get"];
+		[iq addChild:query];
+		
+		[xmppStream sendElement:iq];
+		
+		[self setRequestedRoster:YES];
+		
+		[pool drain];
+	};
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
-	
-	[self setRequestedRoster:YES];
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,20 +395,19 @@ enum XMPPRosterFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (id <XMPPUser>)myUser {
-    return [self.xmppRosterStorage myUser];
+    return [xmppRosterStorage myUser];
 }
 - (id <XMPPResource>)myResource {
-    return [self.xmppRosterStorage myResource];
+    return [xmppRosterStorage myResource];
 }
 
 - (id <XMPPUser>)userForJID:(XMPPJID *)jid {
-    return [self.xmppRosterStorage userForJID:jid];
+    return [xmppRosterStorage userForJID:jid];
 }
 
 - (id <XMPPResource>)resourceForJID:(XMPPJID *)jid {
-    return [self.xmppRosterStorage resourceForJID:jid];
+    return [xmppRosterStorage resourceForJID:jid];
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
@@ -313,6 +415,10 @@ enum XMPPRosterFlags
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
+	// This method is invoked on the moduleQueue.
+	
+	XMPPLogTrace();
+	
 	if ([self autoRoster])
 	{
 		[self fetchRoster];
@@ -321,6 +427,10 @@ enum XMPPRosterFlags
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+	// This method is invoked on the moduleQueue.
+	
+	XMPPLogTrace();
+	
 	// Note: Some jabber servers send an iq element with an xmlns.
 	// Because of the bug in Apple's NSXML (documented in our elementForName method),
 	// it is important we specify the xmlns for the query.
@@ -363,6 +473,10 @@ enum XMPPRosterFlags
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
+	// This method is invoked on the moduleQueue.
+	
+	XMPPLogTrace();
+	
 	if (![self hasRoster])
 	{
 		// We received a presence notification,
@@ -395,7 +509,7 @@ enum XMPPRosterFlags
 	{
 		id <XMPPUser> user = [xmppRosterStorage userForJID:[presence from]];
 		
-		if(user && [self autoRoster])
+		if (user && [self autoRoster])
 		{
 			// Presence subscription request from someone who's already in our roster.
 			// Automatically approve.
@@ -423,6 +537,10 @@ enum XMPPRosterFlags
 
 - (void)xmppStream:(XMPPStream *)sender didSendPresence:(XMPPPresence *)presence
 {
+	// This method is invoked on the moduleQueue.
+	
+	XMPPLogTrace();
+	
 	if ([[presence type] isEqualToString:@"unavailable"])
 	{
 		// We don't receive presence notifications when we're offline.
@@ -441,6 +559,10 @@ enum XMPPRosterFlags
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
+	// This method is invoked on the moduleQueue.
+	
+	XMPPLogTrace();
+	
 	[xmppRosterStorage clearAllUsersAndResources];
 	
 	[self setRequestedRoster:NO];

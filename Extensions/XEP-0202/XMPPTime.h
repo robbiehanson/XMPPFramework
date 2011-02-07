@@ -16,8 +16,6 @@
 	NSMutableDictionary *queryIDs;
 }
 
-- (id)initWithStream:(XMPPStream *)xmppStream;
-
 /**
  * Send query to the server or a specific JID.
  * The disco module may be used to detect if the target supports this XEP.
