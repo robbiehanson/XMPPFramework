@@ -149,6 +149,7 @@ enum XMPPStreamConfig
 - (void)cleanup;
 - (void)setIsSecure:(BOOL)flag;
 - (void)setIsAuthenticated:(BOOL)flag;
+- (void)continueSendElement:(NSXMLElement *)element withTag:(long)tag;
 - (void)startNegotiation;
 - (void)sendOpeningNegotiation;
 - (void)continueStartTLS:(NSMutableDictionary *)settings;
@@ -2008,6 +2009,211 @@ enum XMPPStreamConfig
 	}
 }
 
+- (void)sendIQ:(XMPPIQ *)iq withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_CONNECTED, @"Invoked with incorrect state");
+	
+	
+	// We're getting ready to send an IQ.
+	// We need to notify delegates of this action to allow them to optionally alter the IQ element.
+	
+	SEL selector = @selector(xmppStream:willSendIQ:);
+	
+	if ([multicastDelegate countForSelector:selector] == 0)
+	{
+		// None of the delegates implement the method.
+		// Use a shortcut.
+		
+		[self continueSendElement:iq withTag:tag];
+	}
+	else
+	{
+		// Notify all interested delegates.
+		// This must be done serially to allow them to alter the element.
+		
+		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+		
+		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		dispatch_async(concurrentQueue, ^{
+			NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
+			
+			// Allow delegates to modify outgoing element
+			
+			id del;
+			dispatch_queue_t dq;
+			
+			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			{
+				dispatch_sync(dq, ^{
+					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+					
+					[del xmppStream:self willSendIQ:iq];
+					
+					[innerPool release];
+				});
+			}
+			
+			dispatch_async(xmppQueue, ^{
+				NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+				
+				[self continueSendElement:iq withTag:tag];
+				
+				[innerPool release];
+			});
+			
+			[outerPool drain];
+		});
+	}
+}
+
+- (void)sendMessage:(XMPPMessage *)message withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_CONNECTED, @"Invoked with incorrect state");
+	
+	
+	// We're getting ready to send a message.
+	// We need to notify delegates of this action to allow them to optionally alter the message element.
+	
+	SEL selector = @selector(xmppStream:willSendMessage:);
+	
+	if ([multicastDelegate countForSelector:selector] == 0)
+	{
+		// None of the delegates implement the method.
+		// Use a shortcut.
+		
+		[self continueSendElement:message withTag:tag];
+	}
+	else
+	{
+		// Notify all interested delegates.
+		// This must be done serially to allow them to alter the element.
+		
+		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+		
+		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		dispatch_async(concurrentQueue, ^{
+			NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
+			
+			// Allow delegates to modify outgoing element
+			
+			id del;
+			dispatch_queue_t dq;
+			
+			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			{
+				dispatch_sync(dq, ^{
+					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+					
+					[del xmppStream:self willSendMessage:message];
+					
+					[innerPool release];
+				});
+			}
+			
+			dispatch_async(xmppQueue, ^{
+				NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+				
+				[self continueSendElement:message withTag:tag];
+				
+				[innerPool release];
+			});
+			
+			[outerPool drain];
+		});
+	}
+}
+
+- (void)sendPresence:(XMPPPresence *)presence withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_CONNECTED, @"Invoked with incorrect state");
+	
+	
+	// We're getting ready to send a presence element.
+	// We need to notify delegates of this action to allow them to optionally alter the presence element.
+	
+	SEL selector = @selector(xmppStream:willSendPresence:);
+	
+	if ([multicastDelegate countForSelector:selector] == 0)
+	{
+		// None of the delegates implement the method.
+		// Use a shortcut.
+		
+		[self continueSendElement:presence withTag:tag];
+	}
+	else
+	{
+		// Notify all interested delegates.
+		// This must be done serially to allow them to alter the element.
+		
+		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+		
+		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		dispatch_async(concurrentQueue, ^{
+			NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
+			
+			// Allow delegates to modify outgoing element
+			
+			id del;
+			dispatch_queue_t dq;
+			
+			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			{
+				dispatch_sync(dq, ^{
+					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+					
+					[del xmppStream:self willSendPresence:presence];
+					
+					[innerPool release];
+				});
+			}
+			
+			dispatch_async(xmppQueue, ^{
+				NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+				
+				[self continueSendElement:presence withTag:tag];
+				
+				[innerPool release];
+			});
+			
+			[outerPool drain];
+		});
+	}
+}
+
+- (void)continueSendElement:(NSXMLElement *)element withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	
+	if (state == STATE_CONNECTED)
+	{
+		NSString *outgoingStr = [element compactXMLString];
+		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+		
+		XMPPLogSend(@"SEND: %@", outgoingStr);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
+		           withTimeout:TIMEOUT_WRITE
+		                   tag:tag];
+		
+		if ([element isKindOfClass:[XMPPIQ class]])
+		{
+			[multicastDelegate xmppStream:self didSendIQ:(XMPPIQ *)element];
+		}
+		else if ([element isKindOfClass:[XMPPMessage class]])
+		{
+			[multicastDelegate xmppStream:self didSendMessage:(XMPPMessage *)element];
+		}
+		else if ([element isKindOfClass:[XMPPPresence class]])
+		{
+			[multicastDelegate xmppStream:self didSendPresence:(XMPPPresence *)element];
+		}
+	}
+}
+
 /**
  * Private method.
  * Presencts a common method for the various public sendElement methods.
@@ -2019,15 +2225,15 @@ enum XMPPStreamConfig
 	
 	if ([element isKindOfClass:[XMPPIQ class]])
 	{
-		[multicastDelegate xmppStream:self willSendIQ:(XMPPIQ *)element];
+		[self sendIQ:(XMPPIQ *)element withTag:tag];
 	}
 	else if ([element isKindOfClass:[XMPPMessage class]])
 	{
-		[multicastDelegate xmppStream:self willSendMessage:(XMPPMessage *)element];
+		[self sendMessage:(XMPPMessage *)element withTag:tag];
 	}
 	else if ([element isKindOfClass:[XMPPPresence class]])
 	{
-		[multicastDelegate xmppStream:self willSendPresence:(XMPPPresence *)element];
+		[self sendPresence:(XMPPPresence *)element withTag:tag];
 	}
 	else
 	{
@@ -2035,39 +2241,16 @@ enum XMPPStreamConfig
 		
 		if ([elementName isEqualToString:@"iq"])
 		{
-			[multicastDelegate xmppStream:self willSendIQ:[XMPPIQ iqFromElement:element]];
+			[self sendIQ:[XMPPIQ iqFromElement:element] withTag:tag];
 		}
 		else if ([elementName isEqualToString:@"message"])
 		{
-			[multicastDelegate xmppStream:self willSendMessage:[XMPPMessage messageFromElement:element]];
+			[self sendMessage:[XMPPMessage messageFromElement:element] withTag:tag];
 		}
 		else if ([elementName isEqualToString:@"presence"])
 		{
-			[multicastDelegate xmppStream:self willSendPresence:[XMPPPresence presenceFromElement:element]];
+			[self sendPresence:[XMPPPresence presenceFromElement:element] withTag:tag];
 		}
-	}
-	
-	NSString *outgoingStr = [element compactXMLString];
-	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-	
-	XMPPLogSend(@"SEND: %@", outgoingStr);
-	numberOfBytesSent += [outgoingData length];
-	
-	[asyncSocket writeData:outgoingData
-			   withTimeout:TIMEOUT_WRITE
-					   tag:tag];
-	
-	if ([element isKindOfClass:[XMPPIQ class]])
-	{
-		[multicastDelegate xmppStream:self didSendIQ:(XMPPIQ *)element];
-	}
-	else if ([element isKindOfClass:[XMPPMessage class]])
-	{
-		[multicastDelegate xmppStream:self didSendMessage:(XMPPMessage *)element];
-	}
-	else if ([element isKindOfClass:[XMPPPresence class]])
-	{
-		[multicastDelegate xmppStream:self didSendPresence:(XMPPPresence *)element];
 	}
 }
 
