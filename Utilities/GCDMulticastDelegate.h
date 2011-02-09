@@ -7,7 +7,7 @@ struct GCDMulticastDelegateListNode {
 	dispatch_queue_t delegateQueue;
 	struct GCDMulticastDelegateListNode * prev;
     struct GCDMulticastDelegateListNode * next;
-    NSUInteger retainCount;
+    int32_t retainCount;
 };
 typedef struct GCDMulticastDelegateListNode GCDMulticastDelegateListNode;
 
@@ -45,6 +45,8 @@ typedef struct GCDMulticastDelegateListNode GCDMulticastDelegateListNode;
 - (void)removeAllDelegates;
 
 - (NSUInteger)count;
+- (NSUInteger)countOfClass:(Class)aClass;
+- (NSUInteger)countForSelector:(SEL)aSelector;
 
 - (GCDMulticastDelegateEnumerator *)delegateEnumerator;
 
