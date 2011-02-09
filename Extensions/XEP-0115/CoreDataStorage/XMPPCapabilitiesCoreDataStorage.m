@@ -12,6 +12,31 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
 @synthesize parent;
 
+@dynamic managedObjectModel;
+@dynamic persistentStoreCoordinator;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Protocol Configuration
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)configureWithParent:(XMPPCapabilities *)aParent queue:(dispatch_queue_t)queue
+{
+	NSParameterAssert(aParent != nil);
+	NSParameterAssert(queue != NULL);
+	
+	if ((parent == nil) && (storageQueue == NULL))
+	{
+		parent = aParent; // Parents retain children, children do not retain parents
+		
+		storageQueue = queue;
+		dispatch_retain(storageQueue);
+		
+		return YES;
+	}
+	
+	return NO;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Core Data Setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,81 +69,125 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
 - (NSManagedObjectModel *)managedObjectModel
 {
-	if (managedObjectModel)
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	if (storageQueue == NULL)
 	{
-		return managedObjectModel;
+		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
+		return nil;
 	}
 	
-	XMPPLogVerbose(@"%@: Creating managedObjectModel", THIS_FILE);
+	dispatch_block_t block = ^{
+		
+		if (managedObjectModel)
+		{
+			return;
+		}
+		
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		XMPPLogVerbose(@"%@: Creating managedObjectModel", THIS_FILE);
+		
+		NSString *path = [[NSBundle mainBundle] pathForResource:@"XMPPCapabilities" ofType:@"mom"];
+		if (path)
+		{
+			// If path is nil, then NSURL or NSManagedObjectModel will throw an exception
+			
+			NSURL *url = [NSURL fileURLWithPath:path];
+			
+			managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
+		}
+		
+		[pool drain];
+	};
 	
-	NSString *path = [[NSBundle mainBundle] pathForResource:@"XMPPCapabilities" ofType:@"mom"];
-	if (path)
-	{
-		// If path is nil, then NSURL or NSManagedObjectModel will throw an exception
-		
-		NSURL *url = [NSURL fileURLWithPath:path];
-		
-		managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
-	}
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_sync(storageQueue, block);
 	
 	return managedObjectModel;
 }
 
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator
 {
-	if (persistentStoreCoordinator)
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	if (storageQueue == NULL)
 	{
-		return persistentStoreCoordinator;
+		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
+		return nil;
 	}
 	
-	NSManagedObjectModel *mom = [self managedObjectModel];
-	
-	XMPPLogVerbose(@"%@: Creating persistentStoreCoordinator", THIS_FILE);
-	
-	persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
-	
-	NSString *docsPath = [self persistentStoreDirectory];
-	NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPCapabilities.sqlite"];
-	if (storePath)
-	{
-		// If storePath is nil, then NSURL will throw an exception
+	dispatch_block_t block = ^{
 		
-		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
-		
-		NSError *error = nil;
-		NSPersistentStore *persistentStore;
-		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
-		                                                           configuration:nil
-		                                                                  URL:storeUrl
-		                                                              options:nil
-		                                                                error:&error];
-		if (!persistentStore)
+		if (persistentStoreCoordinator)
 		{
-		  #if TARGET_OS_IPHONE
-			XMPPLogError(@"%@:\n"
-						 @"====================================================================================="
-						 @"Error creating persistent store:\n%@"
-						 @"Chaned core data model recently?"
-						 @"Quick Fix: Delete the app from device and reinstall."
-						 @"=====================================================================================",
-						 THIS_FILE, error);
-		  #else
-			XMPPLogError(@"%@:\n"
-						 @"====================================================================================="
-						 @"Error creating persistent store:\n%@"
-						 @"Chaned core data model recently?"
-						 @"Quick Fix: Delete the database: %@"
-						 @"=====================================================================================",
-						 THIS_FILE, error, storePath);
-		  #endif
+			return;
 		}
-	}
+		
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		NSManagedObjectModel *mom = [self managedObjectModel];
+		
+		XMPPLogVerbose(@"%@: Creating persistentStoreCoordinator", THIS_FILE);
+		
+		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
+		
+		NSString *docsPath = [self persistentStoreDirectory];
+		NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPCapabilities.sqlite"];
+		if (storePath)
+		{
+			// If storePath is nil, then NSURL will throw an exception
+			
+			NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
+			
+			NSError *error = nil;
+			NSPersistentStore *persistentStore;
+			persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+			                                                           configuration:nil
+			                                                                  URL:storeUrl
+			                                                              options:nil
+			                                                                error:&error];
+			if (!persistentStore)
+			{
+			  #if TARGET_OS_IPHONE
+				XMPPLogError(@"%@:\n"
+				             @"====================================================================================="
+				             @"Error creating persistent store:\n%@"
+				             @"Chaned core data model recently?"
+				             @"Quick Fix: Delete the app from device and reinstall."
+				             @"=====================================================================================",
+				             THIS_FILE, error);
+			  #else
+				XMPPLogError(@"%@:\n"
+				             @"====================================================================================="
+				             @"Error creating persistent store:\n%@"
+				             @"Chaned core data model recently?"
+				             @"Quick Fix: Delete the database: %@"
+				             @"=====================================================================================",
+				             THIS_FILE, error, storePath);
+			  #endif
+			}
+		}
+		
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_sync(storageQueue, block);
 
     return persistentStoreCoordinator;
 }
 
 - (NSManagedObjectContext *)managedObjectContext
 {
+	// This is a private method.
+	
 	if (managedObjectContext)
 	{
 		return managedObjectContext;
@@ -197,28 +266,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Protocol Configuration
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (BOOL)configureWithParent:(XMPPCapabilities *)aParent queue:(dispatch_queue_t)queue
-{
-	NSParameterAssert(aParent != nil);
-	NSParameterAssert(queue != NULL);
-	
-	if ((parent == nil) && (storageQueue == NULL))
-	{
-		parent = aParent; // Parents retain children, children do not retain parents
-		
-		storageQueue = queue;
-		dispatch_retain(storageQueue);
-		
-		return YES;
-	}
-	
-	return NO;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Protocol Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -235,24 +282,26 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		return NO;
 	}
 	
-	__block BOOL result;
-	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-		
-		result = (resource.caps != nil);
-		
-		[pool drain];
-	};
-	
 	if (dispatch_get_current_queue() == storageQueue)
-		block;
+	{
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
+		return (resource.caps != nil);
+	}
 	else
-		dispatch_sync(storageQueue, block);
-	
-	return result;
+	{
+		__block BOOL result;
+		
+		dispatch_sync(storageQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
+			result = (resource.caps != nil);
+			
+			[pool drain];
+		});
+		
+		return result;
+	}
 }
 
 - (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid
@@ -268,22 +317,24 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		return nil;
 	}
 	
-	__block NSXMLElement *result;
-	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		result = [[self capabilitiesForJID:jid ext:nil] retain];
-		
-		[pool drain];
-	};
-	
 	if (dispatch_get_current_queue() == storageQueue)
-		block();
+	{
+		return [self capabilitiesForJID:jid ext:nil];
+	}
 	else
-		dispatch_sync(storageQueue, block);
-	
-	return [result autorelease];
+	{
+		__block NSXMLElement *result;
+		
+		dispatch_sync(storageQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			result = [[self capabilitiesForJID:jid ext:nil] retain];
+			
+			[pool drain];
+		});
+		
+		return [result autorelease];
+	}
 }
 
 - (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr
@@ -299,39 +350,40 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		return nil;
 	}
 	
-	__block NSXMLElement *result;
-	__block NSString *ext;
-	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
+	if (dispatch_get_current_queue() == storageQueue)
+	{
 		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
 		
-		if (resource == nil)
-		{
-			result = nil;
-			ext = nil;
-		}
-		else
-		{
-			result = [[[resource caps] capabilities] retain];
-			ext = [[resource ext] retain];
-		}
+		if (extPtr) *extPtr = [resource ext];
 		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
+		return [[resource caps] capabilities];
+	}
 	else
-		dispatch_sync(storageQueue, block);
-	
-	if (extPtr)
-		*extPtr = [ext autorelease];
-	else
-		[ext release];
-	
-	return [result autorelease];
+	{
+		__block NSXMLElement *result = nil;
+		__block NSString *ext = nil;
+		
+		dispatch_sync(storageQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
+			
+			if (resource)
+			{
+				result = [[[resource caps] capabilities] retain];
+				ext = [[resource ext] retain];
+			}
+			
+			[pool drain];
+		});
+		
+		if (extPtr)
+			*extPtr = [ext autorelease];
+		else
+			[ext release];
+		
+		return [result autorelease];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

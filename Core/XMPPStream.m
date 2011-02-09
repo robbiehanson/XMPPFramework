@@ -2525,7 +2525,7 @@ enum XMPPStreamConfig
 		if ([settings count] == 0)
 		{
 			// Use the default settings, and set the peer name
-			if (hostName)
+			if ([hostName length] > 0)
 			{
 				[settings setObject:hostName forKey:(NSString *)kCFStreamSSLPeerName];
 			}
