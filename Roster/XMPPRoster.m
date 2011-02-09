@@ -456,14 +456,20 @@ enum XMPPRosterFlags
 			// We should have our roster now
 			
 			[self setHasRoster:YES];
-			[xmppRosterStorage endRosterPopulation];
 			
-			// Which means we can process any premature presence elements we received
+			// Which means we can process any premature presence elements we received.
+			// 
+			// Note: We do this before invoking endRosterPopulation to enable optimizations
+			// concerning the possible presence storm.
+			
 			for (XMPPPresence *presence in earlyPresenceElements)
 			{
 				[self xmppStream:xmppStream didReceivePresence:presence];
 			}
 			[earlyPresenceElements removeAllObjects];
+			
+			// And finally, notify roster storage that the roster population is complete
+			[xmppRosterStorage endRosterPopulation];
 		}
 	}
 	
