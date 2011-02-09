@@ -98,15 +98,6 @@
 // 
 // 
 
-- (void)beginRosterPopulation;
-- (void)endRosterPopulation;
-
-- (void)handleRosterItem:(NSXMLElement *)item;
-- (void)handlePresence:(XMPPPresence *)presence;
-
-- (void)clearAllResources;
-- (void)clearAllUsersAndResources;
-
 /**
  * Configures the storage class, passing it's parent and parent's dispatch queue.
  * 
@@ -125,6 +116,15 @@
  * storage class in its init method if this method returns NO.
 **/
 - (BOOL)configureWithParent:(XMPPRoster *)aParent queue:(dispatch_queue_t)queue;
+
+- (void)beginRosterPopulation;
+- (void)endRosterPopulation;
+
+- (void)handleRosterItem:(NSXMLElement *)item;
+- (void)handlePresence:(XMPPPresence *)presence;
+
+- (void)clearAllResources;
+- (void)clearAllUsersAndResources;
 
 @end
 

@@ -47,11 +47,8 @@
 		DC6E98EC1098A4C700070ADE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E98EA1098A4C700070ADE /* AppDelegate.m */; };
 		DC6E98ED1098A4C700070ADE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6E98EA1098A4C700070ADE /* AppDelegate.m */; };
 		DC73028512F37F8A00549AC7 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73028212F37F8A00549AC7 /* DDList.m */; };
-		DC73028612F37F8A00549AC7 /* DelegateList.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73028412F37F8A00549AC7 /* DelegateList.m */; };
 		DC73028712F37F8A00549AC7 /* DDList.h in Headers */ = {isa = PBXBuildFile; fileRef = DC73028112F37F8A00549AC7 /* DDList.h */; };
 		DC73028812F37F8A00549AC7 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73028212F37F8A00549AC7 /* DDList.m */; };
-		DC73028912F37F8A00549AC7 /* DelegateList.h in Headers */ = {isa = PBXBuildFile; fileRef = DC73028312F37F8A00549AC7 /* DelegateList.h */; };
-		DC73028A12F37F8A00549AC7 /* DelegateList.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73028412F37F8A00549AC7 /* DelegateList.m */; };
 		DC73029412F3801500549AC7 /* XMPPResourceMemoryStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73028E12F3801500549AC7 /* XMPPResourceMemoryStorage.m */; };
 		DC73029512F3801500549AC7 /* XMPPRosterMemoryStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73029012F3801500549AC7 /* XMPPRosterMemoryStorage.m */; };
 		DC73029612F3801500549AC7 /* XMPPUserMemoryStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73029312F3801500549AC7 /* XMPPUserMemoryStorage.m */; };
@@ -219,8 +216,6 @@
 		DC73028012F37F7200549AC7 /* XMPPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPLogging.h; path = ../../Core/XMPPLogging.h; sourceTree = SOURCE_ROOT; };
 		DC73028112F37F8A00549AC7 /* DDList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDList.h; path = ../../Utilities/DDList.h; sourceTree = SOURCE_ROOT; };
 		DC73028212F37F8A00549AC7 /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDList.m; path = ../../Utilities/DDList.m; sourceTree = SOURCE_ROOT; };
-		DC73028312F37F8A00549AC7 /* DelegateList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DelegateList.h; path = ../../Utilities/DelegateList.h; sourceTree = SOURCE_ROOT; };
-		DC73028412F37F8A00549AC7 /* DelegateList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DelegateList.m; path = ../../Utilities/DelegateList.m; sourceTree = SOURCE_ROOT; };
 		DC73028D12F3801500549AC7 /* XMPPResourceMemoryStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPResourceMemoryStorage.h; path = ../../Roster/MemoryStorage/XMPPResourceMemoryStorage.h; sourceTree = SOURCE_ROOT; };
 		DC73028E12F3801500549AC7 /* XMPPResourceMemoryStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPResourceMemoryStorage.m; path = ../../Roster/MemoryStorage/XMPPResourceMemoryStorage.m; sourceTree = SOURCE_ROOT; };
 		DC73028F12F3801500549AC7 /* XMPPRosterMemoryStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPRosterMemoryStorage.h; path = ../../Roster/MemoryStorage/XMPPRosterMemoryStorage.h; sourceTree = SOURCE_ROOT; };
@@ -640,8 +635,6 @@
 				DC84BAE3124407B60055A459 /* GCDMulticastDelegate.m */,
 				DC84BAEB124407DF0055A459 /* RFSRVResolver.h */,
 				DC84BAEC124407DF0055A459 /* RFSRVResolver.m */,
-				DC73028312F37F8A00549AC7 /* DelegateList.h */,
-				DC73028412F37F8A00549AC7 /* DelegateList.m */,
 				DC73028112F37F8A00549AC7 /* DDList.h */,
 				DC73028212F37F8A00549AC7 /* DDList.m */,
 			);
@@ -764,7 +757,6 @@
 				DC53BAC312C3C64D00C8DEEE /* DDTTYLogger.h in Headers */,
 				DC53BAC812C3C68600C8DEEE /* GCDAsyncSocket.h in Headers */,
 				DC73028712F37F8A00549AC7 /* DDList.h in Headers */,
-				DC73028912F37F8A00549AC7 /* DelegateList.h in Headers */,
 				DC73029712F3801500549AC7 /* XMPPResourceMemoryStorage.h in Headers */,
 				DC73029912F3801500549AC7 /* XMPPRosterMemoryStorage.h in Headers */,
 				DC73029B12F3801500549AC7 /* XMPPRosterMemoryStoragePrivate.h in Headers */,
@@ -926,7 +918,6 @@
 				DC53BAC412C3C64D00C8DEEE /* DDTTYLogger.m in Sources */,
 				DC53BAC912C3C68600C8DEEE /* GCDAsyncSocket.m in Sources */,
 				DC73028812F37F8A00549AC7 /* DDList.m in Sources */,
-				DC73028A12F37F8A00549AC7 /* DelegateList.m in Sources */,
 				DC73029812F3801500549AC7 /* XMPPResourceMemoryStorage.m in Sources */,
 				DC73029A12F3801500549AC7 /* XMPPRosterMemoryStorage.m in Sources */,
 				DC73029D12F3801500549AC7 /* XMPPUserMemoryStorage.m in Sources */,
@@ -989,7 +980,6 @@
 				DC53BABC12C3C64D00C8DEEE /* DDTTYLogger.m in Sources */,
 				DC53BAC712C3C68600C8DEEE /* GCDAsyncSocket.m in Sources */,
 				DC73028512F37F8A00549AC7 /* DDList.m in Sources */,
-				DC73028612F37F8A00549AC7 /* DelegateList.m in Sources */,
 				DC73029412F3801500549AC7 /* XMPPResourceMemoryStorage.m in Sources */,
 				DC73029512F3801500549AC7 /* XMPPRosterMemoryStorage.m in Sources */,
 				DC73029612F3801500549AC7 /* XMPPUserMemoryStorage.m in Sources */,

@@ -41,7 +41,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 @implementation XMPPReconnect
 
-@synthesize xmppStream;
 @dynamic    autoReconnect;
 @synthesize reconnectDelay;
 @synthesize reconnectTimerInterval;
