@@ -82,9 +82,8 @@ typedef enum GCDAsyncSocketError GCDAsyncSocketError;
 #else
 	SSLContextRef sslContext;
 	NSMutableData *sslReadBuffer;
+	size_t sslWriteCachedLength;
 #endif
-	
-	id userTag;
 }
 
 /**
@@ -108,16 +107,6 @@ typedef enum GCDAsyncSocketError GCDAsyncSocketError;
 
 #pragma mark Configuration
 
-/**
- * The tag property allows you to associate user defined information with the socket.
- * Tag values are not used internally by GCDAsyncSocket.
-**/
-@property (readwrite, retain) id tag;
-
-/**
- * Delegate configuration.
- * Since the delegate and delegateQueue are tied together, there are methods to get/set both at the same time.
-**/
 - (id)delegate;
 - (void)setDelegate:(id)delegate;
 
