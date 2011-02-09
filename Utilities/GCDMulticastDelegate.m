@@ -1,4 +1,5 @@
 #import "GCDMulticastDelegate.h"
+#import <libkern/OSAtomic.h>
 
 /**
  * How does this class work?
@@ -27,14 +28,13 @@
 
 static void GCDMulticastDelegateListNodeRetain(GCDMulticastDelegateListNode *node)
 {
-    node->retainCount++;
+	OSAtomicIncrement32Barrier(&node->retainCount);
 }
 
 static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *node)
 {
-    node->retainCount--;
-    
-    if (node->retainCount == 0)
+	int32_t newRetainCount = OSAtomicDecrement32Barrier(&node->retainCount);
+    if (newRetainCount == 0)
     {
         free(node);
     }
@@ -178,6 +178,38 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 	return count;
 }
 
+- (NSUInteger)countOfClass:(Class)aClass
+{
+	NSUInteger count = 0;
+	
+	GCDMulticastDelegateListNode *node;
+	for (node = delegateList; node != NULL; node = node->next)
+	{
+		if ([node->delegate isKindOfClass:aClass])
+		{
+			count++;
+		}
+	}
+	
+	return count;
+}
+
+- (NSUInteger)countForSelector:(SEL)aSelector
+{
+	NSUInteger count = 0;
+	
+	GCDMulticastDelegateListNode *node;
+	for (node = delegateList; node != NULL; node = node->next)
+	{
+		if ([node->delegate respondsToSelector:aSelector])
+		{
+			count++;
+		}
+	}
+	
+	return count;
+}
+
 - (GCDMulticastDelegateEnumerator *)delegateEnumerator
 {
 	return [[[GCDMulticastDelegateEnumerator alloc] initWithDelegateList:delegateList] autorelease];
@@ -232,13 +264,16 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 		{
 			id delegate = node->delegate;
 			
-			dispatch_async(node->delegateQueue, ^{
-				
-				if ([delegate respondsToSelector:[anInvocation selector]])
-				{
+			if ([delegate respondsToSelector:[anInvocation selector]])
+			{
+				dispatch_async(node->delegateQueue, ^{
+					NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+					
 					[anInvocation invokeWithTarget:delegate];
-				}
-			});
+					
+					[pool drain];
+				});
+			}
 			
 			node = node->prev;
 		}
