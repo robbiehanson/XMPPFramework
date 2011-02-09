@@ -49,8 +49,6 @@ enum XMPPRosterFlags
 	
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		multicastDelegate = [[GCDMulticastDelegate alloc] init];
-		
 		if ([storage configureWithParent:self queue:moduleQueue])
 		{
 			xmppRosterStorage = [storage retain];
@@ -364,6 +362,7 @@ enum XMPPRosterFlags
 		if ([self requestedRoster])
 		{
 			// We've already requested the roster from the server.
+			[pool drain];
 			return;
 		}
 		
