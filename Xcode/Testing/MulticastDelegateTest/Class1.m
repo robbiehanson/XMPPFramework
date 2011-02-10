@@ -17,6 +17,8 @@
 - (void)foundString:(NSString *)str
 {
 	NSLog(@"Class1(%s): foundString:\"%@\"", dispatch_current_queue_label(), str);
+	
+	[NSThread sleepForTimeInterval:0.2];
 }
 
 - (void)foundString:(NSString *)str andNumber:(NSNumber *)num
