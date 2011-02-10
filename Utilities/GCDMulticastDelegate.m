@@ -16,6 +16,12 @@
  * In other words, it is NOT thread-safe, and should only be used from within the external dedicated dispatch_queue.
 **/
 
+@interface GCDMulticastDelegate (PrivateAPI)
+
+- (NSInvocation *)duplicateInvocation:(NSInvocation *)origInvocation;
+
+@end
+
 @interface GCDMulticastDelegateEnumerator (PrivateAPI)
 
 - (id)initWithDelegateList:(GCDMulticastDelegateListNode *)delegateList;
@@ -237,7 +243,7 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 	return [[self class] instanceMethodSignatureForSelector:@selector(doNothing)];
 }
 
-- (void)forwardInvocation:(NSInvocation *)anInvocation
+- (void)forwardInvocation:(NSInvocation *)origInvocation
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
@@ -247,8 +253,6 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 	
 	if (node != NULL)
 	{
-		[anInvocation retainArguments];
-		
 		// Recall that new delegates are added to the beginning of the linked list.
 		// The last delegate in the list is the first delegate that was added, so it will be the first that's invoked.
 		// We're going to be moving backwards through the linked list as we invoke the delegates.
@@ -260,16 +264,20 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 			node = node->next;
 		}
 		
+		SEL selector = [origInvocation selector];
+		
 		while (node != NULL)
 		{
 			id delegate = node->delegate;
 			
-			if ([delegate respondsToSelector:[anInvocation selector]])
+			if ([delegate respondsToSelector:selector])
 			{
+				NSInvocation *dupInvocation = [self duplicateInvocation:origInvocation];
+				
 				dispatch_async(node->delegateQueue, ^{
 					NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 					
-					[anInvocation invokeWithTarget:delegate];
+					[dupInvocation invokeWithTarget:delegate];
 					
 					[pool drain];
 				});
@@ -293,6 +301,88 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 {
 	[self removeAllDelegates];
 	[super dealloc];
+}
+
+- (NSInvocation *)duplicateInvocation:(NSInvocation *)origInvocation
+{
+	NSMethodSignature *methodSignature = [origInvocation methodSignature];
+	
+	NSInvocation *dupInvocation = [NSInvocation invocationWithMethodSignature:methodSignature];
+	[dupInvocation setSelector:[origInvocation selector]];
+	
+	NSUInteger i, count = [methodSignature numberOfArguments];
+	for (i = 2; i < count; i++)
+	{
+		const char *type = [methodSignature getArgumentTypeAtIndex:i];
+		
+		if (*type == *@encode(BOOL))
+		{
+			BOOL value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == *@encode(char) || *type == *@encode(unsigned char))
+		{
+			char value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == *@encode(short) || *type == *@encode(unsigned short))
+		{
+			short value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == *@encode(int) || *type == *@encode(unsigned int))
+		{
+			int value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == *@encode(long) || *type == *@encode(unsigned long))
+		{
+			long value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == *@encode(long long) || *type == *@encode(unsigned long long))
+		{
+			long long value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == *@encode(double))
+		{
+			double value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == *@encode(float))
+		{
+			float value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else if (*type == '@')
+		{
+			id value;
+			[origInvocation getArgument:&value atIndex:i];
+			[dupInvocation setArgument:&value atIndex:i];
+		}
+		else
+		{
+			NSString *selectorStr = NSStringFromSelector([origInvocation selector]);
+			
+			NSString *format = @"Argument %lu to method %@ - Type(%c) not supported";
+			NSString *reason = [NSString stringWithFormat:format, (unsigned long)(i - 2), selectorStr, *type];
+			
+			[[NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:nil] raise];
+		}
+	}
+	
+	[dupInvocation retainArguments];
+	
+	return dupInvocation;
 }
 
 @end
