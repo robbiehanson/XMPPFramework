@@ -219,7 +219,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE; // | XMPP_LOG_FLAG_TRACE
 #pragma mark Hashing
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NSString* encodeLt(NSString *str)
+static NSString* encodeLt(NSString *str)
 {
 	// From the RFC:
 	// 
@@ -235,7 +235,7 @@ NSString* encodeLt(NSString *str)
 	return [str stringByReplacingOccurrencesOfString:@"<" withString:@"&lt;"];
 }
 
-NSInteger sortIdentities(NSXMLElement *identity1, NSXMLElement *identity2, void *context)
+static NSInteger sortIdentities(NSXMLElement *identity1, NSXMLElement *identity2, void *context)
 {
 	// Sort the service discovery identities by category and then by type and then by xml:lang (if it exists).
 	// 
@@ -288,7 +288,7 @@ NSInteger sortIdentities(NSXMLElement *identity1, NSXMLElement *identity2, void 
 	return [name1 compare:name2 options:NSLiteralSearch];
 }
 
-NSInteger sortFeatures(NSXMLElement *feature1, NSXMLElement *feature2, void *context)
+static NSInteger sortFeatures(NSXMLElement *feature1, NSXMLElement *feature2, void *context)
 {
 	// All sort operations MUST be performed using "i;octet" collation as specified in Section 9.3 of RFC 4790.
 	
@@ -301,7 +301,7 @@ NSInteger sortFeatures(NSXMLElement *feature1, NSXMLElement *feature2, void *con
 	return [var1 compare:var2 options:NSLiteralSearch];
 }
 
-NSString* extractFormTypeValue(NSXMLElement *form)
+static NSString* extractFormTypeValue(NSXMLElement *form)
 {
 	// From the RFC:
 	// 
@@ -369,7 +369,7 @@ NSString* extractFormTypeValue(NSXMLElement *form)
 	return @"";
 }
 
-NSInteger sortForms(NSXMLElement *form1, NSXMLElement *form2, void *context)
+static NSInteger sortForms(NSXMLElement *form1, NSXMLElement *form2, void *context)
 {
 	// Sort the forms by the FORM_TYPE (i.e., by the XML character data of the <value/> element.
 	// 
@@ -383,7 +383,7 @@ NSInteger sortForms(NSXMLElement *form1, NSXMLElement *form2, void *context)
 	return [formTypeValue1 compare:formTypeValue2 options:NSLiteralSearch];
 }
 
-NSInteger sortFormFields(NSXMLElement *field1, NSXMLElement *field2, void *context)
+static NSInteger sortFormFields(NSXMLElement *field1, NSXMLElement *field2, void *context)
 {
 	// Sort the fields by the "var" attribute.
 	// 
@@ -398,7 +398,7 @@ NSInteger sortFormFields(NSXMLElement *field1, NSXMLElement *field2, void *conte
 	return [var1 compare:var2 options:NSLiteralSearch];
 }
 
-NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *context)
+static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, void *context)
 {
 	NSString *str1 = [value1 stringValue];
 	NSString *str2 = [value2 stringValue];
