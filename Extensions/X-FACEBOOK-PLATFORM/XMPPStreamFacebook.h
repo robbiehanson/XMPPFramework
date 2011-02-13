@@ -22,7 +22,14 @@
 + (NSArray *)permissions;
 
 - (BOOL)supportsXFacebookPlatform;
-- (BOOL)authenticateWithAccessToken:(NSString *)accessToken error:(NSError **)errPtr;
-- (BOOL)authenticateWithAccessToken:(NSString *)accessToken expirationDate:(NSDate *)expirationDate error:(NSError **)errPtr;
+
+- (BOOL)authenticateWithAppId:(NSString *)appId 
+                  accessToken:(NSString *)accessToken 
+                        error:(NSError **)errPtr;
+
+- (BOOL)authenticateWithAppId:(NSString *)appId 
+                  accessToken:(NSString *)accessToken 
+               expirationDate:(NSDate *)expirationDate 
+                        error:(NSError **)errPtr;
 
 @end

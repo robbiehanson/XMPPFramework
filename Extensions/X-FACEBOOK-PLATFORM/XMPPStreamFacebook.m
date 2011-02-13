@@ -59,12 +59,20 @@
 /**
  * This method attemts to sign-in to Facebook using the access token.
  **/
-- (BOOL)authenticateWithAccessToken:(NSString *)accessToken error:(NSError **)errPtr {
+- (BOOL)authenticateWithAppId:(NSString *)appId 
+                  accessToken:(NSString *)accessToken 
+                        error:(NSError **)errPtr {
     // hard coding expiration date, because we use offline_access in the permissions
-    return [self authenticateWithAccessToken:accessToken expirationDate:[NSDate distantFuture] error:errPtr];
+    return [self authenticateWithAppId:appId 
+                           accessToken:accessToken 
+                        expirationDate:[NSDate distantFuture] 
+                                 error:errPtr];
 }
 
-- (BOOL)authenticateWithAccessToken:(NSString *)accessToken expirationDate:(NSDate *)expirationDate error:(NSError **)errPtr {
+- (BOOL)authenticateWithAppId:(NSString *)appId 
+                  accessToken:(NSString *)accessToken 
+               expirationDate:(NSDate *)expirationDate 
+                        error:(NSError **)errPtr {
 	if (state != STATE_CONNECTED)
 	{
 		if (errPtr)
@@ -102,7 +110,7 @@
 		return NO;
 	}
     
-    self.facebook = [[[Facebook alloc] init] autorelease];
+    self.facebook = [[[Facebook alloc] initWithAppId:appId] autorelease];
     self.facebook.accessToken = accessToken; 
     self.facebook.expirationDate = expirationDate;
     
