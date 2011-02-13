@@ -5,7 +5,7 @@
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
-static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE; // | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 /**
  * Defines the timeout for a capabilities request.
