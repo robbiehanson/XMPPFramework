@@ -87,7 +87,7 @@
 **/
 - (NSString *)prettyXMLString
 {
-	return [self XMLStringWithOptions:NSXMLNodePrettyPrint];
+	return [self XMLStringWithOptions:(NSXMLNodePrettyPrint | NSXMLNodeCompactEmptyElement)];
 }
 
 /**
