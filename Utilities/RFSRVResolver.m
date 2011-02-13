@@ -245,15 +245,15 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
     uint16_t                u16;
     uint32_t                u32;
     
-    assert(rdata != NULL);
-    assert(rdlen < 65536);      // rdlen comes from a uint16_t, so can't exceed this.  
+    NSAssert(rdata != NULL,@"rdata is NULL");
+    NSAssert(rdlen < 65536,@"rdlen is too big");      // rdlen comes from a uint16_t, so can't exceed this.  
 	// This also constrains [rrData length] to well less than a uint32_t.
     
     // Rather than write a whole bunch of icky parsing code, I just synthesise 
     // a resource record and use <dns_util.h>.
 	
     rrData = [NSMutableData data];
-    assert(rrData != nil);
+    NSAssert(rrData != nil,@"Can't create rrData");
     
 	u8 = 0;
 	[rrData appendBytes:&u8 length:sizeof(u8)];
@@ -270,7 +270,7 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
     // Parse the record.
     
     rr = dns_parse_resource_record([rrData bytes], (uint32_t) [rrData length]);
-    assert(rr != NULL);
+    NSAssert(rr != NULL, @"Can't parse dns resource record");
     
     // If the parse is successful, add the results to the array.
     
@@ -290,7 +290,7 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 			result = [RFSRVRecord recordWithPriority:priority weight:weight port:port target:target];
             
             resultIndexSet = [NSIndexSet indexSetWithIndex:self.results.count];
-            assert(resultIndexSet != nil);
+            NSAssert(resultIndexSet != nil, @"Can't create a result set index");
             
             [self willChange:NSKeyValueChangeInsertion valuesAtIndexes:resultIndexSet forKey:@"results"];
             [_results addObject:result];
@@ -323,16 +323,21 @@ static void QueryRecordCallback(
     DDLogVerbose(@"%s",__PRETTY_FUNCTION__);
 	
     obj = (RFSRVResolver *) context;
-    assert([obj isKindOfClass:[RFSRVResolver class]]);
+    
+    NSCAssert([obj isKindOfClass:[RFSRVResolver class]],@"obj is not of class RFSRVResolver");
     
 #pragma unused(sdRef)
-    assert(sdRef == obj->_sdRef);
-    assert(flags & kDNSServiceFlagsAdd);
+    NSCAssert(sdRef == obj->_sdRef, @"sdRef objects are not the same.");
+    
+    if (!(flags & kDNSServiceFlagsAdd)) {
+        // if the kDNSServiceFlagsAdd flag is not set, the domain information is not valid.
+        return;
+    }
 #pragma unused(interfaceIndex)
     // errorCode looked at below
 #pragma unused(fullname)
 #pragma unused(rrclass)
-    assert(rrclass == kDNSServiceClass_IN);
+    NSCAssert(rrclass == kDNSServiceClass_IN, @"rrclass is not kDNSServiceClass_IN");
     // rdlen and rdata used below
 #pragma unused(ttl)
     // context used above
@@ -367,16 +372,19 @@ static void SDRefSocketCallback(
     
     DDLogVerbose(@"%s",__PRETTY_FUNCTION__);
     
-#pragma unused(type)
-    assert(type == kCFSocketReadCallBack);
+    if (type != kCFSocketReadCallBack) {
+        // we only care about kCFSocketReadCallBack
+        return;
+    }
+
 #pragma unused(address)
 #pragma unused(data)
     
     obj = (RFSRVResolver *) info;
-    assert([obj isKindOfClass:[RFSRVResolver class]]);
+    NSCAssert([obj isKindOfClass:[RFSRVResolver class]], @"obj is not of class RFSRVResolver");
     
 #pragma unused(s)
-    assert(s == obj->_sdRefSocket);
+    NSCAssert(s == obj->_sdRefSocket,@"s is not obj->_sdRefSocket");
     
     err = DNSServiceProcessResult(obj->_sdRef);
     if (err != kDNSServiceErr_NoError) {
@@ -392,7 +400,7 @@ static void SDRefSocketCallback(
     CFSocketContext     context = { 0, self, NULL, NULL, NULL };
     CFRunLoopSourceRef  rls;
     
-    assert(self->_sdRef == NULL);
+    NSAssert(self->_sdRef == NULL, @"_sdRef is not NULL");
     
     // Create the DNSServiceRef to run our query.
     
@@ -411,7 +419,7 @@ static void SDRefSocketCallback(
         err = DNSServiceQueryRecord(
 									&self->_sdRef, 
 									kDNSServiceFlagsReturnIntermediates,
-									0,                                      // interfaceIndex
+									kDNSServiceInterfaceIndexAny,                      // interfaceIndex
 									srvNameCStr, 
 									kDNSServiceType_SRV, 
 									kDNSServiceClass_IN, 
@@ -424,12 +432,12 @@ static void SDRefSocketCallback(
     // DNSServiceRef.
 	
     if (err == kDNSServiceErr_NoError) {
-        assert(self->_sdRef != NULL);
+        NSAssert(self->_sdRef != NULL, @"_sdRef is NULL");
         
         fd = DNSServiceRefSockFD(self->_sdRef);
-        assert(fd >= 0);
+        NSAssert(fd >= 0, @"could not get a file descriptor");
         
-        assert(self->_sdRefSocket == NULL);
+        NSAssert(self->_sdRefSocket == NULL, @"_sdRefSocket is not NULL");
         self->_sdRefSocket = CFSocketCreateWithNative(
 													  NULL, 
 													  fd, 
@@ -437,7 +445,7 @@ static void SDRefSocketCallback(
 													  SDRefSocketCallback, 
 													  &context
 													  );
-        assert(self->_sdRefSocket != NULL);
+        NSAssert(self->_sdRefSocket != NULL, @"Could not create a socket.");
         
         CFSocketSetSocketFlags(
 							   self->_sdRefSocket, 
@@ -445,7 +453,7 @@ static void SDRefSocketCallback(
 							   );
         
         rls = CFSocketCreateRunLoopSource(NULL, self->_sdRefSocket, 0);
-        assert(rls != NULL);
+        NSAssert(rls != NULL,@"Could not create a run loop source");
         
         CFRunLoopAddSource(CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
         
@@ -460,6 +468,11 @@ static void SDRefSocketCallback(
 {
     DDLogVerbose(@"%s",__PRETTY_FUNCTION__);
 	
+    if ([_results count] < 1) {
+        DDLogWarn(@"%s no results",__PRETTY_FUNCTION__);
+        return;
+    }
+    
 	// Sort results
 	NSMutableArray *sortedResults = [NSMutableArray arrayWithCapacity:[_results count]];
 	
