@@ -17,14 +17,18 @@
 {
 	NSDate *timeSent;
 	NSTimeInterval timeout;
+	dispatch_source_t timer;
 }
 
-+ (XMPPPingInfo *)pingInfoWithTimeout:(NSTimeInterval)timeout;
++ (XMPPPingInfo *)pingInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer;
 
 @property (nonatomic, readonly) NSDate *timeSent;
 @property (nonatomic, readonly) NSTimeInterval timeout;
+@property (nonatomic, readonly) dispatch_source_t timer;
 
 - (NSTimeInterval)rtt;
+
+- (void)cancelTimer;
 
 @end
 
@@ -52,7 +56,6 @@
 {
 	if ([super activate:aXmppStream])
 	{
-	
 	#if INTEGRATE_WITH_CAPABILITIES
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
@@ -90,6 +93,7 @@
 		
 		[multicastDelegate xmppPing:self didNotReceivePong:pingID dueToTimeout:[pingInfo timeout]];
 		
+		[pingInfo cancelTimer];
 		[pingInfo release];
 	}
 }
@@ -106,10 +110,6 @@
 	dispatch_async(moduleQueue, ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		// Add ping ID to list so we'll recognize it when we get a response
-		[pingIDs setObject:[XMPPPingInfo pingInfoWithTimeout:timeout]
-					forKey:pingID];
-		
 		// In case we never get a response, we want to remove the ping ID eventually,
 		// or we risk an ever increasing pingIDs array.
 		
@@ -120,9 +120,6 @@
 			
 			[self removePingID:pingID];
 			
-			dispatch_source_cancel(timer);
-			dispatch_release(timer);
-			
 			[pool drain];
 		});
 		
@@ -131,6 +128,11 @@
 		dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
 		dispatch_resume(timer);
 		
+		// Add ping ID to list so we'll recognize it when we get a response
+		[pingIDs setObject:[XMPPPingInfo pingInfoWithTimeout:timeout timer:timer]
+		            forKey:pingID];
+		
+		dispatch_release(timer);
 		[pool release];
 	});
 	
@@ -275,21 +277,19 @@
 
 @synthesize timeSent;
 @synthesize timeout;
+@synthesize timer;
 
-- (id)initWithTimeout:(NSTimeInterval)to
+- (id)initWithTimeout:(NSTimeInterval)to timer:(dispatch_source_t)aTimer
 {
 	if ((self = [super init]))
 	{
 		timeSent = [[NSDate alloc] init];
 		timeout = to;
+		
+		timer = aTimer;
+		dispatch_retain(timer);
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[timeSent release];
-	[super dealloc];
 }
 
 - (NSTimeInterval)rtt
@@ -297,9 +297,28 @@
 	return [timeSent timeIntervalSinceNow] * -1.0;
 }
 
-+ (XMPPPingInfo *)pingInfoWithTimeout:(NSTimeInterval)timeout
+- (void)cancelTimer
 {
-	return [[[XMPPPingInfo alloc] initWithTimeout:timeout] autorelease];
+	if (timer)
+	{
+		dispatch_source_cancel(timer);
+		dispatch_release(timer);
+		timer = NULL;
+	}
+}
+
+- (void)dealloc
+{
+	[self cancelTimer];
+	[timeSent release];
+	[super dealloc];
+}
+
+
+
++ (XMPPPingInfo *)pingInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer
+{
+	return [[[XMPPPingInfo alloc] initWithTimeout:timeout timer:timer] autorelease];
 }
 
 @end
