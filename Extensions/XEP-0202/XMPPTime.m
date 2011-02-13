@@ -18,14 +18,18 @@
 {
 	NSDate *timeSent;
 	NSTimeInterval timeout;
+	dispatch_source_t timer;
 }
 
-+ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout;
++ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer;
 
 @property (nonatomic, readonly) NSDate *timeSent;
 @property (nonatomic, readonly) NSTimeInterval timeout;
+@property (nonatomic, readonly) dispatch_source_t timer;
 
 - (NSTimeInterval)rtt;
+
+- (void)cancelTimer;
 
 @end
 
@@ -90,6 +94,7 @@
 		
 		[multicastDelegate xmppTime:self didNotReceiveResponse:queryID dueToTimeout:[queryInfo timeout]];
 		
+		[queryInfo cancelTimer];
 		[queryInfo release];
 	}
 }
@@ -107,10 +112,6 @@
 	dispatch_async(moduleQueue, ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		// Add query ID to list so we'll recognize it when we get a response
-		[queryIDs setObject:[XMPPTimeQueryInfo queryInfoWithTimeout:timeout]
-		             forKey:queryID];
-		
 		// In case we never get a response, we want to remove the query ID eventually,
 		// or we risk an ever increasing queryIDs array.
 		
@@ -121,9 +122,6 @@
 			
 			[self removeQueryID:queryID];
 			
-			dispatch_source_cancel(timer);
-			dispatch_release(timer);
-			
 			[pool drain];
 		});
 		
@@ -131,6 +129,10 @@
 		
 		dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
 		dispatch_resume(timer);
+		
+		// Add query ID to list so we'll recognize it when we get a response
+		[queryIDs setObject:[XMPPTimeQueryInfo queryInfoWithTimeout:timeout timer:timer]
+		             forKey:queryID];
 		
 		[pool drain];
 	});
@@ -468,21 +470,19 @@
 
 @synthesize timeSent;
 @synthesize timeout;
+@synthesize timer;
 
-- (id)initWithTimeout:(NSTimeInterval)to
+- (id)initWithTimeout:(NSTimeInterval)to timer:(dispatch_source_t)aTimer
 {
 	if ((self = [super init]))
 	{
 		timeSent = [[NSDate alloc] init];
 		timeout = to;
+		
+		timer = aTimer;
+		dispatch_retain(timer);
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[timeSent release];
-	[super dealloc];
 }
 
 - (NSTimeInterval)rtt
@@ -490,9 +490,26 @@
 	return [timeSent timeIntervalSinceNow] * -1.0;
 }
 
-+ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout
+- (void)cancelTimer
 {
-	return [[[XMPPTimeQueryInfo alloc] initWithTimeout:timeout] autorelease];
+	if (timer)
+	{
+		dispatch_source_cancel(timer);
+		dispatch_release(timer);
+		timer = NULL;
+	}
+}
+
+- (void)dealloc
+{
+	[self cancelTimer];
+	[timeSent release];
+	[super dealloc];
+}
+
++ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer
+{
+	return [[[XMPPTimeQueryInfo alloc] initWithTimeout:timeout timer:timer] autorelease];
 }
 
 @end
