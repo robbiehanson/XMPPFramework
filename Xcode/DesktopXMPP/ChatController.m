@@ -116,7 +116,7 @@
 	}
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	[messageField setEnabled:NO];
 }
