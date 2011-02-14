@@ -1,25 +1,42 @@
 #import "XMPPRosterCoreDataStorage.h"
+
+#import "DDLog.h"
+
 #import "XMPPRosterPrivate.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
+#import "XMPPStreamCoreDataStorage.h"
 #import "XMPP.h"
 
 
 @implementation XMPPRosterCoreDataStorage
 
-@synthesize parent;
-
 @dynamic managedObjectModel;
 @dynamic persistentStoreCoordinator;
 @dynamic managedObjectContext;
+@synthesize rosterPopulation;
+
+#pragma mark -
+#pragma mark init
 
 - (id)init
 {
 	if ((self = [super init]))
 	{
-		isRosterPopulation = NO;
+        self.rosterPopulation = [NSMutableDictionary dictionaryWithCapacity:2];
 	}
 	return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    [managedObjectContext release];
+    [persistentStoreCoordinator release];
+    [managedObjectModel release];
+    [rosterPopulation release];
+    
+    [super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,9 +153,34 @@
 	return managedObjectContext;
 }
 
+#pragma mark -
+#pragma mark Notifcations
+
+
+- (void)mergeChanges:(NSNotification *)notification
+{    
+    DDLogVerbose(@"%s",__PRETTY_FUNCTION__);
+    
+    // Merge changes into the main context on the main thread
+    [self.managedObjectContext performSelectorOnMainThread:@selector(mergeChangesFromContextDidSaveNotification:)
+                                                withObject:notification
+                                             waitUntilDone:YES];  
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utility Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)addXMPPStream:(XMPPStream *)xmppStream {
+    [XMPPStreamCoreDataStorage insertInManagedObjectContext:[self managedObjectContext] 
+                                                 withStream:xmppStream];
+
+    NSError *error = nil;
+	
+	if (![[self managedObjectContext] save:&error]) {
+		DDLogError(@"%s ERROR: %@", __PRETTY_FUNCTION__,error);
+	}
+}
 
 /**
  * For some bizarre reason (in my opinion), when you request your roster,
@@ -168,33 +210,34 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPUser Protocol
+#pragma mark XMPPRosterStorage Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id <XMPPUser>)myUser
-{
-	XMPPJID *myJID = parent.xmppStream.myJID;
-	
-	return [self userForJID:myJID];
+- (id <XMPPUser>)myUserForXMPPStream:(XMPPStream *)xmppStream {
+    XMPPJID *myJID = xmppStream.myJID;
+    
+    return [self userForJID:myJID xmppStream:xmppStream];
 }
 
-- (id <XMPPResource>)myResource
+- (id <XMPPResource>)myResourceForXMPPStream:(XMPPStream *)xmppStream
 {
-	XMPPJID *myJID = parent.xmppStream.myJID;
+	XMPPJID *myJID = xmppStream.myJID;
 	
-	return [self resourceForJID:myJID];
+	return [self resourceForJID:myJID xmppStream:xmppStream];
 }
 
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid
+
+- (id <XMPPUser>)userForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream
 {
-	if (jid == nil) return nil;
+	if (jid == nil || xmppStream == nil) return nil;
 	
 	NSString *bareJIDStr = [jid bare];
+    NSString *myJIDStr = [[xmppStream myJID] full];
 	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
-	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", bareJIDStr];
+	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND stream.myJIDStr == %@", bareJIDStr, myJIDStr];
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
@@ -209,16 +252,17 @@
 	return (XMPPUserCoreDataStorage *)[results lastObject];
 }
 
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid
+- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream
 {
-	if (jid == nil) return nil;
+	if (jid == nil || xmppStream == nil) return nil;
 	
 	NSString *fullJIDStr = [jid full];
+    NSString *myJIDStr = [[xmppStream myJID] full];
 	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
-	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", fullJIDStr];
+	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND stream.myJIDStr == %@", fullJIDStr, myJIDStr];
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
@@ -233,32 +277,55 @@
 	return (XMPPResourceCoreDataStorage *)[results lastObject];
 }
 
-- (void)beginRosterPopulation
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)xmppStream
 {
-	isRosterPopulation = YES;
+    NSManagedObjectContext *rosterPopulationManagedObjectContext = [[[NSManagedObjectContext alloc] init] autorelease];
+    [rosterPopulationManagedObjectContext setPersistentStoreCoordinator:[self persistentStoreCoordinator]];
+            
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(mergeChanges:)
+                                                 name:NSManagedObjectContextDidSaveNotification
+                                               object:rosterPopulationManagedObjectContext];
+    XMPPJID *myJID = [xmppStream myJID];
+    
+    [self.rosterPopulation setObject:rosterPopulationManagedObjectContext forKey:myJID];
 }
 
-- (void)endRosterPopulation
+- (void)endRosterPopulationForXMPPStream:(XMPPStream *)xmppStream
 {
-	isRosterPopulation = NO;
-	
-	[[self managedObjectContext] save:nil];
+    XMPPJID *myJID = [xmppStream myJID];
+    NSManagedObjectContext *rosterPopulationManagedObjectContext = [self.rosterPopulation objectForKey:myJID];
+
+	[rosterPopulationManagedObjectContext save:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:NSManagedObjectContextDidSaveNotification
+                                                  object:rosterPopulationManagedObjectContext];
+    
+    [self.rosterPopulation removeObjectForKey:myJID];
 }
 
-- (void)handleRosterItem:(NSXMLElement *)item
+- (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)xmppStream
 {
 	if ([self isRosterItem:item])
 	{
-		if (isRosterPopulation)
+        //DDLogTrace();
+        XMPPUserCoreDataStorage *user = nil;
+
+        NSManagedObjectContext *rosterPopulationManagedObjectContext = [self.rosterPopulation objectForKey:[xmppStream myJID]];
+        
+		if (rosterPopulationManagedObjectContext != nil)
 		{
-			[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext] withItem:item];
+			[XMPPUserCoreDataStorage insertInManagedObjectContext:rosterPopulationManagedObjectContext
+                                                              xmppStream:xmppStream
+                                                                withItem:item];
 		}
 		else
 		{
 			NSString *jidStr = [item attributeStringValueForName:@"jid"];
 			XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
 			
-			XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self userForJID:jid];
+			user = (XMPPUserCoreDataStorage *)[self userForJID:jid xmppStream:xmppStream];
 			
 			NSString *subscription = [item attributeStringValueForName:@"subscription"];
 			if ([subscription isEqualToString:@"remove"])
@@ -276,7 +343,9 @@
 				}
 				else
 				{
-					[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext] withItem:item];
+					[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext] 
+                                                               xmppStream:xmppStream
+                                                                 withItem:item];
 				}
 			}
 			
@@ -285,10 +354,10 @@
 	}
 }
 
-- (void)handlePresence:(XMPPPresence *)presence
+- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)xmppStream
 {
 	XMPPJID *jid = [presence from];
-	XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self userForJID:jid];
+	XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self userForJID:jid xmppStream:xmppStream];
 	
 	if (user)
 	{
@@ -298,13 +367,16 @@
 	}
 }
 
-- (void)clearAllResources
+- (void)clearAllResourcesForXMPPStream:(XMPPStream *)xmppStream
 {
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
 	                                          inManagedObjectContext:[self managedObjectContext]];
-	
+    NSString *myJIDStr = [[xmppStream myJID] full];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"user.stream.myJIDStr == %@", myJIDStr];
+
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
 	
 	NSArray *allResources = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 	
@@ -318,15 +390,18 @@
 	[[self managedObjectContext] save:nil];
 }
 
-- (void)clearAllUsersAndResources
+- (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)xmppStream
 {
 	// Note: Deleting a user will delete all associated resources because of the cascade rule in our core data model.
 	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
 	                                          inManagedObjectContext:[self managedObjectContext]];
-	
+    NSString *myJIDStr = [[xmppStream myJID] full];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"stream.myJIDStr == %@", myJIDStr];
+
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
 	
 	NSArray *allUsers = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 	

@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 #import "XMPPUser.h"
+#import "XMPPStreamCoreDataStorage.h"
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
 #endif
 
 @class XMPPResourceCoreDataStorage;
-
 
 @interface XMPPUserCoreDataStorage : NSManagedObject <XMPPUser>
 
@@ -24,8 +24,9 @@
 
 @property (nonatomic, retain) XMPPResourceCoreDataStorage * primaryResource;
 @property (nonatomic, retain) NSSet * resources;
+@property (nonatomic, retain) XMPPStreamCoreDataStorage * stream;
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withItem:(NSXMLElement *)item;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc xmppStream:(XMPPStream *)xmppStream withItem:(NSXMLElement *)item;
 
 - (void)updateWithItem:(NSXMLElement *)item;
 - (void)updateWithPresence:(XMPPPresence *)presence;
