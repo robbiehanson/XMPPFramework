@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'ParserTestMac' target in the 'ParserTestMac' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
