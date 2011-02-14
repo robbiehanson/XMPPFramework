@@ -49,13 +49,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	// Configure and start xmpp stream
 	
+	// Optional:
+	// 
 	// Replace me with the proper domain and port.
 	// The example below is setup for a typical google talk account.
-	[xmppStream setHostName:@"talk.google.com"];
-	[xmppStream setHostPort:5222];
+	// 
+	// If you don't supply a hostName, then it will be automatically resolved using the JID (below).
+	// For example, if you supply a JID like 'user@quack.com/rsrc'
+	// then the xmpp framework will follow the xmpp specification, and do a SRV lookup for quack.com.
+	// 
+	// If you don't specify a hostPort, then the default (5222) will be used.
+//	[xmppStream setHostName:@"talk.google.com"];
+//	[xmppStream setHostPort:5222];
 	
+	// Required:
+	// 
 	// Replace me with the proper JID and password
-	[xmppStream setMyJID:[XMPPJID jidWithString:@"robbiehanson15@gmail.com/quack"]];
+	[xmppStream setMyJID:[XMPPJID jidWithString:@"user@gmail.com/xmppframework"]];
 	password = @"";
 	
 	// You may need to alter these settings depending on the server you're connecting to
@@ -225,7 +235,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	

@@ -562,7 +562,7 @@ enum XMPPRosterFlags
 	}
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	// This method is invoked on the moduleQueue.
 	

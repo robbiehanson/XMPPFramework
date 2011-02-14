@@ -274,6 +274,7 @@ enum XMPPStreamConfig
 	
 	[parser setDelegate:nil];
 	[parser release];
+	[parserError release];
 	
 	[hostName release];
 	
@@ -1115,7 +1116,7 @@ enum XMPPStreamConfig
 				
 				state = STATE_DISCONNECTED;
 				
-				[multicastDelegate xmppStreamDidDisconnect:self];
+				[multicastDelegate xmppStreamDidDisconnect:self withError:nil];
 			}
 			else
 			{
@@ -1154,7 +1155,7 @@ enum XMPPStreamConfig
 				
 				state = STATE_DISCONNECTED;
 				
-				[multicastDelegate xmppStreamDidDisconnect:self];
+				[multicastDelegate xmppStreamDidDisconnect:self withError:nil];
 			}
 			else
 			{
@@ -3077,8 +3078,7 @@ enum XMPPStreamConfig
 	{
 		state = STATE_DISCONNECTED;
 		
-		[multicastDelegate xmppStream:self didReceiveError:connectError];
-		[multicastDelegate xmppStreamDidDisconnect:self];
+		[multicastDelegate xmppStreamDidDisconnect:self withError:connectError];
 	}
 }
 
@@ -3245,11 +3245,6 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	if (err)
-	{
-		[multicastDelegate xmppStream:self didReceiveError:err];
-	}
-	
 	if (srvResults && (++srvResultsIndex < [srvResults count]))
 	{
 		[self tryNextSrvResult];
@@ -3297,7 +3292,18 @@ enum XMPPStreamConfig
 		[self setIsAuthenticated:NO];
 		
 		// Notify delegate
-		[multicastDelegate xmppStreamDidDisconnect:self];
+		
+		if (parserError)
+		{
+			[multicastDelegate xmppStreamDidDisconnect:self withError:parserError];
+			
+			[parserError release];
+			parserError = nil;
+		}
+		else
+		{
+			[multicastDelegate xmppStreamDidDisconnect:self withError:err];
+		}
 	}
 }
 
@@ -3632,7 +3638,9 @@ enum XMPPStreamConfig
 		
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		[multicastDelegate xmppStream:self didReceiveError:error];
+		[parserError release];
+		parserError = [error retain];
+		
 		[asyncSocket disconnect];
 		
 		[pool drain];
