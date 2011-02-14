@@ -169,7 +169,7 @@
 	}
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	// We can't accept or reject any requests when we're disconnected from the server.
 	// We may as well close the window.

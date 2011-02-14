@@ -54,6 +54,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	UInt64 numberOfBytesReceived;
 	
 	XMPPParser *parser;
+	NSError *parserError;
 	
 	Byte flags;
 	Byte config;
@@ -295,13 +296,13 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * The disconnect method is synchronous.
  * Meaning that the disconnect will happen immediately, even if there are pending elements yet to be sent.
- * The xmppStreamDidDisconnect: method will be invoked before the disconnect method returns.
+ * The xmppStreamDidDisconnect:withError: method will be invoked before the disconnect method returns.
  * 
  * The disconnectAfterSending method is asynchronous.
  * The disconnect will happen after all pending elements have been sent.
  * Attempting to send elements after this method is called will not result in the elements getting sent.
  * The disconnectAfterSending method will return immediately,
- * and the xmppStreamDidDisconnect: delegate method will be invoked at a later time.
+ * and the xmppStreamDidDisconnect:withError: delegate method will be invoked at a later time.
 **/
 - (void)disconnect;
 - (void)disconnectAfterSending;
@@ -718,9 +719,10 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence;
 
 /**
- * There are two types of errors: TCP errors and XMPP errors.
- * If a TCP error is encountered (failure to connect, broken connection, etc) a standard NSError object is passed.
- * If an XMPP error is encountered (<stream:error> for example) an NSXMLElement object is passed.
+ * This method is called if an XMPP error is received.
+ * In other words, a <stream:error/>.
+ * 
+ * However, this method may also be called for any unrecognized xml stanzas.
  * 
  * Note that standard errors (<iq type='error'/> for example) are delivered normally,
  * via the other didReceive...: methods.
@@ -753,8 +755,14 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * This method is called after the stream is closed.
+ * 
+ * The given error parameter will be non-nil if the error was due to something outside the general xmpp realm.
+ * Some examples:
+ * - The TCP socket was unexpectedly disconnected.
+ * - The SRV resolution of the domain failed.
+ * - Error parsing xml sent from server. 
 **/
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender;
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error;
 
 /**
  * This method is only used in P2P mode when the connectTo:withAddress: method was used.

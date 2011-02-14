@@ -559,7 +559,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	

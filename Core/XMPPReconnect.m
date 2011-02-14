@@ -317,7 +317,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	[self stop];
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	// This method is executed on our moduleQueue.
 	
