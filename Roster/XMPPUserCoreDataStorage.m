@@ -28,6 +28,7 @@
 
 @dynamic primaryResource;
 @dynamic resources;
+@dynamic stream;
 
 - (XMPPJID *)jid
 {
@@ -109,7 +110,7 @@
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withItem:(NSXMLElement *)item
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc xmppStream:(XMPPStream *)xmppStream withItem:(NSXMLElement *)item
 {
 	NSString *jidStr = [item attributeStringValueForName:@"jid"];
 	XMPPJID *jid = [XMPPJID jidWithString:jidStr];
@@ -123,7 +124,11 @@
 	XMPPUserCoreDataStorage *newUser;
 	newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPUserCoreDataStorage"
 	                                        inManagedObjectContext:moc];
-	
+    
+    XMPPStreamCoreDataStorage *stream = [XMPPStreamCoreDataStorage getOrInsertInManagedObjectContext:moc
+                                                                                      withXMPPStream:xmppStream];
+    newUser.stream = stream;
+    
 	[newUser updateWithItem:item];
 	
 	return newUser;
@@ -139,7 +144,7 @@
 		NSLog(@"XMPPUserCoreDataStorage: invalid item (missing or invalid jid): %@", item);
 		return;
 	}
-	
+    
 	self.jid = jid;
 	self.nickname = [item attributeStringValueForName:@"name"];
 	
@@ -179,8 +184,8 @@
 - (void)updateWithPresence:(XMPPPresence *)presence
 {
 	XMPPResourceCoreDataStorage *resource = (XMPPResourceCoreDataStorage *)[self resourceForJID:[presence from]];
-	
-	if ([[presence type] isEqualToString:@"unavailable"])
+	NSString *presenceType = [presence type];
+	if ([presenceType isEqualToString:@"unavailable"])
 	{
 		if (resource)
 		{
@@ -188,6 +193,12 @@
 			[[self managedObjectContext] deleteObject:resource];
 		}
 	}
+    else if ([presenceType isEqualToString:@"unsubscribe"] ||
+             [presenceType isEqualToString:@"unsubscribed"])
+    {
+        [[self managedObjectContext] deleteObject:self];
+        return;
+    }
 	else
 	{
 		if(resource)
