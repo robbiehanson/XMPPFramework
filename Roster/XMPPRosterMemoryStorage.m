@@ -45,19 +45,21 @@
 #pragma mark Roster Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id <XMPPUser>)myUser
+- (id <XMPPUser>)myUserForXMPPStream:(XMPPStream *)xmppStream
 {
+    // TODO: make implementation stream specific
+    
 	return myUser;
 }
 
-- (id <XMPPResource>)myResource
+- (id <XMPPResource>)myResourceForXMPPStream:(XMPPStream *)xmppStream
 {
-	XMPPJID *myJID = parent.xmppStream.myJID;
+	XMPPJID *myJID = xmppStream.myJID;
 	
 	return [myUser resourceForJID:myJID];
 }
 
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid
+- (id <XMPPUser>)userForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream
 {
 	id <XMPPUser> result = [roster objectForKey:[jid bareJID]];
 	
@@ -66,7 +68,7 @@
 		return result;
 	}
 	
-	XMPPJID *myJID = parent.xmppStream.myJID;
+	XMPPJID *myJID = xmppStream.myJID;
 	
 	XMPPJID *myBareJID = [myJID bareJID];
 	XMPPJID *bareJID = [jid bareJID];
@@ -79,9 +81,9 @@
 	return nil;
 }
 
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid
+- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream
 {
-	id <XMPPUser> user = [self userForJID:jid];
+	id <XMPPUser> user = [self userForJID:jid xmppStream:xmppStream];
 	
 	return [user resourceForJID:jid];
 }
@@ -183,17 +185,17 @@
 #pragma mark Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)beginRosterPopulation
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)xmppStream
 {
 	isRosterPopulation = YES;
 	
-	XMPPJID *myJID = parent.xmppStream.myJID;
+	XMPPJID *myJID = xmppStream.myJID;
 	
 	[myUser release];
 	myUser = [[XMPPUserMemoryStorage alloc] initWithJID:myJID];
 }
 
-- (void)handleRosterItem:(NSXMLElement *)item
+- (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)xmppStream
 {
 	if ([self isRosterItem:item])
 	{
@@ -229,14 +231,14 @@
 	}
 }
 
-- (void)endRosterPopulation
+- (void)endRosterPopulationForXMPPStream:(XMPPStream *)xmppStream
 {
 	isRosterPopulation = NO;
 	
 	[[self multicastDelegate] xmppRosterDidChange:self];
 }
 
-- (void)handlePresence:(XMPPPresence *)presence
+- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)xmppStream
 {
 	XMPPJID *jidKey = [[presence from] bareJID];
 	XMPPUserMemoryStorage *rosterUser = [roster objectForKey:jidKey];
@@ -252,7 +254,7 @@
 		// Not a presence element for anyone in our roster.
 		// Is it a presence element for our user (either our resource or another resource)?
 		
-		XMPPJID *myJID = parent.xmppStream.myJID;
+		XMPPJID *myJID = xmppStream.myJID;
 		XMPPJID *myBareJID = [myJID bareJID];
 		
 		if([myBareJID isEqual:jidKey])
@@ -264,7 +266,7 @@
 	}
 }
 
-- (void)clearAllResources
+- (void)clearAllResourcesForXMPPStream:(XMPPStream *)xmppStream
 {
 	NSEnumerator *enumerator = [roster objectEnumerator];
 	XMPPUserMemoryStorage *user;
@@ -277,7 +279,7 @@
 	[[self multicastDelegate] xmppRosterDidChange:self];
 }
 
-- (void)clearAllUsersAndResources
+- (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)xmppStream
 {
 	[roster removeAllObjects];
 	

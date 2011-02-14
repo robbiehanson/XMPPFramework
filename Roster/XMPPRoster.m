@@ -9,7 +9,10 @@ enum XMPPRosterFlags
 	kHasRoster       = 1 << 2,  // If set, we have received the roster
 };
 
-@interface XMPPRoster (PrivateAPI)
+@interface XMPPRoster ()
+
+@property(retain) NSMutableArray *earlyPresenceElements;
+@property(assign) Byte flags;
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence;
 
@@ -21,6 +24,8 @@ enum XMPPRosterFlags
 
 @implementation XMPPRoster
 
+@synthesize earlyPresenceElements;
+@synthesize flags;
 @synthesize xmppStream;
 @synthesize xmppRosterStorage;
 @dynamic    autoRoster;
@@ -43,7 +48,9 @@ enum XMPPRosterFlags
 		[xmppStream addDelegate:self];
 		
 		xmppRosterStorage = [storage retain];
-		[xmppRosterStorage setParent:self];
+        if ([xmppRosterStorage respondsToSelector:@selector(setParent:)]) {
+            xmppRosterStorage.parent = self;
+        }
 		
 		flags = 0;
 		
@@ -82,15 +89,15 @@ enum XMPPRosterFlags
 
 - (BOOL)autoRoster
 {
-	return (flags & kAutoRoster) ? YES : NO;
+	return (self.flags & kAutoRoster) ? YES : NO;
 }
 
 - (void)setAutoRoster:(BOOL)flag
 {
 	if(flag)
-		flags |= kAutoRoster;
+		self.flags |= kAutoRoster;
 	else
-		flags &= ~kAutoRoster;
+		self.flags &= ~kAutoRoster;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +183,7 @@ enum XMPPRosterFlags
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
 	[iq addAttributeWithName:@"type" stringValue:@"set"];
+    [iq addAttributeWithName:@"id" stringValue:[xmppStream generateUUID]];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -240,28 +248,28 @@ enum XMPPRosterFlags
 
 - (BOOL)requestedRoster
 {
-	return (flags & kRequestedRoster) ? YES : NO;
+	return (self.flags & kRequestedRoster) ? YES : NO;
 }
 
 - (void)setRequestedRoster:(BOOL)flag
 {
 	if(flag)
-		flags |= kRequestedRoster;
+		self.flags |= kRequestedRoster;
 	else
-		flags &= ~kRequestedRoster;
+		self.flags &= ~kRequestedRoster;
 }
 
 - (BOOL)hasRoster
 {
-	return (flags & kHasRoster) ? YES : NO;
+	return (self.flags & kHasRoster) ? YES : NO;
 }
 
 - (void)setHasRoster:(BOOL)flag
 {
 	if(flag)
-		flags |= kHasRoster;
+		self.flags |= kHasRoster;
 	else
-		flags &= ~kHasRoster;
+		self.flags &= ~kHasRoster;
 }
 
 - (void)fetchRoster
@@ -292,18 +300,18 @@ enum XMPPRosterFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (id <XMPPUser>)myUser {
-    return [self.xmppRosterStorage myUser];
+    return [self.xmppRosterStorage myUserForXMPPStream:xmppStream];
 }
 - (id <XMPPResource>)myResource {
-    return [self.xmppRosterStorage myResource];
+    return [self.xmppRosterStorage myResourceForXMPPStream:xmppStream];
 }
 
 - (id <XMPPUser>)userForJID:(XMPPJID *)jid {
-    return [self.xmppRosterStorage userForJID:jid];
+    return [self.xmppRosterStorage userForJID:jid xmppStream:xmppStream];
 }
 
 - (id <XMPPResource>)resourceForJID:(XMPPJID *)jid {
-    return [self.xmppRosterStorage resourceForJID:jid];
+    return [self.xmppRosterStorage resourceForJID:jid xmppStream:xmppStream];
 }
 
 
@@ -312,7 +320,7 @@ enum XMPPRosterFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
-{
+{    
 	if ([self autoRoster])
 	{
 		[self fetchRoster];
@@ -321,6 +329,11 @@ enum XMPPRosterFlags
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+    // We only want IQ for our stream
+    if (sender != xmppStream) {
+        return NO;
+    }
+    
 	// Note: Some jabber servers send an iq element with an xmlns.
 	// Because of the bug in Apple's NSXML (documented in our elementForName method),
 	// it is important we specify the xmlns for the query.
@@ -330,39 +343,67 @@ enum XMPPRosterFlags
 	{
 		if (![self hasRoster])
 		{
-			[xmppRosterStorage beginRosterPopulation];
-		}
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                [xmppRosterStorage beginRosterPopulationForXMPPStream:sender];
+                
+                NSArray *items = [query elementsForName:@"item"];
+                for (NSXMLElement *item in items)
+                {
+                    // Filter out items for users who aren't actually in our roster.
+                    // That is, those users who have requested to be our buddy, but we haven't approved yet.
+                    
+                    [xmppRosterStorage handleRosterItem:item xmppStream:sender];
+                }
+                
+                // We should have our roster now
+                
+                [self setHasRoster:YES];
+                [xmppRosterStorage endRosterPopulationForXMPPStream:sender];
+                
+                // Which means we can process any premature presence elements we received
+                for (XMPPPresence *presence in self.earlyPresenceElements)
+                {
+                    // needs to happen on the main thread or context will get messed up
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        [self xmppStream:xmppStream didReceivePresence:presence];
+                    });
+                }
+                [self.earlyPresenceElements removeAllObjects];
+                
+            });
+		} else {
+            NSArray *items = [query elementsForName:@"item"];
+            for (NSXMLElement *item in items)
+            {
+                // Filter out items for users who aren't actually in our roster.
+                // That is, those users who have requested to be our buddy, but we haven't approved yet.
+                
+                [xmppRosterStorage handleRosterItem:item xmppStream:sender];
+            }            
+        }
+        
+        // return result
+        if ([iq requiresResponse]) {
+            XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"result" to:[iq from] elementID:[iq elementID]];
+            NSXMLElement *resultQuery = [[query copy] autorelease];
+            [iqResponse addChild:resultQuery];
+            
+            [sender sendElement:iqResponse];
+        }
 		
-		NSArray *items = [query elementsForName:@"item"];
-		for (NSXMLElement *item in items)
-		{
-			// Filter out items for users who aren't actually in our roster.
-			// That is, those users who have requested to be our buddy, but we haven't approved yet.
-			
-			[xmppRosterStorage handleRosterItem:item];
-		}
-		
-		if (![self hasRoster])
-		{
-			// We should have our roster now
-			
-			[self setHasRoster:YES];
-			[xmppRosterStorage endRosterPopulation];
-			
-			// Which means we can process any premature presence elements we received
-			for (XMPPPresence *presence in earlyPresenceElements)
-			{
-				[self xmppStream:xmppStream didReceivePresence:presence];
-			}
-			[earlyPresenceElements removeAllObjects];
-		}
-	}
+        return YES;
+    }
 	
 	return NO;
 }
-
+ 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
+    // We only want Presence for our stream
+    if (sender != xmppStream) {
+        return;
+    }
 	if (![self hasRoster])
 	{
 		// We received a presence notification,
@@ -380,7 +421,7 @@ enum XMPPRosterFlags
 		if ([self requestedRoster])
 		{
 			// We store the presence element until we get our roster.
-			[earlyPresenceElements addObject:presence];
+			[self.earlyPresenceElements addObject:presence];
 		}
 		else
 		{
@@ -393,7 +434,7 @@ enum XMPPRosterFlags
 	
 	if ([[presence type] isEqualToString:@"subscribe"])
 	{
-		id <XMPPUser> user = [xmppRosterStorage userForJID:[presence from]];
+		id <XMPPUser> user = [xmppRosterStorage userForJID:[presence from] xmppStream:sender];
 		
 		if(user && [self autoRoster])
 		{
@@ -417,12 +458,17 @@ enum XMPPRosterFlags
 	}
 	else
 	{
-		[xmppRosterStorage handlePresence:presence];
+		[xmppRosterStorage handlePresence:presence xmppStream:sender];
 	}
 }
 
 - (void)xmppStream:(XMPPStream *)sender didSendPresence:(XMPPPresence *)presence
 {
+    // We only want Presence for our stream
+    if (sender != xmppStream) {
+        return;
+    }
+    
 	if ([[presence type] isEqualToString:@"unavailable"])
 	{
 		// We don't receive presence notifications when we're offline.
@@ -433,20 +479,25 @@ enum XMPPRosterFlags
 		// We will receive general roster updates as long as we're still connected though.
 		// So there's no need to refetch the roster.
 		
-		[xmppRosterStorage clearAllResources];
+		[xmppRosterStorage clearAllResourcesForXMPPStream:sender];
 		
-		[earlyPresenceElements removeAllObjects];
+		[self.earlyPresenceElements removeAllObjects];
 	}
 }
 
+// try using xmppStreamWillConnect, so we can keep user info when we go offline temporarily
+//- (void)xmppStreamWillConnect:(XMPPStream *)sender
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender
 {
-	[xmppRosterStorage clearAllUsersAndResources];
+    if (sender != xmppStream) {
+        return;
+    }
+	[xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:sender];
 	
 	[self setRequestedRoster:NO];
 	[self setHasRoster:NO];
 	
-	[earlyPresenceElements removeAllObjects];
+	[self.earlyPresenceElements removeAllObjects];
 }
 
 @end

@@ -59,24 +59,26 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @protocol XMPPRosterStorage <NSObject>
-@required
+@optional
 
 @property (nonatomic, assign) XMPPRoster *parent;
 
-- (id <XMPPUser>)myUser;
-- (id <XMPPResource>)myResource;
+@required
 
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid;
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
+- (id <XMPPUser>)myUserForXMPPStream:(XMPPStream *)xmppStream;
+- (id <XMPPResource>)myResourceForXMPPStream:(XMPPStream *)xmppStream;
 
-- (void)beginRosterPopulation;
-- (void)endRosterPopulation;
+- (id <XMPPUser>)userForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream;
+- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream;
 
-- (void)handleRosterItem:(NSXMLElement *)item;
-- (void)handlePresence:(XMPPPresence *)presence;
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)xmppStream;
+- (void)endRosterPopulationForXMPPStream:(XMPPStream *)xmppStream;
 
-- (void)clearAllResources;
-- (void)clearAllUsersAndResources;
+- (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)xmppStream;
+- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)xmppStream;
+
+- (void)clearAllResourcesForXMPPStream:(XMPPStream *)xmppStream;
+- (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)xmppStream;
 
 @end
 
