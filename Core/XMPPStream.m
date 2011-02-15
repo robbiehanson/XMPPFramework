@@ -74,7 +74,7 @@
                                                     XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
 
 // Log levels: off, error, warn, info, verbose
-static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
 
 // Define the various states we'll use to track our progress
 enum {
