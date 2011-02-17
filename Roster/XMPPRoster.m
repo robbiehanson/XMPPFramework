@@ -471,6 +471,8 @@ enum XMPPRosterFlags
 			// And finally, notify roster storage that the roster population is complete
 			[xmppRosterStorage endRosterPopulation];
 		}
+		
+		return YES;
 	}
 	
 	return NO;
