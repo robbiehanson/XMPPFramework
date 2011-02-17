@@ -1,0 +1,6 @@
+syntax: glob
+
+Xcode/*/build
+Xcode/Testing/*/build
+*.pbxuser
+*.mode1v3
