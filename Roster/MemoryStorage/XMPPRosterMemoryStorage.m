@@ -620,11 +620,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	XMPPJID *jidKey = [[presence from] bareJID];
 	XMPPUserMemoryStorage *rosterUser = [roster objectForKey:jidKey];
 	
-	if(rosterUser)
+	if (rosterUser)
 	{
 		[rosterUser updateWithPresence:presence];
 		
-		[[self multicastDelegate] xmppRosterDidChange:self];
+		if (!isRosterPopulation)
+		{
+			[[self multicastDelegate] xmppRosterDidChange:self];
+		}
 	}
 	else
 	{
@@ -638,7 +641,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		{
 			[myUser updateWithPresence:presence];
 			
-			[[self multicastDelegate] xmppRosterDidChange:self];
+			if (!isRosterPopulation)
+			{
+				[[self multicastDelegate] xmppRosterDidChange:self];
+			}
 		}
 	}
 }
