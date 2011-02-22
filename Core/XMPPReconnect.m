@@ -553,24 +553,14 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 			
 			GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 			
-			SEL selector = @selector(xmppReconnect:shouldAttemptAutoReconnect:);
-			
-			NSUInteger delegateCount = [delegateEnumerator countForSelector:selector];
-			NSUInteger delegateIndex = 0;
-			
-			// I tried to use a primitive boolean array here.
-			// But the compiler keeps complaining about it for some reason:
-			//  "__block not allowed on a variable length array declaration"
-			// 
-			// Apparently the workaround is to wrap the primitive array in a struct.
-			// I have no idea why this works.
-			// I'm assuming it is a bug in the compiler?
-			
-			__block struct { BOOL a[delegateCount]; }responses;
-			
 			id del;
 			dispatch_queue_t dq;
 			
+			SEL selector = @selector(xmppReconnect:shouldAttemptAutoReconnect:);
+			
+			NSUInteger delegateCount = [delegateEnumerator countForSelector:selector];
+			
+			dispatch_semaphore_t delSemaphore = dispatch_semaphore_create(0);
 			dispatch_group_t delGroup = dispatch_group_create();
 			
 			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
@@ -578,12 +568,13 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 				dispatch_group_async(delGroup, dq, ^{
 					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
 					
-					responses.a[delegateIndex] = [del xmppReconnect:self shouldAttemptAutoReconnect:reachabilityFlags];
+					if (![del xmppReconnect:self shouldAttemptAutoReconnect:reachabilityFlags])
+					{
+						dispatch_semaphore_signal(delSemaphore);
+					}
 					
 					[innerPool release];
 				});
-				
-				delegateIndex++;
 			}
 			
 			[self setQueryingDelegates:YES];
@@ -596,12 +587,14 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 				
 				// What was the delegate response?
 				
-				BOOL shouldAttemptReconnect = YES;
-				
-				NSUInteger i;
-				for (i = 0; i < delegateCount && shouldAttemptReconnect; i++)
+				BOOL shouldAttemptReconnect;
+				if (delegateCount == 0)
 				{
-					shouldAttemptReconnect = responses.a[i];
+					shouldAttemptReconnect = YES;
+				}
+				else
+				{
+					shouldAttemptReconnect = (dispatch_semaphore_wait(delSemaphore, DISPATCH_TIME_NOW) != 0);
 				}
 				
 				dispatch_async(moduleQueue, ^{
@@ -631,6 +624,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 					[innerPool drain];
 				});
 				
+				dispatch_release(delSemaphore);
 				dispatch_release(delGroup);
 				
 				[outerPool drain];
