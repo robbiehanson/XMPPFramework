@@ -1,6 +1,8 @@
 #import "XMPPReconnect.h"
 #import "XMPPStream.h"
 #import "XMPPLogging.h"
+#import "NSXMLElementAdditions.h"
+
 
 #define IMPOSSIBLE_REACHABILITY_FLAGS 0xFFFFFFFF
 
@@ -111,95 +113,53 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (BOOL)shouldReconnect
 {
-	__block BOOL result;
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
 	
-	dispatch_block_t block = ^{
-		result = (flags & kShouldReconnect) ? YES : NO;
-	};
-	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
-	else
-		dispatch_sync(moduleQueue, block);
-	
-	return result;
+	return (flags & kShouldReconnect) ? YES : NO;
 }
 
 - (void)setShouldReconnect:(BOOL)flag
 {
-	dispatch_block_t block = ^{
-		if (flag)
-			flags |= kShouldReconnect;
-		else
-			flags &= ~kShouldReconnect;
-	};
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
 	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
+	if (flag)
+		flags |= kShouldReconnect;
 	else
-		dispatch_sync(moduleQueue, block);
+		flags &= ~kShouldReconnect;
 }
 
 - (BOOL)multipleReachabilityChanges
 {
-	__block BOOL result;
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
 	
-	dispatch_block_t block = ^{
-		result = (flags & kMultipleChanges) ? YES : NO;
-	};
-	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
-	else
-		dispatch_sync(moduleQueue, block);
-	
-	return result;
+	return (flags & kMultipleChanges) ? YES : NO;
 }
 
 - (void)setMultipleReachabilityChanges:(BOOL)flag
 {
-	dispatch_block_t block = ^{
-		if (flag)
-			flags |= kMultipleChanges;
-		else
-			flags &= ~kMultipleChanges;
-	};
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
 	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
+	if (flag)
+		flags |= kMultipleChanges;
 	else
-		dispatch_async(moduleQueue, block);
+		flags &= ~kMultipleChanges;
 }
 
 - (BOOL)manuallyStarted
 {
-	__block BOOL result;
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
 	
-	dispatch_block_t block = ^{
-		result = (flags & kManuallyStarted) ? YES : NO;
-	};
-	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
-	else
-		dispatch_async(moduleQueue, block);
-	
-	return result;
+	return (flags & kManuallyStarted) ? YES : NO;
 }
 
 - (void)setManuallyStarted:(BOOL)flag
 {
-	dispatch_block_t block = ^{
-		if (flag)
-			flags |= kManuallyStarted;
-		else
-			flags &= ~kManuallyStarted;
-	};
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked private method outside moduleQueue");
 	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
+	if (flag)
+		flags |= kManuallyStarted;
 	else
-		dispatch_async(moduleQueue, block);
+		flags &= ~kManuallyStarted;
 }
 
 - (BOOL)queryingDelegates
@@ -253,7 +213,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		// Clear all flags (except the kAutoReconnect flag, which should remain as is)
 		// This is to disable any further reconnect attemts regardless of the state we're in.
 		
-		flags &= kAutoReconnect;
+		flags = kAutoReconnect;
 		
 		// Stop any planned reconnect attempts and stop monitoring the network.
 		
@@ -307,6 +267,32 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	// We're now connected and properly authenticated.
 	// Should we get accidentally disconnected we should automatically reconnect (if autoReconnect is set).
 	[self setShouldReconnect:YES];
+}
+
+- (void)xmppStream:(XMPPStream *)sender didReceiveError:(NSXMLElement *)element
+{
+	// This method is executed on our moduleQueue.
+	
+	// <stream:error>
+	//   <conflict xmlns="urn:ietf:params:xml:ns:xmpp-streams"/>
+	//   <text xmlns="urn:ietf:params:xml:ns:xmpp-streams" xml:lang="">Replaced by new connection</text>
+	// </stream:error>
+	// 
+	// If our connection ever gets replaced, we shouldn't attempt a reconnect,
+	// because the user has logged in on another device.
+	// If we still applied the reconnect logic,
+	// the two devices may get into an infinite loop of kicking each other off the system.
+	
+	NSString *elementName = [element name];
+	
+	if ([elementName isEqualToString:@"stream:error"] || [elementName isEqualToString:@"error"])
+	{
+		NSXMLElement *conflict = [element elementForName:@"conflict" xmlns:@"urn:ietf:params:xml:ns:xmpp-streams"];
+		if (conflict)
+		{
+			[self setShouldReconnect:NO];
+		}
+	}
 }
 
 - (void)xmppStreamWasToldToDisconnect:(XMPPStream *)sender
