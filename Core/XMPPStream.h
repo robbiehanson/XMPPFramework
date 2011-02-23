@@ -348,7 +348,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * You may wish to configure the security settings via the xmppStream:willSecureWithSettings: delegate method.
  * 
  * If the SSL/TLS handshake fails, the connection will be closed.
- * The reason for the error will be reported via the xmppStream:didReceiveError: delegate method.
+ * The reason for the error will be reported via the xmppStreamDidDisconnect:withError: delegate method.
  * The error parameter will be an NSError object, and may have an error domain of kCFStreamErrorDomainSSL.
  * The corresponding error code is documented in Apple's Security framework, in SecureTransport.h
 **/
@@ -727,7 +727,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Note that standard errors (<iq type='error'/> for example) are delivered normally,
  * via the other didReceive...: methods.
 **/
-- (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error;
+- (void)xmppStream:(XMPPStream *)sender didReceiveError:(NSXMLElement *)error;
 
 /**
  * These methods are called before their respective XML elements are sent over the stream.

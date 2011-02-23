@@ -3287,9 +3287,8 @@ enum XMPPStreamConfig
 		}
 		[receipts removeAllObjects];
 		
-		// Update flags
-		[self setIsSecure:NO];
-		[self setIsAuthenticated:NO];
+		// Clear flags
+		flags = 0;
 		
 		// Notify delegate
 		
