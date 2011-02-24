@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0771B81D1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m in Sources */ = {isa = PBXBuildFile; fileRef = 0771B81A1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m */; };
+		0771B81E1315E9FC0018D5C6 /* XMPPStreamCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 0771B81C1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.m */; };
 		1D3623260D0F684500981E51 /* iPhoneXMPPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -49,6 +51,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0771B8191315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XMPPRosterCoreDataStorage+shared.h"; path = "../../Roster/XMPPRosterCoreDataStorage+shared.h"; sourceTree = SOURCE_ROOT; };
+		0771B81A1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XMPPRosterCoreDataStorage+shared.m"; path = "../../Roster/XMPPRosterCoreDataStorage+shared.m"; sourceTree = SOURCE_ROOT; };
+		0771B81B1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStreamCoreDataStorage.h; path = ../../Roster/XMPPStreamCoreDataStorage.h; sourceTree = SOURCE_ROOT; };
+		0771B81C1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStreamCoreDataStorage.m; path = ../../Roster/XMPPStreamCoreDataStorage.m; sourceTree = SOURCE_ROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* iPhoneXMPPAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iPhoneXMPPAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iPhoneXMPPAppDelegate.m; sourceTree = "<group>"; };
@@ -346,6 +352,10 @@
 		DC1F985B1152CC0200138A8F /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
+				0771B8191315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.h */,
+				0771B81A1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m */,
+				0771B81B1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.h */,
+				0771B81C1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.m */,
 				DC84BBF912440AF40055A459 /* XMPPRoster.xcdatamodel */,
 				DC84BBFA12440AF40055A459 /* XMPPRosterCoreDataStorage.h */,
 				DC84BBFB12440AF40055A459 /* XMPPRosterCoreDataStorage.m */,
@@ -466,6 +476,8 @@
 				DC84BC0212440AF40055A459 /* XMPPRoster.xcdatamodel in Sources */,
 				DC84BC0312440AF40055A459 /* XMPPRosterCoreDataStorage.m in Sources */,
 				DC84BC0412440AF40055A459 /* XMPPUserCoreDataStorage.m in Sources */,
+				0771B81D1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m in Sources */,
+				0771B81E1315E9FC0018D5C6 /* XMPPStreamCoreDataStorage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -516,7 +528,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				PREBINDING = NO;
-				SDKROOT = iphoneos4.1;
+				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
@@ -530,7 +542,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				PREBINDING = NO;
-				SDKROOT = iphoneos4.1;
+				SDKROOT = iphoneos;
 			};
 			name = Release;
 		};
