@@ -24,6 +24,7 @@
 @dynamic subscription;
 @dynamic ask;
 
+@dynamic sectionName;
 @dynamic sectionNum;
 
 @dynamic primaryResource;
@@ -48,6 +49,17 @@
 - (void)setSection:(int)value
 {
 	self.sectionNum = [NSNumber numberWithInt:value];
+}
+
+- (NSString *)sectionName {
+  [self willAccessValueForKey:@"displayName"];
+  NSString *aString = [[self primitiveDisplayName] uppercaseString];
+  [self didAccessValueForKey:@"displayName"];
+  
+  // support UTF-16:
+  NSString *stringToReturn = [aString substringWithRange:[aString rangeOfComposedCharacterSequenceAtIndex:0]];
+    
+  return stringToReturn;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,19 +339,29 @@
 	}
 }
 
+
 #pragma mark -
 #pragma mark KVO compliance methods
+
 
 + (NSSet *)keyPathsForValuesAffectingIsOnline {
     return [NSSet setWithObject:@"primaryResource"];
 }
 
+
 + (NSSet *)keyPathsForValuesAffectingUnsortedResources {
     return [NSSet setWithObject:@"resources"];
 }
 
+
 + (NSSet *)keyPathsForValuesAffectingSortedResources {
     return [NSSet setWithObject:@"unsortedResources"];
 }
+
+
++ (NSSet *)keyPathsForValuesAffectingSectionName {
+    return [NSSet setWithObject:@"displayName"];
+}
+
 
 @end
