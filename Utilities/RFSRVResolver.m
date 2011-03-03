@@ -62,6 +62,13 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 	return self;
 }
 
+- (void)dealloc {
+  [target release];
+  target = nil;
+  
+  [super dealloc];
+}
+
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<%@:%p target(%@) port(%hu) priority(%hu) weight(%hu)>",
