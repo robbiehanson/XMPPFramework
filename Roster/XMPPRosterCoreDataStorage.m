@@ -363,7 +363,12 @@
 	{
 		[user updateWithPresence:presence];
 		
-		[[self managedObjectContext] save:nil];
+    NSError *error = nil;
+		[[self managedObjectContext] save:&error];
+    
+    if (error != nil) {
+      DDLogError(@"%s %@",__PRETTY_FUNCTION__, error);
+    }
 	}
 }
 

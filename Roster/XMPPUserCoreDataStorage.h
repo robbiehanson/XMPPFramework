@@ -20,6 +20,7 @@
 @property (nonatomic, retain) NSString * subscription;
 @property (nonatomic, retain) NSString * ask;
 
+@property (nonatomic, retain,readonly) NSString * sectionName;
 @property (nonatomic, retain) NSNumber * sectionNum;
 
 @property (nonatomic, retain) XMPPResourceCoreDataStorage * primaryResource;
