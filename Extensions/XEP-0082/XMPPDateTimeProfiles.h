@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 
+#import "NSDate+XMPPDateTimeProfiles.h"
+
 
 @interface XMPPDateTimeProfiles : NSObject
 
