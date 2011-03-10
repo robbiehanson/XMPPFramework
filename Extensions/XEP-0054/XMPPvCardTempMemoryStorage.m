@@ -13,7 +13,7 @@
 
 #ifdef DEBUG_LEVEL
 #undef DEBUG_LEVEL
-#define DEBUG_LEVEL 3
+#define DEBUG_LEVEL 1
 #endif
 
 
