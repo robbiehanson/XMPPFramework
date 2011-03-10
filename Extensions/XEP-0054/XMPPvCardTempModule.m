@@ -68,7 +68,7 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
   // Check whether we already have a vCard
 	if (vCard == nil) {
 		// Not got it yet. Let's make a request for the vCard
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:bareJID];
 		NSXMLElement *vCardElem = [NSXMLElement elementWithName:@"vCard" xmlns:XMPPNSvCardTemp];
 		
 		[iq addChild:vCardElem];
