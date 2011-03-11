@@ -106,25 +106,25 @@
 /*
  * Is a vCard stored locally for this JID?
  */
-- (BOOL)havevCardForJID:(XMPPJID *)jid;
+- (BOOL)havevCardForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 
 /*
  * The vCard for the given JID.
  */
-- (XMPPvCard *)vCardForJID:(XMPPJID *)jid;
+- (XMPPvCard *)vCardForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 
 /*
  * Save the given vCard for the given JID.
  */
-- (void)savevCard:(XMPPvCard *)vCard forJID:(XMPPJID *)jid;
+- (void)savevCard:(XMPPvCard *)vCard forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 
 /*
  * Remove any stored vCard for the given JID.
  */
-- (void)removevCardForJID:(XMPPJID *)jid;
+- (void)removevCardForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 
 @end
