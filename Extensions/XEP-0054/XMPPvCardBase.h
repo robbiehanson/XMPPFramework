@@ -57,7 +57,7 @@
   }
 
 
-@interface XMPPvCardBase : NSXMLElement {
+@interface XMPPvCardBase : NSXMLElement <NSCoding> {
 
 }
 

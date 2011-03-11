@@ -52,7 +52,7 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 
 
 - (BOOL)havevCardForJID:(XMPPJID *)jid{
-  return [_storage havevCardForJID:jid];
+  return [_storage havevCardForJID:jid xmppStream:xmppStream];
 }
 
 
@@ -63,7 +63,7 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 - (XMPPvCard *)vCardForJID:(XMPPJID *)jid {
   
 	XMPPJID *bareJID = [jid bareJID];
-  XMPPvCard *vCard = [_storage vCardForJID:bareJID];
+  XMPPvCard *vCard = [_storage vCardForJID:bareJID xmppStream:xmppStream];
   
   // Check whether we already have a vCard
 	if (vCard == nil) {
@@ -84,7 +84,7 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
  * Remove the stored vCard for the given JID.
  */
 - (void)removevCardForJID:(XMPPJID *)jid {
-  [_storage removevCardForJID:jid];
+  [_storage removevCardForJID:jid xmppStream:xmppStream];
 }
 
 
@@ -97,7 +97,7 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 	DDLogInfo(@"Received IQ in vCard module with elem: %@", elem);
 	if (elem != nil) {
 		XMPPvCard *vCard = [XMPPvCard vCardFromElement:elem];
-		[_storage savevCard:vCard forJID:[iq from]];
+		[_storage savevCard:vCard forJID:[iq from] xmppStream:xmppStream];
 		
 		[multicastDelegate xmppvCardTempModule:self didReceivevCard:vCard forJID:[iq from]];
     return YES;

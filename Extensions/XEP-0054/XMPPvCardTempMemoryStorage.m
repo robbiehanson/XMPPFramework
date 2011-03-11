@@ -43,12 +43,12 @@
 #pragma mark XMPPvCardTempStorage protocol
 
 
-- (BOOL)havevCardForJID:(XMPPJID *)jid {
-	return [self vCardForJID:jid] != nil;
+- (BOOL)havevCardForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream {
+	return [self vCardForJID:jid xmppStream:stream] != nil;
 }
 
 
-- (XMPPvCard *)vCardForJID:(XMPPJID *)jid {  
+- (XMPPvCard *)vCardForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream {  
   if (jid == nil) {
     return nil;
   }
@@ -59,10 +59,10 @@
 }
 
 
-- (void)savevCard:(XMPPvCard *)vCard forJID:(XMPPJID *)jid {  
+- (void)savevCard:(XMPPvCard *)vCard forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream {  
   if (jid != nil) {
     if (vCard == nil) {
-      [self removevCardForJID:jid];
+      [self removevCardForJID:jid xmppStream:stream];
     } else {
       [vcards setObject:vCard forKey:jid];
       DDLogInfo(@"%s %@\n", __PRETTY_FUNCTION__, [jid bare]);
@@ -72,7 +72,7 @@
 }
 
 
-- (void)removevCardForJID:(XMPPJID *)jid {
+- (void)removevCardForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream {
   if (jid != nil) {
     [vcards removeObjectForKey:jid];
     DDLogInfo(@"%s %@", __PRETTY_FUNCTION__, [jid bare]);
