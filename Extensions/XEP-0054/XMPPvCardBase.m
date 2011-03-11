@@ -13,4 +13,53 @@
 
 @implementation XMPPvCardBase
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark NSCoding protocol
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+#if ! TARGET_OS_IPHONE
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+	if([encoder isBycopy])
+		return self;
+	else
+		return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
+}
+#endif
+
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+	NSString *xmlString;
+	if([coder allowsKeyedCoding])
+	{
+		xmlString = [coder decodeObjectForKey:@"xmlString"];
+	}
+	else
+	{
+		xmlString = [coder decodeObject];
+	}
+	
+	return [super initWithXMLString:xmlString error:nil];
+}
+
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+	NSString *xmlString = [self XMLString];
+	
+	if([coder allowsKeyedCoding])
+	{
+		[coder encodeObject:xmlString forKey:@"xmlString"];
+	}
+	else
+	{
+		[coder encodeObject:xmlString];
+	}
+}
+
+
 @end
