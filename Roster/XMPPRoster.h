@@ -16,7 +16,11 @@
 
 @interface XMPPRoster : NSObject
 {
-	XMPPStream *xmppStream;
+  /*
+   * XMPPStream is accessed by a background thread, do not change after init, 
+   * without making atomic and updating all code to use the accessor method.
+   */
+	XMPPStream *xmppStream;   
 	id <XMPPRosterStorage> xmppRosterStorage;
 	
 	MulticastDelegate <XMPPRosterDelegate> *multicastDelegate;
