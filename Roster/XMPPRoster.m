@@ -295,6 +295,43 @@ enum XMPPRosterFlags
 	[self setRequestedRoster:YES];
 }
 
+
+- (void)didReceivePresence:(XMPPPresence *)presence {
+  [self xmppStream:xmppStream didReceivePresence:presence];
+}
+
+
+- (void)updateRosterWithQuery:(NSXMLElement *)query {
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  
+  [xmppRosterStorage beginRosterPopulationForXMPPStream:xmppStream];
+  
+  NSArray *items = [query elementsForName:@"item"];
+  for (NSXMLElement *item in items)
+  {
+    // Filter out items for users who aren't actually in our roster.
+    // That is, those users who have requested to be our buddy, but we haven't approved yet.
+    
+    [xmppRosterStorage handleRosterItem:item xmppStream:xmppStream];
+  }
+  
+  [xmppRosterStorage endRosterPopulationForXMPPStream:xmppStream];
+  
+  [self setHasRoster:YES];
+  
+  // Which means we can process any premature presence elements we received
+  for (XMPPPresence *presence in self.earlyPresenceElements)
+  {
+    // needs to happen on the main thread or context will get messed up
+    [self performSelectorOnMainThread:@selector(didReceivePresence:)
+                           withObject:presence
+                        waitUntilDone:NO];
+  }
+  [self.earlyPresenceElements removeAllObjects];
+  [pool release];
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Roster methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -343,35 +380,7 @@ enum XMPPRosterFlags
 	{
 		if (![self hasRoster])
 		{
-            
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                [xmppRosterStorage beginRosterPopulationForXMPPStream:sender];
-                
-                NSArray *items = [query elementsForName:@"item"];
-                for (NSXMLElement *item in items)
-                {
-                    // Filter out items for users who aren't actually in our roster.
-                    // That is, those users who have requested to be our buddy, but we haven't approved yet.
-                    
-                    [xmppRosterStorage handleRosterItem:item xmppStream:sender];
-                }
-                
-                // We should have our roster now
-                
-                [self setHasRoster:YES];
-                [xmppRosterStorage endRosterPopulationForXMPPStream:sender];
-                
-                // Which means we can process any premature presence elements we received
-                for (XMPPPresence *presence in self.earlyPresenceElements)
-                {
-                    // needs to happen on the main thread or context will get messed up
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                        [self xmppStream:xmppStream didReceivePresence:presence];
-                    });
-                }
-                [self.earlyPresenceElements removeAllObjects];
-                
-            });
+      [self performSelectorInBackground:@selector(updateRosterWithQuery:) withObject:query];
 		} else {
             NSArray *items = [query elementsForName:@"item"];
             for (NSXMLElement *item in items)
@@ -391,10 +400,8 @@ enum XMPPRosterFlags
             
             [sender sendElement:iqResponse];
         }
-		
         return YES;
     }
-	
 	return NO;
 }
  
