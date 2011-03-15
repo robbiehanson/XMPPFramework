@@ -139,6 +139,9 @@
 				expectedCertName = serverDomain;
 			}
 		}
+    else if (serverDomain == nil) {
+      expectedCertName = virtualDomain;
+    }
 		else
 		{
 			expectedCertName = serverDomain;
