@@ -26,15 +26,17 @@
 	
 	[xmppRoster setAutoRoster:YES];
 	
-	// Replace me with the proper domain and port.
-	// The example below is setup for a typical google talk account.
-//	[xmppStream setHostName:@"talk.google.com"];
-//	[xmppStream setHostPort:5222];
-	
 	// Replace me with the proper JID and password
 //	[xmppStream setMyJID:[XMPPJID jidWithString:@"user@gmail.com/iPhoneTest"]];
 //	password = @"password";
 	
+  // If you are NOT using SRV lookup based on the JID above,
+	// replace me with the proper domain and port.
+	// The example below is setup for a typical google talk account.
+  //	[xmppStream setHostName:@"talk.google.com"];
+  //	[xmppStream setHostPort:5222];
+	
+
 	// You may need to alter these settings depending on the server you're connecting to
 	allowSelfSignedCertificates = NO;
 	allowSSLHostNameMismatch = NO;
