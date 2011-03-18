@@ -1,5 +1,5 @@
 //
-//  XMPPvCardEmail.m
+//  XMPPvCardTempEmail.m
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -8,12 +8,12 @@
 //
 
 
-#import "XMPPvCardEmail.h"
+#import "XMPPvCardTempEmail.h"
 
 #import <objc/runtime.h>
 
 
-@implementation XMPPvCardEmail
+@implementation XMPPvCardTempEmail
 
 
 + (void)initialize {
@@ -28,20 +28,20 @@
 	// To do so, try realloc'ing self after altering the class, and then initialize your variables.
 	
 	size_t superSize = class_getInstanceSize([NSXMLElement class]);
-	size_t ourSize   = class_getInstanceSize([XMPPvCardEmail class]);
+	size_t ourSize   = class_getInstanceSize([XMPPvCardTempEmail class]);
 	
 	if (superSize != ourSize)
 	{
-		DDLogError(@"Adding instance variables to XMPPvCardEmail is not currently supported!");
+		DDLogError(@"Adding instance variables to XMPPvCardTempEmail is not currently supported!");
 		exit(15);
 	}
 }
 
 
-+ (XMPPvCardEmail *)vCardEmailFromElement:(NSXMLElement *)elem {
-	object_setClass(elem, [XMPPvCardEmail class]);
++ (XMPPvCardTempEmail *)vCardEmailFromElement:(NSXMLElement *)elem {
+	object_setClass(elem, [XMPPvCardTempEmail class]);
 	
-	return (XMPPvCardEmail *)elem;
+	return (XMPPvCardTempEmail *)elem;
 }
 
 

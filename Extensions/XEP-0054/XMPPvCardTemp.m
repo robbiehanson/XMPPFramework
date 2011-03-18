@@ -1,5 +1,5 @@
 //
-//  XMPPvCard.m
+//  XMPPvCardTemp.m
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -8,7 +8,7 @@
 //
 
 
-#import "XMPPvCard.h"
+#import "XMPPvCardTemp.h"
 
 #import <objc/runtime.h>
 
@@ -16,7 +16,11 @@
 #import "XMPPDateTimeProfiles.h"
 
 
-@implementation XMPPvCard
+NSString *const kXMPPNSvCardTemp = @"vcard-temp";
+NSString *const kXMPPvCardTempElement = @"vCard";
+
+
+@implementation XMPPvCardTemp
 
 
 + (void)initialize {
@@ -31,20 +35,40 @@
 	// To do so, try realloc'ing self after altering the class, and then initialize your variables.
 	
 	size_t superSize = class_getInstanceSize([NSXMLElement class]);
-	size_t ourSize   = class_getInstanceSize([XMPPvCard class]);
+	size_t ourSize   = class_getInstanceSize([XMPPvCardTemp class]);
 	
 	if (superSize != ourSize)
 	{
-		DDLogError(@"Adding instance variables to XMPPvCard is not currently supported!");
+		DDLogError(@"Adding instance variables to XMPPvCardTemp is not currently supported!");
 		exit(15);
 	}
 }
 
 
-+ (XMPPvCard *)vCardFromElement:(NSXMLElement *)elem {
-	object_setClass(elem, [XMPPvCard class]);
++ (XMPPvCardTemp *)vCardFromElement:(NSXMLElement *)elem {
+	object_setClass(elem, [XMPPvCardTemp class]);
 	
-	return (XMPPvCard *)elem;
+	return (XMPPvCardTemp *)elem;
+}
+
+
++ (XMPPvCardTemp *)vCardFromIQ:(XMPPIQ *)iq {
+  XMPPvCardTemp *vCard = nil;
+  NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+  
+  if ([iq isResultIQ] && query != nil) {
+    vCard = [self vCardFromElement:query];
+  }
+  return vCard;
+}
+
+
++ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid {
+  XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID]];
+  NSXMLElement *vCardElem = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+  
+  [iq addChild:vCardElem];
+  return iq;
 }
 
 
@@ -243,29 +267,29 @@
 
 
 - (NSArray *)addresses { return nil; }
-- (void)addAddress:(XMPPvCardAdr *)adr { }
-- (void)removeAddress:(XMPPvCardAdr *)adr { }
+- (void)addAddress:(XMPPvCardTempAdr *)adr { }
+- (void)removeAddress:(XMPPvCardTempAdr *)adr { }
 - (void)setAddresses:(NSArray *)adrs { }
 - (void)clearAddresses { }
 
 
 - (NSArray *)labels { return nil; }
-- (void)addLabel:(XMPPvCardLabel *)label { }
-- (void)removeLabel:(XMPPvCardLabel *)label { }
+- (void)addLabel:(XMPPvCardTempLabel *)label { }
+- (void)removeLabel:(XMPPvCardTempLabel *)label { }
 - (void)setLabels:(NSArray *)labels { }
 - (void)clearLabels { }
 
 
 - (NSArray *)telecomsAddresses { return nil; }
-- (void)addTelecomsAddress:(XMPPvCardTel *)tel { }
-- (void)removeTelecomsAddress:(XMPPvCardTel *)tel { }
+- (void)addTelecomsAddress:(XMPPvCardTempTel *)tel { }
+- (void)removeTelecomsAddress:(XMPPvCardTempTel *)tel { }
 - (void)setTelecomsAddresses:(NSArray *)tels { }
 - (void)clearTelecomsAddresses { }
 
 
 - (NSArray *)emailAddresses { return nil; }
-- (void)addEmailAddress:(XMPPvCardEmail *)email { }
-- (void)removeEmailAddress:(XMPPvCardEmail *)email { }
+- (void)addEmailAddress:(XMPPvCardTempEmail *)email { }
+- (void)removeEmailAddress:(XMPPvCardTempEmail *)email { }
 - (void)setEmailAddresses:(NSArray *)emails { }
 - (void)clearEmailAddresses { }
 
@@ -444,19 +468,19 @@
 }
 
 
-- (XMPPvCard *)agent {
-	XMPPvCard *agent = nil;
+- (XMPPvCardTemp *)agent {
+	XMPPvCardTemp *agent = nil;
 	NSXMLElement *elem = [self elementForName:@"AGENT"];
 	
 	if (elem != nil) {
-		agent = [XMPPvCard vCardFromElement:elem];
+		agent = [XMPPvCardTemp vCardFromElement:elem];
 	}
 	
 	return agent;
 }
 
 
-- (void)setAgent:(XMPPvCard *)agent {
+- (void)setAgent:(XMPPvCardTemp *)agent {
 	NSXMLElement *elem = [self elementForName:@"AGENT"];
 	
 	if (elem != nil) {
@@ -772,17 +796,17 @@
 #pragma mark Security Types
 
 
-- (XMPPvCardClass)privacyClass {
-	XMPPvCardClass priv = XMPPvCardClassNone;
+- (XMPPvCardTempClass)privacyClass {
+	XMPPvCardTempClass priv = XMPPvCardTempClassNone;
 	NSXMLElement *elem = [self elementForName:@"CLASS"];
 	
 	if (elem != nil) {
 		if ([elem elementForName:@"PUBLIC"] != nil) {
-			priv = XMPPvCardClassPublic;
+			priv = XMPPvCardTempClassPublic;
 		} else if ([elem elementForName:@"PRIVATE"] != nil) {
-			priv = XMPPvCardClassPrivate;
+			priv = XMPPvCardTempClassPrivate;
 		} else if ([elem elementForName:@"CONFIDENTIAL"] != nil) {
-			priv = XMPPvCardClassConfidential;
+			priv = XMPPvCardTempClassConfidential;
 		}
 	}
 	
@@ -790,10 +814,10 @@
 }
 
 
-- (void)setPrivacyClass:(XMPPvCardClass)privacyClass {
+- (void)setPrivacyClass:(XMPPvCardTempClass)privacyClass {
 	NSXMLElement *elem = [self elementForName:@"CLASS"];
   
-	if (elem == nil && privacyClass != XMPPvCardClassNone) {
+	if (elem == nil && privacyClass != XMPPvCardTempClassNone) {
 		elem = [NSXMLElement elementWithName:@"CLASS"];
 	}
 	
@@ -806,17 +830,17 @@
 		}
 		
 		switch (privacyClass) {
-			case XMPPvCardClassPublic:
+			case XMPPvCardTempClassPublic:
 				[elem addChild:[NSXMLElement elementWithName:@"PUBLIC"]];
 				break;
-			case XMPPvCardClassPrivate:
+			case XMPPvCardTempClassPrivate:
 				[elem addChild:[NSXMLElement elementWithName:@"PRIVATE"]];
 				break;
-			case XMPPvCardClassConfidential:
+			case XMPPvCardTempClassConfidential:
 				[elem addChild:[NSXMLElement elementWithName:@"CONFIDENTIAL"]];
 				break;
 			default:
-			case XMPPvCardClassNone:
+			case XMPPvCardTempClassNone:
 				// Remove the whole element
 				[self removeChildAtIndex:[[self children] indexOfObject:elem]];
 				break;

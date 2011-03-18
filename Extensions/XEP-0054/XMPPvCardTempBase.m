@@ -1,5 +1,5 @@
 //
-//  XMPPvCardBase.m
+//  XMPPvCardTempBase.m
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -8,10 +8,10 @@
 //
 
 
-#import "XMPPvCardBase.h"
+#import "XMPPvCardTempBase.h"
 
 
-@implementation XMPPvCardBase
+@implementation XMPPvCardTempBase
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

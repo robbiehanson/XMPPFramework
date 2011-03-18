@@ -1,24 +1,12 @@
 //
 //  XMPPvCardTempModule.m
-//  XEP-0054 vCard-temp
+//  talk
 //
-//  Created by Eric Chamberlain on 3/9/11.
+//  Created by Eric Chamberlain on 3/17/11.
 //  Copyright 2011 RF.com. All rights reserved.
-//  Copyright 2010 Martin Morrison. All rights reserved.
 //
-
 
 #import "XMPPvCardTempModule.h"
-
-#import "DDLog.h"
-#import "NSXMLElementAdditions.h"
-#import "XMPPIQ.h"
-#import "XMPPJID.h"
-#import "XMPPPresence.h"
-#import "XMPPStream.h"
-
-
-NSString *const XMPPNSvCardTemp = @"vcard-temp";
 
 
 @implementation XMPPvCardTempModule
@@ -28,63 +16,56 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 #pragma mark Init/dealloc methods
 
 
-- (id)initWithStream:(XMPPStream *)stream 
-             storage:(id <XMPPvCardTempStorage>)storage 
-           autoFetch:(BOOL)autoFetch {
-	if (self == [super initWithStream:stream]) {
-		_storage = [storage retain];
-		_autoFetch = autoFetch;
-	}
-	return self;
+- (id)initWithStream:(XMPPStream *)aXmppStream 
+             storage:(id <XMPPvCardTempModuleStorage>)moduleStorage {
+  if ((self = [super initWithStream:aXmppStream])) {
+    _moduleStorage = [moduleStorage retain];
+  }
+  return self;
 }
 
 
 - (void)dealloc {
-	[_storage release];
-	_storage = nil;
-
-	[super dealloc];
+  [_moduleStorage release];
+  _moduleStorage = nil;
+  
+  [super dealloc];
 }
 
 
 #pragma mark -
-#pragma mark Public instance methods
+#pragma mark Private methods
 
 
-- (BOOL)havevCardForJID:(XMPPJID *)jid{
-  return [_storage havevCardForJID:jid xmppStream:xmppStream];
+- (void)_fetchvCardTempForJID:(XMPPJID *)jid {
+  XMPPIQ *iq = [XMPPvCardTemp iqvCardTempRequestForJID:jid];
+  
+  [xmppStream sendElement:iq];
 }
 
 
-/*
- * Return the vCard for the given JID, if stored locally.
- * If the vCard is not local, fetch the vCard from the server.
- */
-- (XMPPvCard *)vCardForJID:(XMPPJID *)jid {
-  
-	XMPPJID *bareJID = [jid bareJID];
-  XMPPvCard *vCard = [_storage vCardForJID:bareJID xmppStream:xmppStream];
-  
-  // Check whether we already have a vCard
-	if (vCard == nil) {
-		// Not got it yet. Let's make a request for the vCard
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:bareJID];
-		NSXMLElement *vCardElem = [NSXMLElement elementWithName:@"vCard" xmlns:XMPPNSvCardTemp];
-		
-		[iq addChild:vCardElem];
-		
-		[xmppStream sendElement:iq];
-	}
-  
-  return vCard;
+#pragma mark -
+#pragma mark Fetch vCardTemp methods
+
+
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)aXmppStream {
+  return [self fetchvCard:jid xmppStream:aXmppStream useCache:YES];
 }
 
 
-/*
- * Remove the stored vCard for the given JID.
- */
-- (void)removevCardForJID:(XMPPJID *)jid {
-  [_storage removevCardForJID:jid xmppStream:xmppStream];
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream useCache:(BOOL)useCache {
+  XMPPvCardTemp *vCardTemp = nil;
+  
+  if (useCache) {
+    // try loading from the cache
+    vCardTemp = [_moduleStorage vCardTempForJID:jid];
+  }
+  
+  if (vCardTemp == nil) {
+    [self _fetchvCardTempForJID:jid];
+  }
+  
+  return vCardTemp;
 }
 
 
@@ -92,30 +73,19 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 #pragma mark XMPPStreamDelegate methods
 
 
-- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {
-	NSXMLElement *elem = [iq elementForName:@"vCard" xmlns:XMPPNSvCardTemp];
-	DDLogInfo(@"Received IQ in vCard module with elem: %@", elem);
-	if (elem != nil) {
-		XMPPvCard *vCard = [XMPPvCard vCardFromElement:elem];
-		[_storage savevCard:vCard forJID:[iq from] xmppStream:xmppStream];
-		
-		[multicastDelegate xmppvCardTempModule:self didReceivevCard:vCard forJID:[iq from]];
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {  
+  XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempFromIQ:iq];
+  
+	if (vCardTemp != nil) { 
+    DDLogVerbose(@"%s %@", __PRETTY_FUNCTION__,[[iq from] bare]);
+    
+    [multicastDelegate xmppvCardTempModule:self 
+                           didReceivevCardTemp:vCardTemp 
+                                    forJID:[iq from]
+                                xmppStream:sender];
     return YES;
 	}
-	
 	return NO;
-}
-
-
-- (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence {
-  XMPPJID *fromJID = [presence from];
-  
-  // We use this to track online buddies
-  if (_autoFetch &&
-      [presence status] != @"unavailable" &&
-      fromJID != nil) {
-    [self vCardForJID:fromJID];
-  }    
 }
 
 
@@ -123,8 +93,7 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 #pragma mark Getter/setter methods
 
 
-@synthesize autoFetch = _autoFetch;
-@synthesize storage = _storage;
+@synthesize moduleStorage = _moduleStorage;
 
 
 @end
