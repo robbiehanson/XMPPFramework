@@ -14,7 +14,7 @@
 NSString *const RFSRVResolverErrorDomain = @"RFSRVResolverErrorDomain";
 
 // Log levels: off, error, warn, info, verbose
-static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -

@@ -134,3 +134,28 @@
 
 #define XMPPLogCTrace2(frmt, ...)     LOG_C_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
+
+// Setup logging for XMPPStream (and subclasses such as XMPPStreamFacebook)
+
+#define XMPP_LOG_FLAG_SEND      (1 << 5)
+#define XMPP_LOG_FLAG_RECV_PRE  (1 << 6) // Prints data before it goes to the parser
+#define XMPP_LOG_FLAG_RECV_POST (1 << 7) // Prints data as it comes out of the parser
+
+#define XMPP_LOG_FLAG_SEND_RECV (XMPP_LOG_FLAG_SEND | XMPP_LOG_FLAG_RECV_POST)
+
+#define XMPP_LOG_SEND      (xmppLogLevel & XMPP_LOG_FLAG_SEND)
+#define XMPP_LOG_RECV_PRE  (xmppLogLevel & XMPP_LOG_FLAG_RECV_PRE)
+#define XMPP_LOG_RECV_POST (xmppLogLevel & XMPP_LOG_FLAG_RECV_POST)
+
+#define XMPP_LOG_ASYNC_SEND      (YES && XMPP_LOG_ASYNC_ENABLED)
+#define XMPP_LOG_ASYNC_RECV_PRE  (YES && XMPP_LOG_ASYNC_ENABLED)
+#define XMPP_LOG_ASYNC_RECV_POST (YES && XMPP_LOG_ASYNC_ENABLED)
+
+#define XMPPLogSend(format, ...)     LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_SEND, xmppLogLevel, XMPP_LOG_FLAG_SEND, \
+                                                    XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
+
+#define XMPPLogRecvPre(format, ...)  LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_RECV_PRE, xmppLogLevel, XMPP_LOG_FLAG_RECV_PRE, \
+                                                    XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
+
+#define XMPPLogRecvPost(format, ...) LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_RECV_POST, xmppLogLevel, XMPP_LOG_FLAG_RECV_POST, \
+                                                    XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
