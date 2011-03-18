@@ -38,4 +38,5 @@
  * For example: DDLogTrace() -> @"MyVC: viewDidLoad"
 **/
 
-#define DDLogTrace() do{ if(DEBUG_VERBOSE) NSLog(@"%@: %@", THIS_FILE, THIS_METHOD); }while(0)
+//#define DDLogTrace() do{ if(DEBUG_VERBOSE) NSLog(@"%@: %@", THIS_FILE, THIS_METHOD); }while(0)
+#define DDLogTrace() do{ if(DEBUG_VERBOSE) NSLog(@"%s",__PRETTY_FUNCTION__); }while(0)
