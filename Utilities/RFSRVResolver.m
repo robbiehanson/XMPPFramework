@@ -399,6 +399,12 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
     
 	XMPPLogCTrace();
 	
+	if (!(flags & kDNSServiceFlagsAdd))
+	{
+		// If the kDNSServiceFlagsAdd flag is not set, the domain information is not valid.
+		return;
+    }
+	
 	if (errorCode == kDNSServiceErr_NoError)
 	{
 		if (rrtype != kDNSServiceType_SRV)
@@ -467,7 +473,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		DNSServiceErrorType sdErr;
 		sdErr = DNSServiceQueryRecord(&sdRef,                              // Pointer to unitialized DNSServiceRef
 		                              kDNSServiceFlagsReturnIntermediates, // Flags
-		                              0,                                   // Interface index
+		                              kDNSServiceInterfaceIndexAny,        // Interface index
 		                              srvNameCStr,                         // Full domain name
 		                              kDNSServiceType_SRV,                 // rrtype
 		                              kDNSServiceClass_IN,                 // rrclass
