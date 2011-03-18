@@ -2327,6 +2327,7 @@ enum XMPPStreamFlags
 
 - (void)keepAlive:(NSTimer *)aTimer
 {
+  DDLogTrace();
 	if (state == STATE_CONNECTED)
 	{
 		NSData *outgoingData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
