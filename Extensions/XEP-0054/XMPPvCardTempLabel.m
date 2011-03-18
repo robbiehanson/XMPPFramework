@@ -1,5 +1,5 @@
 //
-//  XMPPvCardLabel.m
+//  XMPPvCardTempLabel.m
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -8,12 +8,12 @@
 //
 
 
-#import "XMPPvCardLabel.h"
+#import "XMPPvCardTempLabel.h"
 
 #import <objc/runtime.h>
 
 
-@implementation XMPPvCardLabel
+@implementation XMPPvCardTempLabel
 
 
 + (void)initialize {
@@ -28,20 +28,20 @@
 	// To do so, try realloc'ing self after altering the class, and then initialize your variables.
 	
 	size_t superSize = class_getInstanceSize([NSXMLElement class]);
-	size_t ourSize   = class_getInstanceSize([XMPPvCardLabel class]);
+	size_t ourSize   = class_getInstanceSize([XMPPvCardTempLabel class]);
 	
 	if (superSize != ourSize)
 	{
-		DDLogError(@"Adding instance variables to XMPPvCardLabel is not currently supported!");
+		DDLogError(@"Adding instance variables to XMPPvCardTempLabel is not currently supported!");
 		exit(15);
 	}
 }
 
 
-+ (XMPPvCardLabel *)vCardLabelFromElement:(NSXMLElement *)elem {
-	object_setClass(elem, [XMPPvCardLabel class]);
++ (XMPPvCardTempLabel *)vCardLabelFromElement:(NSXMLElement *)elem {
+	object_setClass(elem, [XMPPvCardTempLabel class]);
 	
-	return (XMPPvCardLabel *)elem;
+	return (XMPPvCardTempLabel *)elem;
 }
 
 
