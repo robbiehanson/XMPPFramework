@@ -1,7 +1,8 @@
 #import <Foundation/Foundation.h>
-#import "MulticastDelegate.h"
 
-@class XMPPStream;
+#import "MulticastDelegate.h"
+#import "XMPPStream.h"
+
 
 /**
  * XMPPModule is the base class that all extensions/modules inherit.
@@ -12,7 +13,7 @@
  * 
  * The module also automatically registers/unregisters itself with the xmpp stream.
 **/
-@interface XMPPModule : NSObject
+@interface XMPPModule : NSObject <XMPPStreamDelegate>
 {
 	XMPPStream *xmppStream;
 	
