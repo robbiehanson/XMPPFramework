@@ -1,5 +1,5 @@
 //
-//  XMPPvCardTel.h
+//  XMPPvCardTempTel.h
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -10,10 +10,10 @@
 
 #import <Foundation/Foundation.h>
 
-#import "XMPPvCardBase.h"
+#import "XMPPvCardTempBase.h"
 
 
-@interface XMPPvCardTel : XMPPvCardBase
+@interface XMPPvCardTempTel : XMPPvCardTempBase
 
 
 @property (nonatomic, assign, setter=setHome) BOOL isHome;
@@ -32,7 +32,7 @@
 @property (nonatomic, assign) NSString *number;
 
 
-+ (XMPPvCardTel *)vCardTelFromElement:(NSXMLElement *)elem;
++ (XMPPvCardTempTel *)vCardTelFromElement:(NSXMLElement *)elem;
 
 
 @end

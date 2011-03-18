@@ -1,5 +1,5 @@
 //
-//  XMPPvCard.h
+//  XMPPvCardTemp.h
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -11,20 +11,26 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
+#import "XMPPIQ.h"
 #import "XMPPJID.h"
-#import "XMPPvCardAdr.h"
-#import "XMPPvCardBase.h"
-#import "XMPPvCardEmail.h"
-#import "XMPPvCardLabel.h"
-#import "XMPPvCardTel.h"
+#import "XMPPUser.h"
+#import "XMPPvCardTempAdr.h"
+#import "XMPPvCardTempBase.h"
+#import "XMPPvCardTempEmail.h"
+#import "XMPPvCardTempLabel.h"
+#import "XMPPvCardTempTel.h"
 
 
-typedef enum _XMPPvCardClass {
-	XMPPvCardClassNone,
-	XMPPvCardClassPublic,
-	XMPPvCardClassPrivate,
-	XMPPvCardClassConfidential,
-} XMPPvCardClass;
+typedef enum _XMPPvCardTempClass {
+	XMPPvCardTempClassNone,
+	XMPPvCardTempClassPublic,
+	XMPPvCardTempClassPrivate,
+	XMPPvCardTempClassConfidential,
+} XMPPvCardTempClass;
+
+
+extern NSString *const kXMPPNSvCardTemp;
+extern NSString *const kXMPPvCardTempElement;
 
 
 /*
@@ -33,7 +39,7 @@ typedef enum _XMPPvCardClass {
  * entries make sense - for the others, if required, the NSXMLElement accessors
  * must be used.
  */
-@interface XMPPvCard : XMPPvCardBase
+@interface XMPPvCardTemp : XMPPvCardTempBase
 
 
 @property (nonatomic, assign) NSDate *bday;
@@ -60,7 +66,7 @@ typedef enum _XMPPvCardClass {
 @property (nonatomic, assign) NSString *title;
 @property (nonatomic, assign) NSString *role;
 @property (nonatomic, assign) NSData *logo;
-@property (nonatomic, assign) XMPPvCard *agent;
+@property (nonatomic, assign) XMPPvCardTemp *agent;
 @property (nonatomic, assign) NSString *orgName;
 
 /*
@@ -80,31 +86,33 @@ typedef enum _XMPPvCardClass {
 @property (nonatomic, assign) NSString *version;
 @property (nonatomic, assign) NSString *description;
 
-@property (nonatomic, assign) XMPPvCardClass privacyClass;
+@property (nonatomic, assign) XMPPvCardTempClass privacyClass;
 @property (nonatomic, assign) NSData *key;
 @property (nonatomic, assign) NSString *keyType;
 
 
-+ (XMPPvCard *)vCardFromElement:(NSXMLElement *)element;
++ (XMPPvCardTemp *)vCardFromElement:(NSXMLElement *)element;
++ (XMPPvCardTemp *)vCardFromIQ:(XMPPIQ *)iq;
++ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid;
 
 
-- (void)addAddress:(XMPPvCardAdr *)adr;
-- (void)removeAddress:(XMPPvCardAdr *)adr;
+- (void)addAddress:(XMPPvCardTempAdr *)adr;
+- (void)removeAddress:(XMPPvCardTempAdr *)adr;
 - (void)clearAddresses;
 
 
-- (void)addLabel:(XMPPvCardLabel *)label;
-- (void)removeLabel:(XMPPvCardLabel *)label;
+- (void)addLabel:(XMPPvCardTempLabel *)label;
+- (void)removeLabel:(XMPPvCardTempLabel *)label;
 - (void)clearLabels;
 
 
-- (void)addTelecomsAddress:(XMPPvCardTel *)tel;
-- (void)removeTelecomsAddress:(XMPPvCardTel *)tel;
+- (void)addTelecomsAddress:(XMPPvCardTempTel *)tel;
+- (void)removeTelecomsAddress:(XMPPvCardTempTel *)tel;
 - (void)clearTelecomsAddresses;
 
 
-- (void)addEmailAddress:(XMPPvCardEmail *)email;
-- (void)removeEmailAddress:(XMPPvCardEmail *)email;
+- (void)addEmailAddress:(XMPPvCardTempEmail *)email;
+- (void)removeEmailAddress:(XMPPvCardTempEmail *)email;
 - (void)clearEmailAddresses;
 
 

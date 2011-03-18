@@ -1,5 +1,5 @@
 //
-//  XMPPvCardAdrTypes.m
+//  XMPPvCardTempAdrTypes.m
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -8,10 +8,10 @@
 //
 
 
-#import "XMPPvCardAdrTypes.h"
+#import "XMPPvCardTempAdrTypes.h"
 
 
-@implementation XMPPvCardAdrTypes
+@implementation XMPPvCardTempAdrTypes
 
 
 #pragma mark -
