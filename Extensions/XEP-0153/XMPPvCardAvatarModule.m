@@ -42,9 +42,8 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 #pragma mark Init/dealloc methods
 
 
-- (id)initWithStream:(XMPPStream *)aXmppStream 
- xmppvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule {
-	if ((self = [super initWithStream:aXmppStream])) {
+- (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule {
+	if ((self = [super initWithStream:xmppvCardTempModule.xmppStream])) {
     _xmppvCardTempModule = [xmppvCardTempModule retain];
     _moduleStorage = (id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage;
     
@@ -82,7 +81,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 }
 
 
-- (void)xmppStreamDidConnect:(XMPPStream *)sender {
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
   [_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] xmppStream:sender useCache:NO];
 }
 
@@ -114,7 +113,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
   
   NSString *photoHash = [[xElement elementForName:kXMPPvCardAvatarPhotoElement] stringValue];
   
-  if (photoHash == nil) {
+  if (photoHash == nil || [photoHash isEqualToString:@""]) {
     return;
   }
   
@@ -140,7 +139,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
    * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
    * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
    */
-  if ([jid isEqual:[aXmppStream myJID]]) {
+  if ([jid isEqual:[[aXmppStream myJID] bareJID]]) {
     NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
     
     [aXmppStream sendElement:presence];
