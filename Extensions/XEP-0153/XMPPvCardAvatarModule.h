@@ -33,6 +33,7 @@
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;
 
+- (NSData *)photoDataForJID:(XMPPJID *)jid;
 
 @end
 
@@ -40,6 +41,7 @@
 @protocol XMPPvCardAvatarStorage <NSObject>
 
 
+- (NSData *)photoDataForJID:(XMPPJID *)jid;
 - (NSString *)photoHashForJID:(XMPPJID *)jid;
 
 - (void)clearvCardTempForJID:(XMPPJID *)jid;
