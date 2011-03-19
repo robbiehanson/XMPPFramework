@@ -66,6 +66,19 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 }
 
 
+#pragma mark - Public instance methods
+
+
+- (NSData *)photoDataForJID:(XMPPJID *)jid {
+  NSData *photoData = [_moduleStorage photoDataForJID:jid];
+  
+  if (photoData == nil) {
+    [_xmppvCardTempModule fetchvCardTempForJID:jid xmppStream:xmppStream useCache:NO];
+  }
+  return photoData;
+}
+
+
 #pragma mark -
 #pragma mark XMPPStreamDelegate methods
 
