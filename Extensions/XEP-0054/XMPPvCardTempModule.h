@@ -1,6 +1,6 @@
 //
 //  XMPPvCardTempModule.h
-//  talk
+//  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/17/11.
 //  Copyright 2011 RF.com. All rights reserved.
@@ -41,10 +41,6 @@
 - (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream useCache:(BOOL)useCache;
 
 
-- (void)clearAllvCardTemp;
-- (void)clearvCardTemp:(XMPPJID *)jid;
-
-
 @end
 
 
@@ -66,11 +62,22 @@
 @protocol XMPPvCardTempModuleStorage <NSObject>
 
 
+/*
+ * Returns a vCardTemp object or nil
+ */
 - (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid;
 
+
+/*
+ * Used to set the vCardTemp object when we get it from the XMPP server.
+ */
 - (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid;
 
-- (void)clearAllvCardTemp;
 
+/*
+ * Asks the backend if we should fetch the vCardTemp from the network.
+ * This is used so that we don't request the vCardTemp multiple times.
+ */
+- (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid;
 
 @end
