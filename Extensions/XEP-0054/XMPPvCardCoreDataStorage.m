@@ -115,6 +115,8 @@
     [[self managedObjectContext] deleteObject:self.vCardAvatarRel];
     [self setPrimitiveValue:nil forKey:@"photoHash"];
     return;
+  } else if (photoData == nil) {
+    return;
   }
   
   if (self.vCardAvatarRel == nil) {
