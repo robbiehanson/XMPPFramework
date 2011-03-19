@@ -31,8 +31,7 @@
 @property(nonatomic,retain,readonly) XMPPvCardTempModule *xmppvCardTempModule;
 
 
-- (id)initWithStream:(XMPPStream *)xmppStream 
- xmppvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;
+- (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;
 
 
 @end
