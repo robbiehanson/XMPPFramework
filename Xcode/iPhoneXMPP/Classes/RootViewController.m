@@ -1,10 +1,12 @@
 #import "RootViewController.h"
 #import "iPhoneXMPPAppDelegate.h"
+#import "SettingsViewController.h"
 
 #import "XMPP.h"
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
+#import "XMPPvCardAvatarModule.h"
 
 
 @implementation RootViewController
@@ -15,6 +17,25 @@
 	
 	// Uncomment the following line to display an Edit button in the navigation bar for this view controller.
 	// self.navigationItem.rightBarButtonItem = self.editButtonItem;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  
+  /*
+   * monitor for vCard changes, so we can reload the tableView
+   */
+  [[self.appDelegate xmppvCardTempModule] addDelegate:self];
+  
+  [self.appDelegate connect];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [self.appDelegate disconnect];
+  
+  [[self.appDelegate xmppvCardTempModule] removeDelegate:self];
+  
+  [super viewWillDisappear:animated];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +169,14 @@
 	XMPPUserCoreDataStorage *user = [[self fetchedResultsController] objectAtIndexPath:indexPath];
 	
 	cell.textLabel.text = user.displayName;
+  
+  NSData *photoData = [[self.appDelegate xmppvCardAvatarModule] photoDataForJID:user.jid];
+  
+  if (photoData != nil) {
+    cell.imageView.image = [UIImage imageWithData:photoData];
+  } else {
+    cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
+  }
 	
 	return cell;
 }
@@ -156,5 +185,29 @@
 {
 	[super dealloc];
 }
+
+
+#pragma mark - Actions
+
+
+- (IBAction)settings:(id)sender {
+  [self.navigationController presentModalViewController:[[self appDelegate] settingsViewController] animated:YES];
+}
+
+
+#pragma mark - XMPPvCardTempModuleDelegate methods
+
+
+- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule 
+        didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
+                     forJID:(XMPPJID *)jid
+                 xmppStream:(XMPPStream *)xmppStream {
+  /*
+   *  Reloading just the changed row, if it is visible would be a better solution.
+   */
+  [self.tableView reloadRowsAtIndexPaths:[self.tableView indexPathsForVisibleRows] 
+                        withRowAnimation:NO];
+}
+
 
 @end
