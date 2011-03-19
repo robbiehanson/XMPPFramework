@@ -1,12 +1,14 @@
 //
 //  XMPPvCardTempModule.m
-//  talk
+//  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/17/11.
 //  Copyright 2011 RF.com. All rights reserved.
 //
 
 #import "XMPPvCardTempModule.h"
+
+#import "DDLog.h"
 
 
 @implementation XMPPvCardTempModule
@@ -38,7 +40,7 @@
 
 
 - (void)_fetchvCardTempForJID:(XMPPJID *)jid {
-  XMPPIQ *iq = [XMPPvCardTemp iqvCardTempRequestForJID:jid];
+  XMPPIQ *iq = [XMPPvCardTemp iqvCardRequestForJID:jid];
   
   [xmppStream sendElement:iq];
 }
@@ -49,7 +51,7 @@
 
 
 - (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)aXmppStream {
-  return [self fetchvCard:jid xmppStream:aXmppStream useCache:YES];
+  return [self fetchvCardTempForJID:jid xmppStream:aXmppStream useCache:YES];
 }
 
 
@@ -61,7 +63,7 @@
     vCardTemp = [_moduleStorage vCardTempForJID:jid];
   }
   
-  if (vCardTemp == nil) {
+  if (vCardTemp == nil && [_moduleStorage shouldFetchvCardTempForJID:jid]) {
     [self _fetchvCardTempForJID:jid];
   }
   
@@ -77,11 +79,14 @@
   XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempFromIQ:iq];
   
 	if (vCardTemp != nil) { 
-    DDLogVerbose(@"%s %@", __PRETTY_FUNCTION__,[[iq from] bare]);
+    XMPPJID *jid = [iq from];
+    DDLogVerbose(@"%s %@", __PRETTY_FUNCTION__,[jid bare]);
+    
+    [_moduleStorage setvCardTemp:vCardTemp forJID:jid];
     
     [multicastDelegate xmppvCardTempModule:self 
                            didReceivevCardTemp:vCardTemp 
-                                    forJID:[iq from]
+                                    forJID:jid
                                 xmppStream:sender];
     return YES;
 	}

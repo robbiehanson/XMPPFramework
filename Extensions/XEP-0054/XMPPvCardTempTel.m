@@ -12,6 +12,8 @@
 
 #import <objc/runtime.h>
 
+#import "DDLog.h"
+
 
 @implementation XMPPvCardTempTel
 
