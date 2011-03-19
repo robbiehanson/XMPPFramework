@@ -12,6 +12,7 @@
 
 #import <objc/runtime.h>
 
+#import "DDLog.h"
 #import "NSDataAdditions.h"
 #import "XMPPDateTimeProfiles.h"
 
@@ -45,19 +46,19 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-+ (XMPPvCardTemp *)vCardFromElement:(NSXMLElement *)elem {
++ (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTemp class]);
 	
 	return (XMPPvCardTemp *)elem;
 }
 
 
-+ (XMPPvCardTemp *)vCardFromIQ:(XMPPIQ *)iq {
++ (XMPPvCardTemp *)vCardTempFromIQ:(XMPPIQ *)iq {
   XMPPvCardTemp *vCard = nil;
   NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
   
   if ([iq isResultIQ] && query != nil) {
-    vCard = [self vCardFromElement:query];
+    vCard = [self vCardTempFromElement:query];
   }
   return vCard;
 }
@@ -473,7 +474,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	NSXMLElement *elem = [self elementForName:@"AGENT"];
 	
 	if (elem != nil) {
-		agent = [XMPPvCardTemp vCardFromElement:elem];
+		agent = [XMPPvCardTemp vCardTempFromElement:elem];
 	}
 	
 	return agent;
