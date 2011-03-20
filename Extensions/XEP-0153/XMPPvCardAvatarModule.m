@@ -15,6 +15,11 @@
  */
 
 
+#ifdef DEBUG_LEVEL
+  #undef DEBUG_LEVEL
+  #define DEBUG_LEVEL 1
+#endif
+
 
 #import "XMPPvCardAvatarModule.h"
 
@@ -22,12 +27,6 @@
 #import "NSXMLElementAdditions.h"
 #import "XMPPPresence.h"
 #import "XMPPvCardTempModule.h"
-
-
-#ifdef DEBUG_LEVEL
-  #undef DEBUG_LEVEL
-  #define DEBUG_LEVEL 1
-#endif
 
 
 NSString *const kXMPPvCardAvatarElement = @"x";
