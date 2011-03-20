@@ -7,6 +7,7 @@
   #import "DDXML.h"
 #endif
 
+@class XMPPGroupCoreDataStorage;
 @class XMPPResourceCoreDataStorage;
 
 @interface XMPPUserCoreDataStorage : NSManagedObject <XMPPUser>
@@ -23,6 +24,7 @@
 @property (nonatomic, retain,readonly) NSString * sectionName;
 @property (nonatomic, retain) NSNumber * sectionNum;
 
+@property (nonatomic, retain) NSSet * groups;
 @property (nonatomic, retain) XMPPResourceCoreDataStorage * primaryResource;
 @property (nonatomic, retain) NSSet * resources;
 @property (nonatomic, retain) XMPPStreamCoreDataStorage * stream;
@@ -36,9 +38,17 @@
 
 @interface XMPPUserCoreDataStorage (CoreDataGeneratedAccessors)
 
+
 - (void)addResourcesObject:(XMPPResourceCoreDataStorage *)value;
 - (void)removeResourcesObject:(XMPPResourceCoreDataStorage *)value;
 - (void)addResources:(NSSet *)value;
 - (void)removeResources:(NSSet *)value;
+
+
+- (void)addGroupsObject:(XMPPGroupCoreDataStorage *)value;
+- (void)removeGroupsObject:(XMPPGroupCoreDataStorage *)value;
+- (void)addGroups:(NSSet *)value;
+- (void)removeGroups:(NSSet *)value;
+
 
 @end
