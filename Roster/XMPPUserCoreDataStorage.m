@@ -2,6 +2,8 @@
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
+#import "XMPPGroupCoreDataStorage.h"
+
 
 @interface XMPPUserCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
 - (NSString *)primitiveNickname;
@@ -27,6 +29,7 @@
 @dynamic sectionName;
 @dynamic sectionNum;
 
+@dynamic groups;
 @dynamic primaryResource;
 @dynamic resources;
 @dynamic stream;
@@ -164,6 +167,21 @@
 	
 	self.subscription = [item attributeStringValueForName:@"subscription"];
 	self.ask = [item attributeStringValueForName:@"ask"];
+  
+  // groups
+  XMPPGroupCoreDataStorage *group = nil;
+  
+  for (NSXMLElement *groupElement in [item elementsForName:@"group"]) {
+    NSString *groupName = [groupElement stringValue];
+    
+    group = [XMPPGroupCoreDataStorage getOrInsertInManagedObjectContext:[self managedObjectContext] 
+                                                          withGroupName:groupName];
+    
+    if (group != nil) {
+      [self addGroupsObject:group];
+    }
+  }  
+
 }
 
 - (void)recalculatePrimaryResource
