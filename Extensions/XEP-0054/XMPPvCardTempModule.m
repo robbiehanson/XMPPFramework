@@ -6,10 +6,13 @@
 //  Copyright 2011 RF.com. All rights reserved.
 //
 
-#import "XMPPvCardTempModule.h"
+#ifdef DEBUG_LEVEL
+  #undef DEBUG_LEVEL
+  #define DEBUG_LEVEL 1
+#endif
 
-#undef DEBUG_LEVEL
-#define DEBUG_LEVEL 4
+
+#import "XMPPvCardTempModule.h"
 
 #import "DDLog.h"
 
