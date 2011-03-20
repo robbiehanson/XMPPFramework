@@ -205,8 +205,7 @@
   /*
    *  Reloading just the changed row, if it is visible would be a better solution.
    */
-  [self.tableView reloadRowsAtIndexPaths:[self.tableView indexPathsForVisibleRows] 
-                        withRowAnimation:NO];
+  [self.tableView reloadData];
 }
 
 
