@@ -2,23 +2,24 @@
 //  XMPPvCardTempModule.m
 //  XEP-0054 vCard-temp
 //
-//  Created by Eric Chamberlain on 3/9/11.
+//  Created by Eric Chamberlain on 3/17/11.
 //  Copyright 2011 RF.com. All rights reserved.
-//  Copyright 2010 Martin Morrison. All rights reserved.
 //
-
 
 #import "XMPPvCardTempModule.h"
 
+#undef DEBUG_LEVEL
+#define DEBUG_LEVEL 4
+
 #import "DDLog.h"
-#import "NSXMLElementAdditions.h"
-#import "XMPPIQ.h"
-#import "XMPPJID.h"
-#import "XMPPPresence.h"
-#import "XMPPStream.h"
 
 
-NSString *const XMPPNSvCardTemp = @"vcard-temp";
+#if XMPP_VCARD_TEMP_QUEUEING
+enum {
+  kXMPPvCardTempModuleMaxOpenFetchRequests = 5,
+  kXMPPvCardTempModuleOpenFetchRequestTimeout = 10,
+};
+#endif
 
 
 @implementation XMPPvCardTempModule
@@ -28,63 +29,79 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 #pragma mark Init/dealloc methods
 
 
-- (id)initWithStream:(XMPPStream *)stream 
-             storage:(id <XMPPvCardTempStorage>)storage 
-           autoFetch:(BOOL)autoFetch {
-	if (self == [super initWithStream:stream]) {
-		_storage = [storage retain];
-		_autoFetch = autoFetch;
-	}
-	return self;
+- (id)initWithStream:(XMPPStream *)aXmppStream 
+             storage:(id <XMPPvCardTempModuleStorage>)moduleStorage {
+  if ((self = [super initWithStream:aXmppStream])) {
+    _moduleStorage = [moduleStorage retain];
+    
+#if XMPP_VCARD_TEMP_QUEUEING
+    _openFetchRequests = 0;
+    _pendingFetchRequests = [[NSMutableArray alloc] initWithCapacity:2];
+#endif
+  }
+  return self;
 }
 
 
 - (void)dealloc {
-	[_storage release];
-	_storage = nil;
-
-	[super dealloc];
+#if XMPP_VCARD_TEMP_QUEUEING
+  [_pendingFetchRequests release];
+#endif
+  
+  [_moduleStorage release];
+  _moduleStorage = nil;
+  
+  [super dealloc];
 }
 
 
 #pragma mark -
-#pragma mark Public instance methods
+#pragma mark Private methods
 
 
-- (BOOL)havevCardForJID:(XMPPJID *)jid{
-  return [_storage havevCardForJID:jid xmppStream:xmppStream];
+- (void)_fetchvCardTempForJID:(XMPPJID *)jid {
+  XMPPIQ *iq = [XMPPvCardTemp iqvCardRequestForJID:jid];
+  
+#if XMPP_VCARD_TEMP_QUEUEING
+  _openFetchRequests++;
+  DDLogVerbose(@"%s %d", __PRETTY_FUNCTION__, _openFetchRequests);
+#endif
+  
+  [xmppStream sendElement:iq];
 }
 
 
-/*
- * Return the vCard for the given JID, if stored locally.
- * If the vCard is not local, fetch the vCard from the server.
- */
-- (XMPPvCard *)vCardForJID:(XMPPJID *)jid {
-  
-	XMPPJID *bareJID = [jid bareJID];
-  XMPPvCard *vCard = [_storage vCardForJID:bareJID xmppStream:xmppStream];
-  
-  // Check whether we already have a vCard
-	if (vCard == nil) {
-		// Not got it yet. Let's make a request for the vCard
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:bareJID];
-		NSXMLElement *vCardElem = [NSXMLElement elementWithName:@"vCard" xmlns:XMPPNSvCardTemp];
-		
-		[iq addChild:vCardElem];
-		
-		[xmppStream sendElement:iq];
-	}
-  
-  return vCard;
+#pragma mark -
+#pragma mark Fetch vCardTemp methods
+
+
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)aXmppStream {
+  return [self fetchvCardTempForJID:jid xmppStream:aXmppStream useCache:YES];
 }
 
 
-/*
- * Remove the stored vCard for the given JID.
- */
-- (void)removevCardForJID:(XMPPJID *)jid {
-  [_storage removevCardForJID:jid xmppStream:xmppStream];
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream useCache:(BOOL)useCache {
+  XMPPvCardTemp *vCardTemp = nil;
+  
+  if (useCache) {
+    // try loading from the cache
+    vCardTemp = [_moduleStorage vCardTempForJID:jid];
+  }
+  
+  if (vCardTemp == nil && [_moduleStorage shouldFetchvCardTempForJID:jid]) {
+    
+#if XMPP_VCARD_TEMP_QUEUEING
+    if (_openFetchRequests >= kXMPPvCardTempModuleMaxOpenFetchRequests) {
+      // queue the request
+      [_pendingFetchRequests addObject:jid];
+      
+      return vCardTemp;
+    }
+#endif
+    
+    [self _fetchvCardTempForJID:jid];
+  }
+  return vCardTemp;
 }
 
 
@@ -92,30 +109,48 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 #pragma mark XMPPStreamDelegate methods
 
 
-- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {
-	NSXMLElement *elem = [iq elementForName:@"vCard" xmlns:XMPPNSvCardTemp];
-	DDLogInfo(@"Received IQ in vCard module with elem: %@", elem);
-	if (elem != nil) {
-		XMPPvCard *vCard = [XMPPvCard vCardFromElement:elem];
-		[_storage savevCard:vCard forJID:[iq from] xmppStream:xmppStream];
-		
-		[multicastDelegate xmppvCardTempModule:self didReceivevCard:vCard forJID:[iq from]];
+#if XMPP_VCARD_TEMP_QUEUEING
+/*
+ * clean up if we get disconnected
+ */
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender {
+  _openFetchRequests = 0;
+  [_pendingFetchRequests removeAllObjects];
+}
+#endif
+
+
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {  
+  XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempFromIQ:iq];
+  
+	if (vCardTemp != nil) { 
+    XMPPJID *jid = [iq from];
+    DDLogVerbose(@"%s %@", __PRETTY_FUNCTION__,[jid bare]);
+    
+#if XMPP_VCARD_TEMP_QUEUEING
+    if (_openFetchRequests > 0) {
+      _openFetchRequests--;
+    }
+    
+    DDLogVerbose(@"%s %d", __PRETTY_FUNCTION__, _openFetchRequests);
+    
+    if (_openFetchRequests < kXMPPvCardTempModuleMaxOpenFetchRequests &&
+        [_pendingFetchRequests count] > 0) {
+      [self _fetchvCardTempForJID:[_pendingFetchRequests objectAtIndex:0]];
+      [_pendingFetchRequests removeObjectAtIndex:0];
+    }
+    
+#endif
+    
+    [_moduleStorage setvCardTemp:vCardTemp forJID:jid];
+    
+    [multicastDelegate xmppvCardTempModule:self 
+                           didReceivevCardTemp:vCardTemp 
+                                    forJID:jid
+                                xmppStream:sender];
     return YES;
 	}
-	
 	return NO;
-}
-
-
-- (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence {
-  XMPPJID *fromJID = [presence from];
-  
-  // We use this to track online buddies
-  if (_autoFetch &&
-      [presence status] != @"unavailable" &&
-      fromJID != nil) {
-    [self vCardForJID:fromJID];
-  }    
 }
 
 
@@ -123,8 +158,7 @@ NSString *const XMPPNSvCardTemp = @"vcard-temp";
 #pragma mark Getter/setter methods
 
 
-@synthesize autoFetch = _autoFetch;
-@synthesize storage = _storage;
+@synthesize moduleStorage = _moduleStorage;
 
 
 @end

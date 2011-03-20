@@ -1,5 +1,5 @@
 //
-//  XMPPvCardLabel.h
+//  XMPPvCardTempLabel.h
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -10,16 +10,16 @@
 
 #import <Foundation/Foundation.h>
 
-#import "XMPPvCardAdrTypes.h"
+#import "XMPPvCardTempAdrTypes.h"
 
 
-@interface XMPPvCardLabel : XMPPvCardAdrTypes
+@interface XMPPvCardTempLabel : XMPPvCardTempAdrTypes
 
 
 @property (nonatomic, assign) NSArray *lines;
 
 
-+ (XMPPvCardLabel *)vCardLabelFromElement:(NSXMLElement *)elem;
++ (XMPPvCardTempLabel *)vCardLabelFromElement:(NSXMLElement *)elem;
 
 
 @end

@@ -1,5 +1,5 @@
 //
-//  XMPPvCardEmail.h
+//  XMPPvCardTempAdrTypes.h
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -10,21 +10,19 @@
 
 #import <Foundation/Foundation.h>
 
-#import "XMPPvCardBase.h"
+#import "XMPPvCardTempBase.h"
 
 
-@interface XMPPvCardEmail : XMPPvCardBase
+@interface XMPPvCardTempAdrTypes : XMPPvCardTempBase
 
 
 @property (nonatomic, assign, setter=setHome) BOOL isHome;
 @property (nonatomic, assign, setter=setWork) BOOL isWork;
-@property (nonatomic, assign, setter=setInternet) BOOL isInternet;
-@property (nonatomic, assign, setter=setX400) BOOL isX400;
+@property (nonatomic, assign, setter=setParcel) BOOL isParcel;
+@property (nonatomic, assign, setter=setPostal) BOOL isPostal;
+@property (nonatomic, assign, setter=setDomestic) BOOL isDomestic;
+@property (nonatomic, assign, setter=setInternational) BOOL isInternational;
 @property (nonatomic, assign, setter=setPreferred) BOOL isPreferred;
-@property (nonatomic, assign) NSString *userid;
-
-
-+ (XMPPvCardEmail *)vCardEmailFromElement:(NSXMLElement *)elem;
 
 
 @end

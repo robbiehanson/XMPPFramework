@@ -1,5 +1,5 @@
 //
-//  XMPPvCardBase.h
+//  XMPPvCardTempBase.h
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -57,7 +57,7 @@
   }
 
 
-@interface XMPPvCardBase : NSXMLElement <NSCoding> {
+@interface XMPPvCardTempBase : NSXMLElement <NSCoding> {
 
 }
 

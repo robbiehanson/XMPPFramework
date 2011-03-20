@@ -1,5 +1,5 @@
 //
-//  XMPPvCardAdr.h
+//  XMPPvCardTempAdr.h
 //  XEP-0054 vCard-temp
 //
 //  Created by Eric Chamberlain on 3/9/11.
@@ -10,10 +10,10 @@
 
 #import <Foundation/Foundation.h>
 
-#import "XMPPvCardAdrTypes.h"
+#import "XMPPvCardTempAdrTypes.h"
 
 
-@interface XMPPvCardAdr : XMPPvCardAdrTypes
+@interface XMPPvCardTempAdr : XMPPvCardTempAdrTypes
 
 
 @property (nonatomic, assign) NSString *pobox;
@@ -25,7 +25,7 @@
 @property (nonatomic, assign) NSString *country;
 
 
-+ (XMPPvCardAdr *)vCardAdrFromElement:(NSXMLElement *)elem;
++ (XMPPvCardTempAdr *)vCardAdrFromElement:(NSXMLElement *)elem;
 
 
 @end
