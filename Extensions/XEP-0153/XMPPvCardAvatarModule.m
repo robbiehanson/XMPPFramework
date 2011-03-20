@@ -73,7 +73,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
   NSData *photoData = [_moduleStorage photoDataForJID:jid];
   
   if (photoData == nil) {
-    [_xmppvCardTempModule fetchvCardTempForJID:jid xmppStream:xmppStream useCache:NO];
+    [_xmppvCardTempModule fetchvCardTempForJID:jid xmppStream:xmppStream useCache:YES];
   }
   return photoData;
 }
