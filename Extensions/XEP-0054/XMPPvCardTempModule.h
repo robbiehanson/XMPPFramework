@@ -6,6 +6,15 @@
 //  Copyright 2011 RF.com. All rights reserved.
 //
 
+/*
+ *  NOTE:  Queueing vCardTemp fetch requests is needed to prevent the UI from freezing.
+ *  v3 doesn't process the resonse on the main thread, so this code won't be needed.
+ *  Change the #define below to 0, to disable queing.
+ */
+
+#define XMPP_VCARD_TEMP_QUEUEING 1
+
+
 #import <Foundation/Foundation.h>
 
 #if TARGET_OS_IPHONE
@@ -25,6 +34,11 @@
 
 @interface XMPPvCardTempModule : XMPPModule {
   id <XMPPvCardTempModuleStorage> _moduleStorage;
+
+#if XMPP_VCARD_TEMP_QUEUEING
+  NSUInteger _openFetchRequests;
+  NSMutableArray *_pendingFetchRequests;
+#endif
 }
 
 
