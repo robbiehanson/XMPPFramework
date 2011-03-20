@@ -45,19 +45,22 @@
 
 - (NSString *)persistentStoreDirectory
 {
-#if TARGET_OS_IPHONE
-	
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *result = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
-	
-#else
-	
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
-	
-	NSString *result = [basePath stringByAppendingPathComponent:@"XMPPStream"];
-	
-#endif
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+  NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+  
+  NSBundle *bundle = [NSBundle mainBundle];
+  
+	// Attempt to find a name for this application
+	NSString *appName = [bundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+	if (appName == nil) {
+		appName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];	
+	}
+  
+  if (appName == nil) {
+    appName = @"xmppframework";
+  }
+  
+  NSString *result = [basePath stringByAppendingPathComponent:appName];
 	
 	NSFileManager *fileManager = [NSFileManager defaultManager];
 	
