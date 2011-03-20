@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07676C97133694CE00E3B7D8 /* XMPPGroupCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 07676C96133694CE00E3B7D8 /* XMPPGroupCoreDataStorage.m */; };
 		0771B81D1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m in Sources */ = {isa = PBXBuildFile; fileRef = 0771B81A1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m */; };
 		0771B81E1315E9FC0018D5C6 /* XMPPStreamCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 0771B81C1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.m */; };
 		07BB9ACB1333E0C000A1A405 /* XMPPvCardTemp.m in Sources */ = {isa = PBXBuildFile; fileRef = 07BB9A8D1333E0C000A1A405 /* XMPPvCardTemp.m */; };
@@ -71,6 +72,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		07676C95133694CE00E3B7D8 /* XMPPGroupCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPGroupCoreDataStorage.h; path = ../../Roster/XMPPGroupCoreDataStorage.h; sourceTree = "<group>"; };
+		07676C96133694CE00E3B7D8 /* XMPPGroupCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPGroupCoreDataStorage.m; path = ../../Roster/XMPPGroupCoreDataStorage.m; sourceTree = "<group>"; };
 		0771B8191315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XMPPRosterCoreDataStorage+shared.h"; path = "../../Roster/XMPPRosterCoreDataStorage+shared.h"; sourceTree = SOURCE_ROOT; };
 		0771B81A1315E9FB0018D5C6 /* XMPPRosterCoreDataStorage+shared.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XMPPRosterCoreDataStorage+shared.m"; path = "../../Roster/XMPPRosterCoreDataStorage+shared.m"; sourceTree = SOURCE_ROOT; };
 		0771B81B1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStreamCoreDataStorage.h; path = ../../Roster/XMPPStreamCoreDataStorage.h; sourceTree = SOURCE_ROOT; };
@@ -509,6 +512,8 @@
 				0771B81B1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.h */,
 				0771B81C1315E9FB0018D5C6 /* XMPPStreamCoreDataStorage.m */,
 				DC84BBF912440AF40055A459 /* XMPPRoster.xcdatamodel */,
+				07676C95133694CE00E3B7D8 /* XMPPGroupCoreDataStorage.h */,
+				07676C96133694CE00E3B7D8 /* XMPPGroupCoreDataStorage.m */,
 				DC84BBFA12440AF40055A459 /* XMPPRosterCoreDataStorage.h */,
 				DC84BBFB12440AF40055A459 /* XMPPRosterCoreDataStorage.m */,
 				DC84BBFE12440AF40055A459 /* XMPPUserCoreDataStorage.h */,
@@ -649,6 +654,7 @@
 				07BB9B54133446CD00A1A405 /* XMPPvCardAvatarCoreDataStorage.m in Sources */,
 				07BB9B571334471500A1A405 /* XMPPvCardTempCoreDataStorage.m in Sources */,
 				07BB9BC8133551BF00A1A405 /* XMPPvCard.xcdatamodeld in Sources */,
+				07676C97133694CE00E3B7D8 /* XMPPGroupCoreDataStorage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
