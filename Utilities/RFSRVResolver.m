@@ -140,53 +140,53 @@ NSString * kRFSRVResolverErrorDomain = @"kRFSRVResolverErrorDomain";
 
 - (id)initWithStream:(XMPPStream *)xmppStream
 {
-	if (self = [super init]) {
+	if ((self = [super init])) {
 		self.xmppStream = xmppStream;
 		self.results = [NSMutableArray arrayWithCapacity:1];
-    }
-    return self;
+  }
+  return self;
 }
 
 - (void)dealloc
 {
-    [self _closeSockets];
-    [_error release];
-    [_results release];
+  [self _closeSockets];
+  [_error release];
+  [_results release];
 	[_xmppStream release];
     
-    [_timeoutTimer invalidate];
-    [_timeoutTimer release];
-    
-    [super dealloc];
+  [_timeoutTimer invalidate];
+  [_timeoutTimer release];
+  
+  [super dealloc];
 }
 
 #pragma mark Public methods
 	 
 - (void)start
 {
-    if (self->_sdRef == NULL) {
-	//	NSLog(@"%s",__PRETTY_FUNCTION__);
-        self.error    = nil;            // starting up again, so forget any previous error
-        self.finished = NO;
-        
-        self.timeoutTimer = [NSTimer scheduledTimerWithTimeInterval:RFSRVRESOLVER_TIMEOUT
-                                                             target:self
-                                                           selector:@selector(_didTimeoutTimer:)
-                                                           userInfo:nil
-                                                            repeats:NO];
-        
-        [self _start];
+  if (self->_sdRef == NULL) {
+    //	NSLog(@"%s",__PRETTY_FUNCTION__);
+    self.error    = nil;            // starting up again, so forget any previous error
+    self.finished = NO;
+    
+    self.timeoutTimer = [NSTimer scheduledTimerWithTimeInterval:RFSRVRESOLVER_TIMEOUT
+                                                         target:self
+                                                       selector:@selector(_didTimeoutTimer:)
+                                                       userInfo:nil
+                                                        repeats:NO];
+    
+    [self _start];
 	}
 }
 
 - (void)stop
 {
-    [self _closeSockets];
-    
-    [self.timeoutTimer invalidate];
-    self.timeoutTimer = nil;
-    
-    self.finished = YES;
+  [self _closeSockets];
+  
+  [self.timeoutTimer invalidate];
+  self.timeoutTimer = nil;
+  
+  self.finished = YES;
 
 	[self sortResults];
 }
@@ -401,19 +401,19 @@ static void SDRefSocketCallback(
 
 - (void)_start
 {
-    DNSServiceErrorType err;
-    const char *        srvNameCStr;
-    int                 fd;
-    CFSocketContext     context = { 0, self, NULL, NULL, NULL };
-    CFRunLoopSourceRef  rls;
-    
-    NSAssert(self->_sdRef == NULL, @"_sdRef is not NULL");
-    
-    // Create the DNSServiceRef to run our query.
-    
-    err = kDNSServiceErr_NoError;
-	
-	
+  DNSServiceErrorType err;
+  const char *        srvNameCStr;
+  int                 fd;
+  CFSocketContext     context = { 0, self, NULL, NULL, NULL };
+  CFRunLoopSourceRef  rls;
+  
+  NSAssert(self->_sdRef == NULL, @"_sdRef is not NULL");
+  
+  // Create the DNSServiceRef to run our query.
+  
+  err = kDNSServiceErr_NoError;
+
+
 	NSString *srvName = [NSString stringWithFormat:@"_xmpp-client._tcp.%@", [[self.xmppStream myJID] domain]];
 	
 	DDLogVerbose(@"%s Looking up %@...",__PRETTY_FUNCTION__,srvName);	
@@ -596,7 +596,7 @@ static void SDRefSocketCallback(
 	}
 	
 	self.results = sortedResults;
-    DDLogVerbose(@"%s Sorted results: %@",__PRETTY_FUNCTION__, self.results);
+  DDLogVerbose(@"%s Sorted results: %@",__PRETTY_FUNCTION__, self.results);
 }
 
 @end
