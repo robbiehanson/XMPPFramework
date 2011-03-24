@@ -36,6 +36,12 @@
 	return (XMPPMessage *)element;
 }
 
+- (id)init
+{
+	self = [super initWithName:@"message"];
+	return self;
+}
+
 - (BOOL)isChatMessage
 {
 	return [[[self attributeForName:@"type"] stringValue] isEqualToString:@"chat"];
