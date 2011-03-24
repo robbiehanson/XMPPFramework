@@ -16,6 +16,8 @@
 // Converts an NSXMLElement to an XMPPMessage element in place (no memory allocations or copying)
 + (XMPPMessage *)messageFromElement:(NSXMLElement *)element;
 
+- (id)init;
+
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;
 - (BOOL)isErrorMessage;
