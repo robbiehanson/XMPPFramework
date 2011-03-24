@@ -35,6 +35,16 @@
 	return (XMPPPresence *)element;
 }
 
++ (XMPPPresence *)presence
+{
+	return [[[XMPPPresence alloc] init] autorelease];
+}
+
++ (XMPPPresence *)presenceWithType:(NSString *)type to:(XMPPJID *)to
+{
+	return [[[XMPPPresence alloc] initWithType:type to:to] autorelease];
+}
+
 - (id)init
 {
 	self = [super initWithName:@"presence"];
