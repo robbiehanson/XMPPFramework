@@ -36,6 +36,11 @@
 	return (XMPPMessage *)element;
 }
 
++ (XMPPMessage *)message
+{
+	return [[[XMPPMessage alloc] init] autorelease];
+}
+
 - (id)init
 {
 	self = [super initWithName:@"message"];

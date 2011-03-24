@@ -22,6 +22,7 @@
  * Creates and returns a new autoreleased XMPPIQ element.
  * If the type or elementID parameters are nil, those attributes will not be added.
 **/
++ (XMPPIQ *)iq;
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid;
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
