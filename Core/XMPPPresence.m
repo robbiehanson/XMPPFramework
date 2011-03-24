@@ -35,12 +35,21 @@
 	return (XMPPPresence *)element;
 }
 
+- (id)init
+{
+	self = [super initWithName:@"presence"];
+	return self;
+}
+
 - (id)initWithType:(NSString *)type to:(XMPPJID *)to
 {
-	if((self = [super initWithName:@"presence"]))
+	if ((self = [super initWithName:@"presence"]))
 	{
-		[self addAttributeWithName:@"type" stringValue:type];
-		[self addAttributeWithName:@"to" stringValue:[to description]];
+		if (type)
+			[self addAttributeWithName:@"type" stringValue:type];
+		
+		if (to)
+			[self addAttributeWithName:@"to" stringValue:[to description]];
 	}
 	return self;
 }
