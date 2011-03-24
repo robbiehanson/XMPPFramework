@@ -41,6 +41,8 @@
 	if(domain)   *domain = nil;
 	if(resource) *resource = nil;
 	
+	if(jidStr == nil) return NO;
+	
 	NSString *rawUser = nil;
 	NSString *rawDomain = nil;
 	NSString *rawResource = nil;
