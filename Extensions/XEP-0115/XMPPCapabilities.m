@@ -64,6 +64,22 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 @dynamic autoFetchHashedCapabilities;
 @dynamic autoFetchNonHashedCapabilities;
 
+- (id)init
+{
+	// This will cause a crash - it's designed to.
+	// Only the init methods listed in XMPPCapabilities.h are supported.
+	
+	return [self initWithCapabilitiesStorage:nil dispatchQueue:NULL];
+}
+
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+{
+	// This will cause a crash - it's designed to.
+	// Only the init methods listed in XMPPCapabilities.h are supported.
+	
+	return [self initWithCapabilitiesStorage:nil dispatchQueue:NULL];
+}
+
 - (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage
 {
 	return [self initWithCapabilitiesStorage:storage dispatchQueue:NULL];
