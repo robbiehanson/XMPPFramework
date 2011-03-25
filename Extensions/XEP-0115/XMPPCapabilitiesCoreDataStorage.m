@@ -18,28 +18,31 @@
 
 - (NSString *)persistentStoreDirectory
 {
-#if TARGET_OS_IPHONE
-	
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *result = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
-	
-#else
-	
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
-	
-	NSString *result = [basePath stringByAppendingPathComponent:@"XMPPStream"];
-	
-#endif
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+  NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
+  
+  NSBundle *bundle = [NSBundle mainBundle];
+  
+	// Attempt to find a name for this application
+	NSString *appName = [bundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+	if (appName == nil) {
+		appName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];	
+	}
+  
+  if (appName == nil) {
+    appName = @"xmppframework";
+  }
+  
+  NSString *result = [basePath stringByAppendingPathComponent:appName];
 	
 	NSFileManager *fileManager = [NSFileManager defaultManager];
 	
-	if(![fileManager fileExistsAtPath:result])
-	{
-		[fileManager createDirectoryAtPath:result withIntermediateDirectories:YES attributes:nil error:nil];
-	}
+  if(![fileManager fileExistsAtPath:result])
+  {
+    [fileManager createDirectoryAtPath:result withIntermediateDirectories:YES attributes:nil error:nil];
+  }
 	
-    return result;
+  return result;
 }
 
 - (NSManagedObjectModel *)managedObjectModel
@@ -62,47 +65,76 @@
 	return managedObjectModel;
 }
 
+- (void)movePersistentStorePath:(NSString *)storePath {
+  /*
+   * If XMPPCapabilities.sqlite is in the old location, move it.
+   */
+#if TARGET_OS_IPHONE
+  
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *result = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+  
+#else
+  
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+  NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
+  
+  NSString *result = [basePath stringByAppendingPathComponent:@"XMPPStream"];
+  
+#endif
+  
+  NSString *oldStorePath = [result stringByAppendingPathComponent:@"XMPPCapabilities.sqlite"];
+  
+  NSFileManager *fileManager = [NSFileManager defaultManager];
+  
+  if([fileManager fileExistsAtPath:oldStorePath])
+  {
+    [fileManager moveItemAtPath:oldStorePath toPath:storePath error:nil];
+  }
+}
+
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator
 {
-	if (persistentStoreCoordinator)
-	{
-		return persistentStoreCoordinator;
-	}
-	
-	NSManagedObjectModel *mom = [self managedObjectModel];
-	
-	persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
-	
-	NSString *docsPath = [self persistentStoreDirectory];
-	NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPCapabilities.sqlite"];
-	if (storePath)
-	{
-		// If storePath is nil, then NSURL will throw an exception
-		
-		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
-		
-		NSError *error = nil;
-		NSPersistentStore *persistentStore;
-		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
-		                                                           configuration:nil
-		                                                                  URL:storeUrl
-		                                                              options:nil
-		                                                                error:&error];
-		if(!persistentStore)
-		{
-			NSLog(@"=====================================================================================");
-			NSLog(@"Error creating persistent store:\n%@", error);
-			NSLog(@"Chaned core data model recently?");
-		#if TARGET_OS_IPHONE
-			NSLog(@"Quick Fix: Delete the app from device and reinstall.");
-		#else
-			NSLog(@"Quick Fix: Delete the database: %@", storePath);
-		#endif
-			NSLog(@"=====================================================================================");
-		}
-	}
-
+  if (persistentStoreCoordinator)
+  {
     return persistentStoreCoordinator;
+  }
+
+  NSManagedObjectModel *mom = [self managedObjectModel];
+
+  persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
+
+  NSString *docsPath = [self persistentStoreDirectory];
+  NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPCapabilities.sqlite"];
+  if (storePath)
+  {
+    // If storePath is nil, then NSURL will throw an exception
+    [self movePersistentStorePath:storePath];
+    
+    NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
+    
+    NSError *error = nil;
+    NSPersistentStore *persistentStore;
+    persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+                                                               configuration:nil
+                                                                      URL:storeUrl
+                                                                  options:nil
+                                                                    error:&error];
+    if(!persistentStore)
+    {
+      NSLog(@"=====================================================================================");
+      NSLog(@"Error creating persistent store:\n%@", error);
+      NSLog(@"Chaned core data model recently?");
+    #if TARGET_OS_IPHONE
+      NSLog(@"Quick Fix: Delete the app from device and reinstall.");
+    #else
+      NSLog(@"Quick Fix: Delete the database: %@", storePath);
+    #endif
+      NSLog(@"=====================================================================================");
+    }
+  }
+
+  return persistentStoreCoordinator;
 }
 
 - (NSManagedObjectContext *)managedObjectContext
