@@ -664,6 +664,12 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 	return self;
 }
 
+- (void)dealloc
+{
+	[target release];
+	[super dealloc];
+}
+
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"<%@:%p target(%@) port(%hu) priority(%hu) weight(%hu)>",
