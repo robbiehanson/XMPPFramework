@@ -12,9 +12,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
 @synthesize parent;
 
-@dynamic managedObjectModel;
-@dynamic persistentStoreCoordinator;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Protocol Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,17 +21,22 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	NSParameterAssert(aParent != nil);
 	NSParameterAssert(queue != NULL);
 	
-	if ((parent == nil) && (storageQueue == NULL))
+	BOOL result = NO;
+	
+	@synchronized(self)
 	{
-		parent = aParent; // Parents retain children, children do not retain parents
-		
-		storageQueue = queue;
-		dispatch_retain(storageQueue);
-		
-		return YES;
+		if ((parent == nil) && (storageQueue == NULL))
+		{
+			parent = aParent; // Parents retain children, children do not retain parents
+			
+			storageQueue = queue;
+			dispatch_retain(storageQueue);
+			
+			result = YES;
+		}
 	}
 	
-	return NO;
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,19 +45,21 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
 - (NSString *)persistentStoreDirectory
 {
-#if TARGET_OS_IPHONE
-	
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *result = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
-	
-#else
-	
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
 	
-	NSString *result = [basePath stringByAppendingPathComponent:@"XMPPStream"];
+	// Attempt to find a name for this application
+	NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+	if (appName == nil) {
+		appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];	
+	}
 	
-#endif
+	if (appName == nil) {
+		appName = @"xmppframework";
+	}
+	
+	
+	NSString *result = [basePath stringByAppendingPathComponent:appName];
 	
 	NSFileManager *fileManager = [NSFileManager defaultManager];
 	
@@ -155,18 +159,18 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 			{
 			  #if TARGET_OS_IPHONE
 				XMPPLogError(@"%@:\n"
-				             @"====================================================================================="
-				             @"Error creating persistent store:\n%@"
-				             @"Chaned core data model recently?"
-				             @"Quick Fix: Delete the app from device and reinstall."
+				             @"=====================================================================================\n"
+				             @"Error creating persistent store:\n%@\n"
+				             @"Chaned core data model recently?\n"
+				             @"Quick Fix: Delete the app from device and reinstall.\n"
 				             @"=====================================================================================",
 				             THIS_FILE, error);
 			  #else
 				XMPPLogError(@"%@:\n"
-				             @"====================================================================================="
-				             @"Error creating persistent store:\n%@"
-				             @"Chaned core data model recently?"
-				             @"Quick Fix: Delete the database: %@"
+				             @"=====================================================================================\n"
+				             @"Error creating persistent store:\n%@\n"
+				             @"Chaned core data model recently?\n"
+				             @"Quick Fix: Delete the database: %@\n"
 				             @"=====================================================================================",
 				             THIS_FILE, error, storePath);
 			  #endif
