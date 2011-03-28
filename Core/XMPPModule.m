@@ -8,8 +8,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 @implementation XMPPModule
 
-@synthesize xmppStream;
-
 /**
  * Standard init method.
 **/
@@ -141,6 +139,24 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
+}
+
+- (XMPPStream *)xmppStream
+{
+	if (dispatch_get_current_queue() == moduleQueue)
+	{
+		return xmppStream;
+	}
+	else
+	{
+		__block XMPPStream *result;
+		
+		dispatch_sync(moduleQueue, ^{
+			result = [xmppStream retain];
+		});
+		
+		return [result autorelease];
+	}
 }
 
 - (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue
