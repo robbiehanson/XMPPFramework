@@ -29,4 +29,9 @@
 // then you need to go read the documentation for core data,
 // specifically the section entitled "Concurrency with Core Data".
 
+/**
+ * A shared store for use with multiple streams.
+ **/
++ (XMPPRosterCoreDataStorage *)sharedXMPPRosterCoreDataStorage;
+
 @end
