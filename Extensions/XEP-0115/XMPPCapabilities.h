@@ -97,7 +97,7 @@
  * If given, the jid must have been registered via the given stream.
  * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
+- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Returns the capabilities for the given jid.
@@ -107,7 +107,7 @@
  * If given, the jid must have been registered via the given stream.
  * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Returns the capabilities for the given jid.
@@ -133,7 +133,7 @@
  * If given, the jid must have been registered via the given stream.
  * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr inStream:(XMPPStream *)stream;
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr xmppStream:(XMPPStream *)stream;
 
 // 
 // 
@@ -188,7 +188,7 @@
                        hash:(NSString *)hash
                   algorithm:(NSString *)hashAlg
                      forJID:(XMPPJID *)jid
-                   inStream:(XMPPStream *)stream
+                 xmppStream:(XMPPStream *)stream
       andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr;
 
 /**
@@ -200,7 +200,7 @@
 - (BOOL)getCapabilitiesHash:(NSString **)hashPtr
                   algorithm:(NSString **)hashAlgPtr
                      forJID:(XMPPJID *)jid
-                   inStream:(XMPPStream *)stream;
+                 xmppStream:(XMPPStream *)stream;
 
 /**
  * Clears any associated hash from a jid.
@@ -209,7 +209,7 @@
  * This method should not clear the actual capabilities information itself.
  * It should simply unlink the connection between the jid and the capabilities.
 **/
-- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
+- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Gets the metadata for the given jid.
@@ -224,7 +224,7 @@
                         hash:(NSString **)hashPtr
                    algorithm:(NSString **)hashAlgPtr
                       forJID:(XMPPJID *)jid
-                    inStream:(XMPPStream *)stream;
+                  xmppStream:(XMPPStream *)stream;
 
 /**
  * Sets the capabilities associated with a given hash.
@@ -257,7 +257,7 @@
  * these capabilities should not be persisted between multiple sessions/streams.
  * See the various clear methods below.
 **/
-- (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
+- (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Marks the disco fetch request as failed so we know not to bother trying again.
@@ -266,7 +266,7 @@
  * It should be cleared when we go unavailable or offline, or if the given jid goes unavailable.
  * See the various clear methods below.
 **/
-- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
+- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * This method is called when we go unavailable or offline.
@@ -280,7 +280,7 @@
  * Non persistent capabilities (those not associated with a hash)
  * should be cleared at this point as they will no longer be linked to any users.
 **/
-- (void)clearAllNonPersistentCapabilitiesInStream:(XMPPStream *)stream;
+- (void)clearAllNonPersistentCapabilitiesForXMPPStream:(XMPPStream *)stream;
 
 /**
  * This method is called when the given jid goes unavailable.
@@ -293,7 +293,7 @@
  * 
  * Non persistent capabilities (those not associated with a hash) should be cleared.
 **/
-- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
+- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end
 
