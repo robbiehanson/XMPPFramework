@@ -2,6 +2,7 @@
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
+#import "DDNumber.h"
 
 @interface XMPPResourceCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
 - (NSDate *)primitivePresenceDate;
@@ -20,6 +21,9 @@
 
 @dynamic jidStr;
 @dynamic presenceStr;
+
+@dynamic stream;
+
 @dynamic type;
 @dynamic show;
 @dynamic status;
@@ -121,7 +125,9 @@
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withPresence:(XMPPPresence *)presence
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                      withPresence:(XMPPPresence *)presence
+                        xmppStream:(XMPPStream *)stream
 {
 	XMPPJID *jid = [presence from];
 	
@@ -134,6 +140,8 @@
 	XMPPResourceCoreDataStorage *newResource;
 	newResource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPResourceCoreDataStorage"
 	                                            inManagedObjectContext:moc];
+	
+	newResource.stream = [NSNumber numberWithPtr:stream];
 	
 	[newResource updateWithPresence:presence];
 	

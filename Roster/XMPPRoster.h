@@ -82,13 +82,11 @@
 // 
 // 
 
-@property (nonatomic, readonly) XMPPRoster *parent;
+- (id <XMPPUser>)myUserForXMPPStream:(XMPPStream *)stream;
+- (id <XMPPResource>)myResourceForXMPPStream:(XMPPStream *)stream;
 
-- (id <XMPPUser>)myUser;
-- (id <XMPPResource>)myResource;
-
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid;
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
+- (id <XMPPUser>)userForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 // 
 // 
@@ -117,14 +115,14 @@
 **/
 - (BOOL)configureWithParent:(XMPPRoster *)aParent queue:(dispatch_queue_t)queue;
 
-- (void)beginRosterPopulation;
-- (void)endRosterPopulation;
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream;
+- (void)endRosterPopulationForXMPPStream:(XMPPStream *)stream;
 
-- (void)handleRosterItem:(NSXMLElement *)item;
-- (void)handlePresence:(XMPPPresence *)presence;
+- (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)stream;
+- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
 
-- (void)clearAllResources;
-- (void)clearAllUsersAndResources;
+- (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream;
+- (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream;
 
 @end
 

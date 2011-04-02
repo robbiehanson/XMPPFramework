@@ -551,10 +551,30 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Updates
+#pragma mark XMPPRosterStorage Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)beginRosterPopulation
+- (id <XMPPUser>)myUserForXMPPStream:(XMPPStream *)stream
+{
+	return [self myUser];
+}
+
+- (id <XMPPResource>)myResourceForXMPPStream:(XMPPStream *)stream
+{
+	return [self myResource];
+}
+
+- (id <XMPPUser>)userForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+	return [self userForJID:jid];
+}
+
+- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+	return [self resourceForJID:jid];
+}
+
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
 	
@@ -566,7 +586,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	myUser = [[XMPPUserMemoryStorage alloc] initWithJID:myJID];
 }
 
-- (void)handleRosterItem:(NSXMLElement *)item
+- (void)endRosterPopulationForXMPPStream:(XMPPStream *)stream
+{
+	XMPPLogTrace();
+	
+	isRosterPopulation = NO;
+	
+	[[self multicastDelegate] xmppRosterDidChange:self];
+}
+
+- (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
 	
@@ -604,16 +633,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	}
 }
 
-- (void)endRosterPopulation
-{
-	XMPPLogTrace();
-	
-	isRosterPopulation = NO;
-	
-	[[self multicastDelegate] xmppRosterDidChange:self];
-}
-
-- (void)handlePresence:(XMPPPresence *)presence
+- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
 	
@@ -649,7 +669,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	}
 }
 
-- (void)clearAllResources
+- (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
 	
@@ -664,7 +684,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	[[self multicastDelegate] xmppRosterDidChange:self];
 }
 
-- (void)clearAllUsersAndResources
+- (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
 	

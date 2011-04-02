@@ -6,6 +6,7 @@
   #import "DDXML.h"
 #endif
 
+@class XMPPStream;
 @class XMPPResourceCoreDataStorage;
 
 
@@ -15,6 +16,8 @@
 @property (nonatomic, assign) int section;
 
 @property (nonatomic, retain) NSString * jidStr;
+@property (nonatomic, retain) NSNumber * stream;
+
 @property (nonatomic, retain) NSString * nickname;
 @property (nonatomic, retain) NSString * displayName;
 @property (nonatomic, retain) NSString * subscription;
@@ -25,10 +28,12 @@
 @property (nonatomic, retain) XMPPResourceCoreDataStorage * primaryResource;
 @property (nonatomic, retain) NSSet * resources;
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withItem:(NSXMLElement *)item;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                          withItem:(NSXMLElement *)item
+                        xmppStream:(XMPPStream *)stream;
 
 - (void)updateWithItem:(NSXMLElement *)item;
-- (void)updateWithPresence:(XMPPPresence *)presence;
+- (void)updateWithPresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
 
 @end
 
