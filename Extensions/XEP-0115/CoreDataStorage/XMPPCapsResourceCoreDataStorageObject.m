@@ -5,6 +5,7 @@
 @implementation XMPPCapsResourceCoreDataStorageObject 
 
 @dynamic jidStr;
+@dynamic stream;
 
 @dynamic haveFailed;
 @dynamic failed;
