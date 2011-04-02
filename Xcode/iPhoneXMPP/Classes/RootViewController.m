@@ -1,4 +1,5 @@
 #import "RootViewController.h"
+#import "SettingsViewController.h"
 #import "iPhoneXMPPAppDelegate.h"
 
 #import "XMPP.h"
@@ -33,6 +34,42 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	return [[self appDelegate] xmppRosterStorage];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark View lifecycle
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  
+  UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 400, 44)];
+  titleLabel.backgroundColor = [UIColor clearColor];
+  titleLabel.textColor = [UIColor whiteColor];
+  titleLabel.font = [UIFont boldSystemFontOfSize:20.0];
+  titleLabel.numberOfLines = 1;
+  titleLabel.adjustsFontSizeToFitWidth = YES;
+  titleLabel.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+  titleLabel.textAlignment = UITextAlignmentCenter;
+  
+  if ([[self appDelegate] connect]) 
+  {
+    titleLabel.text = [[[[self appDelegate] xmppStream] myJID] bare];
+  } else
+  {
+    titleLabel.text = @"No JID";
+  }
+  
+  self.navigationItem.titleView = titleLabel;
+  
+  [titleLabel release];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [[self appDelegate] disconnect];
+  
+  [super viewWillDisappear:animated];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Core Data
@@ -176,6 +213,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	return cell;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Actions
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (IBAction)settings:(id)sender {
+  [self.navigationController presentModalViewController:[[self appDelegate] settingsViewController] animated:YES];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Init/dealloc
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)dealloc
 {
