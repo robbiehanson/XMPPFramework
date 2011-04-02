@@ -5,6 +5,8 @@
 #import "XMPPLogging.h"
 #import "DDNumber.h"
 
+#import <objc/runtime.h>
+
 // Log levels: off, error, warn, info, verbose
 static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
@@ -48,7 +50,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		}
 		else
 		{
-			storageQueue = dispatch_queue_create("XMPPCapabilitiesCoreDataStorage", NULL);
+			storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
 		}
 	}
 	return self;

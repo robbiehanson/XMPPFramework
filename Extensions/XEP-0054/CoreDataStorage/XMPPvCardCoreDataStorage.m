@@ -12,6 +12,8 @@
 #import "XMPPLogging.h"
 #import "NSDataAdditions.h"
 
+#import <objc/runtime.h>
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
@@ -58,7 +60,7 @@ enum {
 		}
 		else
 		{
-			storageQueue = dispatch_queue_create("XMPPvCardCoreDataStorage", NULL);
+			storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
 		}
 	}
 	return self;

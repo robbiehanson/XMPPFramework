@@ -2,6 +2,7 @@
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
+#import "DDNumber.h"
 
 @interface XMPPUserCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
 - (NSString *)primitiveNickname;
@@ -19,6 +20,8 @@
 @dynamic section; // Implementation below
 
 @dynamic jidStr;
+@dynamic stream;
+
 @dynamic nickname;
 @dynamic displayName;
 @dynamic subscription;
@@ -109,7 +112,9 @@
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withItem:(NSXMLElement *)item
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                          withItem:(NSXMLElement *)item
+                        xmppStream:(XMPPStream *)stream
 {
 	NSString *jidStr = [item attributeStringValueForName:@"jid"];
 	XMPPJID *jid = [XMPPJID jidWithString:jidStr];
@@ -123,6 +128,8 @@
 	XMPPUserCoreDataStorage *newUser;
 	newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPUserCoreDataStorage"
 	                                        inManagedObjectContext:moc];
+	
+	newUser.stream = [NSNumber numberWithPtr:stream];
 	
 	[newUser updateWithItem:item];
 	
@@ -176,7 +183,7 @@
 	}
 }
 
-- (void)updateWithPresence:(XMPPPresence *)presence
+- (void)updateWithPresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
 {
 	XMPPResourceCoreDataStorage *resource = (XMPPResourceCoreDataStorage *)[self resourceForJID:[presence from]];
 	
@@ -198,7 +205,8 @@
 		{
 			XMPPResourceCoreDataStorage *newResource;
 			newResource = [XMPPResourceCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
-			                                                           withPresence:presence];
+			                                                           withPresence:presence
+			                                                             xmppStream:stream];
 			
 			[self addResourcesObject:newResource];
 		}

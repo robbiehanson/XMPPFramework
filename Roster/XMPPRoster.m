@@ -121,7 +121,7 @@ enum XMPPRosterFlags
 {
 	// Note: The xmppRosterStorage variable is read-only (set in the init method)
 	
-	return xmppRosterStorage;
+	return [[xmppRosterStorage retain] autorelease];
 }
 
 - (BOOL)autoRoster
@@ -394,18 +394,18 @@ enum XMPPRosterFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (id <XMPPUser>)myUser {
-    return [xmppRosterStorage myUser];
+    return [xmppRosterStorage myUserForXMPPStream:xmppStream];
 }
 - (id <XMPPResource>)myResource {
-    return [xmppRosterStorage myResource];
+    return [xmppRosterStorage myResourceForXMPPStream:xmppStream];
 }
 
 - (id <XMPPUser>)userForJID:(XMPPJID *)jid {
-    return [xmppRosterStorage userForJID:jid];
+    return [xmppRosterStorage userForJID:jid xmppStream:xmppStream];
 }
 
 - (id <XMPPResource>)resourceForJID:(XMPPJID *)jid {
-    return [xmppRosterStorage resourceForJID:jid];
+    return [xmppRosterStorage resourceForJID:jid xmppStream:xmppStream];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -439,7 +439,7 @@ enum XMPPRosterFlags
 	{
 		if (![self hasRoster])
 		{
-			[xmppRosterStorage beginRosterPopulation];
+			[xmppRosterStorage beginRosterPopulationForXMPPStream:xmppStream];
 		}
 		
 		NSArray *items = [query elementsForName:@"item"];
@@ -448,7 +448,7 @@ enum XMPPRosterFlags
 			// Filter out items for users who aren't actually in our roster.
 			// That is, those users who have requested to be our buddy, but we haven't approved yet.
 			
-			[xmppRosterStorage handleRosterItem:item];
+			[xmppRosterStorage handleRosterItem:item xmppStream:xmppStream];
 		}
 		
 		if (![self hasRoster])
@@ -469,7 +469,7 @@ enum XMPPRosterFlags
 			[earlyPresenceElements removeAllObjects];
 			
 			// And finally, notify roster storage that the roster population is complete
-			[xmppRosterStorage endRosterPopulation];
+			[xmppRosterStorage endRosterPopulationForXMPPStream:xmppStream];
 		}
 		
 		return YES;
@@ -514,7 +514,7 @@ enum XMPPRosterFlags
 	
 	if ([[presence type] isEqualToString:@"subscribe"])
 	{
-		id <XMPPUser> user = [xmppRosterStorage userForJID:[presence from]];
+		id <XMPPUser> user = [xmppRosterStorage userForJID:[presence from] xmppStream:xmppStream];
 		
 		if (user && [self autoRoster])
 		{
@@ -538,7 +538,7 @@ enum XMPPRosterFlags
 	}
 	else
 	{
-		[xmppRosterStorage handlePresence:presence];
+		[xmppRosterStorage handlePresence:presence xmppStream:xmppStream];
 	}
 }
 
@@ -558,7 +558,7 @@ enum XMPPRosterFlags
 		// We will receive general roster updates as long as we're still connected though.
 		// So there's no need to refetch the roster.
 		
-		[xmppRosterStorage clearAllResources];
+		[xmppRosterStorage clearAllResourcesForXMPPStream:xmppStream];
 		
 		[earlyPresenceElements removeAllObjects];
 	}
@@ -570,7 +570,7 @@ enum XMPPRosterFlags
 	
 	XMPPLogTrace();
 	
-	[xmppRosterStorage clearAllUsersAndResources];
+	[xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
 	
 	[self setRequestedRoster:NO];
 	[self setHasRoster:NO];

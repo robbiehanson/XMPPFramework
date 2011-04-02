@@ -9,15 +9,34 @@
 
 @interface XMPPRosterCoreDataStorage : NSObject <XMPPRosterStorage>
 {
-	XMPPRoster *parent;
+	BOOL singleUsage;
+	
 	dispatch_queue_t storageQueue;
 	
-	BOOL isRosterPopulation;
+	NSMutableSet *rosterPopulationSet;
 	
 	NSManagedObjectModel *managedObjectModel;
 	NSPersistentStoreCoordinator *persistentStoreCoordinator;
 	NSManagedObjectContext *managedObjectContext;
 }
+
+/**
+ * Creates a CoreDataStorage instance designed to be used by a single instance of XMPPRoster.
+ * 
+ * The storage instance will inherit its dispatch queue from its parent (the XMPPRoster instance).
+**/
+- (id)init;
+- (id)initForSingleUsage;
+
+/**
+ * Creates a CoreDataStorage instance that may be used by multiple instances of XMPPRoster.
+ * This may be useful if your application creates multiple XMPPStream connections.
+ * 
+ * The storage instance will operate on its own dispatch queue, which may optionally be provided.
+**/
+- (id)initForMultipleUsage;
+- (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue;
+
 
 @property (readonly) NSManagedObjectModel *managedObjectModel;
 @property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
