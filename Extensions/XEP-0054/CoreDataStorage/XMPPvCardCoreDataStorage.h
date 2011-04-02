@@ -39,6 +39,7 @@
 - (id)initForMultipleUsage;
 - (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue;
 
+
 @property (readonly) NSManagedObjectModel *managedObjectModel;
 @property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 

@@ -2,8 +2,9 @@
 #import <CoreData/CoreData.h>
 #import "XMPPResource.h"
 
-@class XMPPUserCoreDataStorage;
+@class XMPPStream;
 @class XMPPPresence;
+@class XMPPUserCoreDataStorage;
 
 
 @interface XMPPResourceCoreDataStorage : NSManagedObject <XMPPResource>
@@ -17,6 +18,8 @@
 @property (nonatomic, retain) NSString * jidStr;
 @property (nonatomic, retain) NSString * presenceStr;
 
+@property (nonatomic, retain) NSNumber * stream;
+
 @property (nonatomic, retain) NSString * type;
 @property (nonatomic, retain) NSString * show;
 @property (nonatomic, retain) NSString * status;
@@ -28,7 +31,9 @@
 
 @property (nonatomic, retain) XMPPUserCoreDataStorage * user;
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withPresence:(XMPPPresence *)presence;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                      withPresence:(XMPPPresence *)presence
+                        xmppStream:(XMPPStream *)stream;
 
 - (void)updateWithPresence:(XMPPPresence *)presence;
 
