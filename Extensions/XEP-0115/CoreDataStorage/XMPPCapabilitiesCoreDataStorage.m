@@ -248,7 +248,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		managedObjectContext = [[NSManagedObjectContext alloc] init];
 		[managedObjectContext setPersistentStoreCoordinator:coordinator];
 		
-		[self clearAllNonPersistentCapabilitiesInStream:nil];
+		[self clearAllNonPersistentCapabilitiesForXMPPStream:nil];
 	}
 	
 	return managedObjectContext;
@@ -258,7 +258,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (XMPPCapsResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+- (XMPPCapsResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
 	
@@ -320,7 +320,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 #pragma mark Protocol Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -337,7 +337,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	dispatch_block_t block = ^{
 		
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		result = (resource.caps != nil);
 	};
 	
@@ -351,7 +351,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	return result;
 }
 
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -366,7 +366,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	if (dispatch_get_current_queue() == storageQueue)
 	{
-		return [self capabilitiesForJID:jid ext:nil inStream:stream];
+		return [self capabilitiesForJID:jid ext:nil xmppStream:stream];
 	}
 	else
 	{
@@ -374,14 +374,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		
 		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
 			
-			result = [[self capabilitiesForJID:jid ext:nil inStream:stream] retain];
+			result = [[self capabilitiesForJID:jid ext:nil xmppStream:stream] retain];
 		}));
 		
 		return [result autorelease];
 	}
 }
 
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr inStream:(XMPPStream *)stream
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -396,7 +396,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	if (dispatch_get_current_queue() == storageQueue)
 	{
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		
 		if (extPtr) *extPtr = [resource ext];
 		
@@ -409,7 +409,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		
 		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
 			
-			XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+			XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 			
 			if (resource)
 			{
@@ -437,7 +437,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
                        hash:(NSString *)hash
                   algorithm:(NSString *)hashAlg
                      forJID:(XMPPJID *)jid
-                   inStream:(XMPPStream *)stream
+                 xmppStream:(XMPPStream *)stream
       andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr
 {
 	// This is a private protocol method,
@@ -452,7 +452,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		
 		BOOL hashChange = NO;
 		
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		if (resource)
 		{
 			resource.node = node;
@@ -537,7 +537,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 - (BOOL)getCapabilitiesHash:(NSString **)hashPtr
                   algorithm:(NSString **)hashAlgPtr
                      forJID:(XMPPJID *)jid
-                   inStream:(XMPPStream *)stream
+                 xmppStream:(XMPPStream *)stream
 {
 	// This is a private protocol method,
 	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
@@ -550,7 +550,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	dispatch_block_t block = ^{
 	
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		if (resource)
 		{
 			hash = resource.hashStr;
@@ -597,7 +597,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	return result;
 }
 
-- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a private protocol method,
 	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
@@ -606,7 +606,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	dispatch_block_t block = ^{
 	
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		if (resource)
 		{
 			BOOL clearCaps = NO;
@@ -643,7 +643,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
                         hash:(NSString **)hashPtr
                    algorithm:(NSString **)hashAlgPtr
                       forJID:(XMPPJID *)jid
-                    inStream:(XMPPStream *)stream
+                  xmppStream:(XMPPStream *)stream
 {
 	// This is a private protocol method,
 	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
@@ -660,7 +660,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	dispatch_block_t block = ^{
 		
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		
 		if (resource == nil)
 		{
@@ -773,7 +773,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
-- (void)setCapabilities:(NSXMLElement *)capabilities forJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+- (void)setCapabilities:(NSXMLElement *)capabilities forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a private protocol method,
 	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
@@ -789,7 +789,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 											 inManagedObjectContext:[self managedObjectContext]];
 		caps.capabilities = capabilities;
 		
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		
 		if (resource == nil)
 		{
@@ -810,7 +810,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
-- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a private protocol method,
 	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
@@ -819,7 +819,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	dispatch_block_t block = ^{
 		
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		resource.haveFailed = YES;
 	};
 	
@@ -829,7 +829,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
-- (void)clearAllNonPersistentCapabilitiesInStream:(XMPPStream *)stream
+- (void)clearAllNonPersistentCapabilitiesForXMPPStream:(XMPPStream *)stream
 {
 	// This is a private protocol method,
 	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
@@ -884,7 +884,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
-- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a private protocol method,
 	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
@@ -893,7 +893,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	dispatch_block_t block = ^{
 		
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		
 		if (resource == nil)
 		{

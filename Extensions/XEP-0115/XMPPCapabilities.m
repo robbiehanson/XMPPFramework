@@ -655,7 +655,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		                                         hash:&hash
 		                                    algorithm:&hashAlg
 		                                       forJID:jid
-		                                     inStream:xmppStream];
+		                                   xmppStream:xmppStream];
 		
 		if (areCapabilitiesKnown)
 		{
@@ -804,7 +804,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	                                                                    hash:ver
 	                                                               algorithm:hash
 	                                                                  forJID:jid
-	                                                                inStream:xmppStream
+	                                                              xmppStream:xmppStream
 	                                                   andGetNewCapabilities:&newCapabilities];
 	if (areCapabilitiesKnown)
 	{
@@ -936,7 +936,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	                                                                    hash:nil
 	                                                               algorithm:nil
 	                                                                  forJID:jid
-	                                                                inStream:xmppStream
+	                                                              xmppStream:xmppStream
 	                                                   andGetNewCapabilities:nil];
 	if (areCapabilitiesKnown)
 	{
@@ -1044,7 +1044,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	BOOL hashResponse = [xmppCapabilitiesStorage getCapabilitiesHash:&hash
 	                                                       algorithm:&hashAlg
 	                                                          forJID:jid
-	                                                        inStream:xmppStream];
+	                                                      xmppStream:xmppStream];
 	if (hashResponse)
 	{
 		XMPPLogVerbose(@"%@: %@ - Hash response...", THIS_FILE, THIS_METHOD);
@@ -1086,10 +1086,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			XMPPLogWarn(@"%@: Hash mismatch! hash(%@) != calculatedHash(%@)", THIS_FILE, hash, calculatedHash);
 			
 			// Revoke the associated hash from the jid
-			[xmppCapabilitiesStorage clearCapabilitiesHashAndAlgorithmForJID:jid inStream:xmppStream];
+			[xmppCapabilitiesStorage clearCapabilitiesHashAndAlgorithmForJID:jid xmppStream:xmppStream];
 			
 			// Now set the capabilities for the jid
-			[xmppCapabilitiesStorage setCapabilities:query forJID:jid inStream:xmppStream];
+			[xmppCapabilitiesStorage setCapabilities:query forJID:jid xmppStream:xmppStream];
 			
 			// Remove the jid from the discoRequest variables.
 			// 
@@ -1120,7 +1120,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		XMPPLogVerbose(@"%@: %@ - Non-Hash response", THIS_FILE, THIS_METHOD);
 		
 		// Store the capabilities (associated with the jid)		
-		[xmppCapabilitiesStorage setCapabilities:query forJID:jid inStream:xmppStream];
+		[xmppCapabilitiesStorage setCapabilities:query forJID:jid xmppStream:xmppStream];
 		
 		// Remove the jid from the discoRequest variable
 		[discoRequestJidSet removeObject:jid];
@@ -1146,13 +1146,13 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	BOOL hashResponse = [xmppCapabilitiesStorage getCapabilitiesHash:&hash
 	                                                       algorithm:&hashAlg
 	                                                          forJID:jid
-	                                                        inStream:xmppStream];
+	                                                      xmppStream:xmppStream];
 	if (hashResponse)
 	{
 		NSString *key = [self keyFromHash:hash algorithm:hashAlg];
 		
 		// Make a note of the failure
-		[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid inStream:xmppStream];
+		[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
 		
 		// Remove the jid from the discoRequest variable
 		[discoRequestJidSet removeObject:jid];
@@ -1164,7 +1164,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	else
 	{
 		// Make a note of the failure
-		[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid inStream:xmppStream];
+		[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
 		
 		// Remove the jid from the discoRequest variable
 		[discoRequestJidSet removeObject:jid];
@@ -1202,7 +1202,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	if ([type isEqualToString:@"unavailable"])
 	{
-		[xmppCapabilitiesStorage clearNonPersistentCapabilitiesForJID:[presence from] inStream:xmppStream];
+		[xmppCapabilitiesStorage clearNonPersistentCapabilitiesForJID:[presence from] xmppStream:xmppStream];
 	}
 	else if ([type isEqualToString:@"available"])
 	{
@@ -1292,7 +1292,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	if ([type isEqualToString:@"unavailable"])
 	{
-		[xmppCapabilitiesStorage clearAllNonPersistentCapabilitiesInStream:xmppStream];
+		[xmppCapabilitiesStorage clearAllNonPersistentCapabilitiesForXMPPStream:xmppStream];
 	}
 	else if ([type isEqualToString:@"available"])
 	{
@@ -1488,7 +1488,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		                                         hash:nil
 		                                    algorithm:nil
 		                                       forJID:jid
-		                                     inStream:xmppStream];
+		                                   xmppStream:xmppStream];
 		
 		// <iq to="romeo@montague.lit/orchard" type="get">
 		//   <query xmlns="http://jabber.org/protocol/disco#info" node="[node]#[ver]"/>
@@ -1532,7 +1532,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			XMPPJID *jid = [jids objectAtIndex:i];
 			
 			[discoRequestJidSet removeObject:jid];
-			[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid inStream:xmppStream];
+			[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
 		}
 		
 		[discoRequestHashDict removeObjectForKey:key];
@@ -1557,7 +1557,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// and also opens up the possibility of sending it another query in the future.
 	
 	[discoRequestJidSet removeObject:jid];
-	[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid inStream:xmppStream];
+	[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
 }
 
 @end
