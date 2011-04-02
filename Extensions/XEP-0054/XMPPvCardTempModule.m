@@ -99,10 +99,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		if (useCache)
 		{
 			// Try loading from the cache
-			vCardTemp = [_moduleStorage vCardTempForJID:jid];
+			vCardTemp = [_moduleStorage vCardTempForJID:jid xmppStream:xmppStream];
 		}
 		
-		if (vCardTemp == nil && [_moduleStorage shouldFetchvCardTempForJID:jid])
+		if (vCardTemp == nil && [_moduleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
 		{
 			[xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:jid]];
 		}
@@ -134,7 +134,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		
 		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
 		
-		[_moduleStorage setvCardTemp:vCardTemp forJID:jid];
+		[_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
 		
 		[multicastDelegate xmppvCardTempModule:self
 		                   didReceivevCardTemp:vCardTemp
