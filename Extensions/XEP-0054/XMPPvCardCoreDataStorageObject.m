@@ -10,39 +10,15 @@
 #import "XMPPvCardAvatarCoreDataStorageObject.h"
 
 #import "XMPPJID.h"
+#import "XMPPStream.h"
+#import "DDNumber.h"
 #import "NSDataAdditions.h"
 
 
-@interface XMPPvCardCoreDataStorageObject ()
-
-+ (XMPPvCardCoreDataStorageObject *)fetchvCardForJID:(XMPPJID *)jid 
-                              inManagedObjectContext:(NSManagedObjectContext *)moc;
-
-+ (XMPPvCardCoreDataStorageObject *)insertEmptyvCardForJID:(XMPPJID *)jid 
-                                    inManagedObjectContext:(NSManagedObjectContext *)moc;
-
-@end
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 @implementation XMPPvCardCoreDataStorageObject
 
-
-+ (XMPPvCardCoreDataStorageObject *)fetchOrInsertvCardForJID:(XMPPJID *)jid
-                                      inManagedObjectContext:(NSManagedObjectContext *)moc
-{
-	XMPPvCardCoreDataStorageObject *vCard = [self fetchvCardForJID:jid inManagedObjectContext:moc];
-	if (vCard == nil)
-	{
-		vCard = [self insertEmptyvCardForJID:jid inManagedObjectContext:moc];
-	}
-	
-	return vCard;
-}
-
 + (XMPPvCardCoreDataStorageObject *)fetchvCardForJID:(XMPPJID *)jid
+                                          xmppStream:(XMPPStream *)stream
                               inManagedObjectContext:(NSManagedObjectContext *)moc
 {
 	NSString *entityName = NSStringFromClass([XMPPvCardCoreDataStorageObject class]);
@@ -50,7 +26,11 @@
 	NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
 	                                          inManagedObjectContext:moc];
 	
-	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid bare]];
+	NSPredicate *predicate;
+	if (stream == nil)
+		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid bare]];
+	else
+		predicate = [NSPredicate predicateWithFormat:@"stream == %p AND jidStr == %@", stream, [jid bare]];
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
@@ -66,7 +46,8 @@
 }
 
 
-+ (XMPPvCardCoreDataStorageObject *)insertEmptyvCardForJID:(XMPPJID *)jid 
++ (XMPPvCardCoreDataStorageObject *)insertEmptyvCardForJID:(XMPPJID *)jid
+                                                xmppStream:(XMPPStream *)stream
                                     inManagedObjectContext:(NSManagedObjectContext *)moc
 {
 	NSString *entityName = NSStringFromClass([XMPPvCardCoreDataStorageObject class]);
@@ -75,6 +56,20 @@
 	                                                                      inManagedObjectContext:moc];
 	
 	vCard.jidStr = [jid bare];
+	vCard.stream = [NSNumber numberWithPtr:stream];
+	return vCard;
+}
+
++ (XMPPvCardCoreDataStorageObject *)fetchOrInsertvCardForJID:(XMPPJID *)jid
+                                                  xmppStream:(XMPPStream *)stream
+                                      inManagedObjectContext:(NSManagedObjectContext *)moc
+{
+	XMPPvCardCoreDataStorageObject *vCard = [self fetchvCardForJID:jid xmppStream:stream inManagedObjectContext:moc];
+	if (vCard == nil)
+	{
+		vCard = [self insertEmptyvCardForJID:jid xmppStream:stream inManagedObjectContext:moc];
+	}
+	
 	return vCard;
 }
 
@@ -105,6 +100,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @dynamic jidStr;
+@dynamic stream;
 @dynamic photoHash;
 @dynamic lastUpdated;
 @dynamic waitingForFetch;

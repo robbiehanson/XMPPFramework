@@ -300,7 +300,7 @@ enum {
 #pragma mark XMPPvCardTempModuleStorage protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid
+- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -319,6 +319,7 @@ enum {
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+		                                                      xmppStream:stream
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		result = vCard.vCardTemp;
@@ -345,7 +346,7 @@ enum {
 }
 
 
-- (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
+- (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -362,6 +363,7 @@ enum {
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+		                                                      xmppStream:stream
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		vCard.waitingForFetch = [NSNumber numberWithBool:NO];
@@ -393,7 +395,7 @@ enum {
 }
 
 
-- (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid
+- (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -412,6 +414,7 @@ enum {
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+		                                                      xmppStream:stream
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		BOOL waitingForFetch = [vCard.waitingForFetch boolValue];
