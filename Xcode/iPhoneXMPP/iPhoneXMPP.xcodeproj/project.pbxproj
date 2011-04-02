@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0704FFC8134794020092A737 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0704FFC6134794020092A737 /* SettingsViewController.m */; };
+		0704FFC9134794020092A737 /* SettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0704FFC7134794020092A737 /* SettingsViewController.xib */; };
 		1D3623260D0F684500981E51 /* iPhoneXMPPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -54,6 +56,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0704FFC5134794020092A737 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
+		0704FFC6134794020092A737 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
+		0704FFC7134794020092A737 /* SettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SettingsViewController.xib; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* iPhoneXMPPAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iPhoneXMPPAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iPhoneXMPPAppDelegate.m; sourceTree = "<group>"; };
@@ -168,6 +173,9 @@
 			children = (
 				28C286DF0D94DF7D0034E888 /* RootViewController.h */,
 				28C286E00D94DF7D0034E888 /* RootViewController.m */,
+				0704FFC5134794020092A737 /* SettingsViewController.h */,
+				0704FFC6134794020092A737 /* SettingsViewController.m */,
+				0704FFC7134794020092A737 /* SettingsViewController.xib */,
 				1D3623240D0F684500981E51 /* iPhoneXMPPAppDelegate.h */,
 				1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */,
 			);
@@ -461,6 +469,7 @@
 			files = (
 				28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */,
 				28F335F11007B36200424DE2 /* RootViewController.xib in Resources */,
+				0704FFC9134794020092A737 /* SettingsViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -504,6 +513,7 @@
 				DCC0BF041301CEC700EC45D2 /* XMPPRoster.xcdatamodel in Sources */,
 				DCC0BF051301CEC700EC45D2 /* XMPPRosterCoreDataStorage.m in Sources */,
 				DCC0BF061301CEC700EC45D2 /* XMPPUserCoreDataStorage.m in Sources */,
+				0704FFC8134794020092A737 /* SettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
