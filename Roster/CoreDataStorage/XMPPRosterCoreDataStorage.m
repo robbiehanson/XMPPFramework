@@ -582,7 +582,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	if (stream)
 	{
-		[fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"stream == %p", stream]];
+		[fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"stream == %@", [NSNumber numberWithPtr:stream]]];
 	}
 	
 	NSArray *allResources = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
@@ -613,7 +613,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	if (stream)
 	{
-		[fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"stream == %p", stream]];
+		[fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"stream == %@", [NSNumber numberWithPtr:stream]]];
 	}
 	
 	NSArray *allUsers = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
