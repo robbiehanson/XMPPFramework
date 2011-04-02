@@ -3,40 +3,83 @@
 #import "XMPPCapsResourceCoreDataStorageObject.h"
 #import "XMPP.h"
 #import "XMPPLogging.h"
+#import "DDNumber.h"
 
 // Log levels: off, error, warn, info, verbose
 static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
+#define AUTORELEASED_BLOCK(block) ^{                            \
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]; \
+    block();                                                    \
+    [pool drain];                                               \
+}
 
 @implementation XMPPCapabilitiesCoreDataStorage
 
-@synthesize parent;
+- (id)init
+{
+	return [self initForSingleUsage];
+}
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Protocol Configuration
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (id)initForSingleUsage
+{
+	if ((self = [super init]))
+	{
+		singleUsage = YES;
+	}
+	return self;
+}
+
+- (id)initForMultipleUsage
+{
+	return [self initForMultipleUsageWithDispatchQueue:NULL];
+}
+
+- (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue
+{
+	if ((self = [super init]))
+	{
+		singleUsage = NO;
+		
+		if (queue)
+		{
+			storageQueue = queue;
+			dispatch_retain(storageQueue);
+		}
+		else
+		{
+			storageQueue = dispatch_queue_create("XMPPCapabilitiesCoreDataStorage", NULL);
+		}
+	}
+	return self;
+}
 
 - (BOOL)configureWithParent:(XMPPCapabilities *)aParent queue:(dispatch_queue_t)queue
 {
 	NSParameterAssert(aParent != nil);
 	NSParameterAssert(queue != NULL);
 	
-	BOOL result = NO;
-	
-	@synchronized(self)
+	if (singleUsage)
 	{
-		if ((parent == nil) && (storageQueue == NULL))
+		BOOL result = NO;
+		
+		@synchronized(self)
 		{
-			parent = aParent; // Parents retain children, children do not retain parents
-			
-			storageQueue = queue;
-			dispatch_retain(storageQueue);
-			
-			result = YES;
+			if (storageQueue == NULL)
+			{
+				storageQueue = queue;
+				dispatch_retain(storageQueue);
+				
+				result = YES;
+			}
 		}
+		
+		return result;
 	}
-	
-	return result;
+	else
+	{
+		return YES;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +248,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		managedObjectContext = [[NSManagedObjectContext alloc] init];
 		[managedObjectContext setPersistentStoreCoordinator:coordinator];
 		
-		[self clearAllNonPersistentCapabilities];
+		[self clearAllNonPersistentCapabilitiesInStream:nil];
 	}
 	
 	return managedObjectContext;
@@ -215,7 +258,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (XMPPCapsResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid
+- (XMPPCapsResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
 {
 	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
 	
@@ -226,7 +269,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
-	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid full]];
+	NSPredicate *predicate;
+	if (stream == nil)
+		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid full]];
+	else
+		predicate = [NSPredicate predicateWithFormat:@"stream == %p AND jidStr == %@", stream, [jid full]];
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
@@ -273,7 +320,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 #pragma mark Protocol Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid
+- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -286,29 +333,25 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		return NO;
 	}
 	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-		return (resource.caps != nil);
-	}
-	else
-	{
-		__block BOOL result;
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
 		
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-			result = (resource.caps != nil);
-			
-			[pool drain];
-		});
-		
-		return result;
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		result = (resource.caps != nil);
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue) {
+		block();
 	}
+	else {
+		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(block));
+	}
+	
+	return result;
 }
 
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -323,25 +366,22 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	if (dispatch_get_current_queue() == storageQueue)
 	{
-		return [self capabilitiesForJID:jid ext:nil];
+		return [self capabilitiesForJID:jid ext:nil inStream:stream];
 	}
 	else
 	{
 		__block NSXMLElement *result;
 		
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
 			
-			result = [[self capabilitiesForJID:jid ext:nil] retain];
-			
-			[pool drain];
-		});
+			result = [[self capabilitiesForJID:jid ext:nil inStream:stream] retain];
+		}));
 		
 		return [result autorelease];
 	}
 }
 
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr inStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
@@ -356,7 +396,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	if (dispatch_get_current_queue() == storageQueue)
 	{
-		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
 		
 		if (extPtr) *extPtr = [resource ext];
 		
@@ -367,19 +407,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		__block NSXMLElement *result = nil;
 		__block NSString *ext = nil;
 		
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
 			
-			XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
+			XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
 			
 			if (resource)
 			{
 				result = [[[resource caps] capabilities] retain];
 				ext = [[resource ext] retain];
 			}
-			
-			[pool drain];
-		});
+		}));
 		
 		if (extPtr)
 			*extPtr = [ext autorelease];
@@ -400,121 +437,202 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
                        hash:(NSString *)hash
                   algorithm:(NSString *)hashAlg
                      forJID:(XMPPJID *)jid
+                   inStream:(XMPPStream *)stream
       andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
-	BOOL hashChange = NO;
+	__block BOOL result;
+	__block NSXMLElement *newCapabilities = nil;
 	
-	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-	if (resource)
-	{
-		resource.node = node;
-		resource.ver = ver;
-		resource.ext = ext;
-				
-		if (![hash isEqual:[resource hashStr]])
+	dispatch_block_t block = ^{
+		
+		BOOL hashChange = NO;
+		
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		if (resource)
 		{
-			hashChange = YES;
+			resource.node = node;
+			resource.ver = ver;
+			resource.ext = ext;
+					
+			if (![hash isEqual:[resource hashStr]])
+			{
+				hashChange = YES;
+				resource.hashStr = hash;
+			}
+			
+			if (![hashAlg isEqual:[resource hashAlgorithm]])
+			{
+				hashChange = YES;
+				resource.hashAlgorithm = hashAlg;
+			}
+		}
+		else
+		{
+			resource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsResourceCoreDataStorageObject"
+													 inManagedObjectContext:[self managedObjectContext]];
+			
+			resource.jidStr = [jid full];
+			resource.stream = [NSNumber numberWithPtr:stream];
+			
+			resource.node = node;
+			resource.ver = ver;
+			resource.ext = ext;
+			
 			resource.hashStr = hash;
+			resource.hashAlgorithm = hashAlg;
+			
+			hashChange = ((hash != nil) || (hashAlg != nil));
 		}
 		
-		if (![hashAlg isEqual:[resource hashAlgorithm]])
+		if (hashChange)
 		{
-			hashChange = YES;
-			resource.hashAlgorithm = hashAlg;
+			resource.caps = [self capsForHash:hash algorithm:hashAlg];
+			
+			if (newCapabilitiesPtr)
+			{
+				*newCapabilitiesPtr = resource.caps.capabilities;
+			}
 		}
+		
+		if ([[self managedObjectContext] hasChanges])
+		{
+			[[self managedObjectContext] save:nil];
+		}
+		
+		// Return whether or not the capabilities are known for the given jid
+		
+		result = (resource.caps != nil);
+	};
+	
+	
+	if (dispatch_get_current_queue() == storageQueue)
+	{
+		block();
+		
+		if (newCapabilitiesPtr)
+			*newCapabilitiesPtr = newCapabilities;
 	}
 	else
 	{
-		resource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsResourceCoreDataStorageObject"
-		                                         inManagedObjectContext:[self managedObjectContext]];
-		
-		resource.jidStr = [jid full];
-		
-		resource.node = node;
-		resource.ver = ver;
-		resource.ext = ext;
-		
-		resource.hashStr = hash;
-		resource.hashAlgorithm = hashAlg;
-		
-		hashChange = ((hash != nil) || (hashAlg != nil));
-	}
-	
-	if (hashChange)
-	{
-		resource.caps = [self capsForHash:hash algorithm:hashAlg];
+		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
+			
+			block();
+			[newCapabilities retain];
+		}));
 		
 		if (newCapabilitiesPtr)
-		{
-			*newCapabilitiesPtr = resource.caps.capabilities;
-		}
+			*newCapabilitiesPtr = [newCapabilities autorelease];
+		else
+			[newCapabilities release];
 	}
 	
-	if ([[self managedObjectContext] hasChanges])
-	{
-		[[self managedObjectContext] save:nil];
-	}
-	
-	// Return whether or not the capabilities are known for the given jid
-	
-	return (resource.caps != nil);
+	return result;
 }
 
-- (BOOL)getCapabilitiesHash:(NSString **)hashPtr algorithm:(NSString **)hashAlgPtr forJID:(XMPPJID *)jid
+- (BOOL)getCapabilitiesHash:(NSString **)hashPtr
+                  algorithm:(NSString **)hashAlgPtr
+                     forJID:(XMPPJID *)jid
+                   inStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
-	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-	if (resource)
-	{
-		NSString *hash = resource.hashStr;
-		NSString *hashAlg = resource.hashAlgorithm;
-		
-		if (hash && hashAlg)
+	__block BOOL result;
+	__block NSString *hash;
+	__block NSString *hashAlg;
+	
+	dispatch_block_t block = ^{
+	
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		if (resource)
 		{
-			if (hashPtr) *hashPtr = [[hash copy] autorelease];
-			if (hashAlgPtr) *hashAlgPtr = [[hashAlg copy] autorelease];
+			hash = resource.hashStr;
+			hashAlg = resource.hashAlgorithm;
 			
-			return YES;
+			result = (hash && hashAlg);
 		}
+		else
+		{
+			hash = hashAlg = nil;
+			
+			result = NO;
+		}
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue)
+	{
+		block();
+		
+		if (hashPtr) *hashPtr = hash;
+		if (hashAlgPtr) *hashAlgPtr = hashAlg;
+	}
+	else
+	{
+		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
+			
+			block();
+			
+			[hash retain];
+			[hashAlg retain];
+		}));
+		
+		if (hashPtr)
+			*hashPtr = [hash autorelease];
+		else
+			[hash release];
+		
+		if (hashAlgPtr)
+			*hashAlgPtr = [hashAlg autorelease];
+		else
+			[hashAlg release];
 	}
 	
-	return NO;
+	return result;
 }
 
-- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid
+- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
-	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-	if (resource)
-	{
-		BOOL clearCaps = NO;
-		
-		NSString *hash = resource.hashStr;
-		NSString *hashAlg = resource.hashAlgorithm;
-		
-		if (hash && hashAlg)
+	dispatch_block_t block = ^{
+	
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		if (resource)
 		{
-			clearCaps = YES;
+			BOOL clearCaps = NO;
+			
+			NSString *hash = resource.hashStr;
+			NSString *hashAlg = resource.hashAlgorithm;
+			
+			if (hash && hashAlg)
+			{
+				clearCaps = YES;
+			}
+			
+			resource.hashStr = nil;
+			resource.hashAlgorithm = nil;
+			
+			if (clearCaps)
+			{
+				resource.caps = nil;
+			}
 		}
-		
-		resource.hashStr = nil;
-		resource.hashAlgorithm = nil;
-		
-		if (clearCaps)
-		{
-			resource.caps = nil;
-		}
-	}
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
 - (void)getCapabilitiesKnown:(BOOL *)areCapabilitiesKnownPtr
@@ -525,146 +643,271 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
                         hash:(NSString **)hashPtr
                    algorithm:(NSString **)hashAlgPtr
                       forJID:(XMPPJID *)jid
+                    inStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
-	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
+	__block BOOL areCapabilitiesKnown;
+	__block BOOL haveFailedFetchingBefore;
+	__block NSString *node;
+	__block NSString *ver;
+	__block NSString *ext;
+	__block NSString *hash;
+	__block NSString *hashAlg;
 	
-	if (resource == nil)
+	dispatch_block_t block = ^{
+		
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		
+		if (resource == nil)
+		{
+			// We don't know anything about the given jid
+			
+			areCapabilitiesKnown = NO;
+			haveFailedFetchingBefore = NO;
+			
+			node    = nil;
+			ver     = nil;
+			ext     = nil;
+			hash    = nil;
+			hashAlg = nil;
+		}
+		else
+		{
+			areCapabilitiesKnown = (resource.caps != nil);
+			haveFailedFetchingBefore = resource.haveFailed;
+			
+			node    = resource.node;
+			ver     = resource.ver;
+			ext     = resource.ext;
+			hash    = resource.hashStr;
+			hashAlg = resource.hashAlgorithm;
+		}
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue)
 	{
-		// We don't know anything about the given jid
+		block();
 		
-		if (areCapabilitiesKnownPtr)     *areCapabilitiesKnownPtr = NO;
-		if (haveFailedFetchingBeforePtr) *haveFailedFetchingBeforePtr = NO;
-		
-		if (nodePtr)    *nodePtr    = nil;
-		if (verPtr)     *verPtr     = nil;
-		if (extPtr)     *extPtr     = nil;
-		if (hashPtr)    *hashPtr    = nil;
-		if (hashAlgPtr) *hashAlgPtr = nil;
-		
-		return;
+		if (nodePtr)    *nodePtr    = node;
+		if (verPtr)     *verPtr     = ver;
+		if (extPtr)     *extPtr     = ext;
+		if (hashPtr)    *hashPtr    = hash;
+		if (hashAlgPtr) *hashAlgPtr = hashAlg;
 	}
-	
-	if (areCapabilitiesKnownPtr) *areCapabilitiesKnownPtr = (resource.caps != nil);
-	
-	if (haveFailedFetchingBeforePtr) *haveFailedFetchingBeforePtr = resource.haveFailed;
-	
-	if (nodePtr)    *nodePtr    = resource.node;
-	if (verPtr)     *verPtr     = resource.ver;
-	if (extPtr)     *extPtr     = resource.ext;
-	if (hashPtr)    *hashPtr    = resource.hashStr;
-	if (hashAlgPtr) *hashAlgPtr = resource.hashAlgorithm;
+	else
+	{
+		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
+			
+			block();
+			
+			[node    retain];
+			[ver     retain];
+			[ext     retain];
+			[hash    retain];
+			[hashAlg retain];
+		}));
+		
+		if (nodePtr)    *nodePtr    = [node    autorelease]; else [node    release];
+		if (verPtr)     *verPtr     = [ver     autorelease]; else [ver     release];
+		if (extPtr)     *extPtr     = [ext     autorelease]; else [ext     release];
+		if (hashPtr)    *hashPtr    = [hash    autorelease]; else [hash    release];
+		if (hashAlgPtr) *hashAlgPtr = [hashAlg autorelease]; else [hashAlg release];
+	}
 }
 
 - (void)setCapabilities:(NSXMLElement *)capabilities forHash:(NSString *)hash algorithm:(NSString *)hashAlg
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
 	if (hash == nil) return;
 	if (hashAlg == nil) return;
 	
-	XMPPCapsCoreDataStorageObject *caps = [self capsForHash:hash algorithm:hashAlg];
-	if (caps)
-	{
-		caps.capabilities = capabilities;
-	}
-	else
-	{
-		caps = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsCoreDataStorageObject"
-											 inManagedObjectContext:[self managedObjectContext]];
-		caps.hashStr = hash;
-		caps.hashAlgorithm = hashAlg;
+	dispatch_block_t block = ^{
 		
-		caps.capabilities = capabilities;
-	}
+		XMPPCapsCoreDataStorageObject *caps = [self capsForHash:hash algorithm:hashAlg];
+		if (caps)
+		{
+			caps.capabilities = capabilities;
+		}
+		else
+		{
+			caps = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsCoreDataStorageObject"
+												 inManagedObjectContext:[self managedObjectContext]];
+			caps.hashStr = hash;
+			caps.hashAlgorithm = hashAlg;
+			
+			caps.capabilities = capabilities;
+		}
+		
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
+												  inManagedObjectContext:[self managedObjectContext]];
+		
+		NSPredicate *predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@", hash, hashAlg];
+		
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+		[fetchRequest setEntity:entity];
+		[fetchRequest setPredicate:predicate];
+		
+		NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+		
+		[fetchRequest release];
+		
+		for (XMPPCapsResourceCoreDataStorageObject *resource in results)
+		{
+			resource.caps = caps;
+		}
+		
+		[[self managedObjectContext] save:nil];
+	};
 	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
-	                                          inManagedObjectContext:[self managedObjectContext]];
-	
-	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@", hash, hashAlg];
-	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	[fetchRequest setEntity:entity];
-	[fetchRequest setPredicate:predicate];
-	
-	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
-	
-	[fetchRequest release];
-	
-	for (XMPPCapsResourceCoreDataStorageObject *resource in results)
-	{
-		resource.caps = caps;
-	}
-	
-	[[self managedObjectContext] save:nil];
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
-- (void)setCapabilities:(NSXMLElement *)capabilities forJID:(XMPPJID *)jid
+- (void)setCapabilities:(NSXMLElement *)capabilities forJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
 	if (jid == nil) return;
 	
-	XMPPCapsCoreDataStorageObject *caps;
-	caps = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsCoreDataStorageObject"
-	                                     inManagedObjectContext:[self managedObjectContext]];
-	caps.capabilities = capabilities;
+	dispatch_block_t block = ^{
 	
-	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
+		XMPPCapsCoreDataStorageObject *caps;
+		caps = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsCoreDataStorageObject"
+											 inManagedObjectContext:[self managedObjectContext]];
+		caps.capabilities = capabilities;
+		
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		
+		if (resource == nil)
+		{
+			resource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsResourceCoreDataStorageObject"
+													 inManagedObjectContext:[self managedObjectContext]];
+			resource.jidStr = [jid full];
+			resource.stream = [NSNumber numberWithPtr:stream];
+		}
+		
+		resource.caps = caps;
+		
+		[[self managedObjectContext] save:nil];
+	};
 	
-	if (resource == nil)
-	{
-		resource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsResourceCoreDataStorageObject"
-		                                         inManagedObjectContext:[self managedObjectContext]];
-		resource.jidStr = [jid full];
-	}
-	
-	resource.caps = caps;
-	
-	[[self managedObjectContext] save:nil];
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
-- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid
+- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
-	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-	resource.haveFailed = YES;
+	dispatch_block_t block = ^{
+		
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		resource.haveFailed = YES;
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
-- (void)clearAllNonPersistentCapabilities
+- (void)clearAllNonPersistentCapabilitiesInStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
 	XMPPLogTrace();
 	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
-	                                          inManagedObjectContext:[self managedObjectContext]];
+	dispatch_block_t block = ^{
+		
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
+		                                          inManagedObjectContext:[self managedObjectContext]];
+		
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+		[fetchRequest setEntity:entity];
+		
+		if (stream)
+		{
+			[fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"stream == %p", stream]];
+		}
+		
+		NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+		
+		[fetchRequest release];
+		
+		for (XMPPCapsResourceCoreDataStorageObject *resource in results)
+		{
+			NSString *hash = resource.hashStr;
+			NSString *hashAlg = resource.hashAlgorithm;
+			
+			BOOL nonPersistentCapabilities = ((hash == nil) || (hashAlg == nil));
+			
+			if (nonPersistentCapabilities)
+			{
+				XMPPCapsCoreDataStorageObject *caps = resource.caps;
+				if (caps)
+				{
+					[[self managedObjectContext] deleteObject:caps];
+				}
+			}
+			
+			[[self managedObjectContext] deleteObject:resource];
+		}
+		
+		if ([[self managedObjectContext] hasChanges])
+		{
+			[[self managedObjectContext] save:nil];
+		}
+	};
 	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	[fetchRequest setEntity:entity];
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
+}
+
+- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream
+{
+	// This is a private protocol method,
+	// but may be invoked on any thread/queue if this is a multi-usage storage instance.
 	
-	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+	XMPPLogTrace();
 	
-	[fetchRequest release];
-	
-	for (XMPPCapsResourceCoreDataStorageObject *resource in results)
-	{
+	dispatch_block_t block = ^{
+		
+		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid inStream:stream];
+		
+		if (resource == nil)
+		{
+			return;
+		}
+		
 		NSString *hash = resource.hashStr;
 		NSString *hashAlg = resource.hashAlgorithm;
 		
-		BOOL nonPersistentCapabilities = ((hash == nil) || (hashAlg == nil));
-		
-		if (nonPersistentCapabilities)
+		if (hash && hashAlg)
+		{
+			// The associated capabilities are persistent
+		}
+		else
 		{
 			XMPPCapsCoreDataStorageObject *caps = resource.caps;
 			if (caps)
@@ -674,45 +917,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		}
 		
 		[[self managedObjectContext] deleteObject:resource];
-	}
-	
-	if ([[self managedObjectContext] hasChanges])
-	{
 		[[self managedObjectContext] save:nil];
-	}
-}
-
-- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid
-{
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	};
 	
-	XMPPLogTrace();
-	
-	XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid];
-	
-	if (resource == nil)
-	{
-		return;
-	}
-	
-	NSString *hash = resource.hashStr;
-	NSString *hashAlg = resource.hashAlgorithm;
-	
-	if (hash && hashAlg)
-	{
-		// The associated capabilities are persistent
-	}
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
 	else
-	{
-		XMPPCapsCoreDataStorageObject *caps = resource.caps;
-		if (caps)
-		{
-			[[self managedObjectContext] deleteObject:caps];
-		}
-	}
-	
-	[[self managedObjectContext] deleteObject:resource];
-	[[self managedObjectContext] save:nil];
+		dispatch_async(storageQueue, AUTORELEASED_BLOCK(block));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
