@@ -1,5 +1,6 @@
 #import "iPhoneXMPPAppDelegate.h"
 #import "RootViewController.h"
+#import "SettingsViewController.h"
 
 #import "XMPP.h"
 #import "XMPPRosterCoreDataStorage.h"
@@ -13,6 +14,16 @@
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
+@interface iPhoneXMPPAppDelegate()
+
+- (void)setupStream;
+
+- (void)goOnline;
+- (void)goOffline;
+
+@end
+
+#pragma mark -
 @implementation iPhoneXMPPAppDelegate
 
 @synthesize xmppStream;
@@ -21,14 +32,58 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @synthesize window;
 @synthesize navigationController;
+@synthesize settingsViewController;
+@synthesize loginButton;
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 	// Configure logging framework
 	
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+  
+  // Setup the view controllers
+  
+  [window setRootViewController:navigationController];
+  [window makeKeyAndVisible];
+  
+  // Setup the XMPP stream
+  
+  [self setupStream];
+  
+  if (![self connect]) {
+    [navigationController presentModalViewController:settingsViewController animated:YES];
+  }
+		
+  return YES;
+}
+
+- (void)dealloc
+{
+	[xmppStream removeDelegate:self];
+	[xmppRoster removeDelegate:self];
 	
-	// Initialize variables
+	[xmppStream disconnect];
+	[xmppStream release];
+	[xmppRoster release];
+	
+	[password release];
+	
+  [loginButton release];
+  [settingsViewController release];
+	[navigationController release];
+	[window release];
+	
+	[super dealloc];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Private
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Configure the xmpp stream
+- (void)setupStream
+{
+  // Initialize variables
 	
 	xmppStream = [[XMPPStream alloc] init];
 	
@@ -46,9 +101,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Add ourself as a delegate to anything we may be interested in
 	
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
-	
-	// Configure and start xmpp stream
-	
+  
 	// Optional:
 	// 
 	// Replace me with the proper domain and port.
@@ -59,50 +112,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// then the xmpp framework will follow the xmpp specification, and do a SRV lookup for quack.com.
 	// 
 	// If you don't specify a hostPort, then the default (5222) will be used.
-//	[xmppStream setHostName:@"talk.google.com"];
-//	[xmppStream setHostPort:5222];
-	
-	// Required:
-	// 
-	// Replace me with the proper JID and password
-	[xmppStream setMyJID:[XMPPJID jidWithString:@"user@gmail.com/xmppframework"]];
-	password = @"";
-	
-	// You may need to alter these settings depending on the server you're connecting to
+  //	[xmppStream setHostName:@"talk.google.com"];
+  //	[xmppStream setHostPort:5222];		
+  
+  // You may need to alter these settings depending on the server you're connecting to
 	allowSelfSignedCertificates = NO;
 	allowSSLHostNameMismatch = NO;
-	
-	// Uncomment me when the proper information has been entered above.
-	NSError *error = nil;
-	if (![xmppStream connect:&error])
-	{
-		NSLog(@"Error connecting: %@", error);
-	}
-	
-	[window addSubview:[navigationController view]];
-	[window makeKeyAndVisible];
 }
-
-- (void)dealloc
-{
-	[xmppStream removeDelegate:self];
-	[xmppRoster removeDelegate:self];
-	
-	[xmppStream disconnect];
-	[xmppStream release];
-	[xmppRoster release];
-	
-	[password release];
-	
-	[navigationController release];
-	[window release];
-	
-	[super dealloc];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Custom
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // It's easy to create XML elments to send and to read received XML elements.
 // You have the entire NSXMLElement and NSXMLNode API's.
@@ -128,6 +144,61 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[presence addAttributeWithName:@"type" stringValue:@"unavailable"];
 	
 	[[self xmppStream] sendElement:presence];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Connect/disconnect
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)connect
+{
+  if (![xmppStream isDisconnected]) {
+    return YES;
+  }
+  
+  NSString *myJID = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyJID];
+  NSString *myPassword = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyPassword];
+  
+  //
+  // If you don't want to use the Settings view to set the JID, 
+  // uncomment the section below to hard code a JID and password.
+  //
+  // Replace me with the proper JID and password:
+  //	myJID = @"user@gmail.com/xmppframework";
+  //	myPassword = @"";
+  
+  if (myJID == nil || myPassword == nil) {
+    DDLogWarn(@"JID and password must be set before connecting!");
+    
+    return NO;
+  }
+  
+  [xmppStream setMyJID:[XMPPJID jidWithString:myJID]];
+  password = myPassword;
+  
+  NSError *error = nil;
+  if (![xmppStream connect:&error])
+  {
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error connecting" 
+                                                        message:@"See console for error details." 
+                                                       delegate:nil 
+                                              cancelButtonTitle:@"Ok" 
+                                              otherButtonTitles:nil];
+    [alertView show];
+    [alertView release];
+    
+    DDLogError(@"Error connecting: %@", error);
+    
+    return NO;
+  }
+  
+  return YES;
+}
+
+- (void)disconnect {
+  [self goOffline];
+  
+  [xmppStream disconnect];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

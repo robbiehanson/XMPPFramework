@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreData/CoreData.h>
 
+@class SettingsViewController;
 @class XMPPStream;
 @class XMPPRoster;
 @class XMPPRosterCoreDataStorage;
@@ -21,6 +22,9 @@
 	
 	UIWindow *window;
 	UINavigationController *navigationController;
+  SettingsViewController *loginViewController;
+  UIBarButtonItem *loginButton;
+  
 }
 
 @property (nonatomic, readonly) XMPPStream *xmppStream;
@@ -29,5 +33,10 @@
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet UINavigationController *navigationController;
+@property (nonatomic, retain) IBOutlet SettingsViewController *settingsViewController;
+@property (nonatomic, retain) IBOutlet UIBarButtonItem *loginButton;
+
+- (BOOL)connect;
+- (void)disconnect;
 
 @end
