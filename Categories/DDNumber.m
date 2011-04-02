@@ -3,6 +3,16 @@
 
 @implementation NSNumber (DDNumber)
 
++ (NSNumber *)numberWithPtr:(const void *)ptr
+{
+	return [[[NSNumber alloc] initWithPtr:ptr] autorelease];
+}
+
+- (id)initWithPtr:(const void *)ptr
+{
+	return [self initWithLong:(long)ptr];
+}
+
 + (BOOL)parseString:(NSString *)str intoSInt64:(SInt64 *)pNum
 {
 	if(str == nil)

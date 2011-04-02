@@ -3,6 +3,9 @@
 
 @interface NSNumber (DDNumber)
 
++ (NSNumber *)numberWithPtr:(const void *)ptr;
+- (id)initWithPtr:(const void *)ptr;
+
 + (BOOL)parseString:(NSString *)str intoSInt64:(SInt64 *)pNum;
 + (BOOL)parseString:(NSString *)str intoUInt64:(UInt64 *)pNum;
 

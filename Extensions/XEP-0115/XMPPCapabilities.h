@@ -84,8 +84,6 @@
 @protocol XMPPCapabilitiesStorage <NSObject>
 @required
 
-@property (nonatomic, readonly) XMPPCapabilities *parent;
-
 // 
 // 
 // -- PUBLIC METHODS --
@@ -95,15 +93,21 @@
 /**
  * Returns whether or not we know the capabilities for a given jid.
  * 
- * The jid may or may not be associated with a capabilities hash.
+ * The stream parameter is optional.
+ * If given, the jid must have been registered via the given stream.
+ * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid;
+- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
 
 /**
  * Returns the capabilities for the given jid.
  * The returned element is the <query/> element response to a disco#info request.
+ * 
+ * The stream parameter is optional.
+ * If given, the jid must have been registered via the given stream.
+ * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid;
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
 
 /**
  * Returns the capabilities for the given jid.
@@ -124,8 +128,12 @@
  * 
  * You may pass nil for extPtr if you don't care about the legacy attributes,
  * or you could simply use the capabilitiesForJID: method above.
+ * 
+ * The stream parameter is optional.
+ * If given, the jid must have been registered via the given stream.
+ * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr;
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr inStream:(XMPPStream *)stream;
 
 // 
 // 
@@ -180,6 +188,7 @@
                        hash:(NSString *)hash
                   algorithm:(NSString *)hashAlg
                      forJID:(XMPPJID *)jid
+                   inStream:(XMPPStream *)stream
       andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr;
 
 /**
@@ -188,7 +197,10 @@
  * If the jid is not associated with a capabilities hash, this method should return NO.
  * Otherwise it should return YES, and set the corresponding variables.
 **/
-- (BOOL)getCapabilitiesHash:(NSString **)hashPtr algorithm:(NSString **)hashAlgPtr forJID:(XMPPJID *)jid;
+- (BOOL)getCapabilitiesHash:(NSString **)hashPtr
+                  algorithm:(NSString **)hashAlgPtr
+                     forJID:(XMPPJID *)jid
+                   inStream:(XMPPStream *)stream;
 
 /**
  * Clears any associated hash from a jid.
@@ -197,7 +209,7 @@
  * This method should not clear the actual capabilities information itself.
  * It should simply unlink the connection between the jid and the capabilities.
 **/
-- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid;
+- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
 
 /**
  * Gets the metadata for the given jid.
@@ -211,7 +223,8 @@
                          ext:(NSString **)extPtr
                         hash:(NSString **)hashPtr
                    algorithm:(NSString **)hashAlgPtr
-                      forJID:(XMPPJID *)jid;
+                      forJID:(XMPPJID *)jid
+                    inStream:(XMPPStream *)stream;
 
 /**
  * Sets the capabilities associated with a given hash.
@@ -244,7 +257,7 @@
  * these capabilities should not be persisted between multiple sessions/streams.
  * See the various clear methods below.
 **/
-- (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid;
+- (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
 
 /**
  * Marks the disco fetch request as failed so we know not to bother trying again.
@@ -253,12 +266,12 @@
  * It should be cleared when we go unavailable or offline, or if the given jid goes unavailable.
  * See the various clear methods below.
 **/
-- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid;
+- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
 
 /**
  * This method is called when we go unavailable or offline.
  * 
- * This method should clear all metadata (node, ver, ext, hash ,algorithm, failed) from all jids in the roster.
+ * This method should clear all metadata (node, ver, ext, hash, algorithm, failed) from all jids in the roster.
  * All jids should be unlinked from associated capabilities.
  * 
  * If the associated capabilities are persistent, they should not be cleared.
@@ -267,7 +280,7 @@
  * Non persistent capabilities (those not associated with a hash)
  * should be cleared at this point as they will no longer be linked to any users.
 **/
-- (void)clearAllNonPersistentCapabilities;
+- (void)clearAllNonPersistentCapabilitiesInStream:(XMPPStream *)stream;
 
 /**
  * This method is called when the given jid goes unavailable.
@@ -280,7 +293,7 @@
  * 
  * Non persistent capabilities (those not associated with a hash) should be cleared.
 **/
-- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid;
+- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid inStream:(XMPPStream *)stream;
 
 @end
 
