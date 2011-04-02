@@ -397,7 +397,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		if (stream == nil)
 			predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", bareJIDStr];
 		else
-			predicate = [NSPredicate predicateWithFormat:@"stream == %p AND jidStr == %@", stream, bareJIDStr];
+			predicate = [NSPredicate predicateWithFormat:@"stream == %@ AND jidStr == %@", [NSNumber numberWithPtr:stream], bareJIDStr];
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
