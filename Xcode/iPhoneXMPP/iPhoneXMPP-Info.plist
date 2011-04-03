@@ -26,5 +26,9 @@
 	<true/>
 	<key>NSMainNibFile</key>
 	<string>MainWindow</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>voip</string>
+	</array>
 </dict>
 </plist>
