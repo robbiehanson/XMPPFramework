@@ -14,6 +14,10 @@
 
 #import <objc/runtime.h>
 
+// In production, we don't want to delete the vCard store.
+// Otherwise, we will download all the vCard data when the stream connects
+#define XMPP_VCARD_STORE_DELETE_ON_LAUNCH 0
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
@@ -194,7 +198,8 @@ enum {
 	}
 	
 	dispatch_block_t block = ^{
-		
+		XMPPLogTrace();
+    
 		if (_persistentStoreCoordinator)
 		{
 			return;
@@ -212,11 +217,13 @@ enum {
 		NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPvCard.sqlite"];
 		if (storePath)
 		{
+#if XMPP_VCARD_STORE_DELETE_ON_LAUNCH
 			if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
 			{
 				[[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
 			}
-			
+#endif
+      
 			// If storePath is nil, then NSURL will throw an exception
 			
 			NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
@@ -299,6 +306,142 @@ enum {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPvCardAvatarStorage protocol
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSData *)photoDataForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+  // This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	XMPPLogTrace();
+	
+	if (storageQueue == NULL)
+	{
+		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
+		return nil;
+	}
+	
+	__block NSData *result;
+	
+	dispatch_block_t block = ^{
+		
+		XMPPvCardCoreDataStorageObject *vCard;
+		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+		                                          inManagedObjectContext:[self managedObjectContext]];
+		
+		result = vCard.photoData;
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue)
+	{
+		block();
+		return result;
+	}
+	else
+	{
+		dispatch_sync(storageQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			block();
+			[result retain];
+			
+			[pool drain];
+		});
+		
+		return [result autorelease];
+	}
+}
+
+
+- (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream 
+{
+  // This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	XMPPLogTrace();
+	
+	if (storageQueue == NULL)
+	{
+		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
+		return nil;
+	}
+	
+	__block NSString *result;
+	
+	dispatch_block_t block = ^{
+		
+		XMPPvCardCoreDataStorageObject *vCard;
+		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+		                                          inManagedObjectContext:[self managedObjectContext]];
+		
+		result = vCard.photoHash;
+	};
+	
+	if (dispatch_get_current_queue() == storageQueue)
+	{
+		block();
+		return result;
+	}
+	else
+	{
+		dispatch_sync(storageQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			block();
+			[result retain];
+			
+			[pool drain];
+		});
+		
+		return [result autorelease];
+	}
+}
+
+
+- (void)clearvCardTempForJID:(XMPPJID *)jid  xmppStream:(XMPPStream *)stream
+{
+  // This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	XMPPLogTrace();
+	
+	if (storageQueue == NULL)
+	{
+		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
+		return;
+	}
+	
+	dispatch_block_t block = ^{
+		
+		XMPPvCardCoreDataStorageObject *vCard;
+		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+		                                          inManagedObjectContext:[self managedObjectContext]];
+		
+    vCard.vCardTemp = nil;
+    vCard.lastUpdated = [NSDate date];
+		
+		[self save];
+	};
+	
+	
+	if (dispatch_get_current_queue() == storageQueue)
+	{
+		block();
+	}
+	else
+	{
+		dispatch_sync(storageQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			block();
+			
+			[pool drain];
+		});
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPvCardTempModuleStorage protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -321,7 +464,6 @@ enum {
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
-		                                                      xmppStream:stream
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		result = vCard.vCardTemp;
@@ -365,7 +507,6 @@ enum {
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
-		                                                      xmppStream:stream
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		vCard.waitingForFetch = [NSNumber numberWithBool:NO];
@@ -416,7 +557,6 @@ enum {
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
-		                                                      xmppStream:stream
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		BOOL waitingForFetch = [vCard.waitingForFetch boolValue];
