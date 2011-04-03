@@ -6,6 +6,7 @@
 //
 
 #import "XMPPStreamFacebook.h"
+#import "XMPPInternal.h"
 #import "XMPPLogging.h"
 #import "GCDAsyncSocket.h"
 #import "NSDataAdditions.h"

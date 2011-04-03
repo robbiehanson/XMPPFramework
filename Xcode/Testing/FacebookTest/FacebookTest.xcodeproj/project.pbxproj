@@ -61,6 +61,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DC0AC2A913490B3F00D053E3 /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPInternal.h; sourceTree = "<group>"; };
 		DC0EF906133312730067B5AF /* XMPPStreamFacebook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStreamFacebook.h; sourceTree = "<group>"; };
 		DC0EF907133312730067B5AF /* XMPPStreamFacebook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStreamFacebook.m; sourceTree = "<group>"; };
 		DCC49494133303EE00F3C8F6 /* FBConnect.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = FBConnect.bundle; path = FBConnect/FBConnect.bundle; sourceTree = "<group>"; };
@@ -250,6 +251,7 @@
 			isa = PBXGroup;
 			children = (
 				DCC494B61333043200F3C8F6 /* XMPP.h */,
+				DC0AC2A913490B3F00D053E3 /* XMPPInternal.h */,
 				DCC494BD1333043200F3C8F6 /* XMPPLogging.h */,
 				DCC494C21333043200F3C8F6 /* XMPPParser.h */,
 				DCC494C31333043200F3C8F6 /* XMPPParser.m */,
