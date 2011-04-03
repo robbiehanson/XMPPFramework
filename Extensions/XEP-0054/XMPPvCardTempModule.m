@@ -46,7 +46,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		_moduleStorage = [storage retain];
+    if ([storage configureWithParent:self queue:moduleQueue])
+		{
+			_moduleStorage = [storage retain];
+		}
+		else
+		{
+			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
+		}
 	}
 	return self;
 }
@@ -135,10 +142,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
 		
 		[_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
-		
-		[multicastDelegate xmppvCardTempModule:self
-		                   didReceivevCardTemp:vCardTemp
-		                                forJID:jid];
+    
+		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
+                                                         didReceivevCardTemp:vCardTemp
+                                                                      forJID:jid];
 		
 		return YES;
 	}
