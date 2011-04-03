@@ -9,7 +9,10 @@
 
 @interface XMPPCapabilitiesCoreDataStorage : NSObject <XMPPCapabilitiesStorage>
 {
-	BOOL singleUsage;
+	NSString *databaseFileName;
+	
+	int32_t unsavedCount;
+	int32_t pendingRequests;
 	
 	dispatch_queue_t storageQueue;
 	
@@ -19,22 +22,31 @@
 }
 
 /**
- * Creates a CoreDataStorage instance designed to be used by a single instance of XMPPCapabilities.
+ * XEP-0115 provides a mechanism for hashing a list of capabilities.
+ * Clients then broadcast this hash instead of the entire list to save bandwidth.
+ * Because the hashing is standardized, it is safe to persistently store the linked hash & capabilities.
  * 
- * The storage instance will inherit its dispatch queue from its parent (the XMPPCapabilities instance).
+ * For this reason, it is recommended you use this sharedInstance across all your xmppStreams.
+ * This way all streams can shared a knowledgebase concerning known hashes.
+ * 
+ * All other aspects of capabilities handling (such as JID's, lookup failures, etc) are kept separate between streams.
 **/
-- (id)init;
-- (id)initForSingleUsage;
++ (XMPPCapabilitiesCoreDataStorage *)sharedInstance;
 
 /**
- * Creates a CoreDataStorage instance that may be used by multiple instances of XMPPCapabilities.
- * This may be useful if your application creates multiple XMPPStream connections.
+ * Initializes the core data storage instance, with the given database store filename.
+ * It is recommended your filname use the "sqlite" file extension.
+ * If you pass nil, the default value of "XMPPCapabilities.sqlite" is automatically used.
  * 
- * The storage instance will operate on its own dispatch queue, which may optionally be provided.
+ * If you attempt to create an instance of this class with the same dbFileName as another existing instance,
+ * this method will return nil.
+ * 
+ * It is highly recommended you use the sharedInstance above.
 **/
-- (id)initForMultipleUsage;
-- (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue;
+- (id)initWithDatabaseFilename:(NSString *)databaseFileName;
 
+
+@property (readonly) NSString *databaseFileName;
 
 @property (readonly) NSManagedObjectModel *managedObjectModel;
 @property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
