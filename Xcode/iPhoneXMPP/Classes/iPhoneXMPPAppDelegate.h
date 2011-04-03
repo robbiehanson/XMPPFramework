@@ -6,6 +6,7 @@
 @class SettingsViewController;
 @class XMPPStream;
 @class XMPPRosterCoreDataStorage;
+@class XMPPvCardAvatarModule;
 @class XMPPvCardTempModule;
 
 
@@ -16,6 +17,8 @@ XMPPRosterDelegate
 	XMPPStream *xmppStream;
 	XMPPRoster *xmppRoster;
 	XMPPRosterCoreDataStorage *xmppRosterStorage;
+  
+  XMPPvCardAvatarModule *xmppvCardAvatarModule;
   XMPPvCardTempModule *xmppvCardTempModule;
 	
 	NSString *password;

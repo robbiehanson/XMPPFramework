@@ -5,6 +5,7 @@
 #import "GCDAsyncSocket.h"
 #import "XMPP.h"
 #import "XMPPRosterCoreDataStorage.h"
+#import "XMPPvCardAvatarModule.h"
 #import "XMPPvCardCoreDataStorage.h"
 
 #import "DDLog.h"
@@ -65,6 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[xmppRoster removeDelegate:self];
 	
 	[xmppStream disconnect];
+  [xmppvCardAvatarModule release];
   [xmppvCardTempModule release];
 	[xmppStream release];
 	[xmppRoster release];
@@ -97,6 +99,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   XMPPvCardCoreDataStorage *xmppvCardCoreDataStorage = [[XMPPvCardCoreDataStorage alloc] init];
   xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardCoreDataStorage];
   [xmppvCardCoreDataStorage release];
+  
+  xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
 	
 	// Configure modules
 	
@@ -106,6 +110,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	[xmppRoster activate:xmppStream];
   [xmppvCardTempModule activate:xmppStream];
+  [xmppvCardAvatarModule activate:xmppStream];
 	
 	// Add ourself as a delegate to anything we may be interested in
 	
