@@ -2,6 +2,7 @@
 #import "XMPPCapsCoreDataStorageObject.h"
 #import "XMPPCapsResourceCoreDataStorageObject.h"
 #import "XMPP.h"
+#import "XMPPInternal.h"
 #import "XMPPLogging.h"
 #import "DDNumber.h"
 
@@ -87,7 +88,14 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 			return nil;
 		}
 		
+		myJidCache = [[NSMutableDictionary alloc] init];
+		
 		storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		                                         selector:@selector(updateJidCache:)
+		                                             name:XMPPStreamDidChangeMyJIDNotification
+		                                           object:nil];
 	}
 	return self;
 }
@@ -107,6 +115,63 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	}
 	
 	return YES;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Stream JID Caching
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// We cache a stream's myJID to avoid constantly querying the xmppStream for it.
+// 
+// The motivation behind this is the fact that to query the xmppStream for its myJID
+// requires going through the xmppStream's internal dispatch queue. (A dispatch_sync).
+// It's not necessarily that this is an expensive operation,
+// but the storage classes require this information for just about every operation it performs.
+// In addition, if we can stay out of xmppStream's internal dispatch queue,
+// we free it to perform more xmpp processing tasks.
+
+- (NSString *)streamBareJidStrForXMPPStream:(XMPPStream *)stream
+{
+	NSNumber *key = [[NSNumber alloc] initWithPtr:stream];
+	
+	NSString *result = (NSString *)[myJidCache objectForKey:key];
+	if (!result)
+	{
+		result = [[stream myJID] bare];
+		
+		if (result)
+			[myJidCache setObject:result forKey:key];
+		else
+			[myJidCache removeObjectForKey:key];
+	}
+	
+	[key release];
+	return result;
+}
+
+- (void)updateJidCache:(NSNotification *)notification
+{
+	// Notifications are delivered on the thread/queue that posted them.
+	// In this case, they are delivered on xmppStream's internal processing queue.
+	
+	XMPPStream *stream = (XMPPStream *)[notification object];
+	
+	dispatch_async(storageQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		NSNumber *key = [NSNumber numberWithPtr:stream];
+		if ([myJidCache objectForKey:key])
+		{
+			NSString *newBareJidStr = [[stream myJID] bare];
+			
+			if (newBareJidStr)
+				[myJidCache setObject:newBareJidStr forKey:key];
+			else
+				[myJidCache removeObjectForKey:key];
+		}
+		
+		[pool drain];
+	});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -300,8 +365,8 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	if (stream == nil)
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid full]];
 	else
-		predicate = [NSPredicate predicateWithFormat:@"stream == %@ AND jidStr == %@",
-					                [NSNumber numberWithPtr:stream],      [jid full]];
+		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
+					                                     [jid full], [self streamBareJidStrForXMPPStream:stream]];
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
@@ -829,8 +894,8 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		
 		if (stream)
 		{
-			NSPredicate *predicate;
-			predicate = [NSPredicate predicateWithFormat:@"stream == %@", [NSNumber numberWithPtr:stream]];
+			NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
+			                                        [self streamBareJidStrForXMPPStream:stream]];
 			
 			[fetchRequest setPredicate:predicate];
 		}
@@ -914,9 +979,12 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	
 	[[self class] unregisterDatabaseFileName:databaseFileName];
 	
 	[databaseFileName release];
+	[myJidCache release];
 	
 	if (storageQueue)
 	{
