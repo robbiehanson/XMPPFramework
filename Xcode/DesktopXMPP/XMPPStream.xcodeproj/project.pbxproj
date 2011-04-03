@@ -107,6 +107,7 @@
 		DC0AC28A1346E75D00D053E3 /* XMPPRosterCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRosterCoreDataStorage.m; path = ../../Roster/CoreDataStorage/XMPPRosterCoreDataStorage.m; sourceTree = "<group>"; };
 		DC0AC28B1346E75D00D053E3 /* XMPPUserCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPUserCoreDataStorage.h; path = ../../Roster/CoreDataStorage/XMPPUserCoreDataStorage.h; sourceTree = "<group>"; };
 		DC0AC28C1346E75D00D053E3 /* XMPPUserCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPUserCoreDataStorage.m; path = ../../Roster/CoreDataStorage/XMPPUserCoreDataStorage.m; sourceTree = "<group>"; };
+		DC0AC2A013490A5200D053E3 /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPInternal.h; path = ../../Core/XMPPInternal.h; sourceTree = "<group>"; };
 		DC1B649011518476001F0A0A /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		DC53BAB112C3C64D00C8DEEE /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDASLLogger.h; path = ../../Vendor/CocoaLumberjack/DDASLLogger.h; sourceTree = SOURCE_ROOT; };
 		DC53BAB212C3C64D00C8DEEE /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDASLLogger.m; path = ../../Vendor/CocoaLumberjack/DDASLLogger.m; sourceTree = SOURCE_ROOT; };
@@ -460,6 +461,7 @@
 			isa = PBXGroup;
 			children = (
 				DC84BAF0124407F50055A459 /* XMPP.h */,
+				DC0AC2A013490A5200D053E3 /* XMPPInternal.h */,
 				DC73028012F37F7200549AC7 /* XMPPLogging.h */,
 				DC84BAFB124407F50055A459 /* XMPPParser.h */,
 				DC84BAFC124407F50055A459 /* XMPPParser.m */,
