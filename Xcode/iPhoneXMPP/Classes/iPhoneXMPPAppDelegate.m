@@ -2,8 +2,10 @@
 #import "RootViewController.h"
 #import "SettingsViewController.h"
 
+#import "GCDAsyncSocket.h"
 #import "XMPP.h"
 #import "XMPPRosterCoreDataStorage.h"
+#import "XMPPvCardCoreDataStorage.h"
 
 #import "DDLog.h"
 #import "DDTTYLogger.h"
@@ -63,8 +65,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[xmppRoster removeDelegate:self];
 	
 	[xmppStream disconnect];
+  [xmppvCardTempModule release];
 	[xmppStream release];
 	[xmppRoster release];
+  [xmppRosterStorage release];
 	
 	[password release];
 	
@@ -89,6 +93,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] init];
 	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
+  
+  XMPPvCardCoreDataStorage *xmppvCardCoreDataStorage = [[XMPPvCardCoreDataStorage alloc] init];
+  xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardCoreDataStorage];
+  [xmppvCardCoreDataStorage release];
 	
 	// Configure modules
 	
@@ -97,10 +105,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Activate xmpp modules
 	
 	[xmppRoster activate:xmppStream];
+  [xmppvCardTempModule activate:xmppStream];
 	
 	// Add ourself as a delegate to anything we may be interested in
 	
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+  [xmppRoster addDelegate:self delegateQueue:dispatch_get_main_queue()];
   
 	// Optional:
 	// 
@@ -202,8 +212,93 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark UIApplicationDelegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)applicationDidEnterBackground:(UIApplication *)application 
+{
+  /*
+   Use this method to release shared resources, save user data, invalidate timers, and store enough application state 
+   information to restore your application to its current state in case it is terminated later. 
+   If your application supports background execution, called instead of applicationWillTerminate: when the user quits.
+   */
+  DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+  
+#if TARGET_IPHONE_SIMULATOR
+  DDLogError(@"The iPhone simulator does not process background network traffic.  Inbound traffic is queued until the keepAliveTimeout:handler: fires.");
+#endif
+  
+  if ([application respondsToSelector:@selector(setKeepAliveTimeout:handler:)]) 
+  {
+    [application setKeepAliveTimeout:600 handler:^{
+      DDLogVerbose(@"KeepAliveHandler");
+      
+      // Do other keep alive stuff here.
+    }];
+  }
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application 
+{
+  DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPRosterDelegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppRoster:(XMPPRoster *)sender didReceiveBuddyRequest:(XMPPPresence *)presence
+{
+  DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+  
+  NSString *displayName = [[xmppRoster userForJID:[presence from]] displayName];
+  NSString *jidStrBare = [presence fromStr];
+  NSString *body = nil;
+  
+  if (![displayName isEqualToString:jidStrBare]) 
+  {
+    body = [NSString stringWithFormat:@"Buddy request from %@ <%@>", displayName, jidStrBare];
+  } 
+  else 
+  {
+    body = [NSString stringWithFormat:@"Buddy request from %@", displayName];
+  }
+  
+  
+  if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+  {
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
+                                                        message:body 
+                                                       delegate:nil 
+                                              cancelButtonTitle:@"Not implemented" 
+                                              otherButtonTitles:nil];
+    [alertView show];
+    [alertView release];
+  } 
+  else 
+  {
+    // We are not active, so use a local notification instead
+    UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+    localNotification.alertAction = @"Not implemented";
+    localNotification.alertBody = body;
+    
+    [[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
+    [localNotification release];
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppStream:(XMPPStream *)sender socketDidConnect:(GCDAsyncSocket *)socket 
+{
+  // Allows the application to receive inbound XMPP traffic while in the background.
+  [socket performBlock:^{
+    [socket enableBackgroundingOnSocket];
+  }];
+}
 
 - (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
 {
@@ -294,6 +389,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+  
+  // A simple example of inbound message handling.
+  
+  if ([message isChatMessageWithBody])
+  {
+    NSString *body = [[message elementForName:@"body"] stringValue];    
+    NSString *displayName = [[xmppRoster userForJID:[message from]] displayName];
+
+    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+    {
+      UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
+                                                          message:body 
+                                                         delegate:nil 
+                                                cancelButtonTitle:@"Ok" 
+                                                otherButtonTitles:nil];
+      [alertView show];
+      [alertView release];
+    } else {
+      // We are not active, so use a local notification instead
+      UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+      localNotification.alertAction = @"Ok";
+      localNotification.alertBody = [NSString stringWithFormat:@"From: %@\n\n%@",displayName,body];
+      
+      [[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
+      [localNotification release];
+    }
+  }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence

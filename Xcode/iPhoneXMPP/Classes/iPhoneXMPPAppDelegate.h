@@ -1,17 +1,22 @@
 #import <UIKit/UIKit.h>
 #import <CoreData/CoreData.h>
 
+#import "XMPPRoster.h"
+
 @class SettingsViewController;
 @class XMPPStream;
-@class XMPPRoster;
 @class XMPPRosterCoreDataStorage;
+@class XMPPvCardTempModule;
 
 
-@interface iPhoneXMPPAppDelegate : NSObject <UIApplicationDelegate>
-{
+@interface iPhoneXMPPAppDelegate : NSObject <
+UIApplicationDelegate,
+XMPPRosterDelegate
+> {
 	XMPPStream *xmppStream;
 	XMPPRoster *xmppRoster;
 	XMPPRosterCoreDataStorage *xmppRosterStorage;
+  XMPPvCardTempModule *xmppvCardTempModule;
 	
 	NSString *password;
 	
