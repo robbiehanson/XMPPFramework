@@ -10,7 +10,6 @@
 
 
 @class XMPPJID;
-@class XMPPStream;
 @class XMPPvCardTemp;
 @class XMPPvCardTempCoreDataStorageObject;
 @class XMPPvCardAvatarCoreDataStorageObject;
@@ -23,11 +22,6 @@
  *  User's JID, indexed for lookups
  */
 @property (nonatomic, retain) NSString * jidStr;
-
-/*
- * The XMPPStream owner, specified as the pointer value of the instance. Indexed for lookups.
- */
-@property (nonatomic, retain) NSNumber *stream;
 
 /*
  *  User's photoHash used by XEP-0153
@@ -73,7 +67,6 @@
 
 
 + (XMPPvCardCoreDataStorageObject *)fetchOrInsertvCardForJID:(XMPPJID *)jid
-                                                  xmppStream:(XMPPStream *)stream
                                       inManagedObjectContext:(NSManagedObjectContext *)moc;
 
 
