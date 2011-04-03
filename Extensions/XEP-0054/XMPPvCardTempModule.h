@@ -71,20 +71,20 @@
 **/
 - (BOOL)configureWithParent:(XMPPvCardTempModule *)aParent queue:(dispatch_queue_t)queue;
 
-/*
+/**
  * Returns a vCardTemp object or nil
- */
+**/
 - (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
-/*
+/**
  * Used to set the vCardTemp object when we get it from the XMPP server.
- */
+**/
 - (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
-/*
+/**
  * Asks the backend if we should fetch the vCardTemp from the network.
  * This is used so that we don't request the vCardTemp multiple times.
- */
+**/
 - (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end
