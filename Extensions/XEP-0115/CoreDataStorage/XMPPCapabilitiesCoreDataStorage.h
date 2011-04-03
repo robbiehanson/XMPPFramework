@@ -10,6 +10,7 @@
 @interface XMPPCapabilitiesCoreDataStorage : NSObject <XMPPCapabilitiesStorage>
 {
 	NSString *databaseFileName;
+	NSMutableDictionary *myJidCache;
 	
 	int32_t unsavedCount;
 	int32_t pendingRequests;
