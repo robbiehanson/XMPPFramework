@@ -67,9 +67,11 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
   
 	if ((self = [super initWithDispatchQueue:queue])) {
     _xmppvCardTempModule = [xmppvCardTempModule retain];
+    
+    // we don't need to call the storage configureWithParent:queue: method, because the vCardTempModule already did that.
     _moduleStorage = [(id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage retain];
     
-    [_xmppvCardTempModule addDelegate:self delegateQueue:queue];
+    [_xmppvCardTempModule addDelegate:self delegateQueue:moduleQueue];
 	}
 	return self;
 }
@@ -92,7 +94,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (NSData *)photoDataForJID:(XMPPJID *)jid {
-  NSData *photoData = [_moduleStorage photoDataForJID:jid];
+  NSData *photoData = [_moduleStorage photoDataForJID:jid xmppStream:xmppStream];
   
   if (photoData == nil) {
     [_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
@@ -105,27 +107,31 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppStreamWillConnect:(XMPPStream *)sender {
+  XMPPLogTrace();
   /* 
    * XEP-0153 Section 4.2 rule 1
    *
    * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
    * Once it has done this, it MAY advertise an image. 
    */
-  [_moduleStorage clearvCardTempForJID:[sender myJID]];
+  [_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:xmppStream];
 }
 
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
+  XMPPLogTrace();
   [_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] useCache:NO];
 }
 
 
-- (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {  
+- (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {
+  XMPPLogTrace();
+  
   // add our photo info to the presence stanza
   NSXMLElement *photoElement = nil;
   NSXMLElement *xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
   
-  NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID]];
+  NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:xmppStream];
   
    if (photoHash != nil) {
      photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
@@ -139,6 +145,8 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence  {
+  XMPPLogTrace();
+  
   NSXMLElement *xElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
   
   if (xElement == nil) {
@@ -154,7 +162,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
   XMPPJID *jid = [presence from];
   
   // check the hash
-  if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid]]) {
+  if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]) {
     [_xmppvCardTempModule fetchvCardTempForJID:jid useCache:NO];
   }
 }
@@ -165,17 +173,18 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule 
         didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
-                     forJID:(XMPPJID *)jid
-                 xmppStream:(XMPPStream *)aXmppStream {
+                     forJID:(XMPPJID *)jid {
+  XMPPLogTrace();
+  
   /*
    * XEP-0153 4.1.3
    * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
    * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
    */
-  if ([jid isEqual:[[aXmppStream myJID] bareJID]]) {
+  if ([jid isEqual:[[xmppStream myJID] bareJID]]) {
     NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
     
-    [aXmppStream sendElement:presence];
+    [xmppStream sendElement:presence];
   }
 }
 
