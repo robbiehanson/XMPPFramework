@@ -38,6 +38,8 @@ XMPPRosterDelegate
 @property (nonatomic, readonly) XMPPStream *xmppStream;
 @property (nonatomic, readonly) XMPPRoster *xmppRoster;
 @property (nonatomic, readonly) XMPPRosterCoreDataStorage *xmppRosterStorage;
+@property (nonatomic, readonly) XMPPvCardAvatarModule *xmppvCardAvatarModule;
+@property (nonatomic, readonly) XMPPvCardTempModule *xmppvCardTempModule;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet UINavigationController *navigationController;
