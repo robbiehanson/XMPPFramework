@@ -18,7 +18,6 @@
 @implementation XMPPvCardCoreDataStorageObject
 
 + (XMPPvCardCoreDataStorageObject *)fetchvCardForJID:(XMPPJID *)jid
-                                          xmppStream:(XMPPStream *)stream
                               inManagedObjectContext:(NSManagedObjectContext *)moc
 {
 	NSString *entityName = NSStringFromClass([XMPPvCardCoreDataStorageObject class]);
@@ -26,11 +25,7 @@
 	NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
 	                                          inManagedObjectContext:moc];
 	
-	NSPredicate *predicate;
-	if (stream == nil)
-		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid bare]];
-	else
-		predicate = [NSPredicate predicateWithFormat:@"stream == %p AND jidStr == %@", stream, [jid bare]];
+	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid bare]];
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
@@ -47,7 +42,6 @@
 
 
 + (XMPPvCardCoreDataStorageObject *)insertEmptyvCardForJID:(XMPPJID *)jid
-                                                xmppStream:(XMPPStream *)stream
                                     inManagedObjectContext:(NSManagedObjectContext *)moc
 {
 	NSString *entityName = NSStringFromClass([XMPPvCardCoreDataStorageObject class]);
@@ -56,18 +50,16 @@
 	                                                                      inManagedObjectContext:moc];
 	
 	vCard.jidStr = [jid bare];
-	vCard.stream = [NSNumber numberWithPtr:stream];
 	return vCard;
 }
 
 + (XMPPvCardCoreDataStorageObject *)fetchOrInsertvCardForJID:(XMPPJID *)jid
-                                                  xmppStream:(XMPPStream *)stream
                                       inManagedObjectContext:(NSManagedObjectContext *)moc
 {
-	XMPPvCardCoreDataStorageObject *vCard = [self fetchvCardForJID:jid xmppStream:stream inManagedObjectContext:moc];
+	XMPPvCardCoreDataStorageObject *vCard = [self fetchvCardForJID:jid inManagedObjectContext:moc];
 	if (vCard == nil)
 	{
-		vCard = [self insertEmptyvCardForJID:jid xmppStream:stream inManagedObjectContext:moc];
+		vCard = [self insertEmptyvCardForJID:jid inManagedObjectContext:moc];
 	}
 	
 	return vCard;
@@ -100,7 +92,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @dynamic jidStr;
-@dynamic stream;
 @dynamic photoHash;
 @dynamic lastUpdated;
 @dynamic waitingForFetch;
