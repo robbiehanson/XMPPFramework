@@ -1,8 +1,5 @@
 #import "XMPPStream.h"
-#import "GCDAsyncSocket.h"
-#import "GCDMulticastDelegate.h"
-#import "RFSRVResolver.h"
-#import "DDList.h"
+#import "XMPPInternal.h"
 #import "XMPPParser.h"
 #import "XMPPJID.h"
 #import "XMPPIQ.h"
@@ -10,8 +7,12 @@
 #import "XMPPPresence.h"
 #import "XMPPModule.h"
 #import "XMPPLogging.h"
+#import "GCDAsyncSocket.h"
+#import "GCDMulticastDelegate.h"
 #import "NSDataAdditions.h"
 #import "NSXMLElementAdditions.h"
+#import "RFSRVResolver.h"
+#import "DDList.h"
 
 #import <libkern/OSAtomic.h>
 
@@ -38,6 +39,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; /
 
 
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
+NSString *const XMPPStreamDidChangeMyJIDNotification = @"XMPPStreamDidChangeMyJID";
 
 enum XMPPStreamFlags
 {
@@ -358,6 +360,8 @@ enum XMPPStreamConfig
 			[myJID release];
 			myJID = [newMyJID retain];
 		}
+		
+		[[NSNotificationCenter defaultCenter] postNotificationName:XMPPStreamDidChangeMyJIDNotification object:self];
 	};
 	
 	if (dispatch_get_current_queue() == xmppQueue)
@@ -2885,8 +2889,7 @@ enum XMPPStreamConfig
 		// Extract and save our resource (it may not be what we originally requested)
 		NSString *fullJIDStr = [r_jid stringValue];
 		
-		[myJID release];
-		myJID = [[XMPPJID jidWithString:fullJIDStr] retain];
+		[self setMyJID:[XMPPJID jidWithString:fullJIDStr]];
 		
 		// And we may now have to do one last thing before we're ready - start an IM session
 		NSXMLElement *features = [rootElement elementForName:@"stream:features"];
