@@ -32,6 +32,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @synthesize xmppStream;
 @synthesize xmppRoster;
 @synthesize xmppRosterStorage;
+@synthesize xmppvCardAvatarModule;
+@synthesize xmppvCardTempModule;
 
 @synthesize window;
 @synthesize navigationController;

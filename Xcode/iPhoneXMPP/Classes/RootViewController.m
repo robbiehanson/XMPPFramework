@@ -6,6 +6,7 @@
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
+#import "XMPPvCardAvatarModule.h"
 
 #import "DDLog.h"
 
@@ -14,6 +15,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 @implementation RootViewController
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Accessors
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (iPhoneXMPPAppDelegate *)appDelegate
 {
@@ -51,6 +56,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   titleLabel.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.5];
   titleLabel.textAlignment = UITextAlignmentCenter;
   
+  /*
+   * monitor for vCard changes, so we can reload the tableView
+   */
+  [[[self appDelegate] xmppvCardTempModule] addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+  
   if ([[self appDelegate] connect]) 
   {
     titleLabel.text = [[[[self appDelegate] xmppStream] myJID] bare];
@@ -66,6 +77,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)viewWillDisappear:(BOOL)animated {
   [[self appDelegate] disconnect];
+  
+  [[[self appDelegate] xmppvCardTempModule] removeDelegate:self];
   
   [super viewWillDisappear:animated];
 }
@@ -97,7 +110,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	NSManagedObjectContext *sender = (NSManagedObjectContext *)[notification object];
 	
-	if (sender != managedObjectContext)
+	if (sender != managedObjectContext &&
+      [sender persistentStoreCoordinator] == [managedObjectContext persistentStoreCoordinator])
 	{
 		DDLogError(@"%@: %@", THIS_FILE, THIS_METHOD);
 		
@@ -211,6 +225,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	cell.textLabel.text = user.displayName;
 	
+  NSData *photoData = [[[self appDelegate] xmppvCardAvatarModule] photoDataForJID:user.jid];
+  
+  if (photoData != nil) {
+    cell.imageView.image = [UIImage imageWithData:photoData];
+  } else {
+    cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
+  }
+
 	return cell;
 }
 
@@ -229,6 +251,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)dealloc
 {
 	[super dealloc];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPvCardTempModuleDelegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule 
+        didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
+                     forJID:(XMPPJID *)jid {
+  DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+  
+  /*
+   *  Reloading just the changed row, if it is visible would be a better solution.
+   */
+  [self.tableView reloadData];
 }
 
 @end
