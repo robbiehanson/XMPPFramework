@@ -21,13 +21,14 @@
 	id multicastDelegate;
 }
 
+@property (readonly) dispatch_queue_t moduleQueue;
+@property (readonly) XMPPStream *xmppStream;
+
 - (id)init;
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue;
 
 - (BOOL)activate:(XMPPStream *)xmppStream;
 - (void)deactivate;
-
-@property (readonly) XMPPStream *xmppStream;
 
 - (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;

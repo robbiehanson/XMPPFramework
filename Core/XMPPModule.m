@@ -141,6 +141,24 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		dispatch_sync(moduleQueue, block);
 }
 
+- (dispatch_queue_t)moduleQueue
+{
+  if (dispatch_get_current_queue() == moduleQueue)
+	{
+		return moduleQueue;
+	}
+	else
+	{
+		__block dispatch_queue_t result;
+		
+		dispatch_sync(moduleQueue, ^{
+			result = moduleQueue;
+		});
+		
+		return result;
+	}
+}
+
 - (XMPPStream *)xmppStream
 {
 	if (dispatch_get_current_queue() == moduleQueue)
