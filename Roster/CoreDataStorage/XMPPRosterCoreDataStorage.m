@@ -625,7 +625,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		[[self managedObjectContext] deleteObject:user];
 	}
 	
-	[[self managedObjectContext] save:nil];
+  if ([[self managedObjectContext] hasChanges]) 
+  {
+    [[self managedObjectContext] save:nil];
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
