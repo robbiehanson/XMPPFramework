@@ -17,6 +17,7 @@
 
 
 @class XMPPJID;
+@class XMPPStream;
 
 
 @protocol XMPPvCardAvatarStorage;
@@ -45,11 +46,13 @@
 
 @protocol XMPPvCardAvatarStorage <NSObject>
 
+- (NSData *)photoDataForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
-- (NSData *)photoDataForJID:(XMPPJID *)jid;
-- (NSString *)photoHashForJID:(XMPPJID *)jid;
-
-- (void)clearvCardTempForJID:(XMPPJID *)jid;
-
+/**
+ * Clears the vCardTemp from the store.
+ * This is used so we can clear any cached vCardTemp's for the JID.
+ **/
+- (void)clearvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end
