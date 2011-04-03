@@ -9,10 +9,13 @@
 #import <CoreData/CoreData.h>
 
 #import "XMPPvCardTempModule.h"
+#import "XMPPvCardAvatarModule.h"
 
 
-@interface XMPPvCardCoreDataStorage : NSObject <XMPPvCardTempModuleStorage>
-{
+@interface XMPPvCardCoreDataStorage : NSObject <
+XMPPvCardAvatarStorage,
+XMPPvCardTempModuleStorage
+> {
 	BOOL singleUsage;
 	
 	dispatch_queue_t storageQueue;
