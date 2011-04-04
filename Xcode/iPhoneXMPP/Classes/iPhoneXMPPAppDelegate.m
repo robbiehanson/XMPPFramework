@@ -45,7 +45,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Configure logging framework
 	
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
-  
+    
   // Setup the view controllers
   
   [window setRootViewController:navigationController];
@@ -54,7 +54,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   // Setup the XMPP stream
   
   [self setupStream];
-  
+
   if (![self connect]) {
     [navigationController presentModalViewController:settingsViewController animated:YES];
   }
@@ -95,7 +95,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	xmppStream = [[XMPPStream alloc] init];
 	
-	xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] init];
+	xmppRosterStorage = [XMPPRosterCoreDataStorage sharedInstance];
 	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
   
   XMPPvCardCoreDataStorage *xmppvCardCoreDataStorage = [[XMPPvCardCoreDataStorage alloc] init];
