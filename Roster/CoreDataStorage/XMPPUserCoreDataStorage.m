@@ -2,6 +2,7 @@
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
+#import "XMPPGroupCoreDataStorageObject.h"
 #import "DDNumber.h"
 
 @interface XMPPUserCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
@@ -29,6 +30,7 @@
 
 @dynamic sectionNum;
 
+@dynamic groups;
 @dynamic primaryResource;
 @dynamic resources;
 
@@ -136,6 +138,30 @@
 	return newUser;
 }
 
+- (void)updateGroupsWithItem:(NSXMLElement *)item
+{
+  XMPPGroupCoreDataStorageObject *group = nil;
+  
+  // clear existing group memberships first
+  if ([self.groups count] > 0) {
+    [self removeGroups:self.groups];
+  }
+  
+  NSArray *groupItems = [item elementsForName:@"group"];
+  NSString *groupName = nil;
+  
+  for (NSXMLElement *groupElement in groupItems) {
+    groupName = [groupElement stringValue];
+    
+    group = [XMPPGroupCoreDataStorageObject fetchOrInsertGroupName:groupName 
+                                            inManagedObjectContext:[self managedObjectContext]];
+    
+    if (group != nil) {
+      [self addGroupsObject:group];
+    }
+  }
+}
+
 - (void)updateWithItem:(NSXMLElement *)item
 {
 	NSString *jidStr = [item attributeStringValueForName:@"jid"];
@@ -154,6 +180,8 @@
 	
 	self.subscription = [item attributeStringValueForName:@"subscription"];
 	self.ask = [item attributeStringValueForName:@"ask"];
+  
+  [self updateGroupsWithItem:item];
 }
 
 - (void)recalculatePrimaryResource

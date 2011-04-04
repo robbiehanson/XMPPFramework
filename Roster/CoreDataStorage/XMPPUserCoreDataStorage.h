@@ -7,6 +7,7 @@
 #endif
 
 @class XMPPStream;
+@class XMPPGroupCoreDataStorageObject;
 @class XMPPResourceCoreDataStorage;
 
 
@@ -25,6 +26,7 @@
 
 @property (nonatomic, retain) NSNumber * sectionNum;
 
+@property (nonatomic, retain) NSSet * groups;
 @property (nonatomic, retain) XMPPResourceCoreDataStorage * primaryResource;
 @property (nonatomic, retain) NSSet * resources;
 
@@ -43,5 +45,10 @@
 - (void)removeResourcesObject:(XMPPResourceCoreDataStorage *)value;
 - (void)addResources:(NSSet *)value;
 - (void)removeResources:(NSSet *)value;
+
+- (void)addGroupsObject:(XMPPGroupCoreDataStorageObject *)value;
+- (void)removeGroupsObject:(XMPPGroupCoreDataStorageObject *)value;
+- (void)addGroups:(NSSet *)value;
+- (void)removeGroups:(NSSet *)value;
 
 @end
