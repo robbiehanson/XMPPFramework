@@ -14,8 +14,6 @@
 @interface XMPPUserCoreDataStorage : NSManagedObject <XMPPUser>
 
 @property (nonatomic, retain) XMPPJID *jid;
-@property (nonatomic, assign) int section;
-
 @property (nonatomic, retain) NSString * jidStr;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 
@@ -24,6 +22,8 @@
 @property (nonatomic, retain) NSString * subscription;
 @property (nonatomic, retain) NSString * ask;
 
+@property (nonatomic, assign) NSInteger section;
+@property (nonatomic, retain) NSString * sectionName;
 @property (nonatomic, retain) NSNumber * sectionNum;
 
 @property (nonatomic, retain) NSSet * groups;
