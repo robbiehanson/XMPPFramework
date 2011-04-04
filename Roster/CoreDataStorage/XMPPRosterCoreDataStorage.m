@@ -514,6 +514,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
+	// 
+	// This method is also called internally.
 	
 	XMPPLogTrace();
 	
@@ -523,7 +525,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	__block XMPPUserCoreDataStorage *result;
 	
-	[self executeBlock:^{
+	dispatch_block_t block = ^{
 		
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
 		                                          inManagedObjectContext:[self managedObjectContext]];
@@ -545,16 +547,32 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		[fetchRequest release];
 		
-		result = (XMPPUserCoreDataStorage *)[[results lastObject] retain];
-	}];
+		result = (XMPPUserCoreDataStorage *)[results lastObject];
+	};
 	
-	return [result autorelease];
+	if (dispatch_get_current_queue() == storageQueue)
+	{
+		block();
+		return result;
+	}
+	else
+	{
+		[self executeBlock:^{
+			
+			block();
+			[result retain];
+		}];
+		
+		return [result autorelease];
+	}
 }
 
 - (id <XMPPResource>)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
 	// It may be invoked on any thread/queue.
+	// 
+	// This method is also called internally.
 	
 	XMPPLogTrace();
 	
@@ -564,7 +582,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	__block XMPPResourceCoreDataStorage *result;
 	
-	[self executeBlock:^{
+	dispatch_block_t block = ^{
 		
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
 		                                          inManagedObjectContext:[self managedObjectContext]];
@@ -586,10 +604,24 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		[fetchRequest release];
 		
-		result = (XMPPResourceCoreDataStorage *)[[results lastObject] retain];
-	}];
+		result = (XMPPResourceCoreDataStorage *)[results lastObject];
+	};
 	
-	return [result autorelease];
+	if (dispatch_get_current_queue() == storageQueue)
+	{
+		block();
+		return result;
+	}
+	else
+	{
+		[self executeBlock:^{
+			
+			block();
+			[result retain];
+		}];
+		
+		return [result autorelease];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
