@@ -5,10 +5,16 @@
 #import "XMPPGroupCoreDataStorageObject.h"
 #import "DDNumber.h"
 
-@interface XMPPUserCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
-- (NSString *)primitiveNickname;
-- (NSString *)primitiveDisplayName;
-- (XMPPResourceCoreDataStorage *)primitivePrimaryResource;
+@interface XMPPUserCoreDataStorage ()
+
+@property(nonatomic,retain) XMPPJID *primitiveJid;
+@property(nonatomic,retain) NSString *primitiveJidStr;
+
+@property(nonatomic,retain) NSString *primitiveDisplayName;
+@property(nonatomic,assign) NSInteger primitiveSection;
+@property(nonatomic,retain) NSString *primitiveSectionName;
+@property(nonatomic,retain) NSNumber *primitiveSectionNum;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17,18 +23,23 @@
 
 @implementation XMPPUserCoreDataStorage
 
-@dynamic jid;     // Implementation below
-@dynamic section; // Implementation below
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Accessors
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@dynamic jidStr;
+
+@dynamic jid, primitiveJid;
+@dynamic jidStr, primitiveJidStr;
 @dynamic streamBareJidStr;
 
 @dynamic nickname;
-@dynamic displayName;
+@dynamic displayName, primitiveDisplayName;
 @dynamic subscription;
 @dynamic ask;
 
-@dynamic sectionNum;
+@dynamic section, primitiveSection;
+@dynamic sectionName, primitiveSectionName;
+@dynamic sectionNum, primitiveSectionNum;
 
 @dynamic groups;
 @dynamic primaryResource;
@@ -36,7 +47,18 @@
 
 - (XMPPJID *)jid
 {
-	return [XMPPJID jidWithString:[self jidStr]];
+  // Create and cache the jid on demand
+  
+  [self willAccessValueForKey:@"jid"];
+  XMPPJID *tmp = [self primitiveJid];
+  [self didAccessValueForKey:@"jid"];
+  
+  if (tmp == nil) {
+    tmp = [XMPPJID jidWithString:[self jidStr]];
+
+    [self setPrimitiveJid:tmp];
+  }
+  return tmp;
 }
 
 - (void)setJid:(XMPPJID *)jid
@@ -44,71 +66,95 @@
 	self.jidStr = [jid bare];
 }
 
-- (int)section
-{
-	return [[self sectionNum] intValue];
+- (void)setJidStr:(NSString *)jidStr
+{  
+  [self willChangeValueForKey:@"jidStr"];
+  [self setPrimitiveJidStr:jidStr];
+  [self didChangeValueForKey:@"jidStr"];
+  
+  // If the jidStr changes, the jid becomes invalid.
+  [self setPrimitiveJid:nil];
 }
 
-- (void)setSection:(int)value
+- (NSInteger)section
 {
-	self.sectionNum = [NSNumber numberWithInt:value];
+  // Create and cache the section on demand
+  [self willAccessValueForKey:@"section"];
+  NSInteger tmp = [self primitiveSection];
+  [self didAccessValueForKey:@"section"];
+  
+  // section uses zero, so to distinguish unset values, use NSNotFound
+  if (tmp == NSNotFound) {
+    tmp = [[self sectionNum] integerValue];
+    
+    [self setPrimitiveSection:tmp];
+  }
+  return tmp;
+}
+
+- (void)setSection:(NSInteger)value
+{
+	self.sectionNum = [NSNumber numberWithInteger:value];
+}
+
+- (void)setSectionNum:(NSNumber *)sectionNum
+{
+  [self willChangeValueForKey:@"sectionNum"];
+  [self setPrimitiveSectionNum:sectionNum];
+  [self didChangeValueForKey:@"sectionNum"];
+  
+  // If the sectionNum changes, the section becomes invalid.
+  // section uses zero, so to distinguish unset values, use NSNotFound
+  [self setPrimitiveSection:NSNotFound];
+}
+
+- (NSString *)sectionName
+{
+  // Create and cache the sectionName on demand
+  
+  [self willAccessValueForKey:@"sectionName"];
+  NSString *tmp = [self primitiveSectionName];
+  [self didAccessValueForKey:@"sectionName"];
+  
+  if (tmp == nil) {
+    // Section names are organized by capitalizing the first letter of the displayName
+    
+    NSString *upperCase = [self.displayName uppercaseString];
+    
+    // return the first character with support UTF-16:
+    tmp = [upperCase substringWithRange:[upperCase rangeOfComposedCharacterSequenceAtIndex:0]];
+
+    [self setPrimitiveSectionName:tmp];
+  }
+  return tmp;
+}
+
+- (void)setDisplayName:(NSString *)displayName
+{  
+  [self willChangeValueForKey:@"displayName"];
+  [self setPrimitiveDisplayName:displayName];
+  [self didChangeValueForKey:@"displayName"];
+  
+  // If the displayName changes, the sectionName becomes invalid.
+  [self setPrimitiveSectionName:nil];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Compiler Workarounds
+#pragma mark NSManagedObject
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
-
-/**
- * This method is here to quiet the compiler.
- * Without it the compiler complains that this method is not implemented as required by the protocol.
- * This only seems to be a problem when compiling for the device.
-**/
-- (NSString *)displayName 
+- (void)awakeFromInsert
 {
-    NSString * tmpValue;
-    
-    [self willAccessValueForKey:@"displayName"];
-    tmpValue = [self primitiveDisplayName];
-    [self didAccessValueForKey:@"displayName"];
-    
-    return tmpValue;
+  // section uses zero, so to distinguish unset values, use NSNotFound
+  [self setPrimitiveSection:NSNotFound];
 }
 
-/**
- * This method is here to quiet the compiler.
- * Without it the compiler complains that this method is not implemented as required by the protocol.
- * This only seems to be a problem when compiling for the device.
-**/
-- (NSString *)nickname 
+- (void)awakeFromFetch
 {
-    NSString * tmpValue;
-    
-    [self willAccessValueForKey:@"nickname"];
-    tmpValue = [self primitiveNickname];
-    [self didAccessValueForKey:@"nickname"];
-    
-    return tmpValue;
+  // section uses zero, so to distinguish unset values, use NSNotFound
+  self.section = NSNotFound;
 }
 
-/**
- * This method is here to quiet the compiler.
- * Without it the compiler complains that this method is not implemented as required by the protocol.
- * This only seems to be a problem when compiling for the device.
-**/
-- (XMPPResourceCoreDataStorage *)primaryResource 
-{
-    id tmpObject;
-    
-    [self willAccessValueForKey:@"primaryResource"];
-    tmpObject = [self primitivePrimaryResource];
-    [self didAccessValueForKey:@"primaryResource"];
-    
-    return tmpObject;
-}
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
@@ -356,16 +402,31 @@
 #pragma mark KVO compliance methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
++ (NSSet *)keyPathsForValuesAffectingJid {
+  // If the jidStr changes, the jid may change as well.
+  return [NSSet setWithObject:@"jidStr"];
+}
+
 + (NSSet *)keyPathsForValuesAffectingIsOnline {
     return [NSSet setWithObject:@"primaryResource"];
 }
 
-+ (NSSet *)keyPathsForValuesAffectingUnsortedResources {
-    return [NSSet setWithObject:@"resources"];
++ (NSSet *)keyPathsForValuesAffectingSection {
+  // If the value of sectionNum changes, the section may change as well.
+  return [NSSet setWithObject:@"sectionNum"];
+}
+
++ (NSSet *)keyPathsForValuesAffectingSectionName {
+  // If the value of displayName changes, the sectionName may change as well.
+  return [NSSet setWithObject:@"displayName"];
 }
 
 + (NSSet *)keyPathsForValuesAffectingSortedResources {
-    return [NSSet setWithObject:@"unsortedResources"];
+  return [NSSet setWithObject:@"unsortedResources"];
+}
+
++ (NSSet *)keyPathsForValuesAffectingUnsortedResources {
+  return [NSSet setWithObject:@"resources"];
 }
 
 @end
