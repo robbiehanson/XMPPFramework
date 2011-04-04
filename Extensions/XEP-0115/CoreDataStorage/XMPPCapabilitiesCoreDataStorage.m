@@ -78,6 +78,11 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 
 @synthesize databaseFileName;
 
+- (id)init
+{
+	return [self initWithDatabaseFilename:nil];
+}
+
 - (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
 {
 	if ((self = [super init]))
@@ -597,7 +602,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 													 inManagedObjectContext:[self managedObjectContext]];
 			
 			resource.jidStr = [jid full];
-			resource.stream = [NSNumber numberWithPtr:stream];
+			resource.streamBareJidStr = [self streamBareJidStrForXMPPStream:stream];
 			
 			resource.node = node;
 			resource.ver = ver;
@@ -852,7 +857,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 			resource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsResourceCoreDataStorageObject"
 													 inManagedObjectContext:[self managedObjectContext]];
 			resource.jidStr = [jid full];
-			resource.stream = [NSNumber numberWithPtr:stream];
+			resource.streamBareJidStr = [self streamBareJidStrForXMPPStream:stream];
 			
 			unsavedCount++;
 		}
