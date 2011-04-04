@@ -1,8 +1,12 @@
 #import "XMPP.h"
+#import "XMPPLogging.h"
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
-#import "DDNumber.h"
+
+// Log levels: off, error, warn, info, verbose
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+
 
 @interface XMPPResourceCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
 - (NSDate *)primitivePresenceDate;
@@ -22,7 +26,7 @@
 @dynamic jidStr;
 @dynamic presenceStr;
 
-@dynamic stream;
+@dynamic streamBareJidStr;
 
 @dynamic type;
 @dynamic show;
@@ -127,13 +131,13 @@
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                       withPresence:(XMPPPresence *)presence
-                        xmppStream:(XMPPStream *)stream
+                  streamBareJidStr:(NSString *)streamBareJidStr
 {
 	XMPPJID *jid = [presence from];
 	
 	if (jid == nil)
 	{
-		NSLog(@"XMPPResourceCoreDataStorage: invalid presence (missing or invalid jid): %@", presence);
+		XMPPLogWarn(@"%@: %@ - Invalid presence (missing or invalid jid): %@", [self class], THIS_METHOD, presence);
 		return nil;
 	}
 	
@@ -141,7 +145,7 @@
 	newResource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPResourceCoreDataStorage"
 	                                            inManagedObjectContext:moc];
 	
-	newResource.stream = [NSNumber numberWithPtr:stream];
+	newResource.streamBareJidStr = streamBareJidStr;
 	
 	[newResource updateWithPresence:presence];
 	
@@ -154,7 +158,7 @@
 	
 	if (jid == nil)
 	{
-		NSLog(@"XMPPResourceCoreDataStorage: invalid presence (missing or invalid jid): %@", presence);
+		XMPPLogWarn(@"%@: %@ - Invalid presence (missing or invalid jid): %@", [self class], THIS_METHOD, presence);
 		return;
 	}
 	
