@@ -21,6 +21,7 @@
 		DC0AC28F1346E75D00D053E3 /* XMPPRosterCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC0AC28A1346E75D00D053E3 /* XMPPRosterCoreDataStorage.m */; };
 		DC0AC2901346E75D00D053E3 /* XMPPUserCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC0AC28C1346E75D00D053E3 /* XMPPUserCoreDataStorage.m */; };
 		DC1B649111518476001F0A0A /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1B649011518476001F0A0A /* libxml2.dylib */; };
+		DC4883FF13496EF3000F79C5 /* XMPPvCardAvatarModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DC4883FE13496EF3000F79C5 /* XMPPvCardAvatarModule.m */; };
 		DC53BAB912C3C64D00C8DEEE /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC53BAB212C3C64D00C8DEEE /* DDASLLogger.m */; };
 		DC53BABA12C3C64D00C8DEEE /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC53BAB412C3C64D00C8DEEE /* DDFileLogger.m */; };
 		DC53BABB12C3C64D00C8DEEE /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DC53BAB612C3C64D00C8DEEE /* DDLog.m */; };
@@ -109,6 +110,8 @@
 		DC0AC28C1346E75D00D053E3 /* XMPPUserCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPUserCoreDataStorage.m; path = ../../Roster/CoreDataStorage/XMPPUserCoreDataStorage.m; sourceTree = "<group>"; };
 		DC0AC2A013490A5200D053E3 /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPInternal.h; path = ../../Core/XMPPInternal.h; sourceTree = "<group>"; };
 		DC1B649011518476001F0A0A /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		DC4883FD13496EF3000F79C5 /* XMPPvCardAvatarModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPvCardAvatarModule.h; path = "../../Extensions/XEP-0153/XMPPvCardAvatarModule.h"; sourceTree = "<group>"; };
+		DC4883FE13496EF3000F79C5 /* XMPPvCardAvatarModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardAvatarModule.m; path = "../../Extensions/XEP-0153/XMPPvCardAvatarModule.m"; sourceTree = "<group>"; };
 		DC53BAB112C3C64D00C8DEEE /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDASLLogger.h; path = ../../Vendor/CocoaLumberjack/DDASLLogger.h; sourceTree = SOURCE_ROOT; };
 		DC53BAB212C3C64D00C8DEEE /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDASLLogger.m; path = ../../Vendor/CocoaLumberjack/DDASLLogger.m; sourceTree = SOURCE_ROOT; };
 		DC53BAB312C3C64D00C8DEEE /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDFileLogger.h; path = ../../Vendor/CocoaLumberjack/DDFileLogger.h; sourceTree = SOURCE_ROOT; };
@@ -367,6 +370,15 @@
 			name = "Core Data Storage";
 			sourceTree = "<group>";
 		};
+		DC4883FB13496EDB000F79C5 /* XEP-0153 */ = {
+			isa = PBXGroup;
+			children = (
+				DC4883FD13496EF3000F79C5 /* XMPPvCardAvatarModule.h */,
+				DC4883FE13496EF3000F79C5 /* XMPPvCardAvatarModule.m */,
+			);
+			name = "XEP-0153";
+			sourceTree = "<group>";
+		};
 		DC53BAA812C3C60B00C8DEEE /* Logging */ = {
 			isa = PBXGroup;
 			children = (
@@ -400,6 +412,7 @@
 				DC6E92F61090E2F200070ADE /* XEP-0065 */,
 				DCAD3FB91156DC0700FC568A /* XEP-0100 */,
 				DCAD3FBA1156DC1D00FC568A /* XEP-0115 */,
+				DC4883FB13496EDB000F79C5 /* XEP-0153 */,
 				DCAD3FB31156DBE800FC568A /* XEP-0199 */,
 				DCA6151B1250067000C75522 /* XEP-0202 */,
 				DCD2862D128F7256001E7AEC /* XEP-0203 */,
@@ -817,6 +830,7 @@
 				DC0AC28E1346E75D00D053E3 /* XMPPRoster.xcdatamodel in Sources */,
 				DC0AC28F1346E75D00D053E3 /* XMPPRosterCoreDataStorage.m in Sources */,
 				DC0AC2901346E75D00D053E3 /* XMPPUserCoreDataStorage.m in Sources */,
+				DC4883FF13496EF3000F79C5 /* XMPPvCardAvatarModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

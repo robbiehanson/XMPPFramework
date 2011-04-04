@@ -9,9 +9,13 @@
 
 @interface XMPPRosterCoreDataStorage : NSObject <XMPPRosterStorage>
 {
-	BOOL singleUsage;
+	NSString *databaseFileName;
+	NSMutableDictionary *myJidCache;
 	
 	dispatch_queue_t storageQueue;
+	
+	int32_t unsavedCount;
+	int32_t pendingRequests;
 	
 	NSMutableSet *rosterPopulationSet;
 	
@@ -21,22 +25,30 @@
 }
 
 /**
- * Creates a CoreDataStorage instance designed to be used by a single instance of XMPPRoster.
+ * Convenience method to get an instance with the default database name.
  * 
- * The storage instance will inherit its dispatch queue from its parent (the XMPPRoster instance).
+ * IMPORTANT:
+ * You are NOT required to use the sharedInstance.
+ * 
+ * If your application uses multiple xmppStreams, and you use a sharedInstance of this class,
+ * then all of your streams share the same database store. You might get better performance if you create
+ * multiple instances of this class instead (using different database filenames), as this way you can have
+ * concurrent writes to multiple databases.
 **/
-- (id)init;
-- (id)initForSingleUsage;
++ (XMPPRosterCoreDataStorage *)sharedInstance;
 
 /**
- * Creates a CoreDataStorage instance that may be used by multiple instances of XMPPRoster.
- * This may be useful if your application creates multiple XMPPStream connections.
+ * Initializes the core data storage instance, with the given database store filename.
+ * It is recommended your filname use the "sqlite" file extension.
+ * If you pass nil, the default value of "XMPPRoster.sqlite" is automatically used.
  * 
- * The storage instance will operate on its own dispatch queue, which may optionally be provided.
+ * If you attempt to create an instance of this class with the same databaseFileName as another existing instance,
+ * this method will return nil.
 **/
-- (id)initForMultipleUsage;
-- (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue;
+- (id)initWithDatabaseFilename:(NSString *)databaseFileName;
 
+
+@property (readonly) NSString *databaseFileName;
 
 @property (readonly) NSManagedObjectModel *managedObjectModel;
 @property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
