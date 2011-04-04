@@ -34,12 +34,17 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	dispatch_once(&onceToken, ^{
 		
 		databaseFileNames = [[NSMutableSet alloc] init];
-		sharedInstance = [[XMPPCapabilities alloc] initWithDatabaseFilename:nil];
 	});
 }
 
 + (XMPPCapabilitiesCoreDataStorage *)sharedInstance
 {
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		
+		sharedInstance = [[XMPPCapabilities alloc] initWithDatabaseFilename:nil];
+	});
+	
 	return sharedInstance;
 }
 
