@@ -18,7 +18,7 @@
 @property (nonatomic, retain) NSString * jidStr;
 @property (nonatomic, retain) NSString * presenceStr;
 
-@property (nonatomic, retain) NSNumber * stream;
+@property (nonatomic, retain) NSString * streamBareJidStr;
 
 @property (nonatomic, retain) NSString * type;
 @property (nonatomic, retain) NSString * show;
@@ -33,7 +33,7 @@
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                       withPresence:(XMPPPresence *)presence
-                        xmppStream:(XMPPStream *)stream;
+                  streamBareJidStr:(NSString *)streamBareJidStr;
 
 - (void)updateWithPresence:(XMPPPresence *)presence;
 

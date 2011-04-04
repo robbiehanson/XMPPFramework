@@ -16,7 +16,7 @@
 @property (nonatomic, assign) int section;
 
 @property (nonatomic, retain) NSString * jidStr;
-@property (nonatomic, retain) NSNumber * stream;
+@property (nonatomic, retain) NSString * streamBareJidStr;
 
 @property (nonatomic, retain) NSString * nickname;
 @property (nonatomic, retain) NSString * displayName;
@@ -30,10 +30,10 @@
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                           withItem:(NSXMLElement *)item
-                        xmppStream:(XMPPStream *)stream;
+                  streamBareJidStr:(NSString *)streamBareJidStr;
 
 - (void)updateWithItem:(NSXMLElement *)item;
-- (void)updateWithPresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
+- (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr;
 
 @end
 
