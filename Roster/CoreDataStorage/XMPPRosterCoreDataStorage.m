@@ -3,13 +3,25 @@
 #import "XMPPUserCoreDataStorage.h"
 #import "XMPPResourceCoreDataStorage.h"
 #import "XMPP.h"
+#import "XMPPInternal.h"
 #import "XMPPLogging.h"
 #import "DDNumber.h"
 
 #import <objc/runtime.h>
+#import <libkern/OSAtomic.h>
 
 // Log levels: off, error, warn, info, verbose
 static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
+
+// Defines how big the unsavedCount can get before triggering a database save operation.
+// This has to do with the number of unsaved NSManagedObject's.
+// 
+// Note: A save will automatically get triggered when there are no outstanding requests.
+// This simply serves to restrict memory usage, as unsaved NSManagedObject's remain in memory until saved.
+// 
+// Note: This also acts as a fetchBatchSize for NSFetchRequests.
+// 
+#define MAX_UNSAVED_COUNT 500
 
 #define AUTORELEASED_BLOCK(block) ^{                            \
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]; \
@@ -20,42 +32,82 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
 @implementation XMPPRosterCoreDataStorage
 
-- (id)init
-{
-	return [self initForSingleUsage];
-}
+static NSMutableSet *databaseFileNames;
+static XMPPRosterCoreDataStorage *sharedInstance;
 
-- (id)initForSingleUsage
++ (void)initialize
 {
-	if ((self = [super init]))
-	{
-		singleUsage = YES;
-		rosterPopulationSet = [[NSMutableSet alloc] init];
-	}
-	return self;
-}
-
-- (id)initForMultipleUsage
-{
-	return [self initForMultipleUsageWithDispatchQueue:NULL];
-}
-
-- (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue
-{
-	if ((self = [super init]))
-	{
-		singleUsage = NO;
-		rosterPopulationSet = [[NSMutableSet alloc] init];
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
 		
-		if (queue)
+		databaseFileNames = [[NSMutableSet alloc] init];
+	});
+}
+
++ (XMPPRosterCoreDataStorage *)sharedInstance
+{
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		
+		sharedInstance = [[XMPPRosterCoreDataStorage alloc] initWithDatabaseFilename:nil];
+	});
+	
+	return sharedInstance;
+}
+
++ (BOOL)registerDatabaseFileName:(NSString *)dbFileName
+{
+	BOOL result = NO;
+	
+	@synchronized(databaseFileNames)
+	{
+		if (![databaseFileNames containsObject:dbFileName])
 		{
-			storageQueue = queue;
-			dispatch_retain(storageQueue);
+			[databaseFileNames addObject:dbFileName];
+			result = YES;
 		}
+	}
+	
+	return result;
+}
+
++ (void)unregisterDatabaseFileName:(NSString *)dbFileName
+{
+	@synchronized(databaseFileNames)
+	{
+		[databaseFileNames removeObject:dbFileName];
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Module Setup
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@synthesize databaseFileName;
+
+- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
+{
+	if ((self = [super init]))
+	{
+		if (aDatabaseFileName)
+			databaseFileName = [aDatabaseFileName copy];
 		else
+			databaseFileName = @"XMPPRoster.sqlite";
+		
+		if (![[self class] registerDatabaseFileName:databaseFileName])
 		{
-			storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
+			[self dealloc];
+			return nil;
 		}
+		
+		myJidCache = [[NSMutableDictionary alloc] init];
+		
+		storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		                                         selector:@selector(updateJidCache:)
+		                                             name:XMPPStreamDidChangeMyJIDNotification
+		                                           object:nil];
 	}
 	return self;
 }
@@ -65,27 +117,73 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	NSParameterAssert(aParent != nil);
 	NSParameterAssert(queue != NULL);
 	
-	if (singleUsage)
+	if (queue == storageQueue)
 	{
-		BOOL result = NO;
+		// This class is designed to be run on a separate dispatch queue from its parent.
+		// This allows us to optimize the database save operations by buffering them,
+		// and executing them when demand on the storage instance is low.
 		
-		@synchronized(self)
+		return NO;
+	}
+	
+	return YES;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Stream JID Caching
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// We cache a stream's myJID to avoid constantly querying the xmppStream for it.
+// 
+// The motivation behind this is the fact that to query the xmppStream for its myJID
+// requires going through the xmppStream's internal dispatch queue. (A dispatch_sync).
+// It's not necessarily that this is an expensive operation,
+// but the storage classes require this information for just about every operation it performs.
+// In addition, if we can stay out of xmppStream's internal dispatch queue,
+// we free it to perform more xmpp processing tasks.
+
+- (NSString *)streamBareJidStrForXMPPStream:(XMPPStream *)stream
+{
+	NSNumber *key = [[NSNumber alloc] initWithPtr:stream];
+	
+	NSString *result = (NSString *)[myJidCache objectForKey:key];
+	if (!result)
+	{
+		result = [[stream myJID] bare];
+		
+		if (result)
+			[myJidCache setObject:result forKey:key];
+		else
+			[myJidCache removeObjectForKey:key];
+	}
+	
+	[key release];
+	return result;
+}
+
+- (void)updateJidCache:(NSNotification *)notification
+{
+	// Notifications are delivered on the thread/queue that posted them.
+	// In this case, they are delivered on xmppStream's internal processing queue.
+	
+	XMPPStream *stream = (XMPPStream *)[notification object];
+	
+	dispatch_async(storageQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		NSNumber *key = [NSNumber numberWithPtr:stream];
+		if ([myJidCache objectForKey:key])
 		{
-			if (storageQueue == NULL)
-			{
-				storageQueue = queue;
-				dispatch_retain(storageQueue);
-				
-				result = YES;
-			}
+			NSString *newBareJidStr = [[stream myJID] bare];
+			
+			if (newBareJidStr)
+				[myJidCache setObject:newBareJidStr forKey:key];
+			else
+				[myJidCache removeObjectForKey:key];
 		}
 		
-		return result;
-	}
-	else
-	{
-		return YES;
-	}
+		[pool drain];
+	});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +286,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
 		
 		NSString *docsPath = [self persistentStoreDirectory];
-		NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPRoster.sqlite"];
+		NSString *storePath = [docsPath stringByAppendingPathComponent:databaseFileName];
 		if (storePath)
 		{
 			if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
@@ -262,7 +360,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Utility Methods
+#pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -292,6 +390,76 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	return YES;
 }
 
+- (void)save
+{
+	if ([[self managedObjectContext] hasChanges])
+	{
+		NSError *error = nil;
+		if (![[self managedObjectContext] save:&error])
+		{
+			XMPPLogWarn(@"%@: Error saving - %@ %@", [self class], error, [error userInfo]);
+			
+			[[self managedObjectContext] rollback];
+		}
+	}
+	
+	unsavedCount = 0;
+}
+
+- (void)maybeSave:(int32_t)currentPendingRequests
+{
+	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	
+	if (unsavedCount > 0)
+	{
+		if ((currentPendingRequests == 0) || (unsavedCount >= MAX_UNSAVED_COUNT))
+		{
+			XMPPLogVerbose(@"%@: Triggering save (pendingRequests=%i, unsavedCount=%i)",
+							  [self class], currentPendingRequests, unsavedCount);
+			
+			[self save];
+		}
+	}
+}
+
+- (void)executeBlock:(dispatch_block_t)block
+{
+	// By design this method should not be invoked from the storageQueue.
+	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	
+	// dispatch_Sync
+	//          ^
+	
+	OSAtomicIncrement32(&pendingRequests);
+	dispatch_sync(storageQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		block();
+		
+		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
+		[pool drain];
+	});
+}
+
+- (void)scheduleBlock:(dispatch_block_t)block
+{
+	// By design this method should not be invoked from the storageQueue.
+	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	
+	// dispatch_Async
+	//          ^
+	
+	OSAtomicIncrement32(&pendingRequests);
+	dispatch_async(storageQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		block();
+		
+		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
+		[pool drain];
+	});
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Protocol Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,33 +471,20 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
 	XMPPJID *myJID = stream.myJID;
 	if (myJID == nil)
 	{
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		return [self userForJID:myJID xmppStream:stream];
-	}
-	else
-	{
-		__block XMPPUserCoreDataStorage *result;
-		
-		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
-			
-			result = [[self userForJID:myJID xmppStream:stream] retain];
-		}));
-		
-		return [result autorelease];
-	}
+	__block XMPPUserCoreDataStorage *result;
+	
+	[self executeBlock:^{
+	
+		result = [[self userForJID:myJID xmppStream:stream] retain];
+	}];
+	
+	return [result autorelease];
 }
 
 - (id <XMPPResource>)myResourceForXMPPStream:(XMPPStream *)stream
@@ -339,33 +494,20 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
 	XMPPJID *myJID = stream.myJID;
 	if (myJID == nil)
 	{
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		return [self resourceForJID:myJID xmppStream:stream];
-	}
-	else
-	{
-		__block XMPPResourceCoreDataStorage *result;
+	__block XMPPResourceCoreDataStorage *result;
+	
+	[self executeBlock:^{
 		
-		dispatch_sync(storageQueue, AUTORELEASED_BLOCK(^{
-			
-			result = [[self resourceForJID:myJID xmppStream:stream] retain];
-		}));
-		
-		return [result autorelease];
-	}
+		result = [[self resourceForJID:myJID xmppStream:stream] retain];
+	}];
+	
+	return [result autorelease];
 }
 
 - (id <XMPPUser>)userForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
@@ -375,20 +517,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
 	if (jid == nil) return nil;
 	
 	NSString *bareJIDStr = [jid bare];
 	
 	__block XMPPUserCoreDataStorage *result;
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	[self executeBlock:^{
 		
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
 		                                          inManagedObjectContext:[self managedObjectContext]];
@@ -397,7 +532,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		if (stream == nil)
 			predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", bareJIDStr];
 		else
-			predicate = [NSPredicate predicateWithFormat:@"stream == %@ AND jidStr == %@", [NSNumber numberWithPtr:stream], bareJIDStr];
+			predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
+			                                                 bareJIDStr, [self streamBareJidStrForXMPPStream:stream]];
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
@@ -410,14 +546,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		[fetchRequest release];
 		
 		result = (XMPPUserCoreDataStorage *)[[results lastObject] retain];
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
-	else
-		dispatch_sync(storageQueue, block);
+	}];
 	
 	return [result autorelease];
 }
@@ -429,20 +558,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
 	if (jid == nil) return nil;
 	
 	NSString *fullJIDStr = [jid full];
 	
 	__block XMPPResourceCoreDataStorage *result;
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	[self executeBlock:^{
 		
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
 		                                          inManagedObjectContext:[self managedObjectContext]];
@@ -451,7 +573,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		if (stream == nil)
 			predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", fullJIDStr];
 		else
-			predicate = [NSPredicate predicateWithFormat:@"stream == %p AND jidStr == %@", stream, fullJIDStr];
+			predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
+			                                                 fullJIDStr, [self streamBareJidStrForXMPPStream:stream]];
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
@@ -464,14 +587,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 		[fetchRequest release];
 		
 		result = (XMPPResourceCoreDataStorage *)[[results lastObject] retain];
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
-	else
-		dispatch_sync(storageQueue, block);
+	}];
 	
 	return [result autorelease];
 }
@@ -482,153 +598,168 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
 - (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
 	XMPPLogTrace();
 	
-	[rosterPopulationSet addObject:[NSNumber numberWithPtr:stream]];
+	[self scheduleBlock:^{
+		
+		[rosterPopulationSet addObject:[NSNumber numberWithPtr:stream]];
+	}];
 }
 
 - (void)endRosterPopulationForXMPPStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
 	XMPPLogTrace();
 	
-	[rosterPopulationSet removeObject:[NSNumber numberWithPtr:stream]];
-	
-	[[self managedObjectContext] save:nil];
+	[self scheduleBlock:^{
+		
+		[rosterPopulationSet removeObject:[NSNumber numberWithPtr:stream]];
+	}];
 }
 
 - (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
 	XMPPLogTrace();
 	
-	if ([self isRosterItem:item])
-	{
-		if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:stream]])
+	[self scheduleBlock:^{
+		
+		if ([self isRosterItem:item])
 		{
-			[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
-			                                             withItem:item
-			                                           xmppStream:stream];
-		}
-		else
-		{
-			NSString *jidStr = [item attributeStringValueForName:@"jid"];
-			XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
-			
-			XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self userForJID:jid xmppStream:stream];
-			
-			NSString *subscription = [item attributeStringValueForName:@"subscription"];
-			if ([subscription isEqualToString:@"remove"])
+			if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:stream]])
 			{
-				if (user)
-				{
-					[[self managedObjectContext] deleteObject:user];
-				}
+				unsavedCount++;
+				[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
+															 withItem:item
+														   xmppStream:stream];
 			}
 			else
 			{
-				if (user)
+				NSString *jidStr = [item attributeStringValueForName:@"jid"];
+				XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
+				
+				XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self userForJID:jid xmppStream:stream];
+				
+				NSString *subscription = [item attributeStringValueForName:@"subscription"];
+				if ([subscription isEqualToString:@"remove"])
 				{
-					[user updateWithItem:item];
+					if (user)
+					{
+						unsavedCount++;
+						[[self managedObjectContext] deleteObject:user];
+					}
 				}
 				else
 				{
-					[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
-					                                             withItem:item
-					                                           xmppStream:stream];
+					if (user)
+					{
+						unsavedCount++;
+						[user updateWithItem:item];
+					}
+					else
+					{
+						unsavedCount++;
+						[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
+																	 withItem:item
+																   xmppStream:stream];
+					}
 				}
 			}
-			
-			[[self managedObjectContext] save:nil];
 		}
-	}
+	}];
 }
 
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
 	XMPPLogTrace();
 	
-	XMPPJID *jid = [presence from];
-	XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self userForJID:jid xmppStream:stream];
-	
-	if (user)
-	{
-		[user updateWithPresence:presence xmppStream:stream];
+	[self scheduleBlock:^{
 		
-		if (![rosterPopulationSet containsObject:[NSNumber numberWithPtr:stream]])
+		XMPPJID *jid = [presence from];
+		XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self userForJID:jid xmppStream:stream];
+		
+		if (user)
 		{
-			[[self managedObjectContext] save:nil];
+			unsavedCount++;
+			[user updateWithPresence:presence xmppStream:stream];
 		}
-	}
+	}];
 }
 
 - (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
 	XMPPLogTrace();
 	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
-	                                          inManagedObjectContext:[self managedObjectContext]];
-	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	[fetchRequest setEntity:entity];
-	
-	if (stream)
-	{
-		[fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"stream == %@", [NSNumber numberWithPtr:stream]]];
-	}
-	
-	NSArray *allResources = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
-	
-	[fetchRequest release];
-	
-	for (XMPPResourceCoreDataStorage *resource in allResources)
-	{
-		[[self managedObjectContext] deleteObject:resource];
-	}
-	
-	[[self managedObjectContext] save:nil];
+	[self scheduleBlock:^{
+		
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
+		                                          inManagedObjectContext:[self managedObjectContext]];
+		
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+		[fetchRequest setEntity:entity];
+		[fetchRequest setFetchBatchSize:MAX_UNSAVED_COUNT];
+		
+		if (stream)
+		{
+			NSPredicate *predicate;
+			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
+			                                    [self streamBareJidStrForXMPPStream:stream]];
+			
+			[fetchRequest setPredicate:predicate];
+		}
+		
+		NSArray *allResources = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+		
+		[fetchRequest release];
+		
+		for (XMPPResourceCoreDataStorage *resource in allResources)
+		{
+			[[self managedObjectContext] deleteObject:resource];
+			
+			if (++unsavedCount >= MAX_UNSAVED_COUNT)
+			{
+				[self save];
+			}
+		}
+	}];
 }
 
 - (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
 	XMPPLogTrace();
 	
-	// Note: Deleting a user will delete all associated resources because of the cascade rule in our core data model.
-	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
-	                                          inManagedObjectContext:[self managedObjectContext]];
-	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	[fetchRequest setEntity:entity];
-	
-	if (stream)
-	{
-		[fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"stream == %@", [NSNumber numberWithPtr:stream]]];
-	}
-	
-	NSArray *allUsers = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
-	
-	[fetchRequest release];
-	
-	for (XMPPUserCoreDataStorage *user in allUsers)
-	{
-		[[self managedObjectContext] deleteObject:user];
-	}
-	
-  if ([[self managedObjectContext] hasChanges]) 
-  {
-    [[self managedObjectContext] save:nil];
-  }
+	[self scheduleBlock:^{
+		
+		// Note: Deleting a user will delete all associated resources because of the cascade rule in our core data model.
+		
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
+												  inManagedObjectContext:[self managedObjectContext]];
+		
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+		[fetchRequest setEntity:entity];
+		[fetchRequest setFetchBatchSize:MAX_UNSAVED_COUNT];
+		
+		if (stream)
+		{
+			NSPredicate *predicate;
+			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
+			                            [self streamBareJidStrForXMPPStream:stream]];
+			
+			[fetchRequest setPredicate:predicate];
+		}
+		
+		NSArray *allUsers = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+		
+		[fetchRequest release];
+		
+		for (XMPPUserCoreDataStorage *user in allUsers)
+		{
+			[[self managedObjectContext] deleteObject:user];
+			
+			if (++unsavedCount >= MAX_UNSAVED_COUNT)
+			{
+				[self save];
+			}
+		}
+	}];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -637,6 +768,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	
+	[[self class] unregisterDatabaseFileName:databaseFileName];
+	
+	[databaseFileName release];
+	[myJidCache release];
+	
 	if (storageQueue)
 	{
 		dispatch_release(storageQueue);
