@@ -20,7 +20,7 @@
 @dynamic section; // Implementation below
 
 @dynamic jidStr;
-@dynamic stream;
+@dynamic streamBareJidStr;
 
 @dynamic nickname;
 @dynamic displayName;
@@ -114,7 +114,7 @@
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                           withItem:(NSXMLElement *)item
-                        xmppStream:(XMPPStream *)stream
+                  streamBareJidStr:(NSString *)streamBareJidStr
 {
 	NSString *jidStr = [item attributeStringValueForName:@"jid"];
 	XMPPJID *jid = [XMPPJID jidWithString:jidStr];
@@ -129,7 +129,7 @@
 	newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPUserCoreDataStorage"
 	                                        inManagedObjectContext:moc];
 	
-	newUser.stream = [NSNumber numberWithPtr:stream];
+	newUser.streamBareJidStr = streamBareJidStr;
 	
 	[newUser updateWithItem:item];
 	
@@ -183,7 +183,7 @@
 	}
 }
 
-- (void)updateWithPresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
+- (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr
 {
 	XMPPResourceCoreDataStorage *resource = (XMPPResourceCoreDataStorage *)[self resourceForJID:[presence from]];
 	
@@ -206,7 +206,7 @@
 			XMPPResourceCoreDataStorage *newResource;
 			newResource = [XMPPResourceCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
 			                                                           withPresence:presence
-			                                                             xmppStream:stream];
+			                                                       streamBareJidStr:streamBareJidStr];
 			
 			[self addResourcesObject:newResource];
 		}

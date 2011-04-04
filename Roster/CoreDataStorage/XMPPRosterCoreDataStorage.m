@@ -626,10 +626,12 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		{
 			if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:stream]])
 			{
+				NSString *streamBareJidStr = [self streamBareJidStrForXMPPStream:stream];
+				
 				unsavedCount++;
 				[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
-															 withItem:item
-														   xmppStream:stream];
+				                                             withItem:item
+				                                     streamBareJidStr:streamBareJidStr];
 			}
 			else
 			{
@@ -656,10 +658,12 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 					}
 					else
 					{
+						NSString *streamBareJidStr = [self streamBareJidStrForXMPPStream:stream];
+						
 						unsavedCount++;
 						[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
-																	 withItem:item
-																   xmppStream:stream];
+						                                             withItem:item
+						                                     streamBareJidStr:streamBareJidStr];
 					}
 				}
 			}
@@ -679,7 +683,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if (user)
 		{
 			unsavedCount++;
-			[user updateWithPresence:presence xmppStream:stream];
+			[user updateWithPresence:presence streamBareJidStr:[self streamBareJidStrForXMPPStream:stream]];
 		}
 	}];
 }
