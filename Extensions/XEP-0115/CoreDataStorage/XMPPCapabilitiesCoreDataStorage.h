@@ -39,10 +39,10 @@
  * It is recommended your filname use the "sqlite" file extension.
  * If you pass nil, the default value of "XMPPCapabilities.sqlite" is automatically used.
  * 
- * If you attempt to create an instance of this class with the same dbFileName as another existing instance,
+ * If you attempt to create an instance of this class with the same databaseFileName as another existing instance,
  * this method will return nil.
  * 
- * It is highly recommended you use the sharedInstance above.
+ * It is highly recommended you use the sharedInstance above for reasons documented above.
 **/
 - (id)initWithDatabaseFilename:(NSString *)databaseFileName;
 
