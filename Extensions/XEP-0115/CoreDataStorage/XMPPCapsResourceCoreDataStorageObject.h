@@ -6,7 +6,7 @@
 @interface XMPPCapsResourceCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSString * jidStr;
-@property (nonatomic, retain) NSNumber * stream;
+@property (nonatomic, retain) NSString * streamBareJidStr;
 
 @property (nonatomic, assign) BOOL haveFailed;
 @property (nonatomic, retain) NSNumber * failed;
