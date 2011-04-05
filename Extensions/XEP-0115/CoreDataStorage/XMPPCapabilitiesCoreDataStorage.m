@@ -2,40 +2,16 @@
 #import "XMPPCapsCoreDataStorageObject.h"
 #import "XMPPCapsResourceCoreDataStorageObject.h"
 #import "XMPP.h"
-#import "XMPPInternal.h"
+#import "XMPPCoreDataStorageProtected.h"
 #import "XMPPLogging.h"
-#import "DDNumber.h"
-
-#import <objc/runtime.h>
-#import <libkern/OSAtomic.h>
 
 // Log levels: off, error, warn, info, verbose
 static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 
-// Defines how big the unsavedCount can get before triggering a database save operation.
-// This has to do with the number of unsaved NSManagedObject's.
-// 
-// Note: A save will automatically get triggered when there are no outstanding requests.
-// This simply serves to restrict memory usage, as unsaved NSManagedObject's remain in memory until saved.
-// 
-// Note: This also acts as a fetchBatchSize for NSFetchRequests.
-// 
-#define MAX_UNSAVED_COUNT 500
-
 
 @implementation XMPPCapabilitiesCoreDataStorage
 
-static NSMutableSet *databaseFileNames;
 static XMPPCapabilitiesCoreDataStorage *sharedInstance;
-
-+ (void)initialize
-{
-	static dispatch_once_t onceToken;
-	dispatch_once(&onceToken, ^{
-		
-		databaseFileNames = [[NSMutableSet alloc] init];
-	});
-}
 
 + (XMPPCapabilitiesCoreDataStorage *)sharedInstance
 {
@@ -48,312 +24,13 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	return sharedInstance;
 }
 
-+ (BOOL)registerDatabaseFileName:(NSString *)dbFileName
-{
-	BOOL result = NO;
-	
-	@synchronized(databaseFileNames)
-	{
-		if (![databaseFileNames containsObject:dbFileName])
-		{
-			[databaseFileNames addObject:dbFileName];
-			result = YES;
-		}
-	}
-	
-	return result;
-}
-
-+ (void)unregisterDatabaseFileName:(NSString *)dbFileName
-{
-	@synchronized(databaseFileNames)
-	{
-		[databaseFileNames removeObject:dbFileName];
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Module Setup
+#pragma mark Setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@synthesize databaseFileName;
-
-- (id)init
-{
-	return [self initWithDatabaseFilename:nil];
-}
-
-- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
-{
-	if ((self = [super init]))
-	{
-		if (aDatabaseFileName)
-			databaseFileName = [aDatabaseFileName copy];
-		else
-			databaseFileName = @"XMPPCapabilities.sqlite";
-		
-		if (![[self class] registerDatabaseFileName:databaseFileName])
-		{
-			[self dealloc];
-			return nil;
-		}
-		
-		myJidCache = [[NSMutableDictionary alloc] init];
-		
-		storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		                                         selector:@selector(updateJidCache:)
-		                                             name:XMPPStreamDidChangeMyJIDNotification
-		                                           object:nil];
-	}
-	return self;
-}
 
 - (BOOL)configureWithParent:(XMPPCapabilities *)aParent queue:(dispatch_queue_t)queue
 {
-	NSParameterAssert(aParent != nil);
-	NSParameterAssert(queue != NULL);
-	
-	if (queue == storageQueue)
-	{
-		// This class is designed to be run on a separate dispatch queue from its parent.
-		// This allows us to optimize the database save operations by buffering them,
-		// and executing them when demand on the storage instance is low.
-		
-		return NO;
-	}
-	
-	return YES;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Stream JID Caching
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// We cache a stream's myJID to avoid constantly querying the xmppStream for it.
-// 
-// The motivation behind this is the fact that to query the xmppStream for its myJID
-// requires going through the xmppStream's internal dispatch queue. (A dispatch_sync).
-// It's not necessarily that this is an expensive operation,
-// but the storage classes require this information for just about every operation it performs.
-// In addition, if we can stay out of xmppStream's internal dispatch queue,
-// we free it to perform more xmpp processing tasks.
-
-- (NSString *)streamBareJidStrForXMPPStream:(XMPPStream *)stream
-{
-	NSNumber *key = [[NSNumber alloc] initWithPtr:stream];
-	
-	NSString *result = (NSString *)[myJidCache objectForKey:key];
-	if (!result)
-	{
-		result = [[stream myJID] bare];
-		
-		if (result)
-			[myJidCache setObject:result forKey:key];
-		else
-			[myJidCache removeObjectForKey:key];
-	}
-	
-	[key release];
-	return result;
-}
-
-- (void)updateJidCache:(NSNotification *)notification
-{
-	// Notifications are delivered on the thread/queue that posted them.
-	// In this case, they are delivered on xmppStream's internal processing queue.
-	
-	XMPPStream *stream = (XMPPStream *)[notification object];
-	
-	dispatch_async(storageQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		NSNumber *key = [NSNumber numberWithPtr:stream];
-		if ([myJidCache objectForKey:key])
-		{
-			NSString *newBareJidStr = [[stream myJID] bare];
-			
-			if (newBareJidStr)
-				[myJidCache setObject:newBareJidStr forKey:key];
-			else
-				[myJidCache removeObjectForKey:key];
-		}
-		
-		[pool drain];
-	});
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Core Data Setup
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (NSString *)persistentStoreDirectory
-{
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
-	
-	// Attempt to find a name for this application
-	NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-	if (appName == nil) {
-		appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];	
-	}
-	
-	if (appName == nil) {
-		appName = @"xmppframework";
-	}
-	
-	
-	NSString *result = [basePath stringByAppendingPathComponent:appName];
-	
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	
-	if (![fileManager fileExistsAtPath:result])
-	{
-		[fileManager createDirectoryAtPath:result withIntermediateDirectories:YES attributes:nil error:nil];
-	}
-	
-    return result;
-}
-
-- (NSManagedObjectModel *)managedObjectModel
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
-	dispatch_block_t block = ^{
-		
-		if (managedObjectModel)
-		{
-			return;
-		}
-		
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		XMPPLogVerbose(@"%@: Creating managedObjectModel", THIS_FILE);
-		
-		NSString *path = [[NSBundle mainBundle] pathForResource:@"XMPPCapabilities" ofType:@"mom"];
-		if (path)
-		{
-			// If path is nil, then NSURL or NSManagedObjectModel will throw an exception
-			
-			NSURL *url = [NSURL fileURLWithPath:path];
-			
-			managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
-		}
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
-	else
-		dispatch_sync(storageQueue, block);
-	
-	return managedObjectModel;
-}
-
-- (NSPersistentStoreCoordinator *)persistentStoreCoordinator
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
-	dispatch_block_t block = ^{
-		
-		if (persistentStoreCoordinator)
-		{
-			return;
-		}
-		
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		NSManagedObjectModel *mom = [self managedObjectModel];
-		
-		XMPPLogVerbose(@"%@: Creating persistentStoreCoordinator", THIS_FILE);
-		
-		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
-		
-		NSString *docsPath = [self persistentStoreDirectory];
-		NSString *storePath = [docsPath stringByAppendingPathComponent:databaseFileName];
-		if (storePath)
-		{
-			// If storePath is nil, then NSURL will throw an exception
-			
-			NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
-			
-			NSError *error = nil;
-			NSPersistentStore *persistentStore;
-			persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
-			                                                           configuration:nil
-			                                                                  URL:storeUrl
-			                                                              options:nil
-			                                                                error:&error];
-			if (!persistentStore)
-			{
-			  #if TARGET_OS_IPHONE
-				XMPPLogError(@"%@:\n"
-				             @"=====================================================================================\n"
-				             @"Error creating persistent store:\n%@\n"
-				             @"Chaned core data model recently?\n"
-				             @"Quick Fix: Delete the app from device and reinstall.\n"
-				             @"=====================================================================================",
-				             THIS_FILE, error);
-			  #else
-				XMPPLogError(@"%@:\n"
-				             @"=====================================================================================\n"
-				             @"Error creating persistent store:\n%@\n"
-				             @"Chaned core data model recently?\n"
-				             @"Quick Fix: Delete the database: %@\n"
-				             @"=====================================================================================",
-				             THIS_FILE, error, storePath);
-			  #endif
-			}
-		}
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
-	else
-		dispatch_sync(storageQueue, block);
-
-    return persistentStoreCoordinator;
-}
-
-- (NSManagedObjectContext *)managedObjectContext
-{
-	// This is a private method.
-	
-	if (managedObjectContext)
-	{
-		return managedObjectContext;
-	}
-	
-	NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
-	if (coordinator)
-	{
-		XMPPLogVerbose(@"%@: Creating managedObjectContext", THIS_FILE);
-		
-		managedObjectContext = [[NSManagedObjectContext alloc] init];
-		[managedObjectContext setPersistentStoreCoordinator:coordinator];
-		
-		[self clearAllNonPersistentCapabilitiesForXMPPStream:nil];
-	}
-	
-	return managedObjectContext;
+	return [super configureWithParent:aParent queue:queue];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -376,9 +53,9 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", [jid full]];
 	else
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
-					                                     [jid full], [self streamBareJidStrForXMPPStream:stream]];
+					                                     [jid full], [[self myJIDForXMPPStream:stream] bare]];
 	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setFetchLimit:1];
@@ -406,7 +83,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@",
 	                                                           hash, hashAlg];
 	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setFetchLimit:1];
@@ -419,74 +96,63 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	return caps;
 }
 
-- (void)save
-{
-	if ([[self managedObjectContext] hasChanges])
-	{
-		NSError *error = nil;
-		if (![[self managedObjectContext] save:&error])
-		{
-			XMPPLogWarn(@"%@: Error saving - %@ %@", [self class], error, [error userInfo]);
-			
-			[[self managedObjectContext] rollback];
-		}
-	}
-	
-	unsavedCount = 0;
-}
-
-- (void)maybeSave:(int32_t)currentPendingRequests
+- (void)_clearAllNonPersistentCapabilitiesForXMPPStream:(XMPPStream *)stream
 {
 	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
 	
-	if (unsavedCount > 0)
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
+	                                          inManagedObjectContext:[self managedObjectContext]];
+	
+	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	[fetchRequest setEntity:entity];
+	[fetchRequest setFetchBatchSize:saveThreshold];
+	
+	if (stream)
 	{
-		if ((currentPendingRequests == 0) || (unsavedCount >= MAX_UNSAVED_COUNT))
+		NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
+								  [[self myJIDForXMPPStream:stream] bare]];
+		
+		[fetchRequest setPredicate:predicate];
+	}
+	
+	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+	
+	NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+	
+	for (XMPPCapsResourceCoreDataStorageObject *resource in results)
+	{
+		NSString *hash = resource.hashStr;
+		NSString *hashAlg = resource.hashAlgorithm;
+		
+		BOOL nonPersistentCapabilities = ((hash == nil) || (hashAlg == nil));
+		
+		if (nonPersistentCapabilities)
 		{
-			XMPPLogVerbose(@"%@: Triggering save (pendingRequests=%i, unsavedCount=%i)",
-							  [self class], currentPendingRequests, unsavedCount);
-			
+			XMPPCapsCoreDataStorageObject *caps = resource.caps;
+			if (caps)
+			{
+				[[self managedObjectContext] deleteObject:caps];
+			}
+		}
+		
+		[[self managedObjectContext] deleteObject:resource];
+		
+		if (++unsavedCount >= saveThreshold)
+		{
 			[self save];
 		}
 	}
 }
 
-- (void)executeBlock:(dispatch_block_t)block
-{
-	// By design this method should not be invoked from the storageQueue.
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
-	
-	// dispatch_Sync
-	//          ^
-	
-	OSAtomicIncrement32(&pendingRequests);
-	dispatch_sync(storageQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		block();
-		
-		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
-		[pool drain];
-	});
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Overrides
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)scheduleBlock:(dispatch_block_t)block
+- (void)didCreateManagedObjectContext
 {
-	// By design this method should not be invoked from the storageQueue.
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	// This method is overriden from the XMPPCoreDataStore superclass.
 	
-	// dispatch_Async
-	//          ^
-	
-	OSAtomicIncrement32(&pendingRequests);
-	dispatch_async(storageQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		block();
-		
-		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
-		[pool drain];
-	});
+	[self _clearAllNonPersistentCapabilitiesForXMPPStream:nil];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -602,7 +268,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 													 inManagedObjectContext:[self managedObjectContext]];
 			
 			resource.jidStr = [jid full];
-			resource.streamBareJidStr = [self streamBareJidStrForXMPPStream:stream];
+			resource.streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 			
 			resource.node = node;
 			resource.ver = ver;
@@ -624,8 +290,6 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		// Return whether or not the capabilities are known for the given jid
 		
 		result = (resource.caps != nil);
-		
-		unsavedCount++;
 		
 	}];
 	
@@ -712,8 +376,6 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 			{
 				resource.caps = nil;
 			}
-			
-			unsavedCount++;
 		}
 		
 	}];
@@ -804,28 +466,26 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 			caps.capabilities = capabilities;
 		}
 		
-		unsavedCount++;
-		
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		NSPredicate *predicate;
 		predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@", hash, hashAlg];
 		
-		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
 		[fetchRequest setEntity:entity];
 		[fetchRequest setPredicate:predicate];
-		[fetchRequest setFetchBatchSize:MAX_UNSAVED_COUNT];
+		[fetchRequest setFetchBatchSize:saveThreshold];
 		
 		NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 		
-		[fetchRequest release];
+		NSUInteger unsavedCount = [self numberOfUnsavedChanges];
 		
 		for (XMPPCapsResourceCoreDataStorageObject *resource in results)
 		{
 			resource.caps = caps;
 			
-			if (++unsavedCount >= MAX_UNSAVED_COUNT)
+			if (++unsavedCount >= saveThreshold)
 			{
 				[self save];
 			}
@@ -857,14 +517,10 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 			resource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPCapsResourceCoreDataStorageObject"
 													 inManagedObjectContext:[self managedObjectContext]];
 			resource.jidStr = [jid full];
-			resource.streamBareJidStr = [self streamBareJidStrForXMPPStream:stream];
-			
-			unsavedCount++;
+			resource.streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 		}
 		
 		resource.caps = caps;
-		
-		unsavedCount++;
 		
 	}];
 }
@@ -878,9 +534,6 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		resource.haveFailed = YES;
 		
-		unsavedCount++;
-		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
-		
 	}];
 }
 
@@ -891,63 +544,11 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	OSAtomicIncrement32(&pendingRequests);
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	[self scheduleBlock:^{
 		
-		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
-		                                          inManagedObjectContext:[self managedObjectContext]];
+		[self _clearAllNonPersistentCapabilitiesForXMPPStream:stream];
 		
-		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-		[fetchRequest setEntity:entity];
-		[fetchRequest setFetchBatchSize:MAX_UNSAVED_COUNT];
-		
-		if (stream)
-		{
-			NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
-			                                        [self streamBareJidStrForXMPPStream:stream]];
-			
-			[fetchRequest setPredicate:predicate];
-		}
-		
-		NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
-		
-		[fetchRequest release];
-		
-		for (XMPPCapsResourceCoreDataStorageObject *resource in results)
-		{
-			NSString *hash = resource.hashStr;
-			NSString *hashAlg = resource.hashAlgorithm;
-			
-			BOOL nonPersistentCapabilities = ((hash == nil) || (hashAlg == nil));
-			
-			if (nonPersistentCapabilities)
-			{
-				XMPPCapsCoreDataStorageObject *caps = resource.caps;
-				if (caps)
-				{
-					unsavedCount++;
-					[[self managedObjectContext] deleteObject:caps];
-				}
-			}
-			
-			unsavedCount++;
-			[[self managedObjectContext] deleteObject:resource];
-			
-			if (unsavedCount >= MAX_UNSAVED_COUNT)
-			{
-				[self save];
-			}
-		}
-		
-		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
-	else
-		dispatch_async(storageQueue, block);
+	}];
 }
 
 - (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
@@ -976,36 +577,10 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 				}
 			}
 			
-			unsavedCount++;
 			[[self managedObjectContext] deleteObject:resource];
 		}
 		
 	}];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Memory Management
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	
-	[[self class] unregisterDatabaseFileName:databaseFileName];
-	
-	[databaseFileName release];
-	[myJidCache release];
-	
-	if (storageQueue)
-	{
-		dispatch_release(storageQueue);
-	}
-	
-	[managedObjectContext release];
-	[persistentStoreCoordinator release];
-	[managedObjectModel release];
-	
-	[super dealloc];
 }
 
 @end
