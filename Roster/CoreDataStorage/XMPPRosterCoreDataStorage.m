@@ -23,12 +23,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 // 
 #define MAX_UNSAVED_COUNT 500
 
-#define AUTORELEASED_BLOCK(block) ^{                            \
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]; \
-    block();                                                    \
-    [pool drain];                                               \
-}
-
 
 @implementation XMPPRosterCoreDataStorage
 
