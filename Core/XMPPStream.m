@@ -11,7 +11,7 @@
 #import "GCDMulticastDelegate.h"
 #import "NSDataAdditions.h"
 #import "NSXMLElementAdditions.h"
-#import "RFSRVResolver.h"
+#import "XMPPSRVResolver.h"
 #import "DDList.h"
 
 #import <libkern/OSAtomic.h>
@@ -758,13 +758,13 @@ enum XMPPStreamConfig
 			state = STATE_XMPP_RESOLVING_SRV;
 			
 			[srvResolver release];
-			srvResolver = [[RFSRVResolver alloc] initWithdDelegate:self delegateQueue:xmppQueue resolverQueue:NULL];
+			srvResolver = [[XMPPSRVResolver alloc] initWithdDelegate:self delegateQueue:xmppQueue resolverQueue:NULL];
 			
 			[srvResults release];
 			srvResults = nil;
 			srvResultsIndex = 0;
 			
-			NSString *srvName = [RFSRVResolver srvNameFromXMPPDomain:[myJID domain]];
+			NSString *srvName = [XMPPSRVResolver srvNameFromXMPPDomain:[myJID domain]];
 			
 			[srvResolver startWithSRVName:srvName timeout:30.0];
 			
@@ -2976,7 +2976,7 @@ enum XMPPStreamConfig
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark RFSRVResolver Delegate
+#pragma mark XMPPSRVResolver Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)tryNextSrvResult
@@ -2990,7 +2990,7 @@ enum XMPPStreamConfig
 	
 	while (srvResultsIndex < [srvResults count])
 	{
-		RFSRVRecord *srvRecord = [srvResults objectAtIndex:srvResultsIndex];
+		XMPPSRVRecord *srvRecord = [srvResults objectAtIndex:srvResultsIndex];
 		NSString *srvHost = srvRecord.target;
 		UInt16 srvPort    = srvRecord.port;
 		
@@ -3027,7 +3027,7 @@ enum XMPPStreamConfig
 	}
 }
 
-- (void)srvResolver:(RFSRVResolver *)sender didResolveRecords:(NSArray *)records
+- (void)srvResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
 	
@@ -3043,7 +3043,7 @@ enum XMPPStreamConfig
 	[self tryNextSrvResult];
 }
 
-- (void)srvResolver:(RFSRVResolver *)sender didNotResolveDueToError:(NSError *)error
+- (void)srvResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
 	

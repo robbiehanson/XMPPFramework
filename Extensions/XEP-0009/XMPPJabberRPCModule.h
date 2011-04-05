@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "XMPPModule.h"
 
-extern NSString *const RFJabberRPCErrorDomain;
+extern NSString *const XMPPJabberRPCErrorDomain;
 
 @class XMPPJID;
 @class XMPPStream;
