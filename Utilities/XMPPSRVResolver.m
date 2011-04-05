@@ -1,17 +1,17 @@
 //
-//  RFSRVResolver.m
+//  XMPPSRVResolver.m
 //
 //  Originally created by Eric Chamberlain on 6/15/10.
 //  Based on SRVResolver by Apple, Inc.
 //
 
-#import "RFSRVResolver.h"
+#import "XMPPSRVResolver.h"
 #import "XMPPLogging.h"
 
 #include <dns_util.h>
 #include <stdlib.h>
 
-NSString *const RFSRVResolverErrorDomain = @"RFSRVResolverErrorDomain";
+NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 // Log levels: off, error, warn, info, verbose
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
@@ -20,12 +20,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface RFSRVRecord ()
+@interface XMPPSRVRecord ()
 
 @property(nonatomic, assign) NSUInteger srvResultsIndex;
 @property(nonatomic, assign) NSUInteger sum;
 
-- (NSComparisonResult)compareByPriority:(RFSRVRecord *)aRecord;
+- (NSComparisonResult)compareByPriority:(XMPPSRVRecord *)aRecord;
 
 @end
 
@@ -33,7 +33,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation RFSRVResolver
+@implementation XMPPSRVResolver
 
 - (id)initWithdDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)dq resolverQueue:(dispatch_queue_t)rq
 {
@@ -55,7 +55,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		}
 		else
 		{
-			resolverQueue = dispatch_queue_create("RFSRVResolver", NULL);
+			resolverQueue = dispatch_queue_create("XMPPSRVResolver", NULL);
 		}
 		
 		results = [[NSMutableArray alloc] initWithCapacity:2];
@@ -155,7 +155,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		
 		if (srvResultsCount == 1)
 		{
-			RFSRVRecord *srvRecord = [results objectAtIndex:0];
+			XMPPSRVRecord *srvRecord = [results objectAtIndex:0];
 			
 			[sortedResults addObject:srvRecord];
 			[results removeObjectAtIndex:0];
@@ -175,7 +175,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 			NSUInteger runningSum = 0;
 			NSMutableArray *samePriorityRecords = [NSMutableArray arrayWithCapacity:srvResultsCount];
 			
-			RFSRVRecord *srvRecord = [results objectAtIndex:0];
+			XMPPSRVRecord *srvRecord = [results objectAtIndex:0];
 			
 			NSUInteger initialPriority = srvRecord.priority;
 			NSUInteger index = 0;
@@ -312,10 +312,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 {
 	XMPPLogTrace2(@"%@: %@ %i", THIS_FILE, THIS_METHOD, (int)sdErr);
 	
-	[self failWithError:[NSError errorWithDomain:RFSRVResolverErrorDomain code:sdErr userInfo:nil]];
+	[self failWithError:[NSError errorWithDomain:XMPPSRVResolverErrorDomain code:sdErr userInfo:nil]];
 }
 
-- (RFSRVRecord *)processRecord:(const void *)rdata length:(uint16_t)rdlen
+- (XMPPSRVRecord *)processRecord:(const void *)rdata length:(uint16_t)rdlen
 {
 	XMPPLogTrace();
 	
@@ -332,7 +332,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	// Rather than write a whole bunch of icky parsing code, I just synthesise
 	// a resource record and use <dns_util.h>.
 	
-	RFSRVRecord *result = nil;
+	XMPPSRVRecord *result = nil;
 	
 	NSMutableData *         rrData;
 	dns_resource_record_t * rr;
@@ -368,7 +368,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 			UInt16 weight   = rr->data.SRV->weight;
 			UInt16 port     = rr->data.SRV->port;
 			
-			result = [RFSRVRecord recordWithPriority:priority weight:weight port:port target:target];
+			result = [XMPPSRVRecord recordWithPriority:priority weight:weight port:port target:target];
         }
 		
         dns_free_resource_record(rr);
@@ -393,7 +393,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 	// It does some preliminary work, but the bulk of the interesting stuff 
 	// is done in the processRecord:length: method.
 	
-    RFSRVResolver *resolver = (RFSRVResolver *)context;
+    XMPPSRVResolver *resolver = (XMPPSRVResolver *)context;
 	
 	NSCAssert(dispatch_get_current_queue() == resolver->resolverQueue, @"Invoked on incorrect queue");
     
@@ -414,7 +414,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		}
 		else
 		{
-			RFSRVRecord *record = [resolver processRecord:rdata length:rdlen];
+			XMPPSRVRecord *record = [resolver processRecord:rdata length:rdlen];
 			if (record)
 			{
 				[resolver->results addObject:record];
@@ -547,7 +547,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 				NSString *errMsg = @"Operation timed out";
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 				
-				NSError *err = [NSError errorWithDomain:RFSRVResolverErrorDomain code:0 userInfo:userInfo];
+				NSError *err = [NSError errorWithDomain:XMPPSRVResolverErrorDomain code:0 userInfo:userInfo];
 				
 				[self failWithError:err];
 				
@@ -633,7 +633,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation RFSRVRecord
+@implementation XMPPSRVRecord
 
 @synthesize priority;
 @synthesize weight;
@@ -644,9 +644,9 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 @synthesize srvResultsIndex;
 
 
-+ (RFSRVRecord *)recordWithPriority:(UInt16)p1 weight:(UInt16)w port:(UInt16)p2 target:(NSString *)t
++ (XMPPSRVRecord *)recordWithPriority:(UInt16)p1 weight:(UInt16)w port:(UInt16)p2 target:(NSString *)t
 {
-	return [[[RFSRVRecord alloc] initWithPriority:p1 weight:w port:p2 target:t] autorelease];
+	return [[[XMPPSRVRecord alloc] initWithPriority:p1 weight:w port:p2 target:t] autorelease];
 }
 
 - (id)initWithPriority:(UInt16)p1 weight:(UInt16)w port:(UInt16)p2 target:(NSString *)t
@@ -676,7 +676,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 			NSStringFromClass([self class]), self, target, port, priority, weight];
 }
 
-- (NSComparisonResult)compareByPriority:(RFSRVRecord *)aRecord
+- (NSComparisonResult)compareByPriority:(XMPPSRVRecord *)aRecord
 {
 	UInt16 mPriority = self.priority;
 	UInt16 aPriority = aRecord.priority;
