@@ -22,7 +22,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #import "XMPPCapabilities.h"
 #endif
 
-NSString *const RFJabberRPCErrorDomain = @"RFJabberRPCErrorDomain";
+NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -233,7 +233,7 @@ NSString *const RFJabberRPCErrorDomain = @"RFJabberRPCErrorDomain";
 		[rpcID cancelTimer];
 		[rpcIDs removeObjectForKey:elementID];
 		
-		NSError *error = [NSError errorWithDomain:RFJabberRPCErrorDomain
+		NSError *error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain
 		                                     code:1400
 		                                 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
 		                                          @"Request timed out", @"error",nil]];
@@ -292,7 +292,7 @@ NSString *const RFJabberRPCErrorDomain = @"RFJabberRPCErrorDomain";
 				// TODO: implement error parsing
 				// not much specified in XEP, only 403 forbidden error
 				NSXMLElement *errorElement = [iq childErrorElement];
-				NSError *error = [NSError errorWithDomain:RFJabberRPCErrorDomain 
+				NSError *error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain 
 													 code:[errorElement attributeIntValueForName:@"code"] 
 												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:	
 														   [errorElement attributesAsDictionary],@"error",

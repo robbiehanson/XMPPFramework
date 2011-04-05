@@ -116,7 +116,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		// we should produce an error
 		// response should be a dict
 		if (error) {
-			*error = [NSError errorWithDomain:RFJabberRPCErrorDomain 
+			*error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain 
 										 code:[[response objectForKey:@"faultCode"] intValue] 
 									 userInfo:(NSDictionary *)response];
 		}

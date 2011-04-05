@@ -6,7 +6,7 @@
 #endif
 
 @class GCDAsyncSocket;
-@class RFSRVResolver;
+@class XMPPSRVResolver;
 @class DDList;
 @class XMPPParser;
 @class XMPPJID;
@@ -69,7 +69,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	DDList *registeredModules;
 	NSMutableDictionary *autoDelegateDict;
 	
-	RFSRVResolver *srvResolver;
+	XMPPSRVResolver *srvResolver;
 	NSArray *srvResults;
 	NSUInteger srvResultsIndex;
 	
