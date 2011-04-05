@@ -1,5 +1,5 @@
 //
-//  RFJabberRPCModule.h
+//  XMPPJabberRPCModule.h
 //  XEP-0009
 //
 //  Originally created by Eric Chamberlain on 5/16/10.
@@ -13,10 +13,10 @@ extern NSString *const RFJabberRPCErrorDomain;
 @class XMPPJID;
 @class XMPPStream;
 @class XMPPIQ;
-@protocol RFJabberRPCModuleDelegate;
+@protocol XMPPJabberRPCModuleDelegate;
 
 
-@interface RFJabberRPCModule : XMPPModule
+@interface XMPPJabberRPCModule : XMPPModule
 {
 	NSMutableDictionary *rpcIDs;
 	NSTimeInterval defaultTimeout;
@@ -34,15 +34,15 @@ extern NSString *const RFJabberRPCErrorDomain;
 @end
 
 
-@protocol RFJabberRPCModuleDelegate
+@protocol XMPPJabberRPCModuleDelegate
 @optional
 
 // sent when transport error is received
--(void)jabberRPC:(RFJabberRPCModule *)sender elementID:(NSString *)elementID didReceiveError:(NSError *)error;
+-(void)jabberRPC:(XMPPJabberRPCModule *)sender elementID:(NSString *)elementID didReceiveError:(NSError *)error;
 
 // sent when a methodResponse comes back
--(void)jabberRPC:(RFJabberRPCModule *)sender elementID:(NSString *)elementID didReceiveMethodResponse:(id)response;
+-(void)jabberRPC:(XMPPJabberRPCModule *)sender elementID:(NSString *)elementID didReceiveMethodResponse:(id)response;
 
 // sent when a Jabber-RPC server request is received
--(void)jabberRPC:(RFJabberRPCModule *)sender didReceiveSetIQ:(XMPPIQ *)iq;
+-(void)jabberRPC:(XMPPJabberRPCModule *)sender didReceiveSetIQ:(XMPPIQ *)iq;
 @end
