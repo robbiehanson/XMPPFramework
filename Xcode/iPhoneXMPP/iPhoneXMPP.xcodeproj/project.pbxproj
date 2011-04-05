@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		070400451347CB140092A737 /* defaultPerson.png in Resources */ = {isa = PBXBuildFile; fileRef = 070400441347CB140092A737 /* defaultPerson.png */; };
-		070400981347CB520092A737 /* RFJabberRPCModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0704004D1347CB510092A737 /* RFJabberRPCModule.m */; };
 		070400991347CB520092A737 /* XMPPIQ+JabberRPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 0704004F1347CB510092A737 /* XMPPIQ+JabberRPC.m */; };
 		0704009A1347CB520092A737 /* XMPPIQ+JabberRPCResonse.m in Sources */ = {isa = PBXBuildFile; fileRef = 070400511347CB510092A737 /* XMPPIQ+JabberRPCResonse.m */; };
 		0704009B1347CB520092A737 /* XMPPMessage+XEP0045.m in Sources */ = {isa = PBXBuildFile; fileRef = 070400541347CB510092A737 /* XMPPMessage+XEP0045.m */; };
@@ -45,6 +44,7 @@
 		0704FFC9134794020092A737 /* SettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0704FFC7134794020092A737 /* SettingsViewController.xib */; };
 		07AF16B9134812E20084D82A /* XMPPvCardAvatarModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF16B8134812E20084D82A /* XMPPvCardAvatarModule.m */; };
 		07AF1703134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF1702134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m */; };
+		07AF1892134BC0320084D82A /* XMPPJabberRPCModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF1891134BC0320084D82A /* XMPPJabberRPCModule.m */; };
 		1D3623260D0F684500981E51 /* iPhoneXMPPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -94,8 +94,6 @@
 
 /* Begin PBXFileReference section */
 		070400441347CB140092A737 /* defaultPerson.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = defaultPerson.png; sourceTree = "<group>"; };
-		0704004C1347CB510092A737 /* RFJabberRPCModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFJabberRPCModule.h; sourceTree = "<group>"; };
-		0704004D1347CB510092A737 /* RFJabberRPCModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RFJabberRPCModule.m; sourceTree = "<group>"; };
 		0704004E1347CB510092A737 /* XMPPIQ+JabberRPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPIQ+JabberRPC.h"; sourceTree = "<group>"; };
 		0704004F1347CB510092A737 /* XMPPIQ+JabberRPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XMPPIQ+JabberRPC.m"; sourceTree = "<group>"; };
 		070400501347CB510092A737 /* XMPPIQ+JabberRPCResonse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPIQ+JabberRPCResonse.h"; sourceTree = "<group>"; };
@@ -165,6 +163,8 @@
 		07AF16F7134A4E740084D82A /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPInternal.h; path = ../../Core/XMPPInternal.h; sourceTree = "<group>"; };
 		07AF1701134A544D0084D82A /* XMPPGroupCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPGroupCoreDataStorageObject.h; path = ../../Roster/CoreDataStorage/XMPPGroupCoreDataStorageObject.h; sourceTree = "<group>"; };
 		07AF1702134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPGroupCoreDataStorageObject.m; path = ../../Roster/CoreDataStorage/XMPPGroupCoreDataStorageObject.m; sourceTree = "<group>"; };
+		07AF1890134BC0320084D82A /* XMPPJabberRPCModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPJabberRPCModule.h; sourceTree = "<group>"; };
+		07AF1891134BC0320084D82A /* XMPPJabberRPCModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPJabberRPCModule.m; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* iPhoneXMPPAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iPhoneXMPPAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iPhoneXMPPAppDelegate.m; sourceTree = "<group>"; };
@@ -302,8 +302,8 @@
 		0704004B1347CB510092A737 /* XEP-0009 */ = {
 			isa = PBXGroup;
 			children = (
-				0704004C1347CB510092A737 /* RFJabberRPCModule.h */,
-				0704004D1347CB510092A737 /* RFJabberRPCModule.m */,
+				07AF1890134BC0320084D82A /* XMPPJabberRPCModule.h */,
+				07AF1891134BC0320084D82A /* XMPPJabberRPCModule.m */,
 				0704004E1347CB510092A737 /* XMPPIQ+JabberRPC.h */,
 				0704004F1347CB510092A737 /* XMPPIQ+JabberRPC.m */,
 				070400501347CB510092A737 /* XMPPIQ+JabberRPCResonse.h */,
@@ -826,7 +826,6 @@
 				DCC0BF051301CEC700EC45D2 /* XMPPRosterCoreDataStorage.m in Sources */,
 				DCC0BF061301CEC700EC45D2 /* XMPPUserCoreDataStorage.m in Sources */,
 				0704FFC8134794020092A737 /* SettingsViewController.m in Sources */,
-				070400981347CB520092A737 /* RFJabberRPCModule.m in Sources */,
 				070400991347CB520092A737 /* XMPPIQ+JabberRPC.m in Sources */,
 				0704009A1347CB520092A737 /* XMPPIQ+JabberRPCResonse.m in Sources */,
 				0704009B1347CB520092A737 /* XMPPMessage+XEP0045.m in Sources */,
@@ -861,6 +860,7 @@
 				07AF16B9134812E20084D82A /* XMPPvCardAvatarModule.m in Sources */,
 				07AF1703134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m in Sources */,
 				DC488444134AEB06000F79C5 /* XMPPCoreDataStorage.m in Sources */,
+				07AF1892134BC0320084D82A /* XMPPJabberRPCModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
