@@ -1,5 +1,5 @@
 //
-//  RFSRVResolver.h
+//  XMPPSRVResolver.h
 // 
 //  Originally created by Eric Chamberlain on 6/15/10.
 //  Based on SRVResolver by Apple, Inc.
@@ -8,10 +8,10 @@
 #import <Foundation/Foundation.h>
 #import <dns_sd.h>
 
-extern NSString *const RFSRVResolverErrorDomain;
+extern NSString *const XMPPSRVResolverErrorDomain;
 
 
-@interface RFSRVResolver : NSObject
+@interface XMPPSRVResolver : NSObject
 {
 	id delegate;
 	dispatch_queue_t delegateQueue;
@@ -51,10 +51,10 @@ extern NSString *const RFSRVResolverErrorDomain;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol RFSRVResolverDelegate
+@protocol XMPPSRVResolverDelegate
 
-- (void)srvResolver:(RFSRVResolver *)sender didResolveRecords:(NSArray *)records;
-- (void)srvResolver:(RFSRVResolver *)sender didNotResolveDueToError:(NSError *)error;
+- (void)srvResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records;
+- (void)srvResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error;
 
 @end
 
@@ -62,7 +62,7 @@ extern NSString *const RFSRVResolverErrorDomain;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface RFSRVRecord : NSObject
+@interface XMPPSRVRecord : NSObject
 {
 	UInt16 priority;
 	UInt16 weight;
@@ -73,7 +73,7 @@ extern NSString *const RFSRVResolverErrorDomain;
 	NSUInteger srvResultsIndex;
 }
 
-+ (RFSRVRecord *)recordWithPriority:(UInt16)priority weight:(UInt16)weight port:(UInt16)port target:(NSString *)target;
++ (XMPPSRVRecord *)recordWithPriority:(UInt16)priority weight:(UInt16)weight port:(UInt16)port target:(NSString *)target;
 
 - (id)initWithPriority:(UInt16)priority weight:(UInt16)weight port:(UInt16)port target:(NSString *)target;
 

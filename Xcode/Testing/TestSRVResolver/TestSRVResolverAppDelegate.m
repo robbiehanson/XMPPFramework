@@ -1,5 +1,5 @@
 #import "TestSRVResolverAppDelegate.h"
-#import "RFSRVResolver.h"
+#import "XMPPSRVResolver.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -15,11 +15,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
 	
-	srvResolver = [[RFSRVResolver alloc] initWithdDelegate:self
+	srvResolver = [[XMPPSRVResolver alloc] initWithdDelegate:self
 	                                         delegateQueue:dispatch_get_main_queue()
 	                                         resolverQueue:NULL];
 	
-//	srvResolver = [[RFSRVResolver alloc] initWithdDelegate:self
+//	srvResolver = [[XMPPSRVResolver alloc] initWithdDelegate:self
 //	                                         delegateQueue:dispatch_get_main_queue()
 //	                                         resolverQueue:dispatch_get_main_queue()];
 	
@@ -29,7 +29,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //	NSString *domain = @"someNonExistentDomain_moocow";
 //	NSString *domain = nil;
 	
-	NSString *srvName = [RFSRVResolver srvNameFromXMPPDomain:domain];
+	NSString *srvName = [XMPPSRVResolver srvNameFromXMPPDomain:domain];
 	
 	DDLogVerbose(@"XMPP Domain: %@", domain);
 	DDLogVerbose(@"SRV Name: %@", srvName);
@@ -39,12 +39,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //	[srvResolver stop];
 }
 
-- (void)srvResolver:(RFSRVResolver *)sender didResolveRecords:(NSArray *)records
+- (void)srvResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records
 {
 	DDLogInfo(@"srvResolver:%p didResolveRecords:\n%@", sender, records);
 }
 
-- (void)srvResolver:(RFSRVResolver *)sender didNotResolveDueToError:(NSError *)error
+- (void)srvResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error
 {
 	DDLogInfo(@"srvResolver:%p didNotResolveDueToError:\n%@", sender, error);
 }

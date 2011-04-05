@@ -1,11 +1,11 @@
 #import <Cocoa/Cocoa.h>
 
-@class RFSRVResolver;
+@class XMPPSRVResolver;
 
 
 @interface TestSRVResolverAppDelegate : NSObject <NSApplicationDelegate>
 {
-	RFSRVResolver *srvResolver;
+	XMPPSRVResolver *srvResolver;
 	NSWindow *window;
 }
 

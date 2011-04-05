@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07AF18A9134BC3C30084D82A /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF18A8134BC3C30084D82A /* XMPPSRVResolver.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -45,7 +46,6 @@
 		DC84BAB9124406990055A459 /* NSXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAB6124406990055A459 /* NSXMLElementAdditions.m */; };
 		DC84BAE4124407B60055A459 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE1124407B60055A459 /* LibIDN.m */; };
 		DC84BAE5124407B60055A459 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE3124407B60055A459 /* GCDMulticastDelegate.m */; };
-		DC84BAED124407DF0055A459 /* RFSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAEC124407DF0055A459 /* RFSRVResolver.m */; };
 		DC84BB03124407F50055A459 /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAF2124407F50055A459 /* XMPPElement.m */; };
 		DC84BB04124407F50055A459 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAF4124407F50055A459 /* XMPPIQ.m */; };
 		DC84BB05124407F50055A459 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAF6124407F50055A459 /* XMPPJID.m */; };
@@ -84,6 +84,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		07AF18A7134BC3C30084D82A /* XMPPSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSRVResolver.h; path = ../../Utilities/XMPPSRVResolver.h; sourceTree = "<group>"; };
+		07AF18A8134BC3C30084D82A /* XMPPSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSRVResolver.m; path = ../../Utilities/XMPPSRVResolver.m; sourceTree = "<group>"; };
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -162,8 +164,6 @@
 		DC84BAE1124407B60055A459 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
 		DC84BAE2124407B60055A459 /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDMulticastDelegate.h; path = ../../Utilities/GCDMulticastDelegate.h; sourceTree = SOURCE_ROOT; };
 		DC84BAE3124407B60055A459 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDMulticastDelegate.m; path = ../../Utilities/GCDMulticastDelegate.m; sourceTree = SOURCE_ROOT; };
-		DC84BAEB124407DF0055A459 /* RFSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RFSRVResolver.h; path = ../../Utilities/RFSRVResolver.h; sourceTree = SOURCE_ROOT; };
-		DC84BAEC124407DF0055A459 /* RFSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RFSRVResolver.m; path = ../../Utilities/RFSRVResolver.m; sourceTree = SOURCE_ROOT; };
 		DC84BAF0124407F50055A459 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../../Core/XMPP.h; sourceTree = SOURCE_ROOT; };
 		DC84BAF1124407F50055A459 /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPElement.h; path = ../../Core/XMPPElement.h; sourceTree = SOURCE_ROOT; };
 		DC84BAF2124407F50055A459 /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPElement.m; path = ../../Core/XMPPElement.m; sourceTree = SOURCE_ROOT; };
@@ -583,12 +583,12 @@
 		DCB9BAF80DDC962C002DA335 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				07AF18A7134BC3C30084D82A /* XMPPSRVResolver.h */,
+				07AF18A8134BC3C30084D82A /* XMPPSRVResolver.m */,
 				DC84BAE0124407B60055A459 /* LibIDN.h */,
 				DC84BAE1124407B60055A459 /* LibIDN.m */,
 				DC84BAE2124407B60055A459 /* GCDMulticastDelegate.h */,
 				DC84BAE3124407B60055A459 /* GCDMulticastDelegate.m */,
-				DC84BAEB124407DF0055A459 /* RFSRVResolver.h */,
-				DC84BAEC124407DF0055A459 /* RFSRVResolver.m */,
 				DC73028112F37F8A00549AC7 /* DDList.h */,
 				DC73028212F37F8A00549AC7 /* DDList.m */,
 			);
@@ -800,7 +800,6 @@
 				DC84BAB9124406990055A459 /* NSXMLElementAdditions.m in Sources */,
 				DC84BAE4124407B60055A459 /* LibIDN.m in Sources */,
 				DC84BAE5124407B60055A459 /* GCDMulticastDelegate.m in Sources */,
-				DC84BAED124407DF0055A459 /* RFSRVResolver.m in Sources */,
 				DC84BB03124407F50055A459 /* XMPPElement.m in Sources */,
 				DC84BB04124407F50055A459 /* XMPPIQ.m in Sources */,
 				DC84BB05124407F50055A459 /* XMPPJID.m in Sources */,
@@ -853,6 +852,7 @@
 				DC4883FF13496EF3000F79C5 /* XMPPvCardAvatarModule.m in Sources */,
 				DC0AC2BC134A6F6F00D053E3 /* XMPPGroupCoreDataStorageObject.m in Sources */,
 				DC488434134AEA60000F79C5 /* XMPPCoreDataStorage.m in Sources */,
+				07AF18A9134BC3C30084D82A /* XMPPSRVResolver.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
