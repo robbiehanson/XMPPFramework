@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07AF18C1134BC4E70084D82A /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF18C0134BC4E70084D82A /* XMPPSRVResolver.m */; };
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		256AC3DA0F4B6AC300CF3369 /* TestSRVResolverAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 256AC3D90F4B6AC300CF3369 /* TestSRVResolverAppDelegate.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
@@ -16,11 +17,12 @@
 		DC73039512F53A3000549AC7 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73038F12F53A3000549AC7 /* DDFileLogger.m */; };
 		DC73039612F53A3000549AC7 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73039112F53A3000549AC7 /* DDLog.m */; };
 		DC73039712F53A3000549AC7 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73039312F53A3000549AC7 /* DDTTYLogger.m */; };
-		DC73039A12F53A5400549AC7 /* RFSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DC73039912F53A5400549AC7 /* RFSRVResolver.m */; };
 		DC73039C12F53AAD00549AC7 /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DC73039B12F53AAD00549AC7 /* libresolv.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		07AF18BF134BC4E70084D82A /* XMPPSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSRVResolver.h; path = ../../../Utilities/XMPPSRVResolver.h; sourceTree = "<group>"; };
+		07AF18C0134BC4E70084D82A /* XMPPSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSRVResolver.m; path = ../../../Utilities/XMPPSRVResolver.m; sourceTree = "<group>"; };
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -41,8 +43,6 @@
 		DC73039112F53A3000549AC7 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDLog.m; path = ../../../Vendor/CocoaLumberjack/DDLog.m; sourceTree = SOURCE_ROOT; };
 		DC73039212F53A3000549AC7 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDTTYLogger.h; path = ../../../Vendor/CocoaLumberjack/DDTTYLogger.h; sourceTree = SOURCE_ROOT; };
 		DC73039312F53A3000549AC7 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDTTYLogger.m; path = ../../../Vendor/CocoaLumberjack/DDTTYLogger.m; sourceTree = SOURCE_ROOT; };
-		DC73039812F53A5400549AC7 /* RFSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RFSRVResolver.h; path = ../../../Utilities/RFSRVResolver.h; sourceTree = SOURCE_ROOT; };
-		DC73039912F53A5400549AC7 /* RFSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RFSRVResolver.m; path = ../../../Utilities/RFSRVResolver.m; sourceTree = SOURCE_ROOT; };
 		DC73039B12F53AAD00549AC7 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		DC7303A112F53C7900549AC7 /* XMPPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPLogging.h; path = ../../../Core/XMPPLogging.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -63,9 +63,9 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				07AF18BF134BC4E70084D82A /* XMPPSRVResolver.h */,
+				07AF18C0134BC4E70084D82A /* XMPPSRVResolver.m */,
 				DC7303A112F53C7900549AC7 /* XMPPLogging.h */,
-				DC73039812F53A5400549AC7 /* RFSRVResolver.h */,
-				DC73039912F53A5400549AC7 /* RFSRVResolver.m */,
 				256AC3D80F4B6AC300CF3369 /* TestSRVResolverAppDelegate.h */,
 				256AC3D90F4B6AC300CF3369 /* TestSRVResolverAppDelegate.m */,
 			);
@@ -223,7 +223,7 @@
 				DC73039512F53A3000549AC7 /* DDFileLogger.m in Sources */,
 				DC73039612F53A3000549AC7 /* DDLog.m in Sources */,
 				DC73039712F53A3000549AC7 /* DDTTYLogger.m in Sources */,
-				DC73039A12F53A5400549AC7 /* RFSRVResolver.m in Sources */,
+				07AF18C1134BC4E70084D82A /* XMPPSRVResolver.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
