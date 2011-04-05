@@ -9,7 +9,7 @@
 
 #import "NSDataAdditions.h"
 #import "NSXMLElementAdditions.h"
-#import "RFJabberRPCModule.h"
+#import "XMPPJabberRPCModule.h"
 
 #import "XMPPLogging.h"
 

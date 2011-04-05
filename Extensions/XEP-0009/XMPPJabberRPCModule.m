@@ -1,11 +1,11 @@
 //
-//  RFJabberRPCModule.m
+//  XMPPJabberRPCModule.m
 //  XEP-0009
 //
 //  Originally created by Eric Chamberlain on 5/16/10.
 //
 
-#import "RFJabberRPCModule.h"
+#import "XMPPJabberRPCModule.h"
 #import "XMPP.h"
 #import "XMPPIQ+JabberRPC.h"
 #import "XMPPIQ+JabberRPCResonse.h"
@@ -94,7 +94,7 @@ NSString *const RFJabberRPCErrorDomain = @"RFJabberRPCErrorDomain";
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation RFJabberRPCModule
+@implementation XMPPJabberRPCModule
 
 @dynamic defaultTimeout;
 
