@@ -122,8 +122,6 @@ static NSMutableSet *databaseFileNames;
 
 - (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
 {
-	NSParameterAssert(aDatabaseFileName != nil);
-	
 	if ((self = [super init]))
 	{
 		if (aDatabaseFileName)
