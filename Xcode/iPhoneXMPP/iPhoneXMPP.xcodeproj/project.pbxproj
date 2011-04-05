@@ -57,6 +57,7 @@
 		DC1F97E81152CA4E00138A8F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F97E71152CA4E00138A8F /* CFNetwork.framework */; };
 		DC1F98371152CBC200138A8F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F98361152CBC200138A8F /* SystemConfiguration.framework */; };
 		DC1F985D1152CC2B00138A8F /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F985C1152CC2B00138A8F /* CoreData.framework */; };
+		DC488444134AEB06000F79C5 /* XMPPCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC488442134AEB06000F79C5 /* XMPPCoreDataStorage.m */; };
 		DC84BBB112440A220055A459 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BBA912440A220055A459 /* DDXMLDocument.m */; };
 		DC84BBB212440A220055A459 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BBAB12440A220055A459 /* DDXMLElement.m */; };
 		DC84BBB312440A220055A459 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BBAD12440A220055A459 /* DDXMLNode.m */; };
@@ -181,6 +182,9 @@
 		DC1F97E71152CA4E00138A8F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		DC1F98361152CBC200138A8F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		DC1F985C1152CC2B00138A8F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		DC488441134AEB06000F79C5 /* XMPPCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCoreDataStorage.h; sourceTree = "<group>"; };
+		DC488442134AEB06000F79C5 /* XMPPCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCoreDataStorage.m; sourceTree = "<group>"; };
+		DC488443134AEB06000F79C5 /* XMPPCoreDataStorageProtected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCoreDataStorageProtected.h; sourceTree = "<group>"; };
 		DC84BBA212440A040055A459 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "../../Vendor/libidn/idn-int.h"; sourceTree = SOURCE_ROOT; };
 		DC84BBA312440A040055A459 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringprep.h; path = ../../Vendor/libidn/stringprep.h; sourceTree = SOURCE_ROOT; };
 		DC84BBA712440A220055A459 /* DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXML.h; path = ../../Vendor/KissXML/DDXML.h; sourceTree = SOURCE_ROOT; };
@@ -277,6 +281,7 @@
 		070400471347CB510092A737 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				DC488440134AEB06000F79C5 /* CoreDataStorage */,
 				0704004B1347CB510092A737 /* XEP-0009 */,
 				070400521347CB510092A737 /* XEP-0045 */,
 				070400591347CB510092A737 /* XEP-0054 */,
@@ -678,6 +683,16 @@
 			name = CoreData;
 			sourceTree = "<group>";
 		};
+		DC488440134AEB06000F79C5 /* CoreDataStorage */ = {
+			isa = PBXGroup;
+			children = (
+				DC488441134AEB06000F79C5 /* XMPPCoreDataStorage.h */,
+				DC488442134AEB06000F79C5 /* XMPPCoreDataStorage.m */,
+				DC488443134AEB06000F79C5 /* XMPPCoreDataStorageProtected.h */,
+			);
+			path = CoreDataStorage;
+			sourceTree = "<group>";
+		};
 		DC84BBA0124409CE0055A459 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
@@ -845,6 +860,7 @@
 				070400B71347CB520092A737 /* XMPPElement+Delay.m in Sources */,
 				07AF16B9134812E20084D82A /* XMPPvCardAvatarModule.m in Sources */,
 				07AF1703134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m in Sources */,
+				DC488444134AEB06000F79C5 /* XMPPCoreDataStorage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
