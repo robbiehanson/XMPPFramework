@@ -6,7 +6,7 @@
 //
 
 #import "XMPPGroupCoreDataStorageObject.h"
-#import "XMPPUserCoreDataStorage.h"
+#import "XMPPUserCoreDataStorageObject.h"
 
 
 @implementation XMPPGroupCoreDataStorageObject
@@ -63,7 +63,7 @@
 @dynamic name;
 @dynamic users;
 
-- (void)addUsersObject:(XMPPUserCoreDataStorage *)value {    
+- (void)addUsersObject:(XMPPUserCoreDataStorageObject *)value {    
   NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];
   [self willChangeValueForKey:@"users" withSetMutation:NSKeyValueUnionSetMutation usingObjects:changedObjects];
   [[self primitiveValueForKey:@"users"] addObject:value];
@@ -71,7 +71,7 @@
   [changedObjects release];
 }
 
-- (void)removeUsersObject:(XMPPUserCoreDataStorage *)value {
+- (void)removeUsersObject:(XMPPUserCoreDataStorageObject *)value {
   NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];
   [self willChangeValueForKey:@"users" withSetMutation:NSKeyValueMinusSetMutation usingObjects:changedObjects];
   [[self primitiveValueForKey:@"users"] removeObject:value];

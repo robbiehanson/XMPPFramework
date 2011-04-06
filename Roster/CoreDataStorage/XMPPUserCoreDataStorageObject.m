@@ -1,11 +1,11 @@
 #import "XMPP.h"
 #import "XMPPRosterCoreDataStorage.h"
-#import "XMPPUserCoreDataStorage.h"
-#import "XMPPResourceCoreDataStorage.h"
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPGroupCoreDataStorageObject.h"
 #import "DDNumber.h"
 
-@interface XMPPUserCoreDataStorage ()
+@interface XMPPUserCoreDataStorageObject ()
 
 @property(nonatomic,retain) XMPPJID *primitiveJid;
 @property(nonatomic,retain) NSString *primitiveJidStr;
@@ -21,7 +21,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation XMPPUserCoreDataStorage
+@implementation XMPPUserCoreDataStorageObject
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Accessors
@@ -183,12 +183,12 @@
 	
 	if (jid == nil)
 	{
-		NSLog(@"XMPPUserCoreDataStorage: invalid item (missing or invalid jid): %@", item);
+		NSLog(@"XMPPUserCoreDataStorageObject: invalid item (missing or invalid jid): %@", item);
 		return nil;
 	}
 	
-	XMPPUserCoreDataStorage *newUser;
-	newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPUserCoreDataStorage"
+	XMPPUserCoreDataStorageObject *newUser;
+	newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPUserCoreDataStorageObject"
 	                                        inManagedObjectContext:moc];
 	
 	newUser.streamBareJidStr = streamBareJidStr;
@@ -229,7 +229,7 @@
 	
 	if (jid == nil)
 	{
-		NSLog(@"XMPPUserCoreDataStorage: invalid item (missing or invalid jid): %@", item);
+		NSLog(@"XMPPUserCoreDataStorageObject: invalid item (missing or invalid jid): %@", item);
 		return;
 	}
 	
@@ -251,7 +251,7 @@
 	NSArray *sortedResources = [self sortedResources];
 	if ([sortedResources count] > 0)
 	{
-		XMPPResourceCoreDataStorage *resource = [sortedResources objectAtIndex:0];
+		XMPPResourceCoreDataStorageObject *resource = [sortedResources objectAtIndex:0];
 		
 		// Primary resource must have a non-negative priority
 		if([resource priority] >= 0)
@@ -273,7 +273,7 @@
 
 - (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr
 {
-	XMPPResourceCoreDataStorage *resource = (XMPPResourceCoreDataStorage *)[self resourceForJID:[presence from]];
+	XMPPResourceCoreDataStorageObject *resource = (XMPPResourceCoreDataStorageObject *)[self resourceForJID:[presence from]];
 	
 	if ([[presence type] isEqualToString:@"unavailable"])
 	{
@@ -291,8 +291,8 @@
 		}
 		else
 		{
-			XMPPResourceCoreDataStorage *newResource;
-			newResource = [XMPPResourceCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
+			XMPPResourceCoreDataStorageObject *newResource;
+			newResource = [XMPPResourceCoreDataStorageObject insertInManagedObjectContext:[self managedObjectContext]
 			                                                           withPresence:presence
 			                                                       streamBareJidStr:streamBareJidStr];
 			
@@ -336,7 +336,7 @@
 {
 	NSString *jidStr = [jid full];
 	
-	for (XMPPResourceCoreDataStorage *resource in [self resources])
+	for (XMPPResourceCoreDataStorageObject *resource in [self resources])
 	{
 		if ([jidStr isEqualToString:[resource jidStr]])
 		{

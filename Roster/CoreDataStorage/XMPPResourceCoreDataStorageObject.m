@@ -1,14 +1,14 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "XMPPRosterCoreDataStorage.h"
-#import "XMPPUserCoreDataStorage.h"
-#import "XMPPResourceCoreDataStorage.h"
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 
 // Log levels: off, error, warn, info, verbose
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 
-@interface XMPPResourceCoreDataStorage (CoreDataGeneratedPrimitiveAccessors)
+@interface XMPPResourceCoreDataStorageObject (CoreDataGeneratedPrimitiveAccessors)
 - (NSDate *)primitivePresenceDate;
 @end
 
@@ -16,7 +16,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation XMPPResourceCoreDataStorage
+@implementation XMPPResourceCoreDataStorageObject
 
 @dynamic jid;      // Implementation below
 @dynamic presence; // Implementation below
@@ -141,8 +141,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		return nil;
 	}
 	
-	XMPPResourceCoreDataStorage *newResource;
-	newResource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPResourceCoreDataStorage"
+	XMPPResourceCoreDataStorageObject *newResource;
+	newResource = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPResourceCoreDataStorageObject"
 	                                            inManagedObjectContext:moc];
 	
 	newResource.streamBareJidStr = streamBareJidStr;
