@@ -14,6 +14,7 @@
 {
 	XMPPJID *jid;
 	NSMutableDictionary *itemAttributes;
+  UIImage *photo;
 	
 	NSMutableDictionary *resources;
 	XMPPResourceMemoryStorage *primaryResource;

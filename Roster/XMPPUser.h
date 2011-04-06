@@ -12,6 +12,8 @@
 
 @protocol XMPPUser <NSObject>
 
+@property (nonatomic, retain) UIImage * photo;
+
 - (XMPPJID *)jid;
 - (NSString *)nickname;
 
