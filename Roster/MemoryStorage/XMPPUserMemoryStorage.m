@@ -12,40 +12,41 @@
 
 @implementation XMPPUserMemoryStorage
 
+- (id)initWithJID:(XMPPJID *)aJid item:(NSXMLElement *)item
+{
+  if ((self = [super init])) {
+    jid = [[aJid bareJID] retain];
+		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+    photo = nil;
+		tag = 0;
+
+    if (item == nil) {
+      itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
+    }
+    else
+    {
+      itemAttributes = [[item attributesAsDictionary] retain];
+    }
+  }
+  return self;
+}
+
 - (id)initWithJID:(XMPPJID *)aJid
 {
-	if ((self = [super init]))
-	{
-		jid = [[aJid bareJID] retain];
-		itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
-		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
-		
-		tag = 0;
-	}
-	return self;
+	return [self initWithJID:aJid item:nil];
 }
 
 - (id)initWithItem:(NSXMLElement *)item
 {
-	if ((self = [super init]))
-	{
-		// Example item:
-		// <item subscription='both' name='Robbie' jid='robbiehanson@deusty.com'/>
+  NSString *jidStr = [[item attributeForName:@"jid"] stringValue];
+  jid = [[XMPPJID jidWithString:jidStr] bareJID];
 		
-		NSString *jidStr = [[item attributeForName:@"jid"] stringValue];
-		jid = [[[XMPPJID jidWithString:jidStr] bareJID] retain];
-		
-		itemAttributes = [[item attributesAsDictionary] retain];
-		
-		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
-		
-		tag = 0;
-	}
-	return self;
+	return [self initWithJID:jid item:item];
 }
 
 - (void)dealloc
 {
+  [photo release];
 	[jid release];
 	[itemAttributes release];
 	[resources release];
@@ -103,6 +104,7 @@
 		{
 			jid             = [[coder decodeObjectForKey:@"jid"] retain];
 			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
+      photo           = [[UIImage imageWithData:[coder decodeObjectForKey:@"photo"]] retain];
 			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
 			primaryResource = [[coder decodeObjectForKey:@"primaryResource"] retain];
 			tag             = [coder decodeIntegerForKey:@"tag"];
@@ -111,6 +113,7 @@
 		{
 			jid             = [[coder decodeObject] retain];
 			itemAttributes  = [[coder decodeObject] mutableCopy];
+      photo           = [[UIImage imageWithData:[coder decodeObject]] retain];
 			resources       = [[coder decodeObject] mutableCopy];
 			primaryResource = [[coder decodeObject] retain];
 			tag             = [[coder decodeObject] integerValue];
@@ -123,16 +126,18 @@
 {
 	if([coder allowsKeyedCoding])
 	{
-		[coder encodeObject:jid             forKey:@"jid"];
-		[coder encodeObject:itemAttributes  forKey:@"itemAttributes"];
-		[coder encodeObject:resources       forKey:@"resources"];
+		[coder encodeObject:jid forKey:@"jid"];
+		[coder encodeObject:itemAttributes forKey:@"itemAttributes"];
+    [coder encodeObject:UIImagePNGRepresentation(photo) forKey:@"photo"];
+		[coder encodeObject:resources forKey:@"resources"];
 		[coder encodeObject:primaryResource forKey:@"primaryResource"];
-		[coder encodeInteger:tag            forKey:@"tag"];
+		[coder encodeInteger:tag forKey:@"tag"];
 	}
 	else
 	{
 		[coder encodeObject:jid];
 		[coder encodeObject:itemAttributes];
+    [coder encodeObject:UIImagePNGRepresentation(photo)];
 		[coder encodeObject:resources];
 		[coder encodeObject:primaryResource];
 		[coder encodeObject:[NSNumber numberWithInteger:tag]];
@@ -142,6 +147,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Standard Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@synthesize photo;
 
 - (XMPPJID *)jid
 {
