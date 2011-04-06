@@ -46,6 +46,7 @@
 		07AF1703134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF1702134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m */; };
 		07AF1892134BC0320084D82A /* XMPPJabberRPCModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF1891134BC0320084D82A /* XMPPJabberRPCModule.m */; };
 		07AF189D134BC3370084D82A /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF189C134BC3370084D82A /* XMPPSRVResolver.m */; };
+		07AF18D6134BD49E0084D82A /* UIImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF18D5134BD49E0084D82A /* UIImageToDataTransformer.m */; };
 		1D3623260D0F684500981E51 /* iPhoneXMPPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -167,6 +168,8 @@
 		07AF1891134BC0320084D82A /* XMPPJabberRPCModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = XMPPJabberRPCModule.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		07AF189B134BC3370084D82A /* XMPPSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSRVResolver.h; path = ../../Utilities/XMPPSRVResolver.h; sourceTree = "<group>"; };
 		07AF189C134BC3370084D82A /* XMPPSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSRVResolver.m; path = ../../Utilities/XMPPSRVResolver.m; sourceTree = "<group>"; };
+		07AF18D4134BD49D0084D82A /* UIImageToDataTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UIImageToDataTransformer.h; path = ../../Utilities/UIImageToDataTransformer.h; sourceTree = "<group>"; };
+		07AF18D5134BD49E0084D82A /* UIImageToDataTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UIImageToDataTransformer.m; path = ../../Utilities/UIImageToDataTransformer.m; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* iPhoneXMPPAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iPhoneXMPPAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iPhoneXMPPAppDelegate.m; sourceTree = "<group>"; };
@@ -606,6 +609,8 @@
 		DC1F98021152CB0500138A8F /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				07AF18D4134BD49D0084D82A /* UIImageToDataTransformer.h */,
+				07AF18D5134BD49E0084D82A /* UIImageToDataTransformer.m */,
 				07AF189B134BC3370084D82A /* XMPPSRVResolver.h */,
 				07AF189C134BC3370084D82A /* XMPPSRVResolver.m */,
 				DC84BBBF12440A6F0055A459 /* LibIDN.h */,
@@ -861,6 +866,7 @@
 				DC488444134AEB06000F79C5 /* XMPPCoreDataStorage.m in Sources */,
 				07AF1892134BC0320084D82A /* XMPPJabberRPCModule.m in Sources */,
 				07AF189D134BC3370084D82A /* XMPPSRVResolver.m in Sources */,
+				07AF18D6134BD49E0084D82A /* UIImageToDataTransformer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

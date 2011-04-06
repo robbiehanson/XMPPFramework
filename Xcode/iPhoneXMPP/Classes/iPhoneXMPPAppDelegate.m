@@ -107,6 +107,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Configure modules
 	
 	[xmppRoster setAutoRoster:YES];
+  
+  /**
+   * Add XMPPRoster as a delegate of XMPPvCardAvatarModule to cache roster photos in the roster.
+   * This frees the view controller from having to save photos on the main thread.
+   **/
+  [xmppvCardAvatarModule addDelegate:xmppRoster delegateQueue:xmppRoster.moduleQueue];
+
 	
 	// Activate xmpp modules
 	
