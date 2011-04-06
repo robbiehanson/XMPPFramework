@@ -20,6 +20,7 @@
 @class XMPPStream;
 
 
+@protocol XMPPvCardAvatarDelegate;
 @protocol XMPPvCardAvatarStorage;
 
 
@@ -37,6 +38,18 @@
 
 
 - (NSData *)photoDataForJID:(XMPPJID *)jid;
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@protocol XMPPvCardAvatarDelegate <NSObject>
+
+- (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
+        didReceivePhoto:(UIImage *)photo 
+                     forJID:(XMPPJID *)jid;
 
 @end
 

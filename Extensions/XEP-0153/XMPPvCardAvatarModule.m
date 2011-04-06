@@ -93,12 +93,15 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 #pragma mark Public
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSData *)photoDataForJID:(XMPPJID *)jid {
+- (NSData *)photoDataForJID:(XMPPJID *)jid 
+{
   NSData *photoData = [_moduleStorage photoDataForJID:jid xmppStream:xmppStream];
   
-  if (photoData == nil) {
+  if (photoData == nil) 
+  {
     [_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
   }
+
   return photoData;
 }
 
@@ -175,6 +178,18 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
         didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
                      forJID:(XMPPJID *)jid {
   XMPPLogTrace();
+  
+  if (vCardTemp.photo != nil) 
+  {
+    UIImage *photo = [UIImage imageWithData:vCardTemp.photo];
+    
+    if (photo != nil) 
+    {
+      [multicastDelegate xmppvCardAvatarModule:self 
+                               didReceivePhoto:photo 
+                                        forJID:jid];
+    }
+  }
   
   /*
    * XEP-0153 4.1.3
