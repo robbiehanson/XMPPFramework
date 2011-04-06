@@ -2,6 +2,7 @@
 #import "XMPPModule.h"
 #import "XMPPUser.h"
 #import "XMPPResource.h"
+#import "XMPPvCardAvatarModule.h"
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
@@ -14,7 +15,12 @@
 @protocol XMPPRosterDelegate;
 
 
-@interface XMPPRoster : XMPPModule
+/**
+ * Add XMPPRoster as a delegate of XMPPvCardAvatarModule to cache roster photos in the roster.
+ * This frees the view controller from having to save photos on the main thread.
+ **/
+
+@interface XMPPRoster : XMPPModule <XMPPvCardAvatarDelegate>
 {
 /*	Inherited from XMPPModule:
 	
