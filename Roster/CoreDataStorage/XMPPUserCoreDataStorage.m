@@ -36,6 +36,8 @@
 @dynamic displayName, primitiveDisplayName;
 @dynamic subscription;
 @dynamic ask;
+@dynamic unreadMessages;
+@dynamic photo;
 
 @dynamic section, primitiveSection;
 @dynamic sectionName, primitiveSectionName;
@@ -96,6 +98,18 @@
 {
 	self.sectionNum = [NSNumber numberWithInteger:value];
 }
+
+- (NSInteger)primitiveSection
+{
+  return section;
+}
+
+- (void)setPrimitiveSection:(NSInteger)primitiveSection
+{
+  section = primitiveSection;
+}
+
+
 
 - (void)setSectionNum:(NSNumber *)sectionNum
 {
