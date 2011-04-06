@@ -179,9 +179,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSData *photoData = [[[self appDelegate] xmppvCardAvatarModule] photoDataForJID:user.jid];
     
     if (photoData != nil) {
-      user.photo = [UIImage imageWithData:photoData];
-      [[self managedObjectContext] save:nil];
-      cell.imageView.image = user.photo;
+      cell.imageView.image = [UIImage imageWithData:photoData];
     } else {
       cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
     }
