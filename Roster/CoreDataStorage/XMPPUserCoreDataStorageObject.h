@@ -8,10 +8,10 @@
 
 @class XMPPStream;
 @class XMPPGroupCoreDataStorageObject;
-@class XMPPResourceCoreDataStorage;
+@class XMPPResourceCoreDataStorageObject;
 
 
-@interface XMPPUserCoreDataStorage : NSManagedObject <XMPPUser>
+@interface XMPPUserCoreDataStorageObject : NSManagedObject <XMPPUser>
 {
   NSInteger section;
 }
@@ -32,7 +32,7 @@
 @property (nonatomic, retain) NSNumber * sectionNum;
 
 @property (nonatomic, retain) NSSet * groups;
-@property (nonatomic, retain) XMPPResourceCoreDataStorage * primaryResource;
+@property (nonatomic, retain) XMPPResourceCoreDataStorageObject * primaryResource;
 @property (nonatomic, retain) NSSet * resources;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
@@ -44,10 +44,10 @@
 
 @end
 
-@interface XMPPUserCoreDataStorage (CoreDataGeneratedAccessors)
+@interface XMPPUserCoreDataStorageObject (CoreDataGeneratedAccessors)
 
-- (void)addResourcesObject:(XMPPResourceCoreDataStorage *)value;
-- (void)removeResourcesObject:(XMPPResourceCoreDataStorage *)value;
+- (void)addResourcesObject:(XMPPResourceCoreDataStorageObject *)value;
+- (void)removeResourcesObject:(XMPPResourceCoreDataStorageObject *)value;
 - (void)addResources:(NSSet *)value;
 - (void)removeResources:(NSSet *)value;
 

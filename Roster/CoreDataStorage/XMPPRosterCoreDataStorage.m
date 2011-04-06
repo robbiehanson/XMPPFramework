@@ -1,6 +1,6 @@
 #import "XMPPRosterCoreDataStorage.h"
-#import "XMPPUserCoreDataStorage.h"
-#import "XMPPResourceCoreDataStorage.h"
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPRosterPrivate.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPP.h"
@@ -89,7 +89,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	NSString *bareJIDStr = [jid bare];
 	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
 	NSPredicate *predicate;
@@ -107,7 +107,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 	
-	return (XMPPUserCoreDataStorage *)[results lastObject];
+	return (XMPPUserCoreDataStorageObject *)[results lastObject];
 }
 
 - (id <XMPPResource>)_resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
@@ -119,7 +119,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	NSString *fullJIDStr = [jid full];
 	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
 	NSPredicate *predicate;
@@ -137,7 +137,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 	
-	return (XMPPResourceCoreDataStorage *)[results lastObject];
+	return (XMPPResourceCoreDataStorageObject *)[results lastObject];
 }
 
 - (void)_clearAllResourcesForXMPPStream:(XMPPStream *)stream
@@ -145,7 +145,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
 	
 	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorage"
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
 	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
@@ -165,7 +165,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	NSUInteger unsavedCount = [self numberOfUnsavedChanges];
 	
-	for (XMPPResourceCoreDataStorage *resource in allResources)
+	for (XMPPResourceCoreDataStorageObject *resource in allResources)
 	{
 		[[self managedObjectContext] deleteObject:resource];
 		
@@ -232,7 +232,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		return nil;
 	}
 	
-	__block XMPPUserCoreDataStorage *result;
+	__block XMPPUserCoreDataStorageObject *result;
 	
 	[self executeBlock:^{
 	
@@ -255,7 +255,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		return nil;
 	}
 	
-	__block XMPPResourceCoreDataStorage *result;
+	__block XMPPResourceCoreDataStorageObject *result;
 	
 	[self executeBlock:^{
 		
@@ -272,7 +272,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	__block XMPPUserCoreDataStorage *result;
+	__block XMPPUserCoreDataStorageObject *result;
 	
 	[self executeBlock:^{
 		
@@ -289,7 +289,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	__block XMPPResourceCoreDataStorage *result;
+	__block XMPPResourceCoreDataStorageObject *result;
 	
 	[self executeBlock:^{
 		
@@ -335,7 +335,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			{
 				NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 				
-				[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
+				[XMPPUserCoreDataStorageObject insertInManagedObjectContext:[self managedObjectContext]
 				                                             withItem:item
 				                                     streamBareJidStr:streamBareJidStr];
 			}
@@ -344,7 +344,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 				NSString *jidStr = [item attributeStringValueForName:@"jid"];
 				XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
 				
-				XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self _userForJID:jid xmppStream:stream];
+				XMPPUserCoreDataStorageObject *user = (XMPPUserCoreDataStorageObject *)[self _userForJID:jid xmppStream:stream];
 				
 				NSString *subscription = [item attributeStringValueForName:@"subscription"];
 				if ([subscription isEqualToString:@"remove"])
@@ -364,7 +364,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 					{
 						NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 						
-						[XMPPUserCoreDataStorage insertInManagedObjectContext:[self managedObjectContext]
+						[XMPPUserCoreDataStorageObject insertInManagedObjectContext:[self managedObjectContext]
 						                                             withItem:item
 						                                     streamBareJidStr:streamBareJidStr];
 					}
@@ -381,7 +381,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	[self scheduleBlock:^{
 		
 		XMPPJID *jid = [presence from];
-		XMPPUserCoreDataStorage *user = (XMPPUserCoreDataStorage *)[self _userForJID:jid xmppStream:stream];
+		XMPPUserCoreDataStorageObject *user = (XMPPUserCoreDataStorageObject *)[self _userForJID:jid xmppStream:stream];
 		
 		if (user)
 		{
@@ -410,7 +410,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		// Note: Deleting a user will delete all associated resources because of the cascade rule in our core data model.
 		
-		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 												  inManagedObjectContext:[self managedObjectContext]];
 		
 		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
@@ -430,7 +430,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		NSUInteger unsavedCount = [self numberOfUnsavedChanges];
 		
-		for (XMPPUserCoreDataStorage *user in allUsers)
+		for (XMPPUserCoreDataStorageObject *user in allUsers)
 		{
 			[[self managedObjectContext] deleteObject:user];
 			

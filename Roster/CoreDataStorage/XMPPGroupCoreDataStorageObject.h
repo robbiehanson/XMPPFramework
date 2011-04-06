@@ -9,7 +9,7 @@
 #import <CoreData/CoreData.h>
 
 
-@class XMPPUserCoreDataStorage;
+@class XMPPUserCoreDataStorageObject;
 
 
 @interface XMPPGroupCoreDataStorageObject : NSManagedObject {
