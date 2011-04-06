@@ -578,4 +578,19 @@ enum XMPPRosterFlags
 	[earlyPresenceElements removeAllObjects];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPvCardAvatarDelegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
+              didReceivePhoto:(UIImage *)photo 
+                       forJID:(XMPPJID *)jid
+{
+  id <XMPPUser> user = [self userForJID:jid];
+  
+  if (user != nil) {
+    user.photo = photo;
+  }
+}
+
 @end
