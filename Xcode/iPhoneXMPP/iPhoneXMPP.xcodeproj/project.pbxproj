@@ -86,7 +86,7 @@
 		DCC0BEE41301CE0D00EC45D2 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEE01301CE0D00EC45D2 /* DDTTYLogger.m */; };
 		DCC0BEEB1301CE3D00EC45D2 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEE61301CE3D00EC45D2 /* DDList.m */; };
 		DCC0BEED1301CE3D00EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEEA1301CE3D00EC45D2 /* GCDMulticastDelegate.m */; };
-		DCC0BF031301CEC700EC45D2 /* XMPPResourceCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEFD1301CEC700EC45D2 /* XMPPResourceCoreDataStorage.m */; };
+		DCC0BF031301CEC700EC45D2 /* XMPPResourceCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEFD1301CEC700EC45D2 /* XMPPResourceCoreDataStorageObject.m */; };
 		DCC0BF041301CEC700EC45D2 /* XMPPRoster.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEFE1301CEC700EC45D2 /* XMPPRoster.xcdatamodel */; };
 		DCC0BF051301CEC700EC45D2 /* XMPPRosterCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BF001301CEC700EC45D2 /* XMPPRosterCoreDataStorage.m */; };
 		DCC0BF061301CEC700EC45D2 /* XMPPUserCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BF021301CEC700EC45D2 /* XMPPUserCoreDataStorage.m */; };
@@ -250,8 +250,8 @@
 		DCC0BEE91301CE3D00EC45D2 /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDMulticastDelegate.h; path = ../../Utilities/GCDMulticastDelegate.h; sourceTree = SOURCE_ROOT; };
 		DCC0BEEA1301CE3D00EC45D2 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDMulticastDelegate.m; path = ../../Utilities/GCDMulticastDelegate.m; sourceTree = SOURCE_ROOT; };
 		DCC0BEF31301CE9100EC45D2 /* XMPPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPLogging.h; path = ../../Core/XMPPLogging.h; sourceTree = SOURCE_ROOT; };
-		DCC0BEFC1301CEC700EC45D2 /* XMPPResourceCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPResourceCoreDataStorage.h; path = ../../Roster/CoreDataStorage/XMPPResourceCoreDataStorage.h; sourceTree = SOURCE_ROOT; };
-		DCC0BEFD1301CEC700EC45D2 /* XMPPResourceCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPResourceCoreDataStorage.m; path = ../../Roster/CoreDataStorage/XMPPResourceCoreDataStorage.m; sourceTree = SOURCE_ROOT; };
+		DCC0BEFC1301CEC700EC45D2 /* XMPPResourceCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; name = XMPPResourceCoreDataStorageObject.h; path = ../../Roster/CoreDataStorage/XMPPResourceCoreDataStorageObject.h; sourceTree = SOURCE_ROOT; };
+		DCC0BEFD1301CEC700EC45D2 /* XMPPResourceCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPResourceCoreDataStorageObject.m; path = ../../Roster/CoreDataStorage/XMPPResourceCoreDataStorageObject.m; sourceTree = SOURCE_ROOT; };
 		DCC0BEFE1301CEC700EC45D2 /* XMPPRoster.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; name = XMPPRoster.xcdatamodel; path = ../../Roster/CoreDataStorage/XMPPRoster.xcdatamodel; sourceTree = SOURCE_ROOT; };
 		DCC0BEFF1301CEC700EC45D2 /* XMPPRosterCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPRosterCoreDataStorage.h; path = ../../Roster/CoreDataStorage/XMPPRosterCoreDataStorage.h; sourceTree = SOURCE_ROOT; };
 		DCC0BF001301CEC700EC45D2 /* XMPPRosterCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRosterCoreDataStorage.m; path = ../../Roster/CoreDataStorage/XMPPRosterCoreDataStorage.m; sourceTree = SOURCE_ROOT; };
@@ -682,8 +682,8 @@
 				07AF1702134A544D0084D82A /* XMPPGroupCoreDataStorageObject.m */,
 				DCC0BF011301CEC700EC45D2 /* XMPPUserCoreDataStorage.h */,
 				DCC0BF021301CEC700EC45D2 /* XMPPUserCoreDataStorage.m */,
-				DCC0BEFC1301CEC700EC45D2 /* XMPPResourceCoreDataStorage.h */,
-				DCC0BEFD1301CEC700EC45D2 /* XMPPResourceCoreDataStorage.m */,
+				DCC0BEFC1301CEC700EC45D2 /* XMPPResourceCoreDataStorageObject.h */,
+				DCC0BEFD1301CEC700EC45D2 /* XMPPResourceCoreDataStorageObject.m */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -825,7 +825,7 @@
 				DCC0BEE41301CE0D00EC45D2 /* DDTTYLogger.m in Sources */,
 				DCC0BEEB1301CE3D00EC45D2 /* DDList.m in Sources */,
 				DCC0BEED1301CE3D00EC45D2 /* GCDMulticastDelegate.m in Sources */,
-				DCC0BF031301CEC700EC45D2 /* XMPPResourceCoreDataStorage.m in Sources */,
+				DCC0BF031301CEC700EC45D2 /* XMPPResourceCoreDataStorageObject.m in Sources */,
 				DCC0BF041301CEC700EC45D2 /* XMPPRoster.xcdatamodel in Sources */,
 				DCC0BF051301CEC700EC45D2 /* XMPPRosterCoreDataStorage.m in Sources */,
 				DCC0BF061301CEC700EC45D2 /* XMPPUserCoreDataStorage.m in Sources */,
