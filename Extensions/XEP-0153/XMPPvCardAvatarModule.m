@@ -101,6 +101,14 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
   {
     [_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
   }
+  else
+  {
+    UIImage *photo = [UIImage imageWithData:photoData];
+    
+    [multicastDelegate xmppvCardAvatarModule:self 
+                             didReceivePhoto:photo 
+                                      forJID:jid];
+  }
 
   return photoData;
 }
