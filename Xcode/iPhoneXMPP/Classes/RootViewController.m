@@ -180,6 +180,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     if (photoData != nil) {
       user.photo = [UIImage imageWithData:photoData];
+      [[self managedObjectContext] save:nil];
       cell.imageView.image = user.photo;
     } else {
       cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
