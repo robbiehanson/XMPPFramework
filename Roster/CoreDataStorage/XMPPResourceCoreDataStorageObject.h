@@ -4,10 +4,10 @@
 
 @class XMPPStream;
 @class XMPPPresence;
-@class XMPPUserCoreDataStorage;
+@class XMPPUserCoreDataStorageObject;
 
 
-@interface XMPPResourceCoreDataStorage : NSManagedObject <XMPPResource>
+@interface XMPPResourceCoreDataStorageObject : NSManagedObject <XMPPResource>
 
 @property (nonatomic, retain) XMPPJID *jid;
 @property (nonatomic, retain) XMPPPresence *presence;
@@ -29,7 +29,7 @@
 @property (nonatomic, retain) NSNumber * priorityNum;
 @property (nonatomic, retain) NSNumber * showNum;
 
-@property (nonatomic, retain) XMPPUserCoreDataStorage * user;
+@property (nonatomic, retain) XMPPUserCoreDataStorageObject * user;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                       withPresence:(XMPPPresence *)presence

@@ -4,8 +4,8 @@
 
 #import "XMPP.h"
 #import "XMPPRosterCoreDataStorage.h"
-#import "XMPPUserCoreDataStorage.h"
-#import "XMPPResourceCoreDataStorage.h"
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPvCardAvatarModule.h"
 
 #import "DDLog.h"
@@ -123,7 +123,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	if (fetchedResultsController == nil)
 	{
-		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"sectionNum" ascending:YES];
@@ -239,7 +239,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		                               reuseIdentifier:CellIdentifier] autorelease];
 	}
 	
-	XMPPUserCoreDataStorage *user = [[self fetchedResultsController] objectAtIndexPath:indexPath];
+	XMPPUserCoreDataStorageObject *user = [[self fetchedResultsController] objectAtIndexPath:indexPath];
 	
 	cell.textLabel.text = user.displayName;
   
