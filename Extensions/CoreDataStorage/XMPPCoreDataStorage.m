@@ -59,7 +59,7 @@ static NSMutableSet *databaseFileNames;
 	// 
 	// This method is used for two things:
 	// 
-	// 1. It provides the name of the ManagedObjectModel file (*.xdatamodel / *.mom) sans file extension.
+	// 1. It provides the name of the ManagedObjectModel file (*.xdatamodel / *.mom / *.momd) sans file extension.
 	//    In other words, this method is queried when setting up the persistentStoreCoordinator.
 	// 
 	// 2. It is used by default implementation of the defaultDatabaseFileName method.
@@ -310,6 +310,12 @@ static NSMutableSet *databaseFileNames;
 		XMPPLogVerbose(@"%@: Creating managedObjectModel", [self class]);
 		
 		NSString *path = [[NSBundle mainBundle] pathForResource:[self defaultFileName] ofType:@"mom"];
+    
+    if (path == nil) {
+      // The model may be versioned or created with Xcode 4, try momd as an extension.
+      path = [[NSBundle mainBundle] pathForResource:[self defaultFileName] ofType:@"momd"];
+    }
+    
 		if (path)
 		{
 			// If path is nil, then NSURL or NSManagedObjectModel will throw an exception
