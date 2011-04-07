@@ -9,22 +9,18 @@
 #import "XMPPvCardCoreDataStorageObject.h"
 #import "XMPPvCardTempCoreDataStorageObject.h"
 #import "XMPPvCardAvatarCoreDataStorageObject.h"
+#import "XMPP.h"
+#import "XMPPCoreDataStorageProtected.h"
 #import "XMPPLogging.h"
-#import "NSDataAdditions.h"
-
-#import <objc/runtime.h>
-
-// In production, we don't want to delete the vCard store.
-// Otherwise, we will download all the vCard data when the stream connects
-#define XMPP_VCARD_STORE_DELETE_ON_LAUNCH 0
 
 // Log levels: off, error, warn, info, verbose
-// Log flags: trace
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
+
 
 enum {
   kXMPPvCardTempNetworkFetchTimeout = 10,
 };
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -32,278 +28,28 @@ enum {
 
 @implementation XMPPvCardCoreDataStorage
 
-- (id)init
-{
-	return [self initForSingleUsage];
-}
+static XMPPvCardCoreDataStorage *sharedInstance;
 
-- (id)initForSingleUsage
++ (XMPPvCardCoreDataStorage *)sharedInstance
 {
-	if ((self = [super init]))
-	{
-		singleUsage = YES;
-	}
-	return self;
-}
-
-- (id)initForMultipleUsage
-{
-	return [self initForMultipleUsageWithDispatchQueue:NULL];
-}
-
-- (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue
-{
-	if ((self = [super init]))
-	{
-		singleUsage = NO;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
 		
-		if (queue)
-		{
-			storageQueue = queue;
-			dispatch_retain(storageQueue);
-		}
-		else
-		{
-			storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
-		}
-	}
-	return self;
+		sharedInstance = [[XMPPvCardCoreDataStorage alloc] initWithDatabaseFilename:nil];
+	});
+	
+	return sharedInstance;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Setup
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (BOOL)configureWithParent:(XMPPvCardTempModule *)aParent queue:(dispatch_queue_t)queue
 {
-	NSParameterAssert(aParent != nil);
-	NSParameterAssert(queue != NULL);
-	
-	if (singleUsage)
-	{
-		BOOL result = NO;
-		
-		@synchronized(self)
-		{
-			if (storageQueue == NULL)
-			{
-				storageQueue = queue;
-				dispatch_retain(storageQueue);
-				
-				result = YES;
-			}
-		}
-		
-		return result;
-	}
-	else
-	{
-		return YES;
-	}
+	return [super configureWithParent:aParent queue:queue];
 }
 
-- (void)dealloc
-{
-	if (storageQueue)
-		dispatch_release(storageQueue);
-	
-	[_managedObjectContext release];
-	[_persistentStoreCoordinator release];
-	[_managedObjectModel release];
-	
-	[super dealloc];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Core Data Setup
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (NSString *)persistentStoreDirectory
-{
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-	NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
-	
-	// Attempt to find a name for this application
-	NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-	if (appName == nil) {
-		appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];	
-	}
-	
-	if (appName == nil) {
-		appName = @"xmppframework";
-	}
-	
-	
-	NSString *result = [basePath stringByAppendingPathComponent:appName];
-	
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	
-	if(![fileManager fileExistsAtPath:result])
-	{
-		[fileManager createDirectoryAtPath:result withIntermediateDirectories:YES attributes:nil error:nil];
-	}
-	
-	return result;
-}
-
-- (NSManagedObjectModel *)managedObjectModel
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
-	dispatch_block_t block = ^{
-		
-		if (_managedObjectModel)
-		{
-			return;
-		}
-		
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		XMPPLogVerbose(@"%@: Creating managedObjectModel", THIS_FILE);
-		
-		NSString *path = [[NSBundle mainBundle] pathForResource:@"XMPPvCard" ofType:@"momd"];
-		if (path)
-		{
-			// If path is nil, then NSURL or NSManagedObjectModel will throw an exception
-			
-			NSURL *url = [NSURL fileURLWithPath:path];
-			
-			_managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
-		}
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
-	else
-		dispatch_sync(storageQueue, block);
-	
-	return _managedObjectModel;
-}
-
-
-- (NSPersistentStoreCoordinator *)persistentStoreCoordinator
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
-	dispatch_block_t block = ^{
-		XMPPLogTrace();
-    
-		if (_persistentStoreCoordinator)
-		{
-			return;
-		}
-		
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		NSManagedObjectModel *mom = [self managedObjectModel];
-		
-		XMPPLogVerbose(@"%@: Creating persistentStoreCoordinator", THIS_FILE);
-		
-		_persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
-		
-		NSString *docsPath = [self persistentStoreDirectory];
-		NSString *storePath = [docsPath stringByAppendingPathComponent:@"XMPPvCard.sqlite"];
-		if (storePath)
-		{
-#if XMPP_VCARD_STORE_DELETE_ON_LAUNCH
-			if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
-			{
-				[[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
-			}
-#endif
-      
-			// If storePath is nil, then NSURL will throw an exception
-			
-			NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
-			
-			NSError *error = nil;
-			NSPersistentStore *persistentStore;
-			persistentStore = [_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
-			                                                            configuration:nil
-			                                                                      URL:storeUrl
-			                                                                  options:nil
-			                                                                    error:&error];
-			if (!persistentStore)
-			{
-			  #if TARGET_OS_IPHONE
-				XMPPLogError(@"%@:\n"
-				             @"=====================================================================================\n"
-				             @"Error creating persistent store:\n%@\n"
-				             @"Chaned core data model recently?\n"
-				             @"Quick Fix: Delete the app from device and reinstall.\n"
-				             @"=====================================================================================",
-				             THIS_FILE, error);
-			  #else
-				XMPPLogError(@"%@:\n"
-				             @"=====================================================================================\n"
-				             @"Error creating persistent store:\n%@\n"
-				             @"Chaned core data model recently?\n"
-				             @"Quick Fix: Delete the database: %@\n"
-				             @"=====================================================================================",
-				             THIS_FILE, error, storePath);
-			  #endif
-			}
-		}
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == storageQueue)
-		block();
-	else
-		dispatch_sync(storageQueue, block);
-	
-	return _persistentStoreCoordinator;
-}
-
-- (NSManagedObjectContext *)managedObjectContext
-{
-	// This is a private method.
-	
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
-	if (_managedObjectContext != nil)
-	{
-		return _managedObjectContext;
-	}
-	
-	NSPersistentStoreCoordinator *coordinator = self.persistentStoreCoordinator;
-	if (coordinator != nil)
-	{
-		_managedObjectContext = [[NSManagedObjectContext alloc] init];
-		[_managedObjectContext setPersistentStoreCoordinator:coordinator];
-	}
-	
-	return _managedObjectContext;
-}
-
-- (void)save
-{
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	
-	NSManagedObjectContext *managedObjectContext = [self managedObjectContext];
-	
-	if ([managedObjectContext hasChanges])
-	{
-		NSError *error = nil;
-		if (![managedObjectContext save:&error])
-		{
-			XMPPLogError(@"%@: %s error: %@", THIS_FILE, __PRETTY_FUNCTION__, error);
-		}
-	}
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPvCardAvatarStorage protocol
@@ -353,7 +99,6 @@ enum {
 	}
 }
 
-
 - (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream 
 {
   // This is a public method.
@@ -397,7 +142,6 @@ enum {
 		return [result autorelease];
 	}
 }
-
 
 - (void)clearvCardTempForJID:(XMPPJID *)jid  xmppStream:(XMPPStream *)stream
 {
@@ -489,7 +233,6 @@ enum {
 	}
 }
 
-
 - (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
@@ -536,7 +279,6 @@ enum {
 		});
 	}
 }
-
 
 - (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
