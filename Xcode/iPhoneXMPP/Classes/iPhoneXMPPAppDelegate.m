@@ -31,7 +31,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @synthesize xmppStream;
 @synthesize xmppRoster;
-@synthesize xmppRosterStorage;
 @synthesize xmppvCardAvatarModule;
 @synthesize xmppvCardTempModule;
 
@@ -72,7 +71,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   [xmppvCardTempModule release];
 	[xmppStream release];
 	[xmppRoster release];
-  [xmppRosterStorage release];
 	
 	[password release];
 	
@@ -94,14 +92,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   // Initialize variables
 	
 	xmppStream = [[XMPPStream alloc] init];
-	
-	xmppRosterStorage = [XMPPRosterCoreDataStorage sharedInstance];
-	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
-  
-  XMPPvCardCoreDataStorage *xmppvCardCoreDataStorage = [[XMPPvCardCoreDataStorage alloc] init];
-  xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardCoreDataStorage];
-  [xmppvCardCoreDataStorage release];
-  
+	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:[XMPPRosterCoreDataStorage sharedInstance]];
+  xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:[XMPPvCardCoreDataStorage sharedInstance]];
   xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
 	
 	// Configure modules

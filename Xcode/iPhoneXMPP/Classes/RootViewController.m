@@ -37,7 +37,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (XMPPRosterCoreDataStorage *)xmppRosterStorage
 {
-	return [[self appDelegate] xmppRosterStorage];
+	return [[self xmppRoster] xmppRosterStorage];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
