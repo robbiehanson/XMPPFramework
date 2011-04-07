@@ -8,49 +8,40 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+#import "XMPPCoreDataStorage.h"
 #import "XMPPvCardTempModule.h"
 #import "XMPPvCardAvatarModule.h"
 
+/**
+ * This class is an example implementation of XMPPCapabilitiesStorage using core data.
+ * You are free to substitute your own storage class.
+ **/
 
-@interface XMPPvCardCoreDataStorage : NSObject <
+@interface XMPPvCardCoreDataStorage : XMPPCoreDataStorage <
 XMPPvCardAvatarStorage,
 XMPPvCardTempModuleStorage
 > {
-	BOOL singleUsage;
-	
-	dispatch_queue_t storageQueue;
-	
-	NSManagedObjectModel *_managedObjectModel;
-	NSPersistentStoreCoordinator *_persistentStoreCoordinator;
-	NSManagedObjectContext *_managedObjectContext;
+	// Inherits protected variables from XMPPCoreDataStorage
 }
 
 /**
- * Creates a vCard CoreDataStorage instance designed to be used by a single instance of XMPPvCardTempModule.
+ * XEP-0054 provides a mechanism for transmitting vCards via XMPP.
+ * Because the JID doesn't change very often and can be large with image data, 
+ * it is safe to persistently store the JID and wait for a user to explicity ask for an update, 
+ * or use XEP-0153 to monitor for JID changes.
  * 
- * The storage instance will inherit its dispatch queue from its parent (the XMPPvCardTempModule instance).
-**/
-- (id)init;
-- (id)initForSingleUsage;
-
-/**
- * Creates a vCard CoreDataStorage instance that may be used by multiple instances of XMPPvCardTempModule.
- * This may be useful if your application creates multiple XMPPStream connections.
+ * For this reason, it is recommended you use this sharedInstance across all your xmppStreams.
+ * This way all streams can shared a knowledgebase concerning known JIDs and Avatar photos.
  * 
- * The storage instance will operate on its own dispatch queue, which may optionally be provided.
-**/
-- (id)initForMultipleUsage;
-- (id)initForMultipleUsageWithDispatchQueue:(dispatch_queue_t)queue;
+ * All other aspects of vCard handling (such as lookup failures, etc) are kept separate between streams.
+ **/
++ (XMPPvCardCoreDataStorage *)sharedInstance;
 
-
-@property (readonly) NSManagedObjectModel *managedObjectModel;
-@property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
-
-// The managedObjectContext is private to the storageQueue.
-// You must create and use your own managedObjectContext.
 // 
-// If you think you can simply add a property for the private managedObjectContext,
-// then you need to go read the documentation for core data,
-// specifically the section entitled "Concurrency with Core Data".
+// This class inherits from XMPPCoreDataStorage.
+// 
+// Please see the XMPPCoreDataStorage header file for more information.
+// 
+
 
 @end
