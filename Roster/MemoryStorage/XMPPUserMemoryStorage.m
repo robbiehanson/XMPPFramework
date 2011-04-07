@@ -46,7 +46,7 @@
 
 - (void)dealloc
 {
-  [photo release];
+	[photo release];
 	[jid release];
 	[itemAttributes release];
 	[resources release];
@@ -104,7 +104,11 @@
 		{
 			jid             = [[coder decodeObjectForKey:@"jid"] retain];
 			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
-      photo           = [[UIImage imageWithData:[coder decodeObjectForKey:@"photo"]] retain];
+		#if TARGET_OS_IPHONE
+			photo           = [[UIImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
+		#else
+			photo           = [[NSImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
+		#endif
 			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
 			primaryResource = [[coder decodeObjectForKey:@"primaryResource"] retain];
 			tag             = [coder decodeIntegerForKey:@"tag"];
@@ -113,7 +117,11 @@
 		{
 			jid             = [[coder decodeObject] retain];
 			itemAttributes  = [[coder decodeObject] mutableCopy];
-      photo           = [[UIImage imageWithData:[coder decodeObject]] retain];
+		#if TARGET_OS_IPHONE
+			photo           = [[UIImage alloc] initWithData:[coder decodeObject]];
+		#else
+			photo           = [[NSImage alloc] initWithData:[coder decodeObject]];
+		#endif	
 			resources       = [[coder decodeObject] mutableCopy];
 			primaryResource = [[coder decodeObject] retain];
 			tag             = [[coder decodeObject] integerValue];
@@ -128,7 +136,11 @@
 	{
 		[coder encodeObject:jid forKey:@"jid"];
 		[coder encodeObject:itemAttributes forKey:@"itemAttributes"];
-    [coder encodeObject:UIImagePNGRepresentation(photo) forKey:@"photo"];
+	#if TARGET_OS_IPHONE
+		[coder encodeObject:UIImagePNGRepresentation(photo) forKey:@"photo"];
+	#else
+		[coder encodeObject:[photo TIFFRepresentation] forKey:@"photo"];
+	#endif
 		[coder encodeObject:resources forKey:@"resources"];
 		[coder encodeObject:primaryResource forKey:@"primaryResource"];
 		[coder encodeInteger:tag forKey:@"tag"];
@@ -137,7 +149,11 @@
 	{
 		[coder encodeObject:jid];
 		[coder encodeObject:itemAttributes];
-    [coder encodeObject:UIImagePNGRepresentation(photo)];
+	#if TARGET_OS_IPHONE
+		[coder encodeObject:UIImagePNGRepresentation(photo)];
+	#else
+		[coder encodeObject:[photo TIFFRepresentation]];
+	#endif
 		[coder encodeObject:resources];
 		[coder encodeObject:primaryResource];
 		[coder encodeObject:[NSNumber numberWithInteger:tag]];

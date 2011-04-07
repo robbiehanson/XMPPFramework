@@ -14,7 +14,12 @@
 {
 	XMPPJID *jid;
 	NSMutableDictionary *itemAttributes;
-  UIImage *photo;
+	
+#if TARGET_OS_IPHONE
+	UIImage *photo;
+#else
+	NSImage *photo;
+#endif
 	
 	NSMutableDictionary *resources;
 	XMPPResourceMemoryStorage *primaryResource;

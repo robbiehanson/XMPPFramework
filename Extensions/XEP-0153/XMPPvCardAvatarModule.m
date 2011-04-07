@@ -95,22 +95,26 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (NSData *)photoDataForJID:(XMPPJID *)jid 
 {
-  NSData *photoData = [_moduleStorage photoDataForJID:jid xmppStream:xmppStream];
-  
-  if (photoData == nil) 
-  {
-    [_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
-  }
-  else
-  {
-    UIImage *photo = [UIImage imageWithData:photoData];
-    
-    [multicastDelegate xmppvCardAvatarModule:self 
-                             didReceivePhoto:photo 
-                                      forJID:jid];
-  }
+	NSData *photoData = [_moduleStorage photoDataForJID:jid xmppStream:xmppStream];
 
-  return photoData;
+	if (photoData == nil) 
+	{
+		[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
+	}
+	else
+	{
+	#if TARGET_OS_IPHONE
+		UIImage *photo = [UIImage imageWithData:photoData];
+	#else
+		NSImage *photo = [[[NSImage alloc] initWithData:photoData] autorelease];
+	#endif
+		
+		[multicastDelegate xmppvCardAvatarModule:self 
+		                         didReceivePhoto:photo 
+		                                  forJID:jid];
+	}
+
+	return photoData;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
