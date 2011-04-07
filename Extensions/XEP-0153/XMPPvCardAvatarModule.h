@@ -11,6 +11,9 @@
 
 
 #import <Foundation/Foundation.h>
+#if TARGET_OS_MAC
+  #import <Cocoa/Cocoa.h>
+#endif
 
 #import "XMPPModule.h"
 #import "XMPPvCardTempModule.h"
@@ -47,9 +50,15 @@
 
 @protocol XMPPvCardAvatarDelegate <NSObject>
 
+#if TARGET_OS_IPHONE
 - (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
-        didReceivePhoto:(UIImage *)photo 
-                     forJID:(XMPPJID *)jid;
+              didReceivePhoto:(UIImage *)photo
+                       forJID:(XMPPJID *)jid;
+#else
+- (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
+              didReceivePhoto:(NSImage *)photo
+                       forJID:(XMPPJID *)jid;
+#endif
 
 @end
 

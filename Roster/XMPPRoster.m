@@ -582,15 +582,21 @@ enum XMPPRosterFlags
 #pragma mark XMPPvCardAvatarDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if TARGET_OS_IPHONE
 - (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
               didReceivePhoto:(UIImage *)photo 
                        forJID:(XMPPJID *)jid
+#else
+- (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
+              didReceivePhoto:(NSImage *)photo 
+                       forJID:(XMPPJID *)jid
+#endif
 {
-  id <XMPPUser> user = [self userForJID:jid];
-  
-  if (user != nil) {
-    user.photo = photo;
-  }
+	id <XMPPUser> user = [self userForJID:jid];
+
+	if (user != nil) {
+		user.photo = photo;
+	}
 }
 
 @end
