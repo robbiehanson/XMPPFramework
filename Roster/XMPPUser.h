@@ -1,4 +1,7 @@
 #import <Foundation/Foundation.h>
+#if TARGET_OS_MAC
+  #import <Cocoa/Cocoa.h>
+#endif
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
@@ -12,7 +15,11 @@
 
 @protocol XMPPUser <NSObject>
 
+#if TARGET_OS_IPHONE
 @property (nonatomic, retain) UIImage * photo;
+#else
+@property (nonatomic, retain) NSImage * photo;
+#endif
 
 - (XMPPJID *)jid;
 - (NSString *)nickname;
