@@ -57,132 +57,62 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 
 - (NSData *)photoDataForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
-  // This is a public method.
+	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
 	__block NSData *result;
 	
-	dispatch_block_t block = ^{
+	[self executeBlock:^{
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-		result = vCard.photoData;
-	};
+		result = [vCard.photoData retain];
+	}];
 	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		block();
-		return result;
-	}
-	else
-	{
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			block();
-			[result retain];
-			
-			[pool drain];
-		});
-		
-		return [result autorelease];
-	}
+	return [result autorelease];
 }
 
 - (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream 
 {
-  // This is a public method.
+	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
 	__block NSString *result;
 	
-	dispatch_block_t block = ^{
+	[self executeBlock:^{
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-		result = vCard.photoHash;
-	};
+		result = [vCard.photoHash retain];
+	}];
 	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		block();
-		return result;
-	}
-	else
-	{
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			block();
-			[result retain];
-			
-			[pool drain];
-		});
-		
-		return [result autorelease];
-	}
+	return [result autorelease];
 }
 
 - (void)clearvCardTempForJID:(XMPPJID *)jid  xmppStream:(XMPPStream *)stream
 {
-  // This is a public method.
+	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return;
-	}
-	
-	dispatch_block_t block = ^{
+	[self scheduleBlock:^{
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-    vCard.vCardTemp = nil;
-    vCard.lastUpdated = [NSDate date];
-		
-		[self save];
-	};
-	
-	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		block();
-	}
-	else
-	{
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			block();
-			
-			[pool drain];
-		});
-	}
+		vCard.vCardTemp = nil;
+		vCard.lastUpdated = [NSDate date];
+	}];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,41 +126,18 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return nil;
-	}
-	
 	__block XMPPvCardTemp *result;
 	
-	dispatch_block_t block = ^{
+	[self executeBlock:^{
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-		result = vCard.vCardTemp;
-	};
+		result = [vCard.vCardTemp retain];
+	}];
 	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		block();
-		return result;
-	}
-	else
-	{
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			block();
-			[result retain];
-			
-			[pool drain];
-		});
-		
-		return [result autorelease];
-	}
+	return [result autorelease];
 }
 
 - (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
@@ -240,13 +147,7 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return;
-	}
-	
-	dispatch_block_t block = ^{
+	[self scheduleBlock:^{
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
@@ -259,25 +160,7 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		vCard.photoData = vCardTemp.photo;
 		
 		vCard.lastUpdated = [NSDate date];
-		
-		[self save];
-	};
-	
-	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		block();
-	}
-	else
-	{
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			block();
-			
-			[pool drain];
-		});
-	}
+	}];
 }
 
 - (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
@@ -287,15 +170,9 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	if (storageQueue == NULL)
-	{
-		XMPPLogWarn(@"%@: Method(%@) invoked before storage configured by parent.", THIS_FILE, THIS_METHOD);
-		return YES;
-	}
-	
 	__block BOOL result;
 	
-	dispatch_block_t block = ^{
+	[self executeBlock:^{
 		
 		XMPPvCardCoreDataStorageObject *vCard;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
@@ -308,7 +185,6 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 			vCard.waitingForFetch = [NSNumber numberWithBool:YES];
 			vCard.lastUpdated = [NSDate date];
 			
-			[self save];
 			result = YES;
 		}
 		else if ([vCard.lastUpdated timeIntervalSinceNow] < -kXMPPvCardTempNetworkFetchTimeout)
@@ -316,7 +192,6 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 			// Our last request exceeded the timeout, send a new one
 			vCard.lastUpdated = [NSDate date];
 			
-			[self save];
 			result = YES;
 		}
 		else
@@ -324,23 +199,7 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 			// We already have an outstanding request, no need to send another one.
 			result = NO;
 		}
-	};
-	
-	
-	if (dispatch_get_current_queue() == storageQueue)
-	{
-		block();
-	}
-	else
-	{
-		dispatch_sync(storageQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			block();
-			
-			[pool drain];
-		});
-	}
+	}];
 	
 	return result;
 }

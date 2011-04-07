@@ -34,7 +34,7 @@ XMPPvCardTempModuleStorage
  * This way all streams can shared a knowledgebase concerning known JIDs and Avatar photos.
  * 
  * All other aspects of vCard handling (such as lookup failures, etc) are kept separate between streams.
- **/
+**/
 + (XMPPvCardCoreDataStorage *)sharedInstance;
 
 // 
