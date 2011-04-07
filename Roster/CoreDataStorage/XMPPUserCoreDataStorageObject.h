@@ -25,7 +25,12 @@
 @property (nonatomic, retain) NSString * subscription;
 @property (nonatomic, retain) NSString * ask;
 @property (nonatomic, retain) NSNumber * unreadMessages;
-@property (nonatomic, retain) UIImage * photo;
+
+#if TARGET_OS_IPHONE
+@property (nonatomic, retain) UIImage *photo;
+#else
+@property (nonatomic, retain) NSImage *photo;
+#endif
 
 @property (nonatomic, assign) NSInteger section;
 @property (nonatomic, retain) NSString * sectionName;
