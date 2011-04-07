@@ -16,7 +16,6 @@ XMPPRosterDelegate
 > {
 	XMPPStream *xmppStream;
 	XMPPRoster *xmppRoster;
-	XMPPRosterCoreDataStorage *xmppRosterStorage;
   
   XMPPvCardAvatarModule *xmppvCardAvatarModule;
   XMPPvCardTempModule *xmppvCardTempModule;
@@ -37,7 +36,6 @@ XMPPRosterDelegate
 
 @property (nonatomic, readonly) XMPPStream *xmppStream;
 @property (nonatomic, readonly) XMPPRoster *xmppRoster;
-@property (nonatomic, readonly) XMPPRosterCoreDataStorage *xmppRosterStorage;
 @property (nonatomic, readonly) XMPPvCardAvatarModule *xmppvCardAvatarModule;
 @property (nonatomic, readonly) XMPPvCardTempModule *xmppvCardTempModule;
 
