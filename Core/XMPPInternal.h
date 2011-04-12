@@ -3,14 +3,6 @@
 //  and any classes that extend XMPPStream such as XMPPFacebookStream.
 //
 
-#if TARGET_OS_IPHONE
-  #define MIN_KEEPALIVE_INTERVAL      20.0 // 20 Seconds
-  #define DEFAULT_KEEPALIVE_INTERVAL 120.0 //  2 Minutes
-#else
-  #define MIN_KEEPALIVE_INTERVAL      10.0 // 10 Seconds
-  #define DEFAULT_KEEPALIVE_INTERVAL 300.0 //  5 Minutes
-#endif
-
 // Define the various timeouts (in seconds) for retreiving various parts of the XML stream
 #define TIMEOUT_XMPP_WRITE         -1
 #define TIMEOUT_XMPP_READ_START    10

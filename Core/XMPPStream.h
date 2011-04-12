@@ -17,6 +17,13 @@
 @class XMPPElementReceipt;
 @protocol XMPPStreamDelegate;
 
+#if TARGET_OS_IPHONE
+  #define MIN_KEEPALIVE_INTERVAL      20.0 // 20 Seconds
+  #define DEFAULT_KEEPALIVE_INTERVAL 120.0 //  2 Minutes
+#else
+  #define MIN_KEEPALIVE_INTERVAL      10.0 // 10 Seconds
+  #define DEFAULT_KEEPALIVE_INTERVAL 300.0 //  5 Minutes
+#endif
 
 extern NSString *const XMPPStreamErrorDomain;
 
@@ -184,17 +191,19 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
- * For this reason, the xmpp stream supports sending keep alive data.
+ * For this reason, the xmpp stream supports sending keep-alive data.
  * This is simply whitespace, which is ignored by the xmpp protocol.
  * 
- * Keepalive data is only sent in the absence of any other data being sent/received.
+ * Keep-alive data is only sent in the absence of any other data being sent/received.
  * 
  * The default value is defined in DEFAULT_KEEPALIVE_INTERVAL.
- * The minimum valud is defined in MIN_KEEPALIVE_INTERVAL.
+ * The minimum value is defined in MIN_KEEPALIVE_INTERVAL.
  * 
- * To disable keepalive, set the interval to zero.
+ * To disable keep-alive, set the interval to zero.
  * 
- * The keepalive timer (if enabled) fires every (keepAliveInterval / 4) seconds.
+ * The keep-alive timer (if enabled) fires every (keepAliveInterval / 4) seconds.
+ * Upon firing it checks when data was last sent/received,
+ * and sends keep-alive data if the elapsed time has exceeded the keepAliveInterval.
  * Thus the effective resolution of the keepalive timer is based on the interval.
 **/
 @property (readwrite, assign) NSTimeInterval keepAliveInterval;
