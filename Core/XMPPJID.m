@@ -308,11 +308,32 @@
 
 - (BOOL)isEqual:(id)anObject
 {
-	if([anObject isMemberOfClass:[self class]])
+	if ([anObject isMemberOfClass:[self class]])
 	{
 		XMPPJID *aJID = (XMPPJID *)anObject;
 		
-		return [[self full] isEqualToString:[aJID full]];
+		if (user) {
+			if (![user isEqualToString:aJID->user]) return NO;
+		}
+		else {
+			if (aJID->user) return NO;
+		}
+		
+		if (domain) {
+			if (![domain isEqualToString:aJID->domain]) return NO;
+		}
+		else {
+			if (aJID->domain) return NO;
+		}
+		
+		if (resource) {
+			if (![resource isEqualToString:aJID->resource]) return NO;
+		}
+		else {
+			if (aJID->resource) return NO;
+		}
+		
+		return YES;
 	}
 	return NO;
 }
