@@ -72,6 +72,24 @@
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		for (XMPPPingInfo *pingInfo in [pingIDs objectEnumerator])
+		{
+			[pingInfo cancelTimer];
+		}
+		
+		[pingIDs removeAllObjects];
+		
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
 	[super deactivate];
 }
 
@@ -221,6 +239,7 @@
 			
 			[multicastDelegate xmppPing:self didReceivePong:iq withRTT:[pingInfo rtt]];
 			
+			[pingInfo cancelTimer];
 			[pingInfo release];
 		}
 	}
@@ -244,6 +263,16 @@
 	}
 	
 	return NO;
+}
+
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+	for (XMPPPingInfo *pingInfo in [pingIDs objectEnumerator])
+	{
+		[pingInfo cancelTimer];
+	}
+	
+	[pingIDs removeAllObjects];
 }
 
 #if INTEGRATE_WITH_CAPABILITIES
@@ -313,7 +342,6 @@
 	[timeSent release];
 	[super dealloc];
 }
-
 
 
 + (XMPPPingInfo *)pingInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer
