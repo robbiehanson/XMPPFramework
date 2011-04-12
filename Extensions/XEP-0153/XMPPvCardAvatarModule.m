@@ -188,31 +188,36 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule 
         didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
-                     forJID:(XMPPJID *)jid {
-  XMPPLogTrace();
-  
-  if (vCardTemp.photo != nil) 
-  {
-    UIImage *photo = [UIImage imageWithData:vCardTemp.photo];
-    
-    if (photo != nil) 
-    {
-      [multicastDelegate xmppvCardAvatarModule:self 
-                               didReceivePhoto:photo 
-                                        forJID:jid];
-    }
-  }
-  
-  /*
-   * XEP-0153 4.1.3
-   * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
-   * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
-   */
-  if ([jid isEqual:[[xmppStream myJID] bareJID]]) {
-    NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-    
-    [xmppStream sendElement:presence];
-  }
+                     forJID:(XMPPJID *)jid
+{
+	XMPPLogTrace();
+	
+	if (vCardTemp.photo != nil)
+	{
+	#if TARGET_OS_IPHONE
+		UIImage *photo = [UIImage imageWithData:vCardTemp.photo];
+	#else
+		NSImage *photo = [[[NSImage alloc] initWithData:vCardTemp.photo] autorelease];
+	#endif
+		
+		if (photo != nil)
+		{
+			[multicastDelegate xmppvCardAvatarModule:self
+			                         didReceivePhoto:photo
+			                                  forJID:jid];
+		}
+	}
+	
+	/*
+	 * XEP-0153 4.1.3
+	 * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
+	 * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
+	 */
+	if ([jid isEqual:[[xmppStream myJID] bareJID]])
+	{
+		NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+		[xmppStream sendElement:presence];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
