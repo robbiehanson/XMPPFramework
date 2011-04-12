@@ -89,35 +89,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Configure the xmpp stream
 - (void)setupStream
 {
-  // Initialize variables
-	
+	// Initialize variables
+
 	xmppStream = [[XMPPStream alloc] init];
 	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:[XMPPRosterCoreDataStorage sharedInstance]];
-  xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:[XMPPvCardCoreDataStorage sharedInstance]];
-  xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
-	
-	// Configure modules
-	
-	[xmppRoster setAutoRoster:YES];
-  
-  /**
-   * Add XMPPRoster as a delegate of XMPPvCardAvatarModule to cache roster photos in the roster.
-   * This frees the view controller from having to save photos on the main thread.
-   **/
-  [xmppvCardAvatarModule addDelegate:xmppRoster delegateQueue:xmppRoster.moduleQueue];
+	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:[XMPPvCardCoreDataStorage sharedInstance]];
+	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
 
-	
+	// Configure modules
+
+	[xmppRoster setAutoRoster:YES];
+
+	/**
+	 * Add XMPPRoster as a delegate of XMPPvCardAvatarModule to cache roster photos in the roster.
+	 * This frees the view controller from having to save photos on the main thread.
+	**/
+	[xmppvCardAvatarModule addDelegate:xmppRoster delegateQueue:xmppRoster.moduleQueue];
+
+
 	// Activate xmpp modules
-	
+
 	[xmppRoster activate:xmppStream];
-  [xmppvCardTempModule activate:xmppStream];
-  [xmppvCardAvatarModule activate:xmppStream];
-	
+	[xmppvCardTempModule activate:xmppStream];
+	[xmppvCardAvatarModule activate:xmppStream];
+
 	// Add ourself as a delegate to anything we may be interested in
-	
+
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
-  [xmppRoster addDelegate:self delegateQueue:dispatch_get_main_queue()];
-  
+	[xmppRoster addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
 	// Optional:
 	// 
 	// Replace me with the proper domain and port.
@@ -128,10 +128,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// then the xmpp framework will follow the xmpp specification, and do a SRV lookup for quack.com.
 	// 
 	// If you don't specify a hostPort, then the default (5222) will be used.
-  //	[xmppStream setHostName:@"talk.google.com"];
-  //	[xmppStream setHostPort:5222];		
-  
-  // You may need to alter these settings depending on the server you're connecting to
+	//	[xmppStream setHostName:@"talk.google.com"];
+	//	[xmppStream setHostPort:5222];		
+
+	// You may need to alter these settings depending on the server you're connecting to
 	allowSelfSignedCertificates = NO;
 	allowSSLHostNameMismatch = NO;
 }
@@ -341,6 +341,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			{
 				expectedCertName = serverDomain;
 			}
+		}
+		else if (serverDomain == nil)
+		{
+			expectedCertName = virtualDomain;
 		}
 		else
 		{
