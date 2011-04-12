@@ -80,4 +80,6 @@
 - (void)xmppTime:(XMPPTime *)sender didReceiveResponse:(XMPPIQ *)iq withRTT:(NSTimeInterval)rtt;
 - (void)xmppTime:(XMPPTime *)sender didNotReceiveResponse:(NSString *)queryID dueToTimeout:(NSTimeInterval)timeout;
 
+// Note: If the xmpp stream is disconnected, no delegate methods will be called, and outstanding queries are forgotten.
+
 @end
