@@ -63,29 +63,30 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule dispatchQueue:(dispatch_queue_t)queue
 {
-  NSParameterAssert(xmppvCardTempModule != nil);
-  
+	NSParameterAssert(xmppvCardTempModule != nil);
+
 	if ((self = [super initWithDispatchQueue:queue])) {
-    _xmppvCardTempModule = [xmppvCardTempModule retain];
-    
-    // we don't need to call the storage configureWithParent:queue: method, because the vCardTempModule already did that.
-    _moduleStorage = [(id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage retain];
-    
-    [_xmppvCardTempModule addDelegate:self delegateQueue:moduleQueue];
+		_xmppvCardTempModule = [xmppvCardTempModule retain];
+
+		// we don't need to call the storage configureWithParent:queue: method,
+		// because the vCardTempModule already did that.
+		_moduleStorage = [(id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage retain];
+
+		[_xmppvCardTempModule addDelegate:self delegateQueue:moduleQueue];
 	}
 	return self;
 }
 
 
 - (void)dealloc {
-  [_xmppvCardTempModule removeDelegate:self];
-  
-  [_moduleStorage release];
-  _moduleStorage = nil;
-  
-  [_xmppvCardTempModule release];
-  _xmppvCardTempModule = nil;
-  
+	[_xmppvCardTempModule removeDelegate:self];
+
+	[_moduleStorage release];
+	_moduleStorage = nil;
+
+	[_xmppvCardTempModule release];
+	_xmppvCardTempModule = nil;
+	
 	[super dealloc];
 }
 
@@ -95,26 +96,45 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (NSData *)photoDataForJID:(XMPPJID *)jid 
 {
-	NSData *photoData = [_moduleStorage photoDataForJID:jid xmppStream:xmppStream];
-
-	if (photoData == nil) 
-	{
-		[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
-	}
-	else
-	{
-	#if TARGET_OS_IPHONE
-		UIImage *photo = [UIImage imageWithData:photoData];
-	#else
-		NSImage *photo = [[[NSImage alloc] initWithData:photoData] autorelease];
-	#endif
+	// This is a public method, so it may be invoked on any thread/queue.
+	// 
+	// The vCardTempModule is thread safe.
+	// The moduleStorage should be thread safe. (User may be using custom module storage class).
+	// The multicastDelegate is NOT thread safe.
+	
+	__block NSData *photoData;
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		[multicastDelegate xmppvCardAvatarModule:self 
-		                         didReceivePhoto:photo 
-		                                  forJID:jid];
-	}
-
-	return photoData;
+		NSData *photoData = [[_moduleStorage photoDataForJID:jid xmppStream:xmppStream] retain];
+		
+		if (photoData == nil) 
+		{
+			[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
+		}
+		else
+		{
+		#if TARGET_OS_IPHONE
+			UIImage *photo = [UIImage imageWithData:photoData];
+		#else
+			NSImage *photo = [[[NSImage alloc] initWithData:photoData] autorelease];
+		#endif
+			
+			[multicastDelegate xmppvCardAvatarModule:self 
+			                         didReceivePhoto:photo 
+			                                  forJID:jid];
+		}
+		
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return [photoData autorelease];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
