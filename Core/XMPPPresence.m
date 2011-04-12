@@ -40,6 +40,11 @@
 	return [[[XMPPPresence alloc] init] autorelease];
 }
 
++ (XMPPPresence *)presenceWithType:(NSString *)type
+{
+	return [[[XMPPPresence alloc] initWithType:type] autorelease];
+}
+
 + (XMPPPresence *)presenceWithType:(NSString *)type to:(XMPPJID *)to
 {
 	return [[[XMPPPresence alloc] initWithType:type to:to] autorelease];
@@ -48,6 +53,16 @@
 - (id)init
 {
 	self = [super initWithName:@"presence"];
+	return self;
+}
+
+- (id)initWithType:(NSString *)type
+{
+	if ((self = [super initWithName:@"presence"]))
+	{
+		if (type)
+			[self addAttributeWithName:@"type" stringValue:type];
+	}
 	return self;
 }
 
