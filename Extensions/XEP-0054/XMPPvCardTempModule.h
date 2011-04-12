@@ -55,19 +55,18 @@
 @protocol XMPPvCardTempModuleStorage <NSObject>
 
 /**
- * Configures the storage class, passing it's parent and parent's dispatch queue.
+ * Configures the storage class, passing its parent and parent's dispatch queue.
  * 
  * This method is called by the init methods of the XMPPvCardTempModule class.
- * This method is designed to inform the storage class of it's parent
+ * This method is designed to inform the storage class of its parent
  * and of the dispatch queue the parent will be operating on.
  * 
- * It is strongly recommended the storage class operate on the same queue as it's parent
- * as the majority of the time it will be getting called by the parent.
- * Thus if both are operating on the same queue, the combination can run faster.
+ * The storage class may choose to operate on the same queue as its parent,
+ * or it may operate on its own internal dispatch queue.
  * 
  * This method should return YES if it was configured properly.
  * The parent class is configured to ignore the passed
- * storage class in it's init method if this method returns NO.
+ * storage class in its init method if this method returns NO.
 **/
 - (BOOL)configureWithParent:(XMPPvCardTempModule *)aParent queue:(dispatch_queue_t)queue;
 

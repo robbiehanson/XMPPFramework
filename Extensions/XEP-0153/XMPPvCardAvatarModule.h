@@ -22,7 +22,6 @@
 @class XMPPJID;
 @class XMPPStream;
 
-
 @protocol XMPPvCardAvatarDelegate;
 @protocol XMPPvCardAvatarStorage;
 
@@ -30,7 +29,7 @@
 @interface XMPPvCardAvatarModule : XMPPModule <XMPPvCardTempModuleDelegate>
 {
 	XMPPvCardTempModule *_xmppvCardTempModule;
-  id <XMPPvCardAvatarStorage> _moduleStorage;
+	id <XMPPvCardAvatarStorage> _moduleStorage;
 }
 
 @property(nonatomic,retain,readonly) XMPPvCardTempModule *xmppvCardTempModule;
