@@ -64,7 +64,7 @@
 
 - (NSString *)fromStr
 {
-	return [[self attributeForName:@"from"] stringValue];;
+	return [[self attributeForName:@"from"] stringValue];
 }
 
 - (XMPPJID *)to
