@@ -45,40 +45,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
     
-  // Setup the view controllers
-  
-  [window setRootViewController:navigationController];
-  [window makeKeyAndVisible];
-  
-  // Setup the XMPP stream
-  
-  [self setupStream];
+	// Setup the view controllers
 
-  if (![self connect]) {
-    [navigationController presentModalViewController:settingsViewController animated:YES];
-  }
+	[window setRootViewController:navigationController];
+	[window makeKeyAndVisible];
+
+	// Setup the XMPP stream
+
+	[self setupStream];
+
+	if (![self connect]) {
+		[navigationController presentModalViewController:settingsViewController animated:YES];
+	}
 		
-  return YES;
+	return YES;
 }
 
 - (void)dealloc
 {
 	[xmppStream removeDelegate:self];
 	[xmppRoster removeDelegate:self];
-	
+
 	[xmppStream disconnect];
-  [xmppvCardAvatarModule release];
-  [xmppvCardTempModule release];
+	[xmppvCardAvatarModule release];
+	[xmppvCardTempModule release];
 	[xmppStream release];
 	[xmppRoster release];
-	
+
 	[password release];
-	
-  [loginButton release];
-  [settingsViewController release];
+
+	[loginButton release];
+	[settingsViewController release];
 	[navigationController release];
 	[window release];
-	
+
 	[super dealloc];
 }
 
@@ -149,15 +149,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)goOnline
 {
-	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+	XMPPPresence *presence = [XMPPPresence presence]; // type="available" is implicit
 	
 	[[self xmppStream] sendElement:presence];
 }
 
 - (void)goOffline
 {
-	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-	[presence addAttributeWithName:@"type" stringValue:@"unavailable"];
+	XMPPPresence *presence = [XMPPPresence presenceWithType:@"unavailable"];
 	
 	[[self xmppStream] sendElement:presence];
 }
