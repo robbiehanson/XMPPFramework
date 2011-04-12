@@ -37,4 +37,6 @@
 - (void)xmppPing:(XMPPPing *)sender didReceivePong:(XMPPIQ *)pong withRTT:(NSTimeInterval)rtt;
 - (void)xmppPing:(XMPPPing *)sender didNotReceivePong:(NSString *)pingID dueToTimeout:(NSTimeInterval)timeout;
 
+// Note: If the xmpp stream is disconnected, no delegate methods will be called, and outstanding pings are forgotten.
+
 @end
