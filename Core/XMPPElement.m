@@ -36,7 +36,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	NSString *xmlString = [self XMLString];
+	NSString *xmlString = [self compactXMLString];
 	
 	if([coder allowsKeyedCoding])
 	{
