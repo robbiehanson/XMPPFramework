@@ -13,10 +13,12 @@
 
 @interface XMPPTime : XMPPModule
 {
+	BOOL respondsToQueries;
 	NSMutableDictionary *queryIDs;
 }
 
 - (id)initWithStream:(XMPPStream *)xmppStream;
+- (id)initWithStream:(XMPPStream *)xmppStream respondsToQueries:(BOOL)flag;
 
 /**
  * Send query to the server or a specific JID.

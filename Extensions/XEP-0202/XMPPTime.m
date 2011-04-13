@@ -37,8 +37,14 @@
 
 - (id)initWithStream:(XMPPStream *)aXmppStream
 {
+	return [self initWithStream:aXmppStream respondsToQueries:YES];
+}
+
+- (id)initWithStream:(XMPPStream *)aXmppStream respondsToQueries:(BOOL)flag;
+{
 	if ((self = [super initWithStream:aXmppStream]))
 	{
+		respondsToQueries = flag;
 		queryIDs = [[NSMutableDictionary alloc] initWithCapacity:5];
 		
 	  #if INTEGRATE_WITH_CAPABILITIES
@@ -188,7 +194,7 @@
 			[queryInfo release];
 		}
 	}
-	else if ([type isEqualToString:@"get"])
+	else if (respondsToQueries && [type isEqualToString:@"get"])
 	{
 		// Example:
 		// 
@@ -219,16 +225,19 @@
 **/
 - (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query
 {
-	// <query xmlns="http://jabber.org/protocol/disco#info">
-	//   ...
-	//   <feature var="urn:xmpp:time"/>
-	//   ...
-	// </query>
-	
-	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-	[feature addAttributeWithName:@"var" stringValue:@"urn:xmpp:time"];
-	
-	[query addChild:feature];
+	if (respondsToQueries)
+	{
+		// <query xmlns="http://jabber.org/protocol/disco#info">
+		//   ...
+		//   <feature var="urn:xmpp:time"/>
+		//   ...
+		// </query>
+		
+		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
+		[feature addAttributeWithName:@"var" stringValue:@"urn:xmpp:time"];
+		
+		[query addChild:feature];
+	}
 }
 #endif
 
