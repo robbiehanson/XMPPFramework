@@ -1,3 +1,11 @@
+//
+//  ParserTestMacAppDelegate.m
+//  ParserTestMac
+//
+//  Created by Robbie Hanson on 4/13/11.
+//  Copyright 2011 Deusty, LLC. All rights reserved.
+//
+
 #import "ParserTestMacAppDelegate.h"
 #import "XMPPParser.h"
 
