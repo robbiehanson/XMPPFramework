@@ -9,16 +9,11 @@
 //
 
 #import "NSDate+XMPPDateTimeProfiles.h"
-
 #import "XMPPDateTimeProfiles.h"
 
 
 @interface NSDate(XMPPDateTimeProfilesPrivate)
-
-
 - (NSString *)xmppStringWithDateFormat:(NSString *)dateFormat;
-
-
 @end
 
 
@@ -72,7 +67,7 @@
 	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
 	[dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
 	[dateFormatter setDateFormat:dateFormat];
-	[dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"GMT"]];
+	[dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
 	NSString *str = [dateFormatter stringFromDate:self];
 	[dateFormatter release];
