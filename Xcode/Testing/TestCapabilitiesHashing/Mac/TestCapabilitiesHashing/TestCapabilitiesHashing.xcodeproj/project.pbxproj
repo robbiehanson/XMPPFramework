@@ -13,7 +13,6 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		DC399597119B067000C50939 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DC399596119B067000C50939 /* libcrypto.dylib */; };
-		DC84BDAF1244122C0055A459 /* SSCrypto.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BDAE1244122C0055A459 /* SSCrypto.m */; };
 		DC84BDBF124412660055A459 /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BDBC124412660055A459 /* NSDataAdditions.m */; };
 		DC84BDC0124412660055A459 /* NSXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BDBE124412660055A459 /* NSXMLElementAdditions.m */; };
 /* End PBXBuildFile section */
@@ -32,8 +31,6 @@
 		8D1107310486CEB800E47090 /* TestCapabilitiesHashing-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TestCapabilitiesHashing-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* TestCapabilitiesHashing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestCapabilitiesHashing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC399596119B067000C50939 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = usr/lib/libcrypto.dylib; sourceTree = SDKROOT; };
-		DC84BDAD1244122C0055A459 /* SSCrypto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SSCrypto.h; path = ../../../../../Vendor/SSCrypto/SSCrypto.h; sourceTree = SOURCE_ROOT; };
-		DC84BDAE1244122C0055A459 /* SSCrypto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SSCrypto.m; path = ../../../../../Vendor/SSCrypto/SSCrypto.m; sourceTree = SOURCE_ROOT; };
 		DC84BDBB124412660055A459 /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = ../../../../../Categories/NSDataAdditions.h; sourceTree = SOURCE_ROOT; };
 		DC84BDBC124412660055A459 /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDataAdditions.m; path = ../../../../../Categories/NSDataAdditions.m; sourceTree = SOURCE_ROOT; };
 		DC84BDBD124412660055A459 /* NSXMLElementAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSXMLElementAdditions.h; path = ../../../../../Categories/NSXMLElementAdditions.h; sourceTree = SOURCE_ROOT; };
@@ -133,19 +130,9 @@
 		DC39958A119B063400C50939 /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
-				DC84BDBA1244124D0055A459 /* Vendor */,
 				DC84BDB9124412460055A459 /* Utilities */,
 			);
 			name = XMPP;
-			sourceTree = "<group>";
-		};
-		DC84BDB8124412320055A459 /* Crypto */ = {
-			isa = PBXGroup;
-			children = (
-				DC84BDAD1244122C0055A459 /* SSCrypto.h */,
-				DC84BDAE1244122C0055A459 /* SSCrypto.m */,
-			);
-			name = Crypto;
 			sourceTree = "<group>";
 		};
 		DC84BDB9124412460055A459 /* Utilities */ = {
@@ -157,14 +144,6 @@
 				DC84BDBE124412660055A459 /* NSXMLElementAdditions.m */,
 			);
 			name = Utilities;
-			sourceTree = "<group>";
-		};
-		DC84BDBA1244124D0055A459 /* Vendor */ = {
-			isa = PBXGroup;
-			children = (
-				DC84BDB8124412320055A459 /* Crypto */,
-			);
-			name = Vendor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -231,7 +210,6 @@
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				256AC3DA0F4B6AC300CF3369 /* TestCapabilitiesHashingAppDelegate.m in Sources */,
-				DC84BDAF1244122C0055A459 /* SSCrypto.m in Sources */,
 				DC84BDBF124412660055A459 /* NSDataAdditions.m in Sources */,
 				DC84BDC0124412660055A459 /* NSXMLElementAdditions.m in Sources */,
 			);
