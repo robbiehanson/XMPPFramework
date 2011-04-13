@@ -1,0 +1,87 @@
+#import <Foundation/Foundation.h>
+#import "XMPPModule.h"
+#import "XMPPPing.h"
+
+@class XMPPJID;
+
+/**
+ * The XMPPAutoPing module sends pings on a designated interval to the target.
+ * The target may simply be the server, or a specific resource.
+ * 
+ * The module only sends pings as needed.
+ * If the xmpp stream is receiving data from the target, there's no need to send a ping.
+ * Only when no data has been received from the target is a ping sent.
+**/
+
+@interface XMPPAutoPing : XMPPModule {
+@private
+	NSTimeInterval pingInterval;
+	NSTimeInterval pingTimeout;
+	XMPPJID *targetJID;
+	NSString *targetJIDStr;
+	
+	NSDate *lastReceiveTime;
+	NSTimer *pingIntervalTimer;
+	BOOL awaitingPingResponse;
+	
+	XMPPPing *xmppPing;
+}
+
+/**
+ * How often to send a ping.
+ * 
+ * The internal timer fires every (pingInterval / 4) seconds.
+ * Upon firing it checks when data was last received from the target,
+ * and sends a ping if the elapsed time has exceeded the pingInterval.
+ * Thus the effective resolution of the timer is based on the configured interval.
+ * 
+ * To temporarily disable auto-ping, set the interval to zero.
+ * 
+ * The default pingInterval is 60 seconds.
+**/
+@property (nonatomic, readwrite) NSTimeInterval pingInterval;
+
+/**
+ * How long to wait after sending a ping before timing out.
+ * 
+ * The timeout is decoupled from the pingInterval to allow for longer pingIntervals,
+ * which avoids flooding the network, and to allow more precise control overall.
+ * 
+ * After a ping is sent, if a reply is not received by this timeout,
+ * the delegate method is invoked.
+ * 
+ * The default pingTimeout is 10 seconds.
+**/
+@property (nonatomic, readwrite) NSTimeInterval pingTimeout;
+
+/**
+ * The target to send pings to.
+ * 
+ * If the targetJID is nil, this implies the target is the xmpp server we're connected to.
+ * In this case, receiving any data means we've received data from the target.
+ * 
+ * If the targetJID is non-nil, it must be a full JID (user@domain.tld/rsrc).
+ * In this case, the module will monitor the stream for data from the given JID.
+ * 
+ * The default targetJID is nil.
+**/
+@property (nonatomic, readwrite, retain) XMPPJID *targetJID;
+
+/**
+ * The last time data was received from the target.
+**/
+@property (nonatomic, readonly) NSDate *lastReceiveTime;
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@protocol XMPPAutoPingDelegate
+@optional
+
+- (void)xmppAutoPingDidSendPing:(XMPPAutoPing *)sender;
+- (void)xmppAutoPingDidReceivePong:(XMPPAutoPing *)sender;
+
+- (void)xmppAutoPingDidTimeout:(XMPPAutoPing *)sender;
+
+@end
