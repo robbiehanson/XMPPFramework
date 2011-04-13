@@ -99,6 +99,35 @@
 	[super dealloc];
 }
 
+- (BOOL)respondsToQueries
+{
+	if (dispatch_get_current_queue() == moduleQueue)
+	{
+		return respondsToQueries;
+	}
+	else
+	{
+		__block BOOL result;
+		
+		dispatch_sync(moduleQueue, ^{
+			result = respondsToQueries;
+		});
+		return result;
+	}
+}
+
+- (void)setRespondsToQueries:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		respondsToQueries = flag;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
 - (void)removePingID:(NSString *)pingID
 {
 	// This method is invoked on the moduleQueue.
@@ -243,7 +272,7 @@
 			[pingInfo release];
 		}
 	}
-	else if ([type isEqualToString:@"get"])
+	else if (respondsToQueries && [type isEqualToString:@"get"])
 	{
 		// Example:
 		// 
@@ -283,16 +312,19 @@
 {
 	// This method is invoked on the moduleQueue.
 	
-	// <query xmlns="http://jabber.org/protocol/disco#info">
-	//   ...
-	//   <feature var="urn:xmpp:ping"/>
-	//   ...
-	// </query>
-	
-	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-	[feature addAttributeWithName:@"var" stringValue:@"urn:xmpp:ping"];
-	
-	[query addChild:feature];
+	if (respondsToQueries)
+	{
+		// <query xmlns="http://jabber.org/protocol/disco#info">
+		//   ...
+		//   <feature var="urn:xmpp:ping"/>
+		//   ...
+		// </query>
+		
+		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
+		[feature addAttributeWithName:@"var" stringValue:@"urn:xmpp:ping"];
+		
+		[query addChild:feature];
+	}
 }
 #endif
 
