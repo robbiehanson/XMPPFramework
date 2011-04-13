@@ -35,12 +35,46 @@
 	return (XMPPPresence *)element;
 }
 
++ (XMPPPresence *)presence
+{
+	return [[[XMPPPresence alloc] init] autorelease];
+}
+
++ (XMPPPresence *)presenceWithType:(NSString *)type
+{
+	return [[[XMPPPresence alloc] initWithType:type] autorelease];
+}
+
++ (XMPPPresence *)presenceWithType:(NSString *)type to:(XMPPJID *)to
+{
+	return [[[XMPPPresence alloc] initWithType:type to:to] autorelease];
+}
+
+- (id)init
+{
+	self = [super initWithName:@"presence"];
+	return self;
+}
+
+- (id)initWithType:(NSString *)type
+{
+	if ((self = [super initWithName:@"presence"]))
+	{
+		if (type)
+			[self addAttributeWithName:@"type" stringValue:type];
+	}
+	return self;
+}
+
 - (id)initWithType:(NSString *)type to:(XMPPJID *)to
 {
-	if((self = [super initWithName:@"presence"]))
+	if ((self = [super initWithName:@"presence"]))
 	{
-		[self addAttributeWithName:@"type" stringValue:type];
-		[self addAttributeWithName:@"to" stringValue:[to description]];
+		if (type)
+			[self addAttributeWithName:@"type" stringValue:type];
+		
+		if (to)
+			[self addAttributeWithName:@"to" stringValue:[to description]];
 	}
 	return self;
 }
