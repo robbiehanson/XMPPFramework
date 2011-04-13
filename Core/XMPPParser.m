@@ -491,11 +491,11 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
         // 
         // "Franks &#38; Beans" -> "Franks & Beans"
         
-		xmlChar *value = xmlStringLenDecodeEntities(ctxt,                     // the parser context
-		                                            valueBegin,               // the input string
-		                                            (valueEnd - valueBegin),  // the input string length
-		                                            (XML_SUBSTITUTE_REF),     // what to substitue
-		                                            0, 0, 0);                 // end markers, 0 if none
+		xmlChar *value = xmlStringLenDecodeEntities(ctxt,                    // the parser context
+		                                            valueBegin,              // the input string
+		                                      (int)(valueEnd - valueBegin),  // the input string length
+		                                           (XML_SUBSTITUTE_REF),     // what to substitue
+		                                            0, 0, 0);                // end markers, 0 if none
 		CHECK_FOR_NULL(value);
         
 		if ((attrPrefix == NULL) && (attrUri == NULL))
@@ -687,7 +687,7 @@ static void xmlEndElement(void *ctx, const xmlChar *localname,
 
 - (void)parsingThread_Parse:(NSData *)data
 {
-	int result = xmlParseChunk(parserCtxt, (const char *)[data bytes], [data length], 0);
+	int result = xmlParseChunk(parserCtxt, (const char *)[data bytes], (int)[data length], 0);
 	
 	if(result != 0)
 	{
