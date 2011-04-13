@@ -1,8 +1,12 @@
 #import "XMPPAutoPing.h"
 #import "XMPP.h"
 
+#define DEBUG_LEVEL 4
+#include "DDLog.h"
+
+
 @interface XMPPAutoPing ()
-- (void)updatePingIntervalTimer;
+- (void)startPingIntervalTimer;
 - (void)stopPingIntervalTimer;
 @end
 
@@ -57,7 +61,8 @@
 	{
 		pingInterval = interval;
 		
-		[self updatePingIntervalTimer];
+		[self stopPingIntervalTimer];
+		[self startPingIntervalTimer];
 	}
 }
 
@@ -83,7 +88,7 @@
 #pragma mark Ping Interval
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)handlePingIntervalTimerFire
+- (void)handlePingIntervalTimerFire:(NSTimer *)aTimer
 {
 	if (awaitingPingResponse) return;
 	
@@ -96,6 +101,8 @@
 	else
 	{
 		NSTimeInterval elapsed = [lastReceiveTime timeIntervalSinceNow] * -1.0;
+		
+		DDLogVerbose(@"%@: %@ - elapsed(%f)", [self class], THIS_METHOD, elapsed);
 		
 		sendPing = (elapsed >= pingInterval);
 	}
@@ -113,18 +120,35 @@
 	}
 }
 
-- (void)updatePingIntervalTimer
-{
-	// Todo...
-}
-
 - (void)startPingIntervalTimer
 {
-	// Todo...
+	if (pingIntervalTimer == nil && [xmppStream isAuthenticated])
+	{
+		NSTimeInterval interval = (pingInterval / 4.0);
+		
+		NSDate *fireDate;
+		if (lastReceiveTime)
+			fireDate = [lastReceiveTime dateByAddingTimeInterval:interval];
+		else
+			fireDate = [[NSDate date] dateByAddingTimeInterval:interval];
+		
+		DDLogVerbose(@"%@: %@ - interval(%f) fireDate(%@)", [self class], THIS_METHOD, interval, fireDate);
+		
+		pingIntervalTimer = [[NSTimer alloc] initWithFireDate:fireDate
+		                                             interval:interval
+		                                               target:self
+		                                             selector:@selector(handlePingIntervalTimerFire:)
+		                                             userInfo:nil
+		                                              repeats:YES];
+		
+		[[NSRunLoop currentRunLoop] addTimer:pingIntervalTimer forMode:NSDefaultRunLoopMode];
+	}
 }
 
 - (void)stopPingIntervalTimer
 {
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
+	
 	if (pingIntervalTimer)
 	{
 		[pingIntervalTimer invalidate];
@@ -139,12 +163,16 @@
 
 - (void)xmppPing:(XMPPPing *)sender didReceivePong:(XMPPIQ *)pong withRTT:(NSTimeInterval)rtt
 {
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
+	
 	awaitingPingResponse = NO;
 	[multicastDelegate xmppAutoPingDidReceivePong:self];
 }
 
 - (void)xmppPing:(XMPPPing *)sender didNotReceivePong:(NSString *)pingID dueToTimeout:(NSTimeInterval)timeout
 {
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
+	
 	awaitingPingResponse = NO;
 	[multicastDelegate xmppAutoPingDidTimeout:self];
 }
