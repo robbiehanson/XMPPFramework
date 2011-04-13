@@ -1,0 +1,318 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DCDA2B3D13563C2200B98971 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2B3C13563C2200B98971 /* Cocoa.framework */; };
+		DCDA2B4713563C2200B98971 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2B4513563C2200B98971 /* InfoPlist.strings */; };
+		DCDA2B4A13563C2200B98971 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2B4913563C2200B98971 /* main.m */; };
+		DCDA2B4D13563C2200B98971 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2B4B13563C2200B98971 /* Credits.rtf */; };
+		DCDA2B5013563C2200B98971 /* ParserTestMacAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2B4F13563C2200B98971 /* ParserTestMacAppDelegate.m */; };
+		DCDA2B5313563C2200B98971 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2B5113563C2200B98971 /* MainMenu.xib */; };
+		DCDA2B7C13563C7000B98971 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2B7013563C7000B98971 /* XMPPParser.m */; };
+		DCDA2B8213563CE200B98971 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2B8113563CE200B98971 /* libxml2.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DCDA2B3813563C2200B98971 /* ParserTestMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParserTestMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCDA2B3C13563C2200B98971 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		DCDA2B3F13563C2200B98971 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		DCDA2B4013563C2200B98971 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		DCDA2B4113563C2200B98971 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DCDA2B4413563C2200B98971 /* ParserTestMac-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ParserTestMac-Info.plist"; sourceTree = "<group>"; };
+		DCDA2B4613563C2200B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DCDA2B4813563C2200B98971 /* ParserTestMac-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ParserTestMac-Prefix.pch"; sourceTree = "<group>"; };
+		DCDA2B4913563C2200B98971 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DCDA2B4C13563C2200B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		DCDA2B4E13563C2200B98971 /* ParserTestMacAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParserTestMacAppDelegate.h; sourceTree = "<group>"; };
+		DCDA2B4F13563C2200B98971 /* ParserTestMacAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParserTestMacAppDelegate.m; sourceTree = "<group>"; };
+		DCDA2B5213563C2200B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		DCDA2B6F13563C7000B98971 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
+		DCDA2B7013563C7000B98971 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
+		DCDA2B8113563CE200B98971 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DCDA2B3513563C2200B98971 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2B8213563CE200B98971 /* libxml2.dylib in Frameworks */,
+				DCDA2B3D13563C2200B98971 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DCDA2B2D13563C2200B98971 = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B6113563C6000B98971 /* XMPP */,
+				DCDA2B4213563C2200B98971 /* ParserTestMac */,
+				DCDA2B3B13563C2200B98971 /* Frameworks */,
+				DCDA2B3913563C2200B98971 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DCDA2B3913563C2200B98971 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B3813563C2200B98971 /* ParserTestMac.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DCDA2B3B13563C2200B98971 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B3C13563C2200B98971 /* Cocoa.framework */,
+				DCDA2B8113563CE200B98971 /* libxml2.dylib */,
+				DCDA2B3E13563C2200B98971 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DCDA2B3E13563C2200B98971 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B3F13563C2200B98971 /* AppKit.framework */,
+				DCDA2B4013563C2200B98971 /* CoreData.framework */,
+				DCDA2B4113563C2200B98971 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		DCDA2B4213563C2200B98971 /* ParserTestMac */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B4E13563C2200B98971 /* ParserTestMacAppDelegate.h */,
+				DCDA2B4F13563C2200B98971 /* ParserTestMacAppDelegate.m */,
+				DCDA2B5113563C2200B98971 /* MainMenu.xib */,
+				DCDA2B4313563C2200B98971 /* Supporting Files */,
+			);
+			path = ParserTestMac;
+			sourceTree = "<group>";
+		};
+		DCDA2B4313563C2200B98971 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B4413563C2200B98971 /* ParserTestMac-Info.plist */,
+				DCDA2B4513563C2200B98971 /* InfoPlist.strings */,
+				DCDA2B4813563C2200B98971 /* ParserTestMac-Prefix.pch */,
+				DCDA2B4913563C2200B98971 /* main.m */,
+				DCDA2B4B13563C2200B98971 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DCDA2B6113563C6000B98971 /* XMPP */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B6313563C7000B98971 /* Core */,
+			);
+			name = XMPP;
+			sourceTree = "<group>";
+		};
+		DCDA2B6313563C7000B98971 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B6F13563C7000B98971 /* XMPPParser.h */,
+				DCDA2B7013563C7000B98971 /* XMPPParser.m */,
+			);
+			name = Core;
+			path = ../../../Core;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DCDA2B3713563C2200B98971 /* ParserTestMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DCDA2B5613563C2200B98971 /* Build configuration list for PBXNativeTarget "ParserTestMac" */;
+			buildPhases = (
+				DCDA2B3413563C2200B98971 /* Sources */,
+				DCDA2B3513563C2200B98971 /* Frameworks */,
+				DCDA2B3613563C2200B98971 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ParserTestMac;
+			productName = ParserTestMac;
+			productReference = DCDA2B3813563C2200B98971 /* ParserTestMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DCDA2B2F13563C2200B98971 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = Voalte;
+			};
+			buildConfigurationList = DCDA2B3213563C2200B98971 /* Build configuration list for PBXProject "ParserTestMac" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = DCDA2B2D13563C2200B98971;
+			productRefGroup = DCDA2B3913563C2200B98971 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DCDA2B3713563C2200B98971 /* ParserTestMac */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DCDA2B3613563C2200B98971 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2B4713563C2200B98971 /* InfoPlist.strings in Resources */,
+				DCDA2B4D13563C2200B98971 /* Credits.rtf in Resources */,
+				DCDA2B5313563C2200B98971 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DCDA2B3413563C2200B98971 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2B4A13563C2200B98971 /* main.m in Sources */,
+				DCDA2B5013563C2200B98971 /* ParserTestMacAppDelegate.m in Sources */,
+				DCDA2B7C13563C7000B98971 /* XMPPParser.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DCDA2B4513563C2200B98971 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2B4613563C2200B98971 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		DCDA2B4B13563C2200B98971 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2B4C13563C2200B98971 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		DCDA2B5113563C2200B98971 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2B5213563C2200B98971 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DCDA2B5413563C2200B98971 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		DCDA2B5513563C2200B98971 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DCDA2B5713563C2200B98971 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ParserTestMac/ParserTestMac-Prefix.pch";
+				INFOPLIST_FILE = "ParserTestMac/ParserTestMac-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		DCDA2B5813563C2200B98971 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ParserTestMac/ParserTestMac-Prefix.pch";
+				INFOPLIST_FILE = "ParserTestMac/ParserTestMac-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DCDA2B3213563C2200B98971 /* Build configuration list for PBXProject "ParserTestMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCDA2B5413563C2200B98971 /* Debug */,
+				DCDA2B5513563C2200B98971 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DCDA2B5613563C2200B98971 /* Build configuration list for PBXNativeTarget "ParserTestMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCDA2B5713563C2200B98971 /* Debug */,
+				DCDA2B5813563C2200B98971 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DCDA2B2F13563C2200B98971 /* Project object */;
+}
