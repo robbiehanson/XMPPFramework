@@ -5,7 +5,7 @@
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
-static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
 
 @interface XMPPAutoPing ()
 - (void)updatePingIntervalTimer;
@@ -31,6 +31,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		lastReceiveTime = DISPATCH_TIME_FOREVER;
 		
 		xmppPing = [[XMPPPing alloc] initWithDispatchQueue:queue];
+		xmppPing.respondsToQueries = NO;
+		
 		[xmppPing addDelegate:self delegateQueue:moduleQueue];
 	}
 	return self;
@@ -54,6 +56,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 		[self stopPingIntervalTimer];
+		
+		lastReceiveTime = DISPATCH_TIME_FOREVER;
+		awaitingPingResponse = NO;
 		
 		[xmppPing deactivate];
 		
@@ -213,24 +218,50 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 - (void)handlePingIntervalTimerFire
 {
-	dispatch_time_t now = dispatch_time(DISPATCH_TIME_NOW, 0);
-	NSTimeInterval elapsed = ((now - lastReceiveTime) / NSEC_PER_SEC);
+	if (awaitingPingResponse) return;
 	
-	if (elapsed >= pingInterval)
+	BOOL sendPing = NO;
+	
+	if (lastReceiveTime == DISPATCH_TIME_FOREVER)
 	{
+		sendPing = YES;
+	}
+	else
+	{
+		dispatch_time_t now = dispatch_time(DISPATCH_TIME_NOW, 0);
+		NSTimeInterval elapsed = ((double)(now - lastReceiveTime) / (double)NSEC_PER_SEC);
+		
+		XMPPLogTrace2(@"%@: %@ - elapsed(%f)", [self class], THIS_METHOD, elapsed);
+		
+		sendPing = (elapsed >= pingInterval);
+	}
+	
+	if (sendPing)
+	{
+		awaitingPingResponse = YES;
+		
 		if (targetJID)
 			[xmppPing sendPingToJID:targetJID withTimeout:pingTimeout];
 		else
 			[xmppPing sendPingToServerWithTimeout:pingTimeout];
+		
+		[multicastDelegate xmppAutoPingDidSendPing:self];
 	}
 }
 
 - (void)updatePingIntervalTimer
 {
+	XMPPLogTrace();
+	
 	if (pingIntervalTimer && [xmppStream isAuthenticated])
 	{
-		uint64_t interval = (pingInterval * NSEC_PER_SEC);
-		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, interval);
+		uint64_t interval = ((pingInterval / 4.0) * NSEC_PER_SEC);
+		dispatch_time_t tt;
+		
+		if (lastReceiveTime != DISPATCH_TIME_FOREVER)
+			tt = dispatch_time(lastReceiveTime, interval);
+		else
+			tt = dispatch_time(DISPATCH_TIME_NOW, interval);
 		
 		dispatch_source_set_timer(pingIntervalTimer, tt, interval, 0);
 	}
@@ -238,6 +269,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 - (void)startPingIntervalTimer
 {
+	XMPPLogTrace();
+	
 	BOOL newTimer = NO;
 	
 	if (pingIntervalTimer == NULL)
@@ -264,6 +297,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 - (void)stopPingIntervalTimer
 {
+	XMPPLogTrace();
+	
 	if (pingIntervalTimer)
 	{
 		dispatch_release(pingIntervalTimer);
@@ -278,12 +313,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 - (void)xmppPing:(XMPPPing *)sender didReceivePong:(XMPPIQ *)pong withRTT:(NSTimeInterval)rtt
 {
 	XMPPLogTrace();
+	
+	awaitingPingResponse = NO;
+	[multicastDelegate xmppAutoPingDidReceivePong:self];
 }
 
 - (void)xmppPing:(XMPPPing *)sender didNotReceivePong:(NSString *)pingID dueToTimeout:(NSTimeInterval)timeout
 {
 	XMPPLogTrace();
 	
+	awaitingPingResponse = NO;
 	[multicastDelegate xmppAutoPingDidTimeout:self];
 }
 
@@ -293,6 +332,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
+	lastReceiveTime = dispatch_time(DISPATCH_TIME_NOW, 0);
+	awaitingPingResponse = NO;
+	
 	[self startPingIntervalTimer];
 }
 
@@ -327,6 +369,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	[self stopPingIntervalTimer];
 	
 	lastReceiveTime = DISPATCH_TIME_FOREVER;
+	awaitingPingResponse = NO;
 }
 
 @end
