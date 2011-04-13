@@ -22,7 +22,6 @@
 	
 	dispatch_time_t lastReceiveTime;
 	dispatch_source_t pingIntervalTimer;
-	dispatch_source_t pingTimeoutTimer;
 	BOOL awaitingPingResponse;
 	
 	XMPPPing *xmppPing;
@@ -66,7 +65,7 @@
  * 
  * The default targetJID is nil.
 **/
-@property (readwrite) XMPPJID *targetJID;
+@property (readwrite, retain) XMPPJID *targetJID;
 
 /**
  * The last time data was received from the target.
@@ -79,6 +78,9 @@
 
 @protocol XMPPAutoPingDelegate
 @optional
+
+- (void)xmppAutoPingDidSendPing:(XMPPAutoPing *)sender;
+- (void)xmppAutoPingDidReceivePong:(XMPPAutoPing *)sender;
 
 - (void)xmppAutoPingDidTimeout:(XMPPAutoPing *)sender;
 
