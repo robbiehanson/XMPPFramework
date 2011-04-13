@@ -36,6 +36,17 @@
 	return (XMPPMessage *)element;
 }
 
++ (XMPPMessage *)message
+{
+	return [[[XMPPMessage alloc] init] autorelease];
+}
+
+- (id)init
+{
+	self = [super initWithName:@"message"];
+	return self;
+}
+
 - (BOOL)isChatMessage
 {
 	return [[[self attributeForName:@"type"] stringValue] isEqualToString:@"chat"];
