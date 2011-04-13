@@ -9,10 +9,12 @@
 
 @interface XMPPPing : XMPPModule
 {
+	BOOL respondsToQueries;
 	NSMutableDictionary *pingIDs;
 }
 
 - (id)initWithStream:(XMPPStream *)xmppStream;
+- (id)initWithStream:(XMPPStream *)xmppStream respondsToQueries:(BOOL)flag;
 
 /**
  * Send pings to the server or a specific JID.
