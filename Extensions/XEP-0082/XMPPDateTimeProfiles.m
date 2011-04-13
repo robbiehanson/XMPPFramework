@@ -1,8 +1,6 @@
 #import "XMPPDateTimeProfiles.h"
+#import "DDNumber.h"
 
-#if TARGET_OS_IPHONE
-  #import "DDXML.h"
-#endif
 
 @interface XMPPDateTimeProfiles (PrivateAPI)
 + (NSDate *)parseDateTime:(NSString *)dateTimeStr withMandatoryTimeZone:(BOOL)mandatoryTZ;
@@ -211,38 +209,36 @@
 	
 	if (hasTimeZoneInfo && !hasTimeZoneOffset)
 	{
-		// The NSDateFormatter will return the proper date, but it will be in our own time zone.
+		[df setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		
-		NSDate *utcDate = [df dateFromString:dateTimeStr];
-		
-		NSTimeInterval localTZO = [[NSTimeZone systemTimeZone] secondsFromGMT];
-		
-		result = [utcDate dateByAddingTimeInterval:localTZO];
+		result = [df dateFromString:dateTimeStr];
 	}
 	else if (hasTimeZoneInfo && hasTimeZoneOffset)
 	{
-		NSString *subStr1;
-		NSString *subStr2;
+		NSString *dto;
+		NSString *tzo;
 		
 		if (hasMilliseconds)
 		{
-			subStr1 = [dateTimeStr substringToIndex:23];
-			subStr2 = [dateTimeStr substringFromIndex:23];
+			dto = [dateTimeStr substringToIndex:23];
+			tzo = [dateTimeStr substringFromIndex:23];
 		}
 		else
 		{
-			subStr1 = [dateTimeStr substringToIndex:19];
-			subStr2 = [dateTimeStr substringFromIndex:19];
+			dto = [dateTimeStr substringToIndex:19];
+			tzo = [dateTimeStr substringFromIndex:19];
 		}
 		
-		NSDate *timeInLocalTZO = [df dateFromString:subStr1];
-		
-		NSTimeInterval remoteTZO = [self parseTimeZoneOffset:subStr2];
-		NSTimeInterval localTZO  = [[NSTimeZone systemTimeZone] secondsFromGMT];
-		
-		NSTimeInterval tzoDiff = localTZO - remoteTZO;
-		
-		result = [timeInLocalTZO dateByAddingTimeInterval:tzoDiff];
+		NSTimeZone *timeZone = [self parseTimeZoneOffset:tzo];
+		if (timeZone == nil)
+		{
+			result = nil;
+		}
+		else
+		{
+			[df setTimeZone:timeZone];
+			result = [df dateFromString:dto];
+		}
 	}
 	else
 	{
@@ -253,37 +249,45 @@
 	return result;
 }
 
-+ (NSTimeInterval)parseTimeZoneOffset:(NSString *)tzo
++ (NSTimeZone *)parseTimeZoneOffset:(NSString *)tzo
 {
-	NSDateFormatter *df= [[NSDateFormatter alloc] init];
-	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
-	[df setDateFormat:@"yyyy-MM-dd'T'HH:mm"];
-	
 	// The tzo value is supposed to start with '+' or '-'.
-	// Spec says: (+-)HH:mm
+	// Spec says: (+-)hh:mm
+	// 
+	// hh : two-digit hour portion (00 through 23)
+	// mm : two-digit minutes portion (00 through 59)
 	
-	NSString *tzoSubStr = [tzo length] > 1 ? [tzo substringFromIndex:1] : nil;
-	
-	NSString *str1 = [NSString stringWithFormat:@"1982-05-20T00:00"];
-	NSString *str2 = [NSString stringWithFormat:@"1982-05-20T%@", tzoSubStr];
-	
-	NSDate *date1 = [df dateFromString:str1];
-	NSDate *date2 = [df dateFromString:str2];
-	
-	NSTimeInterval result = 0;
-	
-	if (date1 && date2)
+	if ([tzo length] != 6)
 	{
-		result = [date2 timeIntervalSinceDate:date1];
+		return nil;
 	}
+	
+	NSString *hoursStr   = [tzo substringWithRange:NSMakeRange(1, 2)];
+	NSString *minutesStr = [tzo substringWithRange:NSMakeRange(4, 2)];
+	
+	NSUInteger hours;
+	if (![NSNumber parseString:hoursStr intoNSUInteger:&hours])
+		return nil;
+	
+	NSUInteger minutes;
+	if (![NSNumber parseString:minutesStr intoNSUInteger:&minutes])
+		return nil;
+	
+	if (hours > 23) return nil;
+	if (minutes > 59) return nil;
+	
+	NSInteger secondsOffset = (NSInteger)((hours * 60 * 60) + (minutes * 60));
 	
 	if ([tzo hasPrefix:@"-"])
 	{
-		result = -1 * result;
+		secondsOffset = -1 * secondsOffset;
+	}
+	else if (![tzo hasPrefix:@"+"])
+	{
+		return nil;
 	}
 	
-	[df release];
-	return result;
+	return [NSTimeZone timeZoneForSecondsFromGMT:secondsOffset];
 }
 
 @end

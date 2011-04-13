@@ -334,7 +334,7 @@
 	// 
 	// NSDate is a very simple class, but can be confusing at times.
 	// NSDate simply stores an NSTimeInterval internally,
-	// which is just a double representing the number seconds since the reference date.
+	// which is just a double representing the number of seconds since the reference date.
 	// Since it's a double, it can yield sub-millisecond precision.
 	// 
 	// In addition to this, it stores the values in UTC.
@@ -354,7 +354,7 @@
 	return [XMPPDateTimeProfiles parseDateTime:utc];
 }
 
-+ (NSTimeInterval)timeZoneOffsetFromResponse:(XMPPIQ *)iq
++ (NSTimeZone *)timeZoneOffsetFromResponse:(XMPPIQ *)iq
 {
 	// <iq type="result" from="robbie@voalte.com/office" to="robbie@deusty.com/home" id="abc123">
 	//   <time xmlns="urn:xmpp:time">
