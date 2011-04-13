@@ -36,7 +36,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	NSString *xmlString = [self XMLString];
+	NSString *xmlString = [self compactXMLString];
 	
 	if([coder allowsKeyedCoding])
 	{
@@ -64,7 +64,7 @@
 
 - (NSString *)fromStr
 {
-	return [[self attributeForName:@"from"] stringValue];;
+	return [[self attributeForName:@"from"] stringValue];
 }
 
 - (XMPPJID *)to

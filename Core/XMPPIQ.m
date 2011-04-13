@@ -36,33 +36,58 @@
 	return (XMPPIQ *)element;
 }
 
++ (XMPPIQ *)iq
+{
+	return [[[XMPPIQ alloc] initWithType:nil to:nil elementID:nil child:nil] autorelease];
+}
+
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid
 {
-	return [self iqWithType:type to:jid elementID:nil child:nil];
+	return [[[XMPPIQ alloc] initWithType:type to:jid elementID:nil child:nil] autorelease];
 }
 
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
 {
-	return [self iqWithType:type to:jid elementID:eid child:nil];
+	return [[[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:nil] autorelease];
 }
 
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
 {
-	XMPPIQ *iq = [[XMPPIQ alloc] initWithName:@"iq"];
-	
-	if (type)
-		[iq addAttributeWithName:@"type" stringValue:type];
-	
-	if (jid)
-		[iq addAttributeWithName:@"to" stringValue:[jid full]];
-	
-	if (eid)
-		[iq addAttributeWithName:@"id" stringValue:eid];
-	
-	if (childElement)
-		[iq addChild:childElement];
-	
-	return [iq autorelease];
+	return [[[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:childElement] autorelease];
+}
+
+- (id)init
+{
+	return [self initWithType:nil to:nil elementID:nil child:nil];
+}
+
+- (id)initWithType:(NSString *)type to:(XMPPJID *)jid
+{
+	return [self initWithType:type to:jid elementID:nil child:nil];
+}
+
+- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
+{
+	return [self initWithType:type to:jid elementID:eid child:nil];
+}
+
+- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
+{
+	if ((self = [super initWithName:@"iq"]))
+	{
+		if (type)
+			[self addAttributeWithName:@"type" stringValue:type];
+		
+		if (jid)
+			[self addAttributeWithName:@"to" stringValue:[jid full]];
+		
+		if (eid)
+			[self addAttributeWithName:@"id" stringValue:eid];
+		
+		if (childElement)
+			[self addChild:childElement];
+	}
+	return self;
 }
 
 - (NSString *)type
