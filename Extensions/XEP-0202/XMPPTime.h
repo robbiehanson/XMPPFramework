@@ -42,9 +42,8 @@
 
 /**
  * Extracts the time zone offset from the given response/time element.
- * The time zone offset is given as an NSTimeInterval, reprsenting the number of seconds from GMT.
 **/
-+ (NSTimeInterval)timeZoneOffsetFromResponse:(XMPPIQ *)iq;
++ (NSTimeZone *)timeZoneOffsetFromResponse:(XMPPIQ *)iq;
 
 /**
  * Given the returned time response from a remote party, and the approximate round trip time,
