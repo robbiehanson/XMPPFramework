@@ -1,0 +1,514 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DCDA2A8D1356392D00B98971 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2A8C1356392D00B98971 /* Cocoa.framework */; };
+		DCDA2A971356392D00B98971 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2A951356392D00B98971 /* InfoPlist.strings */; };
+		DCDA2A9A1356392D00B98971 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A991356392D00B98971 /* main.m */; };
+		DCDA2A9D1356392D00B98971 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2A9B1356392D00B98971 /* Credits.rtf */; };
+		DCDA2AA01356392D00B98971 /* AutoPingTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A9F1356392D00B98971 /* AutoPingTestAppDelegate.m */; };
+		DCDA2AA31356392E00B98971 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2AA11356392E00B98971 /* MainMenu.xib */; };
+		DCDA2ACE1356396500B98971 /* DDNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AAC1356396500B98971 /* DDNumber.m */; };
+		DCDA2ACF1356396500B98971 /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AAE1356396500B98971 /* NSDataAdditions.m */; };
+		DCDA2AD01356396500B98971 /* NSXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AB01356396500B98971 /* NSXMLElementAdditions.m */; };
+		DCDA2AD11356396500B98971 /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AB41356396500B98971 /* XMPPElement.m */; };
+		DCDA2AD21356396500B98971 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AB61356396500B98971 /* XMPPIQ.m */; };
+		DCDA2AD31356396500B98971 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AB81356396500B98971 /* XMPPJID.m */; };
+		DCDA2AD41356396500B98971 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2ABA1356396500B98971 /* XMPPMessage.m */; };
+		DCDA2AD51356396500B98971 /* XMPPModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2ABC1356396500B98971 /* XMPPModule.m */; };
+		DCDA2AD61356396500B98971 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2ABE1356396500B98971 /* XMPPParser.m */; };
+		DCDA2AD71356396500B98971 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AC01356396500B98971 /* XMPPPresence.m */; };
+		DCDA2AD81356396500B98971 /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AC21356396500B98971 /* XMPPReconnect.m */; };
+		DCDA2AD91356396500B98971 /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AC41356396500B98971 /* XMPPStream.m */; };
+		DCDA2ADA1356396500B98971 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AC81356396500B98971 /* LibIDN.m */; };
+		DCDA2ADB1356396500B98971 /* MulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2ACA1356396500B98971 /* MulticastDelegate.m */; };
+		DCDA2ADC1356396500B98971 /* RFSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2ACC1356396500B98971 /* RFSRVResolver.m */; };
+		DCDA2AF41356397C00B98971 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2AE01356397C00B98971 /* AsyncSocket.m */; };
+		DCDA2AFA1356397C00B98971 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2AEF1356397C00B98971 /* libidn.a */; };
+		DCDA2AFD1356399A00B98971 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2AFC1356399A00B98971 /* libcrypto.dylib */; };
+		DCDA2AFF135639A800B98971 /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2AFE135639A800B98971 /* libresolv.dylib */; };
+		DCDA2B01135639C200B98971 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2B00135639C200B98971 /* SystemConfiguration.framework */; };
+		DCDA2B03135639DE00B98971 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2B02135639DE00B98971 /* libxml2.dylib */; };
+		DCDA2B9213563EBD00B98971 /* XMPPAutoPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2B8F13563EBC00B98971 /* XMPPAutoPing.m */; };
+		DCDA2B9313563EBD00B98971 /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2B9113563EBC00B98971 /* XMPPPing.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DCDA2A881356392D00B98971 /* AutoPingTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutoPingTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCDA2A8C1356392D00B98971 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		DCDA2A8F1356392D00B98971 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		DCDA2A901356392D00B98971 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		DCDA2A911356392D00B98971 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DCDA2A941356392D00B98971 /* AutoPingTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AutoPingTest-Info.plist"; sourceTree = "<group>"; };
+		DCDA2A961356392D00B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DCDA2A981356392D00B98971 /* AutoPingTest-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AutoPingTest-Prefix.pch"; sourceTree = "<group>"; };
+		DCDA2A991356392D00B98971 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DCDA2A9C1356392D00B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		DCDA2A9E1356392D00B98971 /* AutoPingTestAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AutoPingTestAppDelegate.h; sourceTree = "<group>"; };
+		DCDA2A9F1356392D00B98971 /* AutoPingTestAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AutoPingTestAppDelegate.m; sourceTree = "<group>"; };
+		DCDA2AA21356392E00B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		DCDA2AAB1356396500B98971 /* DDNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDNumber.h; sourceTree = "<group>"; };
+		DCDA2AAC1356396500B98971 /* DDNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDNumber.m; sourceTree = "<group>"; };
+		DCDA2AAD1356396500B98971 /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataAdditions.h; sourceTree = "<group>"; };
+		DCDA2AAE1356396500B98971 /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataAdditions.m; sourceTree = "<group>"; };
+		DCDA2AAF1356396500B98971 /* NSXMLElementAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSXMLElementAdditions.h; sourceTree = "<group>"; };
+		DCDA2AB01356396500B98971 /* NSXMLElementAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSXMLElementAdditions.m; sourceTree = "<group>"; };
+		DCDA2AB21356396500B98971 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPP.h; sourceTree = "<group>"; };
+		DCDA2AB31356396500B98971 /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPElement.h; sourceTree = "<group>"; };
+		DCDA2AB41356396500B98971 /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPElement.m; sourceTree = "<group>"; };
+		DCDA2AB51356396500B98971 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
+		DCDA2AB61356396500B98971 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
+		DCDA2AB71356396500B98971 /* XMPPJID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPJID.h; sourceTree = "<group>"; };
+		DCDA2AB81356396500B98971 /* XMPPJID.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPJID.m; sourceTree = "<group>"; };
+		DCDA2AB91356396500B98971 /* XMPPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMessage.h; sourceTree = "<group>"; };
+		DCDA2ABA1356396500B98971 /* XMPPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMessage.m; sourceTree = "<group>"; };
+		DCDA2ABB1356396500B98971 /* XMPPModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPModule.h; sourceTree = "<group>"; };
+		DCDA2ABC1356396500B98971 /* XMPPModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPModule.m; sourceTree = "<group>"; };
+		DCDA2ABD1356396500B98971 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
+		DCDA2ABE1356396500B98971 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
+		DCDA2ABF1356396500B98971 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
+		DCDA2AC01356396500B98971 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
+		DCDA2AC11356396500B98971 /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
+		DCDA2AC21356396500B98971 /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
+		DCDA2AC31356396500B98971 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
+		DCDA2AC41356396500B98971 /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
+		DCDA2AC61356396500B98971 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		DCDA2AC71356396500B98971 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibIDN.h; sourceTree = "<group>"; };
+		DCDA2AC81356396500B98971 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
+		DCDA2AC91356396500B98971 /* MulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MulticastDelegate.h; sourceTree = "<group>"; };
+		DCDA2ACA1356396500B98971 /* MulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MulticastDelegate.m; sourceTree = "<group>"; };
+		DCDA2ACB1356396500B98971 /* RFSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFSRVResolver.h; sourceTree = "<group>"; };
+		DCDA2ACC1356396500B98971 /* RFSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RFSRVResolver.m; sourceTree = "<group>"; };
+		DCDA2ACD1356396500B98971 /* SynthesizeSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynthesizeSingleton.h; sourceTree = "<group>"; };
+		DCDA2ADF1356397C00B98971 /* AsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncSocket.h; sourceTree = "<group>"; };
+		DCDA2AE01356397C00B98971 /* AsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsyncSocket.m; sourceTree = "<group>"; };
+		DCDA2AED1356397C00B98971 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "idn-int.h"; sourceTree = "<group>"; };
+		DCDA2AEF1356397C00B98971 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libidn.a; sourceTree = "<group>"; };
+		DCDA2AF01356397C00B98971 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringprep.h; sourceTree = "<group>"; };
+		DCDA2AFC1356399A00B98971 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = usr/lib/libcrypto.dylib; sourceTree = SDKROOT; };
+		DCDA2AFE135639A800B98971 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
+		DCDA2B00135639C200B98971 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		DCDA2B02135639DE00B98971 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		DCDA2B8E13563EBC00B98971 /* XMPPAutoPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAutoPing.h; sourceTree = "<group>"; };
+		DCDA2B8F13563EBC00B98971 /* XMPPAutoPing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAutoPing.m; sourceTree = "<group>"; };
+		DCDA2B9013563EBC00B98971 /* XMPPPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPing.h; sourceTree = "<group>"; };
+		DCDA2B9113563EBC00B98971 /* XMPPPing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPing.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DCDA2A851356392D00B98971 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2B03135639DE00B98971 /* libxml2.dylib in Frameworks */,
+				DCDA2B01135639C200B98971 /* SystemConfiguration.framework in Frameworks */,
+				DCDA2AFF135639A800B98971 /* libresolv.dylib in Frameworks */,
+				DCDA2AFD1356399A00B98971 /* libcrypto.dylib in Frameworks */,
+				DCDA2A8D1356392D00B98971 /* Cocoa.framework in Frameworks */,
+				DCDA2AFA1356397C00B98971 /* libidn.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DCDA2A7D1356392D00B98971 = {
+			isa = PBXGroup;
+			children = (
+				DCDA2AA91356394A00B98971 /* XMPP */,
+				DCDA2A921356392D00B98971 /* AutoPingTest */,
+				DCDA2A8B1356392D00B98971 /* Frameworks */,
+				DCDA2A891356392D00B98971 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DCDA2A891356392D00B98971 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A881356392D00B98971 /* AutoPingTest.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DCDA2A8B1356392D00B98971 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A8C1356392D00B98971 /* Cocoa.framework */,
+				DCDA2B00135639C200B98971 /* SystemConfiguration.framework */,
+				DCDA2AFE135639A800B98971 /* libresolv.dylib */,
+				DCDA2AFC1356399A00B98971 /* libcrypto.dylib */,
+				DCDA2B02135639DE00B98971 /* libxml2.dylib */,
+				DCDA2A8E1356392D00B98971 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DCDA2A8E1356392D00B98971 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A8F1356392D00B98971 /* AppKit.framework */,
+				DCDA2A901356392D00B98971 /* CoreData.framework */,
+				DCDA2A911356392D00B98971 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		DCDA2A921356392D00B98971 /* AutoPingTest */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A9E1356392D00B98971 /* AutoPingTestAppDelegate.h */,
+				DCDA2A9F1356392D00B98971 /* AutoPingTestAppDelegate.m */,
+				DCDA2AA11356392E00B98971 /* MainMenu.xib */,
+				DCDA2A931356392D00B98971 /* Supporting Files */,
+			);
+			path = AutoPingTest;
+			sourceTree = "<group>";
+		};
+		DCDA2A931356392D00B98971 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A941356392D00B98971 /* AutoPingTest-Info.plist */,
+				DCDA2A951356392D00B98971 /* InfoPlist.strings */,
+				DCDA2A981356392D00B98971 /* AutoPingTest-Prefix.pch */,
+				DCDA2A991356392D00B98971 /* main.m */,
+				DCDA2A9B1356392D00B98971 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DCDA2AA91356394A00B98971 /* XMPP */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2ADD1356397C00B98971 /* Vendor */,
+				DCDA2AAA1356396500B98971 /* Categories */,
+				DCDA2AC51356396500B98971 /* Utilities */,
+				DCDA2AB11356396500B98971 /* Core */,
+				DCDA2B8B13563EA700B98971 /* Extensions */,
+			);
+			name = XMPP;
+			sourceTree = "<group>";
+		};
+		DCDA2AAA1356396500B98971 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2AAB1356396500B98971 /* DDNumber.h */,
+				DCDA2AAC1356396500B98971 /* DDNumber.m */,
+				DCDA2AAD1356396500B98971 /* NSDataAdditions.h */,
+				DCDA2AAE1356396500B98971 /* NSDataAdditions.m */,
+				DCDA2AAF1356396500B98971 /* NSXMLElementAdditions.h */,
+				DCDA2AB01356396500B98971 /* NSXMLElementAdditions.m */,
+			);
+			name = Categories;
+			path = ../../../Categories;
+			sourceTree = "<group>";
+		};
+		DCDA2AB11356396500B98971 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2AB21356396500B98971 /* XMPP.h */,
+				DCDA2ABD1356396500B98971 /* XMPPParser.h */,
+				DCDA2ABE1356396500B98971 /* XMPPParser.m */,
+				DCDA2AC31356396500B98971 /* XMPPStream.h */,
+				DCDA2AC41356396500B98971 /* XMPPStream.m */,
+				DCDA2AB71356396500B98971 /* XMPPJID.h */,
+				DCDA2AB81356396500B98971 /* XMPPJID.m */,
+				DCDA2AB31356396500B98971 /* XMPPElement.h */,
+				DCDA2AB41356396500B98971 /* XMPPElement.m */,
+				DCDA2AB51356396500B98971 /* XMPPIQ.h */,
+				DCDA2AB61356396500B98971 /* XMPPIQ.m */,
+				DCDA2AB91356396500B98971 /* XMPPMessage.h */,
+				DCDA2ABA1356396500B98971 /* XMPPMessage.m */,
+				DCDA2ABF1356396500B98971 /* XMPPPresence.h */,
+				DCDA2AC01356396500B98971 /* XMPPPresence.m */,
+				DCDA2AC11356396500B98971 /* XMPPReconnect.h */,
+				DCDA2AC21356396500B98971 /* XMPPReconnect.m */,
+				DCDA2ABB1356396500B98971 /* XMPPModule.h */,
+				DCDA2ABC1356396500B98971 /* XMPPModule.m */,
+			);
+			name = Core;
+			path = ../../../Core;
+			sourceTree = "<group>";
+		};
+		DCDA2AC51356396500B98971 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2AC61356396500B98971 /* DDLog.h */,
+				DCDA2AC71356396500B98971 /* LibIDN.h */,
+				DCDA2AC81356396500B98971 /* LibIDN.m */,
+				DCDA2AC91356396500B98971 /* MulticastDelegate.h */,
+				DCDA2ACA1356396500B98971 /* MulticastDelegate.m */,
+				DCDA2ACB1356396500B98971 /* RFSRVResolver.h */,
+				DCDA2ACC1356396500B98971 /* RFSRVResolver.m */,
+				DCDA2ACD1356396500B98971 /* SynthesizeSingleton.h */,
+			);
+			name = Utilities;
+			path = ../../../Utilities;
+			sourceTree = "<group>";
+		};
+		DCDA2ADD1356397C00B98971 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2ADE1356397C00B98971 /* AsyncSocket */,
+				DCDA2AEC1356397C00B98971 /* libidn */,
+			);
+			name = Vendor;
+			path = ../../../Vendor;
+			sourceTree = "<group>";
+		};
+		DCDA2ADE1356397C00B98971 /* AsyncSocket */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2ADF1356397C00B98971 /* AsyncSocket.h */,
+				DCDA2AE01356397C00B98971 /* AsyncSocket.m */,
+			);
+			path = AsyncSocket;
+			sourceTree = "<group>";
+		};
+		DCDA2AEC1356397C00B98971 /* libidn */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2AED1356397C00B98971 /* idn-int.h */,
+				DCDA2AEF1356397C00B98971 /* libidn.a */,
+				DCDA2AF01356397C00B98971 /* stringprep.h */,
+			);
+			path = libidn;
+			sourceTree = "<group>";
+		};
+		DCDA2B8B13563EA700B98971 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B8D13563EBC00B98971 /* XEP-0199 */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
+		DCDA2B8D13563EBC00B98971 /* XEP-0199 */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2B9013563EBC00B98971 /* XMPPPing.h */,
+				DCDA2B9113563EBC00B98971 /* XMPPPing.m */,
+				DCDA2B8E13563EBC00B98971 /* XMPPAutoPing.h */,
+				DCDA2B8F13563EBC00B98971 /* XMPPAutoPing.m */,
+			);
+			name = "XEP-0199";
+			path = "../../../Extensions/XEP-0199";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DCDA2A871356392D00B98971 /* AutoPingTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DCDA2AA61356392E00B98971 /* Build configuration list for PBXNativeTarget "AutoPingTest" */;
+			buildPhases = (
+				DCDA2A841356392D00B98971 /* Sources */,
+				DCDA2A851356392D00B98971 /* Frameworks */,
+				DCDA2A861356392D00B98971 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AutoPingTest;
+			productName = AutoPingTest;
+			productReference = DCDA2A881356392D00B98971 /* AutoPingTest.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DCDA2A7F1356392D00B98971 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = Voalte;
+			};
+			buildConfigurationList = DCDA2A821356392D00B98971 /* Build configuration list for PBXProject "AutoPingTest" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = DCDA2A7D1356392D00B98971;
+			productRefGroup = DCDA2A891356392D00B98971 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DCDA2A871356392D00B98971 /* AutoPingTest */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DCDA2A861356392D00B98971 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2A971356392D00B98971 /* InfoPlist.strings in Resources */,
+				DCDA2A9D1356392D00B98971 /* Credits.rtf in Resources */,
+				DCDA2AA31356392E00B98971 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DCDA2A841356392D00B98971 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2A9A1356392D00B98971 /* main.m in Sources */,
+				DCDA2AA01356392D00B98971 /* AutoPingTestAppDelegate.m in Sources */,
+				DCDA2ACE1356396500B98971 /* DDNumber.m in Sources */,
+				DCDA2ACF1356396500B98971 /* NSDataAdditions.m in Sources */,
+				DCDA2AD01356396500B98971 /* NSXMLElementAdditions.m in Sources */,
+				DCDA2AD11356396500B98971 /* XMPPElement.m in Sources */,
+				DCDA2AD21356396500B98971 /* XMPPIQ.m in Sources */,
+				DCDA2AD31356396500B98971 /* XMPPJID.m in Sources */,
+				DCDA2AD41356396500B98971 /* XMPPMessage.m in Sources */,
+				DCDA2AD51356396500B98971 /* XMPPModule.m in Sources */,
+				DCDA2AD61356396500B98971 /* XMPPParser.m in Sources */,
+				DCDA2AD71356396500B98971 /* XMPPPresence.m in Sources */,
+				DCDA2AD81356396500B98971 /* XMPPReconnect.m in Sources */,
+				DCDA2AD91356396500B98971 /* XMPPStream.m in Sources */,
+				DCDA2ADA1356396500B98971 /* LibIDN.m in Sources */,
+				DCDA2ADB1356396500B98971 /* MulticastDelegate.m in Sources */,
+				DCDA2ADC1356396500B98971 /* RFSRVResolver.m in Sources */,
+				DCDA2AF41356397C00B98971 /* AsyncSocket.m in Sources */,
+				DCDA2B9213563EBD00B98971 /* XMPPAutoPing.m in Sources */,
+				DCDA2B9313563EBD00B98971 /* XMPPPing.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DCDA2A951356392D00B98971 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2A961356392D00B98971 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		DCDA2A9B1356392D00B98971 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2A9C1356392D00B98971 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		DCDA2AA11356392E00B98971 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2AA21356392E00B98971 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DCDA2AA41356392E00B98971 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		DCDA2AA51356392E00B98971 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DCDA2AA71356392E00B98971 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AutoPingTest/AutoPingTest-Prefix.pch";
+				INFOPLIST_FILE = "AutoPingTest/AutoPingTest-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../Vendor/libidn\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		DCDA2AA81356392E00B98971 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AutoPingTest/AutoPingTest-Prefix.pch";
+				INFOPLIST_FILE = "AutoPingTest/AutoPingTest-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../Vendor/libidn\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DCDA2A821356392D00B98971 /* Build configuration list for PBXProject "AutoPingTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCDA2AA41356392E00B98971 /* Debug */,
+				DCDA2AA51356392E00B98971 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DCDA2AA61356392E00B98971 /* Build configuration list for PBXNativeTarget "AutoPingTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCDA2AA71356392E00B98971 /* Debug */,
+				DCDA2AA81356392E00B98971 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DCDA2A7F1356392D00B98971 /* Project object */;
+}
