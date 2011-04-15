@@ -119,7 +119,25 @@
 - (void)setRespondsToQueries:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		respondsToQueries = flag;
+		
+		if (respondsToQueries != flag)
+		{
+			respondsToQueries = flag;
+			
+		#if INTEGRATE_WITH_CAPABILITIES
+			// Capabilities may have changed, need to notify others.
+			
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			XMPPPresence *presence = xmppStream.myPresence;
+			if (presence)
+			{
+				[xmppStream sendElement:presence];
+			}
+			
+			[pool drain];
+		#endif
+		}
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
