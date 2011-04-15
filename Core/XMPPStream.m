@@ -115,14 +115,6 @@ enum XMPPStreamConfig
 
 @implementation XMPPStream
 
-@dynamic hostName;
-@dynamic hostPort;
-@dynamic myJID;
-@dynamic remoteJID;
-@dynamic keepAliveInterval;
-@dynamic numberOfBytesSent;
-@dynamic numberOfBytesReceived;
-@dynamic resetByteCountPerConnection;
 @synthesize tag = userTag;
 
 /**
@@ -227,6 +219,7 @@ enum XMPPStreamConfig
 	[myJID release];
 	[remoteJID release];
 	
+	[myPresence release];
 	[rootElement release];
 	
 	if (keepAliveTimer)
@@ -382,6 +375,24 @@ enum XMPPStreamConfig
 		
 		dispatch_sync(xmppQueue, ^{
 			result = [remoteJID retain];
+		});
+		
+		return [result autorelease];
+	}
+}
+
+- (XMPPPresence *)myPresence
+{
+	if (dispatch_get_current_queue() == xmppQueue)
+	{
+		return myPresence;
+	}
+	else
+	{
+		__block XMPPPresence *result;
+		
+		dispatch_sync(xmppQueue, ^{
+			result = [myPresence retain];
 		});
 		
 		return [result autorelease];
@@ -2156,6 +2167,24 @@ enum XMPPStreamConfig
 		}
 		else if ([element isKindOfClass:[XMPPPresence class]])
 		{
+			// Update myPresence if this is a normal presence element.
+			// In other words, ignore presence subscription stuff, MUC room stuff, etc.
+			
+			XMPPPresence *presence = (XMPPPresence *)element;
+			
+			// We use the built-in [presence type] which guarantees lowercase strings,
+			// and will return @"available" if there was no set type (as available is implicit).
+			
+			NSString *type = [presence type];
+			if ([type isEqualToString:@"available"] || [type isEqualToString:@"unavailable"])
+			{
+				if ([presence toStr] == nil)
+				{
+					[myPresence release];
+					myPresence = [presence retain];
+				}
+			}
+			
 			[multicastDelegate xmppStream:self didSendPresence:(XMPPPresence *)element];
 		}
 	}
@@ -3211,7 +3240,8 @@ enum XMPPStreamConfig
 		// Clear any saved authentication information
 		[tempPassword release]; tempPassword = nil;
 		
-		// Clear the root element
+		// Clear stored elements
+		[myPresence release]; myPresence = nil;
 		[rootElement release]; rootElement = nil;
 		
 		// Stop the keep alive timer
