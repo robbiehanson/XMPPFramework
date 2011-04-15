@@ -67,6 +67,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	XMPPJID *myJID;
 	XMPPJID *remoteJID;
 	
+	XMPPPresence *myPresence;
 	NSXMLElement *rootElement;
 	
 	NSTimeInterval keepAliveInterval;
@@ -207,6 +208,14 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Thus the effective resolution of the keepalive timer is based on the interval.
 **/
 @property (readwrite, assign) NSTimeInterval keepAliveInterval;
+
+/**
+ * Represents the last sent presence element concerning the presence of myJID on the server.
+ * In other words, it represents the presence as others see us.
+ * 
+ * This excludes presence elements sent concerning subscriptions, MUC rooms, etc.
+**/
+@property (readonly) XMPPPresence *myPresence;
 
 /**
  * Returns the total number of bytes bytes sent/received by the xmpp stream.
