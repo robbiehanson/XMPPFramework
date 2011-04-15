@@ -176,6 +176,8 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
    
    [xElement addChild:photoElement];
    [presence addChild:xElement];
+
+   // Question: If photoElement is nil, should we be adding xElement?
 }
 
 
@@ -235,8 +237,10 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	 */
 	if ([jid isEqual:[[xmppStream myJID] bareJID]])
 	{
-		NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-		[xmppStream sendElement:presence];
+		XMPPPresence *presence = xmppStream.myPresence;
+		if(presence) {
+			[xmppStream sendElement:presence];
+		}
 	}
 }
 
