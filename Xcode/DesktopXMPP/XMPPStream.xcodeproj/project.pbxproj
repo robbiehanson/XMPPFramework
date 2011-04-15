@@ -20,7 +20,6 @@
 		DC84BAB8124406990055A459 /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAB4124406990055A459 /* NSDataAdditions.m */; };
 		DC84BAB9124406990055A459 /* NSXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAB6124406990055A459 /* NSXMLElementAdditions.m */; };
 		DC84BAC2124406C20055A459 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAC1124406C20055A459 /* AsyncSocket.m */; };
-		DC84BAC7124406DF0055A459 /* SSCrypto.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAC6124406DF0055A459 /* SSCrypto.m */; };
 		DC84BAE4124407B60055A459 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE1124407B60055A459 /* LibIDN.m */; };
 		DC84BAE5124407B60055A459 /* MulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE3124407B60055A459 /* MulticastDelegate.m */; };
 		DC84BAED124407DF0055A459 /* RFSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAEC124407DF0055A459 /* RFSRVResolver.m */; };
@@ -84,8 +83,6 @@
 		DC84BAB6124406990055A459 /* NSXMLElementAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSXMLElementAdditions.m; path = ../../Categories/NSXMLElementAdditions.m; sourceTree = SOURCE_ROOT; };
 		DC84BAC0124406C20055A459 /* AsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AsyncSocket.h; path = ../../Vendor/AsyncSocket/AsyncSocket.h; sourceTree = SOURCE_ROOT; };
 		DC84BAC1124406C20055A459 /* AsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AsyncSocket.m; path = ../../Vendor/AsyncSocket/AsyncSocket.m; sourceTree = SOURCE_ROOT; };
-		DC84BAC5124406DF0055A459 /* SSCrypto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SSCrypto.h; path = ../../Vendor/SSCrypto/SSCrypto.h; sourceTree = SOURCE_ROOT; };
-		DC84BAC6124406DF0055A459 /* SSCrypto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SSCrypto.m; path = ../../Vendor/SSCrypto/SSCrypto.m; sourceTree = SOURCE_ROOT; };
 		DC84BAD6124407510055A459 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "../../Vendor/libidn/idn-int.h"; sourceTree = SOURCE_ROOT; };
 		DC84BAD7124407510055A459 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringprep.h; path = ../../Vendor/libidn/stringprep.h; sourceTree = SOURCE_ROOT; };
 		DC84BADF124407B60055A459 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDLog.h; path = ../../Utilities/DDLog.h; sourceTree = SOURCE_ROOT; };
@@ -312,17 +309,6 @@
 			name = Extensions;
 			sourceTree = "<group>";
 		};
-		DC63E9F70E65FD310076E6D2 /* Crypto */ = {
-			isa = PBXGroup;
-			children = (
-				DC84BAC5124406DF0055A459 /* SSCrypto.h */,
-				DC84BAC6124406DF0055A459 /* SSCrypto.m */,
-			);
-			name = Crypto;
-			sourceTree = "<group>";
-			tabWidth = 4;
-			usesTabs = 1;
-		};
 		DC6E92F61090E2F200070ADE /* XEP-0065 */ = {
 			isa = PBXGroup;
 			children = (
@@ -344,7 +330,6 @@
 		DC84BADB124407550055A459 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
-				DC63E9F70E65FD310076E6D2 /* Crypto */,
 				DC84BAD5124407350055A459 /* IDN */,
 				080E96DDFE201D6D7F000001 /* TCP */,
 			);
@@ -610,7 +595,6 @@
 				DC84BAB8124406990055A459 /* NSDataAdditions.m in Sources */,
 				DC84BAB9124406990055A459 /* NSXMLElementAdditions.m in Sources */,
 				DC84BAC2124406C20055A459 /* AsyncSocket.m in Sources */,
-				DC84BAC7124406DF0055A459 /* SSCrypto.m in Sources */,
 				DC84BAE4124407B60055A459 /* LibIDN.m in Sources */,
 				DC84BAE5124407B60055A459 /* MulticastDelegate.m in Sources */,
 				DC84BAED124407DF0055A459 /* RFSRVResolver.m in Sources */,
