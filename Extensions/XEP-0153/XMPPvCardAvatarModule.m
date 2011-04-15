@@ -146,16 +146,17 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
         didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
                      forJID:(XMPPJID *)jid
                  xmppStream:(XMPPStream *)aXmppStream {
-  /*
-   * XEP-0153 4.1.3
-   * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
-   * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
-   */
-  if ([jid isEqual:[[aXmppStream myJID] bareJID]]) {
-    NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-    
-    [aXmppStream sendElement:presence];
-  }
+	/*
+	 * XEP-0153 4.1.3
+	 * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
+	 * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
+	 */
+	if ([jid isEqual:[[aXmppStream myJID] bareJID]])
+	{
+		XMPPPresence *presence = aXmppStream.myPresence;
+		if (presence)
+			[aXmppStream sendElement:presence];
+	}
 }
 
 
