@@ -5,7 +5,7 @@
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
-static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE; // | XMPP_LOG_FLAG_TRACE;
 
 /**
  * Defines the timeout for a capabilities request.
@@ -23,6 +23,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
  * we should move on to the next jid in the list.
 **/
 #define CAPABILITIES_REQUEST_TIMEOUT 30.0 // seconds
+
+/**
+ * Define various xmlns values.
+**/
+#define XMLNS_DISCO_INFO  @"http://jabber.org/protocol/disco#info"
+#define XMLNS_CAPS        @"http://jabber.org/protocol/caps"
 
 /**
  * Application identifier.
@@ -43,6 +49,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 @end
 
 @interface XMPPCapabilities (PrivateAPI)
+
+- (void)continueCollectMyCapabilities:(NSXMLElement *)query;
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid;
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid withHashKey:(NSString *)key;
@@ -152,6 +160,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 {
 	[xmppCapabilitiesStorage release];
 	
+	[myCapabilitiesQuery release];
+	[myCapabilitiesC release];
+	
 	[discoRequestJidSet release];
 	[discoRequestHashDict release];
 	
@@ -160,8 +171,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		[timerWrapper cancel];
 	}
 	[discoTimerJidDict release];
-	
-	[lastHash release];
 	
 	[super dealloc];
 }
@@ -600,22 +609,163 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 #pragma mark Logic
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-- (void)addStandardFeaturesToQuery:(NSXMLElement *)query
+- (void)collectMyCapabilities
 {
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
+	if (collectingMyCapabilities)
+	{
+		XMPPLogInfo(@"%@: %@ - Existing collection already in progress", [self class], THIS_METHOD);
+		return;
+	}
+	
+	[myCapabilitiesQuery release]; myCapabilitiesQuery = nil;
+	[myCapabilitiesC release]; myCapabilitiesC = nil;
+	
+	collectingMyCapabilities = YES;
+	
+	// Create new query and add standard features
+	// 
 	// <query xmlns="http://jabber.org/protocol/disco#info">
 	//   <feature var='http://jabber.org/protocol/disco#info'/>
 	//   <feature var="http://jabber.org/protocol/caps"/>
 	// </query>
 	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
+	
 	NSXMLElement *feature1 = [NSXMLElement elementWithName:@"feature"];
-	[feature1 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/disco#info"];
+	[feature1 addAttributeWithName:@"var" stringValue:XMLNS_DISCO_INFO];
 	
 	NSXMLElement *feature2 = [NSXMLElement elementWithName:@"feature"];
-	[feature2 addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/caps"];
+	[feature2 addAttributeWithName:@"var" stringValue:XMLNS_CAPS];
 	
 	[query addChild:feature1];
 	[query addChild:feature2];
+	
+	// Now prompt the delegates to add any additional features.
+	
+	SEL selector = @selector(xmppCapabilities:collectingMyCapabilities:);
+	
+	if ([multicastDelegate countForSelector:selector] == 0)
+	{
+		// None of the delegates implement the method.
+		// Use a shortcut.
+		
+		[self continueCollectMyCapabilities:query];
+	}
+	else
+	{
+		// Query all interested delegates.
+		// This must be done serially to allow them to alter the element in a thread-safe manner.
+		
+		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+		
+		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		dispatch_async(concurrentQueue, ^{
+			NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
+			
+			// Allow delegates to modify outgoing element
+			
+			id del;
+			dispatch_queue_t dq;
+			
+			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			{
+				dispatch_sync(dq, ^{
+					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+					
+					[del xmppCapabilities:self collectingMyCapabilities:query];
+					
+					[innerPool release];
+				});
+			}
+			
+			dispatch_async(moduleQueue, ^{
+				NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+				
+				[self continueCollectMyCapabilities:query];
+				
+				[innerPool release];
+			});
+			
+			[outerPool drain];
+		});
+	}
+}
+
+- (void)continueCollectMyCapabilities:(NSXMLElement *)query
+{
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
+	collectingMyCapabilities = NO;
+	
+	myCapabilitiesQuery = [query retain];
+	
+	XMPPLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
+				   [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
+	
+	NSString *hash = [self hashCapabilitiesFromQuery:query];
+	
+	if (hash == nil)
+	{
+		XMPPLogWarn(@"%@: Unable to hash capabilites (in order to send in presense element)\n",
+					"Perhaps there are duplicate advertised features...\n%@", THIS_FILE,
+					[query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
+		return;
+	}
+	
+	NSString *hashAlg = @"sha-1";
+	
+	// Cache the hash
+	
+	[xmppCapabilitiesStorage setCapabilities:query forHash:hash algorithm:hashAlg];
+	
+	// Create the c element, which will be added to normal outgoing presence elements.
+	// 
+	// <c xmlns="http://jabber.org/protocol/caps"
+	//     hash="sha-1"
+	//     node="http://code.google.com/p/xmppframework"
+	//     ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
+	
+	myCapabilitiesC = [[NSXMLElement alloc] initWithName:@"c" xmlns:XMLNS_CAPS];
+	[myCapabilitiesC addAttributeWithName:@"hash" stringValue:hashAlg];
+	[myCapabilitiesC addAttributeWithName:@"node" stringValue:DISCO_NODE];
+	[myCapabilitiesC addAttributeWithName:@"ver"  stringValue:hash];
+	
+	// If the collection process started when the stream was connected,
+	// and ended up taking so long as to not be available when the presence was sent,
+	// we should re-broadcast our presence now that we know what our capabilities are.
+	
+	XMPPPresence *myPresence = [xmppStream myPresence];
+	if (myPresence)
+	{
+		[xmppStream sendElement:myPresence];
+	}
+}
+
+- (void)recollectMyCapabilities
+{
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		[self collectMyCapabilities];
+		
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 - (void)fetchCapabilitiesForJID:(XMPPJID *)jid
@@ -724,7 +874,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// Some xmpp clients will return an error if we don't specify the proper query node.
 		// Some xmpp clients will return an error if we don't include an id attribute in the iq.
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
 		
 		if (node && ver)
 		{
@@ -891,7 +1041,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	NSString *nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
 	[query addAttributeWithName:@"node" stringValue:nodeValue];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
@@ -976,7 +1126,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	NSString *nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
 	[query addAttributeWithName:@"node" stringValue:nodeValue];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
@@ -999,33 +1149,38 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	XMPPLogTrace();
 	
-	NSXMLElement *queryRequest = [iqRequest childElement];
-	NSString *node = [queryRequest attributeStringValueForName:@"node"];
-	
-	// <iq to="jid" id="id" type="result">
-	//   <query xmlns="http://jabber.org/protocol/disco#info">
-	//     <feature var="feature1"/>
-	//     <feature var="feature2"/>
-	//   </query>
-	// </iq>
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
-	
-	[self addStandardFeaturesToQuery:query];
-	
-	if (node)
+	if (myCapabilitiesQuery == nil)
 	{
-		[query addAttributeWithName:@"node" stringValue:node];
+		// It appears we haven't collected our list of capabilites yet.
+		// This will need to be done before we can add the hash to the outgoing presence element.
+		
+		[self collectMyCapabilities];
 	}
-	
-	[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
-	
-	XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"result"
-	                                     to:[iqRequest from]
-	                              elementID:[iqRequest elementID]
-	                                  child:query];
-	
-	[xmppStream sendElement:iqResponse];
+	else if (myCapabilitiesC)
+	{
+		NSXMLElement *queryRequest = [iqRequest childElement];
+		NSString *node = [queryRequest attributeStringValueForName:@"node"];
+		
+		// <iq to="jid" id="id" type="result">
+		//   <query xmlns="http://jabber.org/protocol/disco#info">
+		//     <feature var="feature1"/>
+		//     <feature var="feature2"/>
+		//   </query>
+		// </iq>
+		
+		NSXMLElement *query = [[myCapabilitiesQuery copy] autorelease];
+		if (node)
+		{
+			[query addAttributeWithName:@"node" stringValue:node];
+		}
+		
+		XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"result"
+		                                     to:[iqRequest from]
+		                              elementID:[iqRequest elementID]
+		                                  child:query];
+		
+		[xmppStream sendElement:iqResponse];
+	}
 }
 
 /**
@@ -1178,6 +1333,17 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)xmppStreamDidConnect:(XMPPStream *)sender
+{
+	// If this is the first time we've connected, start collecting our list of capabilities.
+	// We do this now so that the process is likely ready by the time we need to send a presence element.
+	
+	if (myCapabilitiesQuery == nil)
+	{
+		[self collectMyCapabilities];
+	}
+}
+
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
 	// This method is invoked on the moduleQueue.
@@ -1206,7 +1372,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 	else if ([type isEqualToString:@"available"])
 	{
-		NSXMLElement *c = [presence elementForName:@"c" xmlns:@"http://jabber.org/protocol/caps"];
+		NSXMLElement *c = [presence elementForName:@"c" xmlns:XMLNS_CAPS];
 		if (c == nil)
 		{
 			if (autoFetchNonHashedCapabilities)
@@ -1248,7 +1414,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNS_DISCO_INFO];
 	if (query == nil)
 	{
 		return NO;
@@ -1296,53 +1462,19 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 	else if ([type isEqualToString:@"available"])
 	{
-		// <query xmlns="http://jabber.org/protocol/disco#info">
-		//   <feature var="feature1"/>
-		//   <feature var="feature2"/>
-		// </query>
-		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
-		
-		[self addStandardFeaturesToQuery:query];
-		
-		[multicastDelegate xmppCapabilities:self willSendMyCapabilities:query];
-		
-		XMPPLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
-					 [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
-		
-		NSString *hash = [self hashCapabilitiesFromQuery:query];
-		
-		if (hash == nil)
+		if (myCapabilitiesQuery == nil)
 		{
-			XMPPLogWarn(@"%@: Unable to hash capabilites (in order to send in presense element)\n",
-			             "Perhaps there are duplicate advertised features...\n%@", THIS_FILE,
-			             [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
-			return;
-		}
-		
-		NSString *hashAlg = @"sha-1";
-		
-		// Cache the hash
-		
-		if (![hash isEqual:lastHash])
-		{
-			[xmppCapabilitiesStorage setCapabilities:query forHash:hash algorithm:hashAlg];
+			// It appears we haven't collected our list of capabilites yet.
+			// This will need to be done before we can add the hash to the outgoing presence element.
 			
-			[lastHash release];
-			lastHash = [hash copy];
+			[self collectMyCapabilities];
 		}
-		
-		// <c xmlns="http://jabber.org/protocol/caps"
-		//     hash="sha-1"
-		//     node="http://code.google.com/p/xmppframework"
-		//     ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
-		
-		NSXMLElement *c = [NSXMLElement elementWithName:@"c" xmlns:@"http://jabber.org/protocol/caps"];
-		[c addAttributeWithName:@"hash" stringValue:hashAlg];
-		[c addAttributeWithName:@"node" stringValue:DISCO_NODE];
-		[c addAttributeWithName:@"ver"  stringValue:hash];
-		
-		[presence addChild:c];
+		else if (myCapabilitiesC)
+		{
+			NSXMLElement *c = [[myCapabilitiesC copy] autorelease];
+			
+			[presence addChild:c];
+		}
 	}
 }
 
@@ -1498,7 +1630,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// Some xmpp clients will return an error if we don't specify the proper query node.
 		// Some xmpp clients will return an error if we don't include an id attribute in the iq.
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
 		
 		if (node && ver)
 		{
