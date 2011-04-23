@@ -12,6 +12,15 @@
 	return element;
 }
 
+- (id)initWithName:(NSString *)name xmlns:(NSString *)ns
+{
+	if ([self initWithName:name])
+	{
+		[self setXmlns:ns];
+	}
+	return self;
+}
+
 /**
  * This method returns the first child element for the given name (as an NSXMLElement).
  * If no child elements exist for the given name, nil is returned.
