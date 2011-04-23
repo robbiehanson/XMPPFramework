@@ -8,6 +8,7 @@
 @interface NSXMLElement (XMPPStreamAdditions)
 
 + (NSXMLElement *)elementWithName:(NSString *)name xmlns:(NSString *)ns;
+- (id)initWithName:(NSString *)name xmlns:(NSString *)ns;
 
 - (NSXMLElement *)elementForName:(NSString *)name;
 - (NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns;
