@@ -345,7 +345,7 @@
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for XEP-0202.
 **/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query
+- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query
 {
 	// This method is invoked on the moduleQueue.
 	

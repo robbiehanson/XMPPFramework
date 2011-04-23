@@ -2104,7 +2104,7 @@ enum XMPPStreamConfig
 	else
 	{
 		// Notify all interested delegates.
-		// This must be done serially to allow them to alter the element.
+		// This must be done serially to allow them to alter the element in a thread-safe manner.
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
