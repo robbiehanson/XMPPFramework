@@ -326,8 +326,8 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 #if INTEGRATE_WITH_CAPABILITIES
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for JabberRPC.
- **/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query
+**/
+- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query
 {
 	XMPPLogTrace();
 	

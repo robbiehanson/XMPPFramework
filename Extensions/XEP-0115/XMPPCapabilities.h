@@ -16,6 +16,10 @@
 {
 	id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
 	
+	NSXMLElement *myCapabilitiesQuery; // Full list of capabilites <query/>
+	NSXMLElement *myCapabilitiesC;     // Hashed element <c/>
+	BOOL collectingMyCapabilities;
+	
 	NSMutableSet *discoRequestJidSet;
 	NSMutableDictionary *discoRequestHashDict;
 	NSMutableDictionary *discoTimerJidDict;
@@ -26,8 +30,6 @@
 	NSTimeInterval capabilitiesRequestTimeout;
 	
 	NSMutableSet *timers;
-	
-	NSString *lastHash;
 }
 
 - (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
@@ -74,6 +76,15 @@
  * When the capabilities are received, the xmppCapabilities:didDiscoverCapabilities: delegate method is invoked.
 **/
 - (void)fetchCapabilitiesForJID:(XMPPJID *)jid;
+
+/**
+ * This module automatically collects my capabilities.
+ * See the xmppCapabilities:collectingMyCapabilities: delegate method.
+ * 
+ * The design of XEP-115 is such that capabilites are expected to remain rather static.
+ * However, if the capabilities change, this method may be used to perform a manual update.
+**/
+- (void)recollectMyCapabilities;
 
 @end
 
@@ -306,9 +317,13 @@
 
 /**
  * Use this delegate method to add specific capabilities.
- * This method may be invoked prior to sending a disco response, or prior to sending a presence element.
+ * This method in invoked automatically when the stream is connected for the first time,
+ * or if the module detects an outgoing presence element and my capabilities haven't been collected yet
+ * 
+ * The design of XEP-115 is such that capabilites are expected to remain rather static.
+ * However, if the capabilities change, the recollectMyCapabilities method may be used to perform a manual update.
 **/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query;
+- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query;
 
 /**
  * Invoked when capabilities have been discovered for an available JID.
