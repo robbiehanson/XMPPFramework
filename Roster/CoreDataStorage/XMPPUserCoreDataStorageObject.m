@@ -159,14 +159,18 @@
 
 - (void)awakeFromInsert
 {
-  // section uses zero, so to distinguish unset values, use NSNotFound
-  [self setPrimitiveSection:NSNotFound];
+	// Section uses zero, so to distinguish unset values, use NSNotFound.
+	
+	self.primitiveSection = NSNotFound;
 }
 
 - (void)awakeFromFetch
 {
-  // section uses zero, so to distinguish unset values, use NSNotFound
-  self.section = NSNotFound;
+	// Section uses zero, so to distinguish unset values, use NSNotFound.
+	// 
+	// Note: Do NOT use "self.section = NSNotFound" as this will in turn set the sectionNum.
+	
+	self.primitiveSection = NSNotFound;
 }
 
 
@@ -273,7 +277,8 @@
 
 - (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr
 {
-	XMPPResourceCoreDataStorageObject *resource = (XMPPResourceCoreDataStorageObject *)[self resourceForJID:[presence from]];
+	XMPPResourceCoreDataStorageObject *resource;
+	resource = (XMPPResourceCoreDataStorageObject *)[self resourceForJID:[presence from]];
 	
 	if ([[presence type] isEqualToString:@"unavailable"])
 	{
