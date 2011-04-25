@@ -2,7 +2,7 @@
 #import <libxml/tree.h>
 
 
-@interface NSString (NSStringAdditions)
+@interface NSString (DDXML)
 
 /**
  * xmlChar - A basic replacement for char, a byte in a UTF-8 encoded string.
