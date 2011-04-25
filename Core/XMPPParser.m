@@ -51,7 +51,7 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 		//   if 2 copy properties and namespaces (when applicable)
 		
 		xmlNodePtr rootCopy = xmlCopyNode(root, 2);
-		DDXMLElement *rootCopyWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)rootCopy];
+		DDXMLElement *rootCopyWrapper = [DDXMLElement nodeWithElementPrimitive:rootCopy freeOnDealloc:YES];
 		
 #if USE_TRY_CATCH
 		@try
@@ -75,8 +75,9 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 
 static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 {
-	DDXMLElement *childWrapper = [DDXMLElement nodeWithPrimitive:(xmlKindPtr)child];
-	[childWrapper detach];
+	[DDXMLNode detachChild:child fromNode:child->parent];
+	
+	DDXMLElement *childWrapper = [DDXMLElement nodeWithElementPrimitive:child freeOnDealloc:YES];
 	
 	// Note: We want to detach the child from the root even if the delegate method isn't setup.
 	// This prevents the doc from growing infinitely large.
