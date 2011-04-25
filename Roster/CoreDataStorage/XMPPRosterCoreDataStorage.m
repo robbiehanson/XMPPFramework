@@ -323,9 +323,13 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	}];
 }
 
-- (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)stream
+- (void)handleRosterItem:(NSXMLElement *)itemSubElement xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+	
+	// Remember XML heirarchy memory management rules.
+	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
+	NSXMLElement *item = [[itemSubElement copy] autorelease];
 	
 	[self scheduleBlock:^{
 		
@@ -408,7 +412,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		// Note: Deleting a user will delete all associated resources because of the cascade rule in our core data model.
+		// Note: Deleting a user will delete all associated resources
+		// because of the cascade rule in our core data model.
 		
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 												  inManagedObjectContext:[self managedObjectContext]];
