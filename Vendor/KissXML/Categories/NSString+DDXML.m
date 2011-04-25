@@ -1,7 +1,7 @@
-#import "NSStringAdditions.h"
+#import "NSString+DDXML.h"
 
 
-@implementation NSString (NSStringAdditions)
+@implementation NSString (DDXML)
 
 - (const xmlChar *)xmlChar
 {
