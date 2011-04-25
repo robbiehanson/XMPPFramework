@@ -951,8 +951,8 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	BOOL areCapabilitiesKnown = [xmppCapabilitiesStorage setCapabilitiesNode:node
 	                                                                     ver:ver
 	                                                                     ext:nil
-	                                                                    hash:ver
-	                                                               algorithm:hash
+	                                                                    hash:ver  // Yes, this is correct (see above)
+	                                                               algorithm:hash // Ditto
 	                                                                  forJID:jid
 	                                                              xmppStream:xmppStream
 	                                                   andGetNewCapabilities:&newCapabilities];
@@ -1186,12 +1186,16 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 /**
  * Invoked when we receive a response to one of our previously sent disco requests.
 **/
-- (void)handleDiscoResponse:(NSXMLElement *)query fromJID:(XMPPJID *)jid
+- (void)handleDiscoResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
 	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
+	
+	// Remember XML hiearchy memory management rules.
+	// The passed parameter is a subnode of the IQ, and we need to pass it asynchronously to storge / delegate(s).
+	NSXMLElement *query = [[querySubElement copy] autorelease];
 	
 	NSString *hash = nil;
 	NSString *hashAlg = nil;
@@ -1288,7 +1292,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 }
 
-- (void)handleDiscoErrorResponse:(NSXMLElement *)query fromJID:(XMPPJID *)jid
+- (void)handleDiscoErrorResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
 	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
