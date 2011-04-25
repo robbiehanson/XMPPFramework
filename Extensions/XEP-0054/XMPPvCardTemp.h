@@ -92,7 +92,8 @@ extern NSString *const kXMPPvCardTempElement;
 
 
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)element;
-+ (XMPPvCardTemp *)vCardTempFromIQ:(XMPPIQ *)iq;
++ (XMPPvCardTemp *)vCardTempSubElementFromIQ:(XMPPIQ *)iq;
++ (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq;
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid;
 
 
