@@ -9,7 +9,7 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 #import "NSXMLElementAdditions.h"
-#import "NSStringAdditions.h"
+#import "NSString+DDXML.h"
 #import "DDLog.h"
 
 #import <arpa/inet.h>
