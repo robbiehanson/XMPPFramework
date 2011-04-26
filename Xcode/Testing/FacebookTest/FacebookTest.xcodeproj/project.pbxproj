@@ -31,7 +31,6 @@
 		DCC494FC1333043200F3C8F6 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CC1333043200F3C8F6 /* DDList.m */; };
 		DCC494FD1333043200F3C8F6 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */; };
 		DCC494FE1333043200F3C8F6 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D01333043200F3C8F6 /* LibIDN.m */; };
-		DCC494FF1333043200F3C8F6 /* RFSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D21333043200F3C8F6 /* RFSRVResolver.m */; };
 		DCC495001333043200F3C8F6 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D61333043200F3C8F6 /* GCDAsyncSocket.m */; };
 		DCC495011333043200F3C8F6 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D91333043200F3C8F6 /* DDASLLogger.m */; };
 		DCC495021333043200F3C8F6 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494DB1333043200F3C8F6 /* DDFileLogger.m */; };
@@ -40,7 +39,6 @@
 		DCC495051333043200F3C8F6 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494E31333043200F3C8F6 /* DDXMLDocument.m */; };
 		DCC495061333043200F3C8F6 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494E51333043200F3C8F6 /* DDXMLElement.m */; };
 		DCC495071333043200F3C8F6 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494E71333043200F3C8F6 /* DDXMLNode.m */; };
-		DCC495081333043200F3C8F6 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494EA1333043200F3C8F6 /* NSStringAdditions.m */; };
 		DCC4950A1333043200F3C8F6 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC494EE1333043200F3C8F6 /* libidn.a */; };
 		DCC4950E1333055700F3C8F6 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC4950D1333055700F3C8F6 /* SystemConfiguration.framework */; };
 		DCC495101333056900F3C8F6 /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC4950F1333056900F3C8F6 /* libresolv.dylib */; };
@@ -58,6 +56,8 @@
 		DCD28104133303AE002CF80A /* FBDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD280FE133303AE002CF80A /* FBDialog.m */; };
 		DCD28105133303AE002CF80A /* FBLoginDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD28100133303AE002CF80A /* FBLoginDialog.m */; };
 		DCD28106133303AE002CF80A /* FBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD28102133303AE002CF80A /* FBRequest.m */; };
+		DCF3C1341367274E00111BA3 /* NSString+DDXML.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF3C1331367274E00111BA3 /* NSString+DDXML.m */; };
+		DCF3C1391367276900111BA3 /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF3C1381367276900111BA3 /* XMPPSRVResolver.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -111,8 +111,6 @@
 		DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDMulticastDelegate.m; sourceTree = "<group>"; };
 		DCC494CF1333043200F3C8F6 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibIDN.h; sourceTree = "<group>"; };
 		DCC494D01333043200F3C8F6 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
-		DCC494D11333043200F3C8F6 /* RFSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFSRVResolver.h; sourceTree = "<group>"; };
-		DCC494D21333043200F3C8F6 /* RFSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RFSRVResolver.m; sourceTree = "<group>"; };
 		DCC494D51333043200F3C8F6 /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncSocket.h; sourceTree = "<group>"; };
 		DCC494D61333043200F3C8F6 /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncSocket.m; sourceTree = "<group>"; };
 		DCC494D81333043200F3C8F6 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
@@ -130,9 +128,6 @@
 		DCC494E51333043200F3C8F6 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLElement.m; sourceTree = "<group>"; };
 		DCC494E61333043200F3C8F6 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLNode.h; sourceTree = "<group>"; };
 		DCC494E71333043200F3C8F6 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLNode.m; sourceTree = "<group>"; };
-		DCC494E81333043200F3C8F6 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLPrivate.h; sourceTree = "<group>"; };
-		DCC494E91333043200F3C8F6 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringAdditions.h; sourceTree = "<group>"; };
-		DCC494EA1333043200F3C8F6 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringAdditions.m; sourceTree = "<group>"; };
 		DCC494EC1333043200F3C8F6 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "idn-int.h"; sourceTree = "<group>"; };
 		DCC494EE1333043200F3C8F6 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = ../../../Vendor/libidn/libidn.a; sourceTree = "<group>"; };
 		DCC494EF1333043200F3C8F6 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringprep.h; sourceTree = "<group>"; };
@@ -162,6 +157,11 @@
 		DCD28100133303AE002CF80A /* FBLoginDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FBLoginDialog.m; path = FBConnect/FBLoginDialog.m; sourceTree = "<group>"; };
 		DCD28101133303AE002CF80A /* FBRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FBRequest.h; path = FBConnect/FBRequest.h; sourceTree = "<group>"; };
 		DCD28102133303AE002CF80A /* FBRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FBRequest.m; path = FBConnect/FBRequest.m; sourceTree = "<group>"; };
+		DCF3C1321367274E00111BA3 /* NSString+DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+DDXML.h"; path = "Categories/NSString+DDXML.h"; sourceTree = "<group>"; };
+		DCF3C1331367274E00111BA3 /* NSString+DDXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+DDXML.m"; path = "Categories/NSString+DDXML.m"; sourceTree = "<group>"; };
+		DCF3C1361367275800111BA3 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLPrivate.h; path = Private/DDXMLPrivate.h; sourceTree = "<group>"; };
+		DCF3C1371367276900111BA3 /* XMPPSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSRVResolver.h; sourceTree = "<group>"; };
+		DCF3C1381367276900111BA3 /* XMPPSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSRVResolver.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -283,8 +283,8 @@
 				DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */,
 				DCC494CF1333043200F3C8F6 /* LibIDN.h */,
 				DCC494D01333043200F3C8F6 /* LibIDN.m */,
-				DCC494D11333043200F3C8F6 /* RFSRVResolver.h */,
-				DCC494D21333043200F3C8F6 /* RFSRVResolver.m */,
+				DCF3C1371367276900111BA3 /* XMPPSRVResolver.h */,
+				DCF3C1381367276900111BA3 /* XMPPSRVResolver.m */,
 				DCC494CB1333043200F3C8F6 /* DDList.h */,
 				DCC494CC1333043200F3C8F6 /* DDList.m */,
 			);
@@ -359,8 +359,8 @@
 		DCC4950B1333045B00F3C8F6 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
-				DCC494E91333043200F3C8F6 /* NSStringAdditions.h */,
-				DCC494EA1333043200F3C8F6 /* NSStringAdditions.m */,
+				DCF3C1321367274E00111BA3 /* NSString+DDXML.h */,
+				DCF3C1331367274E00111BA3 /* NSString+DDXML.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -368,7 +368,7 @@
 		DCC4950C1333046500F3C8F6 /* Private */ = {
 			isa = PBXGroup;
 			children = (
-				DCC494E81333043200F3C8F6 /* DDXMLPrivate.h */,
+				DCF3C1361367275800111BA3 /* DDXMLPrivate.h */,
 			);
 			name = Private;
 			sourceTree = "<group>";
@@ -543,7 +543,6 @@
 				DCC494FC1333043200F3C8F6 /* DDList.m in Sources */,
 				DCC494FD1333043200F3C8F6 /* GCDMulticastDelegate.m in Sources */,
 				DCC494FE1333043200F3C8F6 /* LibIDN.m in Sources */,
-				DCC494FF1333043200F3C8F6 /* RFSRVResolver.m in Sources */,
 				DCC495001333043200F3C8F6 /* GCDAsyncSocket.m in Sources */,
 				DCC495011333043200F3C8F6 /* DDASLLogger.m in Sources */,
 				DCC495021333043200F3C8F6 /* DDFileLogger.m in Sources */,
@@ -552,8 +551,9 @@
 				DCC495051333043200F3C8F6 /* DDXMLDocument.m in Sources */,
 				DCC495061333043200F3C8F6 /* DDXMLElement.m in Sources */,
 				DCC495071333043200F3C8F6 /* DDXMLNode.m in Sources */,
-				DCC495081333043200F3C8F6 /* NSStringAdditions.m in Sources */,
 				DC0EF908133312730067B5AF /* XMPPStreamFacebook.m in Sources */,
+				DCF3C1341367274E00111BA3 /* NSString+DDXML.m in Sources */,
+				DCF3C1391367276900111BA3 /* XMPPSRVResolver.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
