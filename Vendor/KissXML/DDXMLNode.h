@@ -22,57 +22,23 @@ enum {
 typedef NSUInteger DDXMLNodeKind;
 
 enum {
-	DDXMLNodeOptionsNone                       = 0,
-	DDXMLNodeExpandEmptyElement                = 1 << 1,
-	DDXMLNodeCompactEmptyElement               = 1 << 2,
-	DDXMLNodePrettyPrint                       = 1 << 17,
+	DDXMLNodeOptionsNone            = 0,
+	DDXMLNodeExpandEmptyElement     = 1 << 1,
+	DDXMLNodeCompactEmptyElement    = 1 << 2,
+	DDXMLNodePrettyPrint            = 1 << 17,
 };
 
-/**
- * DDXMLNode can represent several underlying types, such as xmlNodePtr, xmlDocPtr, xmlAttrPtr, xmlNsPtr, etc.
- * All of these are pointers to structures, and all of those structures start with a pointer, and a type.
- * The xmlKind struct is used as a generic structure, and a stepping stone.
- * We use it to check the type of a structure, and then perform the appropriate cast.
- * 
- * For example:
- * if(genericPtr->type == XML_ATTRIBUTE_NODE)
- * {
- *     xmlAttrPtr attr = (xmlAttrPtr)genericPtr;
- *     // Do something with attr
- * }
-**/
-struct _xmlKind {
-	void * ignore;
-	xmlElementType type;
-};
-typedef struct _xmlKind *xmlKindPtr;
 
-/**
- * Most xml types all start with this standard structure. In fact, all do except the xmlNsPtr.
- * We will occasionally take advantage of this to simplify code when the code wouldn't vary from type to type.
- * Obviously, you cannnot cast a xmlNsPtr to a xmlStdPtr.
-**/
-struct _xmlStd {
-	void * _private;
-	xmlElementType type;
-	const xmlChar *name;
-	struct _xmlNode *children;
-	struct _xmlNode *last;
-	struct _xmlNode *parent;
-	struct _xmlStd *next;
-	struct _xmlStd *prev;
-	struct _xmlDoc *doc;
-};
-typedef struct _xmlStd *xmlStdPtr;
+//extern struct _xmlKind;
+
 
 @interface DDXMLNode : NSObject <NSCopying>
 {
 	// Every DDXML object is simply a wrapper around an underlying libxml node
-	xmlKindPtr genericPtr;
+	struct _xmlKind *genericPtr;
 	
-	// The xmlNsPtr type doesn't store a reference to it's parent
-	// This is here to fix that problem, and make this class more compatible with the NSXML classes
-	xmlNodePtr nsParentPtr;
+	// Root nodes free the underlying libxml node on dealloc.
+	BOOL freeOnDealloc;
 }
 
 //- (id)initWithKind:(DDXMLNodeKind)kind;

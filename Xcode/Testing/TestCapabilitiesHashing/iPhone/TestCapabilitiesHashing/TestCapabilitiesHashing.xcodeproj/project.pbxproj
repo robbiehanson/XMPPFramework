@@ -21,7 +21,6 @@
 		DC84BD911244119A0055A459 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD891244119A0055A459 /* DDXMLDocument.m */; };
 		DC84BD921244119A0055A459 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD8B1244119A0055A459 /* DDXMLElement.m */; };
 		DC84BD931244119A0055A459 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD8D1244119A0055A459 /* DDXMLNode.m */; };
-		DC84BD941244119A0055A459 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD901244119A0055A459 /* NSStringAdditions.m */; };
 		DCC0C3351303495900EC45D2 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C32E1303495900EC45D2 /* DDASLLogger.m */; };
 		DCC0C3361303495900EC45D2 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C3301303495900EC45D2 /* DDFileLogger.m */; };
 		DCC0C3371303495900EC45D2 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C3321303495900EC45D2 /* DDLog.m */; };
@@ -30,7 +29,6 @@
 		DCC0C348130349A600EC45D2 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C341130349A600EC45D2 /* DDList.m */; };
 		DCC0C349130349A600EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C343130349A600EC45D2 /* GCDMulticastDelegate.m */; };
 		DCC0C34A130349A600EC45D2 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C345130349A600EC45D2 /* LibIDN.m */; };
-		DCC0C34B130349A600EC45D2 /* RFSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C347130349A600EC45D2 /* RFSRVResolver.m */; };
 		DCC0C361130349C300EC45D2 /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C34F130349C300EC45D2 /* XMPPElement.m */; };
 		DCC0C362130349C300EC45D2 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C351130349C300EC45D2 /* XMPPIQ.m */; };
 		DCC0C363130349C300EC45D2 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C353130349C300EC45D2 /* XMPPJID.m */; };
@@ -48,6 +46,10 @@
 		DCC0C38213034A6800EC45D2 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC0C38113034A6800EC45D2 /* libidn.a */; };
 		DCC0C39A13034A8C00EC45D2 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC0C39913034A8C00EC45D2 /* CFNetwork.framework */; };
 		DCC0C3C813034A9700EC45D2 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC0C3C713034A9700EC45D2 /* CoreData.framework */; };
+		DCF3C1651367297F00111BA3 /* XMPPCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF3C1631367297F00111BA3 /* XMPPCoreDataStorage.m */; };
+		DCF3C1691367299200111BA3 /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF3C1681367299200111BA3 /* XMPPSRVResolver.m */; };
+		DCF3C16C136729AA00111BA3 /* NSString+DDXML.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF3C16B136729AA00111BA3 /* NSString+DDXML.m */; };
+		DCF3C17113672A4300111BA3 /* DDNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF3C17013672A4300111BA3 /* DDNumber.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,9 +78,6 @@
 		DC84BD8B1244119A0055A459 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLElement.m; path = ../../../../../Vendor/KissXML/DDXMLElement.m; sourceTree = SOURCE_ROOT; };
 		DC84BD8C1244119A0055A459 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLNode.h; path = ../../../../../Vendor/KissXML/DDXMLNode.h; sourceTree = SOURCE_ROOT; };
 		DC84BD8D1244119A0055A459 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLNode.m; path = ../../../../../Vendor/KissXML/DDXMLNode.m; sourceTree = SOURCE_ROOT; };
-		DC84BD8E1244119A0055A459 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLPrivate.h; path = ../../../../../Vendor/KissXML/DDXMLPrivate.h; sourceTree = SOURCE_ROOT; };
-		DC84BD8F1244119A0055A459 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = ../../../../../Vendor/KissXML/NSStringAdditions.h; sourceTree = SOURCE_ROOT; };
-		DC84BD901244119A0055A459 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = ../../../../../Vendor/KissXML/NSStringAdditions.m; sourceTree = SOURCE_ROOT; };
 		DCC0C32D1303495900EC45D2 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDASLLogger.h; path = ../../../../../Vendor/CocoaLumberjack/DDASLLogger.h; sourceTree = SOURCE_ROOT; };
 		DCC0C32E1303495900EC45D2 /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDASLLogger.m; path = ../../../../../Vendor/CocoaLumberjack/DDASLLogger.m; sourceTree = SOURCE_ROOT; };
 		DCC0C32F1303495900EC45D2 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDFileLogger.h; path = ../../../../../Vendor/CocoaLumberjack/DDFileLogger.h; sourceTree = SOURCE_ROOT; };
@@ -97,8 +96,6 @@
 		DCC0C343130349A600EC45D2 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDMulticastDelegate.m; path = ../../../../../Utilities/GCDMulticastDelegate.m; sourceTree = SOURCE_ROOT; };
 		DCC0C344130349A600EC45D2 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../../../../Utilities/LibIDN.h; sourceTree = SOURCE_ROOT; };
 		DCC0C345130349A600EC45D2 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../../../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
-		DCC0C346130349A600EC45D2 /* RFSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RFSRVResolver.h; path = ../../../../../Utilities/RFSRVResolver.h; sourceTree = SOURCE_ROOT; };
-		DCC0C347130349A600EC45D2 /* RFSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RFSRVResolver.m; path = ../../../../../Utilities/RFSRVResolver.m; sourceTree = SOURCE_ROOT; };
 		DCC0C34D130349C300EC45D2 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../../../../../Core/XMPP.h; sourceTree = SOURCE_ROOT; };
 		DCC0C34E130349C300EC45D2 /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPElement.h; path = ../../../../../Core/XMPPElement.h; sourceTree = SOURCE_ROOT; };
 		DCC0C34F130349C300EC45D2 /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPElement.m; path = ../../../../../Core/XMPPElement.m; sourceTree = SOURCE_ROOT; };
@@ -130,6 +127,17 @@
 		DCC0C38113034A6800EC45D2 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = "/Users/robbie/Programs/Google Code/XMPPFramework/Vendor/libidn/libidn.a"; sourceTree = "<absolute>"; };
 		DCC0C39913034A8C00EC45D2 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		DCC0C3C713034A9700EC45D2 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		DCF3C1621367297F00111BA3 /* XMPPCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCoreDataStorage.h; sourceTree = "<group>"; };
+		DCF3C1631367297F00111BA3 /* XMPPCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCoreDataStorage.m; sourceTree = "<group>"; };
+		DCF3C1641367297F00111BA3 /* XMPPCoreDataStorageProtected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCoreDataStorageProtected.h; sourceTree = "<group>"; };
+		DCF3C1671367299200111BA3 /* XMPPSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSRVResolver.h; path = ../../../../../Utilities/XMPPSRVResolver.h; sourceTree = "<group>"; };
+		DCF3C1681367299200111BA3 /* XMPPSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSRVResolver.m; path = ../../../../../Utilities/XMPPSRVResolver.m; sourceTree = "<group>"; };
+		DCF3C16A136729AA00111BA3 /* NSString+DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+DDXML.h"; path = "../../../../../Vendor/KissXML/Categories/NSString+DDXML.h"; sourceTree = "<group>"; };
+		DCF3C16B136729AA00111BA3 /* NSString+DDXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+DDXML.m"; path = "../../../../../Vendor/KissXML/Categories/NSString+DDXML.m"; sourceTree = "<group>"; };
+		DCF3C16D136729B400111BA3 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLPrivate.h; path = ../../../../../Vendor/KissXML/Private/DDXMLPrivate.h; sourceTree = "<group>"; };
+		DCF3C16E13672A1900111BA3 /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPInternal.h; path = ../../../../../Core/XMPPInternal.h; sourceTree = "<group>"; };
+		DCF3C16F13672A4300111BA3 /* DDNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDNumber.h; path = ../../../../../Categories/DDNumber.h; sourceTree = "<group>"; };
+		DCF3C17013672A4300111BA3 /* DDNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDNumber.m; path = ../../../../../Categories/DDNumber.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -248,8 +256,8 @@
 		DC3995CD119B06D300C50939 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
-				DC84BD8F1244119A0055A459 /* NSStringAdditions.h */,
-				DC84BD901244119A0055A459 /* NSStringAdditions.m */,
+				DCF3C16A136729AA00111BA3 /* NSString+DDXML.h */,
+				DCF3C16B136729AA00111BA3 /* NSString+DDXML.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -257,7 +265,7 @@
 		DC3995CE119B06DC00C50939 /* Private */ = {
 			isa = PBXGroup;
 			children = (
-				DC84BD8E1244119A0055A459 /* DDXMLPrivate.h */,
+				DCF3C16D136729B400111BA3 /* DDXMLPrivate.h */,
 			);
 			name = Private;
 			sourceTree = "<group>";
@@ -309,6 +317,8 @@
 		DCC0C33E1303498600EC45D2 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
+				DCF3C16F13672A4300111BA3 /* DDNumber.h */,
+				DCF3C17013672A4300111BA3 /* DDNumber.m */,
 				DC84BD81124411820055A459 /* NSDataAdditions.h */,
 				DC84BD82124411820055A459 /* NSDataAdditions.m */,
 				DC84BD83124411820055A459 /* NSXMLElementAdditions.h */,
@@ -324,8 +334,8 @@
 				DCC0C345130349A600EC45D2 /* LibIDN.m */,
 				DCC0C342130349A600EC45D2 /* GCDMulticastDelegate.h */,
 				DCC0C343130349A600EC45D2 /* GCDMulticastDelegate.m */,
-				DCC0C346130349A600EC45D2 /* RFSRVResolver.h */,
-				DCC0C347130349A600EC45D2 /* RFSRVResolver.m */,
+				DCF3C1671367299200111BA3 /* XMPPSRVResolver.h */,
+				DCF3C1681367299200111BA3 /* XMPPSRVResolver.m */,
 				DCC0C340130349A600EC45D2 /* DDList.h */,
 				DCC0C341130349A600EC45D2 /* DDList.m */,
 			);
@@ -336,6 +346,7 @@
 			isa = PBXGroup;
 			children = (
 				DCC0C34D130349C300EC45D2 /* XMPP.h */,
+				DCF3C16E13672A1900111BA3 /* XMPPInternal.h */,
 				DCC0C354130349C300EC45D2 /* XMPPLogging.h */,
 				DCC0C359130349C300EC45D2 /* XMPPParser.h */,
 				DCC0C35A130349C300EC45D2 /* XMPPParser.m */,
@@ -360,6 +371,7 @@
 		DCC0C36A130349F000EC45D2 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				DCF3C1611367297F00111BA3 /* CoreDataStorage */,
 				DCC0C36B130349FA00EC45D2 /* XEP-0115 */,
 			);
 			name = Extensions;
@@ -387,6 +399,17 @@
 				DCC0C37613034A2700EC45D2 /* XMPPCapsResourceCoreDataStorageObject.m */,
 			);
 			name = CoreDataStorage;
+			sourceTree = "<group>";
+		};
+		DCF3C1611367297F00111BA3 /* CoreDataStorage */ = {
+			isa = PBXGroup;
+			children = (
+				DCF3C1621367297F00111BA3 /* XMPPCoreDataStorage.h */,
+				DCF3C1631367297F00111BA3 /* XMPPCoreDataStorage.m */,
+				DCF3C1641367297F00111BA3 /* XMPPCoreDataStorageProtected.h */,
+			);
+			name = CoreDataStorage;
+			path = ../../../../../Extensions/CoreDataStorage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -458,7 +481,6 @@
 				DC84BD911244119A0055A459 /* DDXMLDocument.m in Sources */,
 				DC84BD921244119A0055A459 /* DDXMLElement.m in Sources */,
 				DC84BD931244119A0055A459 /* DDXMLNode.m in Sources */,
-				DC84BD941244119A0055A459 /* NSStringAdditions.m in Sources */,
 				DCC0C3351303495900EC45D2 /* DDASLLogger.m in Sources */,
 				DCC0C3361303495900EC45D2 /* DDFileLogger.m in Sources */,
 				DCC0C3371303495900EC45D2 /* DDLog.m in Sources */,
@@ -467,7 +489,6 @@
 				DCC0C348130349A600EC45D2 /* DDList.m in Sources */,
 				DCC0C349130349A600EC45D2 /* GCDMulticastDelegate.m in Sources */,
 				DCC0C34A130349A600EC45D2 /* LibIDN.m in Sources */,
-				DCC0C34B130349A600EC45D2 /* RFSRVResolver.m in Sources */,
 				DCC0C361130349C300EC45D2 /* XMPPElement.m in Sources */,
 				DCC0C362130349C300EC45D2 /* XMPPIQ.m in Sources */,
 				DCC0C363130349C300EC45D2 /* XMPPJID.m in Sources */,
@@ -481,6 +502,10 @@
 				DCC0C37813034A2700EC45D2 /* XMPPCapabilitiesCoreDataStorage.m in Sources */,
 				DCC0C37913034A2700EC45D2 /* XMPPCapsCoreDataStorageObject.m in Sources */,
 				DCC0C37A13034A2700EC45D2 /* XMPPCapsResourceCoreDataStorageObject.m in Sources */,
+				DCF3C1651367297F00111BA3 /* XMPPCoreDataStorage.m in Sources */,
+				DCF3C1691367299200111BA3 /* XMPPSRVResolver.m in Sources */,
+				DCF3C16C136729AA00111BA3 /* NSString+DDXML.m in Sources */,
+				DCF3C17113672A4300111BA3 /* DDNumber.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,6 +552,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;

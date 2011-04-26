@@ -56,14 +56,40 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-+ (XMPPvCardTemp *)vCardTempFromIQ:(XMPPIQ *)iq {
-  XMPPvCardTemp *vCard = nil;
-  NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
-  
-  if ([iq isResultIQ] && query != nil) {
-    vCard = [self vCardTempFromElement:query];
-  }
-  return vCard;
++ (XMPPvCardTemp *)vCardTempSubElementFromIQ:(XMPPIQ *)iq
+{
+	if ([iq isResultIQ])
+	{
+		NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+		if (query)
+		{
+			return [self vCardTempFromElement:query];
+		}
+	}
+	
+	return nil;
+}
+
++ (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq
+{
+	// This doesn't work.
+	// It looks like the copy that comes back is of class DDXMLElement.
+	// So maybe the vCardTemp class has to implement its own copy method...
+	// 
+	//return [[[self vCardTempSubElementFromIQ:iq] copy] autorelease];
+	
+	if ([iq isResultIQ])
+	{
+		NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+		if (query)
+		{
+			NSXMLElement *queryCopy = [[query copy] autorelease];
+			
+			return [self vCardTempFromElement:queryCopy];
+		}
+	}
+	
+	return nil;
 }
 
 

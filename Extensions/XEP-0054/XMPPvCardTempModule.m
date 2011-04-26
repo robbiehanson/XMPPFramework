@@ -184,7 +184,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 {
 	// This method is invoked on the moduleQueue.
 	
-	XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempFromIQ:iq];
+	// Remember XML heirarchy memory management rules.
+	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
+	// 
+	// Therefore we use vCardTempCopyFromIQ instead of vCardTempSubElementFromIQ.
+	
+	XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempCopyFromIQ:iq];
 	if (vCardTemp != nil)
 	{
 		[self _updatevCardTemp:vCardTemp forJID:[iq from]];
