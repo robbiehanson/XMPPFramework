@@ -14,6 +14,11 @@
 // Log flags: trace
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
+@interface XMPPvCardTempModule()
+
+- (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid;
+
+@end
 
 @implementation XMPPvCardTempModule
 
@@ -126,6 +131,51 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	return [result autorelease];
 }
 
+- (XMPPvCardTemp *)myvCardTemp
+{
+  return [self fetchvCardTempForJID:[xmppStream myJID]];
+}
+
+- (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp
+{
+  XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
+  
+  NSString *elemId = [xmppStream generateUUID];
+  XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
+  [xmppStream sendElement:iq];
+  
+  [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
+  
+  [newvCardTemp release];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Private
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
+{
+  // this method could be called from anywhere
+  dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
+    
+    [_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
+    
+    [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
+                                                         didReceivevCardTemp:vCardTemp
+                                                                      forJID:jid];
+    
+    [pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,15 +192,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempCopyFromIQ:iq];
 	if (vCardTemp != nil)
 	{
-		XMPPJID *jid = [iq from];
-		
-		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
-		
-		[_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
-    
-		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
-                                                         didReceivevCardTemp:vCardTemp
-                                                                      forJID:jid];
+		[self _updatevCardTemp:vCardTemp forJID:[iq from]];
 		
 		return YES;
 	}
