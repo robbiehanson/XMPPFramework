@@ -23,6 +23,7 @@
 
 
 @property(nonatomic, readonly) id <XMPPvCardTempModuleStorage> moduleStorage;
+@property(nonatomic, readonly) XMPPvCardTemp *myvCardTemp;
 
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage;
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
@@ -32,6 +33,7 @@
  */
 - (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid;
 - (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid useCache:(BOOL)useCache;
+- (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp;
 
 @end
 
