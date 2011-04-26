@@ -5,7 +5,7 @@
 #import "Service.h"
 #import "Message.h"
 #import "NSXMLElementAdditions.h"
-#import "NSStringAdditions.h"
+#import "NSString+DDXML.h"
 #import "DDLog.h"
 
 // Log levels: off, error, warn, info, verbose
