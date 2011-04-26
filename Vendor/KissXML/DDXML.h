@@ -78,6 +78,14 @@
 // Please keep in mind that this option is for debugging only.
 // It significantly slows down the library, and should NOT be enabled for production builds.
 // 
-#define DDXML_DEBUG_MEMORY_ISSUES 1
+// Note: Xcode projects created with Xcode 4 automatically define DEBUG via the project's preprocessor macros.
+// If you're not using Xcode 4, or you created the project with a previous version of Xcode,
+// you may need to add the DEBUG macro manually.
+// 
+#if DEBUG
+  #define DDXML_DEBUG_MEMORY_ISSUES 1
+#else
+  #define DDXML_DEBUG_MEMORY_ISSUES 0
+#endif
 
 #endif
