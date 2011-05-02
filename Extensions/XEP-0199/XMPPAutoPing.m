@@ -122,7 +122,7 @@
 
 - (void)startPingIntervalTimer
 {
-	if (pingIntervalTimer == nil && [xmppStream isAuthenticated])
+	if (pingIntervalTimer == nil && pingInterval > 0 && [xmppStream isAuthenticated])
 	{
 		NSTimeInterval interval = (pingInterval / 4.0);
 		
