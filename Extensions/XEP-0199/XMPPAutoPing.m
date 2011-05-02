@@ -115,7 +115,26 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
 		{
 			pingInterval = interval;
 			
-			[self updatePingIntervalTimer];
+			// Update the pingTimer.
+			// Depending on new value this may mean starting, stoping, or simply updating the timer.
+			
+			if (pingTimer)
+			{
+				if (pingInterval > 0)
+				{
+					// Remember: Only start the pinger after the xmpp stream is up and authenticated
+					if ([xmppStream isAuthenticated])
+						[self updatePingIntervalTimer];
+				}
+				else
+				{
+					[self stopPingIntervalTimer];
+				}
+			}
+			else if (pingInterval > 0)
+			{
+				[self startPingIntervalTimer];
+			}
 		}
 	};
 	
@@ -253,23 +272,30 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
 {
 	XMPPLogTrace();
 	
-	if (pingIntervalTimer && [xmppStream isAuthenticated])
-	{
-		uint64_t interval = ((pingInterval / 4.0) * NSEC_PER_SEC);
-		dispatch_time_t tt;
-		
-		if (lastReceiveTime != DISPATCH_TIME_FOREVER)
-			tt = dispatch_time(lastReceiveTime, interval);
-		else
-			tt = dispatch_time(DISPATCH_TIME_NOW, interval);
-		
-		dispatch_source_set_timer(pingIntervalTimer, tt, interval, 0);
-	}
+	NSAssert(pintIntervalTimer != NULL, @"Broken logic (1)");
+	NSAssert(pingInterval > 0, @"Broken logic (2)");
+	
+	
+	uint64_t interval = ((pingInterval / 4.0) * NSEC_PER_SEC);
+	dispatch_time_t tt;
+	
+	if (lastReceiveTime != DISPATCH_TIME_FOREVER)
+		tt = dispatch_time(lastReceiveTime, interval);
+	else
+		tt = dispatch_time(DISPATCH_TIME_NOW, interval);
+	
+	dispatch_source_set_timer(pingIntervalTimer, tt, interval, 0);
 }
 
 - (void)startPingIntervalTimer
 {
 	XMPPLogTrace();
+	
+	if (pingInterval <= 0)
+	{
+		// Pinger is disabled
+		return;
+	}
 	
 	BOOL newTimer = NO;
 	
