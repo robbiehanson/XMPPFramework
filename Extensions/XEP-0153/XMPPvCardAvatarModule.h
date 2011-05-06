@@ -11,7 +11,8 @@
 
 
 #import <Foundation/Foundation.h>
-#if TARGET_OS_MAC && !TARGET_IPHONE_SIMULATOR
+
+#if !TARGET_OS_IPHONE
   #import <Cocoa/Cocoa.h>
 #endif
 
