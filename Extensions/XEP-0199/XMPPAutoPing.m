@@ -9,6 +9,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
 
 @interface XMPPAutoPing ()
 - (void)updatePingIntervalTimer;
+- (void)startPingIntervalTimer;
 - (void)stopPingIntervalTimer;
 @end
 
@@ -118,7 +119,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
 			// Update the pingTimer.
 			// Depending on new value this may mean starting, stoping, or simply updating the timer.
 			
-			if (pingTimer)
+			if (pingIntervalTimer)
 			{
 				if (pingInterval > 0)
 				{
@@ -272,7 +273,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
 {
 	XMPPLogTrace();
 	
-	NSAssert(pintIntervalTimer != NULL, @"Broken logic (1)");
+	NSAssert(pingIntervalTimer != NULL, @"Broken logic (1)");
 	NSAssert(pingInterval > 0, @"Broken logic (2)");
 	
 	
