@@ -2178,7 +2178,7 @@ enum XMPPStreamConfig
 			NSString *type = [presence type];
 			if ([type isEqualToString:@"available"] || [type isEqualToString:@"unavailable"])
 			{
-				if ([presence toStr] == nil)
+				if ([presence toStr] == nil && myPresence != presence)
 				{
 					[myPresence release];
 					myPresence = [presence retain];
