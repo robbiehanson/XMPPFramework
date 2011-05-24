@@ -6,11 +6,13 @@
 + (BOOL)validateDomain:(NSString *)domain
 {
 	// Domain is the only required part of a JID
-	if((domain == nil) || ([domain length] == 0)) return NO;
+	if ((domain == nil) || ([domain length] == 0))
+		return NO;
 	
 	// If there's an @ symbol in the domain it probably means user put @ in their username
 	NSRange invalidAtRange = [domain rangeOfString:@"@"];
-	if(invalidAtRange.location != NSNotFound) return NO;
+	if (invalidAtRange.location != NSNotFound)
+		return NO;
 	
 	return YES;
 }
@@ -18,16 +20,19 @@
 + (BOOL)validateResource:(NSString *)resource
 {
 	// Can't use an empty string resource name
-	if((resource != nil) && ([resource length] == 0)) return NO;
+	if ((resource != nil) && ([resource length] == 0))
+		return NO;
 	
 	return YES;
 }
 
 + (BOOL)validateUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
 {
-	if(![self validateDomain:domain]) return NO;
+	if (![self validateDomain:domain])
+		return NO;
 	
-	if(![self validateResource:resource]) return NO;
+	if (![self validateResource:resource])
+		return NO;
 	
 	return YES;
 }
@@ -285,9 +290,35 @@
 	}
 }
 
+- (BOOL)isBare
+{
+	// From RFC 6120 Terminology:
+	// 
+	// The term "bare JID" refers to an XMPP address of the form <localpart@domainpart> (for an account at a server)
+	// or of the form <domainpart> (for a server).
+	
+	return (resource == nil);
+}
+
+- (BOOL)isBareWithUser
+{
+	return (user != nil && resource == nil);
+}
+
 - (BOOL)isFull
 {
+	// From RFC 6120 Terminology:
+	// 
+	// The term "full JID" refers to an XMPP address of the form
+	// <localpart@domainpart/resourcepart> (for a particular authorized client or device associated with an account)
+	// or of the form <domainpart/resourcepart> (for a particular resource or script associated with a server).
+	
 	return (resource != nil);
+}
+
+- (BOOL)isFullWithUser
+{
+	return (user != nil && resource != nil);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
