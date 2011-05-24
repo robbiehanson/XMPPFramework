@@ -799,12 +799,6 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
-	if (![jid isFull])
-	{
-		// Invalid JID - Must be a full JID (i.e. it must include the resource)
-		return;
-	}
-	
 	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
