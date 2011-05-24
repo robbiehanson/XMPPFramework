@@ -28,4 +28,6 @@
 - (BOOL)isFull;
 - (BOOL)isFullWithUser;
 
+- (BOOL)isServer;
+
 @end
