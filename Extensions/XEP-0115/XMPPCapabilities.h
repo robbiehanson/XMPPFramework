@@ -11,7 +11,17 @@
 @protocol XMPPCapabilitiesStorage;
 @protocol XMPPCapabilitiesDelegate;
 
-
+/**
+ * This class provides support for capabilities discovery.
+ * 
+ * It collects our capabilities and publishes them according to the XEP by:
+ * - Injecting the <c/> element into outgoing presence stanzas
+ * - Responding to incoming disco#info queries
+ * 
+ * It also collects the capabilities of available resources,
+ * provides a mechanism to persistently store XEP-0115 hased caps,
+ * and makes available a simple API to query (disco#info) a resource or server.
+**/
 @interface XMPPCapabilities : XMPPModule
 {
 	id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
@@ -70,10 +80,14 @@
 /**
  * Manually fetch the capabilities for the given jid.
  * 
- * The jid must be a full jid (includes resource).
- * If there is an existing disco request associated with the current jid, this method does nothing.
+ * The jid must be a full jid (user@domain/resource) or a domain JID (domain without user or resource).
+ * You would pass a full jid if you wanted to know the capabilities of a particular user's resource.
+ * You would pass a domain jid if you wanted to know the capabilities of a particular server.
  * 
- * When the capabilities are received, the xmppCapabilities:didDiscoverCapabilities: delegate method is invoked.
+ * If there is an existing disco request associated with the given jid, this method does nothing.
+ * 
+ * When the capabilities are received,
+ * the xmppCapabilities:didDiscoverCapabilities:forJID: delegate method is invoked.
 **/
 - (void)fetchCapabilitiesForJID:(XMPPJID *)jid;
 
@@ -124,7 +138,7 @@
  * Returns the capabilities for the given jid.
  * The returned element is the <query/> element response to a disco#info request.
  * 
- * The given jid must be a full jid (must contain a resource).
+ * The given jid should be a full jid (user@domain/resource) or a domin JID (domain without user or resource).
  * 
  * If the jid has broadcast capabilities via the legacy format of XEP-0115,
  * the extension list may optionally be retrieved via the ext parameter.
