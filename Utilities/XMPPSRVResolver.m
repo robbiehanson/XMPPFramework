@@ -288,23 +288,25 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 	
 	id theDelegate = delegate;
 	
-	dispatch_async(delegateQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		SEL selector = @selector(srvResolver:didNotResolveDueToError:);
-		
-		if ([theDelegate respondsToSelector:selector])
-		{
-			[theDelegate srvResolver:self didNotResolveDueToError:error];
-		}
-		else
-		{
-			XMPPLogWarn(@"%@: delegate doesn't implement %@", THIS_FILE, NSStringFromSelector(selector));
-		}
-		
-		[pool drain];
-	});
-	
+    if (delegateQueue != NULL) {
+        dispatch_async(delegateQueue, ^{
+            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+            SEL selector = @selector(srvResolver:didNotResolveDueToError:);
+
+            if ([theDelegate respondsToSelector:selector])
+            {
+            [theDelegate srvResolver:self didNotResolveDueToError:error];
+            }
+            else
+            {
+            XMPPLogWarn(@"%@: delegate doesn't implement %@", THIS_FILE, NSStringFromSelector(selector));
+            }
+
+            [pool drain];
+        });
+    }
+  
 	[self stop];
 }
 
@@ -404,32 +406,25 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		// If the kDNSServiceFlagsAdd flag is not set, the domain information is not valid.
 		return;
     }
-	
-	if (errorCode == kDNSServiceErr_NoError)
-	{
-		if (rrtype != kDNSServiceType_SRV)
-		{
-			// Facebook does a CNAME redirect instead of SRV lookup for _xmpp-client._tcp.chat.facebook.com
-			[resolver succeed];
-		}
-		else
-		{
-			XMPPSRVRecord *record = [resolver processRecord:rdata length:rdlen];
-			if (record)
-			{
-				[resolver->results addObject:record];
-			}
-			
-			if ( ! (flags & kDNSServiceFlagsMoreComing) )
-			{
-				[resolver succeed];
-			}
-		}
-	}
-	else
-	{
-		[resolver failWithDNSError:errorCode];
-	}
+
+    if (errorCode == kDNSServiceErr_NoError &&
+        rrtype == kDNSServiceType_SRV)
+    {
+        XMPPSRVRecord *record = [resolver processRecord:rdata length:rdlen];
+        if (record)
+        {
+            [resolver->results addObject:record];
+        }
+
+        if ( ! (flags & kDNSServiceFlagsMoreComing) )
+        {
+            [resolver succeed];
+        }    
+    }
+    else
+    {
+        [resolver failWithDNSError:errorCode];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
