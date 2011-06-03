@@ -4,6 +4,7 @@
 
 #import "GCDAsyncSocket.h"
 #import "XMPP.h"
+#import "XMPPCapabilitiesCoreDataStorage.h"
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPvCardAvatarModule.h"
 #import "XMPPvCardCoreDataStorage.h"
@@ -30,6 +31,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @implementation iPhoneXMPPAppDelegate
 
 @synthesize xmppStream;
+@synthesize xmppCapabilities;
 @synthesize xmppRoster;
 @synthesize xmppvCardAvatarModule;
 @synthesize xmppvCardTempModule;
@@ -69,6 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[xmppStream disconnect];
 	[xmppvCardAvatarModule release];
 	[xmppvCardTempModule release];
+    [xmppCapabilities release];
 	[xmppStream release];
 	[xmppRoster release];
 
@@ -92,11 +95,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Initialize variables
 
 	xmppStream = [[XMPPStream alloc] init];
+    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:[XMPPCapabilitiesCoreDataStorage sharedInstance]];
 	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:[XMPPRosterCoreDataStorage sharedInstance]];
 	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:[XMPPvCardCoreDataStorage sharedInstance]];
 	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
 
 	// Configure modules
+
+    xmppCapabilities.autoFetchHashedCapabilities = YES;
+    xmppCapabilities.autoFetchNonHashedCapabilities = NO;
 
 	[xmppRoster setAutoRoster:YES];
 
@@ -109,6 +116,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 	// Activate xmpp modules
 
+    [xmppCapabilities activate:xmppStream];
 	[xmppRoster activate:xmppStream];
 	[xmppvCardTempModule activate:xmppStream];
 	[xmppvCardAvatarModule activate:xmppStream];
