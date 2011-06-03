@@ -5,6 +5,7 @@
 
 @class SettingsViewController;
 @class XMPPStream;
+@class XMPPCapabilities;
 @class XMPPRosterCoreDataStorage;
 @class XMPPvCardAvatarModule;
 @class XMPPvCardTempModule;
@@ -15,10 +16,11 @@ UIApplicationDelegate,
 XMPPRosterDelegate
 > {
 	XMPPStream *xmppStream;
+    XMPPCapabilities *xmppCapabilities;
 	XMPPRoster *xmppRoster;
   
-  XMPPvCardAvatarModule *xmppvCardAvatarModule;
-  XMPPvCardTempModule *xmppvCardTempModule;
+    XMPPvCardAvatarModule *xmppvCardAvatarModule;
+    XMPPvCardTempModule *xmppvCardTempModule;
 	
 	NSString *password;
 	
@@ -29,12 +31,12 @@ XMPPRosterDelegate
 	
 	UIWindow *window;
 	UINavigationController *navigationController;
-  SettingsViewController *loginViewController;
-  UIBarButtonItem *loginButton;
-  
+    SettingsViewController *loginViewController;
+    UIBarButtonItem *loginButton;
 }
 
 @property (nonatomic, readonly) XMPPStream *xmppStream;
+@property (nonatomic, readonly) XMPPCapabilities *xmppCapabilities;
 @property (nonatomic, readonly) XMPPRoster *xmppRoster;
 @property (nonatomic, readonly) XMPPvCardAvatarModule *xmppvCardAvatarModule;
 @property (nonatomic, readonly) XMPPvCardTempModule *xmppvCardTempModule;
