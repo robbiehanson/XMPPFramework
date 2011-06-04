@@ -102,6 +102,33 @@ static NSMutableSet *databaseFileNames;
 	// file if it already exists on disk.
 }
 
+- (void)didNotAddPersistentStorePath:(NSString *)path error:(NSError *)error
+{
+    // Override me, if needed, to provide customized behavior.
+	// 
+	// For example, if you are using the database for non-persistent data and the model changes, 
+    // you may want to delete the database file if it already exists on disk.
+    
+#if TARGET_OS_IPHONE
+    XMPPLogError(@"%@:\n"
+                 @"=====================================================================================\n"
+                 @"Error creating persistent store:\n%@\n"
+                 @"Chaned core data model recently?\n"
+                 @"Quick Fix: Delete the app from device and reinstall.\n"
+                 @"=====================================================================================",
+                 [self class], error);
+#else
+    XMPPLogError(@"%@:\n"
+                 @"=====================================================================================\n"
+                 @"Error creating persistent store:\n%@\n"
+                 @"Chaned core data model recently?\n"
+                 @"Quick Fix: Delete the database: %@\n"
+                 @"=====================================================================================",
+                 [self class], error, storePath);
+#endif
+
+}
+
 - (void)didCreateManagedObjectContext
 {
 	// Override me to provide customized behavior.
@@ -340,6 +367,41 @@ static NSMutableSet *databaseFileNames;
 	return managedObjectModel;
 }
 
+- (BOOL)addPersistentStorePath:(NSString *)storePath error:(NSError **)error
+{
+    // This is a private method.
+    // 
+	// If you even comtemplate ignoring this warning,
+	// then you need to go read the documentation for core data,
+	// specifically the section entitled "Concurrency with Core Data".
+	// 
+	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	// 
+	// Do NOT remove the assert statment above!
+	// Read the comments above!
+	// 
+    
+    NSAssert1(storePath, @"%@: Error creating persistentStoreCoordinator - Nil persistentStoreDirectory", [self class]);
+
+    // If storePath is nil, then NSURL will throw an exception
+    NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
+    
+    // Support for automatic lightweight migrations
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                             [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
+                             [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, 
+                             nil];
+    
+    NSPersistentStore *persistentStore;
+    persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+                                                               configuration:nil
+                                                                         URL:storeUrl
+                                                                     options:options
+                                                                       error:error];
+
+    return persistentStore != nil;
+}
+
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator
 {
 	// This is a public method.
@@ -369,37 +431,14 @@ static NSMutableSet *databaseFileNames;
 		if (storePath)
 		{
 			// If storePath is nil, then NSURL will throw an exception
-			
+            
 			[self willCreatePersistentStore:storePath];
-			
-			NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
-			
+            
 			NSError *error = nil;
-			NSPersistentStore *persistentStore;
-			persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
-			                                                           configuration:nil
-			                                                                  URL:storeUrl
-			                                                              options:nil
-			                                                                error:&error];
-			if (!persistentStore)
+            
+			if (![self addPersistentStorePath:storePath error:&error])
 			{
-			  #if TARGET_OS_IPHONE
-				XMPPLogError(@"%@:\n"
-				             @"=====================================================================================\n"
-				             @"Error creating persistent store:\n%@\n"
-				             @"Chaned core data model recently?\n"
-				             @"Quick Fix: Delete the app from device and reinstall.\n"
-				             @"=====================================================================================",
-				             [self class], error);
-			  #else
-				XMPPLogError(@"%@:\n"
-				             @"=====================================================================================\n"
-				             @"Error creating persistent store:\n%@\n"
-				             @"Chaned core data model recently?\n"
-				             @"Quick Fix: Delete the database: %@\n"
-				             @"=====================================================================================",
-				             [self class], error, storePath);
-			  #endif
+                [self didNotAddPersistentStorePath:storePath error:error];
 			}
 		}
 		else
