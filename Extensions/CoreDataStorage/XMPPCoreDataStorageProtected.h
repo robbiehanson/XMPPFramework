@@ -53,6 +53,16 @@
 
 /**
  * Override me, if needed, to provide customized behavior.
+ *
+ * For example, if you are using the database for non-persistent data and the model changes, you may want
+ * to delete the database file if it already exists on disk and a core data migration is not worthwhile.
+ *
+ * The default implementation writes to the XMPP error log.
+**/
+- (void)didNotAddPersistentStorePath:(NSString *)filePath error:(NSError *)error;
+
+/**
+ * Override me, if needed, to provide customized behavior.
  * 
  * For example, you may want to perform cleanup of any non-persistent data before you start using the database.
  * 
@@ -112,6 +122,15 @@
  * The standard persistentStoreDirectory method.
 **/
 - (NSString *)persistentStoreDirectory;
+
+/**
+ * Adds the persistent store path to the persistent store coordinator.
+ *
+ * Returns true if the persistent store is created.
+ *
+ * This method may be overridden if the model changes and the change can't be handled by lightweight migration.
+**/
+- (BOOL)addPersistentStorePath:(NSString *)storePath error:(NSError **)error;
 
 /**
  * Provides access to the managedObjectContext.
