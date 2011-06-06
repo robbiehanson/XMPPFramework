@@ -107,7 +107,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		NSData *photoData = [[_moduleStorage photoDataForJID:jid xmppStream:xmppStream] retain];
+		photoData = [[_moduleStorage photoDataForJID:jid xmppStream:xmppStream] retain];
 		
 		if (photoData == nil) 
 		{
