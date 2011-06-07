@@ -200,16 +200,8 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 - (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
-	
-	__block NSXMLElement *result;
-	
-	[self executeBlock:^{
-		
-		result = [[self capabilitiesForJID:jid ext:nil xmppStream:stream] retain];
-		
-	}];
-	
-	return [result autorelease];
+    
+    return [self capabilitiesForJID:jid ext:nil xmppStream:stream];	
 }
 
 - (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr xmppStream:(XMPPStream *)stream
