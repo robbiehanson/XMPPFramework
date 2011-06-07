@@ -50,6 +50,31 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	return [super configureWithParent:aParent queue:queue];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Overrides
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)addPersistentStorePath:(NSString *)storePath error:(NSError **)error
+{    
+    BOOL result = [super addPersistentStorePath:storePath error:error];
+    
+    if (!result &&
+        [*error code] == NSMigrationMissingSourceModelError &&
+        [[*error domain] isEqualToString:NSCocoaErrorDomain]) {
+        // If we get this error while trying to add the persistent store, it most likely means the model changed.
+        // Since we are caching capabilities, it is safe to delete the persistent store and create a new one.
+        
+        if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
+        {
+            [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
+            
+            // Try creating the store again, without creating a deletion/creation loop.
+            result = [super addPersistentStorePath:storePath error:error];
+        }
+    }
+    
+    return result;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPvCardAvatarStorage protocol
