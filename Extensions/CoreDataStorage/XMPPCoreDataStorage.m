@@ -3,7 +3,7 @@
 #import "XMPPInternal.h"
 #import "XMPPJID.h"
 #import "XMPPLogging.h"
-#import "DDNumber.h"
+#import "NSNumber+XMPP.h"
 
 #import <objc/runtime.h>
 #import <libkern/OSAtomic.h>

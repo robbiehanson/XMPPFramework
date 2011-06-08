@@ -1,5 +1,5 @@
 #import "XMPPMessage+XEP0045.h"
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 
 
 @implementation XMPPMessage(XEP0045)

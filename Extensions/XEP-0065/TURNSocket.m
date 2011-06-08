@@ -2,8 +2,8 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "GCDAsyncSocket.h"
-#import "NSDataAdditions.h"
-#import "DDNumber.h"
+#import "NSData+XMPP.h"
+#import "NSNumber+XMPP.h"
 
 // Log levels: off, error, warn, info, verbose
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
