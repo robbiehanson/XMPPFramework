@@ -5,7 +5,7 @@
 #endif
 
 
-@interface NSXMLElement (XMPPStreamAdditions)
+@interface NSXMLElement (XMPP)
 
 + (NSXMLElement *)elementWithName:(NSString *)name xmlns:(NSString *)ns;
 - (id)initWithName:(NSString *)name xmlns:(NSString *)ns;
