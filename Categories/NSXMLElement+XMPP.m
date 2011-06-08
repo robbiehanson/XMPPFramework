@@ -1,6 +1,6 @@
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 
-@implementation NSXMLElement (XMPPStreamAdditions)
+@implementation NSXMLElement (XMPP)
 
 /**
  * Quick method to create an element
