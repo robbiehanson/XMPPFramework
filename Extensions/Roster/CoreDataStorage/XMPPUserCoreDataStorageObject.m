@@ -3,7 +3,7 @@
 #import "XMPPUserCoreDataStorageObject.h"
 #import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPGroupCoreDataStorageObject.h"
-#import "DDNumber.h"
+#import "NSNumber+XMPP.h"
 
 @interface XMPPUserCoreDataStorageObject ()
 

@@ -4,7 +4,7 @@
 #import "XMPPStream.h"
 #import "Service.h"
 #import "Message.h"
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 #import "NSString+DDXML.h"
 #import "DDLog.h"
 

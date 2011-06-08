@@ -1,7 +1,7 @@
 #import "XMPPReconnect.h"
 #import "XMPPStream.h"
 #import "XMPPLogging.h"
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 
 
 #define IMPOSSIBLE_REACHABILITY_FLAGS 0xFFFFFFFF

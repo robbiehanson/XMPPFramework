@@ -18,12 +18,12 @@
 		2899E5600DE3E45000AC0155 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E55F0DE3E45000AC0155 /* RootViewController.xib */; };
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
+		DC3731A1139F091B00A8407D /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC37319C139F091B00A8407D /* NSData+XMPP.m */; };
+		DC3731A2139F091B00A8407D /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC37319E139F091B00A8407D /* NSNumber+XMPP.m */; };
+		DC3731A3139F091B00A8407D /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731A0139F091B00A8407D /* NSXMLElement+XMPP.m */; };
 		DC84BC7C12440D6B0055A459 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC7412440D6B0055A459 /* DDXMLDocument.m */; };
 		DC84BC7D12440D6B0055A459 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC7612440D6B0055A459 /* DDXMLElement.m */; };
 		DC84BC7E12440D6B0055A459 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC7812440D6B0055A459 /* DDXMLNode.m */; };
-		DC84BC8912440DA70055A459 /* DDNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC8412440DA70055A459 /* DDNumber.m */; };
-		DC84BC8A12440DA70055A459 /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC8612440DA70055A459 /* NSDataAdditions.m */; };
-		DC84BC8B12440DA70055A459 /* NSXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC8812440DA70055A459 /* NSXMLElementAdditions.m */; };
 		DC84BC9312440DBE0055A459 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC8E12440DBE0055A459 /* LibIDN.m */; };
 		DC84BCA912440DD80055A459 /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC9812440DD80055A459 /* XMPPElement.m */; };
 		DC84BCAA12440DD80055A459 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC9A12440DD80055A459 /* XMPPIQ.m */; };
@@ -75,6 +75,12 @@
 		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* ServerlessDemo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ServerlessDemo-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		DC37319B139F091B00A8407D /* NSData+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSData+XMPP.h"; path = "../../Categories/NSData+XMPP.h"; sourceTree = "<group>"; };
+		DC37319C139F091B00A8407D /* NSData+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+XMPP.m"; path = "../../Categories/NSData+XMPP.m"; sourceTree = "<group>"; };
+		DC37319D139F091B00A8407D /* NSNumber+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSNumber+XMPP.h"; path = "../../Categories/NSNumber+XMPP.h"; sourceTree = "<group>"; };
+		DC37319E139F091B00A8407D /* NSNumber+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSNumber+XMPP.m"; path = "../../Categories/NSNumber+XMPP.m"; sourceTree = "<group>"; };
+		DC37319F139F091B00A8407D /* NSXMLElement+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSXMLElement+XMPP.h"; path = "../../Categories/NSXMLElement+XMPP.h"; sourceTree = "<group>"; };
+		DC3731A0139F091B00A8407D /* NSXMLElement+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSXMLElement+XMPP.m"; path = "../../Categories/NSXMLElement+XMPP.m"; sourceTree = "<group>"; };
 		DC84BC7012440D5B0055A459 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "../../Vendor/libidn/idn-int.h"; sourceTree = SOURCE_ROOT; };
 		DC84BC7112440D5B0055A459 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringprep.h; path = ../../Vendor/libidn/stringprep.h; sourceTree = SOURCE_ROOT; };
 		DC84BC7212440D6B0055A459 /* DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXML.h; path = ../../Vendor/KissXML/DDXML.h; sourceTree = SOURCE_ROOT; };
@@ -84,12 +90,6 @@
 		DC84BC7612440D6B0055A459 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLElement.m; path = ../../Vendor/KissXML/DDXMLElement.m; sourceTree = SOURCE_ROOT; };
 		DC84BC7712440D6B0055A459 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLNode.h; path = ../../Vendor/KissXML/DDXMLNode.h; sourceTree = SOURCE_ROOT; };
 		DC84BC7812440D6B0055A459 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLNode.m; path = ../../Vendor/KissXML/DDXMLNode.m; sourceTree = SOURCE_ROOT; };
-		DC84BC8312440DA70055A459 /* DDNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDNumber.h; path = ../../Categories/DDNumber.h; sourceTree = SOURCE_ROOT; };
-		DC84BC8412440DA70055A459 /* DDNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDNumber.m; path = ../../Categories/DDNumber.m; sourceTree = SOURCE_ROOT; };
-		DC84BC8512440DA70055A459 /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = ../../Categories/NSDataAdditions.h; sourceTree = SOURCE_ROOT; };
-		DC84BC8612440DA70055A459 /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDataAdditions.m; path = ../../Categories/NSDataAdditions.m; sourceTree = SOURCE_ROOT; };
-		DC84BC8712440DA70055A459 /* NSXMLElementAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSXMLElementAdditions.h; path = ../../Categories/NSXMLElementAdditions.h; sourceTree = SOURCE_ROOT; };
-		DC84BC8812440DA70055A459 /* NSXMLElementAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSXMLElementAdditions.m; path = ../../Categories/NSXMLElementAdditions.m; sourceTree = SOURCE_ROOT; };
 		DC84BC8D12440DBE0055A459 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../Utilities/LibIDN.h; sourceTree = SOURCE_ROOT; };
 		DC84BC8E12440DBE0055A459 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
 		DC84BC9612440DD80055A459 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../../Core/XMPP.h; sourceTree = SOURCE_ROOT; };
@@ -399,12 +399,12 @@
 		DCE60E9010F9438E00E20271 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
-				DC84BC8312440DA70055A459 /* DDNumber.h */,
-				DC84BC8412440DA70055A459 /* DDNumber.m */,
-				DC84BC8512440DA70055A459 /* NSDataAdditions.h */,
-				DC84BC8612440DA70055A459 /* NSDataAdditions.m */,
-				DC84BC8712440DA70055A459 /* NSXMLElementAdditions.h */,
-				DC84BC8812440DA70055A459 /* NSXMLElementAdditions.m */,
+				DC37319B139F091B00A8407D /* NSData+XMPP.h */,
+				DC37319C139F091B00A8407D /* NSData+XMPP.m */,
+				DC37319D139F091B00A8407D /* NSNumber+XMPP.h */,
+				DC37319E139F091B00A8407D /* NSNumber+XMPP.m */,
+				DC37319F139F091B00A8407D /* NSXMLElement+XMPP.h */,
+				DC3731A0139F091B00A8407D /* NSXMLElement+XMPP.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -503,9 +503,6 @@
 				DC84BC7C12440D6B0055A459 /* DDXMLDocument.m in Sources */,
 				DC84BC7D12440D6B0055A459 /* DDXMLElement.m in Sources */,
 				DC84BC7E12440D6B0055A459 /* DDXMLNode.m in Sources */,
-				DC84BC8912440DA70055A459 /* DDNumber.m in Sources */,
-				DC84BC8A12440DA70055A459 /* NSDataAdditions.m in Sources */,
-				DC84BC8B12440DA70055A459 /* NSXMLElementAdditions.m in Sources */,
 				DC84BC9312440DBE0055A459 /* LibIDN.m in Sources */,
 				DC84BCA912440DD80055A459 /* XMPPElement.m in Sources */,
 				DC84BCAA12440DD80055A459 /* XMPPIQ.m in Sources */,
@@ -524,6 +521,9 @@
 				DCB81EB9130AC9C3002ACF2E /* GCDMulticastDelegate.m in Sources */,
 				07AF18BD134BC4960084D82A /* XMPPSRVResolver.m in Sources */,
 				DCF3C1171367258400111BA3 /* NSString+DDXML.m in Sources */,
+				DC3731A1139F091B00A8407D /* NSData+XMPP.m in Sources */,
+				DC3731A2139F091B00A8407D /* NSNumber+XMPP.m in Sources */,
+				DC3731A3139F091B00A8407D /* NSXMLElement+XMPP.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

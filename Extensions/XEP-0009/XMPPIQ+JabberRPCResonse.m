@@ -7,8 +7,8 @@
 
 #import "XMPPIQ+JabberRPCResonse.h"
 
-#import "NSDataAdditions.h"
-#import "NSXMLElementAdditions.h"
+#import "NSData+XMPP.h"
+#import "NSXMLElement+XMPP.h"
 #import "XMPPJabberRPCModule.h"
 
 #import "XMPPLogging.h"

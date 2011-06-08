@@ -13,7 +13,7 @@
 #import <objc/runtime.h>
 
 #import "XMPPLogging.h"
-#import "NSDataAdditions.h"
+#import "NSData+XMPP.h"
 #import "XMPPDateTimeProfiles.h"
 
 static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
