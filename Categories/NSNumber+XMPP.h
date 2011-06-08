@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface NSNumber (DDNumber)
+@interface NSNumber (XMPP)
 
 + (NSNumber *)numberWithPtr:(const void *)ptr;
 - (id)initWithPtr:(const void *)ptr;

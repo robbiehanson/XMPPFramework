@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@interface NSData (XMPPStreamAdditions)
+@interface NSData (XMPP)
 
 - (NSData *)md5Digest;
 

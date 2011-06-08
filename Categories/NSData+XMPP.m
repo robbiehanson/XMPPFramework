@@ -1,8 +1,8 @@
-#import "NSDataAdditions.h"
+#import "NSData+XMPP.h"
 #import <CommonCrypto/CommonDigest.h>
 
 
-@implementation NSData (XMPPStreamAdditions)
+@implementation NSData (XMPP)
 
 static char encodingTable[64] = {
         'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',

@@ -1,7 +1,7 @@
-#import "DDNumber.h"
+#import "NSNumber+XMPP.h"
 
 
-@implementation NSNumber (DDNumber)
+@implementation NSNumber (XMPP)
 
 + (NSNumber *)numberWithPtr:(const void *)ptr
 {
