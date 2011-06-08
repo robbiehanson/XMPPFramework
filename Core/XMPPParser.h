@@ -14,28 +14,18 @@
 	unsigned depth;
 	
 	xmlParserCtxt *parserCtxt;
-	
-	BOOL stopped;
-	
-	NSThread *streamThread;
-	NSThread *parsingThread;
 }
 
 - (id)initWithDelegate:(id)delegate;
 
-/**
- * Asynchronously parses the given data.
- * The delegate methods will be called as elements are fully read and parsed.
-**/
-- (void)parseData:(NSData *)data;
+- (id)delegate;
+- (void)setDelegate:(id)delegate;
 
 /**
- * You must call this method before releasing the parser.
- * This will stop any asynchronous parsing, and ensure that no further delegate methods are invoked.
- * 
- * Failure to call this method will also leak the parser object.
+ * Synchronously parses the given data.
+ * This means the delegate methods will get called before this method returns.
 **/
-- (void)stop;
+- (void)parseData:(NSData *)data;
 
 @end
 
@@ -53,7 +43,5 @@
 - (void)xmppParserDidEnd:(XMPPParser *)sender;
 
 - (void)xmppParser:(XMPPParser *)sender didFail:(NSError *)error;
-
-- (void)xmppParser:(XMPPParser *)sender didParseDataOfLength:(NSUInteger)length;
 
 @end

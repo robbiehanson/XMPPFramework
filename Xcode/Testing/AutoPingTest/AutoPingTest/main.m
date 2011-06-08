@@ -3,7 +3,7 @@
 //  AutoPingTest
 //
 //  Created by Robbie Hanson on 4/13/11.
-//  Copyright 2011 Voalte. All rights reserved.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>

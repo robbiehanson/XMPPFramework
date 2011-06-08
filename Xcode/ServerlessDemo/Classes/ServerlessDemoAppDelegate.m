@@ -3,11 +3,13 @@
 #import "BonjourClient.h"
 #import "StreamController.h"
 #import "XMPPJID.h"
+#import "DDLog.h"
+#import "DDTTYLogger.h"
 
 #import <arpa/inet.h>
 
-#define THIS_FILE   @"ChatViewController"
-#define THIS_METHOD NSStringFromSelector(_cmd)
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 @implementation ServerlessDemoAppDelegate
@@ -22,6 +24,10 @@
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
+	// Configure logging
+	
+	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+	
 	// Configure UI
 	
 	RootViewController *rootViewController = (RootViewController *)[navigationController topViewController];
@@ -55,7 +61,7 @@
 //		
 //		if (![managedObjectContext save:&error])
 //		{
-//			NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+//			DDLogError(@"Unresolved error %@, %@", error, [error userInfo]);
 //			abort();
 //        }
 //	}
@@ -64,25 +70,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Core Data stack
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Returns the managed object context for the application.
- * If the context doesn't already exist, it is created and
- * bound to the persistent store coordinator for the application.
-**/
-- (NSManagedObjectContext *) managedObjectContext
-{
-	if (managedObjectContext != nil) {
-        return managedObjectContext;
-    }
-	
-    NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
-    if (coordinator != nil) {
-        managedObjectContext = [[NSManagedObjectContext alloc] init];
-        [managedObjectContext setPersistentStoreCoordinator: coordinator];
-    }
-    return managedObjectContext;
-}
 
 /**
  * Returns the managed object model for the application.
@@ -129,11 +116,30 @@
 	                                                                                      error:&error];
     if (persistentStore == nil)
 	{
-		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+		DDLogError(@"Unresolved error %@, %@", error, [error userInfo]);
 		abort();
     }    
 	
     return persistentStoreCoordinator;
+}
+
+/**
+ * Returns the managed object context for the application.
+ * If the context doesn't already exist, it is created and
+ * bound to the persistent store coordinator for the application.
+**/
+- (NSManagedObjectContext *)managedObjectContext
+{
+	if (managedObjectContext != nil) {
+        return managedObjectContext;
+    }
+	
+    NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
+    if (coordinator != nil) {
+        managedObjectContext = [[NSManagedObjectContext alloc] init];
+        [managedObjectContext setPersistentStoreCoordinator: coordinator];
+    }
+    return managedObjectContext;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

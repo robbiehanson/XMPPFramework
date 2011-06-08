@@ -1,11 +1,20 @@
-#import "AutoPingTestAppDelegate.h"
+//
+//  AutoPingTestAppDelegate.m
+//  AutoPingTest
+//
+//  Created by Robbie Hanson on 4/13/11.
+//  Copyright 2011 Deusty, LLC. All rights reserved.
+//
 
-#define DEBUG_LEVEL 4
-#include "DDLog.h"
+#import "AutoPingTestAppDelegate.h"
+#import "DDLog.h"
+#import "DDTTYLogger.h"
+
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #define MY_JID      @"robbie@robbiehanson.com/rsrc"
-#define MY_PASSWORD @"secret"
-
+#define MY_PASSWORD @""
 
 @implementation AutoPingTestAppDelegate
 
@@ -13,16 +22,22 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+	
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
+	
 	xmppStream = [[XMPPStream alloc] init];
 	[xmppStream setMyJID:[XMPPJID jidWithString:MY_JID]];
 	
-	xmppAutoPing = [[XMPPAutoPing alloc] initWithStream:xmppStream];
+	xmppAutoPing = [[XMPPAutoPing alloc] init];
 	xmppAutoPing.pingInterval = 15;
 	xmppAutoPing.pingTimeout = 5;
 	xmppAutoPing.targetJID = nil;
 	
-	[xmppStream addDelegate:self];
-	[xmppAutoPing addDelegate:self];
+	[xmppAutoPing activate:xmppStream];
+	
+	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[xmppAutoPing addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
 	NSError *error = nil;
 	
@@ -34,21 +49,21 @@
 
 - (void)goOnline:(NSTimer *)aTimer
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
 	[xmppStream sendElement:[XMPPPresence presence]];
 }
 
 - (void)goOffline:(NSTimer *)aTimer
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
 	[xmppStream sendElement:[XMPPPresence presenceWithType:@"unavailable"]];
 }
 
 - (void)changeAutoPingInterval:(NSTimer *)aTimer
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
 	xmppAutoPing.pingInterval = 30;
 }
@@ -57,7 +72,7 @@
 
 - (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
 	NSError *error = nil;
 	
@@ -69,7 +84,7 @@
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
 	[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(goOnline:) userInfo:nil repeats:NO];
 	[NSTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(goOffline:) userInfo:nil repeats:NO];
@@ -78,29 +93,29 @@
 
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppAutoPingDidSendPing:(XMPPAutoPing *)sender
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 }
 
 - (void)xmppAutoPingDidReceivePong:(XMPPAutoPing *)sender
 {
-	DDLogInfo(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 }
 
 - (void)xmppAutoPingDidTimeout:(XMPPAutoPing *)sender
 {
-	NSLog(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 }
 
 @end

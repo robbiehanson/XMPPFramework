@@ -8,31 +8,28 @@
 #import "XMPP.h"
 #import "XMPPRoomOccupant.h"
 
-@interface XMPPRoom : NSObject
+@interface XMPPRoom : XMPPModule
 {
-	id delegate;
-	XMPPStream *stream;
 	NSString *roomName;
 	NSString *nickName;
 	NSString *subject;
 	NSString *invitedUser;
-	BOOL isJoined;
+	BOOL _isJoined;
 	NSMutableDictionary *occupants;
 }
-@property (nonatomic, readonly, assign) XMPPStream *stream;
-@property (nonatomic, readonly, retain) NSString *roomName, *nickName, *subject;
-@property (nonatomic, readonly, assign) BOOL isJoined;
-@property (nonatomic, readonly) NSMutableDictionary *occupants;
 
+- (id)initWithRoomName:(NSString *)roomName nickName:(NSString *)nickName;
+- (id)initWithRoomName:(NSString *)roomName nickName:(NSString *)nickName dispatchQueue:(dispatch_queue_t)queue;
 
-- (id)initWithStream:(XMPPStream *)aStream roomName:(NSString *)name nickName:(NSString *)nickname;
+@property (readonly) NSString *roomName;
+@property (readonly) NSString *nickName;
+@property (readonly) NSString *subject;
 
-// associated delegate for XMPPRoom Notifications.
-- (void)setDelegate:(id)aDelegate;
-- (id)delegate;
+@property (readonly, assign) BOOL isJoined;
 
-- (NSString *)invitedUser;
-- (void)setInvitedUser:(NSString *)ainvitedUser;
+@property (readonly) NSDictionary *occupants;
+
+@property (readwrite, copy) NSString *invitedUser;
 
 - (void)createOrJoinRoom;
 - (void)joinRoom;
@@ -40,9 +37,10 @@
 
 - (void)chageNickForRoom:(NSString *)name;
 
-- (void)inviteUser:(XMPPJID *)jid message:(NSString *)message;
+- (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)invitationMessage;
 - (void)acceptInvitation;
 - (void)rejectInvitation;
+- (void)rejectInvitationWithMessage:(NSString *)reasonForRejection;
 
 - (void)sendMessage:(NSString *)msg;
 
@@ -50,10 +48,11 @@
 
 @protocol XMPPRoomDelegate <NSObject>
 @optional
-- (void)xmppRoom:(XMPPRoom *)room didCreate:(BOOL)success;
-- (void)xmppRoom:(XMPPRoom *)room didEnter:(BOOL)enter;
-- (void)xmppRoom:(XMPPRoom *)room didLeave:(BOOL)leave;
-- (void)xmppRoom:(XMPPRoom *)room didReceiveMessage:(NSString *)message fromNick:(NSString *)nick;
-- (void)xmppRoom:(XMPPRoom *)room didChangeOccupants:(NSDictionary *)occupants;
+
+- (void)xmppRoomDidCreate:(XMPPRoom *)sender;
+- (void)xmppRoomDidEnter:(XMPPRoom *)sender;
+- (void)xmppRoomDidLeave:(XMPPRoom *)sender;
+- (void)xmppRoom:(XMPPRoom *)sender didReceiveMessage:(XMPPMessage *)message fromNick:(NSString *)nick;
+- (void)xmppRoom:(XMPPRoom *)sender didChangeOccupants:(NSDictionary *)occupants;
 
 @end

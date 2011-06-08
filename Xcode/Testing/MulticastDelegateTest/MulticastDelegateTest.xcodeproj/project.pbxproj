@@ -14,7 +14,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		DC5016AF10DBDD0100562A7B /* Class1.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5016AE10DBDD0100562A7B /* Class1.m */; };
 		DC5016B210DBDD0B00562A7B /* Class2.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5016B110DBDD0B00562A7B /* Class2.m */; };
-		DC84BCFF12440FA70055A459 /* MulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BCFE12440FA70055A459 /* MulticastDelegate.m */; };
+		DCC0C1541302FABC00EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C1531302FABC00EC45D2 /* GCDMulticastDelegate.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,8 +35,8 @@
 		DC5016AE10DBDD0100562A7B /* Class1.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Class1.m; sourceTree = "<group>"; };
 		DC5016B010DBDD0B00562A7B /* Class2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Class2.h; sourceTree = "<group>"; };
 		DC5016B110DBDD0B00562A7B /* Class2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Class2.m; sourceTree = "<group>"; };
-		DC84BCFD12440FA70055A459 /* MulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MulticastDelegate.h; path = ../../../Utilities/MulticastDelegate.h; sourceTree = SOURCE_ROOT; };
-		DC84BCFE12440FA70055A459 /* MulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MulticastDelegate.m; path = ../../../Utilities/MulticastDelegate.m; sourceTree = SOURCE_ROOT; };
+		DCC0C1521302FABC00EC45D2 /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDMulticastDelegate.h; path = ../../../Utilities/GCDMulticastDelegate.h; sourceTree = SOURCE_ROOT; };
+		DCC0C1531302FABC00EC45D2 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDMulticastDelegate.m; path = ../../../Utilities/GCDMulticastDelegate.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,8 +94,8 @@
 		29B97314FDCFA39411CA2CEA /* MulticastDelegateTest */ = {
 			isa = PBXGroup;
 			children = (
-				DC84BCFD12440FA70055A459 /* MulticastDelegate.h */,
-				DC84BCFE12440FA70055A459 /* MulticastDelegate.m */,
+				DCC0C1521302FABC00EC45D2 /* GCDMulticastDelegate.h */,
+				DCC0C1531302FABC00EC45D2 /* GCDMulticastDelegate.m */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -199,7 +199,7 @@
 				256AC3DA0F4B6AC300CF3369 /* MulticastDelegateTestAppDelegate.m in Sources */,
 				DC5016AF10DBDD0100562A7B /* Class1.m in Sources */,
 				DC5016B210DBDD0B00562A7B /* Class2.m in Sources */,
-				DC84BCFF12440FA70055A459 /* MulticastDelegate.m in Sources */,
+				DCC0C1541302FABC00EC45D2 /* GCDMulticastDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -262,6 +262,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;

@@ -4,6 +4,6 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
-#import "XMPPReconnect.h"
+#import "XMPPModule.h"
 
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"

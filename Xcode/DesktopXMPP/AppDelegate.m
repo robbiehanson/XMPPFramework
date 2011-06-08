@@ -2,11 +2,13 @@
 #import "RosterController.h"
 #import "XMPP.h"
 #import "TURNSocket.h"
+#import "GCDAsyncSocket.h"
+#import "DDLog.h"
+#import "DDTTYLogger.h"
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
-// SCNetworkConnectionFlags was renamed to SCNetworkReachabilityFlags in 10.6
-typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
-#endif
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @implementation AppDelegate
 
@@ -20,25 +22,29 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (id)init
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
+		// Configure logging framework
+		
+		[DDLog addLogger:[DDTTYLogger sharedInstance]];
+		
+		// Initialize variables
+		
 		xmppStream = [[XMPPStream alloc] init];
 		
-	//	xmppReconnect = [[XMPPReconnect alloc] initWithStream:xmppStream];
+	//	xmppReconnect = [[XMPPReconnect alloc] init];
 		
 		xmppRosterStorage = [[XMPPRosterMemoryStorage alloc] init];
-		xmppRoster = [[XMPPRoster alloc] initWithStream:xmppStream
-		                                  rosterStorage:xmppRosterStorage];
+		xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
 		
 		xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
-		xmppCapabilities = [[XMPPCapabilities alloc] initWithStream:xmppStream
-		                                        capabilitiesStorage:xmppCapabilitiesStorage];
+		xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
 		
-		xmppCapabilities.autoFetchHashedCapabilities = YES;
-		xmppCapabilities.autoFetchNonHashedCapabilities = NO;
+	//	xmppCapabilities.autoFetchHashedCapabilities = YES;
+	//	xmppCapabilities.autoFetchNonHashedCapabilities = NO;
 		
-		xmppPing = [[XMPPPing alloc] initWithStream:xmppStream];
-		xmppTime = [[XMPPTime alloc] initWithStream:xmppStream];
+	//	xmppPing = [[XMPPPing alloc] init];
+	//	xmppTime = [[XMPPTime alloc] init];
 		
 		turnSockets = [[NSMutableArray alloc] init];
 	}
@@ -47,13 +53,34 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	[xmppStream addDelegate:self];
-	[xmppReconnect addDelegate:self];
-	[xmppCapabilities addDelegate:self];
-	[xmppPing addDelegate:self];
-	[xmppTime addDelegate:self];
+	DDLogInfo(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	
+	// Activate xmpp modules
+	
+	[xmppReconnect activate:xmppStream];
+	[xmppRoster activate:xmppStream];
+	[xmppCapabilities activate:xmppStream];
+	[xmppPing activate:xmppStream];
+	[xmppTime activate:xmppStream];
+	
+	// Add ourself as a delegate to anything we may be interested in
+	
+//	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[xmppReconnect addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[xmppCapabilities addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[xmppPing addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[xmppTime addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	
+	// Start the GUI stuff
 	
 	[rosterController displaySignInSheet];
+}
+
+- (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module
+{
+	DDLogVerbose(@"%@: xmppStream:didRegisterModule: %@", THIS_FILE, module);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,27 +91,27 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	if(jid == nil) return;
 	
-	NSLog(@"Attempting TURN connection to %@", jid);
+	DDLogInfo(@"Attempting TURN connection to %@", jid);
 	
 	TURNSocket *turnSocket = [[TURNSocket alloc] initWithStream:xmppStream toJID:jid];
 	
 	[turnSockets addObject:turnSocket];
 	
-	[turnSocket start:self];
+	[turnSocket startWithDelegate:self delegateQueue:dispatch_get_main_queue()];
 	[turnSocket release];
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSLog(@"---------- xmppStream:didReceiveIQ: ----------");
+	DDLogVerbose(@"---------- xmppStream:didReceiveIQ: ----------");
 	
-	if([TURNSocket isNewStartTURNRequest:iq])
+	if ([TURNSocket isNewStartTURNRequest:iq])
 	{
 		TURNSocket *turnSocket = [[TURNSocket alloc] initWithStream:sender incomingTURNRequest:iq];
 		
 		[turnSockets addObject:turnSocket];
 		
-		[turnSocket start:self];
+		[turnSocket startWithDelegate:self delegateQueue:dispatch_get_main_queue()];
 		[turnSocket release];
 		
 		return YES;
@@ -93,10 +120,10 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	return NO;
 }
 
-- (void)turnSocket:(TURNSocket *)sender didSucceed:(AsyncSocket *)socket
+- (void)turnSocket:(TURNSocket *)sender didSucceed:(GCDAsyncSocket *)socket
 {
-	NSLog(@"TURN Connection succeeded!");
-	NSLog(@"You now have a socket that you can use to send/receive data to/from the other person.");
+	DDLogInfo(@"TURN Connection succeeded!");
+	DDLogInfo(@"You now have a socket that you can use to send/receive data to/from the other person.");
 	
 	// Now retain and use the socket.
 	
@@ -105,7 +132,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)turnSocketDidFail:(TURNSocket *)sender
 {
-	NSLog(@"TURN Connection failed!");
+	DDLogInfo(@"TURN Connection failed!");
 	
 	[turnSockets removeObject:sender];
 	
@@ -115,21 +142,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #pragma mark Auto Reconnect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
-{
-	NSLog(@"xmppStream:didReceiveError: %@", error);
-}
-
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
-{
-	NSLog(@"xmppStreamDidDisconnect:");
-	
-	// If we weren't using auto reconnect, we could take this opportunity to display the sign in sheet.
-}
-
 - (BOOL)xmppReconnect:(XMPPReconnect *)sender shouldAttemptAutoReconnect:(SCNetworkReachabilityFlags)reachabilityFlags
 {
-	NSLog(@"---------- xmppReconnect:shouldAttemptAutoReconnect: ----------");
+	DDLogVerbose(@"---------- xmppReconnect:shouldAttemptAutoReconnect: ----------");
 	
 	return YES;
 }
@@ -140,9 +155,10 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)xmppCapabilities:(XMPPCapabilities *)sender didDiscoverCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid
 {
-	NSLog(@"---------- xmppCapabilities:didDiscoverCapabilities:forJID: ----------");
-	NSLog(@"jid: %@", jid);
-	NSLog(@"capabilities:\n%@", [caps XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
+	DDLogVerbose(@"---------- xmppCapabilities:didDiscoverCapabilities:forJID: ----------");
+	DDLogVerbose(@"jid: %@", jid);
+	DDLogVerbose(@"capabilities:\n%@",
+				 [caps XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 }
 
 @end

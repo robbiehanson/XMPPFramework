@@ -14,19 +14,20 @@
 
 @interface XMPPPubSub : XMPPModule
 {
-  XMPPJID *pubsubService;
+	XMPPJID *serviceJID;
 }
 
-@property (nonatomic, retain) XMPPJID *pubsubService;
+- (id)initWithServiceJID:(XMPPJID *)aServiceJID;
+- (id)initWithServiceJID:(XMPPJID *)aServiceJID dispatchQueue:(dispatch_queue_t)queue;
 
-- (id)initWithStream:(XMPPStream *)stream;
+@property (nonatomic, readonly) XMPPJID *serviceJID;
 
-- (NSString*)subscribeToNode:(NSString*)node withOptions:(NSDictionary*)options;
-- (NSString*)unsubscribeFromNode:(NSString*)node;
-- (NSString*)createNode:(NSString*)node withOptions:(NSDictionary*)options;
-- (NSString*)deleteNode:(NSString*)node;
-- (NSString*)configureNode:(NSString*)node;
-- (NSString*)allItemsForNode:(NSString*)node;
+- (NSString *)subscribeToNode:(NSString *)node withOptions:(NSDictionary *)options;
+- (NSString *)unsubscribeFromNode:(NSString *)node;
+- (NSString *)createNode:(NSString *)node withOptions:(NSDictionary *)options;
+- (NSString *)deleteNode:(NSString *)node;
+- (NSString *)configureNode:(NSString *)node;
+- (NSString *)allItemsForNode:(NSString *)node;
 
 @end
 
@@ -34,7 +35,7 @@
 @optional
 
 - (void)xmppPubSub:(XMPPPubSub *)sender didSubscribe:(XMPPIQ *)iq;
-- (void)xmppPubSub:(XMPPPubSub *)sender didCreateNode:(NSString*)node withIQ:(XMPPIQ *)iq;
+- (void)xmppPubSub:(XMPPPubSub *)sender didCreateNode:(NSString *)node withIQ:(XMPPIQ *)iq;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveMessage:(XMPPMessage *)message;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveError:(XMPPIQ *)iq;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveResult:(XMPPIQ *)iq;

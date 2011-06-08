@@ -7,13 +7,19 @@
 
 @class XMPPJID;
 
-@interface XMPPRoomOccupant : NSObject {
+@interface XMPPRoomOccupant : NSObject
+{
 	XMPPJID *jid;
-	NSString *role;
 	NSString *nick;
+	NSString *role;
 }
 
-@property (nonatomic, retain) XMPPJID *jid;
-@property (nonatomic, retain) NSString *role, *nick;
++ (XMPPRoomOccupant *)occupantWithJID:(XMPPJID *)aJid nick:(NSString *)aNick role:(NSString *)aRole;
+
+- (id)initWithJID:(XMPPJID *)aJid nick:(NSString *)aNick role:(NSString *)aRole;
+
+@property (readonly) XMPPJID *jid;
+@property (readonly) NSString *nick;
+@property (readonly) NSString *role;
 
 @end

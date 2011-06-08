@@ -2,6 +2,10 @@
 #import "ServerlessDemoAppDelegate.h"
 #import "Service.h"
 #import "DDString.h"
+#import "DDLog.h"
+
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #define SERVICE_TYPE @"_presence._tcp."
 
@@ -123,7 +127,7 @@ static BonjourClient *sharedInstance;
 		}
 		else
 		{
-			NSLog(@"Unable to get string from key \"%@\"", key);
+			DDLogWarn(@"%@: Unable to get string from key \"%@\"", THIS_FILE, key);
 		}
 	}
 	
@@ -148,7 +152,7 @@ static BonjourClient *sharedInstance;
 		}
 		else
 		{
-			NSLog(@"Value for key \"%@\" is not a string.", key);
+			DDLogWarn(@"%@: Value for key \"%@\" is not a string.", THIS_FILE, key);
 		}
 	}
 	
@@ -173,13 +177,14 @@ static BonjourClient *sharedInstance;
 	
 	if (results == nil)
 	{
-		NSLog(@"Error searching for service \"%@\": %@, %@", serviceDescription, error, [error userInfo]);
+		DDLogError(@"%@: Error searching for service \"%@\": %@, %@",
+				   THIS_FILE, serviceDescription, error, [error userInfo]);
 		
 		return nil;
 	}
 	else if ([results count] == 0)
 	{
-		NSLog(@"Unable to find service \"%@\"", serviceDescription);
+		DDLogWarn(@"%@: Unable to find service \"%@\"", THIS_FILE, serviceDescription);
 		
 		return nil;
 	}
@@ -195,7 +200,7 @@ static BonjourClient *sharedInstance;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)sb didFindService:(NSNetService *)ns moreComing:(BOOL)moreComing
 {
-	NSLog(@"netServiceBrowser:didFindService: %@", ns);
+	DDLogVerbose(@"%@: netServiceBrowser:didFindService: %@", THIS_FILE, ns);
 	
 	// Add service to database (if it's not our own service)
 	
@@ -247,7 +252,6 @@ static BonjourClient *sharedInstance;
 	if (service)
 	{
 		NSDictionary *dict = [self dictionaryFromTXTRecordData:data];
-		NSLog(@"dict: %@", dict);
 		
 		// Example:
 		// 
@@ -288,7 +292,7 @@ static BonjourClient *sharedInstance;
 		NSData *address = [appDelegate IPv4AddressFromAddresses:[ns addresses]];
 		NSString *addrStr = [appDelegate stringFromAddress:address];
 		
-		NSLog(@"ns(%@) -> %@", [self descriptionForNetService:ns], addrStr);
+		DDLogVerbose(@"%@: ns(%@) -> %@", THIS_FILE, [self descriptionForNetService:ns], addrStr);
 		
 		service.lastResolvedAddress = addrStr;
 		
@@ -300,7 +304,7 @@ static BonjourClient *sharedInstance;
 
 - (void)netService:(NSNetService *)ns didNotResolve:(NSDictionary *)errorDict
 {
-	NSLog(@"netService:%@ didNotResolve:%@", ns, errorDict);
+	DDLogVerbose(@"%@: netService:%@ didNotResolve:%@", THIS_FILE, ns, errorDict);
 	
 	[ns stop];
 }
@@ -311,12 +315,12 @@ static BonjourClient *sharedInstance;
 
 - (void)netServiceDidPublish:(NSNetService *)sender
 {
-	NSLog(@"netServiceDidPublish");
+	DDLogVerbose(@"%@: netServiceDidPublish", THIS_FILE);
 }
 
 - (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict
 {
-	NSLog(@"netService:didNotPublish: %@", errorDict);
+	DDLogVerbose(@"%@: netService:didNotPublish: %@", THIS_FILE, errorDict);
 }
 
 @end

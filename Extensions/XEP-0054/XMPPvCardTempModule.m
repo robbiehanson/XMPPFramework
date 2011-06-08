@@ -6,162 +6,198 @@
 //  Copyright 2011 RF.com. All rights reserved.
 //
 
-#ifdef DEBUG_LEVEL
-  #undef DEBUG_LEVEL
-  #define DEBUG_LEVEL 1
-#endif
-
-
+#import "XMPP.h"
+#import "XMPPLogging.h"
 #import "XMPPvCardTempModule.h"
 
-#import "DDLog.h"
+// Log levels: off, error, warn, info, verbose
+// Log flags: trace
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
+@interface XMPPvCardTempModule()
 
-#if XMPP_VCARD_TEMP_QUEUEING
-enum {
-  kXMPPvCardTempModuleMaxOpenFetchRequests = 5,
-  kXMPPvCardTempModuleOpenFetchRequestTimeout = 10,
-};
-#endif
+- (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid;
 
+@end
 
 @implementation XMPPvCardTempModule
 
+@synthesize moduleStorage = _moduleStorage;
 
-#pragma mark -
-#pragma mark Init/dealloc methods
-
-
-- (id)initWithStream:(XMPPStream *)aXmppStream 
-             storage:(id <XMPPvCardTempModuleStorage>)moduleStorage {
-  if ((self = [super initWithStream:aXmppStream])) {
-    _moduleStorage = [moduleStorage retain];
-    
-#if XMPP_VCARD_TEMP_QUEUEING
-    _openFetchRequests = 0;
-    _pendingFetchRequests = [[NSMutableArray alloc] initWithCapacity:2];
-#endif
-  }
-  return self;
+- (id)init
+{
+	// This will cause a crash - it's designed to.
+	// Only the init methods listed in XMPPvCardTempModule.h are supported.
+	
+	return [self initWithvCardStorage:nil dispatchQueue:NULL];
 }
 
-
-- (void)dealloc {
-#if XMPP_VCARD_TEMP_QUEUEING
-  [_pendingFetchRequests release];
-#endif
-  
-  [_moduleStorage release];
-  _moduleStorage = nil;
-  
-  [super dealloc];
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+{
+	// This will cause a crash - it's designed to.
+	// Only the init methods listed in XMPPvCardTempModule.h are supported.
+	
+	return [self initWithvCardStorage:nil dispatchQueue:NULL];
 }
 
-
-#pragma mark -
-#pragma mark Private methods
-
-
-- (void)_fetchvCardTempForJID:(XMPPJID *)jid {
-  XMPPIQ *iq = [XMPPvCardTemp iqvCardRequestForJID:jid];
-  
-#if XMPP_VCARD_TEMP_QUEUEING
-  _openFetchRequests++;
-  DDLogVerbose(@"%s %d", __PRETTY_FUNCTION__, _openFetchRequests);
-#endif
-  
-  [xmppStream sendElement:iq];
+- (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage
+{
+	return [self initWithvCardStorage:storage dispatchQueue:NULL];
 }
 
-
-#pragma mark -
-#pragma mark Fetch vCardTemp methods
-
-
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)aXmppStream {
-  return [self fetchvCardTempForJID:jid xmppStream:aXmppStream useCache:YES];
-}
-
-
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream useCache:(BOOL)useCache {
-  XMPPvCardTemp *vCardTemp = nil;
-  
-  if (useCache) {
-    // try loading from the cache
-    vCardTemp = [_moduleStorage vCardTempForJID:jid];
-  }
-  
-  if (vCardTemp == nil && [_moduleStorage shouldFetchvCardTempForJID:jid]) {
-    
-#if XMPP_VCARD_TEMP_QUEUEING
-    if (_openFetchRequests >= kXMPPvCardTempModuleMaxOpenFetchRequests) {
-      // queue the request
-      [_pendingFetchRequests addObject:jid];
-      
-      return vCardTemp;
-    }
-#endif
-    
-    [self _fetchvCardTempForJID:jid];
-  }
-  return vCardTemp;
-}
-
-
-#pragma mark -
-#pragma mark XMPPStreamDelegate methods
-
-
-#if XMPP_VCARD_TEMP_QUEUEING
-/*
- * clean up if we get disconnected
- */
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender {
-  _openFetchRequests = 0;
-  [_pendingFetchRequests removeAllObjects];
-}
-#endif
-
-
-- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {  
-  XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempFromIQ:iq];
-  
-	if (vCardTemp != nil) { 
-    XMPPJID *jid = [iq from];
-    DDLogVerbose(@"%s %@", __PRETTY_FUNCTION__,[jid bare]);
-    
-#if XMPP_VCARD_TEMP_QUEUEING
-    if (_openFetchRequests > 0) {
-      _openFetchRequests--;
-    }
-    
-    DDLogVerbose(@"%s %d", __PRETTY_FUNCTION__, _openFetchRequests);
-    
-    if (_openFetchRequests < kXMPPvCardTempModuleMaxOpenFetchRequests &&
-        [_pendingFetchRequests count] > 0) {
-      [self _fetchvCardTempForJID:[_pendingFetchRequests objectAtIndex:0]];
-      [_pendingFetchRequests removeObjectAtIndex:0];
-    }
-    
-#endif
-    
-    [_moduleStorage setvCardTemp:vCardTemp forJID:jid];
-    
-    [multicastDelegate xmppvCardTempModule:self 
-                           didReceivevCardTemp:vCardTemp 
-                                    forJID:jid
-                                xmppStream:sender];
-    return YES;
+- (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(dispatch_queue_t)queue
+{
+	NSParameterAssert(storage != nil);
+	
+	if ((self = [super initWithDispatchQueue:queue]))
+	{
+    if ([storage configureWithParent:self queue:moduleQueue])
+		{
+			_moduleStorage = [storage retain];
+		}
+		else
+		{
+			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
+		}
 	}
+	return self;
+}
+
+- (BOOL)activate:(XMPPStream *)aXmppStream
+{
+	if ([super activate:aXmppStream])
+	{
+		// Custom code goes here (if needed)
+		
+		return YES;
+	}
+	
 	return NO;
 }
 
+- (void)deactivate
+{
+	// Custom code goes here (if needed)
+	
+	[super deactivate];
+}
 
-#pragma mark -
-#pragma mark Getter/setter methods
+- (void)dealloc
+{
+	[_moduleStorage release];
+	_moduleStorage = nil;
+	
+	[super dealloc];
+}
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Fetch vCardTemp methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@synthesize moduleStorage = _moduleStorage;
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid
+{
+	return [self fetchvCardTempForJID:jid useCache:YES];
+}
 
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid useCache:(BOOL)useCache
+{
+	__block XMPPvCardTemp *result;
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		XMPPvCardTemp *vCardTemp = nil;
+		
+		if (useCache)
+		{
+			// Try loading from the cache
+			vCardTemp = [_moduleStorage vCardTempForJID:jid xmppStream:xmppStream];
+		}
+		
+		if (vCardTemp == nil && [_moduleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
+		{
+			[xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:jid]];
+		}
+		
+		result = [vCardTemp retain];
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return [result autorelease];
+}
+
+- (XMPPvCardTemp *)myvCardTemp
+{
+  return [self fetchvCardTempForJID:[xmppStream myJID]];
+}
+
+- (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp
+{
+  XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
+  
+  NSString *elemId = [xmppStream generateUUID];
+  XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
+  [xmppStream sendElement:iq];
+  
+  [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
+  
+  [newvCardTemp release];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Private
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
+{
+  // this method could be called from anywhere
+  dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
+    
+    [_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
+    
+    [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
+                                                         didReceivevCardTemp:vCardTemp
+                                                                      forJID:jid];
+    
+    [pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPStreamDelegate methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+{
+	// This method is invoked on the moduleQueue.
+	
+	// Remember XML heirarchy memory management rules.
+	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
+	// 
+	// Therefore we use vCardTempCopyFromIQ instead of vCardTempSubElementFromIQ.
+	
+	XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempCopyFromIQ:iq];
+	if (vCardTemp != nil)
+	{
+		[self _updatevCardTemp:vCardTemp forJID:[iq from]];
+		
+		return YES;
+	}
+	
+	return NO;
+}
 
 @end

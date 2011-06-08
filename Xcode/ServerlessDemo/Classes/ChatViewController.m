@@ -8,10 +8,14 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
-#import "NSXMLElementAdditions.h"
-#import "NSStringAdditions.h"
+#import "NSXMLElement+XMPP.h"
+#import "NSString+DDXML.h"
+#import "DDLog.h"
 
 #import <arpa/inet.h>
+
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 // The BlueBubble and GreenBubble images are used as stretchable images.
 // Stretchable images are defined using a leftCapWidth and topCapHeight.
@@ -52,9 +56,6 @@
 #define kBubbleImageViewTag  1
 #define kContentLabelTag     2
 #define kTimestampLabelTag   3
-
-#define THIS_FILE   @"ChatViewController"
-#define THIS_METHOD NSStringFromSelector(_cmd)
 
 
 @interface ChatViewController (PrivateAPI)
@@ -134,7 +135,7 @@
 
 - (void)keyboardWillShow:(NSNotification *)notification
 {
-	NSLog(@"keyboardWillShow");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	// Extract information about the keyboard change.
 	
@@ -144,8 +145,10 @@
 	// UIKeyboardBoundsUserInfoKey:
 	// The key for an NSValue object containing a CGRect that identifies the bounds rectangle of the keyboard.
 	
-	CGRect keyboardRect = [[[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey] CGRectValue];
-	keyboardHeight = keyboardRect.size.height;
+	CGRect beginRect = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue];
+	CGRect endRect   = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+	
+	keyboardHeight = ABS(beginRect.origin.y - endRect.origin.y);
 	
 	// UIKeyboardAnimationDurationUserInfoKey
 	// The key for an NSValue object containing a double that identifies the duration of the animation in seconds.
@@ -171,7 +174,7 @@
 
 - (void)keyboardWillHide:(NSNotification *)notification
 {
-    NSLog(@"keyboardWillHide");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	// Extract information about the keyboard change.
 	
@@ -181,8 +184,10 @@
 	// UIKeyboardBoundsUserInfoKey:
 	// The key for an NSValue object containing a CGRect that identifies the bounds rectangle of the keyboard.
 	
-	CGRect keyboardRect = [[[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey] CGRectValue];
-	keyboardHeight = keyboardRect.size.height;
+	CGRect beginRect = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue];
+	CGRect endRect   = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+	
+	keyboardHeight = ABS(beginRect.origin.y - endRect.origin.y);
 	
 	// UIKeyboardAnimationDurationUserInfoKey
 	// The key for an NSValue object containing a double that identifies the duration of the animation in seconds.
@@ -546,7 +551,7 @@
 		NSError *error = nil;
         if (![fetchedResultsController performFetch:&error])
         {
-			NSLog(@"Error fetching messages: %@ %@", error, [error userInfo]);
+			DDLogError(@"Error fetching messages: %@ %@", error, [error userInfo]);
         }
 		
 		[dateSD release];
@@ -561,7 +566,7 @@
 {
     if (![self isViewLoaded]) return;
 	
-	NSLog(@"ChatViewController: controllerWillChangeContent");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
     [tableView beginUpdates];
 }
@@ -577,28 +582,28 @@
     switch(type)
     {
         case NSFetchedResultsChangeInsert:
-			NSLog(@"NSFetchedResultsChangeInsert: %@", newIndexPath);
+			DDLogVerbose(@"%@: NSFetchedResultsChangeInsert: %@", THIS_FILE, newIndexPath);
 			
             [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath]
 			                 withRowAnimation:UITableViewRowAnimationFade];
 			break;
 			
         case NSFetchedResultsChangeDelete:
-            NSLog(@"NSFetchedResultsChangeDelete: %@", indexPath);
+            DDLogVerbose(@"%@: NSFetchedResultsChangeDelete: %@", THIS_FILE, indexPath);
 			
 			[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
 			                 withRowAnimation:UITableViewRowAnimationFade];
             break;
 			
         case NSFetchedResultsChangeUpdate:
-			NSLog(@"NSFetchedResultsChangeUpdate: %@", indexPath);
+			DDLogVerbose(@"%@: NSFetchedResultsChangeUpdate: %@", THIS_FILE, indexPath);
 			
 			[tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
 			                 withRowAnimation:UITableViewRowAnimationNone];
 			break;
 			
         case NSFetchedResultsChangeMove:
-            NSLog(@"NSFetchedResultsChangeMove: %@ -> %@", indexPath, newIndexPath);
+            DDLogVerbose(@"%@: NSFetchedResultsChangeMove: %@ -> %@", THIS_FILE, indexPath, newIndexPath);
 			
 			[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
 			                 withRowAnimation:UITableViewRowAnimationFade];
@@ -613,7 +618,7 @@
 {
     if (![self isViewLoaded]) return;
 	
-	NSLog(@"ChatViewController: controllerDidChangeContent");
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
     [tableView endUpdates];
 	
@@ -626,8 +631,7 @@
 
 - (void)netServiceDidResolveAddress:(NSNetService *)ns
 {
-	NSLog(@"netServiceDidResolveAddress:");
-	NSLog(@"service.serviceName = %@", service.serviceName);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	// The iPhone only supports IPv4, so we need to get the IPv4 address from the resolve operation.
 	
@@ -646,12 +650,11 @@
 		XMPPJID *myJID      = [appDelegate myJID];
 		XMPPJID *serviceJID = [XMPPJID jidWithString:[service serviceName]];
 		
-		NSLog(@"myJID: %@", myJID);
-		NSLog(@"serviceJID: %@", serviceJID);
+		DDLogVerbose(@"%@: myJID(%@) serviceJID(%@)", THIS_FILE, myJID, serviceJID);
 		
 		xmppStream = [[XMPPStream alloc] initP2PFrom:myJID];
 		
-		[xmppStream addDelegate:self];
+		[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
 		[xmppStream connectTo:serviceJID withAddress:address error:nil];
 	}
 	
@@ -664,29 +667,29 @@
 
 - (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender willSendP2PFeatures:(NSXMLElement *)streamFeatures
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveP2PFeatures:(NSXMLElement *)streamFeatures
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	return NO;
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	NSString *msgBody = [[[message elementForName:@"body"] stringValue] stringByTrimming];
 	if ([msgBody length] > 0)
@@ -707,17 +710,17 @@
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
 {
-	NSLog(@"%@: %@ %@", THIS_FILE, THIS_METHOD, error);
+	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, error);
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -734,13 +737,15 @@
 
 - (void)dealloc
 {
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
 	[service release];
 	
 	[netService setDelegate:nil];
 	[netService stop];
 	[netService release];
 	
-	[xmppStream removeDelegate:nil];
+	[xmppStream removeDelegate:self];
 	[xmppStream disconnect];
 	[xmppStream release];
 	

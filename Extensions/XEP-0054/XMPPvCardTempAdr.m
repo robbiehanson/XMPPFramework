@@ -9,16 +9,18 @@
 
 
 #import "XMPPvCardTempAdr.h"
+#import "XMPPLogging.h"
 
 #import <objc/runtime.h>
 
-#import "DDLog.h"
+static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 
 @implementation XMPPvCardTempAdr
 
 
-+ (void)initialize {
++ (void)initialize
+{
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
 	// The size of the two classes is expected to be the same.
 	// 
@@ -34,7 +36,9 @@
 	
 	if (superSize != ourSize)
 	{
-		DDLogError(@"Adding instance variables to XMPPvCardTempAdr is not currently supported!");
+		XMPPLogError(@"Adding instance variables to XMPPvCardTempAdr is not currently supported!");
+		
+		[DDLog flushLog];
 		exit(15);
 	}
 }

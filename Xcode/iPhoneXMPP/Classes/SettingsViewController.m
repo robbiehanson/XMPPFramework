@@ -15,15 +15,9 @@ NSString *const kXMPPmyPassword = @"kXMPPmyPassword";
 
 @implementation SettingsViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-      self.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-    }
-    return self;
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Init/dealloc methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)awakeFromNib {
   self.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
@@ -31,67 +25,45 @@ NSString *const kXMPPmyPassword = @"kXMPPmyPassword";
 
 - (void)dealloc
 {
-  [_jidField release];
-  [_passwordField release];
+  [jidField release];
+  [passwordField release];
   [super dealloc];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
-}
-
-#pragma mark - View lifecycle
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-}
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark View lifecycle
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   
-  self.jidField.text = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyJID];
-  self.passwordField.text = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyPassword];
+  jidField.text = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyJID];
+  passwordField.text = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyPassword];
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
-  if (self.jidField.text != nil) {
-    [[NSUserDefaults standardUserDefaults] setObject:self.jidField.text forKey:kXMPPmyJID];
-  } else {
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:kXMPPmyJID];
-  }
-  
-  if (self.passwordField.text != nil) {
-    [[NSUserDefaults standardUserDefaults] setObject:self.passwordField.text forKey:kXMPPmyPassword];
-  } else {
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:kXMPPmyPassword];
-  }
-  
-  [super viewWillDisappear:animated];
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Private
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+- (void)setField:(UITextField *)field forKey:(NSString *)key
 {
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+  if (field.text != nil) 
+  {
+    [[NSUserDefaults standardUserDefaults] setObject:field.text forKey:key];
+  } else {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:key];
+  }
 }
 
-#pragma mark - Actions
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Actions
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (IBAction)done:(id)sender
 {
+  [self setField:jidField forKey:kXMPPmyJID];
+  [self setField:passwordField forKey:kXMPPmyPassword];
+
   [self dismissModalViewControllerAnimated:YES];
 }
 
@@ -100,11 +72,11 @@ NSString *const kXMPPmyPassword = @"kXMPPmyPassword";
   [self done:sender];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Getter/setter methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma mark - Getter/setter methods
-
-
-@synthesize jidField = _jidField;
-@synthesize passwordField = _passwordField;
+@synthesize jidField;
+@synthesize passwordField;
 
 @end

@@ -13,18 +13,16 @@ extern NSString *const kXMPPmyJID;
 extern NSString *const kXMPPmyPassword;
 
 
-@interface SettingsViewController : UIViewController {
-  UITextField *_jidField;
-  UITextField *_passwordField;
+@interface SettingsViewController : UIViewController 
+{
+  UITextField *jidField;
+  UITextField *passwordField;
 }
-
 
 @property (nonatomic,retain) IBOutlet UITextField *jidField;
 @property (nonatomic,retain) IBOutlet UITextField *passwordField;
 
-
 - (IBAction)done:(id)sender;
 - (IBAction)hideKeyboard:(id)sender;
-
 
 @end

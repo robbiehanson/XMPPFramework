@@ -10,11 +10,13 @@
 #import "FBConnect.h"
 #import "XMPPStream.h"
 
-@interface XMPPStreamFacebook : XMPPStream <FBRequestDelegate> {
+@interface XMPPStreamFacebook : XMPPStream <FBRequestDelegate>
+{
     Facebook *facebook;
+	FBRequest *facebookRequest;
 }
 
-@property (nonatomic, readwrite, retain) Facebook *facebook;
+@property (readwrite, retain) Facebook *facebook;
 
 /**
  * returns the correct permissions for xmpp

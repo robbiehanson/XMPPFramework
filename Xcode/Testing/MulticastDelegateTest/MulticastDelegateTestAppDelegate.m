@@ -1,13 +1,15 @@
 #import "MulticastDelegateTestAppDelegate.h"
 #import "Class1.h"
 #import "Class2.h"
+#import <libkern/OSAtomic.h>
+
+#define dispatch_current_queue_label() dispatch_queue_get_label(dispatch_get_current_queue())
 
 @interface MulticastDelegateTestAppDelegate (PrivateAPI)
 
 - (void)testVoidMethods;
 - (void)testAnyBoolMethod;
 - (void)testAllBoolMethod;
-- (void)testForwardingFastPath;
 
 @end
 
@@ -21,19 +23,22 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	multicastDelegate = [[MulticastDelegate alloc] init];
+	multicastDelegate = [[GCDMulticastDelegate alloc] init];
 	
 	del1 = [[Class1 alloc] init];
 	del2 = [[Class2 alloc] init];
 	
-	[multicastDelegate addDelegate:self];
-	[multicastDelegate addDelegate:del1];
-	[multicastDelegate addDelegate:del2];	
+	queue1 = dispatch_queue_create("S", NULL);
+	queue2 = dispatch_queue_create("1", NULL);
+	queue3 = dispatch_queue_create("2", NULL);
+	
+	[multicastDelegate addDelegate:self delegateQueue:queue1];
+	[multicastDelegate addDelegate:del1 delegateQueue:queue2];
+	[multicastDelegate addDelegate:del2 delegateQueue:queue3];
 	
 	[self testVoidMethods];
 	[self testAnyBoolMethod];
 	[self testAllBoolMethod];
-	[self testForwardingFastPath];
 }
 
 - (void)testVoidMethods
@@ -54,15 +59,39 @@
 	SEL selector = @selector(shouldSing);
 	BOOL result = NO;
 	
-	MulticastDelegateEnumerator *delegateEnum = [multicastDelegate delegateEnumerator];
-	id delegate;
+	GCDMulticastDelegateEnumerator *delegateEnum = [multicastDelegate delegateEnumerator];
 	
-	while(!result && (delegate = [delegateEnum nextDelegateForSelector:selector]))
+	dispatch_group_t delGroup = dispatch_group_create();
+	dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+	
+	id del;
+	dispatch_queue_t dq;
+	
+	while ([delegateEnum getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 	{
-		result = [delegate shouldSing];
+		dispatch_group_async(delGroup, dq, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			if ([del shouldSing])
+			{
+				dispatch_semaphore_signal(semaphore);
+			}
+			
+			[pool drain];
+		});
 	}
 	
-	NSLog(@"%@ = %@", NSStringFromSelector(selector), (result ? @"YES" : @"NO"));
+	dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
+	
+	if (dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW) == 0)
+		result = YES;
+	else
+		result = NO;
+	
+	dispatch_release(delGroup);
+	dispatch_release(semaphore);
+	
+	NSLog(@"%@ (ANY) = %@", NSStringFromSelector(selector), (result ? @"YES" : @"NO"));
 }
 
 - (void)testAllBoolMethod
@@ -74,23 +103,39 @@
 	SEL selector = @selector(shouldDance);
 	BOOL result = YES;
 	
-	MulticastDelegateEnumerator *delegateEnum = [multicastDelegate delegateEnumerator];
-	id delegate;
+	GCDMulticastDelegateEnumerator *delegateEnum = [multicastDelegate delegateEnumerator];
 	
-	while(result && (delegate = [delegateEnum nextDelegateForSelector:selector]))
+	int32_t total = (int32_t)[delegateEnum countForSelector:selector];
+	
+	dispatch_group_t delGroup = dispatch_group_create();
+	__block int32_t value = 0;
+	
+	id del;
+	dispatch_queue_t dq;
+	
+	while ([delegateEnum getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 	{
-		result = [delegate shouldDance];
+		dispatch_group_async(delGroup, dq, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			if ([del shouldDance])
+			{
+				OSAtomicIncrement32(&value);
+			}
+			
+			[pool drain];
+		});
 	}
 	
-	NSLog(@"%@ = %@", NSStringFromSelector(selector), (result ? @"YES" : @"NO"));
-}
-
-- (void)testForwardingFastPath
-{
-	// We are testing the forwardingTargetForSelector method in MulticastDelegate.
-	// Only a single delegate should implement the fastTrack method.
+	dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
+	OSMemoryBarrier();
 	
-	[multicastDelegate fastTrack];
+	if (OSAtomicCompareAndSwap32(total, total, &value))
+		result = YES;
+	else
+		result = NO;
+	
+	NSLog(@"%@ (ALL) = %@", NSStringFromSelector(selector), (result ? @"YES" : @"NO"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,17 +144,17 @@
 
 - (void)didSomething
 {
-	NSLog(@"Self: didSomething");
+	NSLog(@"Self(%s)  : didSomething", dispatch_current_queue_label());
 }
 
 - (void)didSomethingElse:(BOOL)flag
 {
-	NSLog(@"Self: didSomethingElse:%@", (flag ? @"YES" : @"NO"));
+	NSLog(@"Self(%s)  : didSomethingElse:%@", dispatch_current_queue_label(), (flag ? @"YES" : @"NO"));
 }
 
 - (void)foundString:(NSString *)str
 {
-	NSLog(@"Self: foundString:\"%@\"", str);
+	NSLog(@"Self(%s)  : foundString:\"%@\"", dispatch_current_queue_label(), str);
 	
 //	[multicastDelegate removeDelegate:self];
 //	[multicastDelegate removeDelegate:del2];
@@ -117,30 +162,30 @@
 
 - (void)foundString:(NSString *)str andNumber:(NSNumber *)num
 {
-	NSLog(@"Self: foundString:\"%@\" andNumber:%@", str, num);
+	NSLog(@"Self(%s)  : foundString:\"%@\" andNumber:%@", dispatch_current_queue_label(), str, num);
 }
 
 - (BOOL)shouldSing
 {
 	BOOL answer = NO;
 	
-	NSLog(@"Self: shouldSing: returning %@", (answer ? @"YES" : @"NO"));
+	NSLog(@"Self(%s)  : shouldSing: returning %@", dispatch_current_queue_label(), (answer ? @"YES" : @"NO"));
 	
 	return answer;
 }
 
 - (BOOL)shouldDance
 {
-	BOOL answer = YES;
+	BOOL answer = NO;
 	
-	NSLog(@"Self: shouldDance: returning %@", (answer ? @"YES" : @"NO"));
+	NSLog(@"Self(%s)  : shouldDance: returning %@", dispatch_current_queue_label(), (answer ? @"YES" : @"NO"));
 	
 	return answer;
 }
 
 - (void)fastTrack
 {
-	NSLog(@"Self: fastTrack");
+	NSLog(@"Self(%s)  : fastTrack", dispatch_current_queue_label());
 }
 
 @end

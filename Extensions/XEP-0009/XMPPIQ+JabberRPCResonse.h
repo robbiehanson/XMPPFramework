@@ -3,7 +3,6 @@
 //  XEP-0009
 //
 //  Created by Eric Chamberlain on 5/25/10.
-//  Copyright 2010 RF.com. All rights reserved.
 //
 
 #import "XMPPIQ.h"

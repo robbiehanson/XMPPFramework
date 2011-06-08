@@ -6,11 +6,22 @@
 //
 
 #import "XMPPStreamFacebook.h"
+#import "XMPPInternal.h"
+#import "XMPPLogging.h"
+#import "GCDAsyncSocket.h"
+#import "NSData+XMPP.h"
+#import "NSXMLElement+XMPP.h"
 
-#import "AsyncSocket.h"
-#import "DDLog.h"
-#import "NSDataAdditions.h"
-#import "NSXMLElementAdditions.h"
+/**
+ * Seeing a return statements within an inner block
+ * can sometimes be mistaken for a return point of the enclosing method.
+ * This makes inline blocks a bit easier to read.
+**/
+#define return_from_block  return
+
+// Log levels: off, error, warn, info, verbose
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
+
 
 @interface XMPPXFacebookPlatformAuthentication : NSObject
 {
@@ -35,179 +46,299 @@
 
 @end 
 
+#pragma mark -
 
 @implementation XMPPStreamFacebook
 
-- (void)dealloc {
-    [facebook release];
-    [super dealloc];
+@dynamic facebook;
+
+- (Facebook *)facebook
+{
+	if (dispatch_get_current_queue() == xmppQueue)
+	{
+		return facebook;
+	}
+	else
+	{
+		__block Facebook *result;
+		
+		dispatch_sync(xmppQueue, ^{
+			result = [facebook retain];
+		});
+		
+		return [result autorelease];
+	}
 }
 
-#pragma mark -
+- (void)setFacebook:(Facebook *)newFacebook
+{
+	dispatch_block_t block = ^{
+		
+		if (facebook != newFacebook)
+		{
+			[facebook release];
+			facebook = [newFacebook retain];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
+}
+
+- (void)dealloc
+{
+	[facebook release];
+	[super dealloc];
+}
+
 #pragma mark Public class methods
 
-+ (NSArray *)permissions {
-    return [NSArray arrayWithObjects:  
-            @"offline_access", 
-            @"xmpp_login",
-            nil];
++ (NSArray *)permissions
+{
+	return [NSArray arrayWithObjects:@"offline_access", @"xmpp_login", nil];
 }
 
-#pragma mark -
 #pragma mark Public instance methods
 
 /**
+ * This method checks the stream features of the connected server to
+ * determine if X-FACEBOOK-PLATFORM authentication is supported.
+ * If we are not connected to a server, this method simply returns NO.
+ *
+ * This is the preferred authentication technique, and will be used if
+ * the server supports it.
+**/
+- (BOOL)supportsXFacebookPlatform
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		
+		// The root element can be properly queried for authentication mechanisms anytime after the
+		// stream:features are received, and TLS has been setup (if required)
+		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *mech = [features elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+			
+			NSArray *mechanisms = [mech elementsForName:@"mechanism"];
+			
+			for (NSXMLElement *mechanism in mechanisms)
+			{
+				if ([[mechanism stringValue] isEqualToString:@"X-FACEBOOK-PLATFORM"])
+				{
+					result = YES;
+					break;
+				}
+			}
+			
+			[pool drain];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+/**
  * This method attemts to sign-in to Facebook using the access token.
- **/
+**/
 - (BOOL)authenticateWithAppId:(NSString *)appId 
                   accessToken:(NSString *)accessToken 
-                        error:(NSError **)errPtr {
-    // hard coding expiration date, because we use offline_access in the permissions
-    return [self authenticateWithAppId:appId 
-                           accessToken:accessToken 
-                        expirationDate:[NSDate distantFuture] 
-                                 error:errPtr];
+                        error:(NSError **)errPtr
+{
+	// Hard coding expiration date, because we use offline_access in the permissions
+	return [self authenticateWithAppId:appId 
+	                       accessToken:accessToken 
+	                    expirationDate:[NSDate distantFuture] 
+	                             error:errPtr];
 }
 
 - (BOOL)authenticateWithAppId:(NSString *)appId 
                   accessToken:(NSString *)accessToken 
                expirationDate:(NSDate *)expirationDate 
-                        error:(NSError **)errPtr {
-	if (state != STATE_CONNECTED)
-	{
-		if (errPtr)
+                        error:(NSError **)errPtr
+{
+	XMPPLogTrace();
+	
+	__block BOOL result = YES;
+	__block NSError *err = nil;
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		if (state != STATE_XMPP_CONNECTED)
 		{
 			NSString *errMsg = @"Please wait until the stream is connected.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
-			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+			
+			[err retain];
+			[pool drain];
+			
+			result = NO;
+			return_from_block;
 		}
-		return NO;
-	}
-    
-    if (![self supportsXFacebookPlatform])
-	{
-		if (errPtr)
+		
+		if (![self supportsXFacebookPlatform])
 		{
 			NSString *errMsg = @"The server does not support X-FACEBOOK-PLATFORM authentication.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
-			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+				
+			[err retain];
+			[pool drain];
 			
+			result = NO;
+			return_from_block;
 		}
-		return NO;
-	}
-    
-    if (accessToken == nil || expirationDate == nil)
-	{
-		if (errPtr)
+		
+		if (accessToken == nil || expirationDate == nil)
 		{
-			NSString *errMsg = @"You must get the facebook accessToken and expirationDate before calling authenticateWithAccessToken:expirationDate:error:.";
+			NSString *errMsg = @"Facebook accessToken and expirationDate required.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
-			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+			
+			[err retain];
+			[pool drain];
+			
+			result = NO;
+			return_from_block;
 		}
-		return NO;
-	}
+		
+		[facebook release];
+		
+		facebook = [[Facebook alloc] initWithAppId:appId];
+		facebook.accessToken = accessToken; 
+		facebook.expirationDate = expirationDate;
+		
+		// Facebook uses NSURLConnection which is dependent on a RunLoop.
+		// So we need to use the xmppUtilityThread.
+		
+		[self performSelector:@selector(sendFacebookRequest:)
+		            onThread:xmppUtilityThread
+		          withObject:facebook
+		       waitUntilDone:NO];
+		
+		// Update state
+		state = STATE_XMPP_AUTH_1;
+		
+		[pool drain];
+	};
     
-    self.facebook = [[[Facebook alloc] initWithAppId:appId] autorelease];
-    self.facebook.accessToken = accessToken; 
-    self.facebook.expirationDate = expirationDate;
-    
-    [self.facebook requestWithMethodName:@"auth.promoteSession" 
-                               andParams:[NSMutableDictionary dictionaryWithCapacity:3] 
-                           andHttpMethod:@"GET" 
-                             andDelegate:self]; 
-    return YES;
+	
+    if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	if (errPtr)
+		*errPtr = [err autorelease];
+	else
+		[err release];
+	
+	return result;
 }
 
-- (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr {
-	if (state != STATE_CONNECTED)
-	{
-		if (errPtr)
+- (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr
+{
+	XMPPLogTrace();
+	
+	__block BOOL result = YES;
+	__block NSError *err = nil;
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		if (state != STATE_XMPP_CONNECTED)
 		{
 			NSString *errMsg = @"Please wait until the stream is connected.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
-			*errPtr = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+			
+			[err retain];
+			[pool drain];
+			
+			result = NO;
+			return_from_block;
 		}
-		return NO;
-	}
-    
-	if (self.facebook != nil && [self supportsXFacebookPlatform]) {
-		NSString *auth = @"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='X-FACEBOOK-PLATFORM'/>";
 		
-		NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
-		
-		DDLogSend(@"SEND: %@", auth);
-		numberOfBytesSent += [outgoingData length];
-		
-		[asyncSocket writeData:outgoingData
-				   withTimeout:TIMEOUT_WRITE
-						   tag:TAG_WRITE_STREAM];
-		
-		// Save authentication information
-		[tempPassword release];
-		tempPassword = [password copy];
-		
-		// Update state
-		state = STATE_AUTH_1;
-        return YES;
-	} else {
-        return [super authenticateWithPassword:password error:errPtr];
-    }
-}
-
-/**
- * This method checks the stream features of the connected server to
- determine if X-FACEBOOK-PLATFORM authentication is supported.
- * If we are not connected to a server, this method simply returns NO.
- *
- * This is the preferred authentication technique, and will be used if
- the server supports it.
- **/
-- (BOOL)supportsXFacebookPlatform
-{
-	//return NO;
-	// The root element can be properly queried for authentication mechanisms anytime after the
-	// stream:features are received, and TLS has been setup (if required)
-	if (state > STATE_STARTTLS)
-	{
-		NSXMLElement *features = [rootElement
-								  elementForName:@"stream:features"];
-		NSXMLElement *mech = [features elementForName:@"mechanisms"
-												xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-		
-		NSArray *mechanisms = [mech elementsForName:@"mechanism"];
-		
-		for (NSXMLElement *mechanism in mechanisms)
+		if (facebook != nil && [self supportsXFacebookPlatform])
 		{
-			if ([[mechanism stringValue] isEqualToString:@"X-FACEBOOK-PLATFORM"])
-			{
-				return YES;
-			}
+			NSString *auth = @"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='X-FACEBOOK-PLATFORM'/>";
+			
+			NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
+			
+			XMPPLogSend(@"SEND: %@", auth);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
+			           withTimeout:TIMEOUT_XMPP_WRITE
+			                   tag:TAG_XMPP_WRITE_STREAM];
+			
+			// Save authentication information
+			[tempPassword release];
+			tempPassword = [password copy];
+			
+			// Update state
+			state = STATE_XMPP_AUTH_1;
 		}
-	}
-	return NO; 
+		else
+		{
+			result = [super authenticateWithPassword:password error:&err];
+		}
+		
+		[err retain];
+		[pool drain];
+	};
+	
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	if (errPtr)
+		*errPtr = [err autorelease];
+	else
+		[err release];
+	
+	return result;
 }
 
-#pragma mark -
 #pragma mark Private instance methods
 
 - (void)handleAuth1:(NSXMLElement *)response
 {
-	if (self.facebook != nil && [self supportsXFacebookPlatform]) {
-		DDLogSend(@"SEND: X-FACEBOOK-PLATFORM");
-		if(![[response name] isEqualToString:@"challenge"])
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
+	if (facebook != nil && [self supportsXFacebookPlatform])
+	{
+		if (![[response name] isEqualToString:@"challenge"])
 		{
 			// Revert back to connected state (from authenticating state)
-			state = STATE_CONNECTED;
+			state = STATE_XMPP_CONNECTED;
 			
 			[multicastDelegate xmppStream:self didNotAuthenticate:response];
 		}
 		else
 		{
-			XMPPXFacebookPlatformAuthentication *auth = [[XMPPXFacebookPlatformAuthentication alloc] initWithChallenge:response];
+			XMPPXFacebookPlatformAuthentication *auth;
+			auth = [[XMPPXFacebookPlatformAuthentication alloc] initWithChallenge:response];
             
             [auth setAccessToken:facebook.accessToken];
             [auth setSessionSecret:tempPassword];
@@ -219,66 +350,130 @@
 			NSString *outgoingStr = [cr compactXMLString];
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
-			DDLogSend(@"SEND: %@", outgoingStr);
+			XMPPLogSend(@"SEND: %@", outgoingStr);
 			numberOfBytesSent += [outgoingData length];
 			
 			[asyncSocket writeData:outgoingData
-					   withTimeout:TIMEOUT_WRITE
-							   tag:TAG_WRITE_STREAM];
+			           withTimeout:TIMEOUT_XMPP_WRITE
+			                   tag:TAG_XMPP_WRITE_STREAM];
 			
-            // Release unneeded resources
+			// Release unneeded resources
 			[auth release];
 			[tempPassword release]; tempPassword = nil;
             
 			// Update state
-			state = STATE_AUTH_3;
+			state = STATE_XMPP_AUTH_3;
 		}
-	} else {
-        [super handleAuth1:response];
+	}
+	else
+	{
+		[super handleAuth1:response];
     }
-}    
+}
 
-#pragma mark -
-#pragma mark FBRequestDelegate
+- (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
+{
+	[facebookRequest release];
+	facebookRequest = nil;
+	
+	[facebook release];
+	facebook = nil;
+}
+
+#pragma mark FBRequest
+
+- (void)sendFacebookRequest:(Facebook *)fb
+{
+	// 
+	// This method is run on the xmppUtilityThread.
+	// 
+	
+	FBRequest *fbRequest = [fb requestWithMethodName:@"auth.promoteSession"
+	                                       andParams:[NSMutableDictionary dictionaryWithCapacity:3]
+	                                   andHttpMethod:@"GET"
+	                                     andDelegate:self];
+	
+	dispatch_async(xmppQueue, ^{
+		
+		[facebookRequest release];
+		facebookRequest = [fbRequest retain];
+	});
+}
 
 /**
  * Called when an error prevents the request from completing successfully.
- */
-- (void)request:(FBRequest*)request didFailWithError:(NSError*)error{
-    
-    // Revert back to connected state (from authenticating state)
-    state = STATE_CONNECTED;
-    
-    [multicastDelegate xmppStream:self didNotAuthenticate:nil];
+**/
+- (void)request:(FBRequest *)sender didFailWithError:(NSError *)error
+{
+	XMPPLogTrace();
+	
+	// 
+    // This method is invoked on the xmppUtilityThread.
+	// 
+	
+	dispatch_async(xmppQueue, ^{
+    	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		if (sender == facebookRequest)
+		{
+			XMPPLogWarn(@"%@: Facebook request failed - error: %@", THIS_FILE, error);
+			
+			// Revert back to connected state (from authenticating state)
+			state = STATE_XMPP_CONNECTED;
+			
+			[multicastDelegate xmppStream:self didNotAuthenticate:nil];
+		}
+		
+		[pool drain];
+	});
 }
 
 /**
  * Called when a request returns and its response has been parsed into an object.
- * The resulting object may be a dictionary, an array, a string, or a number, depending
- * on thee format of the API response.
- */
-- (void)request:(FBRequest*)request didLoad:(id)result {
-    if ([result isKindOfClass:[NSData class]]) {
+ * The resulting object may be a dictionary, an array, a string, or a number,
+ * depending on thee format of the API response.
+**/
+- (void)request:(FBRequest *)sender didLoad:(id)result
+{
+	XMPPLogTrace();
+	
+	// 
+    // This method is invoked on the xmppUtilityThread.
+	// 
+	
+    if ([result isKindOfClass:[NSData class]])
+	{
         NSString *resultStr = [[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding] autorelease];
-        
-        // finish authenticating
-        NSError *error;
-        if (![self authenticateWithPassword:[resultStr stringByReplacingOccurrencesOfString:@"\"" 
-                                                                                 withString:@""] error:&error]) {
-            DDLogError(@"authenticateWithPassword: %@ error: %@",resultStr,error);
-            
-            // Revert back to connected state (from authenticating state)
-            state = STATE_CONNECTED;
-            
-            [multicastDelegate xmppStream:self didNotAuthenticate:nil];
-        }        
+		NSString *pwd = [resultStr stringByReplacingOccurrencesOfString:@"\"" withString:@""];
+		
+		dispatch_async(xmppQueue, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			if (sender == facebookRequest)
+			{
+				// Revert back to connected state (from authenticating state)
+				state = STATE_XMPP_CONNECTED;
+				
+				// Finish authenticating
+				
+				NSError *error = nil;
+				
+				if (![self authenticateWithPassword:pwd error:&error])
+				{
+					XMPPLogWarn(@"%@: Facebook auth failed - resultStr(%@) error: %@", THIS_FILE, resultStr, error);
+					
+					[multicastDelegate xmppStream:self didNotAuthenticate:nil];
+				}
+			}
+			
+			[pool drain];
+		});
     }
 }
-
+  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Getters/setters
-
-@synthesize facebook;   
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @end
 
@@ -286,7 +481,7 @@
 
 - (id)initWithChallenge:(NSXMLElement *)challenge
 {
-    if(self = [super init])
+    if ((self = [super init]))
     {
 		// Convert the base 64 encoded data into a string
 		NSData *base64Data = [[challenge stringValue]
@@ -296,7 +491,7 @@
         NSString *authStr = [[[NSString alloc] initWithData:decodedData 
                                                    encoding:NSUTF8StringEncoding] autorelease];
 		
-        DDLogVerbose(@"decoded challenge: %@", authStr);
+        XMPPLogVerbose(@"XMPPXFacebookPlatformAuthentication: decoded challenge: %@", authStr);
 		
         // Extract all the key=value pairs, and put them in a dictionary for easy lookup
         NSMutableDictionary *auth = [NSMutableDictionary dictionaryWithCapacity:3];
@@ -373,8 +568,8 @@
     NSString* sigMD5 =  [[[sig dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
     [buffer appendFormat:@"sig=%@", sigMD5];
 	
-    DDLogVerbose(@"sig for facebook: %@", sig);
-    DDLogVerbose(@"response for facebook: %@", buffer);
+    XMPPLogVerbose(@"XMPPXFacebookPlatformAuthentication: sig for facebook: %@", sig);
+    XMPPLogVerbose(@"XMPPXFacebookPlatformAuthentication: response for facebook: %@", buffer);
 	
     NSData *utf8data = [buffer dataUsingEncoding:NSUTF8StringEncoding];
 	

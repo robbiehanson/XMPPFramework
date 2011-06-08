@@ -11,10 +11,24 @@
 @protocol XMPPCapabilitiesStorage;
 @protocol XMPPCapabilitiesDelegate;
 
-
+/**
+ * This class provides support for capabilities discovery.
+ * 
+ * It collects our capabilities and publishes them according to the XEP by:
+ * - Injecting the <c/> element into outgoing presence stanzas
+ * - Responding to incoming disco#info queries
+ * 
+ * It also collects the capabilities of available resources,
+ * provides a mechanism to persistently store XEP-0115 hased caps,
+ * and makes available a simple API to query (disco#info) a resource or server.
+**/
 @interface XMPPCapabilities : XMPPModule
 {
 	id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
+	
+	NSXMLElement *myCapabilitiesQuery; // Full list of capabilites <query/>
+	NSXMLElement *myCapabilitiesC;     // Hashed element <c/>
+	BOOL collectingMyCapabilities;
 	
 	NSMutableSet *discoRequestJidSet;
 	NSMutableDictionary *discoRequestHashDict;
@@ -26,11 +40,10 @@
 	NSTimeInterval capabilitiesRequestTimeout;
 	
 	NSMutableSet *timers;
-	
-	NSString *lastHash;
 }
 
-- (id)initWithStream:(XMPPStream *)xmppStream capabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
+- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
+- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 @property (nonatomic, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
 
@@ -46,7 +59,7 @@
  * 
  * The default value is YES.
 **/
-@property (nonatomic, assign) BOOL autoFetchHashedCapabilities;
+@property (assign) BOOL autoFetchHashedCapabilities;
 
 /**
  * Defines fetching behavior for entities NOT using the XEP-0115 standard.
@@ -62,17 +75,30 @@
  * 
  * You may always fetch the capabilities (if/when needed) via the fetchCapabilitiesForJID method.
 **/
-@property (nonatomic, assign) BOOL autoFetchNonHashedCapabilities;
+@property (assign) BOOL autoFetchNonHashedCapabilities;
 
 /**
  * Manually fetch the capabilities for the given jid.
  * 
- * The jid must be a full jid (includes resource).
- * If there is an existing disco request associated with the current jid, this method does nothing.
+ * The jid must be a full jid (user@domain/resource) or a domain JID (domain without user or resource).
+ * You would pass a full jid if you wanted to know the capabilities of a particular user's resource.
+ * You would pass a domain jid if you wanted to know the capabilities of a particular server.
  * 
- * When the capabilities are received, the xmppCapabilities:didDiscoverCapabilities: delegate method is invoked.
+ * If there is an existing disco request associated with the given jid, this method does nothing.
+ * 
+ * When the capabilities are received,
+ * the xmppCapabilities:didDiscoverCapabilities:forJID: delegate method is invoked.
 **/
 - (void)fetchCapabilitiesForJID:(XMPPJID *)jid;
+
+/**
+ * This module automatically collects my capabilities.
+ * See the xmppCapabilities:collectingMyCapabilities: delegate method.
+ * 
+ * The design of XEP-115 is such that capabilites are expected to remain rather static.
+ * However, if the capabilities change, this method may be used to perform a manual update.
+**/
+- (void)recollectMyCapabilities;
 
 @end
 
@@ -83,8 +109,6 @@
 @protocol XMPPCapabilitiesStorage <NSObject>
 @required
 
-@property (nonatomic, assign) XMPPCapabilities *parent;
-
 // 
 // 
 // -- PUBLIC METHODS --
@@ -94,21 +118,27 @@
 /**
  * Returns whether or not we know the capabilities for a given jid.
  * 
- * The jid may or may not be associated with a capabilities hash.
+ * The stream parameter is optional.
+ * If given, the jid must have been registered via the given stream.
+ * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid;
-
-/**
- * Returns the capabilities for the given jid.
- * The returned element is the <query/> element response to a disco#info request.
-**/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid;
+- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Returns the capabilities for the given jid.
  * The returned element is the <query/> element response to a disco#info request.
  * 
- * The given jid must be a full jid (must contain a resource).
+ * The stream parameter is optional.
+ * If given, the jid must have been registered via the given stream.
+ * Otherwise it will match the given jid from any stream this storage instance is managing.
+**/
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+
+/**
+ * Returns the capabilities for the given jid.
+ * The returned element is the <query/> element response to a disco#info request.
+ * 
+ * The given jid should be a full jid (user@domain/resource) or a domin JID (domain without user or resource).
  * 
  * If the jid has broadcast capabilities via the legacy format of XEP-0115,
  * the extension list may optionally be retrieved via the ext parameter.
@@ -123,16 +153,39 @@
  * 
  * You may pass nil for extPtr if you don't care about the legacy attributes,
  * or you could simply use the capabilitiesForJID: method above.
+ * 
+ * The stream parameter is optional.
+ * If given, the jid must have been registered via the given stream.
+ * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr;
+- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr xmppStream:(XMPPStream *)stream;
 
 // 
 // 
 // -- PRIVATE METHODS --
 // 
-// These methods are designed to be used only by the XMPPCapabilities class.
+// These methods are designed to be used ONLY by the XMPPCapabilities class.
 // 
 // 
+
+/**
+ * Configures the capabilities storage class, passing it's parent and parent's dispatch queue.
+ * 
+ * This method is called by the init methods of the XMPPCapabilities class.
+ * This method is designed to inform the storage class of it's parent
+ * and of the dispatch queue the parent will be operating on.
+ * 
+ * It is strongly recommended the storage class operate on the same queue as it's parent
+ * as the majority of the time it will be getting called by the parent.
+ * Thus if both are operating on the same queue, the combination can run faster.
+ * 
+ * This method should return YES if it was configured properly.
+ * A storage class is generally meant to be used once, and only with a single parent at a time.
+ * Thus if you attempt to use a single storage class with multiple parents, this method may return NO.
+ * The XMPPCapabilites class is configured to ignore the passed
+ * storage class in it's init method if this method returns NO.
+**/
+- (BOOL)configureWithParent:(XMPPCapabilities *)aParent queue:(dispatch_queue_t)queue;
 
 /**
  * Sets metadata for the given jid.
@@ -160,6 +213,7 @@
                        hash:(NSString *)hash
                   algorithm:(NSString *)hashAlg
                      forJID:(XMPPJID *)jid
+                 xmppStream:(XMPPStream *)stream
       andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr;
 
 /**
@@ -168,7 +222,10 @@
  * If the jid is not associated with a capabilities hash, this method should return NO.
  * Otherwise it should return YES, and set the corresponding variables.
 **/
-- (BOOL)getCapabilitiesHash:(NSString **)hashPtr algorithm:(NSString **)hashAlgPtr forJID:(XMPPJID *)jid;
+- (BOOL)getCapabilitiesHash:(NSString **)hashPtr
+                  algorithm:(NSString **)hashAlgPtr
+                     forJID:(XMPPJID *)jid
+                 xmppStream:(XMPPStream *)stream;
 
 /**
  * Clears any associated hash from a jid.
@@ -177,7 +234,7 @@
  * This method should not clear the actual capabilities information itself.
  * It should simply unlink the connection between the jid and the capabilities.
 **/
-- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid;
+- (void)clearCapabilitiesHashAndAlgorithmForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Gets the metadata for the given jid.
@@ -191,7 +248,8 @@
                          ext:(NSString **)extPtr
                         hash:(NSString **)hashPtr
                    algorithm:(NSString **)hashAlgPtr
-                      forJID:(XMPPJID *)jid;
+                      forJID:(XMPPJID *)jid
+                  xmppStream:(XMPPStream *)stream;
 
 /**
  * Sets the capabilities associated with a given hash.
@@ -224,7 +282,7 @@
  * these capabilities should not be persisted between multiple sessions/streams.
  * See the various clear methods below.
 **/
-- (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid;
+- (void)setCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Marks the disco fetch request as failed so we know not to bother trying again.
@@ -233,12 +291,12 @@
  * It should be cleared when we go unavailable or offline, or if the given jid goes unavailable.
  * See the various clear methods below.
 **/
-- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid;
+- (void)setCapabilitiesFetchFailedForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * This method is called when we go unavailable or offline.
  * 
- * This method should clear all metadata (node, ver, ext, hash ,algorithm, failed) from all jids in the roster.
+ * This method should clear all metadata (node, ver, ext, hash, algorithm, failed) from all jids in the roster.
  * All jids should be unlinked from associated capabilities.
  * 
  * If the associated capabilities are persistent, they should not be cleared.
@@ -247,7 +305,7 @@
  * Non persistent capabilities (those not associated with a hash)
  * should be cleared at this point as they will no longer be linked to any users.
 **/
-- (void)clearAllNonPersistentCapabilities;
+- (void)clearAllNonPersistentCapabilitiesForXMPPStream:(XMPPStream *)stream;
 
 /**
  * This method is called when the given jid goes unavailable.
@@ -260,7 +318,7 @@
  * 
  * Non persistent capabilities (those not associated with a hash) should be cleared.
 **/
-- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid;
+- (void)clearNonPersistentCapabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end
 
@@ -273,9 +331,13 @@
 
 /**
  * Use this delegate method to add specific capabilities.
- * This method may be invoked prior to sending a disco response, or prior to sending a presence element.
+ * This method in invoked automatically when the stream is connected for the first time,
+ * or if the module detects an outgoing presence element and my capabilities haven't been collected yet
+ * 
+ * The design of XEP-115 is such that capabilites are expected to remain rather static.
+ * However, if the capabilities change, the recollectMyCapabilities method may be used to perform a manual update.
 **/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query;
+- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query;
 
 /**
  * Invoked when capabilities have been discovered for an available JID.

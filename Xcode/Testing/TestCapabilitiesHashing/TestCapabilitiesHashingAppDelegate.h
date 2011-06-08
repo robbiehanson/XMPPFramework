@@ -5,9 +5,12 @@
 #import <UIKit/UIKit.h>
 #import "TestCapabilitiesHashingViewController.h"
 
+@class XMPPCapabilities;
 
 @interface TestCapabilitiesHashingAppDelegate : NSObject <UIApplicationDelegate>
 {
+	XMPPCapabilities *capabilities;
+	
 	UIWindow *window;
 	TestCapabilitiesHashingViewController *viewController;
 }
@@ -23,9 +26,12 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class XMPPCapabilities;
 
 @interface TestCapabilitiesHashingAppDelegate : NSObject <NSApplicationDelegate>
 {
+	XMPPCapabilities *capabilities;
+	
     NSWindow *window;
 }
 

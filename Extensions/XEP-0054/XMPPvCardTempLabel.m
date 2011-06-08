@@ -9,10 +9,11 @@
 
 
 #import "XMPPvCardTempLabel.h"
+#import "XMPPLogging.h"
 
 #import <objc/runtime.h>
 
-#import "DDLog.h"
+static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 
 @implementation XMPPvCardTempLabel
@@ -34,7 +35,9 @@
 	
 	if (superSize != ourSize)
 	{
-		DDLogError(@"Adding instance variables to XMPPvCardTempLabel is not currently supported!");
+		XMPPLogError(@"Adding instance variables to XMPPvCardTempLabel is not currently supported!");
+		
+		[DDLog flushLog];
 		exit(15);
 	}
 }

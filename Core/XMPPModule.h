@@ -1,30 +1,39 @@
 #import <Foundation/Foundation.h>
+#import "GCDMulticastDelegate.h"
 
-#import "MulticastDelegate.h"
-#import "XMPPStream.h"
-
+@class XMPPStream;
 
 /**
  * XMPPModule is the base class that all extensions/modules inherit.
  * They automatically get:
  * 
- * - An xmppStream variable, with the corresponding property.
- * - A multicastDelegate that automatically invokes added delegates.
+ * - A dispatch queue.
+ * - A multicast delegate that automatically invokes added delegates.
  * 
- * The module also automatically registers/unregisters itself with the xmpp stream.
+ * The module also automatically registers/unregisters itself with the
+ * xmpp stream during the activate/deactive methods.
 **/
-@interface XMPPModule : NSObject <XMPPStreamDelegate>
+@interface XMPPModule : NSObject
 {
 	XMPPStream *xmppStream;
 	
+	dispatch_queue_t moduleQueue;
 	id multicastDelegate;
 }
 
-- (id)initWithStream:(XMPPStream *)xmppStream;
+@property (readonly) dispatch_queue_t moduleQueue;
+@property (readonly) XMPPStream *xmppStream;
 
-@property (nonatomic, readonly) XMPPStream *xmppStream;
+- (id)init;
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue;
 
-- (void)addDelegate:(id)delegate;
+- (BOOL)activate:(XMPPStream *)xmppStream;
+- (void)deactivate;
+
+- (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
+- (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate;
+
+- (NSString *)moduleName;
 
 @end

@@ -3,12 +3,11 @@
 //  XEP-0009
 //
 //  Created by Eric Chamberlain on 5/16/10.
-//  Copyright 2010 RF.com. All rights reserved.
 //
 
 #import "XMPPIQ+JabberRPC.h"
 
-#import "NSDataAdditions.h"
+#import "NSData+XMPP.h"
 #import "XMPP.h"
 
 

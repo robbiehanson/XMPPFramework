@@ -33,7 +33,8 @@
 
 - (void)awakeFromNib
 {
-	[xmppStream addDelegate:self];
+	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	
 	
 	[messageView setString:@""];
 	
@@ -115,7 +116,7 @@
 	}
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	[messageField setEnabled:NO];
 }

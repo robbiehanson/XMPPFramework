@@ -1,6 +1,6 @@
 #import "XMPPElement.h"
 #import "XMPPJID.h"
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 
 
 @implementation XMPPElement

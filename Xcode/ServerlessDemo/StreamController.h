@@ -1,12 +1,11 @@
 #import <Foundation/Foundation.h>
 
-@class AsyncSocket;
+@class GCDAsyncSocket;
 @class Service;
 
 @interface StreamController : NSObject
 {
-	AsyncSocket *listeningSocket;
-	NSMutableArray *sockets;
+	GCDAsyncSocket *listeningSocket;
 	NSMutableArray *xmppStreams;
 	NSMutableDictionary *serviceDict;
 }

@@ -3,7 +3,6 @@
 //  XEP-0009
 //
 //  Created by Eric Chamberlain on 5/16/10.
-//  Copyright 2010 RF.com. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -17,7 +16,7 @@
  * Creates and returns a new autoreleased XMPPIQ.
  * This is the only method you normally need to call.
  **/
-+(XMPPIQ *)rpcTo:(XMPPJID *)jid methodName:(NSString *)method parameters:(NSArray *)parameters;
++ (XMPPIQ *)rpcTo:(XMPPJID *)jid methodName:(NSString *)method parameters:(NSArray *)parameters;
 
 #pragma mark -
 #pragma mark Element helper methods

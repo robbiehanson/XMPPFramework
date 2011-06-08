@@ -17,8 +17,14 @@
 	NSMutableDictionary *queryIDs;
 }
 
-- (id)initWithStream:(XMPPStream *)xmppStream;
-- (id)initWithStream:(XMPPStream *)xmppStream respondsToQueries:(BOOL)flag;
+/**
+ * Whether or not the module should respond to incoming time queries.
+ * It you create multiple instances of this module, only one instance should respond to queries.
+ * 
+ * It is recommended you set this (if needed) before you activate the module.
+ * The default value is YES.
+**/
+@property (readwrite) BOOL respondsToQueries;
 
 /**
  * Send query to the server or a specific JID.
@@ -46,9 +52,8 @@
 
 /**
  * Extracts the time zone offset from the given response/time element.
- * The time zone offset is given as an NSTimeInterval, reprsenting the number of seconds from GMT.
 **/
-+ (NSTimeInterval)timeZoneOffsetFromResponse:(XMPPIQ *)iq;
++ (NSTimeZone *)timeZoneOffsetFromResponse:(XMPPIQ *)iq;
 
 /**
  * Given the returned time response from a remote party, and the approximate round trip time,
@@ -83,5 +88,7 @@
 
 - (void)xmppTime:(XMPPTime *)sender didReceiveResponse:(XMPPIQ *)iq withRTT:(NSTimeInterval)rtt;
 - (void)xmppTime:(XMPPTime *)sender didNotReceiveResponse:(NSString *)queryID dueToTimeout:(NSTimeInterval)timeout;
+
+// Note: If the xmpp stream is disconnected, no delegate methods will be called, and outstanding queries are forgotten.
 
 @end

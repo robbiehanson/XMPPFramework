@@ -4,7 +4,9 @@
 @class XMPPStream;
 
 
-@interface ChatViewController : UIViewController <UITableViewDelegate, UITextFieldDelegate,
+@interface ChatViewController : UIViewController <UITableViewDelegate,
+                                                  UITextFieldDelegate,
+                                                  NSNetServiceDelegate,
                                                   NSFetchedResultsControllerDelegate>
 {
 	IBOutlet UITextField *textField;

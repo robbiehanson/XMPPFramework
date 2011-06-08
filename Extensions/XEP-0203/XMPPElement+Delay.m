@@ -1,6 +1,6 @@
 #import "XMPPElement+Delay.h"
 #import "XMPPDateTimeProfiles.h"
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 
 
 @implementation XMPPElement (XEP0203)

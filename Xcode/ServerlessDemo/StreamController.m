@@ -1,14 +1,15 @@
 #import "StreamController.h"
 #import "ServerlessDemoAppDelegate.h"
-#import "AsyncSocket.h"
+#import "GCDAsyncSocket.h"
 #import "XMPPStream.h"
 #import "Service.h"
 #import "Message.h"
-#import "NSXMLElementAdditions.h"
-#import "NSStringAdditions.h"
+#import "NSXMLElement+XMPP.h"
+#import "NSString+DDXML.h"
+#import "DDLog.h"
 
-#define THIS_FILE   @"StreamController"
-#define THIS_METHOD NSStringFromSelector(_cmd)
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 @implementation StreamController
@@ -36,7 +37,6 @@ static StreamController *sharedInstance;
 	
 	if((self = [super init]))
 	{
-		sockets     = [[NSMutableArray alloc] initWithCapacity:4];
 		xmppStreams = [[NSMutableArray alloc] initWithCapacity:4];
 		serviceDict = [[NSMutableDictionary alloc] initWithCapacity:4];
 	}
@@ -56,13 +56,13 @@ static StreamController *sharedInstance;
 {
 	if (listeningSocket == nil)
 	{
-		listeningSocket = [[AsyncSocket alloc] initWithDelegate:self];
+		listeningSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
 	}
 	
 	NSError *error = nil;
 	if (![listeningSocket acceptOnPort:0 error:&error])
 	{
-		NSLog(@"Error setting up socket: %@", error);
+		DDLogError(@"Error setting up socket: %@", error);
 	}
 }
 
@@ -111,13 +111,13 @@ static StreamController *sharedInstance;
 	
 	if (results == nil)
 	{
-		NSLog(@"Error searching for service with address \"%@\": %@, %@", addrStr, error, [error userInfo]);
+		DDLogError(@"Error searching for service with address \"%@\": %@, %@", addrStr, error, [error userInfo]);
 		
 		return nil;
 	}
 	else if ([results count] == 0)
 	{
-		NSLog(@"Unable to find service with address \"%@\"", addrStr);
+		DDLogWarn(@"Unable to find service with address \"%@\"", addrStr);
 		
 		return nil;
 	}
@@ -145,48 +145,33 @@ static StreamController *sharedInstance;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark AsyncSocket Delegate Methods
+#pragma mark GCDAsyncSocket Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)onSocket:(AsyncSocket *)sock didAcceptNewSocket:(AsyncSocket *)newSocket
+- (void)socket:(GCDAsyncSocket *)listenSock didAcceptNewSocket:(GCDAsyncSocket *)acceptedSock
 {
-	// We don't have access to the socket's connectedAddress yet.
-	// Robbie is planning on addressing this shortcoming.
-	// 
-	// Current Workaround: Wait until the onSocket:didConnectToHost:port: method.
-	
-	[sockets addObject:newSocket];
-}
-
-- (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
-{
-	NSString *addrStr = [sock connectedHost];
+	NSString *addrStr = [acceptedSock connectedHost];
 	
 	Service *service = [self serviceWithAddress:addrStr];
 	if (service)
 	{
-		NSLog(@"Accepting connection from service: %@", service.serviceDescription);
+		DDLogInfo(@"Accepting connection from service: %@", service.serviceDescription);
 		
 		id tag = [self nextXMPPStreamTag];
 		
 		XMPPStream *xmppStream = [[XMPPStream alloc] initP2PFrom:[self myJID]];
 		
-		[xmppStream addDelegate:self];
+		[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
 		xmppStream.tag = tag;
 		
-		[xmppStream connectP2PWithSocket:sock error:nil];
+		[xmppStream connectP2PWithSocket:acceptedSock error:nil];
 		
 		[xmppStreams addObject:xmppStream];
 		[serviceDict setObject:[service objectID] forKey:tag];
-		
-		[sockets removeObject:sock];
 	}
 	else
 	{
-		NSLog(@"Ignoring connection from unknown service (%@)", addrStr);
-		
-		[sock disconnect];
-		[sockets removeObject:sock];
+		DDLogWarn(@"Ignoring connection from unknown service (%@)", addrStr);
 	}
 }
 
@@ -196,29 +181,29 @@ static StreamController *sharedInstance;
 
 - (void)xmppStreamDidConnect:(XMPPStream *)sender
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender willSendP2PFeatures:(NSXMLElement *)streamFeatures
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveP2PFeatures:(NSXMLElement *)streamFeatures
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	return NO;
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	Service *service = [self serviceWithXMPPStream:sender];
 	if (service)
@@ -243,17 +228,17 @@ static StreamController *sharedInstance;
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
 {
-	NSLog(@"%@: %@ %@", THIS_FILE, THIS_METHOD, error);
+	DDLogVerbose(@"%@: %@ %@", THIS_FILE, THIS_METHOD, error);
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
 	[serviceDict removeObjectForKey:sender.tag];
 	[xmppStreams removeObject:sender];

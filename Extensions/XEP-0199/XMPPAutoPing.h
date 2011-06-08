@@ -20,8 +20,8 @@
 	XMPPJID *targetJID;
 	NSString *targetJIDStr;
 	
-	NSDate *lastReceiveTime;
-	NSTimer *pingIntervalTimer;
+	dispatch_time_t lastReceiveTime;
+	dispatch_source_t pingIntervalTimer;
 	BOOL awaitingPingResponse;
 	
 	XMPPPing *xmppPing;
@@ -39,7 +39,7 @@
  * 
  * The default pingInterval is 60 seconds.
 **/
-@property (nonatomic, readwrite) NSTimeInterval pingInterval;
+@property (readwrite) NSTimeInterval pingInterval;
 
 /**
  * How long to wait after sending a ping before timing out.
@@ -52,7 +52,7 @@
  * 
  * The default pingTimeout is 10 seconds.
 **/
-@property (nonatomic, readwrite) NSTimeInterval pingTimeout;
+@property (readwrite) NSTimeInterval pingTimeout;
 
 /**
  * The target to send pings to.
@@ -65,12 +65,12 @@
  * 
  * The default targetJID is nil.
 **/
-@property (nonatomic, readwrite, retain) XMPPJID *targetJID;
+@property (readwrite, retain) XMPPJID *targetJID;
 
 /**
  * The last time data was received from the target.
 **/
-@property (nonatomic, readonly) NSDate *lastReceiveTime;
+@property (readonly) dispatch_time_t lastReceiveTime;
 
 @end
 

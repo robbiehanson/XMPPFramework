@@ -6,11 +6,13 @@
 + (BOOL)validateDomain:(NSString *)domain
 {
 	// Domain is the only required part of a JID
-	if((domain == nil) || ([domain length] == 0)) return NO;
+	if ((domain == nil) || ([domain length] == 0))
+		return NO;
 	
 	// If there's an @ symbol in the domain it probably means user put @ in their username
 	NSRange invalidAtRange = [domain rangeOfString:@"@"];
-	if(invalidAtRange.location != NSNotFound) return NO;
+	if (invalidAtRange.location != NSNotFound)
+		return NO;
 	
 	return YES;
 }
@@ -18,16 +20,19 @@
 + (BOOL)validateResource:(NSString *)resource
 {
 	// Can't use an empty string resource name
-	if((resource != nil) && ([resource length] == 0)) return NO;
+	if ((resource != nil) && ([resource length] == 0))
+		return NO;
 	
 	return YES;
 }
 
 + (BOOL)validateUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
 {
-	if(![self validateDomain:domain]) return NO;
+	if (![self validateDomain:domain])
+		return NO;
 	
-	if(![self validateResource:resource]) return NO;
+	if (![self validateResource:resource])
+		return NO;
 	
 	return YES;
 }
@@ -40,6 +45,8 @@
 	if(user)     *user = nil;
 	if(domain)   *domain = nil;
 	if(resource) *resource = nil;
+	
+	if(jidStr == nil) return NO;
 	
 	NSString *rawUser = nil;
 	NSString *rawDomain = nil;
@@ -283,9 +290,40 @@
 	}
 }
 
+- (BOOL)isBare
+{
+	// From RFC 6120 Terminology:
+	// 
+	// The term "bare JID" refers to an XMPP address of the form <localpart@domainpart> (for an account at a server)
+	// or of the form <domainpart> (for a server).
+	
+	return (resource == nil);
+}
+
+- (BOOL)isBareWithUser
+{
+	return (user != nil && resource == nil);
+}
+
 - (BOOL)isFull
 {
+	// From RFC 6120 Terminology:
+	// 
+	// The term "full JID" refers to an XMPP address of the form
+	// <localpart@domainpart/resourcepart> (for a particular authorized client or device associated with an account)
+	// or of the form <domainpart/resourcepart> (for a particular resource or script associated with a server).
+	
 	return (resource != nil);
+}
+
+- (BOOL)isFullWithUser
+{
+	return (user != nil && resource != nil);
+}
+
+- (BOOL)isServer
+{
+	return (user == nil);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,11 +344,32 @@
 
 - (BOOL)isEqual:(id)anObject
 {
-	if([anObject isMemberOfClass:[self class]])
+	if ([anObject isMemberOfClass:[self class]])
 	{
 		XMPPJID *aJID = (XMPPJID *)anObject;
 		
-		return [[self full] isEqualToString:[aJID full]];
+		if (user) {
+			if (![user isEqualToString:aJID->user]) return NO;
+		}
+		else {
+			if (aJID->user) return NO;
+		}
+		
+		if (domain) {
+			if (![domain isEqualToString:aJID->domain]) return NO;
+		}
+		else {
+			if (aJID->domain) return NO;
+		}
+		
+		if (resource) {
+			if (![resource isEqualToString:aJID->resource]) return NO;
+		}
+		else {
+			if (aJID->resource) return NO;
+		}
+		
+		return YES;
 	}
 	return NO;
 }

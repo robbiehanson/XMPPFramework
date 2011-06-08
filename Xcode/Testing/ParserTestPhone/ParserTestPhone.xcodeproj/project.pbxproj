@@ -16,8 +16,8 @@
 		DC84BD52124410D40055A459 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD4A124410D40055A459 /* DDXMLDocument.m */; };
 		DC84BD53124410D40055A459 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD4C124410D40055A459 /* DDXMLElement.m */; };
 		DC84BD54124410D40055A459 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD4E124410D40055A459 /* DDXMLNode.m */; };
-		DC84BD55124410D40055A459 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD51124410D40055A459 /* NSStringAdditions.m */; };
 		DC84BD5A124411070055A459 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BD59124411070055A459 /* XMPPParser.m */; };
+		DCF3C156136728BE00111BA3 /* NSString+DDXML.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF3C155136728BE00111BA3 /* NSString+DDXML.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,11 +38,11 @@
 		DC84BD4C124410D40055A459 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLElement.m; path = ../../../Vendor/KissXML/DDXMLElement.m; sourceTree = SOURCE_ROOT; };
 		DC84BD4D124410D40055A459 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLNode.h; path = ../../../Vendor/KissXML/DDXMLNode.h; sourceTree = SOURCE_ROOT; };
 		DC84BD4E124410D40055A459 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLNode.m; path = ../../../Vendor/KissXML/DDXMLNode.m; sourceTree = SOURCE_ROOT; };
-		DC84BD4F124410D40055A459 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLPrivate.h; path = ../../../Vendor/KissXML/DDXMLPrivate.h; sourceTree = SOURCE_ROOT; };
-		DC84BD50124410D40055A459 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = ../../../Vendor/KissXML/NSStringAdditions.h; sourceTree = SOURCE_ROOT; };
-		DC84BD51124410D40055A459 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = ../../../Vendor/KissXML/NSStringAdditions.m; sourceTree = SOURCE_ROOT; };
 		DC84BD58124411070055A459 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPParser.h; path = ../../../Core/XMPPParser.h; sourceTree = SOURCE_ROOT; };
 		DC84BD59124411070055A459 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPParser.m; path = ../../../Core/XMPPParser.m; sourceTree = SOURCE_ROOT; };
+		DCF3C154136728BE00111BA3 /* NSString+DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+DDXML.h"; path = "../../../Vendor/KissXML/Categories/NSString+DDXML.h"; sourceTree = "<group>"; };
+		DCF3C155136728BE00111BA3 /* NSString+DDXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+DDXML.m"; path = "../../../Vendor/KissXML/Categories/NSString+DDXML.m"; sourceTree = "<group>"; };
+		DCF3C158136728C700111BA3 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLPrivate.h; path = ../../../Vendor/KissXML/Private/DDXMLPrivate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,8 +146,8 @@
 		DCD8D41B10BA299B00C71631 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
-				DC84BD50124410D40055A459 /* NSStringAdditions.h */,
-				DC84BD51124410D40055A459 /* NSStringAdditions.m */,
+				DCF3C154136728BE00111BA3 /* NSString+DDXML.h */,
+				DCF3C155136728BE00111BA3 /* NSString+DDXML.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -155,7 +155,7 @@
 		DCD8D41C10BA29A100C71631 /* Private */ = {
 			isa = PBXGroup;
 			children = (
-				DC84BD4F124410D40055A459 /* DDXMLPrivate.h */,
+				DCF3C158136728C700111BA3 /* DDXMLPrivate.h */,
 			);
 			name = Private;
 			sourceTree = "<group>";
@@ -225,8 +225,8 @@
 				DC84BD52124410D40055A459 /* DDXMLDocument.m in Sources */,
 				DC84BD53124410D40055A459 /* DDXMLElement.m in Sources */,
 				DC84BD54124410D40055A459 /* DDXMLNode.m in Sources */,
-				DC84BD55124410D40055A459 /* NSStringAdditions.m in Sources */,
 				DC84BD5A124411070055A459 /* XMPPParser.m in Sources */,
+				DCF3C156136728BE00111BA3 /* NSString+DDXML.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,12 +265,13 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				OTHER_LDFLAGS = "-lxml2";
 				PREBINDING = NO;
-				SDKROOT = iphoneos4.1;
+				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
@@ -285,7 +286,7 @@
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				OTHER_LDFLAGS = "-lxml2";
 				PREBINDING = NO;
-				SDKROOT = iphoneos4.1;
+				SDKROOT = iphoneos;
 			};
 			name = Release;
 		};

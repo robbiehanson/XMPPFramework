@@ -12,39 +12,69 @@
 
 #import <Foundation/Foundation.h>
 
+#if !TARGET_OS_IPHONE
+  #import <Cocoa/Cocoa.h>
+#endif
+
 #import "XMPPModule.h"
-#import "XMPPStream.h"
+#import "XMPPvCardTempModule.h"
 
 
 @class XMPPJID;
-@class XMPPvCardTempModule;
+@class XMPPStream;
 
-
+@protocol XMPPvCardAvatarDelegate;
 @protocol XMPPvCardAvatarStorage;
 
 
-@interface XMPPvCardAvatarModule : XMPPModule {
+@interface XMPPvCardAvatarModule : XMPPModule <XMPPvCardTempModuleDelegate>
+{
 	XMPPvCardTempModule *_xmppvCardTempModule;
-  id <XMPPvCardAvatarStorage> _moduleStorage;
+	id <XMPPvCardAvatarStorage> _moduleStorage;
 }
 
 @property(nonatomic,retain,readonly) XMPPvCardTempModule *xmppvCardTempModule;
 
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;
+- (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule  dispatchQueue:(dispatch_queue_t)queue;
+
 
 - (NSData *)photoDataForJID:(XMPPJID *)jid;
 
 @end
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@protocol XMPPvCardAvatarDelegate <NSObject>
+
+#if TARGET_OS_IPHONE
+- (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
+              didReceivePhoto:(UIImage *)photo
+                       forJID:(XMPPJID *)jid;
+#else
+- (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
+              didReceivePhoto:(NSImage *)photo
+                       forJID:(XMPPJID *)jid;
+#endif
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @protocol XMPPvCardAvatarStorage <NSObject>
 
+- (NSData *)photoDataForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
-- (NSData *)photoDataForJID:(XMPPJID *)jid;
-- (NSString *)photoHashForJID:(XMPPJID *)jid;
-
-- (void)clearvCardTempForJID:(XMPPJID *)jid;
-
+/**
+ * Clears the vCardTemp from the store.
+ * This is used so we can clear any cached vCardTemp's for the JID.
+ **/
+- (void)clearvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end

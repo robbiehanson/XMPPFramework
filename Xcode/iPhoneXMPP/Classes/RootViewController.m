@@ -1,42 +1,20 @@
 #import "RootViewController.h"
-#import "iPhoneXMPPAppDelegate.h"
 #import "SettingsViewController.h"
+#import "iPhoneXMPPAppDelegate.h"
 
 #import "XMPP.h"
 #import "XMPPRosterCoreDataStorage.h"
-#import "XMPPUserCoreDataStorage.h"
-#import "XMPPResourceCoreDataStorage.h"
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPvCardAvatarModule.h"
+
+#import "DDLog.h"
+
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 @implementation RootViewController
-
-- (void)viewDidLoad
-{
-	[super viewDidLoad];
-	
-	// Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-	// self.navigationItem.rightBarButtonItem = self.editButtonItem;
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
-  
-  /*
-   * monitor for vCard changes, so we can reload the tableView
-   */
-  [[self.appDelegate xmppvCardTempModule] addDelegate:self];
-  
-  [self.appDelegate connect];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-  [self.appDelegate disconnect];
-  
-  [[self.appDelegate xmppvCardTempModule] removeDelegate:self];
-  
-  [super viewWillDisappear:animated];
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Accessors
@@ -59,12 +37,82 @@
 
 - (XMPPRosterCoreDataStorage *)xmppRosterStorage
 {
-	return [[self appDelegate] xmppRosterStorage];
+	return [[self xmppRoster] xmppRosterStorage];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark View lifecycle
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  
+  UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 400, 44)];
+  titleLabel.backgroundColor = [UIColor clearColor];
+  titleLabel.textColor = [UIColor whiteColor];
+  titleLabel.font = [UIFont boldSystemFontOfSize:20.0];
+  titleLabel.numberOfLines = 1;
+  titleLabel.adjustsFontSizeToFitWidth = YES;
+  titleLabel.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+  titleLabel.textAlignment = UITextAlignmentCenter;
+  
+  if ([[self appDelegate] connect]) 
+  {
+    titleLabel.text = [[[[self appDelegate] xmppStream] myJID] bare];
+  } else
+  {
+    titleLabel.text = @"No JID";
+  }
+  
+  self.navigationItem.titleView = titleLabel;
+  
+  [titleLabel release];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [[self appDelegate] disconnect];
+  
+  [[[self appDelegate] xmppvCardTempModule] removeDelegate:self];
+  
+  [super viewWillDisappear:animated];
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Core Data
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (NSManagedObjectContext *)managedObjectContext
 {
-	return [[self xmppRosterStorage] managedObjectContext];
+	if (managedObjectContext == nil)
+	{
+		managedObjectContext = [[NSManagedObjectContext alloc] init];
+		
+		NSPersistentStoreCoordinator *psc = [[self xmppRosterStorage] persistentStoreCoordinator];
+		[managedObjectContext setPersistentStoreCoordinator:psc];
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		                                         selector:@selector(contextDidSave:)
+		                                             name:NSManagedObjectContextDidSaveNotification
+		                                           object:nil];
+	}
+	
+	return managedObjectContext;
+}
+
+- (void)contextDidSave:(NSNotification *)notification
+{
+	NSManagedObjectContext *sender = (NSManagedObjectContext *)[notification object];
+	
+	if (sender != managedObjectContext &&
+      [sender persistentStoreCoordinator] == [managedObjectContext persistentStoreCoordinator])
+	{
+		DDLogError(@"%@: %@", THIS_FILE, THIS_METHOD);
+		
+		[managedObjectContext performSelectorOnMainThread:@selector(mergeChangesFromContextDidSaveNotification:)
+		                                       withObject:notification
+		                                    waitUntilDone:NO];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +123,7 @@
 {
 	if (fetchedResultsController == nil)
 	{
-		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorage"
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"sectionNum" ascending:YES];
@@ -103,6 +151,7 @@
 		{
 			NSLog(@"Error performing fetch: %@", error);
 		}
+	
 	}
 	
 	return fetchedResultsController;
@@ -111,6 +160,30 @@
 - (void)controllerDidChangeContent:(NSFetchedResultsController *)controller
 {
 	[[self tableView] reloadData];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark UITableViewCell helpers
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)configurePhotoForCell:(UITableViewCell *)cell user:(id <XMPPUser>)user
+{
+  // XMPPRoster will cache photos as they arrive from the xmppvCardAvatarModule, we only need to
+  // ask the avatar module for a photo, if the roster doesn't have it.
+  if (user.photo != nil)
+  {
+    cell.imageView.image = user.photo;
+  } 
+  else
+  {
+    NSData *photoData = [[[self appDelegate] xmppvCardAvatarModule] photoDataForJID:user.jid];
+    
+    if (photoData != nil) {
+      cell.imageView.image = [UIImage imageWithData:photoData];
+    } else {
+      cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,47 +239,30 @@
 		                               reuseIdentifier:CellIdentifier] autorelease];
 	}
 	
-	XMPPUserCoreDataStorage *user = [[self fetchedResultsController] objectAtIndexPath:indexPath];
+	XMPPUserCoreDataStorageObject *user = [[self fetchedResultsController] objectAtIndexPath:indexPath];
 	
 	cell.textLabel.text = user.displayName;
   
-  NSData *photoData = [[self.appDelegate xmppvCardAvatarModule] photoDataForJID:user.jid];
+  [self configurePhotoForCell:cell user:user];
   
-  if (photoData != nil) {
-    cell.imageView.image = [UIImage imageWithData:photoData];
-  } else {
-    cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
-  }
-	
 	return cell;
 }
 
-- (void)dealloc
-{
-	[super dealloc];
-}
-
-
-#pragma mark - Actions
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Actions
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (IBAction)settings:(id)sender {
   [self.navigationController presentModalViewController:[[self appDelegate] settingsViewController] animated:YES];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Init/dealloc
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma mark - XMPPvCardTempModuleDelegate methods
-
-
-- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule 
-        didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
-                     forJID:(XMPPJID *)jid
-                 xmppStream:(XMPPStream *)xmppStream {
-  /*
-   *  Reloading just the changed row, if it is visible would be a better solution.
-   */
-  [self.tableView reloadData];
+- (void)dealloc
+{
+	[super dealloc];
 }
-
 
 @end

@@ -12,10 +12,11 @@
 
 #import <objc/runtime.h>
 
-#import "DDLog.h"
-#import "NSDataAdditions.h"
+#import "XMPPLogging.h"
+#import "NSData+XMPP.h"
 #import "XMPPDateTimeProfiles.h"
 
+static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 NSString *const kXMPPNSvCardTemp = @"vcard-temp";
 NSString *const kXMPPvCardTempElement = @"vCard";
@@ -40,7 +41,9 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	
 	if (superSize != ourSize)
 	{
-		DDLogError(@"Adding instance variables to XMPPvCardTemp is not currently supported!");
+		XMPPLogError(@"Adding instance variables to XMPPvCardTemp is not currently supported!");
+		
+		[DDLog flushLog];
 		exit(15);
 	}
 }
@@ -53,14 +56,40 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-+ (XMPPvCardTemp *)vCardTempFromIQ:(XMPPIQ *)iq {
-  XMPPvCardTemp *vCard = nil;
-  NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
-  
-  if ([iq isResultIQ] && query != nil) {
-    vCard = [self vCardTempFromElement:query];
-  }
-  return vCard;
++ (XMPPvCardTemp *)vCardTempSubElementFromIQ:(XMPPIQ *)iq
+{
+	if ([iq isResultIQ])
+	{
+		NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+		if (query)
+		{
+			return [self vCardTempFromElement:query];
+		}
+	}
+	
+	return nil;
+}
+
++ (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq
+{
+	// This doesn't work.
+	// It looks like the copy that comes back is of class DDXMLElement.
+	// So maybe the vCardTemp class has to implement its own copy method...
+	// 
+	//return [[[self vCardTempSubElementFromIQ:iq] copy] autorelease];
+	
+	if ([iq isResultIQ])
+	{
+		NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+		if (query)
+		{
+			NSXMLElement *queryCopy = [[query copy] autorelease];
+			
+			return [self vCardTempFromElement:queryCopy];
+		}
+	}
+	
+	return nil;
 }
 
 

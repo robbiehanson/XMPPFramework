@@ -1,6 +1,5 @@
 #import <Cocoa/Cocoa.h>
 
-
 @protocol MyProtocol
 @optional
 

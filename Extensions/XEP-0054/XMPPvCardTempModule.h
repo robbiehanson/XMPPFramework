@@ -6,92 +6,86 @@
 //  Copyright 2011 RF.com. All rights reserved.
 //
 
-/*
- *  NOTE:  Queueing vCardTemp fetch requests is needed to prevent the UI from freezing.
- *  v3 doesn't process the resonse on the main thread, so this code won't be needed.
- *  Change the #define below to 0, to disable queing.
- */
-
-#define XMPP_VCARD_TEMP_QUEUEING 1
-
 
 #import <Foundation/Foundation.h>
-
-#if TARGET_OS_IPHONE
-#import "DDXML.h"
-#endif
-
-#import "NSXMLElementAdditions.h"
-#import "XMPPJID.h"
 #import "XMPPModule.h"
-
-#import "XMPPStream.h"
 #import "XMPPvCardTemp.h"
 
-
+@class XMPPJID;
+@class XMPPStream;
 @protocol XMPPvCardTempModuleStorage;
 
 
-@interface XMPPvCardTempModule : XMPPModule {
-  id <XMPPvCardTempModuleStorage> _moduleStorage;
-
-#if XMPP_VCARD_TEMP_QUEUEING
-  NSUInteger _openFetchRequests;
-  NSMutableArray *_pendingFetchRequests;
-#endif
+@interface XMPPvCardTempModule : XMPPModule
+{
+	id <XMPPvCardTempModuleStorage> _moduleStorage;
 }
 
 
-@property(nonatomic,retain,readonly) id <XMPPvCardTempModuleStorage> moduleStorage;
+@property(nonatomic, readonly) id <XMPPvCardTempModuleStorage> moduleStorage;
+@property(nonatomic, readonly) XMPPvCardTemp *myvCardTemp;
 
-
-- (id)initWithStream:(XMPPStream *)xmppStream storage:(id <XMPPvCardTempModuleStorage>)moduleStorage;
-
+- (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage;
+- (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 /*
- * return the cached vCard for the user or fetch it, if we don't have it.
+ * Return the cached vCard for the user or fetch it, if we don't have it.
  */
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream;
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)xmppStream useCache:(BOOL)useCache;
-
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid;
+- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid useCache:(BOOL)useCache;
+- (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp;
 
 @end
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @protocol XMPPvCardTempModuleDelegate
-
-
 @optional
 
-
 - (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule 
-            didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
-                     forJID:(XMPPJID *)jid
-                 xmppStream:(XMPPStream *)xmppStream;
-
+        didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
+                     forJID:(XMPPJID *)jid;
 
 @end
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @protocol XMPPvCardTempModuleStorage <NSObject>
 
+/**
+ * Configures the storage class, passing its parent and parent's dispatch queue.
+ * 
+ * This method is called by the init methods of the XMPPvCardTempModule class.
+ * This method is designed to inform the storage class of its parent
+ * and of the dispatch queue the parent will be operating on.
+ * 
+ * The storage class may choose to operate on the same queue as its parent,
+ * or it may operate on its own internal dispatch queue.
+ * 
+ * This method should return YES if it was configured properly.
+ * The parent class is configured to ignore the passed
+ * storage class in its init method if this method returns NO.
+**/
+- (BOOL)configureWithParent:(XMPPvCardTempModule *)aParent queue:(dispatch_queue_t)queue;
 
-/*
+/**
  * Returns a vCardTemp object or nil
- */
-- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid;
+**/
+- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
-
-/*
+/**
  * Used to set the vCardTemp object when we get it from the XMPP server.
- */
-- (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid;
+**/
+- (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
-
-/*
+/**
  * Asks the backend if we should fetch the vCardTemp from the network.
  * This is used so that we don't request the vCardTemp multiple times.
- */
-- (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid;
+**/
+- (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end

@@ -3,14 +3,18 @@
 //  XEP-0009
 //
 //  Created by Eric Chamberlain on 5/25/10.
-//  Copyright 2010 RF.com. All rights reserved.
 //
 
 #import "XMPPIQ+JabberRPCResonse.h"
 
-#import "NSDataAdditions.h"
-#import "NSXMLElementAdditions.h"
-#import "RFJabberRPCModule.h"
+#import "NSData+XMPP.h"
+#import "NSXMLElement+XMPP.h"
+#import "XMPPJabberRPCModule.h"
+
+#import "XMPPLogging.h"
+
+// Log levels: off, error, warn, info, verbose
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 
 @implementation XMPPIQ(JabberRPCResonse)
@@ -112,7 +116,7 @@
 		// we should produce an error
 		// response should be a dict
 		if (error) {
-			*error = [NSError errorWithDomain:RFJabberRPCErrorDomain 
+			*error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain 
 										 code:[[response objectForKey:@"faultCode"] intValue] 
 									 userInfo:(NSDictionary *)response];
 		}
@@ -162,7 +166,7 @@
 		return [self parseData:[param stringValue]];
 	} else {
 		// bad element
-		DDLogWarn(@"%s bad element: %@", __PRETTY_FUNCTION__, [param stringValue]);
+		XMPPLogWarn(@"%@: %@ - bad element: %@", THIS_FILE, THIS_METHOD, [param stringValue]);
 	}
 	return nil;
 }				

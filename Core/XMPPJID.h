@@ -22,6 +22,12 @@
 - (NSString *)bare;
 - (NSString *)full;
 
+- (BOOL)isBare;
+- (BOOL)isBareWithUser;
+
 - (BOOL)isFull;
+- (BOOL)isFullWithUser;
+
+- (BOOL)isServer;
 
 @end

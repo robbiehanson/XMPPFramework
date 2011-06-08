@@ -18,14 +18,18 @@
 {
 	NSDate *timeSent;
 	NSTimeInterval timeout;
+	dispatch_source_t timer;
 }
 
-+ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout;
++ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer;
 
 @property (nonatomic, readonly) NSDate *timeSent;
 @property (nonatomic, readonly) NSTimeInterval timeout;
+@property (nonatomic, readonly) dispatch_source_t timer;
 
 - (NSTimeInterval)rtt;
+
+- (void)cancelTimer;
 
 @end
 
@@ -35,66 +39,117 @@
 
 @implementation XMPPTime
 
-- (id)initWithStream:(XMPPStream *)aXmppStream
+- (id)init
 {
-	return [self initWithStream:aXmppStream respondsToQueries:YES];
+	return [self initWithDispatchQueue:NULL];
 }
 
-- (id)initWithStream:(XMPPStream *)aXmppStream respondsToQueries:(BOOL)flag;
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue
 {
-	if ((self = [super initWithStream:aXmppStream]))
+	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		respondsToQueries = flag;
 		queryIDs = [[NSMutableDictionary alloc] initWithCapacity:5];
-		
-	  #if INTEGRATE_WITH_CAPABILITIES
-		
-		[xmppStream autoAddDelegate:self toModulesOfClass:[XMPPCapabilities class]];
-		
-	  #endif
 	}
 	return self;
 }
 
+- (BOOL)activate:(XMPPStream *)aXmppStream
+{
+	if ([super activate:aXmppStream])
+	{
+	#if INTEGRATE_WITH_CAPABILITIES
+		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+	#endif
+		
+		return YES;
+	}
+	
+	return NO;
+}
+
+- (void)deactivate
+{
+#if INTEGRATE_WITH_CAPABILITIES
+	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+#endif
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		for (XMPPTimeQueryInfo *queryInfo in [queryIDs objectEnumerator])
+		{
+			[queryInfo cancelTimer];
+		}
+		
+		[queryIDs removeAllObjects];
+		
+		[pool drain];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	[super deactivate];
+}
+
 - (void)dealloc
 {
-  #if INTEGRATE_WITH_CAPABILITIES
-	
-	[xmppStream removeAutoDelegate:self fromModulesOfClass:[XMPPCapabilities class]];
-	
-  #endif
-	
 	[queryIDs release];
-	
 	[super dealloc];
 }
 
-- (NSString *)generateQueryIDWithTimeout:(NSTimeInterval)timeout
+- (BOOL)respondsToQueries
 {
-	// Generate unique ID for query.
-	// It's important the ID be unique as the ID is the
-	// only thing that distinguishes multiple queries from each other.
-	
-	NSString *queryID = [xmppStream generateUUID];
-	
-	// Add query ID to list so we'll recognize it when we get a response
-	[queryIDs setObject:[XMPPTimeQueryInfo queryInfoWithTimeout:timeout]
-	             forKey:queryID];
-	
-	// In case we never get a response, we want to remove the query ID eventually,
-	// or we risk an ever increasing queryIDs array.
-	[NSTimer scheduledTimerWithTimeInterval:timeout
-									 target:self
-								   selector:@selector(removeQueryID:)
-								   userInfo:queryID
-									repeats:NO];
-	
-	return queryID;
+	if (dispatch_get_current_queue() == moduleQueue)
+	{
+		return respondsToQueries;
+	}
+	else
+	{
+		__block BOOL result;
+		
+		dispatch_sync(moduleQueue, ^{
+			result = respondsToQueries;
+		});
+		return result;
+	}
 }
 
-- (void)removeQueryID:(NSTimer *)aTimer
+- (void)setRespondsToQueries:(BOOL)flag
 {
-	NSString *queryID = (NSString *)[aTimer userInfo];
+	dispatch_block_t block = ^{
+		
+		if (respondsToQueries != flag)
+		{
+			respondsToQueries = flag;
+			
+		#if INTEGRATE_WITH_CAPABILITIES
+			// Capabilities may have changed, need to notify others.
+			
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			XMPPPresence *presence = xmppStream.myPresence;
+			if (presence)
+			{
+				[xmppStream sendElement:presence];
+			}
+			
+			[pool drain];
+		#endif
+		}
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)removeQueryID:(NSString *)queryID
+{
+	// This method is invoked on the moduleQueue.
 	
 	XMPPTimeQueryInfo *queryInfo = [queryIDs objectForKey:queryID];
 	if (queryInfo)
@@ -104,17 +159,65 @@
 		
 		[multicastDelegate xmppTime:self didNotReceiveResponse:queryID dueToTimeout:[queryInfo timeout]];
 		
+		[queryInfo cancelTimer];
 		[queryInfo release];
 	}
 }
 
+- (NSString *)generateQueryIDWithTimeout:(NSTimeInterval)timeout
+{
+	// This method may be invoked on any thread/queue.
+	
+	// Generate unique ID for query.
+	// It's important the ID be unique as the ID is the
+	// only thing that distinguishes multiple queries from each other.
+	
+	NSString *queryID = [xmppStream generateUUID];
+	
+	dispatch_async(moduleQueue, ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+		// In case we never get a response, we want to remove the query ID eventually,
+		// or we risk an ever increasing queryIDs array.
+		
+		dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
+		
+		dispatch_source_set_event_handler(timer, ^{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			[self removeQueryID:queryID];
+			
+			[pool drain];
+		});
+		
+		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
+		
+		dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
+		dispatch_resume(timer);
+		
+		// Add query ID to list so we'll recognize it when we get a response
+		[queryIDs setObject:[XMPPTimeQueryInfo queryInfoWithTimeout:timeout timer:timer]
+		             forKey:queryID];
+		
+		[pool drain];
+	});
+	
+	return queryID;
+}
+
 - (NSString *)sendQueryToServer
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	return [self sendQueryToServerWithTimeout:DEFAULT_TIMEOUT];
 }
 
 - (NSString *)sendQueryToServerWithTimeout:(NSTimeInterval)timeout
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	NSString *queryID = [self generateQueryIDWithTimeout:timeout];
 	
 	// Send ping packet
@@ -137,11 +240,17 @@
 
 - (NSString *)sendQueryToJID:(XMPPJID *)jid
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	return [self sendQueryToJID:jid withTimeout:DEFAULT_TIMEOUT];
 }
 
 - (NSString *)sendQueryToJID:(XMPPJID *)jid withTimeout:(NSTimeInterval)timeout
 {
+	// This is a public method.
+	// It may be invoked on any thread/queue.
+	
 	NSString *queryID = [self generateQueryIDWithTimeout:timeout];
 	
 	// Send ping element
@@ -161,6 +270,8 @@
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+	// This method is invoked on the moduleQueue.
+	
 	NSString *type = [iq type];
 	
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
@@ -191,6 +302,7 @@
 			
 			[multicastDelegate xmppTime:self didReceiveResponse:iq withRTT:[queryInfo rtt]];
 			
+			[queryInfo cancelTimer];
 			[queryInfo release];
 		}
 	}
@@ -219,12 +331,24 @@
 	return NO;
 }
 
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+	for (XMPPTimeQueryInfo *queryInfo in [queryIDs objectEnumerator])
+	{
+		[queryInfo cancelTimer];
+	}
+	
+	[queryIDs removeAllObjects];
+}
+
 #if INTEGRATE_WITH_CAPABILITIES
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for XEP-0202.
 **/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender willSendMyCapabilities:(NSXMLElement *)query
+- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query
 {
+	// This method is invoked on the moduleQueue.
+	
 	if (respondsToQueries)
 	{
 		// <query xmlns="http://jabber.org/protocol/disco#info">
@@ -260,7 +384,7 @@
 	// 
 	// NSDate is a very simple class, but can be confusing at times.
 	// NSDate simply stores an NSTimeInterval internally,
-	// which is just a double representing the number seconds since the reference date.
+	// which is just a double representing the number of seconds since the reference date.
 	// Since it's a double, it can yield sub-millisecond precision.
 	// 
 	// In addition to this, it stores the values in UTC.
@@ -280,7 +404,7 @@
 	return [XMPPDateTimeProfiles parseDateTime:utc];
 }
 
-+ (NSTimeInterval)timeZoneOffsetFromResponse:(XMPPIQ *)iq
++ (NSTimeZone *)timeZoneOffsetFromResponse:(XMPPIQ *)iq
 {
 	// <iq type="result" from="robbie@voalte.com/office" to="robbie@deusty.com/home" id="abc123">
 	//   <time xmlns="urn:xmpp:time">
@@ -425,21 +549,19 @@
 
 @synthesize timeSent;
 @synthesize timeout;
+@synthesize timer;
 
-- (id)initWithTimeout:(NSTimeInterval)to
+- (id)initWithTimeout:(NSTimeInterval)to timer:(dispatch_source_t)aTimer
 {
 	if ((self = [super init]))
 	{
 		timeSent = [[NSDate alloc] init];
 		timeout = to;
+		
+		timer = aTimer;
+		dispatch_retain(timer);
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[timeSent release];
-	[super dealloc];
 }
 
 - (NSTimeInterval)rtt
@@ -447,9 +569,26 @@
 	return [timeSent timeIntervalSinceNow] * -1.0;
 }
 
-+ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout
+- (void)cancelTimer
 {
-	return [[[XMPPTimeQueryInfo alloc] initWithTimeout:timeout] autorelease];
+	if (timer)
+	{
+		dispatch_source_cancel(timer);
+		dispatch_release(timer);
+		timer = NULL;
+	}
+}
+
+- (void)dealloc
+{
+	[self cancelTimer];
+	[timeSent release];
+	[super dealloc];
+}
+
++ (XMPPTimeQueryInfo *)queryInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer
+{
+	return [[[XMPPTimeQueryInfo alloc] initWithTimeout:timeout timer:timer] autorelease];
 }
 
 @end
