@@ -23,7 +23,6 @@
 		DC17CDB41355EDD1007A32CC /* XMPPModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD7A1355EDD1007A32CC /* XMPPModule.m */; };
 		DC17CDB51355EDD1007A32CC /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD7C1355EDD1007A32CC /* XMPPParser.m */; };
 		DC17CDB61355EDD1007A32CC /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD7E1355EDD1007A32CC /* XMPPPresence.m */; };
-		DC17CDB71355EDD1007A32CC /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD801355EDD1007A32CC /* XMPPReconnect.m */; };
 		DC17CDB81355EDD1007A32CC /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD821355EDD1007A32CC /* XMPPStream.m */; };
 		DC17CDB91355EDD1007A32CC /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD851355EDD1007A32CC /* DDList.m */; };
 		DC17CDBA1355EDD1007A32CC /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD871355EDD1007A32CC /* GCDMulticastDelegate.m */; };
@@ -82,8 +81,6 @@
 		DC17CD7C1355EDD1007A32CC /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		DC17CD7D1355EDD1007A32CC /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		DC17CD7E1355EDD1007A32CC /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		DC17CD7F1355EDD1007A32CC /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
-		DC17CD801355EDD1007A32CC /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
 		DC17CD811355EDD1007A32CC /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
 		DC17CD821355EDD1007A32CC /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DC17CD841355EDD1007A32CC /* DDList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDList.h; sourceTree = "<group>"; };
@@ -248,8 +245,6 @@
 				DC17CD781355EDD1007A32CC /* XMPPMessage.m */,
 				DC17CD7D1355EDD1007A32CC /* XMPPPresence.h */,
 				DC17CD7E1355EDD1007A32CC /* XMPPPresence.m */,
-				DC17CD7F1355EDD1007A32CC /* XMPPReconnect.h */,
-				DC17CD801355EDD1007A32CC /* XMPPReconnect.m */,
 				DC17CD791355EDD1007A32CC /* XMPPModule.h */,
 				DC17CD7A1355EDD1007A32CC /* XMPPModule.m */,
 			);
@@ -423,7 +418,6 @@
 				DC17CDB41355EDD1007A32CC /* XMPPModule.m in Sources */,
 				DC17CDB51355EDD1007A32CC /* XMPPParser.m in Sources */,
 				DC17CDB61355EDD1007A32CC /* XMPPPresence.m in Sources */,
-				DC17CDB71355EDD1007A32CC /* XMPPReconnect.m in Sources */,
 				DC17CDB81355EDD1007A32CC /* XMPPStream.m in Sources */,
 				DC17CDB91355EDD1007A32CC /* DDList.m in Sources */,
 				DC17CDBA1355EDD1007A32CC /* GCDMulticastDelegate.m in Sources */,
@@ -562,6 +556,7 @@
 				DC17CD591355ED29007A32CC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
