@@ -26,7 +26,6 @@
 		DCC494F71333043200F3C8F6 /* XMPPModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494C11333043200F3C8F6 /* XMPPModule.m */; };
 		DCC494F81333043200F3C8F6 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494C31333043200F3C8F6 /* XMPPParser.m */; };
 		DCC494F91333043200F3C8F6 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494C51333043200F3C8F6 /* XMPPPresence.m */; };
-		DCC494FA1333043200F3C8F6 /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494C71333043200F3C8F6 /* XMPPReconnect.m */; };
 		DCC494FB1333043200F3C8F6 /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494C91333043200F3C8F6 /* XMPPStream.m */; };
 		DCC494FC1333043200F3C8F6 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CC1333043200F3C8F6 /* DDList.m */; };
 		DCC494FD1333043200F3C8F6 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */; };
@@ -101,8 +100,6 @@
 		DCC494C31333043200F3C8F6 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		DCC494C41333043200F3C8F6 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		DCC494C51333043200F3C8F6 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		DCC494C61333043200F3C8F6 /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
-		DCC494C71333043200F3C8F6 /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
 		DCC494C81333043200F3C8F6 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
 		DCC494C91333043200F3C8F6 /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DCC494CB1333043200F3C8F6 /* DDList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDList.h; sourceTree = "<group>"; };
@@ -269,8 +266,6 @@
 				DCC494C51333043200F3C8F6 /* XMPPPresence.m */,
 				DCC494C01333043200F3C8F6 /* XMPPModule.h */,
 				DCC494C11333043200F3C8F6 /* XMPPModule.m */,
-				DCC494C61333043200F3C8F6 /* XMPPReconnect.h */,
-				DCC494C71333043200F3C8F6 /* XMPPReconnect.m */,
 			);
 			name = Core;
 			path = ../../../Core;
@@ -538,7 +533,6 @@
 				DCC494F71333043200F3C8F6 /* XMPPModule.m in Sources */,
 				DCC494F81333043200F3C8F6 /* XMPPParser.m in Sources */,
 				DCC494F91333043200F3C8F6 /* XMPPPresence.m in Sources */,
-				DCC494FA1333043200F3C8F6 /* XMPPReconnect.m in Sources */,
 				DCC494FB1333043200F3C8F6 /* XMPPStream.m in Sources */,
 				DCC494FC1333043200F3C8F6 /* DDList.m in Sources */,
 				DCC494FD1333043200F3C8F6 /* GCDMulticastDelegate.m in Sources */,
