@@ -124,7 +124,7 @@ static NSMutableSet *databaseFileNames;
                  @"Chaned core data model recently?\n"
                  @"Quick Fix: Delete the database: %@\n"
                  @"=====================================================================================",
-                 [self class], error, storePath);
+                 [self class], error, path);
 #endif
 
 }
