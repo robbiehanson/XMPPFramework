@@ -9,7 +9,7 @@
 
 
 #import <Foundation/Foundation.h>
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 
 
 #define XMPP_VCARD_SET_EMPTY_CHILD(Set, Name)                                                   \

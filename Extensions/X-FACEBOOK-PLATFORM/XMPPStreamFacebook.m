@@ -9,8 +9,8 @@
 #import "XMPPInternal.h"
 #import "XMPPLogging.h"
 #import "GCDAsyncSocket.h"
-#import "NSDataAdditions.h"
-#import "NSXMLElementAdditions.h"
+#import "NSData+XMPP.h"
+#import "NSXMLElement+XMPP.h"
 
 /**
  * Seeing a return statements within an inner block

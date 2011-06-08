@@ -1,5 +1,5 @@
 #import "XMPPDateTimeProfiles.h"
-#import "DDNumber.h"
+#import "NSNumber+XMPP.h"
 
 
 @interface XMPPDateTimeProfiles (PrivateAPI)

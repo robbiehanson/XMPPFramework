@@ -147,7 +147,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // It's easy to create XML elments to send and to read received XML elements.
 // You have the entire NSXMLElement and NSXMLNode API's.
 // 
-// In addition to this, the NSXMLElementAdditions class provides some very handy methods for working with XMPP.
+// In addition to this, the NSXMLElement+XMPP category provides some very handy methods for working with XMPP.
 // 
 // On the iPhone, Apple chose not to include the full NSXML suite.
 // No problem - we use the KissXML library as a drop in replacement.

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DC373217139F0A3400A8407D /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC373216139F0A3400A8407D /* NSNumber+XMPP.m */; };
 		DCDA2A171355494F00B98971 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2A161355494F00B98971 /* UIKit.framework */; };
 		DCDA2A191355494F00B98971 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2A181355494F00B98971 /* Foundation.framework */; };
 		DCDA2A1B1355494F00B98971 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2A1A1355494F00B98971 /* CoreGraphics.framework */; };
@@ -16,13 +17,14 @@
 		DCDA2A2A1355494F00B98971 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2A281355494F00B98971 /* MainWindow.xib */; };
 		DCDA2A2D1355494F00B98971 /* TestXEP82ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A2C1355494F00B98971 /* TestXEP82ViewController.m */; };
 		DCDA2A301355494F00B98971 /* TestXEP82ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2A2E1355494F00B98971 /* TestXEP82ViewController.xib */; };
-		DCDA2A401355496C00B98971 /* DDNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A3F1355496C00B98971 /* DDNumber.m */; };
 		DCDA2A461355497700B98971 /* NSDate+XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A431355497700B98971 /* NSDate+XMPPDateTimeProfiles.m */; };
 		DCDA2A471355497700B98971 /* XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A451355497700B98971 /* XMPPDateTimeProfiles.m */; };
 		DCDA2A4A135549DF00B98971 /* TestXEP82.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A49135549DF00B98971 /* TestXEP82.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DC373215139F0A3400A8407D /* NSNumber+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSNumber+XMPP.h"; path = "../../../../Categories/NSNumber+XMPP.h"; sourceTree = "<group>"; };
+		DC373216139F0A3400A8407D /* NSNumber+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSNumber+XMPP.m"; path = "../../../../Categories/NSNumber+XMPP.m"; sourceTree = "<group>"; };
 		DCDA2A121355494F00B98971 /* TestXEP82.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestXEP82.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCDA2A161355494F00B98971 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		DCDA2A181355494F00B98971 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -37,8 +39,6 @@
 		DCDA2A2B1355494F00B98971 /* TestXEP82ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestXEP82ViewController.h; sourceTree = "<group>"; };
 		DCDA2A2C1355494F00B98971 /* TestXEP82ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestXEP82ViewController.m; sourceTree = "<group>"; };
 		DCDA2A2F1355494F00B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TestXEP82ViewController.xib; sourceTree = "<group>"; };
-		DCDA2A3E1355496C00B98971 /* DDNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDNumber.h; path = ../../../../Categories/DDNumber.h; sourceTree = "<group>"; };
-		DCDA2A3F1355496C00B98971 /* DDNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDNumber.m; path = ../../../../Categories/DDNumber.m; sourceTree = "<group>"; };
 		DCDA2A421355497700B98971 /* NSDate+XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSDate+XMPPDateTimeProfiles.h"; path = "../../../../Extensions/XEP-0082/NSDate+XMPPDateTimeProfiles.h"; sourceTree = "<group>"; };
 		DCDA2A431355497700B98971 /* NSDate+XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSDate+XMPPDateTimeProfiles.m"; path = "../../../../Extensions/XEP-0082/NSDate+XMPPDateTimeProfiles.m"; sourceTree = "<group>"; };
 		DCDA2A441355497700B98971 /* XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPDateTimeProfiles.h; path = "../../../../Extensions/XEP-0082/XMPPDateTimeProfiles.h"; sourceTree = "<group>"; };
@@ -64,8 +64,8 @@
 		DCDA2A071355494E00B98971 = {
 			isa = PBXGroup;
 			children = (
-				DCDA2A3E1355496C00B98971 /* DDNumber.h */,
-				DCDA2A3F1355496C00B98971 /* DDNumber.m */,
+				DC373215139F0A3400A8407D /* NSNumber+XMPP.h */,
+				DC373216139F0A3400A8407D /* NSNumber+XMPP.m */,
 				DCDA2A441355497700B98971 /* XMPPDateTimeProfiles.h */,
 				DCDA2A451355497700B98971 /* XMPPDateTimeProfiles.m */,
 				DCDA2A421355497700B98971 /* NSDate+XMPPDateTimeProfiles.h */,
@@ -187,10 +187,10 @@
 				DCDA2A241355494F00B98971 /* main.m in Sources */,
 				DCDA2A271355494F00B98971 /* TestXEP82AppDelegate.m in Sources */,
 				DCDA2A2D1355494F00B98971 /* TestXEP82ViewController.m in Sources */,
-				DCDA2A401355496C00B98971 /* DDNumber.m in Sources */,
 				DCDA2A461355497700B98971 /* NSDate+XMPPDateTimeProfiles.m in Sources */,
 				DCDA2A471355497700B98971 /* XMPPDateTimeProfiles.m in Sources */,
 				DCDA2A4A135549DF00B98971 /* TestXEP82.m in Sources */,
+				DC373217139F0A3400A8407D /* NSNumber+XMPP.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

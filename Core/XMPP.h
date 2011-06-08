@@ -6,4 +6,4 @@
 #import "XMPPPresence.h"
 #import "XMPPModule.h"
 
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"

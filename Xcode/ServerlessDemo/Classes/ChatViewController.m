@@ -8,7 +8,7 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
-#import "NSXMLElementAdditions.h"
+#import "NSXMLElement+XMPP.h"
 #import "NSString+DDXML.h"
 #import "DDLog.h"
 

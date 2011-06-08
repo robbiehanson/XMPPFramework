@@ -16,8 +16,8 @@
 
 #import "XMPPvCardAvatarModule.h"
 
-#import "NSDataAdditions.h"
-#import "NSXMLElementAdditions.h"
+#import "NSData+XMPP.h"
+#import "NSXMLElement+XMPP.h"
 #import "XMPPLogging.h"
 #import "XMPPPresence.h"
 #import "XMPPStream.h"

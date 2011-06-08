@@ -11,8 +11,8 @@
 
 #import "XMPPJID.h"
 #import "XMPPStream.h"
-#import "DDNumber.h"
-#import "NSDataAdditions.h"
+#import "NSNumber+XMPP.h"
+#import "NSData+XMPP.h"
 
 
 @implementation XMPPvCardCoreDataStorageObject

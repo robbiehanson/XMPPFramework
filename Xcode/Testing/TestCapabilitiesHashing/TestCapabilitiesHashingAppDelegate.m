@@ -1,6 +1,6 @@
 #import "TestCapabilitiesHashingAppDelegate.h"
-#import "NSDataAdditions.h"
-#import "NSXMLElementAdditions.h"
+#import "NSData+XMPP.h"
+#import "NSXMLElement+XMPP.h"
 #import "XMPPCapabilities.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
 
