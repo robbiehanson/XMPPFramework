@@ -3,7 +3,11 @@
 #import "XMPPLogging.h"
 
 // Log levels: off, error, warn, info, verbose
-static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#if DEBUG
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#else
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
 
 
 @implementation XMPPModule

@@ -9,7 +9,11 @@
 #import <libkern/OSAtomic.h>
 
 // Log levels: off, error, warn, info, verbose
-static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+#if DEBUG
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+#else
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
 
 
 @implementation XMPPCoreDataStorage

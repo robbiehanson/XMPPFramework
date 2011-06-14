@@ -7,7 +7,11 @@
 #define IMPOSSIBLE_REACHABILITY_FLAGS 0xFFFFFFFF
 
 // Log levels: off, error, warn, info, verbose
-static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+#if DEBUG
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+#else
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
 
 enum XMPPReconnectFlags
 {

@@ -13,7 +13,11 @@
 
 #import <objc/runtime.h>
 
-static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
+#if DEBUG
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
+#else
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
+#endif
 
 
 @implementation XMPPvCardTempLabel
