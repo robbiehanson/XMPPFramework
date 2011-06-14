@@ -44,6 +44,19 @@
  * 
  * XMPPLog has the same syntax as NSLog.
  * This means you can pass it multiple variables just like NSLog.
+ * 
+ * You may optionally choose to define different log levels for debug and release builds.
+ * You can do so like this:
+ * 
+ * // Log levels: off, error, warn, info, verbose
+ * #if DEBUG
+ *   static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+ * #else
+ *   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+ * #endif
+ * 
+ * Xcode projects created with Xcode 4 automatically define DEBUG via the project's preprocessor macros.
+ * If you created your project with a previous version of Xcode, you may need to add the DEBUG macro manually.
 **/
 
 #import "DDLog.h"

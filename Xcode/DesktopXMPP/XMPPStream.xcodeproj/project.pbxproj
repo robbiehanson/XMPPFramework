@@ -402,13 +402,13 @@
 		DC37307B139E9EE500A8407D /* MemoryStorage */ = {
 			isa = PBXGroup;
 			children = (
-				DC37307C139E9EE500A8407D /* XMPPResourceMemoryStorage.h */,
-				DC37307D139E9EE500A8407D /* XMPPResourceMemoryStorage.m */,
 				DC37307E139E9EE500A8407D /* XMPPRosterMemoryStorage.h */,
 				DC37307F139E9EE500A8407D /* XMPPRosterMemoryStorage.m */,
 				DC373080139E9EE500A8407D /* XMPPRosterMemoryStoragePrivate.h */,
 				DC373081139E9EE500A8407D /* XMPPUserMemoryStorage.h */,
 				DC373082139E9EE500A8407D /* XMPPUserMemoryStorage.m */,
+				DC37307C139E9EE500A8407D /* XMPPResourceMemoryStorage.h */,
+				DC37307D139E9EE500A8407D /* XMPPResourceMemoryStorage.m */,
 			);
 			path = MemoryStorage;
 			sourceTree = "<group>";

@@ -5,7 +5,11 @@
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
-static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
+#if DEBUG
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
+#else
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
 
 @interface XMPPAutoPing ()
 - (void)updatePingIntervalTimer;
