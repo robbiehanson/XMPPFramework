@@ -49,6 +49,7 @@
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
 		queryIDs = [[NSMutableDictionary alloc] initWithCapacity:5];
+		respondsToQueries = YES;
 	}
 	return self;
 }

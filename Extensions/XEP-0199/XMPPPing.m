@@ -48,6 +48,7 @@
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
 		pingIDs = [[NSMutableDictionary alloc] initWithCapacity:5];
+		respondsToQueries = YES;
 	}
 	return self;
 }
