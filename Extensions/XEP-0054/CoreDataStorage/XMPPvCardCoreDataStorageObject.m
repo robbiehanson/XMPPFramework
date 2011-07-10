@@ -4,6 +4,7 @@
 //
 //  Originally created by Eric Chamberlain on 3/18/11.
 //
+#import <objc/runtime.h>
 
 #import "XMPPvCardCoreDataStorageObject.h"
 #import "XMPPvCardTempCoreDataStorageObject.h"
@@ -37,7 +38,10 @@
 	
 	[fetchRequest release];
 	
-	return (XMPPvCardCoreDataStorageObject *)[results lastObject];
+	XMPPvCardCoreDataStorageObject *vCard = (XMPPvCardCoreDataStorageObject *)[results lastObject];
+	object_setClass(vCard.vCardTemp, [XMPPvCardTemp class]);
+	
+	return vCard;
 }
 
 
@@ -50,6 +54,8 @@
 	                                                                      inManagedObjectContext:moc];
 	
 	vCard.jidStr = [jid bare];
+	object_setClass(vCard.vCardTemp, [XMPPvCardTemp class]);
+	
 	return vCard;
 }
 

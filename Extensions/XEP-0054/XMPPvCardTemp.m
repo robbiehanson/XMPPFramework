@@ -72,24 +72,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 + (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq
 {
-	// This doesn't work.
-	// It looks like the copy that comes back is of class DDXMLElement.
-	// So maybe the vCardTemp class has to implement its own copy method...
-	// 
-	//return [[[self vCardTempSubElementFromIQ:iq] copy] autorelease];
-	
-	if ([iq isResultIQ])
-	{
-		NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
-		if (query)
-		{
-			NSXMLElement *queryCopy = [[query copy] autorelease];
-			
-			return [self vCardTempFromElement:queryCopy];
-		}
-	}
-	
-	return nil;
+	return [[[self vCardTempSubElementFromIQ:iq] copy] autorelease];
 }
 
 
@@ -101,6 +84,13 @@ NSString *const kXMPPvCardTempElement = @"vCard";
   return iq;
 }
 
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	id theCopy = [super copyWithZone:zone];
+	object_setClass(theCopy, [XMPPvCardTemp class]);
+	return theCopy;
+}
 
 #pragma mark -
 #pragma mark Identification Types
@@ -723,7 +713,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (void)setPhoneticSound:(NSString *)phonetic {
 	NSXMLElement *sound = [self elementForName:@"SOUND"];
-	NSXMLElement *elem;
+	NSXMLElement *elem = nil;
 	
 	if (sound == nil && phonetic != nil) {
 		sound = [NSXMLElement elementWithName:@"SOUND"];
@@ -901,7 +891,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (void)setKeyType:(NSString *)type {
 	NSXMLElement *key = [self elementForName:@"KEY"];
-	NSXMLElement *elem;
+	NSXMLElement *elem = nil;
 	
 	if (key == nil && type != nil) {
 		key = [NSXMLElement elementWithName:@"KEY"];

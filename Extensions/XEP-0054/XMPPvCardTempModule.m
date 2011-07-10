@@ -107,7 +107,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 		XMPPvCardTemp *vCardTemp = nil;
-		
+
 		if (useCache)
 		{
 			// Try loading from the cache
@@ -138,15 +138,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp
 {
-  XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
-  
-  NSString *elemId = [xmppStream generateUUID];
-  XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
-  [xmppStream sendElement:iq];
-  
-  [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
-  
-  [newvCardTemp release];
+	XMPPvCardTemp *newvCardTemp = [[vCardTemp copy] autorelease];
+	
+	NSString *elemId = [xmppStream generateUUID];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
+	[xmppStream sendElement:iq];
+	
+	[self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,19 +153,21 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
 {
-  // this method could be called from anywhere
-  dispatch_block_t block = ^{
+	// this method could be called from anywhere
+	// copy the vCardTemp to ensure it is detached from it's possibly released root
+	XMPPvCardTemp *copiedvCardTemp = [[vCardTemp copy] autorelease];
+	
+	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
-    
-    [_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
-    
-    [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
-                                                         didReceivevCardTemp:vCardTemp
-                                                                      forJID:jid];
-    
-    [pool drain];
+		
+		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
+		
+		[_moduleStorage setvCardTemp:copiedvCardTemp forJID:jid xmppStream:xmppStream];
+		
+		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
+																												 didReceivevCardTemp:copiedvCardTemp
+																																			forJID:jid];
+		[pool drain];
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
