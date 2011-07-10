@@ -1403,6 +1403,11 @@ enum XMPPStreamConfig
 	else
 		dispatch_sync(xmppQueue, block);
 	
+	if (errPtr)
+		*errPtr = [err autorelease];
+	else
+		[err release];
+	
 	return result;
 }
 
