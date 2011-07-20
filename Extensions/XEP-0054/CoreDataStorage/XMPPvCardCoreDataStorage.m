@@ -57,13 +57,13 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 #pragma mark Overrides
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)addPersistentStorePath:(NSString *)storePath error:(NSError **)error
+- (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr
 {    
-    BOOL result = [super addPersistentStorePath:storePath error:error];
+    BOOL result = [super addPersistentStoreWithPath:storePath error:errorPtr];
     
     if (!result &&
-        [*error code] == NSMigrationMissingSourceModelError &&
-        [[*error domain] isEqualToString:NSCocoaErrorDomain]) {
+        [*errorPtr code] == NSMigrationMissingSourceModelError &&
+        [[*errorPtr domain] isEqualToString:NSCocoaErrorDomain]) {
         // If we get this error while trying to add the persistent store, it most likely means the model changed.
         // Since we are caching capabilities, it is safe to delete the persistent store and create a new one.
         
@@ -72,7 +72,7 @@ static XMPPvCardCoreDataStorage *sharedInstance;
             [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
             
             // Try creating the store again, without creating a deletion/creation loop.
-            result = [super addPersistentStorePath:storePath error:error];
+            result = [super addPersistentStoreWithPath:storePath error:errorPtr];
         }
     }
     

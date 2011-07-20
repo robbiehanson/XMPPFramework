@@ -95,9 +95,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Initialize variables
 
 	xmppStream = [[XMPPStream alloc] init];
-    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:[XMPPCapabilitiesCoreDataStorage sharedInstance]];
-	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:[XMPPRosterCoreDataStorage sharedInstance]];
-	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:[XMPPvCardCoreDataStorage sharedInstance]];
+	
+	id <XMPPCapabilitiesStorage> capsStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
+    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:capsStorage];
+	
+//	id <XMPPRosterStorage> rosterStorage = [XMPPRosterCoreDataStorage sharedInstance];
+	id <XMPPRosterStorage> rosterStorage = [[[XMPPRosterCoreDataStorage alloc] initWithInMemoryStore] autorelease];
+	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:rosterStorage];
+	
+	id <XMPPvCardTempModuleStorage> vcardStorage = [XMPPvCardCoreDataStorage sharedInstance];
+	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:vcardStorage];
+	
 	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
 
 	// Configure modules

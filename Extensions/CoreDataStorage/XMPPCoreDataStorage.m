@@ -57,17 +57,12 @@ static NSMutableSet *databaseFileNames;
 #pragma mark Override Me
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)defaultFileName
+- (NSString *)managedObjectModelName
 {
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// This method is used for two things:
-	// 
-	// 1. It provides the name of the ManagedObjectModel file (*.xdatamodel / *.mom / *.momd) sans file extension.
-	//    In other words, this method is queried when setting up the persistentStoreCoordinator.
-	// 
-	// 2. It is used by default implementation of the defaultDatabaseFileName method.
-	//    See below.
+	// This method is queried to get the name of the ManagedObjectModel within the app bundle.
+	// It should return the name of the appropriate file (*.xdatamodel / *.mom / *.momd) sans file extension.
 	// 
 	// The default implementation returns the name of the subclass, stripping any suffix of "CoreDataStorage".
 	// E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtension".
@@ -95,18 +90,65 @@ static NSMutableSet *databaseFileNames;
 	// 
 	// You are encouraged to use the sqlite file extension.
 	
-	return [NSString stringWithFormat:@"%@.sqlite", [self defaultFileName]];
+	return [NSString stringWithFormat:@"%@.sqlite", [self managedObjectModelName]];
 }
 
-- (void)willCreatePersistentStore:(NSString *)filePath
+- (void)willCreatePersistentStoreWithPath:(NSString *)storePath
 {
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// For example, if you are using the database for non-persistent data you may want to delete the database
-	// file if it already exists on disk.
+	// If you are using a database file with non-persistent data (e.g. for memory optimization purposes on iOS),
+	// you may want to delete the database file if it already exists on disk.
+	// 
+	// If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
+	// If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
 }
 
-- (void)didNotAddPersistentStorePath:(NSString *)path error:(NSError *)error
+- (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr
+{
+	// Override me, if needed, to completely customize the persistent store.
+	// 
+	// Adds the persistent store path to the persistent store coordinator.
+	// Returns true if the persistent store is created.
+	// 
+	// If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
+	// If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
+			
+    NSPersistentStore *persistentStore;
+	
+	if (storePath)
+	{
+		// SQLite persistent store
+		
+		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
+		
+		// Default support for automatic lightweight migrations
+		NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+		                         [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
+		                         [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, 
+		                         nil];
+		
+		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+		                                                           configuration:nil
+		                                                                     URL:storeUrl
+		                                                                 options:options
+		                                                                   error:errorPtr];
+	}
+	else
+	{
+		// In-Memory persistent store
+		
+		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSInMemoryStoreType
+		                                                           configuration:nil
+		                                                                     URL:nil
+		                                                                 options:nil
+		                                                                   error:errorPtr];
+	}
+	
+    return persistentStore != nil;
+}
+
+- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error
 {
     // Override me, if needed, to provide customized behavior.
 	// 
@@ -128,7 +170,7 @@ static NSMutableSet *databaseFileNames;
                  @"Chaned core data model recently?\n"
                  @"Quick Fix: Delete the database: %@\n"
                  @"=====================================================================================",
-                 [self class], error, path);
+                 [self class], error, storePath);
 #endif
 
 }
@@ -145,6 +187,19 @@ static NSMutableSet *databaseFileNames;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @synthesize databaseFileName;
+
+- (void)commonInit
+{
+	saveThreshold = 500;
+	storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
+	
+	myJidCache = [[NSMutableDictionary alloc] init];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+	                                         selector:@selector(updateJidCache:)
+	                                             name:XMPPStreamDidChangeMyJIDNotification
+	                                           object:nil];
+}
 
 - (id)init
 {
@@ -166,15 +221,18 @@ static NSMutableSet *databaseFileNames;
 			return nil;
 		}
 		
-		saveThreshold = 500;
-		storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
+		[self commonInit];
+	}
+	return self;
+}
+
+- (id)initWithInMemoryStore
+{
+	if ((self = [super init]))
+	{
 		
-		myJidCache = [[NSMutableDictionary alloc] init];
 		
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		                                         selector:@selector(updateJidCache:)
-		                                             name:XMPPStreamDidChangeMyJIDNotification
-		                                           object:nil];
+		[self commonInit];
 	}
 	return self;
 }
@@ -340,24 +398,26 @@ static NSMutableSet *databaseFileNames;
 		
 		XMPPLogVerbose(@"%@: Creating managedObjectModel", [self class]);
 		
-		NSString *path = [[NSBundle mainBundle] pathForResource:[self defaultFileName] ofType:@"mom"];
+		NSString *momName = [self managedObjectModelName];
+		
+		NSString *momPath = [[NSBundle mainBundle] pathForResource:momName ofType:@"mom"];
+		if (momPath == nil)
+		{
+			// The model may be versioned or created with Xcode 4, try momd as an extension.
+			momPath = [[NSBundle mainBundle] pathForResource:momName ofType:@"momd"];
+		}
     
-    if (path == nil) {
-      // The model may be versioned or created with Xcode 4, try momd as an extension.
-      path = [[NSBundle mainBundle] pathForResource:[self defaultFileName] ofType:@"momd"];
-    }
-    
-		if (path)
+		if (momPath)
 		{
 			// If path is nil, then NSURL or NSManagedObjectModel will throw an exception
 			
-			NSURL *url = [NSURL fileURLWithPath:path];
+			NSURL *momUrl = [NSURL fileURLWithPath:momPath];
 			
-			managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
+			managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:momUrl];
 		}
 		else
 		{
-			XMPPLogWarn(@"%@: Couldn't find managedObjectModel file - %@", [self class], [self defaultFileName]);
+			XMPPLogWarn(@"%@: Couldn't find managedObjectModel file - %@", [self class], momName);
 		}
 		
 		[pool drain];
@@ -369,41 +429,6 @@ static NSMutableSet *databaseFileNames;
 		dispatch_sync(storageQueue, block);
 	
 	return managedObjectModel;
-}
-
-- (BOOL)addPersistentStorePath:(NSString *)storePath error:(NSError **)error
-{
-    // This is a private method.
-    // 
-	// If you even comtemplate ignoring this warning,
-	// then you need to go read the documentation for core data,
-	// specifically the section entitled "Concurrency with Core Data".
-	// 
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
-	// 
-	// Do NOT remove the assert statment above!
-	// Read the comments above!
-	// 
-    
-    NSAssert1(storePath, @"%@: Error creating persistentStoreCoordinator - Nil persistentStoreDirectory", [self class]);
-
-    // If storePath is nil, then NSURL will throw an exception
-    NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
-    
-    // Support for automatic lightweight migrations
-    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
-                             [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
-                             [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, 
-                             nil];
-    
-    NSPersistentStore *persistentStore;
-    persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
-                                                               configuration:nil
-                                                                         URL:storeUrl
-                                                                     options:options
-                                                                       error:error];
-
-    return persistentStore != nil;
 }
 
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator
@@ -430,24 +455,40 @@ static NSMutableSet *databaseFileNames;
 		
 		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
 		
-		NSString *docsPath = [self persistentStoreDirectory];
-		NSString *storePath = [docsPath stringByAppendingPathComponent:databaseFileName];
-		if (storePath)
+		if (databaseFileName)
 		{
-			// If storePath is nil, then NSURL will throw an exception
-            
-			[self willCreatePersistentStore:storePath];
-            
-			NSError *error = nil;
-            
-			if (![self addPersistentStorePath:storePath error:&error])
+			// SQLite persistent store
+			
+			NSString *docsPath = [self persistentStoreDirectory];
+			NSString *storePath = [docsPath stringByAppendingPathComponent:databaseFileName];
+			if (storePath)
 			{
-                [self didNotAddPersistentStorePath:storePath error:error];
+				// If storePath is nil, then NSURL will throw an exception
+				
+				[self willCreatePersistentStoreWithPath:storePath];
+				
+				NSError *error = nil;
+				if (![self addPersistentStoreWithPath:storePath error:&error])
+				{
+					[self didNotAddPersistentStoreWithPath:storePath error:error];
+				}
+			}
+			else
+			{
+				XMPPLogWarn(@"%@: Error creating persistentStoreCoordinator - Nil persistentStoreDirectory", [self class]);
 			}
 		}
 		else
 		{
-			XMPPLogWarn(@"%@: Error creating persistentStoreCoordinator - Nil persistentStoreDirectory", [self class]);
+			// In-Memory persistent store
+			
+			[self willCreatePersistentStoreWithPath:nil];
+			
+			NSError *error = nil;
+			if (![self addPersistentStoreWithPath:nil error:&error])
+			{
+				[self didNotAddPersistentStoreWithPath:nil error:error];
+			}
 		}
 		
 		[pool drain];
@@ -636,9 +677,12 @@ static NSMutableSet *databaseFileNames;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	
-	[[self class] unregisterDatabaseFileName:databaseFileName];
+	if (databaseFileName)
+	{
+		[[self class] unregisterDatabaseFileName:databaseFileName];
+		[databaseFileName release];
+	}
 	
-	[databaseFileName release];
 	[myJidCache release];
 	
 	if (storageQueue)

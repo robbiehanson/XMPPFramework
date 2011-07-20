@@ -57,14 +57,21 @@
 }
 
 /**
- * Initializes the core data storage instance, with the given database store filename.
- * It is recommended your filname use the "sqlite" file extension.
- * If you pass nil, the default value of is automatically used.
+ * Initializes a core data storage instance, backed by SQLite, with the given database store filename.
+ * It is recommended your database filname use the "sqlite" file extension (e.g. "XMPPRoster.sqlite").
+ * If you pass nil, a default database filename is automatically used.
+ * This default is derived from the classname,
+ * meaning subclasses will get a default database filename derived from the subclass classname.
  * 
  * If you attempt to create an instance of this class with the same databaseFileName as another existing instance,
  * this method will return nil.
 **/
 - (id)initWithDatabaseFilename:(NSString *)databaseFileName;
+
+/**
+ * Initializes a core data storage instance, backed by an in-memory store.
+**/
+- (id)initWithInMemoryStore;
 
 /**
  * Readonly access to the databaseFileName used during initialization.
