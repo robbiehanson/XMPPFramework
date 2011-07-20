@@ -14,20 +14,15 @@
 /**
  * Override me, if needed, to provide customized behavior.
  * 
- * This method is used for two things:
- * 
- * 1. It provides the name of the ManagedObjectModel file (*.xdatamodel / *.mom) sans file extension.
- *    In other words, this method is queried when setting up the persistentStoreCoordinator.
- * 
- * 2. It is used by default implementation of the defaultDatabaseFileName method.
- *    See below.
+ * This method is queried to get the name of the ManagedObjectModel within the app bundle.
+ * It should return the name of the appropriate file (*.xdatamodel / *.mom / *.momd) sans file extension.
  *  
  * The default implementation returns the name of the subclass, stripping any suffix of "CoreDataStorage".
  * E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtension".
  * 
  * Note that a file extension should NOT be included.
 **/
-- (NSString *)defaultFileName;
+- (NSString *)managedObjectModelName;
 
 /**
  * Override me, if needed, to provide customized behavior.
@@ -44,22 +39,39 @@
 /**
  * Override me, if needed, to provide customized behavior.
  * 
- * For example, if you are using the database for non-persistent data you may want to delete the database
- * file if it already exists on disk.
+ * If you are using a database file with non-persistent data (e.g. for memory optimization purposes on iOS),
+ * you may want to delete the database file if it already exists on disk.
+ * 
+ * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
+ * If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
  * 
  * The default implementation does nothing.
 **/
-- (void)willCreatePersistentStore:(NSString *)filePath;
+- (void)willCreatePersistentStoreWithPath:(NSString *)storePath;
+
+/**
+ * Override me, if needed, to completely customize the persistent store.
+ * 
+ * Adds the persistent store path to the persistent store coordinator.
+ * Returns true if the persistent store is created.
+ * 
+ * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
+ * If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
+**/
+- (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr;
 
 /**
  * Override me, if needed, to provide customized behavior.
- *
+ * 
  * For example, if you are using the database for non-persistent data and the model changes, you may want
  * to delete the database file if it already exists on disk and a core data migration is not worthwhile.
- *
- * The default implementation writes to the XMPP error log.
+ * 
+ * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
+ * If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
+ * 
+ * The default implementation simply writes to the XMPP error log.
 **/
-- (void)didNotAddPersistentStorePath:(NSString *)filePath error:(NSError *)error;
+- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error;
 
 /**
  * Override me, if needed, to provide customized behavior.
@@ -122,15 +134,6 @@
  * The standard persistentStoreDirectory method.
 **/
 - (NSString *)persistentStoreDirectory;
-
-/**
- * Adds the persistent store path to the persistent store coordinator.
- *
- * Returns true if the persistent store is created.
- *
- * This method may be overridden if the model changes and the change can't be handled by lightweight migration.
-**/
-- (BOOL)addPersistentStorePath:(NSString *)storePath error:(NSError **)error;
 
 /**
  * Provides access to the managedObjectContext.
