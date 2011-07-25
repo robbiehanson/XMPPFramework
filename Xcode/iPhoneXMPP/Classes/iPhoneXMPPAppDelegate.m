@@ -4,6 +4,7 @@
 
 #import "GCDAsyncSocket.h"
 #import "XMPP.h"
+#import "XMPPReconnect.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPvCardAvatarModule.h"
@@ -31,6 +32,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @implementation iPhoneXMPPAppDelegate
 
 @synthesize xmppStream;
+@synthesize xmppReconnect;
 @synthesize xmppCapabilities;
 @synthesize xmppRoster;
 @synthesize xmppvCardAvatarModule;
@@ -69,6 +71,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[xmppRoster removeDelegate:self];
 
 	[xmppStream disconnect];
+	[xmppReconnect release];
 	[xmppvCardAvatarModule release];
 	[xmppvCardTempModule release];
     [xmppCapabilities release];
@@ -92,38 +95,94 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Configure the xmpp stream
 - (void)setupStream
 {
-	// Initialize variables
+	// Setup xmpp stream
+	// 
+	// The XMPPStream is the base class for all activity.
+	// Everything else plugs into the xmppStream, such as modules/extensions and delegates.
 
 	xmppStream = [[XMPPStream alloc] init];
 	
-	id <XMPPCapabilitiesStorage> capsStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
-    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:capsStorage];
+	#if !TARGET_IPHONE_SIMULATOR
+	{
+		// Want xmpp to run in the background?
+		// 
+		// P.S. - The simulator doesn't support backgrounding yet.
+		//        When you try to set the associated property on the simulator, it simply fails.
+		//        And when you background an app on the simulator,
+		//        it just queues network traffic til the app is foregrounded again.
+		//        We are patiently waiting for a fix from Apple.
+		//        If you do enableBackgroundingOnSocket on the simulator,
+		//        you will simply see an error message from the xmpp stack when it fails to set the property.
+		
+		xmppStream.enableBackgroundingOnSocket = YES;
+	}
+	#endif
 	
-//	id <XMPPRosterStorage> rosterStorage = [XMPPRosterCoreDataStorage sharedInstance];
-	id <XMPPRosterStorage> rosterStorage = [[[XMPPRosterCoreDataStorage alloc] initWithInMemoryStore] autorelease];
+	// Setup roster
+	// 
+	// The XMPPRoster handles the xmpp protocol stuff related to the roster.
+	// The storage for the roster is abstracted.
+	// So you can use any storage mechanism you want.
+	// You can store it all in memory, or use core data and store it on disk, or use core data with an in-memory store,
+	// or setup your own using raw SQLite, or create your own storage mechanism.
+	// You can do it however you like! It's your application.
+	// But you do need to provide the roster with some storage facility.
+	
+	id <XMPPRosterStorage> rosterStorage = [[[XMPPRosterCoreDataStorage alloc] init] autorelease];
+//	id <XMPPRosterStorage> rosterStorage = [[[XMPPRosterCoreDataStorage alloc] initWithInMemoryStore] autorelease];
+	
 	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:rosterStorage];
+	
+	// Setup vCard support
+	
+	// We add XMPPRoster as a delegate of XMPPvCardAvatarModule to cache roster photos in the roster.
+	// This frees the view controller from having to save photos on the main thread.
 	
 	id <XMPPvCardTempModuleStorage> vcardStorage = [XMPPvCardCoreDataStorage sharedInstance];
 	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:vcardStorage];
 	
 	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
-
-	// Configure modules
+	
+	[xmppvCardAvatarModule addDelegate:xmppRoster delegateQueue:xmppRoster.moduleQueue];
+	
+	// Setup reconnect
+	// 
+	// The XMPPReconnect module monitors for "accidental disconnections" and
+	// automatically reconnects the stream for you.
+	// There's a bunch more information in the XMPPReconnect header file.
+	
+	xmppReconnect = [[XMPPReconnect alloc] init];
+	
+	// Setup capabilities
+	// 
+	// The XMPPCapabilities module handles all the complex hashing of the caps protocol (XEP-0115).
+	// Basically, when other clients broadcast their presence on the network
+	// they include information about what capabilities their client supports (audio, video, file transfer, etc).
+	// But as you can imagine, this list starts to get pretty big.
+	// This is where the hashing stuff comes into play.
+	// Most people running the same version of the same client are going to have the same list of capabilities.
+	// So the protocol defines a standardized way to hash the list of capabilities.
+	// Clients then broadcast the tiny hash instead of the big list.
+	// The XMPPCapabilities protocol automatically handles figuring out what these hashes mean,
+	// and also persistently storing the hashes so lookups aren't needed in the future.
+	// 
+	// Similarly to the roster, the storage of the module is abstracted.
+	// You are strongly encouraged to persist caps information across sessions.
+	// 
+	// The XMPPCapabilitiesCoreDataStorage is an ideal solution.
+	// It can also be shared amongst multiple streams to further reduce hash lookups.
+	
+	id <XMPPCapabilitiesStorage> capsStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
+    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:capsStorage];
 
     xmppCapabilities.autoFetchHashedCapabilities = YES;
     xmppCapabilities.autoFetchNonHashedCapabilities = NO;
 
 	[xmppRoster setAutoRoster:YES];
 
-	/**
-	 * Add XMPPRoster as a delegate of XMPPvCardAvatarModule to cache roster photos in the roster.
-	 * This frees the view controller from having to save photos on the main thread.
-	**/
-	[xmppvCardAvatarModule addDelegate:xmppRoster delegateQueue:xmppRoster.moduleQueue];
-
-
 	// Activate xmpp modules
 
+	[xmppReconnect activate:xmppStream];
     [xmppCapabilities activate:xmppStream];
 	[xmppRoster activate:xmppStream];
 	[xmppvCardTempModule activate:xmppStream];
@@ -144,8 +203,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// then the xmpp framework will follow the xmpp specification, and do a SRV lookup for quack.com.
 	// 
 	// If you don't specify a hostPort, then the default (5222) will be used.
-	//	[xmppStream setHostName:@"talk.google.com"];
-	//	[xmppStream setHostPort:5222];		
+	
+//	[xmppStream setHostName:@"talk.google.com"];
+//	[xmppStream setHostPort:5222];	
+	
 
 	// You may need to alter these settings depending on the server you're connecting to
 	allowSelfSignedCertificates = NO;
@@ -183,47 +244,47 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)connect
 {
-  if (![xmppStream isDisconnected]) {
-    return YES;
-  }
-  
-  NSString *myJID = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyJID];
-  NSString *myPassword = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyPassword];
-  
-  //
-  // If you don't want to use the Settings view to set the JID, 
-  // uncomment the section below to hard code a JID and password.
-  //
-  // Replace me with the proper JID and password:
-  //	myJID = @"user@gmail.com/xmppframework";
-  //	myPassword = @"";
-  
-  if (myJID == nil || myPassword == nil) {
-    DDLogWarn(@"JID and password must be set before connecting!");
-    
-    return NO;
-  }
-  
-  [xmppStream setMyJID:[XMPPJID jidWithString:myJID]];
-  password = myPassword;
-  
-  NSError *error = nil;
-  if (![xmppStream connect:&error])
-  {
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error connecting" 
-                                                        message:@"See console for error details." 
-                                                       delegate:nil 
-                                              cancelButtonTitle:@"Ok" 
-                                              otherButtonTitles:nil];
-    [alertView show];
-    [alertView release];
-    
-    DDLogError(@"Error connecting: %@", error);
-    
-    return NO;
-  }
-  
-  return YES;
+	if (![xmppStream isDisconnected]) {
+		return YES;
+	}
+
+	NSString *myJID = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyJID];
+	NSString *myPassword = [[NSUserDefaults standardUserDefaults] stringForKey:kXMPPmyPassword];
+
+	//
+	// If you don't want to use the Settings view to set the JID, 
+	// uncomment the section below to hard code a JID and password.
+	//
+	// Replace me with the proper JID and password:
+	//	myJID = @"user@gmail.com/xmppframework";
+	//	myPassword = @"";
+
+	if (myJID == nil || myPassword == nil) {
+		DDLogWarn(@"JID and password must be set before connecting!");
+
+		return NO;
+	}
+
+	[xmppStream setMyJID:[XMPPJID jidWithString:myJID]];
+	password = myPassword;
+
+	NSError *error = nil;
+	if (![xmppStream connect:&error])
+	{
+		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error connecting" 
+		                                                    message:@"See console for error details." 
+		                                                   delegate:nil 
+		                                          cancelButtonTitle:@"Ok" 
+		                                          otherButtonTitles:nil];
+		[alertView show];
+		[alertView release];
+
+		DDLogError(@"Error connecting: %@", error);
+
+		return NO;
+	}
+
+	return YES;
 }
 
 - (void)disconnect {
@@ -315,10 +376,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)xmppStream:(XMPPStream *)sender socketDidConnect:(GCDAsyncSocket *)socket 
 {
-  // Allows the application to receive inbound XMPP traffic while in the background.
-  [socket performBlock:^{
-    [socket enableBackgroundingOnSocket];
-  }];
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 - (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
