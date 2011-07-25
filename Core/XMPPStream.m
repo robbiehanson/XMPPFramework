@@ -57,6 +57,9 @@ enum XMPPStreamConfig
 {
 	kP2PMode                      = 1 << 0,  // If set, the XMPPStream was initialized in P2P mode
 	kResetByteCountPerConnection  = 1 << 1,  // If set, byte count should be reset per connection
+#if TARGET_OS_IPHONE
+	kEnableBackgroundingOnSocket  = 1 << 2,  // If set, the VoIP flag should be set on the socket
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -480,20 +483,18 @@ enum XMPPStreamConfig
 
 - (BOOL)resetByteCountPerConnection
 {
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (config & kResetByteCountPerConnection) ? YES : NO;
+	};
+	
 	if (dispatch_get_current_queue() == xmppQueue)
-	{
-		return (config & kResetByteCountPerConnection) ? YES : NO;
-	}
+		block();
 	else
-	{
-		__block BOOL result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = (config & kResetByteCountPerConnection) ? YES : NO;
-		});
-		
-		return result;
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
 - (void)setResetByteCountPerConnection:(BOOL)flag
@@ -510,6 +511,41 @@ enum XMPPStreamConfig
 	else
 		dispatch_async(xmppQueue, block);
 }
+
+#if TARGET_OS_IPHONE
+
+- (BOOL)enableBackgroundingOnSocket
+{
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (config & kEnableBackgroundingOnSocket) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+- (void)setEnableBackgroundingOnSocket:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		if (flag)
+			config |= kEnableBackgroundingOnSocket;
+		else
+			config &= ~kEnableBackgroundingOnSocket;
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Configuration
@@ -3103,6 +3139,24 @@ enum XMPPStreamConfig
 	// The TCP connection is now established.
 	
 	XMPPLogTrace();
+	
+	#if TARGET_OS_IPHONE
+	{
+		if (self.enableBackgroundingOnSocket)
+		{
+			__block BOOL result;
+			
+			[asyncSocket performBlock:^{
+				result = [asyncSocket enableBackgroundingOnSocket];
+			}];
+			
+			if (result)
+				XMPPLogVerbose(@"%@: Enabled backgrounding on socket", THIS_FILE);
+			else
+				XMPPLogError(@"%@: Error enabling backgrounding on socket!", THIS_FILE);
+		}
+	}
+	#endif
 	
 	[multicastDelegate xmppStream:self socketDidConnect:sock];
 	

@@ -245,6 +245,17 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 **/
 @property (readwrite, retain) id tag;
 
+#if TARGET_OS_IPHONE
+
+/**
+ * If set, the kCFStreamNetworkServiceTypeVoIP flags will be set on the underlying CFRead/Write streams.
+ * 
+ * The default value is NO.
+**/
+@property (readwrite, assign) BOOL enableBackgroundingOnSocket;
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark State
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -626,14 +637,11 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStreamWillConnect:(XMPPStream *)sender;
 
 /**
- * This method is called after the socket has connected to the remote host.
+ * This method is called after the tcp socket has connected to the remote host.
+ * It may be used as a hook for various things, such as updating the UI or extracting the server's IP address.
  * 
- * If developing an iOS app that runs in the background, this is where you would enable background sockets.
- * For example:
- * 
- * [socket performBlock:^{
- *     [socket enableBackgroundingOnSocket];
- * }];
+ * If developing an iOS app that runs in the background,
+ * please use XMPPStream's enableBackgroundingOnSocket property as opposed to doing it directly on the socket here.
 **/
 - (void)xmppStream:(XMPPStream *)sender socketDidConnect:(GCDAsyncSocket *)socket;
 

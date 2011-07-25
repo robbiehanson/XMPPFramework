@@ -5,17 +5,17 @@
 
 @class SettingsViewController;
 @class XMPPStream;
+@class XMPPReconnect;
 @class XMPPCapabilities;
 @class XMPPRosterCoreDataStorage;
 @class XMPPvCardAvatarModule;
 @class XMPPvCardTempModule;
 
 
-@interface iPhoneXMPPAppDelegate : NSObject <
-UIApplicationDelegate,
-XMPPRosterDelegate
-> {
+@interface iPhoneXMPPAppDelegate : NSObject <UIApplicationDelegate, XMPPRosterDelegate>
+{
 	XMPPStream *xmppStream;
+	XMPPReconnect *xmppReconnect;
     XMPPCapabilities *xmppCapabilities;
 	XMPPRoster *xmppRoster;
   
@@ -36,6 +36,7 @@ XMPPRosterDelegate
 }
 
 @property (nonatomic, readonly) XMPPStream *xmppStream;
+@property (nonatomic, readonly) XMPPReconnect *xmppReconnect;
 @property (nonatomic, readonly) XMPPCapabilities *xmppCapabilities;
 @property (nonatomic, readonly) XMPPRoster *xmppRoster;
 @property (nonatomic, readonly) XMPPvCardAvatarModule *xmppvCardAvatarModule;
