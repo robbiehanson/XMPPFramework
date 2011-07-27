@@ -51,6 +51,7 @@
 @interface XMPPReconnect : XMPPModule
 {
 	Byte flags;
+	Byte config;
 	NSTimeInterval reconnectDelay;
 	
 	dispatch_source_t reconnectTimer;
