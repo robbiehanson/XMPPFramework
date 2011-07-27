@@ -15,11 +15,15 @@
 
 enum XMPPReconnectFlags
 {
+	kShouldReconnect   = 1 << 0,  // If set, disconnection was accidental, and autoReconnect may be used
+	kMultipleChanges   = 1 << 1,  // If set, there have been reachability changes during a connection attempt
+	kManuallyStarted   = 1 << 2,  // If set, we were started manually via manualStart method
+	kQueryingDelegates = 1 << 3,  // If set, we are awaiting response(s) from the delegate(s)
+};
+
+enum XMPPReconnectConfig
+{
 	kAutoReconnect     = 1 << 0,  // If set, automatically attempts to reconnect after a disconnection
-	kShouldReconnect   = 1 << 1,  // If set, disconnection was accidental, and autoReconnect may be used
-	kMultipleChanges   = 1 << 2,  // If set, there have been reachability changes during a connection attempt
-	kManuallyStarted   = 1 << 3,  // If set, we were started manually via manualStart method
-	kQueryingDelegates = 1 << 4,  // If set, we are awaiting response(s) from the delegate(s)
 };
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
@@ -60,7 +64,8 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		flags = kAutoReconnect;
+		flags = 0;
+		config = kAutoReconnect;
 		
 		reconnectDelay = DEFAULT_XMPP_RECONNECT_DELAY;
 		reconnectTimerInterval = DEFAULT_XMPP_RECONNECT_TIMER_INTERVAL;
@@ -89,7 +94,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	__block BOOL result;
 	
 	dispatch_block_t block = ^{
-		result = (flags & kAutoReconnect) ? YES : NO;
+		result = (config & kAutoReconnect) ? YES : NO;
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -104,9 +109,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{
 		if (flag)
-			flags |= kAutoReconnect;
+			config |= kAutoReconnect;
 		else
-			flags &= ~kAutoReconnect;
+			config &= ~kAutoReconnect;
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -214,10 +219,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		// Clear all flags (except the kAutoReconnect flag, which should remain as is)
-		// This is to disable any further reconnect attemts regardless of the state we're in.
+		// Clear all flags to disable any further reconnect attemts regardless of the state we're in.
 		
-		flags = kAutoReconnect;
+		flags = 0;
 		
 		// Stop any planned reconnect attempts and stop monitoring the network.
 		
