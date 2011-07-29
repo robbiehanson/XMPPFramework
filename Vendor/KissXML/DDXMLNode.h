@@ -37,8 +37,11 @@ enum {
 	// Every DDXML object is simply a wrapper around an underlying libxml node
 	struct _xmlKind *genericPtr;
 	
-	// Root nodes free the underlying libxml node on dealloc.
-	BOOL freeOnDealloc;
+	// Every libxml node resides somewhere within an xml tree heirarchy.
+	// We cannot free the tree heirarchy until all referencing nodes have been released.
+	// So all nodes retain a reference to the node that created them,
+	// and when the last reference is released the tree gets freed.
+	DDXMLNode *owner;
 }
 
 //- (id)initWithKind:(DDXMLNodeKind)kind;
