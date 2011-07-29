@@ -8,29 +8,29 @@
  * Returns a DDXML wrapper object for the given primitive node.
  * The given node MUST be non-NULL and of the proper type.
 **/
-+ (id)nodeWithDocPrimitive:(xmlDocPtr)doc freeOnDealloc:(BOOL)flag
++ (id)nodeWithDocPrimitive:(xmlDocPtr)doc owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLDocument alloc] initWithDocPrimitive:doc freeOnDealloc:flag] autorelease];
+	return [[[DDXMLDocument alloc] initWithDocPrimitive:doc owner:owner] autorelease];
 }
 
-- (id)initWithDocPrimitive:(xmlDocPtr)doc freeOnDealloc:(BOOL)flag
+- (id)initWithDocPrimitive:(xmlDocPtr)doc owner:(DDXMLNode *)inOwner
 {
-	self = [super initWithPrimitive:(xmlKindPtr)doc freeOnDealloc:flag];
+	self = [super initWithPrimitive:(xmlKindPtr)doc owner:inOwner];
 	return self;
 }
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)owner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes
-	NSAssert(NO, @"Use nodeWithDocPrimitive:freeOnDealloc:");
+	NSAssert(NO, @"Use nodeWithDocPrimitive:owner:");
 	
 	return nil;
 }
 
-- (id)initWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
+- (id)initWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)inOwner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
-	NSAssert(NO, @"Use initWithDocPrimitive:freeOnDealloc:");
+	NSAssert(NO, @"Use initWithDocPrimitive:owner:");
 	
 	[self release];
 	return nil;
@@ -81,7 +81,7 @@
 		return nil;
 	}
 	
-	return [self initWithDocPrimitive:doc freeOnDealloc:YES];
+	return [self initWithDocPrimitive:doc owner:nil];
 }
 
 /**
@@ -100,7 +100,7 @@
 	xmlNodePtr rootNode = xmlDocGetRootElement(doc);
 	
 	if (rootNode != NULL)
-		return [DDXMLElement nodeWithElementPrimitive:rootNode freeOnDealloc:NO];
+		return [DDXMLElement nodeWithElementPrimitive:rootNode owner:self];
 	else
 		return nil;
 }

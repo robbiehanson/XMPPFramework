@@ -8,29 +8,29 @@
  * Returns a DDXML wrapper object for the given primitive node.
  * The given node MUST be non-NULL and of the proper type.
 **/
-+ (id)nodeWithElementPrimitive:(xmlNodePtr)node freeOnDealloc:(BOOL)flag
++ (id)nodeWithElementPrimitive:(xmlNodePtr)node owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLElement alloc] initWithElementPrimitive:node freeOnDealloc:flag] autorelease];
+	return [[[DDXMLElement alloc] initWithElementPrimitive:node owner:owner] autorelease];
 }
 
-- (id)initWithElementPrimitive:(xmlNodePtr)node freeOnDealloc:(BOOL)flag
+- (id)initWithElementPrimitive:(xmlNodePtr)node owner:(DDXMLNode *)inOwner
 {
-	self = [super initWithPrimitive:(xmlKindPtr)node freeOnDealloc:flag];
+	self = [super initWithPrimitive:(xmlKindPtr)node owner:inOwner];
 	return self;
 }
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)owner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes
-	NSAssert(NO, @"Use nodeWithElementPrimitive:freeOnDealloc:");
+	NSAssert(NO, @"Use nodeWithElementPrimitive:owner:");
 	
 	return nil;
 }
 
-- (id)initWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
+- (id)initWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)inOwner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
-	NSAssert(NO, @"Use initWithElementPrimitive:freeOnDealloc:");
+	NSAssert(NO, @"Use initWithElementPrimitive:owner:");
 	
 	[self release];
 	return nil;
@@ -47,7 +47,7 @@
 		return nil;
 	}
 	
-	return [self initWithElementPrimitive:node freeOnDealloc:YES];
+	return [self initWithElementPrimitive:node owner:nil];
 }
 
 - (id)initWithName:(NSString *)name URI:(NSString *)URI
@@ -61,7 +61,7 @@
 		return nil;
 	}
 	
-	DDXMLElement *result = [self initWithElementPrimitive:node freeOnDealloc:YES];
+	DDXMLElement *result = [self initWithElementPrimitive:node owner:nil];
 	[result setURI:URI];
 	
 	return result;
@@ -78,7 +78,7 @@
 		return nil;
 	}
 	
-	DDXMLElement *result = [self initWithElementPrimitive:node freeOnDealloc:YES];
+	DDXMLElement *result = [self initWithElementPrimitive:node owner:nil];
 	[result setStringValue:string];
 	
 	return result;
@@ -154,7 +154,7 @@
 	// We need to figure out what the prefix is for this URI.
 	// Then we search for elements that are named prefix:localName OR (named localName AND have the given URI).
 	
-	NSString *prefix = [[self class] resolvePrefixForURI:URI atNode:(xmlNodePtr)genericPtr];
+	NSString *prefix = [self _recursiveResolvePrefixForURI:URI atNode:(xmlNodePtr)genericPtr];
 	if (prefix != nil)
 	{
 		NSString *name = [NSString stringWithFormat:@"%@:%@", prefix, localName];
@@ -215,7 +215,7 @@
 			
 			if (match)
 			{
-				[result addObject:[DDXMLElement nodeWithElementPrimitive:child freeOnDealloc:NO]];
+				[result addObject:[DDXMLElement nodeWithElementPrimitive:child owner:self]];
 			}
 		}
 		
@@ -306,7 +306,8 @@
 	xmlAddChild((xmlNodePtr)genericPtr, (xmlNodePtr)attribute->genericPtr);
 	
 	// The attribute is now part of the xml tree heirarchy
-	attribute->freeOnDealloc = NO;
+	[attribute->owner release];
+	attribute->owner = [self retain];
 }
 
 - (void)removeAttributeForName:(NSString *)name
@@ -329,7 +330,7 @@
 	xmlAttrPtr attr = ((xmlNodePtr)genericPtr)->properties;
 	while (attr != NULL)
 	{
-		[result addObject:[DDXMLAttributeNode nodeWithAttrPrimitive:attr freeOnDealloc:NO]];
+		[result addObject:[DDXMLAttributeNode nodeWithAttrPrimitive:attr owner:self]];
 		
 		attr = attr->next;
 	}
@@ -358,14 +359,14 @@
 			
 			if (xmlStrQEqual(attr->ns->prefix, attr->name, attrName))
 			{
-				return [DDXMLAttributeNode nodeWithAttrPrimitive:attr freeOnDealloc:NO];
+				return [DDXMLAttributeNode nodeWithAttrPrimitive:attr owner:self];
 			}
 		}
 		else
 		{
 			if (xmlStrEqual(attr->name, attrName))
 			{
-				return [DDXMLAttributeNode nodeWithAttrPrimitive:attr freeOnDealloc:NO];
+				return [DDXMLAttributeNode nodeWithAttrPrimitive:attr owner:self];
 			}
 		}
 		
@@ -464,7 +465,8 @@
 	}
 	
 	// The namespace is now part of the xml tree heirarchy
-	namespace->freeOnDealloc = NO;
+	[namespace->owner release];
+	namespace->owner = [self retain];
 	
 	if ([namespace isKindOfClass:[DDXMLNamespaceNode class]])
 	{
@@ -512,7 +514,7 @@
 	xmlNsPtr ns = ((xmlNodePtr)genericPtr)->nsDef;
 	while (ns != NULL)
 	{
-		[result addObject:[DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:(xmlNodePtr)genericPtr freeOnDealloc:NO]];
+		[result addObject:[DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:(xmlNodePtr)genericPtr owner:self]];
 		
 		ns = ns->next;
 	}
@@ -534,7 +536,7 @@
 		xmlNsPtr ns = ((xmlNodePtr)genericPtr)->ns;
 		if (ns != NULL)
 		{
-			return [DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:(xmlNodePtr)genericPtr freeOnDealloc:NO];
+			return [DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:(xmlNodePtr)genericPtr owner:self];
 		}
 	}
 	else
@@ -544,7 +546,7 @@
 		{
 			if (xmlStrEqual(ns->prefix, [prefix xmlChar]))
 			{
-				return [DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:(xmlNodePtr)genericPtr freeOnDealloc:NO];
+				return [DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:(xmlNodePtr)genericPtr owner:self];
 			}
 			ns = ns->next;
 		}
@@ -574,7 +576,7 @@
 /**
  * Recursively searches the given node for the given namespace
 **/
-+ (DDXMLNode *)resolveNamespaceForPrefix:(NSString *)prefix atNode:(xmlNodePtr)nodePtr
+- (DDXMLNode *)_recursiveResolveNamespaceForPrefix:(NSString *)prefix atNode:(xmlNodePtr)nodePtr
 {
 	// This is a private/internal method
 	
@@ -585,12 +587,12 @@
 	{
 		if (xmlStrEqual(ns->prefix, [prefix xmlChar]))
 		{
-			return [DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:nodePtr freeOnDealloc:NO];
+			return [DDXMLNamespaceNode nodeWithNsPrimitive:ns nsParent:nodePtr owner:self];
 		}
 		ns = ns->next;
 	}
 	
-	return [self resolveNamespaceForPrefix:prefix atNode:nodePtr->parent];
+	return [self _recursiveResolveNamespaceForPrefix:prefix atNode:nodePtr->parent];
 }
 
 /**
@@ -606,7 +608,7 @@
 	// If the user passes nil or an empty string for name, they're looking for the default namespace.
 	if ([name length] == 0)
 	{
-		return [[self class] resolveNamespaceForPrefix:nil atNode:(xmlNodePtr)genericPtr];
+		return [self _recursiveResolveNamespaceForPrefix:nil atNode:(xmlNodePtr)genericPtr];
 	}
 	
 	NSString *prefix = [[self class] prefixForName:name];
@@ -617,7 +619,7 @@
 		// This gives us mostly what we want, except we also need to know the nsParent.
 		// So we do the recursive search ourselves.
 		
-		return [[self class] resolveNamespaceForPrefix:prefix atNode:(xmlNodePtr)genericPtr];
+		return [self _recursiveResolveNamespaceForPrefix:prefix atNode:(xmlNodePtr)genericPtr];
 	}
 	
 	return nil;
@@ -626,7 +628,7 @@
 /**
  * Recursively searches the given node for a namespace with the given URI, and a set prefix.
 **/
-+ (NSString *)resolvePrefixForURI:(NSString *)uri atNode:(xmlNodePtr)nodePtr
+- (NSString *)_recursiveResolvePrefixForURI:(NSString *)uri atNode:(xmlNodePtr)nodePtr
 {
 	// This is a private/internal method
 	
@@ -645,7 +647,7 @@
 		ns = ns->next;
 	}
 	
-	return [self resolvePrefixForURI:uri atNode:nodePtr->parent];
+	return [self _recursiveResolvePrefixForURI:uri atNode:nodePtr->parent];
 }
 
 /**
@@ -661,7 +663,7 @@
 	// We can't use xmlSearchNsByHref because it will return xmlNsPtr's with NULL prefixes.
 	// We're looking for a definitive prefix for the given URI.
 	
-	return [[self class] resolvePrefixForURI:namespaceURI atNode:(xmlNodePtr)genericPtr];
+	return [self _recursiveResolvePrefixForURI:namespaceURI atNode:(xmlNodePtr)genericPtr];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -682,7 +684,8 @@
 	xmlAddChild((xmlNodePtr)genericPtr, (xmlNodePtr)child->genericPtr);
 	
 	// The node is now part of the xml tree heirarchy
-	child->freeOnDealloc = NO;
+	[child->owner release];
+	child->owner = [self retain];
 }
 
 - (void)insertChild:(DDXMLNode *)child atIndex:(NSUInteger)index
@@ -707,7 +710,10 @@
 			if (i == index)
 			{
 				xmlAddPrevSibling(childNodePtr, (xmlNodePtr)child->genericPtr);
-				child->freeOnDealloc = NO;
+				
+				[child->owner release];
+				child->owner = [self retain];
+				
 				return;
 			}
 			
@@ -719,7 +725,10 @@
 	if (i == index)
 	{
 		xmlAddChild((xmlNodePtr)genericPtr, (xmlNodePtr)child->genericPtr);
-		child->freeOnDealloc = NO;
+		
+		[child->owner release];
+		child->owner = [self retain];
+		
 		return;
 	}
 	

@@ -23,12 +23,20 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 
 #endif
 
+/**
+ * From Apple's Documentation:
+ * 
+ * The runtime sends initialize to each class in a program exactly one time just before the class,
+ * or any class that inherits from it, is sent its first message from within the program. (Thus the method may
+ * never be invoked if the class is not used.) The runtime sends the initialize message to classes
+ * in a thread-safe manner. Superclasses receive this message before their subclasses.
+ * 
+ * The method may also be called directly (assumably by accident), hence the safety mechanism.
+**/
 + (void)initialize
 {
-	static BOOL initialized = NO;
-	if (!initialized)
-	{
-		initialized = YES;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
 		
 		// Redirect error output to our own function (don't clog up the console)
 		initGenericErrorDefaultFunc(NULL);
@@ -39,13 +47,14 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		// This also has the added benefit of taking up less RAM when parsing formatted XML documents.
 		xmlKeepBlanksDefault(0);
 		
-	#if DDXML_DEBUG_MEMORY_ISSUES
+		#if DDXML_DEBUG_MEMORY_ISSUES
+		{
+			zombieTracker = CFDictionaryCreateMutable(NULL, 0, NULL, &kCFTypeDictionaryValueCallBacks);
+			zombieQueue = dispatch_queue_create("DDXMLZombieQueue", NULL);
+		}
+		#endif
 		
-		zombieTracker = CFDictionaryCreateMutable(NULL, 0, NULL, &kCFTypeDictionaryValueCallBacks);
-		zombieQueue = dispatch_queue_create("DDXMLZombieQueue", NULL);
-		
-	#endif
-	}
+	});
 }
 
 + (id)elementWithName:(NSString *)name
@@ -78,7 +87,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (attr == NULL) return nil;
 	
-	return [[[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr freeOnDealloc:YES] autorelease];
+	return [[[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:nil] autorelease];
 }
 
 + (id)attributeWithName:(NSString *)name URI:(NSString *)URI stringValue:(NSString *)stringValue
@@ -87,7 +96,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (attr == NULL) return nil;
 	
-	DDXMLAttributeNode *result = [[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr freeOnDealloc:YES];
+	DDXMLAttributeNode *result = [[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:nil];
 	[result setURI:URI];
 	
 	return [result autorelease];
@@ -102,7 +111,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (ns == NULL) return nil;
 	
-	return [[[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:NULL freeOnDealloc:YES] autorelease];
+	return [[[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:NULL owner:nil] autorelease];
 }
 
 + (id)processingInstructionWithName:(NSString *)name stringValue:(NSString *)stringValue
@@ -111,7 +120,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (procInst == NULL) return nil;
 	
-	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)procInst freeOnDealloc:YES] autorelease];
+	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)procInst owner:nil] autorelease];
 }
 
 + (id)commentWithStringValue:(NSString *)stringValue
@@ -120,7 +129,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (comment == NULL) return nil;
 	
-	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)comment freeOnDealloc:YES] autorelease];
+	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)comment owner:nil] autorelease];
 }
 
 + (id)textWithStringValue:(NSString *)stringValue
@@ -129,36 +138,36 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (text == NULL) return nil;
 	
-	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)text freeOnDealloc:YES] autorelease];
+	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)text owner:nil] autorelease];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Init, Dealloc
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (id)nodeWithUnknownPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
++ (id)nodeWithUnknownPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)owner
 {
 	if (kindPtr->type == XML_DOCUMENT_NODE)
 	{
-		return [DDXMLDocument nodeWithDocPrimitive:(xmlDocPtr)kindPtr freeOnDealloc:flag];
+		return [DDXMLDocument nodeWithDocPrimitive:(xmlDocPtr)kindPtr owner:owner];
 	}
 	else if (kindPtr->type == XML_ELEMENT_NODE)
 	{
-		return [DDXMLElement nodeWithElementPrimitive:(xmlNodePtr)kindPtr freeOnDealloc:flag];
+		return [DDXMLElement nodeWithElementPrimitive:(xmlNodePtr)kindPtr owner:owner];
 	}
 	else if (kindPtr->type == XML_NAMESPACE_DECL)
 	{
 		// Todo: This may be a problem...
 		
-		return [DDXMLNamespaceNode nodeWithNsPrimitive:(xmlNsPtr)kindPtr nsParent:NULL freeOnDealloc:flag];
+		return [DDXMLNamespaceNode nodeWithNsPrimitive:(xmlNsPtr)kindPtr nsParent:NULL owner:owner];
 	}
 	else if (kindPtr->type == XML_ATTRIBUTE_NODE)
 	{
-		return [DDXMLAttributeNode nodeWithAttrPrimitive:(xmlAttrPtr)kindPtr freeOnDealloc:flag];
+		return [DDXMLAttributeNode nodeWithAttrPrimitive:(xmlAttrPtr)kindPtr owner:owner];
 	}
 	else
 	{
-		return [DDXMLNode nodeWithPrimitive:kindPtr freeOnDealloc:flag];
+		return [DDXMLNode nodeWithPrimitive:kindPtr owner:owner];
 	}
 }
 
@@ -166,21 +175,21 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
  * Returns a DDXML wrapper object for the given primitive node.
  * The given node MUST be non-NULL and of the proper type.
 **/
-+ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLNode alloc] initWithPrimitive:kindPtr freeOnDealloc:flag] autorelease];
+	return [[[DDXMLNode alloc] initWithPrimitive:kindPtr owner:owner] autorelease];
 }
 
 /**
  * Returns a DDXML wrapper object for the given primitive node.
  * The given node MUST be non-NULL and of the proper type.
 **/
-- (id)initWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
+- (id)initWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)inOwner
 {
 	if ((self = [super init]))
 	{
 		genericPtr = kindPtr;
-		freeOnDealloc = flag;
+		owner = [inOwner retain];
 		
 	#if DDXML_DEBUG_MEMORY_ISSUES
 		MarkBirth(genericPtr, self);
@@ -198,7 +207,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	// We also check if genericPtr is NULL.
 	// This may be the case if, e.g., DDXMLElement calls [self release] from it's init method.
 	
-	if (freeOnDealloc && (genericPtr != NULL))
+	if ((owner == nil) && (genericPtr != NULL))
 	{
 		if (IsXmlNsPtr(genericPtr))
 		{
@@ -244,6 +253,8 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 			NSAssert1(NO, @"Cannot free unknown node type: %i", ((xmlKindPtr)genericPtr)->type);
 		}
 	}
+	
+	[owner release];
 	[super dealloc];
 }
 
@@ -263,7 +274,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		
 		if (copyDocPtr == NULL) return nil;
 		
-		return [[DDXMLDocument alloc] initWithDocPrimitive:copyDocPtr freeOnDealloc:YES];
+		return [[DDXMLDocument alloc] initWithDocPrimitive:copyDocPtr owner:nil];
 	}
 	
 	if (IsXmlNodePtr(genericPtr))
@@ -273,9 +284,9 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		if (copyNodePtr == NULL) return nil;
 		
 		if ([self isKindOfClass:[DDXMLElement class]])
-			return [[DDXMLElement alloc] initWithElementPrimitive:copyNodePtr freeOnDealloc:YES];
+			return [[DDXMLElement alloc] initWithElementPrimitive:copyNodePtr owner:nil];
 		else
-			return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyNodePtr freeOnDealloc:YES];
+			return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyNodePtr owner:nil];
 	}
 	
 	if (IsXmlAttrPtr(genericPtr))
@@ -284,7 +295,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		
 		if (copyAttrPtr == NULL) return nil;
 		
-		return [[DDXMLAttributeNode alloc] initWithAttrPrimitive:copyAttrPtr freeOnDealloc:YES];
+		return [[DDXMLAttributeNode alloc] initWithAttrPrimitive:copyAttrPtr owner:nil];
 	}
 	
 	if (IsXmlNsPtr(genericPtr))
@@ -293,7 +304,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		
 		if (copyNsPtr == NULL) return nil;
 		
-		return [[DDXMLNamespaceNode alloc] initWithNsPrimitive:copyNsPtr nsParent:NULL freeOnDealloc:YES];
+		return [[DDXMLNamespaceNode alloc] initWithNsPrimitive:copyNsPtr nsParent:NULL owner:nil];
 	}
 	
 	if (IsXmlDtdPtr(genericPtr))
@@ -302,10 +313,33 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		
 		if (copyDtdPtr == NULL) return nil;
 		
-		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyDtdPtr freeOnDealloc:YES];
+		return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)copyDtdPtr owner:nil];
 	}
 	
 	return nil;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Equality
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)isEqual:(id)anObject
+{
+	// DDXMLNode, DDXMLElement, and DDXMLDocument are simply light-weight wrappers atop a libxml structure.
+	// 
+	// To provide maximum speed and thread-safety,
+	// multiple DDXML wrapper objects may be created that wrap the same underlying libxml node.
+	// 
+	// Thus equality is simply a matter of what underlying libxml node DDXML is wrapping.
+	
+	if ([anObject class] == [self class])
+	{
+		DDXMLNode *aNode = (DDXMLNode *)anObject;
+		
+		return (genericPtr == aNode->genericPtr);
+	}
+	
+	return NO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -474,7 +508,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	if (node == NULL || node->doc == NULL)
 		return nil;
 	else
-		return [DDXMLDocument nodeWithDocPrimitive:node->doc freeOnDealloc:NO];
+		return [DDXMLDocument nodeWithDocPrimitive:node->doc owner:self];
 }
 
 /**
@@ -497,7 +531,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	if (node->parent == NULL)
 		return nil;
 	else
-		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->parent freeOnDealloc:NO];
+		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->parent owner:self];
 }
 
 /**
@@ -550,7 +584,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	xmlNodePtr child = ((xmlStdPtr)genericPtr)->children;
 	while (child != NULL)
 	{
-		[result addObject:[DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)child freeOnDealloc:NO]];
+		[result addObject:[DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)child owner:self]];
 		
 		child = child->next;
 	}
@@ -594,7 +628,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	{
 		if (i == index)
 		{
-			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)child freeOnDealloc:NO];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)child owner:self];
 		}
 		
 		i++;
@@ -626,7 +660,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	if (node->prev == NULL)
 		return nil;
 	else
-		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->prev freeOnDealloc:NO];
+		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->prev owner:self];
 }
 
 /**
@@ -649,7 +683,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	if (node->next == NULL)
 		return nil;
 	else
-		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->next freeOnDealloc:NO];
+		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->next owner:self];
 }
 
 /**
@@ -687,12 +721,12 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 				lastChild = lastChild->last;
 			}
 			
-			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)lastChild freeOnDealloc:NO];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)lastChild owner:self];
 		}
 		else
 		{
 			// The previous sibling has no children, so the previous node is simply the previous sibling
-			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)previousSibling freeOnDealloc:NO];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)previousSibling owner:self];
 		}
 	}
 	
@@ -703,7 +737,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	if (node->parent == NULL || node->parent->type == XML_DOCUMENT_NODE)
 		return nil;
 	else
-		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->parent freeOnDealloc:NO];
+		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node->parent owner:self];
 }
 
 /**
@@ -744,7 +778,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	{
 		xmlNodePtr parentNextSibling = parent->next;
 		if (parentNextSibling != NULL)
-			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)parentNextSibling freeOnDealloc:NO];
+			return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)parentNextSibling owner:self];
 		else
 			parent = parent->parent;
 	}
@@ -774,12 +808,14 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		if (IsXmlNodePtr(genericPtr))
 		{
 			[[self class] detachChild:(xmlNodePtr)node fromNode:node->parent];
-			freeOnDealloc = YES;
+			
+			[owner release];
+			owner = nil;
 		}
 	}
 }
 
-- (xmlStdPtr)XPathPreProcess:(NSMutableString *)result
+- (xmlStdPtr)_XPathPreProcess:(NSMutableString *)result
 {
 	// This is a private/internal method
 	
@@ -801,7 +837,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	// /rootElement[1]/subElement[4]/thisNode[2]
 	// topElement/thisNode[2]
 	
-	xmlStdPtr node = [self XPathPreProcess:result];
+	xmlStdPtr node = [self _XPathPreProcess:result];
 	
 	// Note: rootNode.parent == docNode
 		
@@ -947,6 +983,8 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 **/
 + (NSString *)localNameForName:(NSString *)name
 {
+	// This is a public/API method
+	
 	if (name)
 	{
 		NSRange range = [name rangeOfString:@":"];
@@ -971,6 +1009,8 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 **/
 + (NSString *)prefixForName:(NSString *)name
 {
+	// This is a public/API method
+	
 	if (name)
 	{
 		NSRange range = [name rangeOfString:@":"];
@@ -1130,7 +1170,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 			{
 				xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
 				
-				[mResult addObject:[DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node freeOnDealloc:NO]];
+				[mResult addObject:[DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)node owner:self]];
 			}
 			
 			result = mResult;
@@ -1183,7 +1223,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 // 
 // 
 // 
-// Example #2 - Safe vs Unsafe sub-element processing
+// Example #2 - Asynchronous child processing
 // 
 // DDXMLElement *root = [[DDXMLElement alloc] initWithXMLString:str error:nil];
 // DDXMLElement *child = [root elementForName:@"starbucks"];
@@ -1192,77 +1232,18 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 //     <process child>
 // });
 // 
-// [root release]; <-------------- NOT safe!
+// [root release];
 // 
-// But why is it not safe?
-// Does it have something to do with the child?
-// Do I need to retain the child?
-// Doesn't the child get retained automatically by dispatch_async?
+// You may have noticed that we possibly released the root node before the child was processed.
+// Is this safe?
 // 
-// Yes, the child does get retainied automatically by dispatch_async, but that's not the problem.
-// XML represents a heirarchy of nodes. For example:
-// 
-// <root>
-//   <starbucks>
-//     <coffee/>
-//   </starbucks>
-// </root>
-//     
-// Each element within the heirarchy has references/pointers to its parent, children, siblings, etc.
-// This is necessary to support the traversal strategies one requires to work with XML.
-// This also means its not thread-safe to deallocate the root node of an element if
-// you are still using/accessing a child node.
-// So let's rewrite example 2 in a thread-safe manner this time.
-// 
-// DDXMLElement *root = [[DDXMLElement alloc] initWithXMLString:str error:nil];
-// DDXMLElement *child = [root elementForName:@"starbucks"];
-// 
-// [child detach]; <-------------- Detached from root, and can safely be used even if we now dealloc root.
-// 
-// dispatch_async(queue, ^{
-//     <process child>
-// });
-// 
-// [root release]; <-------------- Thread-safe thanks to the detach above.
+// The answer is YES.
+// The child node retains a reference to the root node,
+// so the xml tree heirarchy won't be freed until you're done using all associated nodes.
 // 
 // 
 // 
-// Example #3 - Building up an element
-// 
-// DDXMLElement *coffee    = [[DDXMLElement alloc] initWithName:@"coffee"];
-// DDXMLElement *starbucks = [[DDXMLElement alloc] initWithName:@"starbucks"];
-// DDXMLElement *root      = [[DDXMLElement alloc] initWithName:@"root"];
-// 
-// At this point we have 3 root nodes (root, starbucks, coffee)
-// 
-// [starbucks addChild:coffee];
-// 
-// At this point we have 2 root nodes (root, starbucks).
-// The coffee node is now a child of starbucks, so it is no-longer a "root" node since
-// it has a parent within the xml tree heirarchy.
-// 
-// [coffee addChild:starbucks];
-// 
-// At this point we have only 1 root node (root).
-// Again, the others are no-longer "root" nodes since they have a parent within the xml tree heirarchy.
-// 
-// [coffee release]; coffee = nil;
-// 
-// If you have a reference to a child node, you can safely release that reference.
-// Since coffee is embedded in the tree heirarchy, the coffee node doesn't disappear.
-// 
-// DDXMLElement *coffee2 = [starbucks elementForName:@"coffee"];
-// 
-// So the above will return a new reference to the coffee node.
-// 
-// [root release]; root = nil;
-// 
-// Now, we have just released the root node.
-// This means that it is no longer safe to use starbucks or coffee2.
-// 
-// [starbucks release]; starbucks = nil;
-// 
-// Yes, this is safe. Just don't do anything else with starbucks besides release it.
+
 
 /**
  * Returns whether or not the node has a parent.
@@ -1826,36 +1807,36 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
  * Returns a DDXML wrapper object for the given primitive node.
  * The given node MUST be non-NULL and of the proper type.
 **/
-+ (id)nodeWithNsPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent freeOnDealloc:(BOOL)flag
++ (id)nodeWithNsPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:parent freeOnDealloc:flag] autorelease];
+	return [[[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:parent owner:owner] autorelease];
 }
 
 /**
  * Returns a DDXML wrapper object for the given primitive node.
  * The given node MUST be non-NULL and of the proper type.
 **/
-- (id)initWithNsPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent  freeOnDealloc:(BOOL)flag
+- (id)initWithNsPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent owner:(DDXMLNode *)inOwner
 {
-	if ((self = [super initWithPrimitive:(xmlKindPtr)ns freeOnDealloc:flag]))
+	if ((self = [super initWithPrimitive:(xmlKindPtr)ns owner:inOwner]))
 	{
 		nsParentPtr = parent;
 	}
 	return self;
 }
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)owner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
-	NSAssert(NO, @"Use nodeWithNsPrimitive:nsParent:freeOnDealloc:");
+	NSAssert(NO, @"Use nodeWithNsPrimitive:nsParent:owner:");
 	
 	return nil;
 }
 
-- (id)initWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
+- (id)initWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)inOwner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
-	NSAssert(NO, @"Use initWithNsPrimitive:nsParent:freeOnDealloc:");
+	NSAssert(NO, @"Use initWithNsPrimitive:nsParent:owner:");
 	
 	[self release];
 	return nil;
@@ -1975,7 +1956,7 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	if (node == NULL || node->doc == NULL)
 		return nil;
 	else
-		return [DDXMLDocument nodeWithDocPrimitive:node->doc freeOnDealloc:NO];
+		return [DDXMLDocument nodeWithDocPrimitive:node->doc owner:self];
 }
 
 - (DDXMLNode *)parent
@@ -1987,7 +1968,7 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	if (nsParentPtr == NULL)
 		return nil;
 	else
-		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)nsParentPtr freeOnDealloc:NO];
+		return [DDXMLNode nodeWithUnknownPrimitive:(xmlKindPtr)nsParentPtr owner:self];
 }
 
 - (NSUInteger)childCount
@@ -2063,12 +2044,14 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	{
 		[DDXMLNode detachNamespace:(xmlNsPtr)genericPtr fromNode:nsParentPtr];
 		
-		freeOnDealloc = YES;
+		[owner release];
+		owner = nil;
+		
 		nsParentPtr = NULL;
 	}
 }
 
-- (xmlStdPtr)XPathPreProcess:(NSMutableString *)result
+- (xmlStdPtr)_XPathPreProcess:(NSMutableString *)result
 {
 	// This is a private/internal method
 	
@@ -2161,29 +2144,29 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 
 @implementation DDXMLAttributeNode
 
-+ (id)nodeWithAttrPrimitive:(xmlAttrPtr)attr freeOnDealloc:(BOOL)flag
++ (id)nodeWithAttrPrimitive:(xmlAttrPtr)attr owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr freeOnDealloc:flag] autorelease];
+	return [[[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:owner] autorelease];
 }
 
-- (id)initWithAttrPrimitive:(xmlAttrPtr)attr freeOnDealloc:(BOOL)flag
+- (id)initWithAttrPrimitive:(xmlAttrPtr)attr owner:(DDXMLNode *)inOwner
 {
-	self = [super initWithPrimitive:(xmlKindPtr)attr freeOnDealloc:flag];
+	self = [super initWithPrimitive:(xmlKindPtr)attr owner:inOwner];
 	return self;
 }
 
-+ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
++ (id)nodeWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)owner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
-	NSAssert(NO, @"Use nodeWithAttrPrimitive:nsParent:freeOnDealloc:");
+	NSAssert(NO, @"Use nodeWithAttrPrimitive:nsParent:owner:");
 	
 	return nil;
 }
 
-- (id)initWithPrimitive:(xmlKindPtr)kindPtr freeOnDealloc:(BOOL)flag
+- (id)initWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)inOwner
 {
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
-	NSAssert(NO, @"Use initWithAttrPrimitive:nsParent:freeOnDealloc:");
+	NSAssert(NO, @"Use initWithAttrPrimitive:nsParent:owner:");
 	
 	[self release];
 	return nil;
@@ -2263,11 +2246,13 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	if (attr->parent != NULL)
 	{
 		[[self class] detachAttribute:attr fromNode:attr->parent];
-		freeOnDealloc = YES;
+		
+		[owner release];
+		owner = nil;
 	}
 }
 
-- (xmlStdPtr)XPathPreProcess:(NSMutableString *)result
+- (xmlStdPtr)_XPathPreProcess:(NSMutableString *)result
 {
 	// This is a private/internal method
 	
