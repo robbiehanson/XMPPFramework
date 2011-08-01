@@ -1,11 +1,10 @@
 #import <Foundation/Foundation.h>
+#import "GCDAsyncSocket.h"
 #import "GCDMulticastDelegate.h"
-
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
 #endif
 
-@class GCDAsyncSocket;
 @class XMPPSRVResolver;
 @class DDList;
 @class XMPPParser;
@@ -38,7 +37,7 @@ enum XMPPStreamErrorCode
 typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 
-@interface XMPPStream : NSObject
+@interface XMPPStream : NSObject <GCDAsyncSocketDelegate>
 {
 	dispatch_queue_t xmppQueue;
 	dispatch_queue_t parserQueue;

@@ -7,8 +7,6 @@
 #import "XMPPPresence.h"
 #import "XMPPModule.h"
 #import "XMPPLogging.h"
-#import "GCDAsyncSocket.h"
-#import "GCDMulticastDelegate.h"
 #import "NSData+XMPP.h"
 #import "NSXMLElement+XMPP.h"
 #import "XMPPSRVResolver.h"
