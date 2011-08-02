@@ -12,9 +12,9 @@
 + (XMPPJID *)jidWithString:(NSString *)jidStr resource:(NSString *)resource;
 + (XMPPJID *)jidWithUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource;
 
-- (NSString *)user;
-- (NSString *)domain;
-- (NSString *)resource;
+@property (readonly) NSString *user;
+@property (readonly) NSString *domain;
+@property (readonly) NSString *resource;
 
 - (XMPPJID *)bareJID;
 - (XMPPJID *)domainJID;
