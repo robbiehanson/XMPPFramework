@@ -19,6 +19,8 @@
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSSet* users;
 
++ (void)clearEmptyGroupsInManagedObjectContext:(NSManagedObjectContext *)moc;
+
 + (id)fetchOrInsertGroupName:(NSString *)groupName inManagedObjectContext:(NSManagedObjectContext *)moc;
 
 + (id)insertGroupName:(NSString *)groupName inManagedObjectContext:(NSManagedObjectContext *)moc;
