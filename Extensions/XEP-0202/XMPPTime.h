@@ -8,13 +8,14 @@
 @class XMPPJID;
 @class XMPPStream;
 @class XMPPIQ;
+@class XMPPIDTracker;
 @protocol XMPPTimeDelegate;
 
 
 @interface XMPPTime : XMPPModule
 {
 	BOOL respondsToQueries;
-	NSMutableDictionary *queryIDs;
+	XMPPIDTracker *queryTracker;
 }
 
 /**
