@@ -4,13 +4,14 @@
 @class XMPPJID;
 @class XMPPStream;
 @class XMPPIQ;
+@class XMPPIDTracker;
 @protocol XMPPPingDelegate;
 
 
 @interface XMPPPing : XMPPModule
 {
 	BOOL respondsToQueries;
-	NSMutableDictionary *pingIDs;
+	XMPPIDTracker *pingTracker;
 }
 
 /**
