@@ -10,6 +10,8 @@
 
 #import "XMPPvCardTempBase.h"
 
+#import <objc/runtime.h>
+
 
 @implementation XMPPvCardTempBase
 
@@ -43,7 +45,10 @@
 		xmlString = [coder decodeObject];
 	}
 	
-	return [super initWithXMLString:xmlString error:nil];
+  NSXMLElement *elem = [self initWithXMLString:xmlString error:nil];
+  object_setClass(elem, [self class]);
+  
+	return elem;
 }
 
 

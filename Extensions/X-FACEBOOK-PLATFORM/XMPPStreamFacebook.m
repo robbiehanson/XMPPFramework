@@ -377,6 +377,8 @@
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
+  [super socketDidDisconnect:sock withError:err];
+  
 	[facebookRequest release];
 	facebookRequest = nil;
 	
