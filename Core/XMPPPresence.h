@@ -33,4 +33,6 @@
 
 - (int)intShow;
 
+- (BOOL)isErrorPresence;
+
 @end
