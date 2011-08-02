@@ -225,19 +225,27 @@
 #pragma mark Normal Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// Why didn't we just synthesize these properties?
+// 
+// Since these variables are readonly within the class,
+// we want the synthesized methods to work like a nonatomic property.
+// In order to do this, we have to mark the properties as nonatomic in the header.
+// However we don't like marking the property as nonatomic in the header because
+// then people might think it's not thread-safe when in fact it is.
+
 - (NSString *)user
 {
-	return user;
+	return user; // Why didn't we just synthesize this? See comment above.
 }
 
 - (NSString *)domain
 {
-	return domain;
+	return domain; // Why didn't we just synthesize this? See comment above.
 }
 
 - (NSString *)resource
 {
-	return resource;
+	return resource; // Why didn't we just synthesize this? See comment above.
 }
 
 - (XMPPJID *)bareJID

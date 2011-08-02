@@ -175,13 +175,16 @@
  * This method is designed to inform the storage class of it's parent
  * and of the dispatch queue the parent will be operating on.
  * 
- * It is strongly recommended the storage class operate on the same queue as it's parent
+ * A storage class may choose to operate on the same queue as it's parent,
  * as the majority of the time it will be getting called by the parent.
- * Thus if both are operating on the same queue, the combination can run faster.
+ * If both are operating on the same queue, the combination may run faster.
+ * 
+ * Some storage classes support multiple xmppStreams,
+ * and may choose to operate on their own internal queue.
  * 
  * This method should return YES if it was configured properly.
- * A storage class is generally meant to be used once, and only with a single parent at a time.
- * Thus if you attempt to use a single storage class with multiple parents, this method may return NO.
+ * It should return NO only if configuration failed.
+ * For example, a storage class designed to be used only with a single xmppStream is being added to a second stream.
  * The XMPPCapabilites class is configured to ignore the passed
  * storage class in it's init method if this method returns NO.
 **/

@@ -91,7 +91,7 @@
 	// This will cause a crash - it's designed to.
 	// Only the init methods listed in XMPPCapabilities.h are supported.
 	
-	return [self initWithCapabilitiesStorage:nil dispatchQueue:NULL];
+	return [self initWithCapabilitiesStorage:nil dispatchQueue:queue];
 }
 
 - (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage
