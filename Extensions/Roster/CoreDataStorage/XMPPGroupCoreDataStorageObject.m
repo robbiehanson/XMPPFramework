@@ -15,6 +15,27 @@
 #pragma mark Public
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
++ (void)clearEmptyGroupsInManagedObjectContext:(NSManagedObjectContext *)moc
+{
+  NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([self class])
+	                                          inManagedObjectContext:moc];
+	
+	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"users.@count == 0"];
+	
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+	[fetchRequest setEntity:entity];
+	[fetchRequest setPredicate:predicate];
+	[fetchRequest setIncludesPendingChanges:YES];
+	
+	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+	
+	[fetchRequest release];
+  
+  for (NSManagedObject *group in results) {
+    [moc deleteObject:group];
+  }
+}
+
 + (id)insertGroupName:(NSString *)groupName inManagedObjectContext:(NSManagedObjectContext *)moc
 {
   if (groupName == nil) {

@@ -1,4 +1,5 @@
 #import "XMPPRosterCoreDataStorage.h"
+#import "XMPPGroupCoreDataStorageObject.h"
 #import "XMPPUserCoreDataStorageObject.h"
 #import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPRosterPrivate.h"
@@ -9,7 +10,7 @@
 
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_TRACE;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -313,6 +314,36 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	[self scheduleBlock:^{
 		
 		[rosterPopulationSet addObject:[NSNumber numberWithPtr:stream]];
+    
+    // clear anything already in the roster core data store
+  
+    // Note: Deleting a user will delete all associated resources
+		// because of the cascade rule in our core data model.
+		
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
+                                              inManagedObjectContext:[self managedObjectContext]];
+		
+		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+		[fetchRequest setEntity:entity];
+		[fetchRequest setFetchBatchSize:saveThreshold];
+		
+		if (stream)
+		{
+			NSPredicate *predicate;
+			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
+                   [[self myJIDForXMPPStream:stream] bare]];
+			
+			[fetchRequest setPredicate:predicate];
+		}
+		
+		NSArray *allUsers = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+		
+		for (XMPPUserCoreDataStorageObject *user in allUsers)
+		{
+			[[self managedObjectContext] deleteObject:user];
+		}
+    
+    [XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:[self managedObjectContext]];
 	}];
 }
 
@@ -447,6 +478,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 				[self save];
 			}
 		}
+    
+    [XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:[self managedObjectContext]];
 	}];
 }
 
