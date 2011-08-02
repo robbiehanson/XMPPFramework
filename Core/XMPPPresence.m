@@ -119,4 +119,10 @@
 	return 3;
 }
 
+- (BOOL)isErrorPresence
+{
+	return [[self type] isEqualToString:@"error"];
+}
+
+
 @end
