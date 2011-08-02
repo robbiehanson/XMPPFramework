@@ -284,7 +284,8 @@
 
 - (void)updateWithPresence:(XMPPPresence *)presence
 {
-	if([[presence type] isEqualToString:@"unavailable"])
+	if([[presence type] isEqualToString:@"unavailable"] ||
+     [presence isErrorPresence])
 	{
 		[resources removeObjectForKey:[presence from]];
 	}

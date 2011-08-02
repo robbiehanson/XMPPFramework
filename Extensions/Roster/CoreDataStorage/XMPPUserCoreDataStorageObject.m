@@ -280,7 +280,8 @@
 	XMPPResourceCoreDataStorageObject *resource;
 	resource = (XMPPResourceCoreDataStorageObject *)[self resourceForJID:[presence from]];
 	
-	if ([[presence type] isEqualToString:@"unavailable"])
+	if ([[presence type] isEqualToString:@"unavailable"] ||
+      [presence isErrorPresence])
 	{
 		if (resource)
 		{
