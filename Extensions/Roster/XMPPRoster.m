@@ -552,7 +552,8 @@ enum XMPPRosterFlags
 	
 	XMPPLogTrace();
 	
-	if ([[presence type] isEqualToString:@"unavailable"])
+  // We check the toStr, so we don't dump the resources when a user leaves a MUC room.
+	if ([[presence type] isEqualToString:@"unavailable"] && [presence toStr] == nil)
 	{
 		// We don't receive presence notifications when we're offline.
 		// So we need to remove all resources from our roster when we're offline.
