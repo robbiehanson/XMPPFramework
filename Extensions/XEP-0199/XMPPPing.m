@@ -1,5 +1,6 @@
 #import "XMPPPing.h"
 #import "XMPP.h"
+#import "XMPPIDTracker.h"
 
 #define DEFAULT_TIMEOUT 30.0 // seconds
 
@@ -13,22 +14,14 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface XMPPPingInfo : NSObject
+@interface XMPPPingInfo : XMPPBasicTrackingInfo
 {
 	NSDate *timeSent;
-	NSTimeInterval timeout;
-	dispatch_source_t timer;
 }
 
-+ (XMPPPingInfo *)pingInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer;
-
 @property (nonatomic, readonly) NSDate *timeSent;
-@property (nonatomic, readonly) NSTimeInterval timeout;
-@property (nonatomic, readonly) dispatch_source_t timer;
 
 - (NSTimeInterval)rtt;
-
-- (void)cancelTimer;
 
 @end
 
@@ -47,7 +40,6 @@
 {
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		pingIDs = [[NSMutableDictionary alloc] initWithCapacity:5];
 		respondsToQueries = YES;
 	}
 	return self;
@@ -60,6 +52,8 @@
 	#if INTEGRATE_WITH_CAPABILITIES
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
+		
+		pingTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
 		
 		return YES;
 	}
@@ -76,12 +70,9 @@
 	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		for (XMPPPingInfo *pingInfo in [pingIDs objectEnumerator])
-		{
-			[pingInfo cancelTimer];
-		}
-		
-		[pingIDs removeAllObjects];
+		[pingTracker removeAllIDs];
+		[pingTracker release];
+		pingTracker = nil;
 		
 		[pool drain];
 	};
@@ -96,7 +87,9 @@
 
 - (void)dealloc
 {
-	[pingIDs release];
+	// pingTracker is handled in the deactivate method,
+	// which is automatically called by [super dealloc] if needed.
+	
 	[super dealloc];
 }
 
@@ -147,23 +140,6 @@
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)removePingID:(NSString *)pingID
-{
-	// This method is invoked on the moduleQueue.
-	
-	XMPPPingInfo *pingInfo = [pingIDs objectForKey:pingID];
-	if (pingInfo)
-	{
-		[pingInfo retain];
-		[pingIDs removeObjectForKey:pingID];
-		
-		[multicastDelegate xmppPing:self didNotReceivePong:pingID dueToTimeout:[pingInfo timeout]];
-		
-		[pingInfo cancelTimer];
-		[pingInfo release];
-	}
-}
-
 - (NSString *)generatePingIDWithTimeout:(NSTimeInterval)timeout
 {
 	// This method may be invoked on any thread/queue.
@@ -176,29 +152,13 @@
 	dispatch_async(moduleQueue, ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		// In case we never get a response, we want to remove the ping ID eventually,
-		// or we risk an ever increasing pingIDs array.
+		XMPPPingInfo *pingInfo = [[XMPPPingInfo alloc] initWithTarget:self
+		                                                     selector:@selector(handlePong:withInfo:)
+		                                                      timeout:timeout];
 		
-		dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
+		[pingTracker addID:pingID trackingInfo:pingInfo];
+		[pingInfo release];
 		
-		dispatch_source_set_event_handler(timer, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			[self removePingID:pingID];
-			
-			[pool drain];
-		});
-		
-		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
-		
-		dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
-		dispatch_resume(timer);
-		
-		// Add ping ID to list so we'll recognize it when we get a response
-		[pingIDs setObject:[XMPPPingInfo pingInfoWithTimeout:timeout timer:timer]
-		            forKey:pingID];
-		
-		dispatch_release(timer);
 		[pool release];
 	});
 	
@@ -265,11 +225,25 @@
 	return pingID;
 }
 
+- (void)handlePong:(XMPPIQ *)pongIQ withInfo:(XMPPPingInfo *)pingInfo
+{
+	if (pongIQ)
+	{
+		[multicastDelegate xmppPing:self didReceivePong:pongIQ withRTT:[pingInfo rtt]];
+	}
+	else
+	{
+		// Timeout
+		
+		[multicastDelegate xmppPing:self didNotReceivePong:[pingInfo elementID] dueToTimeout:[pingInfo timeout]];
+	}
+}
+
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	// This method is invoked on the moduleQueue.
 	
-	NSString *type = [[iq attributeForName:@"type"] stringValue];
+	NSString *type = [iq attributeStringValueForName:@"type"];
 	
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
 	{
@@ -277,19 +251,10 @@
 		// 
 		// <iq from="deusty.com" to="robbiehanson@deusty.com/work" id="abc123" type="result"/>
 		
-		NSString *pingID = [iq elementID];
+		// If this is a response to a ping that we've sent,
+		// then the pingTracker will invoke our handlePong:withInfo: method and return YES.
 		
-		XMPPPingInfo *pingInfo = [pingIDs objectForKey:pingID];
-		if (pingInfo)
-		{
-			[pingInfo retain];
-			[pingIDs removeObjectForKey:pingID];
-			
-			[multicastDelegate xmppPing:self didReceivePong:iq withRTT:[pingInfo rtt]];
-			
-			[pingInfo cancelTimer];
-			[pingInfo release];
-		}
+		return [pingTracker invokeForID:[iq elementID] withObject:iq];
 	}
 	else if (respondsToQueries && [type isEqualToString:@"get"])
 	{
@@ -315,12 +280,7 @@
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	for (XMPPPingInfo *pingInfo in [pingIDs objectEnumerator])
-	{
-		[pingInfo cancelTimer];
-	}
-	
-	[pingIDs removeAllObjects];
+	[pingTracker removeAllIDs];
 }
 
 #if INTEGRATE_WITH_CAPABILITIES
@@ -356,18 +316,12 @@
 @implementation XMPPPingInfo
 
 @synthesize timeSent;
-@synthesize timeout;
-@synthesize timer;
 
-- (id)initWithTimeout:(NSTimeInterval)to timer:(dispatch_source_t)aTimer
+- (id)initWithTarget:(id)aTarget selector:(SEL)aSelector timeout:(NSTimeInterval)aTimeout
 {
-	if ((self = [super init]))
+	if ((self = [super initWithTarget:aTarget selector:aSelector timeout:aTimeout]))
 	{
 		timeSent = [[NSDate alloc] init];
-		timeout = to;
-		
-		timer = aTimer;
-		dispatch_retain(timer);
 	}
 	return self;
 }
@@ -377,27 +331,10 @@
 	return [timeSent timeIntervalSinceNow] * -1.0;
 }
 
-- (void)cancelTimer
-{
-	if (timer)
-	{
-		dispatch_source_cancel(timer);
-		dispatch_release(timer);
-		timer = NULL;
-	}
-}
-
 - (void)dealloc
 {
-	[self cancelTimer];
 	[timeSent release];
 	[super dealloc];
-}
-
-
-+ (XMPPPingInfo *)pingInfoWithTimeout:(NSTimeInterval)timeout timer:(dispatch_source_t)timer
-{
-	return [[[XMPPPingInfo alloc] initWithTimeout:timeout timer:timer] autorelease];
 }
 
 @end
