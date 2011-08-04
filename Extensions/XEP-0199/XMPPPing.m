@@ -243,7 +243,7 @@
 {
 	// This method is invoked on the moduleQueue.
 	
-	NSString *type = [iq attributeStringValueForName:@"type"];
+	NSString *type = [iq type];
 	
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
 	{

@@ -15,7 +15,8 @@
 	if([encoder isBycopy])
 		return self;
 	else
-		return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
+		return [super replacementObjectForPortCoder:encoder];
+	//	return [NSDistantObject proxyWithLocal:self connection:[encoder connection]];
 }
 #endif
 
