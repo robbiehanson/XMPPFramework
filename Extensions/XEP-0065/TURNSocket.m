@@ -1153,7 +1153,7 @@ static NSMutableArray *proxyCandidates;
 	// Address      = P:D (P=LengthOfDomain D=DomainWithoutNullTermination)
 	// Port         = 0
 	
-	uint byteBufferLength = 4 + 1 + [hash length] + 2;
+	uint byteBufferLength = (uint)(4 + 1 + [hash length] + 2);
 	void *byteBuffer = malloc(byteBufferLength);
 	
 	UInt8 ver = 5;

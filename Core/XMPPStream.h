@@ -632,7 +632,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  *
  * If developing an iOS app that runs in the background, this may be a good place to indicate
  * that this is a task that needs to continue running in the background.
- **/
+**/
 - (void)xmppStreamWillConnect:(XMPPStream *)sender;
 
 /**

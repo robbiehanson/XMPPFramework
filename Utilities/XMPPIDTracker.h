@@ -36,7 +36,7 @@
  * 
  * - (BOOL)xmppStream:(XMPPStream *)stream didReceiveIQ:(XMPPIQ *)iq
  * {
- *     NSString *type = [iq attributeStringValueForName:@"type"];
+ *     NSString *type = [iq type];
  *     
  *     if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
  *     {
