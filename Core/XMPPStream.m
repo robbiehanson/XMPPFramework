@@ -2315,7 +2315,7 @@ enum XMPPStreamConfig
 			{
 				NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 				
-				receipt = [[XMPPElementReceipt alloc] init];
+				receipt = [[XMPPElementReceipt alloc] init]; // autoreleased below
 				[receipts addObject:receipt];
 				
 				[self sendElement:element withTag:TAG_XMPP_WRITE_RECEIPT];
@@ -3766,7 +3766,7 @@ enum XMPPStreamConfig
 	
 	// Asynchronous operation
 	
-	dispatch_async(xmppQueue, ^{
+	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 		// Register module
@@ -3791,8 +3791,15 @@ enum XMPPStreamConfig
 		
 		[multicastDelegate xmppStream:self didRegisterModule:module];
 		
-		[pool release];
-	});
+		[pool drain];
+	};
+	
+	// Asynchronous operation
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
 }
 
 - (void)unregisterModule:(XMPPModule *)module
@@ -3801,7 +3808,7 @@ enum XMPPStreamConfig
 	
 	// Synchronous operation
 	
-	dispatch_sync(xmppQueue, ^{
+	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 		// Notify our own delegate(s)
@@ -3826,8 +3833,15 @@ enum XMPPStreamConfig
 		
 		[registeredModules remove:module];
 		
-		[pool release];
-	});
+		[pool drain];
+	};
+	
+	// Synchronous operation
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
 }
 
 - (void)autoAddDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue toModulesOfClass:(Class)aClass
@@ -3837,7 +3851,7 @@ enum XMPPStreamConfig
 	
 	// Asynchronous operation
 	
-	dispatch_async(xmppQueue, ^{
+	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 		NSString *className = NSStringFromClass(aClass);
@@ -3870,54 +3884,114 @@ enum XMPPStreamConfig
 		[delegates addDelegate:delegate delegateQueue:delegateQueue];
 		
 		[pool drain];
-	});
+	};
+	
+	// Asynchronous operation
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
 }
 
 - (void)removeAutoDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue fromModulesOfClass:(Class)aClass
 {
-	if (aClass == nil)
-	{
-		// Remove the delegate from all currently registered modules of ANY class.
+	if (delegate == nil) return;
+	// delegateQueue may be NULL
+	// aClass may be NULL
+	
+	// Synchronous operation
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
-		XMPPModule *module;
-		
-		while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
+		if (aClass == NULL)
 		{
-			[module removeDelegate:delegate delegateQueue:delegateQueue];
-		}
-		
-		// Remove the delegate from list of auto delegates for all classes,
-		// so that it will not be auto added as a delegate to future registered modules.
-		
-		for (GCDMulticastDelegate *delegates in [autoDelegateDict objectEnumerator])
-		{
-			[delegates removeDelegate:delegate delegateQueue:delegateQueue];
-		}
-	}
-	else
-	{
-		NSString *className = NSStringFromClass(aClass);
-		
-		// Remove the delegate from all currently registered modules of the given class.
-		
-		DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
-		XMPPModule *module;
-		
-		while ((module = [registeredModulesEnumerator nextElement]))
-		{
-			if ([module isKindOfClass:aClass])
+			// Remove the delegate from all currently registered modules of ANY class.
+			
+			DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
+			XMPPModule *module;
+			
+			while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
 			{
 				[module removeDelegate:delegate delegateQueue:delegateQueue];
 			}
+			
+			// Remove the delegate from list of auto delegates for all classes,
+			// so that it will not be auto added as a delegate to future registered modules.
+			
+			for (GCDMulticastDelegate *delegates in [autoDelegateDict objectEnumerator])
+			{
+				[delegates removeDelegate:delegate delegateQueue:delegateQueue];
+			}
+		}
+		else
+		{
+			NSString *className = NSStringFromClass(aClass);
+			
+			// Remove the delegate from all currently registered modules of the given class.
+			
+			DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
+			XMPPModule *module;
+			
+			while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
+			{
+				if ([module isKindOfClass:aClass])
+				{
+					[module removeDelegate:delegate delegateQueue:delegateQueue];
+				}
+			}
+			
+			// Remove the delegate from list of auto delegates for the given class,
+			// so that it will not be added as a delegate to future registered modules of the given class.
+			
+			GCDMulticastDelegate *delegates = [autoDelegateDict objectForKey:className];
+			[delegates removeDelegate:delegate delegateQueue:delegateQueue];
 		}
 		
-		// Remove the delegate from list of auto delegates for the given class,
-		// so that it will not be added as a delegate to future registered modules of the given class.
+		[pool drain];
+	};
+	
+	// Synchronous operation
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+}
+
+- (void)enumerateModulesWithBlock:(void (^)(XMPPModule *module, NSUInteger idx, BOOL *stop))enumBlock
+{
+	if (enumBlock == NULL) return;
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		GCDMulticastDelegate *delegates = [autoDelegateDict objectForKey:className];
-		[delegates removeDelegate:delegate delegateQueue:delegateQueue];
-	}
+		DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
+		
+		XMPPModule *module;
+		NSUInteger i = 0;
+		BOOL stop = NO;
+		
+		while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
+		{
+			enumBlock(module, i, &stop);
+			
+			if (stop)
+				break;
+			else
+				i++;
+		}
+		
+		[pool drain];
+	};
+	
+	// Synchronous operation
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4041,9 +4115,7 @@ enum XMPPStreamConfig
 {
 	if ((self = [super init]))
 	{
-		complete = NO;
-		failed   = NO;
-		
+		atomicFlags = 0;
 		semaphore = dispatch_semaphore_create(0);
 	}
 	return self;
@@ -4051,27 +4123,26 @@ enum XMPPStreamConfig
 
 - (void)signalSuccess
 {
-	complete = YES;
-	failed   = NO;
+	uint32_t mask = 3;
+	OSAtomicOr32Barrier(mask, &atomicFlags);
 	
-	OSMemoryBarrier();
 	dispatch_semaphore_signal(semaphore);
 }
 
 - (void)signalFailure
 {
-	complete = YES;
-	failed   = YES;
+	uint32_t mask = 1;
+	OSAtomicOr32Barrier(mask, &atomicFlags);
 	
-	OSMemoryBarrier();
 	dispatch_semaphore_signal(semaphore);
 }
 
 - (BOOL)wait:(NSTimeInterval)timeout_seconds
 {
-	OSMemoryBarrier();
+	uint32_t mask = 0;
+	uint32_t flags = OSAtomicOr32Barrier(mask, &atomicFlags);
 	
-	if (complete) return !failed;
+	if (flags > 0) return (flags > 1);
 	
 	dispatch_time_t timeout_nanos;
 	
@@ -4093,9 +4164,9 @@ enum XMPPStreamConfig
 	
 	if (result == 0)
 	{
-		OSMemoryBarrier();
+		flags = OSAtomicOr32Barrier(mask, &atomicFlags);
 		
-		return complete && !failed;
+		return (flags > 1);
 	}
 	else
 	{

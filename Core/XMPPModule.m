@@ -147,7 +147,7 @@
 
 - (dispatch_queue_t)moduleQueue
 {
-  if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_current_queue() == moduleQueue)
 	{
 		return moduleQueue;
 	}

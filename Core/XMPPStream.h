@@ -546,6 +546,13 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)autoAddDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue toModulesOfClass:(Class)aClass;
 - (void)removeAutoDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue fromModulesOfClass:(Class)aClass;
 
+/**
+ * Allows for enumeration of the currently registered modules.
+ * 
+ * This may be useful if the stream needs to be queried for modules of a particular type.
+**/
+- (void)enumerateModulesWithBlock:(void (^)(XMPPModule *module, NSUInteger idx, BOOL *stop))block;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -592,8 +599,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 @interface XMPPElementReceipt : NSObject
 {
-	BOOL complete;
-	BOOL failed;
+	uint32_t atomicFlags;
 	dispatch_semaphore_t semaphore;
 }
 
