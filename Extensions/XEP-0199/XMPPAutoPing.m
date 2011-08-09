@@ -66,6 +66,7 @@
 		awaitingPingResponse = NO;
 		
 		[xmppPing deactivate];
+		[super deactivate];
 		
 		[pool drain];
 	};
@@ -74,8 +75,6 @@
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
-	
-	[super deactivate];
 }
 
 - (void)dealloc
@@ -121,24 +120,19 @@
 			pingInterval = interval;
 			
 			// Update the pingTimer.
-			// Depending on new value this may mean starting, stoping, or simply updating the timer.
+			// 
+			// Depending on new value and current state of the pingTimer,
+			// this may mean starting, stoping, or simply updating the timer.
 			
-			if (pingIntervalTimer)
+			if (pingInterval > 0)
 			{
-				if (pingInterval > 0)
-				{
-					// Remember: Only start the pinger after the xmpp stream is up and authenticated
-					if ([xmppStream isAuthenticated])
-						[self updatePingIntervalTimer];
-				}
-				else
-				{
-					[self stopPingIntervalTimer];
-				}
+				// Remember: Only start the pinger after the xmpp stream is up and authenticated
+				if ([xmppStream isAuthenticated])
+					[self startPingIntervalTimer];
 			}
-			else if (pingInterval > 0)
+			else
 			{
-				[self startPingIntervalTimer];
+				[self stopPingIntervalTimer];
 			}
 		}
 	};
