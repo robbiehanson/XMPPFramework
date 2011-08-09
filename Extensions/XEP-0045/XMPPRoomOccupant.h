@@ -1,25 +1,17 @@
-//
-// XMPPRoomOccupant
-// A chat room. XEP-0045 Implementation.
-//
-
 #import <Foundation/Foundation.h>
 
 @class XMPPJID;
+@class XMPPPresence;
 
-@interface XMPPRoomOccupant : NSObject
-{
-	XMPPJID *jid;
-	NSString *nick;
-	NSString *role;
-}
 
-+ (XMPPRoomOccupant *)occupantWithJID:(XMPPJID *)aJid nick:(NSString *)aNick role:(NSString *)aRole;
-
-- (id)initWithJID:(XMPPJID *)aJid nick:(NSString *)aNick role:(NSString *)aRole;
+@protocol XMPPRoomOccupant <NSObject>
 
 @property (readonly) XMPPJID *jid;
-@property (readonly) NSString *nick;
+@property (readonly) NSString *nickname;
+
 @property (readonly) NSString *role;
+@property (readonly) NSString *affiliation;
+
+@property (readonly) XMPPPresence *presence;
 
 @end
