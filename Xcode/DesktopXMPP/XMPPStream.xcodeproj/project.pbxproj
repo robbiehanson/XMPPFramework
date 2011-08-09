@@ -64,6 +64,10 @@
 		DC84BB791244095D0055A459 /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BB781244095D0055A459 /* XMPPPing.m */; };
 		DCA614EF1250034B00C75522 /* XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA614EE1250034B00C75522 /* XMPPDateTimeProfiles.m */; };
 		DCA615201250069F00C75522 /* XMPPTime.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA6151F1250069F00C75522 /* XMPPTime.m */; };
+		DCC88A5C13E34B4100CDAB56 /* XMPPMessage+XEP0045.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88A5613E34B4100CDAB56 /* XMPPMessage+XEP0045.m */; };
+		DCC88AAC13E7CBD000CDAB56 /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88AAB13E7CBD000CDAB56 /* XMPPIDTracker.m */; };
+		DCC88AB213E7FD6E00CDAB56 /* XMPPMUC.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88AAE13E7FD6E00CDAB56 /* XMPPMUC.m */; };
+		DCC88AB313E7FD6E00CDAB56 /* XMPPRoom.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88AB013E7FD6E00CDAB56 /* XMPPRoom.m */; };
 		DCCE55610BDC6FAC000E2798 /* RosterController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55600BDC6FAC000E2798 /* RosterController.m */; };
 		DCD28630128F7294001E7AEC /* XMPPElement+Delay.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD2862F128F7294001E7AEC /* XMPPElement+Delay.m */; };
 		DCD493CD1223483B004BEE1A /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD493CC1223483B004BEE1A /* libresolv.dylib */; };
@@ -205,6 +209,15 @@
 		DCA614EE1250034B00C75522 /* XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDateTimeProfiles.m; path = "../../Extensions/XEP-0082/XMPPDateTimeProfiles.m"; sourceTree = SOURCE_ROOT; };
 		DCA6151E1250069F00C75522 /* XMPPTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPTime.h; path = "../../Extensions/XEP-0202/XMPPTime.h"; sourceTree = SOURCE_ROOT; };
 		DCA6151F1250069F00C75522 /* XMPPTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPTime.m; path = "../../Extensions/XEP-0202/XMPPTime.m"; sourceTree = SOURCE_ROOT; };
+		DCC88A5513E34B4100CDAB56 /* XMPPMessage+XEP0045.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPMessage+XEP0045.h"; sourceTree = "<group>"; };
+		DCC88A5613E34B4100CDAB56 /* XMPPMessage+XEP0045.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XMPPMessage+XEP0045.m"; sourceTree = "<group>"; };
+		DCC88AAA13E7CBD000CDAB56 /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPIDTracker.h; path = ../../Utilities/XMPPIDTracker.h; sourceTree = "<group>"; };
+		DCC88AAB13E7CBD000CDAB56 /* XMPPIDTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPIDTracker.m; path = ../../Utilities/XMPPIDTracker.m; sourceTree = "<group>"; };
+		DCC88AAD13E7FD6E00CDAB56 /* XMPPMUC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMUC.h; sourceTree = "<group>"; };
+		DCC88AAE13E7FD6E00CDAB56 /* XMPPMUC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMUC.m; sourceTree = "<group>"; };
+		DCC88AAF13E7FD6E00CDAB56 /* XMPPRoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPRoom.h; sourceTree = "<group>"; };
+		DCC88AB013E7FD6E00CDAB56 /* XMPPRoom.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPRoom.m; sourceTree = "<group>"; };
+		DCC88AB113E7FD6E00CDAB56 /* XMPPRoomOccupant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPRoomOccupant.h; sourceTree = "<group>"; };
 		DCCE555F0BDC6FAC000E2798 /* RosterController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = RosterController.h; sourceTree = "<group>"; };
 		DCCE55600BDC6FAC000E2798 /* RosterController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = RosterController.m; sourceTree = "<group>"; };
 		DCD2862E128F7294001E7AEC /* XMPPElement+Delay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XMPPElement+Delay.h"; path = "../../Extensions/XEP-0203/XMPPElement+Delay.h"; sourceTree = SOURCE_ROOT; };
@@ -470,6 +483,7 @@
 				DC37306B139E9ECE00A8407D /* Reconnect */,
 				DC488400134975E3000F79C5 /* CoreDataStorage */,
 				DC373070139E9EE500A8407D /* Roster */,
+				DCC88A5413E34B4100CDAB56 /* XEP-0045 */,
 				DCE025611340087A007448E1 /* XEP-0054 */,
 				DCA614EC1250032B00C75522 /* XEP-0082 */,
 				DC5ED521123A9F3000D647C0 /* XEP-0060 */,
@@ -616,6 +630,21 @@
 				DC37317B139F04DE00A8407D /* NSXMLElement+XMPP.m */,
 			);
 			name = Categories;
+			sourceTree = "<group>";
+		};
+		DCC88A5413E34B4100CDAB56 /* XEP-0045 */ = {
+			isa = PBXGroup;
+			children = (
+				DCC88A5513E34B4100CDAB56 /* XMPPMessage+XEP0045.h */,
+				DCC88A5613E34B4100CDAB56 /* XMPPMessage+XEP0045.m */,
+				DCC88AAD13E7FD6E00CDAB56 /* XMPPMUC.h */,
+				DCC88AAE13E7FD6E00CDAB56 /* XMPPMUC.m */,
+				DCC88AAF13E7FD6E00CDAB56 /* XMPPRoom.h */,
+				DCC88AB013E7FD6E00CDAB56 /* XMPPRoom.m */,
+				DCC88AB113E7FD6E00CDAB56 /* XMPPRoomOccupant.h */,
+			);
+			name = "XEP-0045";
+			path = "../../Extensions/XEP-0045";
 			sourceTree = "<group>";
 		};
 		DCCE55630BDC6FBC000E2798 /* GUI - MainMenu */ = {
@@ -866,6 +895,10 @@
 				DC37317C139F04DE00A8407D /* NSData+XMPP.m in Sources */,
 				DC37317D139F04DE00A8407D /* NSNumber+XMPP.m in Sources */,
 				DC37317E139F04DE00A8407D /* NSXMLElement+XMPP.m in Sources */,
+				DCC88A5C13E34B4100CDAB56 /* XMPPMessage+XEP0045.m in Sources */,
+				DCC88AAC13E7CBD000CDAB56 /* XMPPIDTracker.m in Sources */,
+				DCC88AB213E7FD6E00CDAB56 /* XMPPMUC.m in Sources */,
+				DCC88AB313E7FD6E00CDAB56 /* XMPPRoom.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
