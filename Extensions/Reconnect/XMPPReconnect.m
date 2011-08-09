@@ -79,8 +79,15 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)dealloc
 {
-	[self teardownReconnectTimer];
-	[self teardownNetworkMonitoring];
+	dispatch_block_t block = ^{
+		[self teardownReconnectTimer];
+		[self teardownNetworkMonitoring];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
 	
 	[super dealloc];
 }
