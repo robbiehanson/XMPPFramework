@@ -573,11 +573,9 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 	// So we create an immutable copy of the dictionary to send to the delegates.
 	// And we don't have to worry about the XMPPRoomOccupant objects changing as they are immutable.
 	
-	NSDictionary *occupantsCopy = [occupants copy];
+	NSDictionary *occupantsCopy = [[occupants copy] autorelease];
 	
 	[multicastDelegate xmppRoom:self didChangeOccupants:occupantsCopy];
-	
-	[occupants release];
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
