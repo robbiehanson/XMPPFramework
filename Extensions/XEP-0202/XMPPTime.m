@@ -234,7 +234,10 @@
 {
 	if (iq)
 	{
-		[multicastDelegate xmppTime:self didReceiveResponse:iq withRTT:[queryInfo rtt]];
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppTime:self didReceiveResponse:iq withRTT:[queryInfo rtt]];
+		else
+			[multicastDelegate xmppTime:self didNotReceiveResponse:[queryInfo elementID] dueToTimeout:-1.0];
 	}
 	else
 	{
