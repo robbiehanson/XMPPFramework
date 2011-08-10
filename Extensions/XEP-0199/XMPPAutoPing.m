@@ -197,7 +197,7 @@
 {
 	dispatch_block_t block = ^{
 		
-		if (![targetJID isEqual:jid])
+		if (![targetJID isEqualToJID:jid])
 		{
 			[targetJID release];
 			targetJID = [jid retain];
