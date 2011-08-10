@@ -22,8 +22,8 @@
 	
 	dispatch_time_t lastReceiveTime;
 	dispatch_source_t pingIntervalTimer;
-	BOOL awaitingPingResponse;
 	
+	BOOL awaitingPingResponse;
 	XMPPPing *xmppPing;
 }
 
