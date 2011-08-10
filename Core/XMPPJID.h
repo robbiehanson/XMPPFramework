@@ -30,4 +30,9 @@
 
 - (BOOL)isServer;
 
+/**
+ * When you know both objects are JIDs, this method is a faster way to check equality than isEqual:.
+**/
+- (BOOL)isEqualToJID:(XMPPJID *)aJID; 
+
 @end

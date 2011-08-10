@@ -355,32 +355,37 @@
 {
 	if ([anObject isMemberOfClass:[self class]])
 	{
-		XMPPJID *aJID = (XMPPJID *)anObject;
-		
-		if (user) {
-			if (![user isEqualToString:aJID->user]) return NO;
-		}
-		else {
-			if (aJID->user) return NO;
-		}
-		
-		if (domain) {
-			if (![domain isEqualToString:aJID->domain]) return NO;
-		}
-		else {
-			if (aJID->domain) return NO;
-		}
-		
-		if (resource) {
-			if (![resource isEqualToString:aJID->resource]) return NO;
-		}
-		else {
-			if (aJID->resource) return NO;
-		}
-		
-		return YES;
+		return [self isEqualToJID:(XMPPJID *)anObject];
 	}
 	return NO;
+}
+
+- (BOOL)isEqualToJID:(XMPPJID *)aJID
+{
+	if (aJID == nil) return NO;
+	
+	if (user) {
+		if (![user isEqualToString:aJID->user]) return NO;
+	}
+	else {
+		if (aJID->user) return NO;
+	}
+	
+	if (domain) {
+		if (![domain isEqualToString:aJID->domain]) return NO;
+	}
+	else {
+		if (aJID->domain) return NO;
+	}
+	
+	if (resource) {
+		if (![resource isEqualToString:aJID->resource]) return NO;
+	}
+	else {
+		if (aJID->resource) return NO;
+	}
+	
+	return YES;
 }
 
 - (NSString *)description
