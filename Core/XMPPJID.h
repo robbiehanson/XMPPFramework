@@ -1,5 +1,16 @@
 #import <Foundation/Foundation.h>
 
+enum XMPPJIDCompareOptions
+{
+	XMPPJIDCompareUser     = 1, // 001
+	XMPPJIDCompareDomain   = 2, // 010
+	XMPPJIDCompareResource = 4, // 100
+	
+	XMPPJIDCompareBare     = 3, // 011
+	XMPPJIDCompareFull     = 7, // 111
+};
+typedef enum XMPPJIDCompareOptions XMPPJIDCompareOptions;
+
 
 @interface XMPPJID : NSObject <NSCoding, NSCopying>
 {
@@ -33,6 +44,7 @@
 /**
  * When you know both objects are JIDs, this method is a faster way to check equality than isEqual:.
 **/
-- (BOOL)isEqualToJID:(XMPPJID *)aJID; 
+- (BOOL)isEqualToJID:(XMPPJID *)aJID;
+- (BOOL)isEqualToJID:(XMPPJID *)aJID options:(XMPPJIDCompareOptions)mask;
 
 @end

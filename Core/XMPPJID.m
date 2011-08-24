@@ -362,27 +362,41 @@
 
 - (BOOL)isEqualToJID:(XMPPJID *)aJID
 {
+	return [self isEqualToJID:aJID options:XMPPJIDCompareFull];
+}
+
+- (BOOL)isEqualToJID:(XMPPJID *)aJID options:(XMPPJIDCompareOptions)mask
+{
 	if (aJID == nil) return NO;
 	
-	if (user) {
-		if (![user isEqualToString:aJID->user]) return NO;
-	}
-	else {
-		if (aJID->user) return NO;
-	}
-	
-	if (domain) {
-		if (![domain isEqualToString:aJID->domain]) return NO;
-	}
-	else {
-		if (aJID->domain) return NO;
+	if (mask & XMPPJIDCompareUser)
+	{
+		if (user) {
+			if (![user isEqualToString:aJID->user]) return NO;
+		}
+		else {
+			if (aJID->user) return NO;
+		}
 	}
 	
-	if (resource) {
-		if (![resource isEqualToString:aJID->resource]) return NO;
+	if (mask & XMPPJIDCompareDomain)
+	{
+		if (domain) {
+			if (![domain isEqualToString:aJID->domain]) return NO;
+		}
+		else {
+			if (aJID->domain) return NO;
+		}
 	}
-	else {
-		if (aJID->resource) return NO;
+	
+	if (mask & XMPPJIDCompareResource)
+	{
+		if (resource) {
+			if (![resource isEqualToString:aJID->resource]) return NO;
+		}
+		else {
+			if (aJID->resource) return NO;
+		}
 	}
 	
 	return YES;
