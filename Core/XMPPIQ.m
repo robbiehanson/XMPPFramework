@@ -41,6 +41,11 @@
 	return [[[XMPPIQ alloc] initWithType:nil to:nil elementID:nil child:nil] autorelease];
 }
 
++ (XMPPIQ *)iqWithType:(NSString *)type
+{
+	return [[[XMPPIQ alloc] initWithType:type to:nil elementID:nil child:nil] autorelease];
+}
+
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid
 {
 	return [[[XMPPIQ alloc] initWithType:type to:jid elementID:nil child:nil] autorelease];
@@ -59,6 +64,11 @@
 - (id)init
 {
 	return [self initWithType:nil to:nil elementID:nil child:nil];
+}
+
+- (id)initWithType:(NSString *)type
+{
+	return [self initWithType:type to:nil elementID:nil child:nil];
 }
 
 - (id)initWithType:(NSString *)type to:(XMPPJID *)jid
