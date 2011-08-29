@@ -229,10 +229,10 @@
 
 - (NSString *)moduleName
 {
-	// Override me to provide a proper module name.
-	// The name may be used as the name of the dispatch_queue which could aid in debugging.
+	// Override me (if needed) to provide a customized module name.
+	// This name is used as the name of the dispatch_queue which could aid in debugging.
 	
-	return @"XMPPModule";
+	return NSStringFromClass([self class]);
 }
 
 @end
