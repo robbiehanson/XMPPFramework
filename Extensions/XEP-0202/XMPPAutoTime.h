@@ -1,6 +1,8 @@
 #import "XMPP.h"
 #import "XMPPTime.h"
 
+#define _XMPP_AUTO_TIME_H
+
 @class XMPPJID;
 
 /**

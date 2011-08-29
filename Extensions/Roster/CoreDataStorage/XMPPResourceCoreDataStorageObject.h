@@ -37,4 +37,6 @@
 
 - (void)updateWithPresence:(XMPPPresence *)presence;
 
+- (NSComparisonResult)compare:(id <XMPPResource>)another;
+
 @end

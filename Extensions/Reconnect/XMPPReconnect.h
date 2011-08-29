@@ -2,6 +2,8 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "XMPPModule.h"
 
+#define _XMPP_RECONNECT_H
+
 #define DEFAULT_XMPP_RECONNECT_DELAY 2.0
 
 #define DEFAULT_XMPP_RECONNECT_TIMER_INTERVAL 20.0

@@ -8,11 +8,11 @@
 
 
 #import <Foundation/Foundation.h>
-#import "XMPPModule.h"
+#import "XMPP.h"
 #import "XMPPvCardTemp.h"
 
-@class XMPPJID;
-@class XMPPStream;
+#define _XMPP_VCARD_TEMP_MODULE_H
+
 @protocol XMPPvCardTempModuleStorage;
 
 

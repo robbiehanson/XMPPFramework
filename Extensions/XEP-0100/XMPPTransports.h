@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 
+#define _XMPP_TRANSPORTS_H
+
 @class XMPPStream;
 
 

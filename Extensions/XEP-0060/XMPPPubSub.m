@@ -5,7 +5,7 @@
 //
 
 #import "XMPPPubSub.h"
-#import "XMPP.h"
+#import "XMPPFramework.h"
 
 #define NS_PUBSUB          @"http://jabber.org/protocol/pubsub"
 #define NS_PUBSUB_EVENT    @"http://jabber.org/protocol/pubsub#event"
@@ -13,13 +13,8 @@
 #define NS_PUBSUB_OWNER    @"http://jabber.org/protocol/pubsub#owner"
 #define NS_DISCO_ITEMS     @"http://jabber.org/protocol/disco#items"
 
-#define INTEGRATE_WITH_CAPABILITIES 1
 
-#if INTEGRATE_WITH_CAPABILITIES
-#import "XMPPCapabilities.h"
-#endif
-
-@implementation XMPPPubSub;
+@implementation XMPPPubSub
 
 @synthesize serviceJID;
 
@@ -53,7 +48,7 @@
 {
 	if ([self activate:aXmppStream])
 	{
-	#if INTEGRATE_WITH_CAPABILITIES
+	#ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
 		
@@ -65,7 +60,7 @@
 
 - (void)deactivate
 {
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
@@ -146,7 +141,7 @@
 	}
 }
 
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for pubsub support.
 **/

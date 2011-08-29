@@ -1,13 +1,8 @@
 #import <Foundation/Foundation.h>
-#import "XMPPModule.h"
+#import "XMPP.h"
 
-#if TARGET_OS_IPHONE
-  #import "DDXML.h"
-#endif
+#define _XMPP_TIME_H
 
-@class XMPPJID;
-@class XMPPStream;
-@class XMPPIQ;
 @class XMPPIDTracker;
 @protocol XMPPTimeDelegate;
 

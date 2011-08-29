@@ -1,15 +1,9 @@
 #import <Foundation/Foundation.h>
-#import "XMPPModule.h"
+#import "XMPP.h"
 
-#if TARGET_OS_IPHONE
-  #import "DDXML.h"
-#endif
+#define _XMPP_CAPABILITIES_H
 
-@class XMPPIQ;
-@class XMPPJID;
-@class XMPPStream;
 @protocol XMPPCapabilitiesStorage;
-@protocol XMPPCapabilitiesDelegate;
 
 /**
  * This class provides support for capabilities discovery.

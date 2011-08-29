@@ -76,6 +76,7 @@
 		DCE025861340087A007448E1 /* XMPPvCardTempLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = DCE025771340087A007448E1 /* XMPPvCardTempLabel.m */; };
 		DCE025871340087A007448E1 /* XMPPvCardTempModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DCE025791340087A007448E1 /* XMPPvCardTempModule.m */; };
 		DCE025881340087A007448E1 /* XMPPvCardTempTel.m in Sources */ = {isa = PBXBuildFile; fileRef = DCE0257B1340087A007448E1 /* XMPPvCardTempTel.m */; };
+		DCE112601406F52D007A2A46 /* XMPPAutoTime.m in Sources */ = {isa = PBXBuildFile; fileRef = DCE1125F1406F52D007A2A46 /* XMPPAutoTime.m */; };
 		DCF825950D748DC000BFABDE /* RequestController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825940D748DC000BFABDE /* RequestController.m */; };
 		DCF825F50D749A5100BFABDE /* ChatController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF825F40D749A5100BFABDE /* ChatController.m */; };
 		DCF825F90D749D1800BFABDE /* ChatWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = DCF825F70D749D1800BFABDE /* ChatWindow.nib */; };
@@ -229,6 +230,9 @@
 		DCE025791340087A007448E1 /* XMPPvCardTempModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPvCardTempModule.m; sourceTree = "<group>"; };
 		DCE0257A1340087A007448E1 /* XMPPvCardTempTel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPvCardTempTel.h; sourceTree = "<group>"; };
 		DCE0257B1340087A007448E1 /* XMPPvCardTempTel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPvCardTempTel.m; sourceTree = "<group>"; };
+		DCE1125E1406F52D007A2A46 /* XMPPAutoTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPAutoTime.h; path = "../../Extensions/XEP-0202/XMPPAutoTime.h"; sourceTree = "<group>"; };
+		DCE1125F1406F52D007A2A46 /* XMPPAutoTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPAutoTime.m; path = "../../Extensions/XEP-0202/XMPPAutoTime.m"; sourceTree = "<group>"; };
+		DCE11263140834D5007A2A46 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
 		DCF825930D748DC000BFABDE /* RequestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestController.h; sourceTree = "<group>"; };
 		DCF825940D748DC000BFABDE /* RequestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestController.m; sourceTree = "<group>"; };
 		DCF825F30D749A5100BFABDE /* ChatController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatController.h; sourceTree = "<group>"; };
@@ -389,15 +393,15 @@
 		DC373071139E9EE500A8407D /* CoreDataStorage */ = {
 			isa = PBXGroup;
 			children = (
-				DC373072139E9EE500A8407D /* XMPPGroupCoreDataStorageObject.h */,
-				DC373073139E9EE500A8407D /* XMPPGroupCoreDataStorageObject.m */,
-				DC373074139E9EE500A8407D /* XMPPResourceCoreDataStorageObject.h */,
-				DC373075139E9EE500A8407D /* XMPPResourceCoreDataStorageObject.m */,
-				DC373076139E9EE500A8407D /* XMPPRoster.xcdatamodel */,
 				DC373077139E9EE500A8407D /* XMPPRosterCoreDataStorage.h */,
 				DC373078139E9EE500A8407D /* XMPPRosterCoreDataStorage.m */,
+				DC373076139E9EE500A8407D /* XMPPRoster.xcdatamodel */,
+				DC373072139E9EE500A8407D /* XMPPGroupCoreDataStorageObject.h */,
+				DC373073139E9EE500A8407D /* XMPPGroupCoreDataStorageObject.m */,
 				DC373079139E9EE500A8407D /* XMPPUserCoreDataStorageObject.h */,
 				DC37307A139E9EE500A8407D /* XMPPUserCoreDataStorageObject.m */,
+				DC373074139E9EE500A8407D /* XMPPResourceCoreDataStorageObject.h */,
+				DC373075139E9EE500A8407D /* XMPPResourceCoreDataStorageObject.m */,
 			);
 			path = CoreDataStorage;
 			sourceTree = "<group>";
@@ -557,6 +561,8 @@
 			children = (
 				DCA6151E1250069F00C75522 /* XMPPTime.h */,
 				DCA6151F1250069F00C75522 /* XMPPTime.m */,
+				DCE1125E1406F52D007A2A46 /* XMPPAutoTime.h */,
+				DCE1125F1406F52D007A2A46 /* XMPPAutoTime.m */,
 			);
 			name = "XEP-0202";
 			sourceTree = "<group>";
@@ -638,6 +644,7 @@
 		DCCE55760BDC8EC8000E2798 /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				DCE11263140834D5007A2A46 /* XMPPFramework.h */,
 				DC84BADB124407550055A459 /* Vendor */,
 				DCB9BBF30DDCEE6B002DA335 /* Categories */,
 				DCB9BAF80DDC962C002DA335 /* Utilities */,
@@ -870,6 +877,7 @@
 				DC37317D139F04DE00A8407D /* NSNumber+XMPP.m in Sources */,
 				DC37317E139F04DE00A8407D /* NSXMLElement+XMPP.m in Sources */,
 				DCC891ED13F1D09000CDAB56 /* XMPPIDTracker.m in Sources */,
+				DCE112601406F52D007A2A46 /* XMPPAutoTime.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

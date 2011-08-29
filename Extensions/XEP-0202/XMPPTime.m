@@ -1,13 +1,7 @@
 #import "XMPPTime.h"
-#import "XMPP.h"
 #import "XMPPIDTracker.h"
 #import "XMPPDateTimeProfiles.h"
-
-#define INTEGRATE_WITH_CAPABILITIES 1
-
-#if INTEGRATE_WITH_CAPABILITIES
-  #import "XMPPCapabilities.h"
-#endif
+#import "XMPPFramework.h"
 
 #define DEFAULT_TIMEOUT  30.0 // seconds
 
@@ -50,7 +44,7 @@
 {
 	if ([super activate:aXmppStream])
 	{
-	#if INTEGRATE_WITH_CAPABILITIES
+	#ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
 		
@@ -64,7 +58,7 @@
 
 - (void)deactivate
 {
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
@@ -119,7 +113,7 @@
 		{
 			respondsToQueries = flag;
 			
-		#if INTEGRATE_WITH_CAPABILITIES
+		#ifdef _XMPP_CAPABILITIES_H
 			// Capabilities may have changed, need to notify others.
 			
 			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -301,7 +295,7 @@
 	[queryTracker removeAllIDs];
 }
 
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for XEP-0202.
 **/

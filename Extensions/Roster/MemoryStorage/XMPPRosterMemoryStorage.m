@@ -11,9 +11,16 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-@interface XMPPRosterMemoryStorage (PrivateAPI)
+#define AssertPrivateQueue() \
+        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private method: MUST run on parentQueue");
 
-- (BOOL)isRosterItem:(NSXMLElement *)item;
+#define AssertParentQueue() \
+        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private protocol method: MUST run on parentQueue");
+
+@interface XMPPRosterMemoryStorage ()
+
+@property (assign, readwrite) XMPPRoster *parent;
+@property (readwrite) dispatch_queue_t parentQueue;
 
 @end
 
@@ -23,17 +30,13 @@
 
 @implementation XMPPRosterMemoryStorage
 
-@synthesize parent;
-
-- (GCDMulticastDelegate <XMPPRosterMemoryStorageDelegate> *)multicastDelegate
-{
-	return (GCDMulticastDelegate <XMPPRosterMemoryStorageDelegate> *)[parent multicastDelegate];
-}
-
 - (id)init
 {
 	if ((self = [super init]))
 	{
+		userClass = [XMPPUserMemoryStorage class];
+		resourceClass = [XMPPResourceMemoryStorage class];
+		
 		roster = [[NSMutableDictionary alloc] init];
 	}
 	return self;
@@ -46,10 +49,8 @@
 	
 	if ((parent == nil) && (parentQueue == NULL))
 	{
-		parent = aParent; // Parents retain their children, children do NOT retain their parent
-		
-		parentQueue = queue;
-		dispatch_retain(parentQueue);
+		self.parent = aParent;
+		self.parentQueue = queue;
 		
 		return YES;
 	}
@@ -63,17 +64,58 @@
 		dispatch_release(parentQueue);
 	
 	[roster release];
+	[myJID release];
 	[myUser release];
 	[super dealloc];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Properties
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@synthesize parent;
+@synthesize userClass;
+@synthesize resourceClass;
+
+- (dispatch_queue_t)parentQueue
+{
+	dispatch_queue_t result = NULL;
+	
+	@synchronized(self)
+	{
+		result = parentQueue;
+	}
+	
+	return result;
+}
+
+- (void)setParentQueue:(dispatch_queue_t)queue
+{
+	@synchronized(self)
+	{
+		if (parentQueue != queue)
+		{
+			if (parentQueue)
+				dispatch_release(parentQueue);
+			
+			parentQueue = queue;
+			dispatch_retain(parentQueue);
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Internal API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (GCDMulticastDelegate <XMPPRosterMemoryStorageDelegate> *)multicastDelegate
+{
+	return (GCDMulticastDelegate <XMPPRosterMemoryStorageDelegate> *)[parent multicastDelegate];
+}
+
 - (id <XMPPUser>)_userForJID:(XMPPJID *)jid
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	XMPPUserMemoryStorage *result = [roster objectForKey:[jid bareJID]];
 	
@@ -82,12 +124,10 @@
 		return result;
 	}
 	
-	XMPPJID *myJID = parent.xmppStream.myJID;
-	
 	XMPPJID *myBareJID = [myJID bareJID];
 	XMPPJID *bareJID = [jid bareJID];
 	
-	if ([bareJID isEqual:myBareJID])
+	if ([bareJID isEqualToJID:myBareJID])
 	{
 		return myUser;
 	}
@@ -97,7 +137,7 @@
 
 - (id <XMPPResource>)_resourceForJID:(XMPPJID *)jid
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	XMPPUserMemoryStorage *user = (XMPPUserMemoryStorage *)[self _userForJID:jid];
 	return [user resourceForJID:jid];
@@ -105,14 +145,14 @@
 
 - (NSArray *)_unsortedUsers
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	return [roster allValues];
 }
 
 - (NSArray *)_unsortedAvailableUsers
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	NSArray *allUsers = [roster allValues];
 	
@@ -131,7 +171,7 @@
 
 - (NSArray *)_unsortedUnavailableUsers
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	NSArray *allUsers = [roster allValues];
 	
@@ -150,35 +190,35 @@
 
 - (NSArray *)_sortedUsersByName
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	return [[roster allValues] sortedArrayUsingSelector:@selector(compareByName:)];
 }
 
 - (NSArray *)_sortedUsersByAvailabilityName
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	return [[roster allValues] sortedArrayUsingSelector:@selector(compareByAvailabilityName:)];
 }
 
 - (NSArray *)_sortedAvailableUsersByName
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	return [[self _unsortedAvailableUsers] sortedArrayUsingSelector:@selector(compareByName:)];
 }
 
 - (NSArray *)_sortedUnavailableUsersByName
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	return [[self _unsortedUnavailableUsers] sortedArrayUsingSelector:@selector(compareByName:)];
 }
 
 - (NSArray *)_sortedResources:(BOOL)includeResourcesForMyUserExcludingMyself
 {
-	// Private method: Only invoked on the parentQueue.
+	AssertPrivateQueue();
 	
 	// Add all the resouces from all the available users in the roster
 	// 
@@ -190,19 +230,18 @@
 	
 	for (id<XMPPUser> user in availableUsers)
 	{
-		[result addObjectsFromArray:[user unsortedResources]];
+		[result addObjectsFromArray:[user allResources]];
 	}
 	
 	if (includeResourcesForMyUserExcludingMyself)
 	{
 		// Now add all the available resources from our own user account (excluding ourselves)
 		
-		XMPPJID *myJID = parent.xmppStream.myJID;
-		NSArray *myResources = [myUser unsortedResources];
+		NSArray *myResources = [myUser allResources];
 		
 		for (id<XMPPResource> resource in myResources)
 		{
-			if (![myJID isEqual:[resource jid]])
+			if (![myJID isEqualToJID:[resource jid]])
 			{
 				[result addObject:resource];
 			}
@@ -218,10 +257,13 @@
 
 - (id <XMPPUser>)myUser
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -241,12 +283,13 @@
 
 - (id <XMPPResource>)myResource
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
-	
-	XMPPJID *myJID = parent.xmppStream.myJID;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -267,10 +310,13 @@
 
 - (id <XMPPUser>)userForJID:(XMPPJID *)jid
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -295,10 +341,13 @@
 
 - (id <XMPPResource>)resourceForJID:(XMPPJID *)jid
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -323,10 +372,13 @@
 
 - (NSArray *)sortedUsersByName
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -352,10 +404,13 @@
 
 - (NSArray *)sortedUsersByAvailabilityName
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -381,10 +436,13 @@
 
 - (NSArray *)sortedAvailableUsersByName
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -410,10 +468,13 @@
 
 - (NSArray *)sortedUnavailableUsersByName
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -439,10 +500,13 @@
 
 - (NSArray *)unsortedUsers
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -468,10 +532,13 @@
 
 - (NSArray *)unsortedAvailableUsers
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -497,10 +564,13 @@
 
 - (NSArray *)unsortedUnavailableUsers
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -526,10 +596,13 @@
 
 - (NSArray *)sortedResources:(BOOL)includeResourcesForMyUserExcludingMyself
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (parentQueue == NULL) return nil;
+	if (self.parentQueue == nil)
+	{
+		// Haven't been attached to parent yet
+		return nil;
+	}
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
@@ -557,61 +630,64 @@
 #pragma mark XMPPRosterStorage Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id <XMPPUser>)myUserForXMPPStream:(XMPPStream *)stream
-{
-	return [self myUser];
-}
-
-- (id <XMPPResource>)myResourceForXMPPStream:(XMPPStream *)stream
-{
-	return [self myResource];
-}
-
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
-{
-	return [self userForJID:jid];
-}
-
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
-{
-	return [self resourceForJID:jid];
-}
-
 - (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+	AssertParentQueue();
 	
 	isRosterPopulation = YES;
 	
-	XMPPJID *myJID = parent.xmppStream.myJID;
+	[myJID release];
+	myJID = [parent.xmppStream.myJID retain];
 	
 	[myUser release];
-	myUser = [[XMPPUserMemoryStorage alloc] initWithJID:myJID];
+	myUser = [[self.userClass alloc] initWithJID:myJID];
 }
 
 - (void)endRosterPopulationForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+	AssertParentQueue();
 	
 	isRosterPopulation = NO;
 	
+	[[self multicastDelegate] xmppRosterDidPopulate:self]; 
 	[[self multicastDelegate] xmppRosterDidChange:self];
 }
 
 - (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+	AssertParentQueue();
 	
-	if ([self isRosterItem:item])
+	NSString *jidStr = [item attributeStringValueForName:@"jid"];
+	XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
+	
+	if (isRosterPopulation)
 	{
-		NSString *jidStr = [item attributeStringValueForName:@"jid"];
-		XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
+		XMPPUserMemoryStorage *newUser = (XMPPUserMemoryStorage *)[[self.userClass alloc] initWithItem:item];
 		
+		[roster setObject:newUser forKey:jid];
+		[newUser release];
+		
+		XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
+	}
+	else
+	{
 		NSString *subscription = [item attributeStringValueForName:@"subscription"];
 		
 		if ([subscription isEqualToString:@"remove"])
 		{
-			[roster removeObjectForKey:jid];
+			XMPPUserMemoryStorage *user = [[[roster objectForKey:jid] retain] autorelease];
+			if (user)
+			{
+				[roster removeObjectForKey:jid];
+				
+				XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
+				
+				[[self multicastDelegate] xmppRoster:self didRemoveUser:user];
+				[[self multicastDelegate] xmppRosterDidChange:self];
+			}
 		}
 		else
 		{
@@ -619,19 +695,24 @@
 			if (user)
 			{
 				[user updateWithItem:item];
+				
+				XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
+				
+				[[self multicastDelegate] xmppRoster:self didUpdateUser:user];
+				[[self multicastDelegate] xmppRosterDidChange:self];
 			}
 			else
 			{
-				XMPPUserMemoryStorage *newUser = [[XMPPUserMemoryStorage alloc] initWithItem:item];
+				XMPPUserMemoryStorage *newUser = (XMPPUserMemoryStorage *)[[self.userClass alloc] initWithItem:item];
 				
 				[roster setObject:newUser forKey:jid];
-				[newUser release];
+				[newUser autorelease];
+				
+				XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
+				
+				[[self multicastDelegate] xmppRoster:self didAddUser:newUser];
+				[[self multicastDelegate] xmppRosterDidChange:self];
 			}
-		}
-		
-		if (!isRosterPopulation)
-		{
-			[[self multicastDelegate] xmppRosterDidChange:self];
 		}
 	}
 }
@@ -639,47 +720,82 @@
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+	AssertParentQueue();
+	
+	int change = XMPP_USER_NO_CHANGE;
+	
+	XMPPUserMemoryStorage *user = nil;
+	XMPPResourceMemoryStorage *resource = nil;
 	
 	XMPPJID *jidKey = [[presence from] bareJID];
-	XMPPUserMemoryStorage *rosterUser = [roster objectForKey:jidKey];
 	
-	if (rosterUser)
+	user = [roster objectForKey:jidKey];
+	if (user)
 	{
-		[rosterUser updateWithPresence:presence];
-		
-		if (!isRosterPopulation)
-		{
-			[[self multicastDelegate] xmppRosterDidChange:self];
-		}
+		change = [user updateWithPresence:presence resourceClass:self.resourceClass andGetResource:&resource];
 	}
 	else
 	{
 		// Not a presence element for anyone in our roster.
 		// Is it a presence element for our user (either our resource or another resource)?
 		
-		XMPPJID *myJID = parent.xmppStream.myJID;
-		XMPPJID *myBareJID = [myJID bareJID];
-		
-		if([myBareJID isEqual:jidKey])
+		if ([[myJID bareJID] isEqualToJID:jidKey])
 		{
-			[myUser updateWithPresence:presence];
-			
-			if (!isRosterPopulation)
-			{
-				[[self multicastDelegate] xmppRosterDidChange:self];
-			}
+			user = myUser;
+			change = [myUser updateWithPresence:presence resourceClass:self.resourceClass andGetResource:&resource];
 		}
+	}
+	
+	XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
+	
+	if (change == XMPP_USER_ADDED_RESOURCE)
+		[[self multicastDelegate] xmppRoster:self didAddResource:resource withUser:user];
+	
+	if (change == XMPP_USER_UPDATED_RESOURCE)
+		[[self multicastDelegate] xmppRoster:self didUpdateResource:resource withUser:user];
+	
+	if (change == XMPP_USER_REMOVED_RESOURCE)
+		[[self multicastDelegate] xmppRoster:self didRemoveResource:resource withUser:user];
+	
+	if (change != XMPP_USER_NO_CHANGE)
+		[[self multicastDelegate] xmppRosterDidChange:self];
+}
+
+- (BOOL)userExistsWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+	XMPPLogTrace();
+	AssertParentQueue();
+	
+	XMPPJID *jidKey = [jid bareJID];
+	XMPPUserMemoryStorage *rosterUser = [roster objectForKey:jidKey];
+	
+	return (rosterUser != nil);
+}
+
+#if TARGET_OS_IPHONE
+- (void)setPhoto:(UIImage *)photo forUserWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+#else
+- (void)setPhoto:(NSImage *)photo forUserWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+#endif
+{
+	XMPPLogTrace();
+	AssertParentQueue();
+	
+	XMPPJID *jidKey = [jid bareJID];
+	XMPPUserMemoryStorage *rosterUser = [roster objectForKey:jidKey];
+	
+	if (rosterUser)
+	{
+		[rosterUser setPhoto:photo];
 	}
 }
 
 - (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+	AssertParentQueue();
 	
-	NSEnumerator *enumerator = [roster objectEnumerator];
-	XMPPUserMemoryStorage *user;
-	
-	while ((user = [enumerator nextObject]))
+	for (XMPPUserMemoryStorage *user in [roster objectEnumerator])
 	{
 		[user clearAllResources];
 	}
@@ -690,6 +806,7 @@
 - (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+	AssertParentQueue();
 	
 	[roster removeAllObjects];
 	
@@ -697,35 +814,6 @@
 	myUser = nil;
 	
 	[[self multicastDelegate] xmppRosterDidChange:self];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * For some bizarre reason (in my opinion), when you request your roster,
- * the server will return JID's NOT in your roster.
- * These are the JID's of users who have requested to be alerted to our presence.
- * After we sign in, we'll again be notified, via the normal presence request objects.
- * It's redundant, and annoying, and just plain incorrect to include these JID's when we request our personal roster.
- * So now, we have to go to the extra effort to filter out these JID's, which is exactly what this method does.
-**/
-- (BOOL)isRosterItem:(NSXMLElement *)item
-{
-	NSString *subscription = [item attributeStringValueForName:@"subscription"];
-	if ([subscription isEqualToString:@"none"])
-	{
-		NSString *ask = [item attributeStringValueForName:@"ask"];
-		if ([ask isEqualToString:@"subscribe"])
-		{
-			return YES;
-		}
-		else
-		{
-			return NO;
-		}
-	}
-	
-	return YES;
 }
 
 @end

@@ -12,45 +12,40 @@
 
 @implementation XMPPUserMemoryStorage
 
-- (id)initWithJID:(XMPPJID *)aJid item:(NSXMLElement *)item
-{
-  if ((self = [super init])) {
-    jid = [[aJid bareJID] retain];
-		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
-    photo = nil;
-		tag = 0;
-
-    if (item == nil) {
-      itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
-    }
-    else
-    {
-      itemAttributes = [[item attributesAsDictionary] retain];
-    }
-  }
-  return self;
-}
-
 - (id)initWithJID:(XMPPJID *)aJid
 {
-	return [self initWithJID:aJid item:nil];
+	if ((self = [super init]))
+	{
+		jid = [[aJid bareJID] retain];
+		
+		itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
+		
+		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+	}
+	return self;
 }
 
 - (id)initWithItem:(NSXMLElement *)item
 {
-  NSString *jidStr = [[item attributeForName:@"jid"] stringValue];
-  jid = [[XMPPJID jidWithString:jidStr] bareJID];
+	if ((self = [super init]))
+	{
+		NSString *jidStr = [item attributeStringValueForName:@"jid"];
+		jid = [[[XMPPJID jidWithString:jidStr] bareJID] retain];
 		
-	return [self initWithJID:jid item:item];
+		itemAttributes = [[item attributesAsDictionary] retain];
+		
+		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+	}
+	return self;
 }
 
 - (void)dealloc
 {
-	[photo release];
 	[jid release];
 	[itemAttributes release];
 	[resources release];
 	[primaryResource release];
+	[photo release];
 	[super dealloc];
 }
 
@@ -77,8 +72,6 @@
 	
 	[deepCopy recalculatePrimaryResource];
 	
-	deepCopy->tag = tag;
-	
 	return deepCopy;
 }
 
@@ -89,7 +82,7 @@
 #if ! TARGET_OS_IPHONE
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {
-	if([encoder isBycopy])
+	if ([encoder isBycopy])
 		return self;
 	else
 		return [super replacementObjectForPortCoder:encoder];
@@ -99,9 +92,9 @@
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
-		if([coder allowsKeyedCoding])
+		if ([coder allowsKeyedCoding])
 		{
 			jid             = [[coder decodeObjectForKey:@"jid"] retain];
 			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
@@ -112,7 +105,6 @@
 		#endif
 			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
 			primaryResource = [[coder decodeObjectForKey:@"primaryResource"] retain];
-			tag             = [coder decodeIntegerForKey:@"tag"];
 		}
 		else
 		{
@@ -125,7 +117,6 @@
 		#endif	
 			resources       = [[coder decodeObject] mutableCopy];
 			primaryResource = [[coder decodeObject] retain];
-			tag             = [[coder decodeObject] integerValue];
 		}
 	}
 	return self;
@@ -133,7 +124,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	if([coder allowsKeyedCoding])
+	if ([coder allowsKeyedCoding])
 	{
 		[coder encodeObject:jid forKey:@"jid"];
 		[coder encodeObject:itemAttributes forKey:@"itemAttributes"];
@@ -144,7 +135,6 @@
 	#endif
 		[coder encodeObject:resources forKey:@"resources"];
 		[coder encodeObject:primaryResource forKey:@"primaryResource"];
-		[coder encodeInteger:tag forKey:@"tag"];
 	}
 	else
 	{
@@ -157,7 +147,6 @@
 	#endif
 		[coder encodeObject:resources];
 		[coder encodeObject:primaryResource];
-		[coder encodeObject:[NSNumber numberWithInteger:tag]];
 	}
 }
 
@@ -180,7 +169,7 @@
 - (NSString *)displayName
 {
 	NSString *nickname = [self nickname];
-	if(nickname)
+	if (nickname)
 		return nickname;
 	else
 		return [jid bare];
@@ -221,12 +210,7 @@
 	return [resources objectForKey:aJid];
 }
 
-- (NSArray *)sortedResources
-{
-	return [[resources allValues] sortedArrayUsingSelector:@selector(compare:)];
-}
-
-- (NSArray *)unsortedResources
+- (NSArray *)allResources
 {
 	return [resources allValues];
 }
@@ -240,13 +224,13 @@
 	[primaryResource release];
 	primaryResource = nil;
 	
-	NSArray *sortedResources = [self sortedResources];
-	if([sortedResources count] > 0)
+	NSArray *sortedResources = [[self allResources] sortedArrayUsingSelector:@selector(compare:)];
+	if ([sortedResources count] > 0)
 	{
 		XMPPResourceMemoryStorage *possiblePrimary = [sortedResources objectAtIndex:0];
 		
 		// Primary resource must have a non-negative priority
-		if([[possiblePrimary presence] priority] >= 0)
+		if ([[possiblePrimary presence] priority] >= 0)
 		{
 			primaryResource = [possiblePrimary retain];
 		}
@@ -267,58 +251,66 @@
 
 - (void)updateWithItem:(NSXMLElement *)item
 {
-	NSArray *attributes = [item attributes];
-	
-	int i;
-	for(i = 0; i < [attributes count]; i++)
+	for (NSXMLNode *node in [item attributes])
 	{
-		NSXMLNode *node = [attributes objectAtIndex:i];
 		NSString *key   = [node name];
 		NSString *value = [node stringValue];
 		
-		if(![value isEqualToString:[itemAttributes objectForKey:key]])
-		{
-			[itemAttributes setObject:value forKey:key];
-		}
+		[itemAttributes setObject:value forKey:key];
 	}
 }
 
-- (void)updateWithPresence:(XMPPPresence *)presence
+- (int)updateWithPresence:(XMPPPresence *)presence
+            resourceClass:(Class)resourceClass
+           andGetResource:(XMPPResourceMemoryStorage **)resourcePtr
 {
-	if([[presence type] isEqualToString:@"unavailable"] ||
-     [presence isErrorPresence])
+	int result = XMPP_USER_NO_CHANGE;
+	XMPPResourceMemoryStorage *resource;
+	
+	XMPPJID *key = [presence from];
+	NSString *presenceType = [presence type];
+	
+	if ([presenceType isEqualToString:@"unavailable"] || [presenceType isEqualToString:@"error"])
 	{
-		[resources removeObjectForKey:[presence from]];
+		resource = [[[resources objectForKey:key] retain] autorelease];
+		if (resource)
+		{
+			[resources removeObjectForKey:key];
+			result = XMPP_USER_REMOVED_RESOURCE;
+		}
 	}
 	else
 	{
-		XMPPJID *key = [presence from];
-		XMPPResourceMemoryStorage *resource = [resources objectForKey:key];
-		
-		if(resource)
+		resource = [resources objectForKey:key];
+		if (resource)
 		{
 			[resource updateWithPresence:presence];
+			result = XMPP_USER_UPDATED_RESOURCE;
 		}
 		else
 		{
-			XMPPResourceMemoryStorage *newResource = [[XMPPResourceMemoryStorage alloc] initWithPresence:presence];
+			resource = (XMPPResourceMemoryStorage *)[[[resourceClass alloc] initWithPresence:presence] autorelease];
 			
-			[resources setObject:newResource forKey:key];
-			[newResource release];
+			[resources setObject:resource forKey:key];
+			result = XMPP_USER_ADDED_RESOURCE;
 		}
 	}
 	
 	[self recalculatePrimaryResource];
+	
+	if (resourcePtr)
+		*resourcePtr = resource;
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Comparison Methods
+#pragma mark Comparisons
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Returns the result of invoking compareByName:options: with no options.
 **/
-- (NSComparisonResult)compareByName:(id <XMPPUser>)another
+- (NSComparisonResult)compareByName:(XMPPUserMemoryStorage *)another
 {
 	return [self compareByName:another options:0];
 }
@@ -330,7 +322,7 @@
  * NSCaseInsensitiveSearch, NSLiteralSearch, NSNumericSearch.
  * See "String Programming Guide for Cocoa" for details on these options.
 **/
-- (NSComparisonResult)compareByName:(id <XMPPUser>)another options:(NSStringCompareOptions)mask
+- (NSComparisonResult)compareByName:(XMPPUserMemoryStorage *)another options:(NSStringCompareOptions)mask
 {
 	NSString *myName = [self displayName];
 	NSString *theirName = [another displayName];
@@ -341,7 +333,7 @@
 /**
  * Returns the result of invoking compareByAvailabilityName:options: with no options.
 **/
-- (NSComparisonResult)compareByAvailabilityName:(id <XMPPUser>)another
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserMemoryStorage *)another
 {
 	return [self compareByAvailabilityName:another options:0];
 }
@@ -352,18 +344,18 @@
  * If both users are available, or both users are not available,
  * this method follows the same functionality as the compareByName:options: as documented above.
 **/
-- (NSComparisonResult)compareByAvailabilityName:(id <XMPPUser>)another options:(NSStringCompareOptions)mask
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserMemoryStorage *)another options:(NSStringCompareOptions)mask
 {
-	if([self isOnline])
+	if ([self isOnline])
 	{
-		if([another isOnline])
+		if ([another isOnline])
 			return [self compareByName:another options:mask];
 		else
 			return NSOrderedAscending;
 	}
 	else
 	{
-		if([another isOnline])
+		if ([another isOnline])
 			return NSOrderedDescending;
 		else
 			return [self compareByName:another options:mask];
@@ -381,11 +373,11 @@
 
 - (BOOL)isEqual:(id)anObject
 {
-	if([anObject isMemberOfClass:[self class]])
+	if ([anObject isMemberOfClass:[self class]])
 	{
 		XMPPUserMemoryStorage *another = (XMPPUserMemoryStorage *)anObject;
 		
-		return [jid isEqual:[another jid]];
+		return [jid isEqualToJID:[another jid]];
 	}
 	
 	return NO;
@@ -393,21 +385,7 @@
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"XMPPUser: %@", [jid bare]];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark User Defined Content
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (NSInteger)tag
-{
-	return tag;
-}
-
-- (void)setTag:(NSInteger)anInt
-{
-	tag = anInt;
+	return [NSString stringWithFormat:@"<XMPPUser[%p]: %@>", self, [jid bare]];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -419,12 +397,8 @@
     return [NSSet setWithObject:@"primaryResource"];
 }
 
-+ (NSSet *)keyPathsForValuesAffectingUnsortedResources {
++ (NSSet *)keyPathsForValuesAffectingAllResources {
     return [NSSet setWithObject:@"resources"];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingSortedResources {
-    return [NSSet setWithObject:@"unsortedResources"];
 }
 
 @end

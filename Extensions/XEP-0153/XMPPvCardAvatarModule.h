@@ -16,14 +16,11 @@
   #import <Cocoa/Cocoa.h>
 #endif
 
-#import "XMPPModule.h"
+#import "XMPP.h"
 #import "XMPPvCardTempModule.h"
 
+#define _XMPP_VCARD_AVATAR_MODULE_H
 
-@class XMPPJID;
-@class XMPPStream;
-
-@protocol XMPPvCardAvatarDelegate;
 @protocol XMPPvCardAvatarStorage;
 
 
@@ -33,7 +30,7 @@
 	id <XMPPvCardAvatarStorage> _moduleStorage;
 }
 
-@property(nonatomic,retain,readonly) XMPPvCardTempModule *xmppvCardTempModule;
+@property(nonatomic,readonly) XMPPvCardTempModule *xmppvCardTempModule;
 
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;
@@ -74,7 +71,7 @@
 /**
  * Clears the vCardTemp from the store.
  * This is used so we can clear any cached vCardTemp's for the JID.
- **/
+**/
 - (void)clearvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end
