@@ -252,13 +252,13 @@
 {
 	self.primaryResource = nil;
 	
-	NSArray *sortedResources = [self sortedResources];
+	NSArray *sortedResources = [[self allResources] sortedArrayUsingSelector:@selector(compare:)];
 	if ([sortedResources count] > 0)
 	{
 		XMPPResourceCoreDataStorageObject *resource = [sortedResources objectAtIndex:0];
 		
 		// Primary resource must have a non-negative priority
-		if([resource priority] >= 0)
+		if ([resource priority] >= 0)
 		{
 			self.primaryResource = resource;
 			
@@ -353,20 +353,19 @@
 	return nil;
 }
 
-- (NSArray *)sortedResources
-{
-	return [[self unsortedResources] sortedArrayUsingSelector:@selector(compare:)];
-}
-
-- (NSArray *)unsortedResources
+- (NSArray *)allResources
 {
 	return [[self resources] allObjects];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Comparisons
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * Returns the result of invoking compareByName:options: with no options.
 **/
-- (NSComparisonResult)compareByName:(id <XMPPUser>)another
+- (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another
 {
 	return [self compareByName:another options:0];
 }
@@ -378,7 +377,7 @@
  * NSCaseInsensitiveSearch, NSLiteralSearch, NSNumericSearch.
  * See "String Programming Guide for Cocoa" for details on these options.
 **/
-- (NSComparisonResult)compareByName:(id <XMPPUser>)another options:(NSStringCompareOptions)mask
+- (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another options:(NSStringCompareOptions)mask
 {
 	NSString *myName = [self displayName];
 	NSString *theirName = [another displayName];
@@ -389,7 +388,7 @@
 /**
  * Returns the result of invoking compareByAvailabilityName:options: with no options.
 **/
-- (NSComparisonResult)compareByAvailabilityName:(id <XMPPUser>)another
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserCoreDataStorageObject *)another
 {
 	return [self compareByAvailabilityName:another options:0];
 }
@@ -400,7 +399,8 @@
  * If both users are available, or both users are not available,
  * this method follows the same functionality as the compareByName:options: as documented above.
 **/
-- (NSComparisonResult)compareByAvailabilityName:(id <XMPPUser>)another options:(NSStringCompareOptions)mask
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserCoreDataStorageObject *)another
+                                        options:(NSStringCompareOptions)mask
 {
 	if ([self isOnline])
 	{
@@ -441,11 +441,7 @@
   return [NSSet setWithObject:@"displayName"];
 }
 
-+ (NSSet *)keyPathsForValuesAffectingSortedResources {
-  return [NSSet setWithObject:@"unsortedResources"];
-}
-
-+ (NSSet *)keyPathsForValuesAffectingUnsortedResources {
++ (NSSet *)keyPathsForValuesAffectingAllResources {
   return [NSSet setWithObject:@"resources"];
 }
 

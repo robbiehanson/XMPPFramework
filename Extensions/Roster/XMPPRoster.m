@@ -1,6 +1,7 @@
 #import "XMPPRoster.h"
 #import "XMPP.h"
 #import "XMPPLogging.h"
+#import "XMPPFramework.h"
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
@@ -10,11 +11,15 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
+enum XMPPRosterConfig
+{
+	kAutoFetchRoster = 1 << 0,                   // If set, we automatically fetch roster after authentication
+	kAutoAcceptKnownPresenceSubscriptionRequests = 1 << 1, // See big description in header file... :D
+};
 enum XMPPRosterFlags
 {
-	kAutoRoster      = 1 << 0,  // If set, we automatically request roster after authentication
-	kRequestedRoster = 1 << 1,  // If set, we have requested the roster
-	kHasRoster       = 1 << 2,  // If set, we have received the roster
+	kRequestedRoster = 1 << 0,  // If set, we have requested the roster
+	kHasRoster       = 1 << 1,  // If set, we have received the roster
 };
 
 @interface XMPPRoster (PrivateAPI)
@@ -28,9 +33,6 @@ enum XMPPRosterFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation XMPPRoster
-
-@dynamic xmppRosterStorage;
-@dynamic autoRoster;
 
 - (id)init
 {
@@ -62,7 +64,9 @@ enum XMPPRosterFlags
 			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
 		}
 		
+		config = kAutoFetchRoster | kAutoAcceptKnownPresenceSubscriptionRequests;
 		flags = 0;
+		
 		earlyPresenceElements = [[NSMutableArray alloc] initWithCapacity:2];
 	}
 	return self;
@@ -76,7 +80,9 @@ enum XMPPRosterFlags
 	{
 		XMPPLogVerbose(@"%@: Activated", THIS_FILE);
 		
-		// Custom code goes here (if needed)
+		#ifdef _XMPP_VCARD_AVATAR_MODULE_H
+		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPvCardAvatarModule class]];
+		#endif
 		
 		return YES;
 	}
@@ -88,7 +94,9 @@ enum XMPPRosterFlags
 {
 	XMPPLogTrace();
 	
-	// Custom code goes here (if needed)
+	#ifdef _XMPP_VCARD_AVATAR_MODULE_H
+	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPvCardAvatarModule class]];
+	#endif
 	
 	[super deactivate];
 }
@@ -105,7 +113,7 @@ enum XMPPRosterFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This method is used by XMPPRosterStorage classes.
+ * This method may optionally be used by XMPPRosterStorage classes (declared in XMPPRosterPrivate.h).
 **/
 - (GCDMulticastDelegate *)multicastDelegate
 {
@@ -116,11 +124,6 @@ enum XMPPRosterFlags
 #pragma mark Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)moduleName
-{
-	return @"XMPPRoster";
-}
-
 - (id <XMPPRosterStorage>)xmppRosterStorage
 {
 	// Note: The xmppRosterStorage variable is read-only (set in the init method)
@@ -128,12 +131,12 @@ enum XMPPRosterFlags
 	return [[xmppRosterStorage retain] autorelease];
 }
 
-- (BOOL)autoRoster
+- (BOOL)autoFetchRoster
 {
 	__block BOOL result;
 	
 	dispatch_block_t block = ^{
-		result = (flags & kAutoRoster) ? YES : NO;
+		result = (config & kAutoFetchRoster) ? YES : NO;
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -144,14 +147,46 @@ enum XMPPRosterFlags
 	return result;
 }
 
-- (void)setAutoRoster:(BOOL)flag
+- (void)setAutoFetchRoster:(BOOL)flag
 {
 	dispatch_block_t block = ^{
 		
 		if (flag)
-			flags |= kAutoRoster;
+			config |= kAutoFetchRoster;
 		else
-			flags &= ~kAutoRoster;
+			config &= ~kAutoFetchRoster;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)autoAcceptKnownPresenceSubscriptionRequests
+{
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (config & kAutoAcceptKnownPresenceSubscriptionRequests) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoAcceptKnownPresenceSubscriptionRequests:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		
+		if (flag)
+			config |= kAutoAcceptKnownPresenceSubscriptionRequests;
+		else
+			config &= ~kAutoAcceptKnownPresenceSubscriptionRequests;
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -161,164 +196,7 @@ enum XMPPRosterFlags
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Buddy Management
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)addBuddy:(XMPPJID *)jid withNickname:(NSString *)optionalName
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	if (jid == nil) return;
-	
-	XMPPJID *myJID = xmppStream.myJID;
-	
-	if ([[myJID bare] isEqualToString:[jid bare]])
-	{
-		// No, you don't need to add yourself
-		return;
-	}
-	
-	// Add the buddy to our roster
-	// 
-	// <iq type="set">
-	//   <query xmlns="jabber:iq:roster">
-	//     <item jid="bareJID" name="optionalName"/>
-	//   </query>
-	// </iq>
-	
-	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
-	
-	if (optionalName)
-	{
-		[item addAttributeWithName:@"name" stringValue:optionalName];
-	}
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
-	[query addChild:item];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
-	
-	// Subscribe to the buddy's presence
-	// 
-	// <presence to="bareJID" type="subscribe"/>
-	
-	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
-	[presence addAttributeWithName:@"to" stringValue:[jid bare]];
-	[presence addAttributeWithName:@"type" stringValue:@"subscribe"];
-	
-	[xmppStream sendElement:presence];
-}
-
-- (void)removeBuddy:(XMPPJID *)jid
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	if (jid == nil) return;
-	
-	XMPPJID *myJID = xmppStream.myJID;
-	
-	if ([[myJID bare] isEqualToString:[jid bare]])
-	{
-		// No, you shouldn't remove yourself
-		return;
-	}
-	
-	// Remove the buddy from our roster
-	// Unsubscribe from presence
-	// And revoke contact's subscription to our presence
-	// ...all in one step
-	
-	// <iq type="set">
-	//   <query xmlns="jabber:iq:roster">
-	//     <item jid="bareJID" subscription="remove"/>
-	//   </query>
-	// </iq>
-	
-	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
-	[item addAttributeWithName:@"subscription" stringValue:@"remove"];
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
-	[query addChild:item];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
-}
-
-- (void)setNickname:(NSString *)nickname forBuddy:(XMPPJID *)jid
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	if (jid == nil) return;
-	
-	// <iq type="set">
-	//   <query xmlns="jabber:iq:roster">
-	//     <item jid="bareJID" name="nickname"/>
-	//   </query>
-	// </iq>
-	
-	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
-	[item addAttributeWithName:@"name" stringValue:nickname];
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
-	[query addChild:item];
-	
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addChild:query];
-	
-	[xmppStream sendElement:iq];
-}
-
-- (void)acceptBuddyRequest:(XMPPJID *)jid
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	// Send presence response
-	// 
-	// <presence to="bareJID" type="subscribed"/>
-	
-	NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-	[response addAttributeWithName:@"to" stringValue:[jid bare]];
-	[response addAttributeWithName:@"type" stringValue:@"subscribed"];
-	
-	[xmppStream sendElement:response];
-	
-	// Add user to our roster
-	
-	[self addBuddy:jid withNickname:nil];
-}
-
-- (void)rejectBuddyRequest:(XMPPJID *)jid
-{
-	// This is a public method.
-	// It may be invoked on any thread/queue.
-	
-	// Send presence response
-	// 
-	// <presence to="bareJID" type="unsubscribed"/>
-	
-	NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-	[response addAttributeWithName:@"to" stringValue:[jid bare]];
-	[response addAttributeWithName:@"type" stringValue:@"unsubscribed"];
-	
-	[xmppStream sendElement:response];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (BOOL)requestedRoster
@@ -355,10 +233,238 @@ enum XMPPRosterFlags
 		flags &= ~kHasRoster;
 }
 
+/**
+ * Some server's include in our roster the JID's of user's NOT in our roster.
+ * This happens when another user adds us to their roster, and requests permission to receive our presence.
+ * 
+ * As discussed in RFC 3921, the state of the other user is "None + Pending In",
+ * and the server "SHOULD NOT" include these JID's in the roster it sends us.
+ * 
+ * Nonetheless, some servers do anyway.
+ * This method filters out such rogue entries in our roster.
+ * 
+ * Note that the server will automatically send us the proper presence subscription request,
+ * and it will continue to do so everytime we sign in.
+ * From the RFC:
+ *     the user's server MUST keep a record of the subscription request and deliver the request when the
+ *     user next creates an available resource, until the user either approves or denies the request.
+ * 
+ * So there is absolutely NO reason to process these entries, or include them in the roster's storage.
+ * Furthermore, it isn't reliable to depend on these entires being there.
+ * The RFC has clearly defined recommendations on the matter, and servers that currently send these rogue items
+ * may very likely stop doing so in future versions.
+**/
+- (BOOL)isRosterItem:(NSXMLElement *)item
+{
+	NSString *subscription = [item attributeStringValueForName:@"subscription"];
+	if ([subscription isEqualToString:@"none"])
+	{
+		NSString *ask = [item attributeStringValueForName:@"ask"];
+		if ([ask isEqualToString:@"subscribe"])
+		{
+			return YES;
+		}
+		else
+		{
+			return NO;
+		}
+	}
+	
+	return YES;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Roster Management
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
+	
+	XMPPJID *myJID = xmppStream.myJID;
+	
+	if ([myJID isEqualToJID:jid options:XMPPJIDCompareBare])
+	{
+		// You don't need to add yourself to the roster.
+		// XMPP will automatically send you presence from all resources signed in under your username.
+		// 
+		// E.g. If you sign in with robbiehanson@deusty.com/home you'll automatically
+		//    receive presence from robbiehanson@deusty.com/work
+		
+		XMPPLogInfo(@"%@: %@ - Ignoring request to add myself to my own roster", [self class], THIS_METHOD);
+		return;
+	}
+	
+	// Add the user to our roster.
+	// 
+	// <iq type="set">
+	//   <query xmlns="jabber:iq:roster">
+	//     <item jid="bareJID" name="optionalName"/>
+	//   </query>
+	// </iq>
+	
+	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
+	
+	if (optionalName)
+	{
+		[item addAttributeWithName:@"name" stringValue:optionalName];
+	}
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+	[query addChild:item];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+	[iq addChild:query];
+	
+	[xmppStream sendElement:iq];
+	
+	// Subscribe to the user's presence.
+	// 
+	// <presence to="bareJID" type="subscribe"/>
+	
+	[xmppStream sendElement:[XMPPPresence presenceWithType:@"subscribe" to:[jid bareJID]]];
+}
+
+- (void)setNickname:(NSString *)nickname forUser:(XMPPJID *)jid
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
+	
+	// <iq type="set">
+	//   <query xmlns="jabber:iq:roster">
+	//     <item jid="bareJID" name="nickname"/>
+	//   </query>
+	// </iq>
+	
+	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
+	[item addAttributeWithName:@"name" stringValue:nickname];
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+	[query addChild:item];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+	[iq addChild:query];
+	
+	[xmppStream sendElement:iq];
+}
+
+- (void)unsubscribePresenceFromUser:(XMPPJID *)jid
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
+	
+	XMPPJID *myJID = xmppStream.myJID;
+	
+	if ([myJID isEqualToJID:jid options:XMPPJIDCompareBare])
+	{
+		XMPPLogInfo(@"%@: %@ - Ignoring request to unsubscribe presence from myself", [self class], THIS_METHOD);
+		return;
+	}
+	
+	// <presence to="bareJID" type="unsubscribe">
+	
+	XMPPPresence *presence = [XMPPPresence presenceWithType:@"unsubscribe" to:[jid bareJID]];
+	[xmppStream sendElement:presence];
+}
+
+- (void)revokePresencePermissionFromUser:(XMPPJID *)jid
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
+	
+	XMPPJID *myJID = xmppStream.myJID;
+	
+	if ([myJID isEqualToJID:jid options:XMPPJIDCompareBare])
+	{
+		XMPPLogInfo(@"%@: %@ - Ignoring request to revoke presence from myself", [self class], THIS_METHOD);
+		return;
+	}
+	
+	// <presence to="bareJID" type="unsubscribed">
+	
+	XMPPPresence *presence = [XMPPPresence presenceWithType:@"unsubscribed" to:[jid bareJID]];
+	[xmppStream sendElement:presence];
+}
+
+- (void)removeUser:(XMPPJID *)jid
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
+	
+	XMPPJID *myJID = xmppStream.myJID;
+	
+	if ([myJID isEqualToJID:jid options:XMPPJIDCompareBare])
+	{
+		XMPPLogInfo(@"%@: %@ - Ignoring request to remove myself from my own roster", [self class], THIS_METHOD);
+		return;
+	}
+	
+	// Remove the user from our roster.
+	// And unsubscribe from presence.
+	// And revoke contact's subscription to our presence.
+	// ...all in one step
+	
+	// <iq type="set">
+	//   <query xmlns="jabber:iq:roster">
+	//     <item jid="bareJID" subscription="remove"/>
+	//   </query>
+	// </iq>
+	
+	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
+	[item addAttributeWithName:@"subscription" stringValue:@"remove"];
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+	[query addChild:item];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+	[iq addChild:query];
+	
+	[xmppStream sendElement:iq];
+}
+
+- (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid andAddToRoster:(BOOL)flag
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	// Send presence response
+	// 
+	// <presence to="bareJID" type="subscribed"/>
+	
+	XMPPPresence *presence = [XMPPPresence presenceWithType:@"subscribed" to:[jid bareJID]];
+	[xmppStream sendElement:presence];
+	
+	// Add optionally add user to our roster
+	
+	if (flag)
+	{
+		[self addUser:jid withNickname:nil];
+	}
+}
+
+- (void)rejectPresenceSubscriptionRequestFrom:(XMPPJID *)jid
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	// Send presence response
+	// 
+	// <presence to="bareJID" type="unsubscribed"/>
+	
+	XMPPPresence *presence = [XMPPPresence presenceWithType:@"unsubscribed" to:[jid bareJID]];
+	[xmppStream sendElement:presence];
+}
+
 - (void)fetchRoster
 {
-	// This is a public method.
-	// It may be invoked on any thread/queue.
+	// This is a public method, so it may be invoked on any thread/queue.
 	
 	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -394,25 +500,6 @@ enum XMPPRosterFlags
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Roster methods
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (id <XMPPUser>)myUser {
-    return [xmppRosterStorage myUserForXMPPStream:xmppStream];
-}
-- (id <XMPPResource>)myResource {
-    return [xmppRosterStorage myResourceForXMPPStream:xmppStream];
-}
-
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid {
-    return [xmppRosterStorage userForJID:jid xmppStream:xmppStream];
-}
-
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid {
-    return [xmppRosterStorage resourceForJID:jid xmppStream:xmppStream];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -422,7 +509,7 @@ enum XMPPRosterFlags
 	
 	XMPPLogTrace();
 	
-	if ([self autoRoster])
+	if ([self autoFetchRoster])
 	{
 		[self fetchRoster];
 	}
@@ -441,7 +528,9 @@ enum XMPPRosterFlags
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:roster"];
 	if (query)
 	{
-		if (![self hasRoster])
+		BOOL hasRoster = [self hasRoster];
+		
+		if (!hasRoster)
 		{
 			[xmppRosterStorage beginRosterPopulationForXMPPStream:xmppStream];
 		}
@@ -449,31 +538,30 @@ enum XMPPRosterFlags
 		NSArray *items = [query elementsForName:@"item"];
 		for (NSXMLElement *item in items)
 		{
-			// Filter out items for users who aren't actually in our roster.
+			// During roster population, we need to filter out items for users who aren't actually in our roster.
 			// That is, those users who have requested to be our buddy, but we haven't approved yet.
+			// This is described in more detail in the method isRosterItem above.
 			
-			[xmppRosterStorage handleRosterItem:item xmppStream:xmppStream];
+			if (hasRoster || [self isRosterItem:item])
+			{
+				[xmppRosterStorage handleRosterItem:item xmppStream:xmppStream];
+			}
 		}
 		
-		if (![self hasRoster])
+		if (!hasRoster)
 		{
 			// We should have our roster now
 			
 			[self setHasRoster:YES];
+			[xmppRosterStorage endRosterPopulationForXMPPStream:xmppStream];
 			
-			// Which means we can process any premature presence elements we received.
-			// 
-			// Note: We do this before invoking endRosterPopulation to enable optimizations
-			// concerning the possible presence storm.
+			// Process any premature presence elements we received.
 			
 			for (XMPPPresence *presence in earlyPresenceElements)
 			{
 				[self xmppStream:xmppStream didReceivePresence:presence];
 			}
 			[earlyPresenceElements removeAllObjects];
-			
-			// And finally, notify roster storage that the roster population is complete
-			[xmppRosterStorage endRosterPopulationForXMPPStream:xmppStream];
 		}
 		
 		return YES;
@@ -518,26 +606,25 @@ enum XMPPRosterFlags
 	
 	if ([[presence type] isEqualToString:@"subscribe"])
 	{
-		id <XMPPUser> user = [xmppRosterStorage userForJID:[presence from] xmppStream:xmppStream];
+		XMPPJID *userJID = [[presence from] bareJID];
 		
-		if (user && [self autoRoster])
+		BOOL knownUser = [xmppRosterStorage userExistsWithJID:userJID xmppStream:xmppStream];
+		
+		if (knownUser && [self autoAcceptKnownPresenceSubscriptionRequests])
 		{
 			// Presence subscription request from someone who's already in our roster.
 			// Automatically approve.
 			// 
 			// <presence to="bareJID" type="subscribed"/>
 			
-			NSXMLElement *response = [NSXMLElement elementWithName:@"presence"];
-			[response addAttributeWithName:@"to" stringValue:[[presence from] bare]];
-			[response addAttributeWithName:@"type" stringValue:@"subscribed"];
-			
+			XMPPPresence *response = [XMPPPresence presenceWithType:@"subscribed" to:userJID];
 			[xmppStream sendElement:response];
 		}
 		else
 		{
 			// Presence subscription request from someone who's NOT in our roster
 			
-			[multicastDelegate xmppRoster:self didReceiveBuddyRequest:presence];
+			[multicastDelegate xmppRoster:self didReceivePresenceSubscriptionRequest:presence];
 		}
 	}
 	else
@@ -552,7 +639,8 @@ enum XMPPRosterFlags
 	
 	XMPPLogTrace();
 	
-  // We check the toStr, so we don't dump the resources when a user leaves a MUC room.
+	// We check the toStr, so we don't dump the resources when a user leaves a MUC room.
+	
 	if ([[presence type] isEqualToString:@"unavailable"] && [presence toStr] == nil)
 	{
 		// We don't receive presence notifications when we're offline.
@@ -587,6 +675,8 @@ enum XMPPRosterFlags
 #pragma mark XMPPvCardAvatarDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef _XMPP_VCARD_AVATAR_MODULE_H
+
 #if TARGET_OS_IPHONE
 - (void)xmppvCardAvatarModule:(XMPPvCardAvatarModule *)vCardTempModule 
               didReceivePhoto:(UIImage *)photo 
@@ -597,11 +687,12 @@ enum XMPPRosterFlags
                        forJID:(XMPPJID *)jid
 #endif
 {
-	id <XMPPUser> user = [self userForJID:jid];
-
-	if (user != nil) {
-		user.photo = photo;
+	if ([xmppRosterStorage respondsToSelector:@selector(setPhoto:forUserWithJID:xmppStream:)])
+	{
+		[xmppRosterStorage setPhoto:photo forUserWithJID:[jid bareJID] xmppStream:xmppStream];
 	}
 }
+
+#endif
 
 @end

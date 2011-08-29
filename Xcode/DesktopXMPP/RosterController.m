@@ -35,7 +35,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogInfo(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	[[self xmppRoster] setAutoRoster:YES];
+	[[self xmppRoster] setAutoFetchRoster:YES];
+	[[self xmppRoster] setAutoAcceptKnownPresenceSubscriptionRequests:YES];
 	
 	[[self xmppStream] addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	[[self xmppRoster] addDelegate:self delegateQueue:dispatch_get_main_queue()];
@@ -289,7 +290,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	XMPPJID *jid = [XMPPJID jidWithString:[buddyField stringValue]];
 	
-	[[self xmppRoster] addBuddy:jid withNickname:nil];
+	[[self xmppRoster] addUser:jid withNickname:nil];
 	
 	// Clear buddy text field
 	[buddyField setStringValue:@""];
@@ -299,7 +300,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	XMPPJID *jid = [XMPPJID jidWithString:[buddyField stringValue]];
 	
-	[[self xmppRoster] removeBuddy:jid];
+	[[self xmppRoster] removeUser:jid];
 	
 	// Clear buddy text field
 	[buddyField setStringValue:@""];
@@ -362,7 +363,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
 	NSString *newName = (NSString *)anObject;
 	
-	[[self xmppRoster] setNickname:newName forBuddy:[user jid]];
+	[[self xmppRoster] setNickname:newName forUser:[user jid]];
 }
 
 - (void)tableView:(NSTableView *)tableView

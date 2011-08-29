@@ -1,14 +1,7 @@
 #import <Cocoa/Cocoa.h>
-#import "XMPP.h"
-#import "XMPPReconnect.h"
-#import "XMPPRoster.h"
-#import "XMPPRosterMemoryStorage.h"
-#import "XMPPCapabilities.h"
-#import "XMPPCapabilitiesCoreDataStorage.h"
-#import "XMPPPing.h"
-#import "XMPPTime.h"
+#import "XMPPFramework.h"
 
-@class  RosterController;
+@class RosterController;
 
 
 @interface AppDelegate : NSObject

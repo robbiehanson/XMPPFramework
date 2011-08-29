@@ -145,66 +145,66 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppStreamWillConnect:(XMPPStream *)sender {
-  XMPPLogTrace();
-  /* 
-   * XEP-0153 Section 4.2 rule 1
-   *
-   * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
-   * Once it has done this, it MAY advertise an image. 
-   */
-  [_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:xmppStream];
+	XMPPLogTrace();
+	/* 
+	 * XEP-0153 Section 4.2 rule 1
+	 *
+	 * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
+	 * Once it has done this, it MAY advertise an image. 
+	 */
+	[_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:xmppStream];
 }
 
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
-  XMPPLogTrace();
-  [_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] useCache:NO];
+	XMPPLogTrace();
+	[_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] useCache:NO];
 }
 
 
 - (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {
-  XMPPLogTrace();
-  
-  // add our photo info to the presence stanza
-  NSXMLElement *photoElement = nil;
-  NSXMLElement *xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
-  
-  NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:xmppStream];
-  
-   if (photoHash != nil) {
-     photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
-   } else {
-     photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement];
-   }
-   
-   [xElement addChild:photoElement];
-   [presence addChild:xElement];
+	XMPPLogTrace();
 
-   // Question: If photoElement is nil, should we be adding xElement?
+	// add our photo info to the presence stanza
+	NSXMLElement *photoElement = nil;
+	NSXMLElement *xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+
+	NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:xmppStream];
+
+	if (photoHash != nil) {
+		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
+	} else {
+		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement];
+	}
+
+	[xElement addChild:photoElement];
+	[presence addChild:xElement];
+
+	// Question: If photoElement is nil, should we be adding xElement?
 }
 
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence  {
-  XMPPLogTrace();
-  
-  NSXMLElement *xElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
-  
-  if (xElement == nil) {
-    return;
-  }
-  
-  NSString *photoHash = [[xElement elementForName:kXMPPvCardAvatarPhotoElement] stringValue];
-  
-  if (photoHash == nil || [photoHash isEqualToString:@""]) {
-    return;
-  }
-  
-  XMPPJID *jid = [presence from];
-  
-  // check the hash
-  if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]) {
-    [_xmppvCardTempModule fetchvCardTempForJID:jid useCache:NO];
-  }
+	XMPPLogTrace();
+
+	NSXMLElement *xElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+
+	if (xElement == nil) {
+		return;
+	}
+
+	NSString *photoHash = [[xElement elementForName:kXMPPvCardAvatarPhotoElement] stringValue];
+
+	if (photoHash == nil || [photoHash isEqualToString:@""]) {
+		return;
+	}
+
+	XMPPJID *jid = [presence from];
+
+	// check the hash
+	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]) {
+		[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:NO];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	 * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
 	 * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
 	 */
-	if ([jid isEqual:[[xmppStream myJID] bareJID]])
+	if ([[xmppStream myJID] isEqualToJID:jid options:XMPPJIDCompareBare])
 	{
 		XMPPPresence *presence = xmppStream.myPresence;
 		if(presence) {

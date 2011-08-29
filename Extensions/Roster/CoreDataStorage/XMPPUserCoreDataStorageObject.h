@@ -1,19 +1,20 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "XMPPUser.h"
 
-#if TARGET_OS_IPHONE
-  #import "DDXML.h"
+#if !TARGET_OS_IPHONE
+  #import <Cocoa/Cocoa.h>
 #endif
 
-@class XMPPStream;
+#import "XMPPUser.h"
+#import "XMPP.h"
+
 @class XMPPGroupCoreDataStorageObject;
 @class XMPPResourceCoreDataStorageObject;
 
 
 @interface XMPPUserCoreDataStorageObject : NSManagedObject <XMPPUser>
 {
-  NSInteger section;
+	NSInteger section;
 }
 
 @property (nonatomic, retain) XMPPJID *jid;
@@ -46,6 +47,13 @@
 
 - (void)updateWithItem:(NSXMLElement *)item;
 - (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr;
+
+- (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another;
+- (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another options:(NSStringCompareOptions)mask;
+
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserCoreDataStorageObject *)another;
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserCoreDataStorageObject *)another
+                                        options:(NSStringCompareOptions)mask;
 
 @end
 

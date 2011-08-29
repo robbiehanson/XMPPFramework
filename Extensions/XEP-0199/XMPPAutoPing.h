@@ -2,7 +2,10 @@
 #import "XMPPModule.h"
 #import "XMPPPing.h"
 
+#define _XMPP_AUTO_PING_H
+
 @class XMPPJID;
+
 
 /**
  * The XMPPAutoPing module sends pings on a designated interval to the target.
@@ -12,7 +15,6 @@
  * If the xmpp stream is receiving data from the target, there's no need to send a ping.
  * Only when no data has been received from the target is a ping sent.
 **/
-
 @interface XMPPAutoPing : XMPPModule {
 @private
 	NSTimeInterval pingInterval;

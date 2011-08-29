@@ -34,10 +34,12 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-	XMPPResourceMemoryStorage *deepCopy = [[XMPPResourceMemoryStorage alloc] init];
+	// We support subclassing
+	
+	XMPPResourceMemoryStorage *deepCopy = (XMPPResourceMemoryStorage *)[[[self class] alloc] init];
 	
 	deepCopy->jid = [jid copy];
-	deepCopy->presence = [presence retain]; // No need to bother with a copy we don't alter presence
+	deepCopy->presence = [presence retain]; // No need to bother with a copy sicne we don't alter presence
 	deepCopy->presenceDate = [presenceDate copy];
 	
 	return deepCopy;
@@ -180,7 +182,7 @@
 	{
 		XMPPResourceMemoryStorage *another = (XMPPResourceMemoryStorage *)anObject;
 		
-		return [jid isEqual:[another jid]];
+		return [jid isEqualToJID:[another jid]];
 	}
 	
 	return NO;
@@ -188,7 +190,7 @@
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"XMPPResource: %@", [jid full]];
+	return [NSString stringWithFormat:@"<XMPPResource[%p]: %@>", self, [jid full]];
 }
 
 @end

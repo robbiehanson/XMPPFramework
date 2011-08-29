@@ -1,8 +1,5 @@
 #import "AppDelegate.h"
 #import "RosterController.h"
-#import "XMPP.h"
-#import "TURNSocket.h"
-#import "GCDAsyncSocket.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -37,8 +34,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		xmppRosterStorage = [[XMPPRosterMemoryStorage alloc] init];
 		xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
 		
-		xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
-		xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
+	//	xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
+	//	xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
 		
 	//	xmppCapabilities.autoFetchHashedCapabilities = YES;
 	//	xmppCapabilities.autoFetchNonHashedCapabilities = NO;
