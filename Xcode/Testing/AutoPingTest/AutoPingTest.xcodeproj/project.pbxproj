@@ -42,6 +42,7 @@
 		DC3731B3139F094100A8407D /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731AE139F094100A8407D /* NSData+XMPP.m */; };
 		DC3731B4139F094100A8407D /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731B0139F094100A8407D /* NSNumber+XMPP.m */; };
 		DC3731B5139F094100A8407D /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731B2139F094100A8407D /* NSXMLElement+XMPP.m */; };
+		DCE11277140D6159007A2A46 /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DCE11276140D6159007A2A46 /* XMPPIDTracker.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -116,6 +117,9 @@
 		DC3731B0139F094100A8407D /* NSNumber+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNumber+XMPP.m"; sourceTree = "<group>"; };
 		DC3731B1139F094100A8407D /* NSXMLElement+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSXMLElement+XMPP.h"; sourceTree = "<group>"; };
 		DC3731B2139F094100A8407D /* NSXMLElement+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSXMLElement+XMPP.m"; sourceTree = "<group>"; };
+		DCE11275140D6159007A2A46 /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIDTracker.h; sourceTree = "<group>"; };
+		DCE11276140D6159007A2A46 /* XMPPIDTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIDTracker.m; sourceTree = "<group>"; };
+		DCE11279140D621F007A2A46 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPFramework.h; path = AutoPingTest/XMPPFramework.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,6 +206,7 @@
 		DC17CD631355EDB2007A32CC /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				DCE11279140D621F007A2A46 /* XMPPFramework.h */,
 				DC17CD8E1355EDD1007A32CC /* Vendor */,
 				DC17CD641355EDD1007A32CC /* Categories */,
 				DC17CD831355EDD1007A32CC /* Utilities */,
@@ -255,6 +260,8 @@
 		DC17CD831355EDD1007A32CC /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				DCE11275140D6159007A2A46 /* XMPPIDTracker.h */,
+				DCE11276140D6159007A2A46 /* XMPPIDTracker.m */,
 				DC17CD841355EDD1007A32CC /* DDList.h */,
 				DC17CD851355EDD1007A32CC /* DDList.m */,
 				DC17CD861355EDD1007A32CC /* GCDMulticastDelegate.h */,
@@ -432,6 +439,7 @@
 				DC3731B3139F094100A8407D /* NSData+XMPP.m in Sources */,
 				DC3731B4139F094100A8407D /* NSNumber+XMPP.m in Sources */,
 				DC3731B5139F094100A8407D /* NSXMLElement+XMPP.m in Sources */,
+				DCE11277140D6159007A2A46 /* XMPPIDTracker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

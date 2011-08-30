@@ -123,6 +123,7 @@
 		DC4173B913F1D3E200ED8D43 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC4173BB13F1E23B00ED8D43 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		DC4173BD13F1E24500ED8D43 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		DCE1127E140D62E6007A2A46 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPFramework.h; path = AutoTimeTest/XMPPFramework.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +208,7 @@
 		DC41734313F1D35100ED8D43 /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				DCE1127E140D62E6007A2A46 /* XMPPFramework.h */,
 				DC41734413F1D37300ED8D43 /* Categories */,
 				DC41734B13F1D37300ED8D43 /* Core */,
 				DC4173AA13F1D39700ED8D43 /* Extensions */,
@@ -575,6 +577,7 @@
 				DC41734213F1D34900ED8D43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
