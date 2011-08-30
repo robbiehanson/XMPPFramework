@@ -305,24 +305,34 @@ static NSMutableSet *databaseFileNames;
 
 - (XMPPJID *)myJIDForXMPPStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	__block XMPPJID *result = nil;
 	
-	
-	NSNumber *key = [[NSNumber alloc] initWithPtr:stream];
-	
-	XMPPJID *result = (XMPPJID *)[myJidCache objectForKey:key];
-	if (!result)
-	{
-		result = [stream myJID];
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		if (result)
-			[myJidCache setObject:result forKey:key];
-		else
-			[myJidCache removeObjectForKey:key];
-	}
+		NSNumber *key = [NSNumber numberWithPtr:stream];
+		
+		result = (XMPPJID *)[myJidCache objectForKey:key];
+		if (!result)
+		{
+			result = [stream myJID];
+			
+			if (result)
+			{
+				[myJidCache setObject:result forKey:key];
+			}
+		}
+		
+		[result retain];
+		[pool drain];
+	};
 	
-	[key release];
-	return result;
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
+	return [result autorelease];
 }
 
 - (void)updateJidCache:(NSNotification *)notification
