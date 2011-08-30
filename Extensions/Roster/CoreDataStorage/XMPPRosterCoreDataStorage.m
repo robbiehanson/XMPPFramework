@@ -61,77 +61,15 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (XMPPUserCoreDataStorageObject *)_userForJID:(XMPPJID *)jid
-                                    xmppStream:(XMPPStream *)stream
-                          managedObjectContext:(NSManagedObjectContext *)moc
-{
-	XMPPLogTrace();
-	AssertPrivateQueue();
-	
-	if (jid == nil) return nil;
-	
-	NSString *bareJIDStr = [jid bare];
-	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
-	                                          inManagedObjectContext:moc];
-	
-	NSPredicate *predicate;
-	if (stream == nil)
-		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", bareJIDStr];
-	else
-		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
-					 bareJIDStr, [[self myJIDForXMPPStream:stream] bare]];
-	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
-	[fetchRequest setEntity:entity];
-	[fetchRequest setPredicate:predicate];
-	[fetchRequest setIncludesPendingChanges:YES];
-	[fetchRequest setFetchLimit:1];
-	
-	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
-	
-	return (XMPPUserCoreDataStorageObject *)[results lastObject];
-}
-
-- (XMPPResourceCoreDataStorageObject *)_resourceForJID:(XMPPJID *)jid
-                                            xmppStream:(XMPPStream *)stream
-                                  managedObjectContext:(NSManagedObjectContext *)moc
-{
-	XMPPLogTrace();
-	AssertPrivateQueue();
-	
-	if (jid == nil) return nil;
-	
-	NSString *fullJIDStr = [jid full];
-	
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorageObject"
-	                                          inManagedObjectContext:moc];
-	
-	NSPredicate *predicate;
-	if (stream == nil)
-		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", fullJIDStr];
-	else
-		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
-					 fullJIDStr, [[self myJIDForXMPPStream:stream] bare]];
-	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
-	[fetchRequest setEntity:entity];
-	[fetchRequest setPredicate:predicate];
-	[fetchRequest setIncludesPendingChanges:YES];
-	[fetchRequest setFetchLimit:1];
-	
-	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
-	
-	return (XMPPResourceCoreDataStorageObject *)[results lastObject];
-}
-
 - (void)_clearAllResourcesForXMPPStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
 	AssertPrivateQueue();
 	
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorageObject"
-	                                          inManagedObjectContext:[self managedObjectContext]];
+	                                          inManagedObjectContext:moc];
 	
 	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
 	[fetchRequest setEntity:entity];
@@ -146,13 +84,13 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		[fetchRequest setPredicate:predicate];
 	}
 	
-	NSArray *allResources = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
+	NSArray *allResources = [moc executeFetchRequest:fetchRequest error:nil];
 	
 	NSUInteger unsavedCount = [self numberOfUnsavedChanges];
 	
 	for (XMPPResourceCoreDataStorageObject *resource in allResources)
 	{
-		[[self managedObjectContext] deleteObject:resource];
+		[moc deleteObject:resource];
 		
 		if (++unsavedCount >= saveThreshold)
 		{
@@ -211,18 +149,13 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	if (moc == nil)
-	{
-		return nil;
-	}
-	
 	XMPPJID *myJID = stream.myJID;
 	if (myJID == nil)
 	{
 		return nil;
 	}
 	
-	return [self _userForJID:myJID xmppStream:stream managedObjectContext:moc];
+	return [self userForJID:myJID xmppStream:stream managedObjectContext:moc];
 }
 
 - (XMPPResourceCoreDataStorageObject *)myResourceForXMPPStream:(XMPPStream *)stream
@@ -232,18 +165,13 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	if (moc == nil)
-	{
-		return nil;
-	}
-	
 	XMPPJID *myJID = stream.myJID;
 	if (myJID == nil)
 	{
 		return nil;
 	}
 	
-	return [self _resourceForJID:myJID xmppStream:stream managedObjectContext:moc];
+	return [self resourceForJID:myJID xmppStream:stream managedObjectContext:moc];
 }
 
 - (XMPPUserCoreDataStorageObject *)userForJID:(XMPPJID *)jid
@@ -254,12 +182,30 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	if (moc == nil)
-	{
-		return nil;
-	}
+	if (jid == nil) return nil;
+	if (moc == nil) return nil;
 	
-	return [self _userForJID:jid xmppStream:stream managedObjectContext:moc];
+	NSString *bareJIDStr = [jid bare];
+	
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
+	                                          inManagedObjectContext:moc];
+	
+	NSPredicate *predicate;
+	if (stream == nil)
+		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", bareJIDStr];
+	else
+		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
+					 bareJIDStr, [[self myJIDForXMPPStream:stream] bare]];
+	
+	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	[fetchRequest setEntity:entity];
+	[fetchRequest setPredicate:predicate];
+	[fetchRequest setIncludesPendingChanges:YES];
+	[fetchRequest setFetchLimit:1];
+	
+	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+	
+	return (XMPPUserCoreDataStorageObject *)[results lastObject];
 }
 
 - (XMPPResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid
@@ -270,12 +216,30 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	if (moc == nil)
-	{
-		return nil;
-	}
+	if (jid == nil) return nil;
+	if (moc == nil) return nil;
 	
-	return [self _resourceForJID:jid xmppStream:stream managedObjectContext:moc];
+	NSString *fullJIDStr = [jid full];
+	
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorageObject"
+	                                          inManagedObjectContext:moc];
+	
+	NSPredicate *predicate;
+	if (stream == nil)
+		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", fullJIDStr];
+	else
+		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
+					 fullJIDStr, [[self myJIDForXMPPStream:stream] bare]];
+	
+	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	[fetchRequest setEntity:entity];
+	[fetchRequest setPredicate:predicate];
+	[fetchRequest setIncludesPendingChanges:YES];
+	[fetchRequest setFetchLimit:1];
+	
+	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+	
+	return (XMPPResourceCoreDataStorageObject *)[results lastObject];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -359,7 +323,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			NSString *jidStr = [item attributeStringValueForName:@"jid"];
 			XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
 			
-			XMPPUserCoreDataStorageObject *user = [self _userForJID:jid xmppStream:stream managedObjectContext:moc];
+			XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 			
 			NSString *subscription = [item attributeStringValueForName:@"subscription"];
 			if ([subscription isEqualToString:@"remove"])
@@ -397,7 +361,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		XMPPJID *jid = [presence from];
 		NSManagedObjectContext *moc = [self managedObjectContext];
 		
-		XMPPUserCoreDataStorageObject *user = [self _userForJID:jid xmppStream:stream managedObjectContext:moc];
+		XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 		
 		if (user)
 		{
@@ -417,7 +381,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	[self executeBlock:^{
 		
 		NSManagedObjectContext *moc = [self managedObjectContext];
-		XMPPUserCoreDataStorageObject *user = [self _userForJID:jid xmppStream:stream managedObjectContext:moc];
+		XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 		
 		result = (user != nil);
 	}];
@@ -436,7 +400,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	[self scheduleBlock:^{
 		
 		NSManagedObjectContext *moc = [self managedObjectContext];
-		XMPPUserCoreDataStorageObject *user = [self _userForJID:jid xmppStream:stream managedObjectContext:moc];
+		XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 		
 		if (user)
 		{
