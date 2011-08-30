@@ -2,12 +2,8 @@
 #import <CoreData/CoreData.h>
 
 
-@class iPhoneXMPPAppDelegate;
-
-
 @interface RootViewController : UITableViewController <NSFetchedResultsControllerDelegate>
 {
-	NSManagedObjectContext *managedObjectContext;
 	NSFetchedResultsController *fetchedResultsController;
 }
 

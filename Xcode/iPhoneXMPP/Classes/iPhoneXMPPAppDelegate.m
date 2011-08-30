@@ -16,27 +16,37 @@
 #import <CFNetwork/CFNetwork.h>
 
 // Log levels: off, error, warn, info, verbose
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#if DEBUG
+  static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#else
+  static const int ddLogLevel = LOG_LEVEL_INFO;
+#endif
 
 
 @interface iPhoneXMPPAppDelegate()
 
 - (void)setupStream;
+- (void)teardownStream;
 
 - (void)goOnline;
 - (void)goOffline;
 
 @end
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 @implementation iPhoneXMPPAppDelegate
 
 @synthesize xmppStream;
 @synthesize xmppReconnect;
-@synthesize xmppCapabilities;
 @synthesize xmppRoster;
-@synthesize xmppvCardAvatarModule;
+@synthesize xmppRosterStorage;
 @synthesize xmppvCardTempModule;
+@synthesize xmppvCardAvatarModule;
+@synthesize xmppCapabilities;
+@synthesize xmppCapabilitiesStorage;
 
 @synthesize window;
 @synthesize navigationController;
@@ -67,16 +77,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)dealloc
 {
-	[xmppStream removeDelegate:self];
-	[xmppRoster removeDelegate:self];
-
-	[xmppStream disconnect];
-	[xmppReconnect release];
-	[xmppvCardAvatarModule release];
-	[xmppvCardTempModule release];
-    [xmppCapabilities release];
-	[xmppStream release];
-	[xmppRoster release];
+	[self teardownStream];
 
 	[password release];
 
@@ -89,12 +90,86 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Core Data
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSManagedObjectContext *)managedObjectContext_roster
+{
+	NSAssert([NSThread isMainThread],
+	         @"NSManagedObjectContext is not thread safe. It must always be used on the same thread/queue");
+	
+	if (managedObjectContext_roster == nil)
+	{
+		managedObjectContext_roster = [[NSManagedObjectContext alloc] init];
+		
+		NSPersistentStoreCoordinator *psc = [xmppRosterStorage persistentStoreCoordinator];
+		[managedObjectContext_roster setPersistentStoreCoordinator:psc];
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		                                         selector:@selector(contextDidSave:)
+		                                             name:NSManagedObjectContextDidSaveNotification
+		                                           object:nil];
+	}
+	
+	return managedObjectContext_roster;
+}
+
+- (NSManagedObjectContext *)managedObjectContext_capabilities
+{
+	NSAssert([NSThread isMainThread],
+	         @"NSManagedObjectContext is not thread safe. It must always be used on the same thread/queue");
+	
+	if (managedObjectContext_capabilities == nil)
+	{
+		managedObjectContext_capabilities = [[NSManagedObjectContext alloc] init];
+		
+		NSPersistentStoreCoordinator *psc = [xmppCapabilitiesStorage persistentStoreCoordinator];
+		[managedObjectContext_roster setPersistentStoreCoordinator:psc];
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		                                         selector:@selector(contextDidSave:)
+		                                             name:NSManagedObjectContextDidSaveNotification
+		                                           object:nil];
+	}
+	
+	return managedObjectContext_capabilities;
+}
+
+- (void)contextDidSave:(NSNotification *)notification
+{
+	NSManagedObjectContext *sender = (NSManagedObjectContext *)[notification object];
+	
+	if (sender != managedObjectContext_roster &&
+	    [sender persistentStoreCoordinator] == [managedObjectContext_roster persistentStoreCoordinator])
+	{
+		DDLogVerbose(@"%@: %@ - Merging changes into managedObjectContext_roster", THIS_FILE, THIS_METHOD);
+		
+		dispatch_async(dispatch_get_main_queue(), ^{
+			
+			[managedObjectContext_roster mergeChangesFromContextDidSaveNotification:notification];
+		});
+    }
+	
+	if (sender != managedObjectContext_capabilities &&
+	    [sender persistentStoreCoordinator] == [managedObjectContext_capabilities persistentStoreCoordinator])
+	{
+		DDLogVerbose(@"%@: %@ - Merging changes into managedObjectContext_capabilities", THIS_FILE, THIS_METHOD);
+		
+		dispatch_async(dispatch_get_main_queue(), ^{
+			
+			[managedObjectContext_capabilities mergeChangesFromContextDidSaveNotification:notification];
+		});
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Private
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Configure the xmpp stream
 - (void)setupStream
 {
+	NSAssert(xmppStream == nil, @"Method setupStream invoked multiple times");
+	
 	// Setup xmpp stream
 	// 
 	// The XMPPStream is the base class for all activity.
@@ -118,6 +193,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 	#endif
 	
+	// Setup reconnect
+	// 
+	// The XMPPReconnect module monitors for "accidental disconnections" and
+	// automatically reconnects the stream for you.
+	// There's a bunch more information in the XMPPReconnect header file.
+	
+	xmppReconnect = [[XMPPReconnect alloc] init];
+	
 	// Setup roster
 	// 
 	// The XMPPRoster handles the xmpp protocol stuff related to the roster.
@@ -128,30 +211,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// You can do it however you like! It's your application.
 	// But you do need to provide the roster with some storage facility.
 	
-	id <XMPPRosterStorage> rosterStorage = [[[XMPPRosterCoreDataStorage alloc] init] autorelease];
-//	id <XMPPRosterStorage> rosterStorage = [[[XMPPRosterCoreDataStorage alloc] initWithInMemoryStore] autorelease];
+	xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] init];
+//	xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] initWithInMemoryStore];
 	
-	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:rosterStorage];
+	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
+	
+	xmppRoster.autoFetchRoster = YES;
+	xmppRoster.autoAcceptKnownPresenceSubscriptionRequests = YES;
 	
 	// Setup vCard support
+	// 
+	// The vCard Avatar module works in conjuction with the standard vCard Temp module to download user avatars.
+	// The XMPPRoster will automatically integrate with XMPPvCardAvatarModule to cache roster photos in the roster.
 	
-	// We add XMPPRoster as a delegate of XMPPvCardAvatarModule to cache roster photos in the roster.
-	// This frees the view controller from having to save photos on the main thread.
-	
-	id <XMPPvCardTempModuleStorage> vcardStorage = [XMPPvCardCoreDataStorage sharedInstance];
-	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:vcardStorage];
+	xmppvCardStorage = [[XMPPvCardCoreDataStorage sharedInstance] retain];
+	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardStorage];
 	
 	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
-	
-	[xmppvCardAvatarModule addDelegate:xmppRoster delegateQueue:xmppRoster.moduleQueue];
-	
-	// Setup reconnect
-	// 
-	// The XMPPReconnect module monitors for "accidental disconnections" and
-	// automatically reconnects the stream for you.
-	// There's a bunch more information in the XMPPReconnect header file.
-	
-	xmppReconnect = [[XMPPReconnect alloc] init];
 	
 	// Setup capabilities
 	// 
@@ -172,21 +248,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// The XMPPCapabilitiesCoreDataStorage is an ideal solution.
 	// It can also be shared amongst multiple streams to further reduce hash lookups.
 	
-	id <XMPPCapabilitiesStorage> capsStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
-    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:capsStorage];
+	xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage sharedInstance] retain];
+    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
 
     xmppCapabilities.autoFetchHashedCapabilities = YES;
     xmppCapabilities.autoFetchNonHashedCapabilities = NO;
 
-	[xmppRoster setAutoRoster:YES];
-
 	// Activate xmpp modules
 
-	[xmppReconnect activate:xmppStream];
-    [xmppCapabilities activate:xmppStream];
-	[xmppRoster activate:xmppStream];
-	[xmppvCardTempModule activate:xmppStream];
+	[xmppReconnect         activate:xmppStream];
+	[xmppRoster            activate:xmppStream];
+	[xmppvCardTempModule   activate:xmppStream];
 	[xmppvCardAvatarModule activate:xmppStream];
+	[xmppCapabilities      activate:xmppStream];
 
 	// Add ourself as a delegate to anything we may be interested in
 
@@ -211,6 +285,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// You may need to alter these settings depending on the server you're connecting to
 	allowSelfSignedCertificates = NO;
 	allowSSLHostNameMismatch = NO;
+}
+
+- (void)teardownStream
+{
+	[xmppStream removeDelegate:self];
+	[xmppRoster removeDelegate:self];
+	
+	[xmppReconnect         deactivate];
+	[xmppRoster            deactivate];
+	[xmppvCardTempModule   deactivate];
+	[xmppvCardAvatarModule deactivate];
+	[xmppCapabilities      deactivate];
+	
+	[xmppStream disconnect];
+	
+	[xmppStream release];
+	[xmppReconnect release];
+	[xmppRoster release];
+	[xmppRosterStorage release];
+	[xmppvCardStorage release];
+	[xmppvCardTempModule release];
+	[xmppvCardAvatarModule release];
+	[xmppCapabilities release];
+	[xmppCapabilitiesStorage release];
+	
+	xmppStream = nil;
+	xmppReconnect = nil;
+    xmppRoster = nil;
+	xmppRosterStorage = nil;
+	xmppvCardStorage = nil;
+    xmppvCardTempModule = nil;
+	xmppvCardAvatarModule = nil;
+	xmppCapabilities = nil;
+	xmppCapabilitiesStorage = nil;
 }
 
 // It's easy to create XML elments to send and to read received XML elements.
@@ -299,75 +407,34 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)applicationDidEnterBackground:(UIApplication *)application 
 {
-  /*
-   Use this method to release shared resources, save user data, invalidate timers, and store enough application state 
-   information to restore your application to its current state in case it is terminated later. 
-   If your application supports background execution, called instead of applicationWillTerminate: when the user quits.
-   */
-  DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
-  
-#if TARGET_IPHONE_SIMULATOR
-  DDLogError(@"The iPhone simulator does not process background network traffic.  Inbound traffic is queued until the keepAliveTimeout:handler: fires.");
-#endif
-  
-  if ([application respondsToSelector:@selector(setKeepAliveTimeout:handler:)]) 
-  {
-    [application setKeepAliveTimeout:600 handler:^{
-      DDLogVerbose(@"KeepAliveHandler");
-      
-      // Do other keep alive stuff here.
-    }];
-  }
+	// Use this method to release shared resources, save user data, invalidate timers, and store
+	// enough application state information to restore your application to its current state in case
+	// it is terminated later.
+	// 
+	// If your application supports background execution,
+	// called instead of applicationWillTerminate: when the user quits.
+	
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+
+	#if TARGET_IPHONE_SIMULATOR
+	DDLogError(@"The iPhone simulator does not process background network traffic. "
+			   @"Inbound traffic is queued until the keepAliveTimeout:handler: fires.");
+	#endif
+
+	if ([application respondsToSelector:@selector(setKeepAliveTimeout:handler:)]) 
+	{
+		[application setKeepAliveTimeout:600 handler:^{
+			
+			DDLogVerbose(@"KeepAliveHandler");
+			
+			// Do other keep alive stuff here.
+		}];
+	}
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application 
 {
-  DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPRosterDelegate
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)xmppRoster:(XMPPRoster *)sender didReceiveBuddyRequest:(XMPPPresence *)presence
-{
-  DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
-  
-  NSString *displayName = [[xmppRoster userForJID:[presence from]] displayName];
-  NSString *jidStrBare = [presence fromStr];
-  NSString *body = nil;
-  
-  if (![displayName isEqualToString:jidStrBare]) 
-  {
-    body = [NSString stringWithFormat:@"Buddy request from %@ <%@>", displayName, jidStrBare];
-  } 
-  else 
-  {
-    body = [NSString stringWithFormat:@"Buddy request from %@", displayName];
-  }
-  
-  
-  if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
-  {
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
-                                                        message:body 
-                                                       delegate:nil 
-                                              cancelButtonTitle:@"Not implemented" 
-                                              otherButtonTitles:nil];
-    [alertView show];
-    [alertView release];
-  } 
-  else 
-  {
-    // We are not active, so use a local notification instead
-    UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-    localNotification.alertAction = @"Not implemented";
-    localNotification.alertBody = body;
-    
-    [[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-    [localNotification release];
-  }
-
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -440,7 +507,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	isOpen = YES;
+	isXmppConnected = YES;
 	
 	NSError *error = nil;
 	
@@ -472,33 +539,39 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
-  
-  // A simple example of inbound message handling.
-  
-  if ([message isChatMessageWithBody])
-  {
-    NSString *body = [[message elementForName:@"body"] stringValue];    
-    NSString *displayName = [[xmppRoster userForJID:[message from]] displayName];
 
-    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
-    {
-      UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
-                                                          message:body 
-                                                         delegate:nil 
-                                                cancelButtonTitle:@"Ok" 
-                                                otherButtonTitles:nil];
-      [alertView show];
-      [alertView release];
-    } else {
-      // We are not active, so use a local notification instead
-      UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-      localNotification.alertAction = @"Ok";
-      localNotification.alertBody = [NSString stringWithFormat:@"From: %@\n\n%@",displayName,body];
-      
-      [[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-      [localNotification release];
-    }
-  }
+	// A simple example of inbound message handling.
+
+	if ([message isChatMessageWithBody])
+	{
+		XMPPUserCoreDataStorageObject *user = [xmppRosterStorage userForJID:[message from]
+		                                                         xmppStream:xmppStream
+		                                               managedObjectContext:[self managedObjectContext_roster]];
+		
+		NSString *body = [[message elementForName:@"body"] stringValue];
+		NSString *displayName = [user displayName];
+
+		if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+		{
+			UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
+															  message:body 
+															 delegate:nil 
+													cancelButtonTitle:@"Ok" 
+													otherButtonTitles:nil];
+			[alertView show];
+			[alertView release];
+		}
+		else
+		{
+			// We are not active, so use a local notification instead
+			UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+			localNotification.alertAction = @"Ok";
+			localNotification.alertBody = [NSString stringWithFormat:@"From: %@\n\n%@",displayName,body];
+
+			[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
+			[localNotification release];
+		}
+	}
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
@@ -515,10 +588,59 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	if (!isOpen)
+	if (!isXmppConnected)
 	{
 		DDLogError(@"Unable to connect to server. Check xmppStream.hostName");
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPRosterDelegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppRoster:(XMPPRoster *)sender didReceiveBuddyRequest:(XMPPPresence *)presence
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	XMPPUserCoreDataStorageObject *user = [xmppRosterStorage userForJID:[presence from]
+	                                                         xmppStream:xmppStream
+	                                               managedObjectContext:[self managedObjectContext_roster]];
+	
+	NSString *displayName = [user displayName];
+	NSString *jidStrBare = [presence fromStr];
+	NSString *body = nil;
+	
+	if (![displayName isEqualToString:jidStrBare])
+	{
+		body = [NSString stringWithFormat:@"Buddy request from %@ <%@>", displayName, jidStrBare];
+	}
+	else
+	{
+		body = [NSString stringWithFormat:@"Buddy request from %@", displayName];
+	}
+	
+	
+	if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+	{
+		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
+		                                                    message:body 
+		                                                   delegate:nil 
+		                                          cancelButtonTitle:@"Not implemented"
+		                                          otherButtonTitles:nil];
+		[alertView show];
+		[alertView release];
+	} 
+	else 
+	{
+		// We are not active, so use a local notification instead
+		UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+		localNotification.alertAction = @"Not implemented";
+		localNotification.alertBody = body;
+		
+		[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
+		[localNotification release];
+	}
+	
 }
 
 @end

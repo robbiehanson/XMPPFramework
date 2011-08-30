@@ -3,10 +3,9 @@
 
 #import "XMPPRoster.h"
 #import "XMPPCoreDataStorage.h"
-
-@class XMPPUserCoreDataStorageObject;
-@class XMPPGroupCoreDataStorageObject;
-@class XMPPResourceCoreDataStorageObject;
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPGroupCoreDataStorageObject.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 
 /**
  * This class is an example implementation of XMPPRosterStorage using core data.
