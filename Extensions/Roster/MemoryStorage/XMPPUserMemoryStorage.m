@@ -55,7 +55,9 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-	XMPPUserMemoryStorage *deepCopy = [[XMPPUserMemoryStorage alloc] init];
+	// We use [self class] to support subclassing
+	
+	XMPPUserMemoryStorage *deepCopy = (XMPPUserMemoryStorage *)[[[self class] alloc] init];
 	
 	deepCopy->jid = [jid copy];
 	deepCopy->itemAttributes = [itemAttributes mutableCopy];
