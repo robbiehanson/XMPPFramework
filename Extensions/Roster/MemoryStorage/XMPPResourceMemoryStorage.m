@@ -34,7 +34,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-	// We support subclassing
+	// We use [self class] to support subclassing
 	
 	XMPPResourceMemoryStorage *deepCopy = (XMPPResourceMemoryStorage *)[[[self class] alloc] init];
 	
