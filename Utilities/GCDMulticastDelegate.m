@@ -275,11 +275,11 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 				NSInvocation *dupInvocation = [self duplicateInvocation:origInvocation];
 				
 				dispatch_async(node->delegateQueue, ^{
-					NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+					NSAutoreleasePool *delegatePool = [[NSAutoreleasePool alloc] init];
 					
 					[dupInvocation invokeWithTarget:delegate];
 					
-					[pool drain];
+					[delegatePool drain];
 				});
 			}
 			

@@ -91,7 +91,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 - (NSString *)srvName
 {
-	__block NSString *result;
+	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
 		result = [srvName copy];
@@ -107,7 +107,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 - (NSTimeInterval)timeout
 {
-	__block NSTimeInterval result;
+	__block NSTimeInterval result = 0.0;
 	
 	dispatch_block_t block = ^{
 		result = timeout;
@@ -509,10 +509,10 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 			// Invoking DNSServiceProcessResult will invoke our QueryRecordCallback,
 			// the callback we set when we created the sdRef.
 			
-			DNSServiceErrorType sdErr = DNSServiceProcessResult(sdRef);
-			if (sdErr != kDNSServiceErr_NoError)
+			DNSServiceErrorType dnsErr = DNSServiceProcessResult(sdRef);
+			if (dnsErr != kDNSServiceErr_NoError)
 			{
-				[self failWithDNSError:sdErr];
+				[self failWithDNSError:dnsErr];
 			}
 			
 			[handlerPool drain];
