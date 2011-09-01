@@ -1020,11 +1020,13 @@ static NSMutableArray *proxyCandidates;
 		
 		proxyPort = [[[streamhost attributeForName:@"port"] stringValue] intValue];
 		
-		NSAssert([asyncSocket isDisconnected], @"Expecting the socket to be disconnected at this point...");
-		
 		if (asyncSocket == nil)
 		{
 			asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:turnQueue];
+		}
+		else
+		{
+			NSAssert([asyncSocket isDisconnected], @"Expecting the socket to be disconnected at this point...");
 		}
 		
 		XMPPLogVerbose(@"TURNSocket: targetNextConnect: %@(%@:%hu)", [proxyJID full], proxyHost, proxyPort);
