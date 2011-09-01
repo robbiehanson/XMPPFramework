@@ -22,7 +22,7 @@
 	XMPPJID *targetJID;
 	NSString *targetJIDStr;
 	
-	dispatch_time_t lastReceiveTime;
+	NSTimeInterval lastReceiveTime;
 	dispatch_source_t pingIntervalTimer;
 	
 	BOOL awaitingPingResponse;
@@ -70,9 +70,10 @@
 @property (readwrite, retain) XMPPJID *targetJID;
 
 /**
- * The last time data was received from the target.
+ * Corresponds to the last time data was received from the target.
+ * The NSTimeInterval value comes from [NSDate timeIntervalSinceReferenceDate]
 **/
-@property (readonly) dispatch_time_t lastReceiveTime;
+@property (readonly) NSTimeInterval lastReceiveTime;
 
 @end
 
