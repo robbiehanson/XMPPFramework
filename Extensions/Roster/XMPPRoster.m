@@ -133,7 +133,7 @@ enum XMPPRosterFlags
 
 - (BOOL)autoFetchRoster
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = (config & kAutoFetchRoster) ? YES : NO;
@@ -165,7 +165,7 @@ enum XMPPRosterFlags
 
 - (BOOL)autoAcceptKnownPresenceSubscriptionRequests
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = (config & kAutoAcceptKnownPresenceSubscriptionRequests) ? YES : NO;

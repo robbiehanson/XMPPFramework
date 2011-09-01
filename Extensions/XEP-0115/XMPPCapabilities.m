@@ -192,7 +192,7 @@
 
 - (BOOL)autoFetchHashedCapabilities
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = autoFetchHashedCapabilities;
@@ -220,7 +220,7 @@
 
 - (BOOL)autoFetchNonHashedCapabilities
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = autoFetchNonHashedCapabilities;
@@ -1336,7 +1336,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	if (requestIndex < [jids count])
 	{
-		XMPPJID *jid = [jids objectAtIndex:requestIndex];
+		jid = [jids objectAtIndex:requestIndex];
 		
 		NSString *node = nil;
 		NSString *ver  = nil;
@@ -1373,7 +1373,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		NSUInteger i;
 		for (i = 1; i < [jids count]; i++)
 		{
-			XMPPJID *jid = [jids objectAtIndex:i];
+			jid = [jids objectAtIndex:i];
 			
 			[discoRequestJidSet removeObject:jid];
 			[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];

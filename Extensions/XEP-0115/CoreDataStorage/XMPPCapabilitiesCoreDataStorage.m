@@ -253,7 +253,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	__block BOOL result;
+	__block BOOL result = NO;
 	__block NSXMLElement *newCapabilities = nil;
 	
 	[self executeBlock:^{
@@ -329,9 +329,9 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	__block BOOL result;
-	__block NSString *hash;
-	__block NSString *hashAlg;
+	__block BOOL result = NO;
+	__block NSString *hash = nil;
+	__block NSString *hashAlg = nil;
 	
 	[self executeBlock:^{
 	

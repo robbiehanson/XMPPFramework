@@ -276,10 +276,10 @@
 		NSXMLElement *time = [iq elementForName:@"time" xmlns:@"urn:xmpp:time"];
 		if (time)
 		{
-			NSXMLElement *time = [[self class] timeElement];
+			NSXMLElement *currentTime = [[self class] timeElement];
 			
 			XMPPIQ *response = [XMPPIQ iqWithType:@"result" to:[iq from] elementID:[iq elementID]];
-			[response addChild:time];
+			[response addChild:currentTime];
 			
 			[sender sendElement:response];
 			

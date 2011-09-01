@@ -481,7 +481,7 @@ enum XMPPStreamConfig
 
 - (BOOL)resetByteCountPerConnection
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = (config & kResetByteCountPerConnection) ? YES : NO;
@@ -514,7 +514,7 @@ enum XMPPStreamConfig
 
 - (BOOL)enableBackgroundingOnSocket
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = (config & kEnableBackgroundingOnSocket) ? YES : NO;
@@ -676,7 +676,7 @@ enum XMPPStreamConfig
 **/
 - (BOOL)isDisconnected
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = (state == STATE_XMPP_DISCONNECTED);
@@ -696,7 +696,7 @@ enum XMPPStreamConfig
 **/
 - (BOOL)isConnected
 {
-	__block BOOL result;
+	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
 		result = (state == STATE_XMPP_CONNECTED);
@@ -854,7 +854,7 @@ enum XMPPStreamConfig
 {
 	XMPPLogTrace();
 	
-	__block BOOL result;
+	__block BOOL result = NO;
 	__block NSError *err = nil;
 	
 	dispatch_block_t block = ^{
@@ -4027,7 +4027,7 @@ enum XMPPStreamConfig
 
 - (NSRunLoop *)xmppUtilityRunLoop
 {
-	__block NSRunLoop *result;
+	__block NSRunLoop *result = nil;
 	
 	dispatch_block_t block = ^{
 		result = [xmppUtilityRunLoop retain];
