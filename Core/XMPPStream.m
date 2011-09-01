@@ -3194,7 +3194,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	lastSendReceiveTime = dispatch_time(DISPATCH_TIME_NOW, 0);
+	lastSendReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 	
 	if (XMPP_LOG_RECV_PRE)
 	{
@@ -3250,7 +3250,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	lastSendReceiveTime = dispatch_time(DISPATCH_TIME_NOW, 0);
+	lastSendReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 	
 	if (tag == TAG_XMPP_WRITE_RECEIPT)
 	{
@@ -3717,11 +3717,11 @@ enum XMPPStreamConfig
 			// This allows us to maintain a single timer,
 			// and an acceptable timer resolution (assuming larger keepAliveIntervals).
 			
-			NSTimeInterval interval = keepAliveInterval / 4.0;
+			uint64_t interval = ((keepAliveInterval / 4.0) * NSEC_PER_SEC);
 			
-			dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (interval * NSEC_PER_SEC));
+			dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, interval);
 			
-			dispatch_source_set_timer(keepAliveTimer, tt, DISPATCH_TIME_FOREVER, 1.0);
+			dispatch_source_set_timer(keepAliveTimer, tt, interval, 1.0);
 			dispatch_resume(keepAliveTimer);
 		}
 	}
@@ -3733,10 +3733,10 @@ enum XMPPStreamConfig
 	
 	if (state == STATE_XMPP_CONNECTED)
 	{
-		dispatch_time_t now = dispatch_time(DISPATCH_TIME_NOW, 0);
-		NSTimeInterval elapsed = ((now - lastSendReceiveTime) / NSEC_PER_SEC);
+		NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+		NSTimeInterval elapsed = (now - lastSendReceiveTime);
 		
-		if (elapsed >= keepAliveInterval)
+		if (elapsed < 0 || elapsed >= keepAliveInterval)
 		{
 			NSData *outgoingData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
 			
@@ -3751,7 +3751,7 @@ enum XMPPStreamConfig
 			// In case the TCP socket comes to a crawl with a giant element in the queue,
 			// which would prevent the socket:didWriteDataWithTag: method from being called for some time.
 			
-			lastSendReceiveTime = now;
+			lastSendReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 		}
 	}
 }
