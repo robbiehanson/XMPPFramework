@@ -1,4 +1,5 @@
 #import "AutoTimeTestAppDelegate.h"
+#import "AutoTimeTestViewController.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -11,9 +12,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @implementation AutoTimeTestAppDelegate
 
-@synthesize window;
+@synthesize window = _window;
+@synthesize viewController = _viewController;
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
 	
@@ -39,6 +41,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	{
 		DDLogError(@"%@: Error connecting: %@", [self class], error);
 	}
+	 
+	self.window.rootViewController = self.viewController;
+	[self.window makeKeyAndVisible];
+    return YES;
 }
 
 - (void)goOnline:(NSTimer *)aTimer
@@ -94,7 +100,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
+	DDLogVerbose(@"%@: %@ %@", [self class], THIS_METHOD, error);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

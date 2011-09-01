@@ -1,6 +1,5 @@
 #import <Cocoa/Cocoa.h>
-#import "XMPP.h"
-#import "XMPPAutoTime.h"
+#import "XMPPFramework.h"
 
 
 @interface AutoTimeTestAppDelegate : NSObject <NSApplicationDelegate> {
