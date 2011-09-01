@@ -71,7 +71,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	
 	NSTimeInterval keepAliveInterval;
 	dispatch_source_t keepAliveTimer;
-	dispatch_time_t lastSendReceiveTime;
+	NSTimeInterval lastSendReceiveTime;
 	
 	DDList *registeredModules;
 	NSMutableDictionary *autoDelegateDict;
