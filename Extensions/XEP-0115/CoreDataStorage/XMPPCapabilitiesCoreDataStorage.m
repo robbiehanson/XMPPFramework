@@ -413,13 +413,13 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	
 	XMPPLogTrace();
 	
-	__block BOOL areCapabilitiesKnown;
-	__block BOOL haveFailedFetchingBefore;
-	__block NSString *node;
-	__block NSString *ver;
-	__block NSString *ext;
-	__block NSString *hash;
-	__block NSString *hashAlg;
+	__block BOOL areCapabilitiesKnown = NO;
+	__block BOOL haveFailedFetchingBefore = NO;
+	__block NSString *node    = nil;
+	__block NSString *ver     = nil;
+	__block NSString *ext     = nil;
+	__block NSString *hash    = nil;
+	__block NSString *hashAlg = nil;
 	
 	[self executeBlock:^{
 		
@@ -451,6 +451,9 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		}
 		
 	}];
+	
+	if (areCapabilitiesKnownPtr)     *areCapabilitiesKnownPtr     = areCapabilitiesKnown;
+	if (haveFailedFetchingBeforePtr) *haveFailedFetchingBeforePtr = haveFailedFetchingBefore;
 	
 	if (nodePtr)    *nodePtr    = [node    autorelease]; else [node    release];
 	if (verPtr)     *verPtr     = [ver     autorelease]; else [ver     release];
