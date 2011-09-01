@@ -1,36 +1,33 @@
-//
-//  AutoPingTestAppDelegate.m
-//  AutoPingTest
-//
-//  Created by Robbie Hanson on 4/13/11.
-//  Copyright 2011 Deusty, LLC. All rights reserved.
-//
-
 #import "AutoPingTestAppDelegate.h"
+#import "AutoPingTestViewController.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
 // Log levels: off, error, warn, info, verbose
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
-#define MY_JID      @"robbie@robbiehanson.com/rsrc"
-#define MY_PASSWORD @""
+#define MY_JID      @"" // <--- ENTER A JID HERE (e.g. user@gmail.com)
+#define MY_PASSWORD @"" // <--- ENTER PASSWORD HERE
+
 
 @implementation AutoPingTestAppDelegate
 
-@synthesize window;
+@synthesize window = _window;
+@synthesize viewController = _viewController;
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
 	
 	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
 	xmppStream = [[XMPPStream alloc] init];
-	[xmppStream setMyJID:[XMPPJID jidWithString:MY_JID]];
+	
+//	xmppStream.hostName = @"";
+	xmppStream.myJID = [XMPPJID jidWithString:MY_JID];
 	
 	xmppAutoPing = [[XMPPAutoPing alloc] init];
-	xmppAutoPing.pingInterval = 15;
+	xmppAutoPing.pingInterval = 30;
 	xmppAutoPing.pingTimeout = 5;
 	xmppAutoPing.targetJID = nil;
 	
@@ -45,6 +42,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	{
 		DDLogError(@"%@: Error connecting: %@", [self class], error);
 	}
+	 
+	self.window.rootViewController = self.viewController;
+	[self.window makeKeyAndVisible];
+    return YES;
 }
 
 - (void)goOnline:(NSTimer *)aTimer
@@ -65,7 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
-	xmppAutoPing.pingInterval = 30;
+	xmppAutoPing.pingInterval = 60;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,9 +87,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", [self class], THIS_METHOD);
 	
-	[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(goOnline:) userInfo:nil repeats:NO];
-	[NSTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(goOffline:) userInfo:nil repeats:NO];
-	[NSTimer scheduledTimerWithTimeInterval:35 target:self selector:@selector(changeAutoPingInterval:) userInfo:nil repeats:NO];
+	[NSTimer scheduledTimerWithTimeInterval:45 target:self selector:@selector(goOnline:) userInfo:nil repeats:NO];
+	[NSTimer scheduledTimerWithTimeInterval:90 target:self selector:@selector(changeAutoPingInterval:) userInfo:nil repeats:NO];
 }
 
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
