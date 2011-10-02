@@ -58,15 +58,15 @@
 	// Configure logging framework
 	
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
-    
+
+  // Setup the XMPP stream
+  
+	[self setupStream];
+
 	// Setup the view controllers
 
 	[window setRootViewController:navigationController];
 	[window makeKeyAndVisible];
-
-	// Setup the XMPP stream
-
-	[self setupStream];
 
 	if (![self connect]) {
 		[navigationController presentModalViewController:settingsViewController animated:YES];
