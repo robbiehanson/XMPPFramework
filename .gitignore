@@ -3,3 +3,4 @@
 *.mode2v3
 xcuserdata
 .netrc
+.DS_Store
