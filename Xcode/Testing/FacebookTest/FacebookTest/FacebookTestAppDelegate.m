@@ -15,12 +15,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Too bad. You're a developer. Get over it.
 // 
 // Now go read this:
-// http://developers.facebook.com/docs/guides/mobile/
-// 
-// And also this:
+//
 // http://code.google.com/p/xmppframework/wiki/FacebookChatHowTo
 // 
-//#define FACEBOOK_APP_ID @"PUT_YOUR_FACEBOOK_ID_HERE_FOR_EXAMPLE_123456789012345"
+// If the build fails, you may need to run the following command to setup 
+// the facebook-ios-sdk:
+//
+// git submodule update --init
+
+// For testing purposes this project uses the XMPPFacebook FBTest Facebook app.
+#define FACEBOOK_APP_ID @"124242144347927"
 
 
 @implementation FacebookTestAppDelegate
