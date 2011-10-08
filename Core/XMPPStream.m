@@ -45,6 +45,9 @@
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
 NSString *const XMPPStreamDidChangeMyJIDNotification = @"XMPPStreamDidChangeMyJID";
 
+static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
+
+
 enum XMPPStreamFlags
 {
 	kP2PInitiator                 = 1 << 0,  // If set, we are the P2P initializer
@@ -168,6 +171,22 @@ enum XMPPStreamConfig
         config = kP2PMode;
     }
 	return self;
+}
+
+
+/**
+ * Facebook Chat X-FACEBOOK-PLATFORM SASL authentication initialization.
+ * This is a convienence init method to help configure Facebook Chat.
+**/
+- (id)initWithFacebookAppId:(NSString *)fbAppId 
+{
+    if ((self = [self init]))
+    {
+        self.appId = fbAppId;
+        self.myJID = [XMPPJID jidWithString:XMPPFacebookChatHostName];
+        self.hostName = XMPPFacebookChatHostName;
+    }
+    return self;
 }
 
 /**
@@ -813,6 +832,14 @@ enum XMPPStreamConfig
 
 		// Notify delegates
 		[multicastDelegate xmppStreamWillConnect:self];
+        
+        // Check for Facebook Chat and set hostName if not set.
+        // As of October 8, 2011, Facebook doesn't have their XMPP SRV records configured properly
+        // and we have to wait for the SRV timeout before trying the A record.
+        if ([hostName length] == 0 && [myJID.domain isEqualToString:XMPPFacebookChatHostName])
+        {
+            self.hostName = XMPPFacebookChatHostName;
+        }
 
 		if ([hostName length] == 0)
 		{
@@ -1757,7 +1784,7 @@ enum XMPPStreamConfig
  * This method attempts to connect to the Facebook Chat servers 
  * using the Facebook OAuth token returned by the Facebook OAuth 2.0 authentication process.
 **/
-- (BOOL)authenticateWithFacebookAuthToken:(NSString *)authToken error:(NSError **)errPtr
+- (BOOL)authenticateWithFacebookAccessToken:(NSString *)accessToken error:(NSError **)errPtr
 {
 	XMPPLogTrace();
 	
@@ -1782,11 +1809,11 @@ enum XMPPStreamConfig
     }
     
     // Save authentication information
-    isAuthToken = YES;
+    isAccessToken = YES;
     [tempPassword release];
-    tempPassword = [authToken copy];
+    tempPassword = [accessToken copy];
 
-    result = [self authenticateWithPassword:authToken error:&err];
+    result = [self authenticateWithPassword:accessToken error:&err];
     
 		[err retain];
 		[pool drain];
@@ -1809,7 +1836,7 @@ enum XMPPStreamConfig
 /**
  * This method attempts to sign-in to the server using the configured myJID and given password.
  * This method also works with Facebook Chat and the Facebook user's password, but authenticating
- * with authenticateWithFacebookAuthToken:error: is preferred by Facebook.
+ * with authenticateWithFacebookAccessToken:error: is preferred by Facebook.
 **/
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr
 {
@@ -1849,19 +1876,20 @@ enum XMPPStreamConfig
 			return_from_block;
 		}
 		
-    // Facebook authentication
-    if (isAuthToken)
-		{
-      [self sendSASLRequestForMechanism:@"X-FACEBOOK-PLATFORM"];
+        // Facebook authentication
+        if (isAccessToken)
+        {
+            [self sendSASLRequestForMechanism:@"X-FACEBOOK-PLATFORM"];
       			
 			// Update state
 			state = STATE_XMPP_AUTH_1;
-		} else if ([self supportsDigestMD5Authentication])
+		} 
+        else if ([self supportsDigestMD5Authentication])
 		{
-      [self sendSASLRequestForMechanism:@"DIGEST-MD5"];
+            [self sendSASLRequestForMechanism:@"DIGEST-MD5"];
 			
 			// Save authentication information
-      isAuthToken = NO;
+            isAccessToken = NO;
 			[tempPassword release];
 			tempPassword = [password copy];
 			
@@ -2023,7 +2051,7 @@ enum XMPPStreamConfig
 				   withTimeout:TIMEOUT_XMPP_WRITE
 						   tag:TAG_XMPP_WRITE_STREAM];
 		
-    isAuthToken = NO;
+    isAccessToken = NO;
     
 		// Update state
 		state = STATE_XMPP_AUTH_3;
@@ -2856,7 +2884,7 @@ enum XMPPStreamConfig
 }
 
 /**
- * After the authenticateWithPassword:error: or authenticateWithFacebookAuthToken:error: methods are invoked, an 
+ * After the authenticateWithPassword:error: or authenticateWithFacebookAccessToken:error: methods are invoked, an 
  * authentication message is sent to the server.
  * If the server supports digest-md5 sasl authentication, it is used.  Otherwise plain sasl authentication is used,
  * assuming the server supports it.
@@ -2871,7 +2899,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-  if ([self supportsDigestMD5Authentication] || isAuthToken)
+  if ([self supportsDigestMD5Authentication] || isAccessToken)
 	{
 		// We're expecting a challenge response
 		// If we get anything else we can safely assume it's the equivalent of a failure response
@@ -2888,11 +2916,11 @@ enum XMPPStreamConfig
 			// We'll release this object at the end of this else block
       id<XMPPSASLAuthentication> auth = nil;
       
-      if (isAuthToken)
+      if (isAccessToken)
       {
         auth = [[XMPPXFacebookPlatformAuthentication alloc] initWithChallenge:response 
                                                                         appId:self.appId 
-                                                                    authToken:tempPassword];
+                                                                    accessToken:tempPassword];
 
         // Update state
           state = STATE_XMPP_AUTH_3;
@@ -2943,7 +2971,7 @@ enum XMPPStreamConfig
 						
       // Release unneeded resources
 			[auth release];
-      isAuthToken = NO;
+      isAccessToken = NO;
 			[tempPassword release]; tempPassword = nil;
 		}
 	}
@@ -3437,7 +3465,7 @@ enum XMPPStreamConfig
 		parser = nil;
 		
 		// Clear any saved authentication information
-    isAuthToken = NO;
+    isAccessToken = NO;
 		[tempPassword release]; tempPassword = nil;
 		
 		// Clear stored elements

@@ -62,7 +62,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	UInt16 hostPort;
 	
 	NSString *tempPassword;
-  BOOL isAuthToken;
+  BOOL isAccessToken;
   
   NSString *appId;
 	
@@ -105,6 +105,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The stream is a direct client to client connection as outlined in XEP-0174.
 **/
 - (id)initP2PFrom:(XMPPJID *)myJID;
+
+/**
+ * Facebook Chat X-FACEBOOK-PLATFORM SASL authentication initialization.
+ * This is a convienence init method to help configure Facebook Chat.
+ **/
+- (id)initWithFacebookAppId:(NSString *)fbAppId;
 
 /**
  * XMPPStream uses a multicast delegate.
@@ -414,7 +420,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 /**
  * Authentication.
  * 
- * The authenticateWithPassword:error: and authenticateWithFacebookAuthToken:error: methods are asynchronous.
+ * The authenticateWithPassword:error: and authenticateWithFacebookAccessToken:error: methods are asynchronous.
  * Each will return immediately, and the delegate methods are used to determine success.
  * See the xmppStreamDidAuthenticate: and xmppStream:didNotAuthenticate: methods.
  * 
@@ -437,7 +443,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (BOOL)supportsXFacebookPlatformAuthentication;
 - (BOOL)supportsDeprecatedPlainAuthentication;
 - (BOOL)supportsDeprecatedDigestAuthentication;
-- (BOOL)authenticateWithFacebookAuthToken:(NSString *)authToken error:(NSError **)errPtr;
+- (BOOL)authenticateWithFacebookAccessToken:(NSString *)accessToken error:(NSError **)errPtr;
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
 - (BOOL)authenticateAnonymously:(NSError **)errPtr;
 
