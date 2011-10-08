@@ -2,8 +2,11 @@
 
 @implementation FacebookTestViewController
 
+@synthesize statusLabel;
+
 - (void)dealloc
 {
+    [statusLabel release];
     [super dealloc];
 }
 
