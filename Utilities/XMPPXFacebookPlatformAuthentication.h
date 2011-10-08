@@ -17,16 +17,16 @@
 @interface XMPPXFacebookPlatformAuthentication : NSObject <XMPPSASLAuthentication>
 {
   NSString *appId;
-  NSString *authToken;
+  NSString *accessToken;
   NSString *nonce;
   NSString *method;
 }
 
 @property (nonatomic,copy) NSString *appId;
-@property (nonatomic,copy) NSString *authToken;
+@property (nonatomic,copy) NSString *accessToken;
 @property (nonatomic,copy) NSString *nonce;
 @property (nonatomic,copy) NSString *method;
 
-- (id)initWithChallenge:(NSXMLElement *)challenge appId:(NSString *)appId authToken:(NSString *)authToken;
+- (id)initWithChallenge:(NSXMLElement *)challenge appId:(NSString *)appId accessToken:(NSString *)accessToken;
 
 @end 
