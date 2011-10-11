@@ -76,5 +76,12 @@
 	}
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+	NSXMLElement *elementCopy = [super copyWithZone:zone];
+	object_setClass(elementCopy, [self class]);
+	
+	return elementCopy;
+}
 
 @end
