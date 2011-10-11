@@ -1,9 +1,18 @@
 #import "XMPPParser.h"
+#import "XMPPLogging.h"
 #import <libxml/parserInternals.h>
 
 #if TARGET_OS_IPHONE
   #import "DDXMLPrivate.h"
 #endif
+
+// Log levels: off, error, warn, info, verbose
+#if DEBUG
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+#else
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
+
 
 // When the xmpp parser invokes a delegate method, such as xmppParser:didReadElement:,
 // it exposes itself to the possibility of exceptions mid-parse.
@@ -19,10 +28,16 @@
 // So for release mode you may consider enabling the try/catch.
 #define USE_TRY_CATCH 0
 
-#define CHECK_FOR_NULL(value) do { if(value == NULL) { xmlAbortDueToMemoryShortage(ctxt); return; } } while(false)
+#define CHECK_FOR_NULL(value)                       \
+    do {                                            \
+        if(value == NULL) {                         \
+            xmpp_xmlAbortDueToMemoryShortage(ctxt); \
+            return;                                 \
+        }                                           \
+    } while(false)
 
 #if !TARGET_OS_IPHONE
-  static void recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode);
+  static void xmpp_recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode);
 #endif
 
 
@@ -34,7 +49,7 @@
 
 #if TARGET_OS_IPHONE
 
-static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
+static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 {
 	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
 	{
@@ -73,7 +88,7 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 	}
 }
 
-static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
+static void xmpp_onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 {
 	[DDXMLNode detachChild:child fromNode:child->parent];
 	
@@ -111,7 +126,7 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 
 #else
 
-static void setName(NSXMLElement *element, xmlNodePtr node)
+static void xmpp_setName(NSXMLElement *element, xmlNodePtr node)
 {
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
@@ -143,7 +158,7 @@ static void setName(NSXMLElement *element, xmlNodePtr node)
 	}
 }
 
-static void addNamespaces(NSXMLElement *element, xmlNodePtr node)
+static void xmpp_addNamespaces(NSXMLElement *element, xmlNodePtr node)
 {
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
@@ -184,7 +199,7 @@ static void addNamespaces(NSXMLElement *element, xmlNodePtr node)
 	}
 }
 
-static void addChildren(NSXMLElement *element, xmlNodePtr node)
+static void xmpp_addChildren(NSXMLElement *element, xmlNodePtr node)
 {
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
@@ -193,7 +208,7 @@ static void addChildren(NSXMLElement *element, xmlNodePtr node)
 	{
 		if(childNode->type == XML_ELEMENT_NODE)
 		{
-			recursiveAddChild(element, childNode);
+			xmpp_recursiveAddChild(element, childNode);
 		}
 		else if(childNode->type == XML_TEXT_NODE)
 		{
@@ -209,7 +224,7 @@ static void addChildren(NSXMLElement *element, xmlNodePtr node)
 	}
 }
 
-static void addAttributes(NSXMLElement *element, xmlNodePtr node)
+static void xmpp_addAttributes(NSXMLElement *element, xmlNodePtr node)
 {
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
@@ -268,21 +283,21 @@ static void addAttributes(NSXMLElement *element, xmlNodePtr node)
 /**
  * Recursively adds all the child elements to the given parent.
  * 
- * Note: This method is almost the same as nsxmlFromLibxml, with one important difference.
+ * Note: This method is almost the same as xmpp_nsxmlFromLibxml, with one important difference.
  * It doen't add any objects to the autorelease pool.
 **/
-static void recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode)
+static void xmpp_recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode)
 {
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
 	NSXMLElement *child = [[NSXMLElement alloc] initWithKind:NSXMLElementKind];
 	
-	setName(child, childNode);
+	xmpp_setName(child, childNode);
 	
-	addNamespaces(child, childNode);
+	xmpp_addNamespaces(child, childNode);
 	
-	addChildren(child, childNode);
-	addAttributes(child, childNode);
+	xmpp_addChildren(child, childNode);
+	xmpp_addAttributes(child, childNode);
 	
 	[parent addChild:child];
 	[child release];
@@ -292,27 +307,27 @@ static void recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode)
  * Creates and returns an NSXMLElement from the given node.
  * Use this method after finding the root element, or root.child element.
 **/
-static NSXMLElement* nsxmlFromLibxml(xmlNodePtr rootNode)
+static NSXMLElement* xmpp_nsxmlFromLibxml(xmlNodePtr rootNode)
 {
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
 	NSXMLElement *root = [[NSXMLElement alloc] initWithKind:NSXMLElementKind];
 	
-	setName(root, rootNode);
+	xmpp_setName(root, rootNode);
 	
-	addNamespaces(root, rootNode);
+	xmpp_addNamespaces(root, rootNode);
 	
-	addChildren(root, rootNode);
-	addAttributes(root, rootNode);
+	xmpp_addChildren(root, rootNode);
+	xmpp_addAttributes(root, rootNode);
 	
 	return [root autorelease];
 }
 
-static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
+static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 {
 	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
 	{
-		NSXMLElement *nsRoot = nsxmlFromLibxml(root);
+		NSXMLElement *nsRoot = xmpp_nsxmlFromLibxml(root);
 		
 #if USE_TRY_CATCH
 		@try
@@ -333,11 +348,11 @@ static void onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 	}
 }
 
-static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
+static void xmpp_onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 {
 	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
 	{
-		NSXMLElement *nsChild = nsxmlFromLibxml(child);
+		NSXMLElement *nsChild = xmpp_nsxmlFromLibxml(child);
 		
 #if USE_TRY_CATCH
 		@try
@@ -375,7 +390,7 @@ static void onDidReadElement(XMPPParser *parser, xmlNodePtr child)
  * This method is called at the end of the xmlStartElement method.
  * This allows us to inspect the parser and xml tree, and determine if we need to invoke any delegate methods.
 **/
-static void postStartElement(xmlParserCtxt *ctxt)
+static void xmpp_postStartElement(xmlParserCtxt *ctxt)
 {
 	XMPPParser *parser = (XMPPParser *)ctxt->_private;
 	parser->depth++;
@@ -389,7 +404,7 @@ static void postStartElement(xmlParserCtxt *ctxt)
 			xmlNodePtr root = xmlDocGetRootElement(ctxt->myDoc);
 			if(root)
 			{
-				onDidReadRoot(parser, root);
+				xmpp_onDidReadRoot(parser, root);
 				
 				parser->hasReportedRoot = YES;
 			}
@@ -401,7 +416,7 @@ static void postStartElement(xmlParserCtxt *ctxt)
  * This method is called at the end of the xmlEndElement method.
  * This allows us to inspect the parser and xml tree, and determine if we need to invoke any delegate methods.
 **/
-static void postEndElement(xmlParserCtxt *ctxt)
+static void xmpp_postEndElement(xmlParserCtxt *ctxt)
 {
 	XMPPParser *parser = (XMPPParser *)ctxt->_private;
 	parser->depth--;
@@ -420,7 +435,7 @@ static void postEndElement(xmlParserCtxt *ctxt)
 		{
 			if(child->type == XML_ELEMENT_NODE)
 			{
-				onDidReadElement(parser, child);
+				xmpp_onDidReadElement(parser, child);
 				
 				// Exit while loop
 				break;
@@ -443,7 +458,7 @@ static void postEndElement(xmlParserCtxt *ctxt)
 /**
  * We're screwed...
 **/
-static void xmlAbortDueToMemoryShortage(xmlParserCtxt *ctxt)
+static void xmpp_xmlAbortDueToMemoryShortage(xmlParserCtxt *ctxt)
 {
 	XMPPParser *parser = (XMPPParser *)ctxt->_private;
 	
@@ -461,17 +476,60 @@ static void xmlAbortDueToMemoryShortage(xmlParserCtxt *ctxt)
 }
 
 /**
+ * (Similar to the libxml "xmlSearchNs" method, with one very important difference.)
+ * 
+ * This method searches for an existing xmlNsPtr in the given node,
+ * recursing on the parents but stopping before it reaches the root node of the document.
+ * 
+ * Why do we skip the root node?
+ * Because all nodes are going to be detached from the root node.
+ * So it makes no sense to allow them to reference namespaces stored in the root node,
+ * since the detach algorithm will be forced to copy the namespaces later anyway.
+**/
+static xmlNsPtr xmpp_xmlSearchNs(xmlDocPtr doc, xmlNodePtr node, const xmlChar *nameSpace)
+{
+	xmlNodePtr rootNode = xmlDocGetRootElement(doc);
+	
+	xmlNodePtr currentNode = node;
+	while (currentNode && currentNode != rootNode)
+	{
+		xmlNsPtr currentNs = currentNode->nsDef;
+		while (currentNs)
+		{
+			if (currentNs->href != NULL)
+			{
+				if ((currentNs->prefix == NULL) && (nameSpace == NULL))
+				{
+					return currentNs;
+				}
+				if ((currentNs->prefix != NULL) && (nameSpace != NULL))
+				{
+					if (xmlStrEqual(currentNs->prefix, nameSpace))
+						return currentNs;
+				}
+			}
+			
+			currentNs = currentNs->next;
+		}
+		
+		currentNode = currentNode->parent;
+	}
+	
+	return NULL;
+}
+
+/**
  * SAX parser C-style callback.
  * Invoked when a new node element is started.
 **/
-static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
-                                       const xmlChar  *nodePrefix,
-                                       const xmlChar  *nodeUri,
-                                                 int   nb_namespaces,
-                                       const xmlChar **namespaces,
-                                                 int   nb_attributes,
-                                                 int   nb_defaulted,
-                                       const xmlChar **attributes)
+static void	xmpp_xmlStartElement(void *ctx, const xmlChar  *nodeName,
+                                            const xmlChar  *nodePrefix,
+                                            const xmlChar  *nodeUri,
+                                                      int   nb_namespaces,
+                                            const xmlChar **namespaces,
+                                                      int   nb_attributes,
+                                                      int   nb_defaulted,
+                                            const xmlChar **attributes)
 {
 	int i, j;
 	xmlNsPtr lastAddedNs = NULL;
@@ -499,7 +557,7 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
 	}
 	
 	// Process the namespaces
-	for(i = 0, j = 0; j < nb_namespaces; j++)
+	for (i = 0, j = 0; j < nb_namespaces; j++)
 	{
 		// Extract namespace prefix and uri
 		const xmlChar *nsPrefix = namespaces[i++];
@@ -518,37 +576,49 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
 		{
 			newNode->nsDef = lastAddedNs = newNs;
 		}
-		else if(lastAddedNs)
+		else
 		{
 			lastAddedNs->next = newNs;
 			lastAddedNs = newNs;
 		}
 		
-		if ((nodeUri != NULL) && (nodePrefix == nsPrefix))
+		// Is this the namespace for the node?
+		
+		if (nodeUri && (nodePrefix == nsPrefix))
 		{
-			// This is the namespace for the node.
-			// Example 1: the node was <stream:stream xmlns:stream="url"> and newNs is the stream:url namespace.
-			// Example 2: the node was <starttls xmlns="url"> and newNs is the null:url namespace.
+			// Ex 1: node == <stream:stream xmlns:stream="url"> && newNs == stream:url
+			// Ex 2: node == <starttls xmlns="url">             && newNs == null:url
+			
 			newNode->ns = newNs;
 		}
 	}
 	
 	// Search for the node's namespace if it wasn't already found
-	if ((nodeUri != NULL) && (newNode->ns == NULL))
+	if ((nodeUri) && (newNode->ns == NULL))
 	{
-		// xmlSearchNs(xmlDocPtr doc, xmlNodePtr node, const xmlChar *nameSpace)
-		// 
-		// Search a Ns registered under a given name space for a document.
-		// Recurse on the parents until it finds the defined namespace or return NULL otherwise.
-		// The nameSpace parameter can be NULL, this is a search for the default namespace.
-		
-		newNode->ns = xmlSearchNs(ctxt->myDoc, parent, nodePrefix);
+		newNode->ns = xmpp_xmlSearchNs(ctxt->myDoc, newNode, nodePrefix);
 		
 		if (newNode->ns == NULL)
 		{
 			// We use href==NULL in the case of an element creation where the namespace was not defined.
-			newNode->ns = xmlNewNs(newNode, NULL, nodePrefix);
-			CHECK_FOR_NULL(newNode->ns);
+			// 
+			// We do NOT use xmlNewNs(newNode, nodeUri, nodePrefix) because that method doesn't properly add
+			// the namespace to BOTH nsDef and ns.
+			
+			xmlNsPtr newNs = xmlNewNs(NULL, nodeUri, nodePrefix);
+			CHECK_FOR_NULL(newNs);
+			
+			if (newNode->nsDef == NULL)
+			{
+				newNode->nsDef = lastAddedNs = newNs;
+			}
+			else
+			{
+				lastAddedNs->next = newNs;
+				lastAddedNs = newNs;
+			}
+			
+			newNode->ns = newNs;
 		}
 	}
 	
@@ -581,9 +651,9 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
 		else
 		{
 			// Find the namespace for the attribute
-			xmlNsPtr attrNs = xmlSearchNs(ctxt->myDoc, newNode, attrPrefix);
+			xmlNsPtr attrNs = xmpp_xmlSearchNs(ctxt->myDoc, newNode, attrPrefix);
 			
-			if(attrNs != NULL)
+			if (attrNs != NULL)
 			{
 				xmlAttrPtr newAttr = xmlNewNsProp(newNode, attrNs, attrName, value);
 				CHECK_FOR_NULL(newAttr);
@@ -605,14 +675,14 @@ static void	xmlStartElement(void *ctx, const xmlChar  *nodeName,
 	ctxt->node = newNode;
 	
 	// Invoke delegate methods if needed
-	postStartElement(ctxt);
+	xmpp_postStartElement(ctxt);
 }
 
 /**
  * SAX parser C-style callback.
  * Invoked when characters are found within a node.
 **/
-static void xmlCharacters(void *ctx, const xmlChar *ch, int len)
+static void xmpp_xmlCharacters(void *ctx, const xmlChar *ch, int len)
 {
 	xmlParserCtxt *ctxt = (xmlParserCtxt *)ctx;
 	
@@ -633,9 +703,9 @@ static void xmlCharacters(void *ctx, const xmlChar *ch, int len)
  * SAX parser C-style callback.
  * Invoked when a new node element is ended.
 **/
-static void xmlEndElement(void *ctx, const xmlChar *localname,
-                                     const xmlChar *prefix,
-                                     const xmlChar *URI)
+static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
+                                          const xmlChar *prefix,
+                                          const xmlChar *URI)
 {
 	xmlParserCtxt *ctxt = (xmlParserCtxt *)ctx;
 	
@@ -644,7 +714,7 @@ static void xmlEndElement(void *ctx, const xmlChar *localname,
 		ctxt->node = ctxt->node->parent;
 	
 	// Invoke delegate methods if needed
-	postEndElement(ctxt);
+	xmpp_postEndElement(ctxt);
 }
 
 - (id)initWithDelegate:(id)aDelegate
@@ -661,9 +731,9 @@ static void xmlEndElement(void *ctx, const xmlChar *localname,
 		memset(&saxHandler, 0, sizeof(xmlSAXHandler));
 		
 		saxHandler.initialized = XML_SAX2_MAGIC;
-		saxHandler.startElementNs = xmlStartElement;
-		saxHandler.characters = xmlCharacters;
-		saxHandler.endElementNs = xmlEndElement;
+		saxHandler.startElementNs = xmpp_xmlStartElement;
+		saxHandler.characters = xmpp_xmlCharacters;
+		saxHandler.endElementNs = xmpp_xmlEndElement;
 		
 		// Create the push parser context
 		parserCtxt = xmlCreatePushParserCtxt(&saxHandler, NULL, NULL, 0, NULL);
