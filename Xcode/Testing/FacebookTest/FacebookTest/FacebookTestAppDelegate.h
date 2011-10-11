@@ -1,14 +1,14 @@
 #import <UIKit/UIKit.h>
 #import "FBConnect.h"
 
-@class XMPPStreamFacebook;
+@class XMPPStream;
 @class FacebookTestViewController;
 
 
 @interface FacebookTestAppDelegate : NSObject <UIApplicationDelegate, FBSessionDelegate>
 {
 	Facebook *facebook;
-	XMPPStreamFacebook *xmppStream;
+	XMPPStream *xmppStream;
 	
 	BOOL allowSelfSignedCertificates;
 	BOOL allowSSLHostNameMismatch;

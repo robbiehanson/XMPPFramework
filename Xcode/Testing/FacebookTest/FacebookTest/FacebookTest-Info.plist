@@ -25,9 +25,13 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>XMPPFramework FBTest</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fbPUT_YOUR_FACEBOOK_APP_ID_HERE</string>
+				<string>fb124242144347927</string>
 			</array>
 		</dict>
 	</array>

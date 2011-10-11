@@ -32,6 +32,8 @@
 		070400B91347D09A0092A737 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 070400B81347D09A0092A737 /* CoreLocation.framework */; };
 		0704FFC8134794020092A737 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0704FFC6134794020092A737 /* SettingsViewController.m */; };
 		0704FFC9134794020092A737 /* SettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0704FFC7134794020092A737 /* SettingsViewController.xib */; };
+		07588E52143807A800134162 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 07588E4E143807A800134162 /* XMPPDigestAuthentication.m */; };
+		07588E53143807A800134162 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 07588E51143807A800134162 /* XMPPXFacebookPlatformAuthentication.m */; };
 		07AF16B9134812E20084D82A /* XMPPvCardAvatarModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF16B8134812E20084D82A /* XMPPvCardAvatarModule.m */; };
 		07AF189D134BC3370084D82A /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF189C134BC3370084D82A /* XMPPSRVResolver.m */; };
 		1D3623260D0F684500981E51 /* iPhoneXMPPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */; };
@@ -128,6 +130,11 @@
 		0704FFC5134794020092A737 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
 		0704FFC6134794020092A737 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
 		0704FFC7134794020092A737 /* SettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SettingsViewController.xib; sourceTree = "<group>"; };
+		07588E4D143807A800134162 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPDigestAuthentication.h; path = ../../Utilities/XMPPDigestAuthentication.h; sourceTree = "<group>"; };
+		07588E4E143807A800134162 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDigestAuthentication.m; path = ../../Utilities/XMPPDigestAuthentication.m; sourceTree = "<group>"; };
+		07588E4F143807A800134162 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSASLAuthentication.h; path = ../../Utilities/XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		07588E50143807A800134162 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPXFacebookPlatformAuthentication.h; path = ../../Utilities/XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		07588E51143807A800134162 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPXFacebookPlatformAuthentication.m; path = ../../Utilities/XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		07AF16B7134812E20084D82A /* XMPPvCardAvatarModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPvCardAvatarModule.h; sourceTree = "<group>"; };
 		07AF16B8134812E20084D82A /* XMPPvCardAvatarModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPvCardAvatarModule.m; sourceTree = "<group>"; };
 		07AF16F7134A4E740084D82A /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPInternal.h; path = ../../Core/XMPPInternal.h; sourceTree = "<group>"; };
@@ -512,6 +519,11 @@
 				DCC0BEEA1301CE3D00EC45D2 /* GCDMulticastDelegate.m */,
 				DCC0BEE51301CE3D00EC45D2 /* DDList.h */,
 				DCC0BEE61301CE3D00EC45D2 /* DDList.m */,
+				07588E4D143807A800134162 /* XMPPDigestAuthentication.h */,
+				07588E4E143807A800134162 /* XMPPDigestAuthentication.m */,
+				07588E4F143807A800134162 /* XMPPSASLAuthentication.h */,
+				07588E50143807A800134162 /* XMPPXFacebookPlatformAuthentication.h */,
+				07588E51143807A800134162 /* XMPPXFacebookPlatformAuthentication.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -659,7 +671,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0410;
+				LastUpgradeCheck = 0420;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "iPhoneXMPP" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -759,6 +771,8 @@
 				DC37318F139F07CC00A8407D /* NSData+XMPP.m in Sources */,
 				DC373190139F07CC00A8407D /* NSNumber+XMPP.m in Sources */,
 				DC373191139F07CC00A8407D /* NSXMLElement+XMPP.m in Sources */,
+				07588E52143807A800134162 /* XMPPDigestAuthentication.m in Sources */,
+				07588E53143807A800134162 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -811,6 +825,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -824,6 +839,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				SDKROOT = iphoneos;
 			};
 			name = Release;
