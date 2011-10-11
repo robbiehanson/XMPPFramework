@@ -9,6 +9,8 @@
 #import "XMPPLogging.h"
 #import "NSData+XMPP.h"
 #import "NSXMLElement+XMPP.h"
+#import "XMPPDigestAuthentication.h"
+#import "XMPPXFacebookPlatformAuthentication.h"
 #import "XMPPSRVResolver.h"
 #import "DDList.h"
 
@@ -43,6 +45,9 @@
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
 NSString *const XMPPStreamDidChangeMyJIDNotification = @"XMPPStreamDidChangeMyJID";
 
+static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
+
+
 enum XMPPStreamFlags
 {
 	kP2PInitiator                 = 1 << 0,  // If set, we are the P2P initializer
@@ -63,35 +68,6 @@ enum XMPPStreamConfig
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@interface XMPPDigestAuthentication : NSObject
-{
-	NSString *rspauth;
-	NSString *realm;
-	NSString *nonce;
-	NSString *qop;
-	NSString *username;
-	NSString *password;
-	NSString *cnonce;
-	NSString *nc;
-	NSString *digestURI;
-}
-
-- (id)initWithChallenge:(NSXMLElement *)challenge;
-
-- (NSString *)rspauth;
-
-- (NSString *)realm;
-- (void)setRealm:(NSString *)realm;
-
-- (void)setDigestURI:(NSString *)digestURI;
-
-- (void)setUsername:(NSString *)username password:(NSString *)password;
-
-- (NSString *)response;
-- (NSString *)base64EncodedFullResponse;
-
-@end
 
 @interface XMPPStream (PrivateAPI)
 
@@ -197,6 +173,22 @@ enum XMPPStreamConfig
 	return self;
 }
 
+
+/**
+ * Facebook Chat X-FACEBOOK-PLATFORM SASL authentication initialization.
+ * This is a convienence init method to help configure Facebook Chat.
+**/
+- (id)initWithFacebookAppId:(NSString *)fbAppId 
+{
+    if ((self = [self init]))
+    {
+        self.appId = fbAppId;
+        self.myJID = [XMPPJID jidWithString:XMPPFacebookChatHostName];
+        self.hostName = XMPPFacebookChatHostName;
+    }
+    return self;
+}
+
 /**
  * Standard deallocation method.
  * Every object variable declared in the header file should be released here.
@@ -257,6 +249,47 @@ enum XMPPStreamConfig
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)appId
+{
+	if (dispatch_get_current_queue() == xmppQueue)
+	{
+		return appId;
+	}
+	else
+	{
+		__block NSString *result;
+		
+		dispatch_sync(xmppQueue, ^{
+			result = [appId retain];
+		});
+		
+		return [result autorelease];
+	}
+}
+
+- (void)setAppId:(NSString *)newAppId
+{
+	if (dispatch_get_current_queue() == xmppQueue)
+	{
+		if (appId != newAppId)
+		{
+			[appId release];
+			appId = [newAppId copy];
+		}
+	}
+	else
+	{
+		NSString *newAppIdCopy = [newAppId copy];
+		
+		dispatch_async(xmppQueue, ^{
+			[appId release];
+			appId = [newAppIdCopy retain];
+		});
+		
+		[newAppIdCopy release];
+	}
+}
 
 - (NSString *)hostName
 {
@@ -799,6 +832,14 @@ enum XMPPStreamConfig
 
 		// Notify delegates
 		[multicastDelegate xmppStreamWillConnect:self];
+        
+        // Check for Facebook Chat and set hostName if not set.
+        // As of October 8, 2011, Facebook doesn't have their XMPP SRV records configured properly
+        // and we have to wait for the SRV timeout before trying the A record.
+        if ([hostName length] == 0 && [myJID.domain isEqualToString:XMPPFacebookChatHostName])
+        {
+            self.hostName = XMPPFacebookChatHostName;
+        }
 
 		if ([hostName length] == 0)
 		{
@@ -1238,6 +1279,20 @@ enum XMPPStreamConfig
 	return result;
 }
 
+- (void)sendSASLRequestForMechanism:(NSString *)mechanism
+{
+  NSString *auth = [NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='%@'/>", mechanism];
+  
+  NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
+  
+  XMPPLogSend(@"SEND: %@", auth);
+  numberOfBytesSent += [outgoingData length];
+  
+  [asyncSocket writeData:outgoingData
+             withTimeout:TIMEOUT_XMPP_WRITE
+                     tag:TAG_XMPP_WRITE_STREAM];
+}
+
 - (void)sendStartTLSRequest
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
@@ -1577,6 +1632,49 @@ enum XMPPStreamConfig
 }
 
 /**
+ * This method checks the stream features of the connected server to
+ * determine if X-FACEBOOK-PLATFORM authentication is supported.
+ * If we are not connected to a server, this method simply returns NO.
+ **/
+- (BOOL)supportsXFacebookPlatformAuthentication
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		
+		// The root element can be properly queried for authentication mechanisms anytime after the
+		// stream:features are received, and TLS has been setup (if required)
+		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			
+			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *mech = [features elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+			
+			NSArray *mechanisms = [mech elementsForName:@"mechanism"];
+			
+			for (NSXMLElement *mechanism in mechanisms)
+			{
+				if ([[mechanism stringValue] isEqualToString:@"X-FACEBOOK-PLATFORM"])
+				{
+					result = YES;
+					break;
+				}
+			}
+			
+			[pool drain];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+/**
  * This method only applies to servers that don't support XMPP version 1.0, as defined in RFC 3920.
  * With these servers, we attempt to discover supported authentication modes via the jabber:iq:auth namespace.
 **/
@@ -1683,8 +1781,62 @@ enum XMPPStreamConfig
 }
 
 /**
+ * This method attempts to connect to the Facebook Chat servers 
+ * using the Facebook OAuth token returned by the Facebook OAuth 2.0 authentication process.
+**/
+- (BOOL)authenticateWithFacebookAccessToken:(NSString *)accessToken error:(NSError **)errPtr
+{
+	XMPPLogTrace();
+	
+	__block BOOL result = YES;
+	__block NSError *err = nil;
+	
+	dispatch_block_t block = ^{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+				
+    if (![self supportsXFacebookPlatformAuthentication])
+    {
+      NSString *errMsg = @"The server does not support X-FACEBOOK-PLATFORM authentication.";
+      NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+      
+      err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+      
+      [err retain];
+      [pool drain];
+      
+      result = NO;
+      return_from_block;
+    }
+    
+    // Save authentication information
+    isAccessToken = YES;
+    [tempPassword release];
+    tempPassword = [accessToken copy];
+
+    result = [self authenticateWithPassword:accessToken error:&err];
+    
+		[err retain];
+		[pool drain];
+	};
+	
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	if (errPtr)
+		*errPtr = [err autorelease];
+	else
+		[err release];
+	
+	return result;
+}
+
+/**
  * This method attempts to sign-in to the server using the configured myJID and given password.
- * If this method immediately fails
+ * This method also works with Facebook Chat and the Facebook user's password, but authenticating
+ * with authenticateWithFacebookAccessToken:error: is preferred by Facebook.
 **/
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr
 {
@@ -1724,20 +1876,20 @@ enum XMPPStreamConfig
 			return_from_block;
 		}
 		
-		if ([self supportsDigestMD5Authentication])
+        // Facebook authentication
+        if (isAccessToken)
+        {
+            [self sendSASLRequestForMechanism:@"X-FACEBOOK-PLATFORM"];
+      			
+			// Update state
+			state = STATE_XMPP_AUTH_1;
+		} 
+        else if ([self supportsDigestMD5Authentication])
 		{
-			NSString *auth = @"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='DIGEST-MD5'/>";
-			
-			NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
-			
-			XMPPLogSend(@"SEND: %@", auth);
-			numberOfBytesSent += [outgoingData length];
-			
-			[asyncSocket writeData:outgoingData
-					   withTimeout:TIMEOUT_XMPP_WRITE
-							   tag:TAG_XMPP_WRITE_STREAM];
+            [self sendSASLRequestForMechanism:@"DIGEST-MD5"];
 			
 			// Save authentication information
+            isAccessToken = NO;
 			[tempPassword release];
 			tempPassword = [password copy];
 			
@@ -1899,6 +2051,8 @@ enum XMPPStreamConfig
 				   withTimeout:TIMEOUT_XMPP_WRITE
 						   tag:TAG_XMPP_WRITE_STREAM];
 		
+    isAccessToken = NO;
+    
 		// Update state
 		state = STATE_XMPP_AUTH_3;
 		
@@ -2730,12 +2884,14 @@ enum XMPPStreamConfig
 }
 
 /**
- * After the authenticateUser:withPassword:resource method is invoked, a authentication message is sent to the server.
+ * After the authenticateWithPassword:error: or authenticateWithFacebookAccessToken:error: methods are invoked, an 
+ * authentication message is sent to the server.
  * If the server supports digest-md5 sasl authentication, it is used.  Otherwise plain sasl authentication is used,
  * assuming the server supports it.
  * 
- * Now if digest-md5 was used, we sent a challenge request, and we're waiting for a challenge response.
- * If plain sasl was used, we sent our authentication information, and we're waiting for a success response.
+ * Now if digest-md5 or X-FACEBOOK-PLATFORM was used, we sent a challenge request, and we're waiting for a 
+ * challenge response.  If plain sasl was used, we sent our authentication information, and we're waiting for a 
+ * success response.
 **/
 - (void)handleAuth1:(NSXMLElement *)response
 {
@@ -2743,7 +2899,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	if ([self supportsDigestMD5Authentication])
+  if ([self supportsDigestMD5Authentication] || isAccessToken)
 	{
 		// We're expecting a challenge response
 		// If we get anything else we can safely assume it's the equivalent of a failure response
@@ -2758,29 +2914,46 @@ enum XMPPStreamConfig
 		{
 			// Create authentication object from the given challenge
 			// We'll release this object at the end of this else block
-			XMPPDigestAuthentication *auth = [[XMPPDigestAuthentication alloc] initWithChallenge:response];
-			
-			NSString *virtualHostName = [myJID domain];
-			NSString *serverHostName = hostName;
-			
-			// Sometimes the realm isn't specified
-			// In this case I believe the realm is implied as the virtual host name
-			if (![auth realm])
-			{
-				if([virtualHostName length] > 0)
-					[auth setRealm:virtualHostName];
-				else
-					[auth setRealm:serverHostName];
-			}
-			
-			// Set digest-uri
-			if([virtualHostName length] > 0)
-				[auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", virtualHostName]];
-			else
-				[auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", serverHostName]];
-			
-			// Set username and password
-			[auth setUsername:[myJID user] password:tempPassword];
+      id<XMPPSASLAuthentication> auth = nil;
+      
+      if (isAccessToken)
+      {
+        auth = [[XMPPXFacebookPlatformAuthentication alloc] initWithChallenge:response 
+                                                                        appId:self.appId 
+                                                                    accessToken:tempPassword];
+
+        // Update state
+          state = STATE_XMPP_AUTH_3;
+      }
+      else
+      {
+        auth = [[XMPPDigestAuthentication alloc] initWithChallenge:response];
+        
+        NSString *virtualHostName = [myJID domain];
+        NSString *serverHostName = hostName;
+        
+        // Sometimes the realm isn't specified
+        // In this case I believe the realm is implied as the virtual host name
+        if (![(XMPPDigestAuthentication *)auth realm])
+        {
+          if([virtualHostName length] > 0)
+            [(XMPPDigestAuthentication *)auth setRealm:virtualHostName];
+          else
+            [(XMPPDigestAuthentication *)auth setRealm:serverHostName];
+        }
+        
+        // Set digest-uri
+        if([virtualHostName length] > 0)
+          [(XMPPDigestAuthentication *)auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", virtualHostName]];
+        else
+          [(XMPPDigestAuthentication *)auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", serverHostName]];
+        
+        // Set username and password
+        [(XMPPDigestAuthentication *)auth setUsername:[myJID user] password:tempPassword];
+
+        // Update state
+        state = STATE_XMPP_AUTH_2;
+      }
 			
 			// Create and send challenge response element
 			NSXMLElement *cr = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
@@ -2795,13 +2968,11 @@ enum XMPPStreamConfig
 			[asyncSocket writeData:outgoingData
 					   withTimeout:TIMEOUT_XMPP_WRITE
 							   tag:TAG_XMPP_WRITE_STREAM];
-			
-			// Release unneeded resources
+						
+      // Release unneeded resources
 			[auth release];
+      isAccessToken = NO;
 			[tempPassword release]; tempPassword = nil;
-			
-			// Update state
-			state = STATE_XMPP_AUTH_2;
 		}
 	}
 	else if ([self supportsPlainAuthentication])
@@ -3294,6 +3465,7 @@ enum XMPPStreamConfig
 		parser = nil;
 		
 		// Clear any saved authentication information
+    isAccessToken = NO;
 		[tempPassword release]; tempPassword = nil;
 		
 		// Clear stored elements
@@ -4179,172 +4351,6 @@ enum XMPPStreamConfig
 	dispatch_release(semaphore);
 	
 	[super dealloc];
-}
-
-@end
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@implementation XMPPDigestAuthentication
-
-- (id)initWithChallenge:(NSXMLElement *)challenge
-{
-	if((self = [super init]))
-	{
-		// Convert the base 64 encoded data into a string
-		NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
-		NSData *decodedData = [base64Data base64Decoded];
-		
-		NSString *authStr = [[[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding] autorelease];
-		
-		XMPPLogVerbose(@"%@: Decoded challenge: %@", THIS_FILE, authStr);
-		
-		// Extract all the key=value pairs, and put them in a dictionary for easy lookup
-		NSMutableDictionary *auth = [NSMutableDictionary dictionaryWithCapacity:5];
-		
-		NSArray *components = [authStr componentsSeparatedByString:@","];
-		
-		int i;
-		for(i = 0; i < [components count]; i++)
-		{
-			NSString *component = [components objectAtIndex:i];
-			
-			NSRange separator = [component rangeOfString:@"="];
-			if(separator.location != NSNotFound)
-			{
-				NSMutableString *key = [[component substringToIndex:separator.location] mutableCopy];
-				NSMutableString *value = [[component substringFromIndex:separator.location+1] mutableCopy];
-				
-				if(key) CFStringTrimWhitespace((CFMutableStringRef)key);
-				if(value) CFStringTrimWhitespace((CFMutableStringRef)value);
-				
-				if([value hasPrefix:@"\""] && [value hasSuffix:@"\""] && [value length] > 2)
-				{
-					// Strip quotes from value
-					[value deleteCharactersInRange:NSMakeRange(0, 1)];
-					[value deleteCharactersInRange:NSMakeRange([value length]-1, 1)];
-				}
-				
-				[auth setObject:value forKey:key];
-				
-				[value release];
-				[key release];
-			}
-		}
-		
-		// Extract and retain the elements we need
-		rspauth = [[auth objectForKey:@"rspauth"] copy];
-		realm = [[auth objectForKey:@"realm"] copy];
-		nonce = [[auth objectForKey:@"nonce"] copy];
-		qop = [[auth objectForKey:@"qop"] copy];
-		
-		// Generate cnonce
-		cnonce = [[XMPPStream generateUUID] retain];
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	[rspauth release];
-	[realm release];
-	[nonce release];
-	[qop release];
-	[username release];
-	[password release];
-	[cnonce release];
-	[nc release];
-	[digestURI release];
-	[super dealloc];
-}
-
-- (NSString *)rspauth
-{
-	return [[rspauth copy] autorelease];
-}
-
-- (NSString *)realm
-{
-	return [[realm copy] autorelease];
-}
-
-- (void)setRealm:(NSString *)newRealm
-{
-	if(![realm isEqual:newRealm])
-	{
-		[realm release];
-		realm = [newRealm copy];
-	}
-}
-
-- (void)setDigestURI:(NSString *)newDigestURI
-{
-	if(![digestURI isEqual:newDigestURI])
-	{
-		[digestURI release];
-		digestURI = [newDigestURI copy];
-	}
-}
-
-- (void)setUsername:(NSString *)newUsername password:(NSString *)newPassword
-{
-	if(![username isEqual:newUsername])
-	{
-		[username release];
-		username = [newUsername copy];
-	}
-	
-	if(![password isEqual:newPassword])
-	{
-		[password release];
-		password = [newPassword copy];
-	}
-}
-
-- (NSString *)response
-{
-	NSString *HA1str = [NSString stringWithFormat:@"%@:%@:%@", username, realm, password];
-	NSString *HA2str = [NSString stringWithFormat:@"AUTHENTICATE:%@", digestURI];
-	
-	NSData *HA1dataA = [[HA1str dataUsingEncoding:NSUTF8StringEncoding] md5Digest];
-	NSData *HA1dataB = [[NSString stringWithFormat:@":%@:%@", nonce, cnonce] dataUsingEncoding:NSUTF8StringEncoding];
-	
-	NSMutableData *HA1data = [NSMutableData dataWithCapacity:([HA1dataA length] + [HA1dataB length])];
-	[HA1data appendData:HA1dataA];
-	[HA1data appendData:HA1dataB];
-	
-	NSString *HA1 = [[HA1data md5Digest] hexStringValue];
-	
-	NSString *HA2 = [[[HA2str dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
-	
-	NSString *responseStr = [NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
-		HA1, nonce, cnonce, HA2];
-	
-	NSString *response = [[[responseStr dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
-	
-	return response;
-}
-
-- (NSString *)base64EncodedFullResponse
-{
-	NSMutableString *buffer = [NSMutableString stringWithCapacity:100];
-	[buffer appendFormat:@"username=\"%@\",", username];
-	[buffer appendFormat:@"realm=\"%@\",", realm];
-	[buffer appendFormat:@"nonce=\"%@\",", nonce];
-	[buffer appendFormat:@"cnonce=\"%@\",", cnonce];
-	[buffer appendFormat:@"nc=00000001,"];
-	[buffer appendFormat:@"qop=auth,"];
-	[buffer appendFormat:@"digest-uri=\"%@\",", digestURI];
-	[buffer appendFormat:@"response=%@,", [self response]];
-	[buffer appendFormat:@"charset=utf-8"];
-	
-	XMPPLogSend(@"decoded response: %@", buffer);
-	
-	NSData *utf8data = [buffer dataUsingEncoding:NSUTF8StringEncoding];
-	
-	return [utf8data base64Encoded];
 }
 
 @end
