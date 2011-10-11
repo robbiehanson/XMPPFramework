@@ -137,20 +137,20 @@
 
 - (XMPPvCardTemp *)myvCardTemp
 {
-  return [self fetchvCardTempForJID:[xmppStream myJID]];
+	return [self fetchvCardTempForJID:[xmppStream myJID]];
 }
 
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp
 {
-  XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
-  
-  NSString *elemId = [xmppStream generateUUID];
-  XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
-  [xmppStream sendElement:iq];
-  
-  [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
-  
-  [newvCardTemp release];
+	XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
+
+	NSString *elemId = [xmppStream generateUUID];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
+	[xmppStream sendElement:iq];
+
+	[self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
+
+	[newvCardTemp release];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,19 +159,19 @@
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
 {
-  // this method could be called from anywhere
-  dispatch_block_t block = ^{
+	// this method could be called from anywhere
+	dispatch_block_t block = ^{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
-    
-    [_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
-    
-    [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
-                                                         didReceivevCardTemp:vCardTemp
-                                                                      forJID:jid];
-    
-    [pool drain];
+		
+		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
+		
+		[_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
+		
+		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
+		                                                     didReceivevCardTemp:vCardTemp
+		                                                                  forJID:jid];
+		
+		[pool drain];
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
