@@ -1367,6 +1367,11 @@ enum XMPPStreamConfig
 	else
 		dispatch_sync(xmppQueue, block);
 	
+	if (errPtr)
+		*errPtr = [err autorelease];
+	else
+		[err release];
+	
 	return result;
 }
 
@@ -1495,6 +1500,11 @@ enum XMPPStreamConfig
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
+	
+	if (errPtr)
+		*errPtr = [err autorelease];
+	else
+		[err release];
 	
 	return result;
 }
