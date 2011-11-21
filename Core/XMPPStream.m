@@ -106,7 +106,7 @@ enum XMPPStreamConfig
 	xmppQueue = dispatch_queue_create("xmppStreamQueue", NULL);
 	parserQueue = dispatch_queue_create("xmppParserQueue", NULL);
 	
-	multicastDelegate = [[GCDMulticastDelegate alloc] init];
+	multicastDelegate = (GCDMulticastDelegate <XMPPStreamDelegate> *)[[GCDMulticastDelegate alloc] init];
 	
 	state = STATE_XMPP_DISCONNECTED;
 	
