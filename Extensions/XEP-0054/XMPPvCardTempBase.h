@@ -27,6 +27,7 @@
 	{                                                                   \
 		if (elem == nil) {												\
 			elem = [NSXMLElement elementWithName:(Name)];				\
+            [self addChild:elem];                                       \
 		}                                                               \
 		[elem setStringValue:(Value)];									\
 	}                                                                   \
