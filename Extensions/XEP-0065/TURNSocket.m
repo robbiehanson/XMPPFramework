@@ -111,11 +111,16 @@ static NSMutableArray *proxyCandidates;
 	//     </streamhosts>
 	//   </query>
 	// </iq>
+	// 
+	// From XEP 65 (9.1):
+	// The 'mode' attribute specifies the mode to use, either "tcp" or "udp".
+	// If this attribute is not included, the default value of "tcp" MUST be assumed.
+	// This attribute is OPTIONAL.
 	
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 	NSString *queryMode = [[query attributeForName:@"mode"] stringValue];
 	
-	BOOL isTcpBytestreamQuery = NO;
+	BOOL isTcpBytestreamQuery = YES;
 	if (queryMode)
 	{
 		isTcpBytestreamQuery = [queryMode caseInsensitiveCompare:@"tcp"] == NSOrderedSame;
@@ -228,7 +233,7 @@ static NSMutableArray *proxyCandidates;
 		
 		// Extract streamhost information from turn request
 		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-		streamhosts = [[query elementsForName:@"streamhost"] retain];
+		streamhosts = [[query elementsForName:@"streamhost"] mutableCopy];
 		
 		// Configure everything else
 		[self performPostInitSetup];
