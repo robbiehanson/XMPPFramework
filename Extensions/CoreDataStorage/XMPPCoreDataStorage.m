@@ -213,7 +213,7 @@ static NSMutableSet *databaseFileNames;
 		if (aDatabaseFileName)
 			databaseFileName = [aDatabaseFileName copy];
 		else
-			databaseFileName = [self defaultDatabaseFileName];
+			databaseFileName = [[self defaultDatabaseFileName] copy];
 		
 		if (![[self class] registerDatabaseFileName:databaseFileName])
 		{
