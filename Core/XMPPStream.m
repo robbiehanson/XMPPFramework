@@ -121,7 +121,7 @@ enum XMPPStreamConfig
 	hostPort = 5222;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
 	
-	registeredModules = [[NSMutableArray alloc] init];
+	registeredModules = [[DDList alloc] init];
 	autoDelegateDict = [[NSMutableDictionary alloc] init];
 	
 	receipts = [[NSMutableArray alloc] init];
@@ -3729,7 +3729,7 @@ enum XMPPStreamConfig
 		
 		// Register module
 		
-		[registeredModules addObject:module];
+		[registeredModules add:(__bridge void *)module];
 		
 		// Add auto delegates (if there are any)
 		
@@ -3787,7 +3787,7 @@ enum XMPPStreamConfig
 		
 		// Unregister modules
 		
-		[registeredModules removeObject:module];
+		[registeredModules remove:(__bridge void *)module];
 		
 	}};
 	
@@ -3812,7 +3812,10 @@ enum XMPPStreamConfig
 		
 		// Add the delegate to all currently registered modules of the given class.
 		
-		for (XMPPModule *module in registeredModules)
+		DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
+		XMPPModule *module;
+		
+		while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
 		{
 			if ([module isKindOfClass:aClass])
 			{
@@ -3858,7 +3861,10 @@ enum XMPPStreamConfig
 		{
 			// Remove the delegate from all currently registered modules of ANY class.
 			
-			for (XMPPModule *module in registeredModules)
+			DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
+			XMPPModule *module;
+			
+			while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
 			{
 				[module removeDelegate:delegate delegateQueue:delegateQueue];
 			}
@@ -3877,7 +3883,10 @@ enum XMPPStreamConfig
 			
 			// Remove the delegate from all currently registered modules of the given class.
 			
-			for (XMPPModule *module in registeredModules)
+			DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
+			XMPPModule *module;
+			
+			while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
 			{
 				if ([module isKindOfClass:aClass])
 				{
@@ -3908,10 +3917,13 @@ enum XMPPStreamConfig
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
+		DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
+		
+		XMPPModule *module;
 		NSUInteger i = 0;
 		BOOL stop = NO;
 		
-		for (XMPPModule *module in registeredModules)
+		while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
 		{
 			enumBlock(module, i, &stop);
 			
