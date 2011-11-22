@@ -1738,7 +1738,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
  * The attribute's surrounding prev/next pointers are properly updated to remove the attribute from the attr list.
  * Then, if the clean flag is YES, the attribute's parent, prev, next and doc pointers are set to null.
 **/
-+ (void)detachAttribute:(xmlAttrPtr)attr andClean:(BOOL)flag
++ (void)detachAttribute:(xmlAttrPtr)attr andClean:(BOOL)clean
 {
 	xmlNodePtr parent = attr->parent;
 	
@@ -1768,7 +1768,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		}
 	}
 	
-	if (flag)
+	if (clean)
 	{
 		// Nullify pointers
 		attr->parent = NULL;
@@ -1833,7 +1833,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
  * The child's surrounding prev/next pointers are properly updated to remove the child from the node's children list.
  * Then, if the clean flag is YES, the child's parent, prev, next and doc pointers are set to null.
 **/
-+ (void)detachChild:(xmlNodePtr)child andClean:(BOOL)flag
++ (void)detachChild:(xmlNodePtr)child andClean:(BOOL)clean andFixNamespaces:(BOOL)fixNamespaces
 {
 	xmlNodePtr parent = child->parent;
 	
@@ -1865,11 +1865,14 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		}
 	}
 	
-	if (flag)
+	if (fixNamespaces)
 	{
 		// Fix namesapces (namespace references that now point outside tree)
+		// Note: This must be done before we nullify pointers so we can search up the tree.
 		[self recursiveFixDefaultNamespacesInNode:child withNewRoot:child];
-		
+	}
+	if (clean)
+	{
 		// Nullify pointers
 		child->parent = NULL;
 		child->prev   = NULL;
@@ -1885,7 +1888,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 **/
 + (void)detachChild:(xmlNodePtr)child
 {
-	[self detachChild:child andClean:YES];
+	[self detachChild:child andClean:YES andFixNamespaces:YES];
 }
 
 /**
@@ -1904,7 +1907,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	// We perform a bit of optimization here.
 	// No need to bother nullifying pointers since we're about to free the node anyway.
-	[self detachChild:child andClean:NO];
+	[self detachChild:child andClean:NO andFixNamespaces:NO];
 	
 	xmlFreeNode(child);
 }
