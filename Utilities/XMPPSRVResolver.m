@@ -76,10 +76,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	if (resolverQueue)
 		dispatch_release(resolverQueue);
 	
-	[srvName release];
-    [results release];
     
-    [super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +99,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	else
 		dispatch_sync(resolverQueue, block);
 	
-	return [result autorelease];
+	return result;
 }
 
 - (NSTimeInterval)timeout
@@ -246,8 +243,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 		}
 	}
 	
-	[results release];
-	results = [sortedResults retain];
+	results = sortedResults;
 	
 	XMPPLogVerbose(@"%@: Sorted results:\n%@", THIS_FILE, results);
 }
@@ -263,8 +259,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	id theDelegate = delegate;
 	NSArray *records = [results copy];
 	
-	dispatch_async(delegateQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(delegateQueue, ^{ @autoreleasepool {
 		
 		SEL selector = @selector(srvResolver:didResolveRecords:);
 		
@@ -277,10 +272,8 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 			XMPPLogWarn(@"%@: delegate doesn't implement %@", THIS_FILE, NSStringFromSelector(selector));
 		}
 		
-		[pool drain];
-	});
+	}});
 	
-	[records release];
 	[self stop];
 }
 
@@ -292,25 +285,24 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	
 	id theDelegate = delegate;
 	
-    if (delegateQueue != NULL) {
-        dispatch_async(delegateQueue, ^{
-            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-            SEL selector = @selector(srvResolver:didNotResolveDueToError:);
-
-            if ([theDelegate respondsToSelector:selector])
-            {
-            [theDelegate srvResolver:self didNotResolveDueToError:error];
-            }
-            else
-            {
-            XMPPLogWarn(@"%@: delegate doesn't implement %@", THIS_FILE, NSStringFromSelector(selector));
-            }
-
-            [pool drain];
-        });
-    }
-  
+    if (delegateQueue != NULL)
+	{
+		dispatch_async(delegateQueue, ^{ @autoreleasepool {
+			
+			SEL selector = @selector(srvResolver:didNotResolveDueToError:);
+			
+			if ([theDelegate respondsToSelector:selector])
+			{
+				[theDelegate srvResolver:self didNotResolveDueToError:error];
+			}
+			else
+			{
+				XMPPLogWarn(@"%@: delegate doesn't implement %@", THIS_FILE, NSStringFromSelector(selector));
+			}
+			
+		}});
+	}
+	
 	[self stop];
 }
 
@@ -399,7 +391,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 	// It does some preliminary work, but the bulk of the interesting stuff 
 	// is done in the processRecord:length: method.
 	
-    XMPPSRVResolver *resolver = (XMPPSRVResolver *)context;
+    XMPPSRVResolver *resolver = (__bridge XMPPSRVResolver *)context;
 	
 	NSCAssert(dispatch_get_current_queue() == resolver->resolverQueue, @"Invoked on incorrect queue");
     
@@ -437,12 +429,10 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 
 - (void)startWithSRVName:(NSString *)aSRVName timeout:(NSTimeInterval)aTimeout
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (resolveInProgress)
 		{
-			[pool drain];
 			return;
 		}
 		
@@ -450,7 +440,6 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		
 		// Save parameters
 		
-		[srvName release];
 		srvName = [aSRVName copy];
 		
 		timeout = aTimeout;
@@ -461,8 +450,6 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		if (srvNameCStr == NULL)
 		{
 			[self failWithDNSError:kDNSServiceErr_BadParam];
-			
-			[pool drain];
 			return;
 			
 		}
@@ -477,13 +464,11 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		                              kDNSServiceType_SRV,                 // rrtype
 		                              kDNSServiceClass_IN,                 // rrclass
 		                              QueryRecordCallback,                 // Callback method
-		                              self);                               // Context pointer
+		                              (__bridge void *)self);              // Context pointer
 		
 		if (sdErr != kDNSServiceErr_NoError)
 		{
 			[self failWithDNSError:sdErr];
-			
-			[pool drain];
 			return;
 		}
 		
@@ -499,8 +484,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		
 		sdReadSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, sdFd, 0, resolverQueue);
 		
-		dispatch_source_set_event_handler(sdReadSource, ^{
-			NSAutoreleasePool *handlerPool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_event_handler(sdReadSource, ^{ @autoreleasepool {
 			
 			XMPPLogVerbose(@"%@: sdReadSource_eventHandler", THIS_FILE);
 			
@@ -515,22 +499,19 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 				[self failWithDNSError:dnsErr];
 			}
 			
-			[handlerPool drain];
-		});
+		}});
 		
 		dispatch_source_t theSdReadSource = sdReadSource;
 		DNSServiceRef theSdRef = sdRef;
 		
-		dispatch_source_set_cancel_handler(sdReadSource, ^{
-			NSAutoreleasePool *handlerPool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_cancel_handler(sdReadSource, ^{ @autoreleasepool {
 			
 			XMPPLogVerbose(@"%@: sdReadSource_cancelHandler", THIS_FILE);
 			
 			dispatch_release(theSdReadSource);
 			DNSServiceRefDeallocate(theSdRef);
 			
-			[handlerPool drain];
-		});
+		}});
 		
 		dispatch_resume(sdReadSource);
 		
@@ -540,8 +521,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		{
 			timeoutTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, resolverQueue);
 			
-			dispatch_source_set_event_handler(timeoutTimer, ^{
-				NSAutoreleasePool *handlerPool = [[NSAutoreleasePool alloc] init];
+			dispatch_source_set_event_handler(timeoutTimer, ^{ @autoreleasepool {
 				
 				NSString *errMsg = @"Operation timed out";
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
@@ -550,8 +530,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 				
 				[self failWithError:err];
 				
-				[handlerPool drain];
-			});
+			}});
 			
 			dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
 			
@@ -560,8 +539,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		}
 		
 		resolveInProgress = YES;
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == resolverQueue)
 		block();
@@ -571,8 +549,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 
 - (void)stop
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -605,8 +582,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		}
 		
 		resolveInProgress = NO;
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == resolverQueue)
 		block();
@@ -645,7 +621,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 
 + (XMPPSRVRecord *)recordWithPriority:(UInt16)p1 weight:(UInt16)w port:(UInt16)p2 target:(NSString *)t
 {
-	return [[[XMPPSRVRecord alloc] initWithPriority:p1 weight:w port:p2 target:t] autorelease];
+	return [[XMPPSRVRecord alloc] initWithPriority:p1 weight:w port:p2 target:t];
 }
 
 - (id)initWithPriority:(UInt16)p1 weight:(UInt16)w port:(UInt16)p2 target:(NSString *)t
@@ -663,11 +639,6 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 	return self;
 }
 
-- (void)dealloc
-{
-	[target release];
-	[super dealloc];
-}
 
 - (NSString *)description
 {

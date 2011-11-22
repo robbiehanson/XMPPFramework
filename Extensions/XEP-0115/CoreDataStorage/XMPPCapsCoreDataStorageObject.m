@@ -15,7 +15,7 @@
 
 - (NSXMLElement *)capabilities
 {
-	return [[[NSXMLElement alloc] initWithXMLString:[self capabilitiesStr] error:nil] autorelease];
+	return [[NSXMLElement alloc] initWithXMLString:[self capabilitiesStr] error:nil];
 }
 
 - (void)setCapabilities:(NSXMLElement *)caps

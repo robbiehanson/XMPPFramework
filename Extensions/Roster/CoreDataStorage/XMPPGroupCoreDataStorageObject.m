@@ -29,7 +29,6 @@
 	
 	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
 	
-	[fetchRequest release];
   
   for (NSManagedObject *group in results) {
     [moc deleteObject:group];
@@ -68,7 +67,6 @@
 	
 	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
 	
-	[fetchRequest release];
   
   if ([results count] > 0) {
     return [results objectAtIndex:0];
@@ -89,7 +87,6 @@
   [self willChangeValueForKey:@"users" withSetMutation:NSKeyValueUnionSetMutation usingObjects:changedObjects];
   [[self primitiveValueForKey:@"users"] addObject:value];
   [self didChangeValueForKey:@"users" withSetMutation:NSKeyValueUnionSetMutation usingObjects:changedObjects];
-  [changedObjects release];
 }
 
 - (void)removeUsersObject:(XMPPUserCoreDataStorageObject *)value {
@@ -97,7 +94,6 @@
   [self willChangeValueForKey:@"users" withSetMutation:NSKeyValueMinusSetMutation usingObjects:changedObjects];
   [[self primitiveValueForKey:@"users"] removeObject:value];
   [self didChangeValueForKey:@"users" withSetMutation:NSKeyValueMinusSetMutation usingObjects:changedObjects];
-  [changedObjects release];
 }
 
 - (void)addUsers:(NSSet *)value {    

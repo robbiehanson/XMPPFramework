@@ -67,7 +67,7 @@
  * 
  * The default targetJID is nil.
 **/
-@property (readwrite, retain) XMPPJID *targetJID;
+@property (readwrite, strong) XMPPJID *targetJID;
 
 /**
  * Corresponds to the last time data was received from the target.

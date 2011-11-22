@@ -145,16 +145,12 @@ static void xmpp_setName(NSXMLElement *element, xmlNodePtr node)
 		
 		NSString *elementName = [[NSString alloc] initWithFormat:@"%@:%@", prefix, name];
 		[element setName:elementName];
-		[elementName release];
 		
-		[name release];
-		[prefix release];
 	}
 	else
 	{
 		NSString *elementName = [[NSString alloc] initWithUTF8String:(const char *)node->name];
 		[element setName:elementName];
-		[elementName release];
 	}
 }
 
@@ -177,7 +173,6 @@ static void xmpp_addNamespaces(NSXMLElement *element, xmlNodePtr node)
 			{
 				NSString *nsName = [[NSString alloc] initWithUTF8String:(const char *)nsNode->prefix];
 				[ns setName:nsName];
-				[nsName release];
 			}
 			else
 			{
@@ -189,10 +184,8 @@ static void xmpp_addNamespaces(NSXMLElement *element, xmlNodePtr node)
 			
 			NSString *nsValue = [[NSString alloc] initWithUTF8String:(const char *)nsNode->href];
 			[ns setStringValue:nsValue];
-			[nsValue release];
 			
 			[element addNamespace:ns];
-			[ns release];
 		}
 		
 		nsNode = nsNode->next;
@@ -216,7 +209,6 @@ static void xmpp_addChildren(NSXMLElement *element, xmlNodePtr node)
 			{
 				NSString *value = [[NSString alloc] initWithUTF8String:(const char *)childNode->content];
 				[element setStringValue:value];
-				[value release];
 			}
 		}
 		
@@ -256,24 +248,18 @@ static void xmpp_addAttributes(NSXMLElement *element, xmlNodePtr node)
 				
 				NSString *attrName = [[NSString alloc] initWithFormat:@"%@:%@", prefix, name];
 				[attr setName:attrName];
-				[attrName release];
 				
-				[name release];
-				[prefix release];
 			}
 			else
 			{
 				NSString *attrName = [[NSString alloc] initWithUTF8String:(const char *)attrNode->name];
 				[attr setName:attrName];
-				[attrName release];
 			}
 			
 			NSString *attrValue = [[NSString alloc] initWithUTF8String:(const char *)attrNode->children->content];
 			[attr setStringValue:attrValue];
-			[attrValue release];
 			
 			[element addAttribute:attr];
-			[attr release];
 		}
 		
 		attrNode = attrNode->next;
@@ -300,7 +286,6 @@ static void xmpp_recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode)
 	xmpp_addAttributes(child, childNode);
 	
 	[parent addChild:child];
-	[child release];
 }
 
 /**
@@ -320,7 +305,7 @@ static NSXMLElement* xmpp_nsxmlFromLibxml(xmlNodePtr rootNode)
 	xmpp_addChildren(root, rootNode);
 	xmpp_addAttributes(root, rootNode);
 	
-	return [root autorelease];
+	return root;
 }
 
 static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
@@ -392,7 +377,7 @@ static void xmpp_onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 **/
 static void xmpp_postStartElement(xmlParserCtxt *ctxt)
 {
-	XMPPParser *parser = (XMPPParser *)ctxt->_private;
+	XMPPParser *parser = (__bridge XMPPParser *)ctxt->_private;
 	parser->depth++;
 	
 	if(!(parser->hasReportedRoot) && (parser->depth == 1))
@@ -418,7 +403,7 @@ static void xmpp_postStartElement(xmlParserCtxt *ctxt)
 **/
 static void xmpp_postEndElement(xmlParserCtxt *ctxt)
 {
-	XMPPParser *parser = (XMPPParser *)ctxt->_private;
+	XMPPParser *parser = (__bridge XMPPParser *)ctxt->_private;
 	parser->depth--;
 	
 	if(parser->depth == 1)
@@ -460,7 +445,7 @@ static void xmpp_postEndElement(xmlParserCtxt *ctxt)
 **/
 static void xmpp_xmlAbortDueToMemoryShortage(xmlParserCtxt *ctxt)
 {
-	XMPPParser *parser = (XMPPParser *)ctxt->_private;
+	XMPPParser *parser = (__bridge XMPPParser *)ctxt->_private;
 	
 	xmlStopParser(ctxt);
 	
@@ -686,7 +671,7 @@ static void xmpp_xmlCharacters(void *ctx, const xmlChar *ch, int len)
 {
 	xmlParserCtxt *ctxt = (xmlParserCtxt *)ctx;
 	
-	if(ctxt->node != NULL)
+	if (ctxt->node != NULL)
 	{
 		xmlNodePtr textNode = xmlNewTextLen(ch, len);
 		
@@ -710,7 +695,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 	xmlParserCtxt *ctxt = (xmlParserCtxt *)ctx;
 	
 	// Update our parent node pointer
-	if(ctxt->node != NULL)
+	if (ctxt->node != NULL)
 		ctxt->node = ctxt->node->parent;
 	
 	// Invoke delegate methods if needed
@@ -719,7 +704,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 
 - (id)initWithDelegate:(id)aDelegate
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
 		delegate = aDelegate;
 		
@@ -744,7 +729,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		parserCtxt->myDoc = xmlNewDoc(parserCtxt->version);
 		
 		// Store reference to ourself
-		parserCtxt->_private = self;
+		parserCtxt->_private = (__bridge void *)(self);
 		
 		// Note: The parserCtxt also has a userData variable, but it is used by the DOM building functions.
 		// If we put a value there, it actually causes a crash!
@@ -755,11 +740,11 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 
 - (void)dealloc
 {
-	if(parserCtxt)
+	if (parserCtxt)
 	{
 		// The xmlFreeParserCtxt method will not free the created document in parserCtxt->myDoc.
 		
-		if(parserCtxt->myDoc)
+		if (parserCtxt->myDoc)
 		{
 			// Free the created xmlDoc
 			xmlFreeDoc(parserCtxt->myDoc);
@@ -768,7 +753,6 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		xmlFreeParserCtxt(parserCtxt);
 	}
 	
-	[super dealloc];
 }
 
 - (id)delegate {
@@ -785,7 +769,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 	// gets invoked, then the parserCtxt will be freed in the middle of the xmlParseChunk method.
 	// This often has the effect of crashing the application.
 	// To get around this problem we simply retain/release within the method.
-	[self retain];
+	XMPPParser *selfRetain = self;
 	
 	int result = xmlParseChunk(parserCtxt, (const char *)[data bytes], (int)[data length], 0);
 	
@@ -813,7 +797,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		}
 	}
 	
-	[self release];
+	selfRetain = nil;
 }
 
 @end

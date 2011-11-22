@@ -14,7 +14,7 @@
 
 @interface XMPPvCardAvatarCoreDataStorageObject : NSManagedObject
 
-@property (nonatomic, retain) NSData * photoData;
-@property (nonatomic, retain) XMPPvCardCoreDataStorageObject * vCard;
+@property (nonatomic, strong) NSData * photoData;
+@property (nonatomic, strong) XMPPvCardCoreDataStorageObject * vCard;
 
 @end

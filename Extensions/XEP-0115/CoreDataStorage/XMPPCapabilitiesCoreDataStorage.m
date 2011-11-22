@@ -58,7 +58,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
 					                                     [jid full], [[self myJIDForXMPPStream:stream] bare]];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setFetchLimit:1];
@@ -86,7 +86,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@",
 	                                                           hash, hashAlg];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setFetchLimit:1];
@@ -106,7 +106,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setFetchBatchSize:saveThreshold];
 	
@@ -223,18 +223,16 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		
 		if (resource)
 		{
-			result = [[[resource caps] capabilities] retain];
-			ext = [[resource ext] retain];
+			result = [[resource caps] capabilities];
+			ext = [resource ext];
 		}
 		
 	}];
 	
 	if (extPtr)
-		*extPtr = [ext autorelease];
-	else
-		[ext release];
+		*extPtr = ext;
 	
-	return [result autorelease];
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,7 +299,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		{
 			resource.caps = [self capsForHash:hash algorithm:hashAlg];
 			
-			newCapabilities = [resource.caps.capabilities retain];
+			newCapabilities = resource.caps.capabilities;
 		}
 		
 		// Return whether or not the capabilities are known for the given jid
@@ -312,9 +310,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	
 	
 	if (newCapabilitiesPtr)
-		*newCapabilitiesPtr = [newCapabilities autorelease];
-	else
-		[newCapabilities release];
+		*newCapabilitiesPtr = newCapabilities;
 	
 	return result;
 }
@@ -338,8 +334,8 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		XMPPCapsResourceCoreDataStorageObject *resource = [self resourceForJID:jid xmppStream:stream];
 		if (resource)
 		{
-			hash = [resource.hashStr retain];
-			hashAlg = [resource.hashAlgorithm retain];
+			hash = resource.hashStr;
+			hashAlg = resource.hashAlgorithm;
 			
 			result = (hash && hashAlg);
 		}
@@ -355,14 +351,10 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	
 	
 	if (hashPtr)
-		*hashPtr = [hash autorelease];
-	else
-		[hash release];
+		*hashPtr = hash;
 	
 	if (hashAlgPtr)
-		*hashAlgPtr = [hashAlg autorelease];
-	else
-		[hashAlg release];
+		*hashAlgPtr = hashAlg;
 	
 	return result;
 }
@@ -443,11 +435,11 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 			areCapabilitiesKnown = (resource.caps != nil);
 			haveFailedFetchingBefore = resource.haveFailed;
 			
-			node    = [resource.node retain];
-			ver     = [resource.ver retain];
-			ext     = [resource.ext retain];
-			hash    = [resource.hashStr retain];
-			hashAlg = [resource.hashAlgorithm retain];
+			node    = resource.node;
+			ver     = resource.ver;
+			ext     = resource.ext;
+			hash    = resource.hashStr;
+			hashAlg = resource.hashAlgorithm;
 		}
 		
 	}];
@@ -455,11 +447,11 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 	if (areCapabilitiesKnownPtr)     *areCapabilitiesKnownPtr     = areCapabilitiesKnown;
 	if (haveFailedFetchingBeforePtr) *haveFailedFetchingBeforePtr = haveFailedFetchingBefore;
 	
-	if (nodePtr)    *nodePtr    = [node    autorelease]; else [node    release];
-	if (verPtr)     *verPtr     = [ver     autorelease]; else [ver     release];
-	if (extPtr)     *extPtr     = [ext     autorelease]; else [ext     release];
-	if (hashPtr)    *hashPtr    = [hash    autorelease]; else [hash    release];
-	if (hashAlgPtr) *hashAlgPtr = [hashAlg autorelease]; else [hashAlg release];
+	if (nodePtr)    *nodePtr    = node;
+	if (verPtr)     *verPtr     = ver;
+	if (extPtr)     *extPtr     = ext;
+	if (hashPtr)    *hashPtr    = hash;
+	if (hashAlgPtr) *hashAlgPtr = hashAlg;
 }
 
 - (void)setCapabilities:(NSXMLElement *)capabilities forHash:(NSString *)hash algorithm:(NSString *)hashAlg
@@ -492,7 +484,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		NSPredicate *predicate;
 		predicate = [NSPredicate predicateWithFormat:@"hashStr == %@ AND hashAlgorithm == %@", hash, hashAlg];
 		
-		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
 		[fetchRequest setPredicate:predicate];
 		[fetchRequest setFetchBatchSize:saveThreshold];

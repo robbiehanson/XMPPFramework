@@ -38,7 +38,7 @@
 
 + (XMPPMessage *)message
 {
-	return [[[XMPPMessage alloc] init] autorelease];
+	return [[XMPPMessage alloc] init];
 }
 
 - (id)init

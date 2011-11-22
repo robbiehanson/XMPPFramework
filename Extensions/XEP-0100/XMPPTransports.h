@@ -7,7 +7,7 @@
 
 @interface XMPPTransports : NSObject
 {
-	XMPPStream *xmppStream;
+	XMPPStream *__weak xmppStream;
 }
 
 - (id)initWithStream:(XMPPStream *)xmppStream;

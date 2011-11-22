@@ -98,10 +98,10 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-		result = [vCard.photoData retain];
+		result = vCard.photoData;
 	}];
 	
-	return [result autorelease];
+	return result;
 }
 
 - (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream 
@@ -119,10 +119,10 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-		result = [vCard.photoHash retain];
+		result = vCard.photoHash;
 	}];
 	
-	return [result autorelease];
+	return result;
 }
 
 - (void)clearvCardTempForJID:(XMPPJID *)jid  xmppStream:(XMPPStream *)stream
@@ -162,10 +162,10 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-		result = [vCard.vCardTemp retain];
+		result = vCard.vCardTemp;
 	}];
 	
-	return [result autorelease];
+	return result;
 }
 
 - (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream

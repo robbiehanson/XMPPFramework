@@ -16,23 +16,22 @@
 @interface XMPPvCardTempTel : XMPPvCardTempBase
 
 
-@property (nonatomic, assign, setter=setHome:) BOOL isHome;
-@property (nonatomic, assign, setter=setWork:) BOOL isWork;
-@property (nonatomic, assign, setter=setVoice:) BOOL isVoice;
-@property (nonatomic, assign, setter=setFax:) BOOL isFax;
-@property (nonatomic, assign, setter=setPager:) BOOL isPager;
-@property (nonatomic, assign, setter=setMessaging:) BOOL hasMessaging;
-@property (nonatomic, assign, setter=setCell:) BOOL isCell;
-@property (nonatomic, assign, setter=setVideo:) BOOL isVideo;
-@property (nonatomic, assign, setter=setBBS:) BOOL isBBS;
-@property (nonatomic, assign, setter=setModem:) BOOL isModem;
-@property (nonatomic, assign, setter=setISDN:) BOOL isISDN;
-@property (nonatomic, assign, setter=setPCS:) BOOL isPCS;
-@property (nonatomic, assign, setter=setPreferred:) BOOL isPreferred;
-@property (nonatomic, assign) NSString *number;
-
-
 + (XMPPvCardTempTel *)vCardTelFromElement:(NSXMLElement *)elem;
 
+@property (nonatomic, assign, setter=setHome:)      BOOL isHome;
+@property (nonatomic, assign, setter=setWork:)      BOOL isWork;
+@property (nonatomic, assign, setter=setVoice:)     BOOL isVoice;
+@property (nonatomic, assign, setter=setFax:)       BOOL isFax;
+@property (nonatomic, assign, setter=setPager:)     BOOL isPager;
+@property (nonatomic, assign, setter=setMessaging:) BOOL hasMessaging;
+@property (nonatomic, assign, setter=setCell:)      BOOL isCell;
+@property (nonatomic, assign, setter=setVideo:)     BOOL isVideo;
+@property (nonatomic, assign, setter=setBBS:)       BOOL isBBS;
+@property (nonatomic, assign, setter=setModem:)     BOOL isModem;
+@property (nonatomic, assign, setter=setISDN:)      BOOL isISDN;
+@property (nonatomic, assign, setter=setPCS:)       BOOL isPCS;
+@property (nonatomic, assign, setter=setPreferred:) BOOL isPreferred;
+
+@property (nonatomic, weak) NSString *number;
 
 @end

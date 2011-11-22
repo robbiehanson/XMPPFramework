@@ -76,7 +76,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 + (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq
 {
-	return [[[self vCardTempSubElementFromIQ:iq] copy] autorelease];
+	return [[self vCardTempSubElementFromIQ:iq] copy];
 }
 
 
@@ -389,7 +389,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		NSXMLElement *lat = [geo elementForName:@"LAT"];
 		NSXMLElement *lon = [geo elementForName:@"LON"];
 		
-		loc = [[[CLLocation alloc] initWithLatitude:[[lat stringValue] doubleValue] longitude:[[lon stringValue] doubleValue]] autorelease];
+		loc = [[CLLocation alloc] initWithLatitude:[[lat stringValue] doubleValue] longitude:[[lon stringValue] doubleValue]];
 	}
 	
 	return loc;
@@ -564,7 +564,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		}
 		
 		result = [NSArray arrayWithArray:arr];
-		[arr release];
 	}
 	
 	return result;
@@ -607,7 +606,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		}
 		
 		result = [NSArray arrayWithArray:arr];
-		[arr release];
 	}
 	
 	return result;

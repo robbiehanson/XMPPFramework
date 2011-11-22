@@ -10,16 +10,11 @@
 {
 	if ((self = [super init]))
 	{
-		xmppStream = [stream retain];
+		xmppStream = stream;
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-	[xmppStream release];
-	[super dealloc];
-}
 
 /**
  * Registration process

@@ -71,7 +71,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:moc];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setFetchBatchSize:saveThreshold];
 	
@@ -197,7 +197,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
 					 bareJIDStr, [[self myJIDForXMPPStream:stream] bare]];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setIncludesPendingChanges:YES];
@@ -231,7 +231,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
 					 fullJIDStr, [[self myJIDForXMPPStream:stream] bare]];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setIncludesPendingChanges:YES];
@@ -252,7 +252,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet addObject:[NSNumber numberWithPtr:stream]];
+		[rosterPopulationSet addObject:[NSNumber numberWithPtr:(__bridge void *)stream]];
     
 		// Clear anything already in the roster core data store.
 		// 
@@ -264,7 +264,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 		                                          inManagedObjectContext:moc];
 		
-		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
 		[fetchRequest setFetchBatchSize:saveThreshold];
 		
@@ -294,7 +294,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet removeObject:[NSNumber numberWithPtr:stream]];
+		[rosterPopulationSet removeObject:[NSNumber numberWithPtr:(__bridge void *)stream]];
 	}];
 }
 
@@ -304,13 +304,13 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	// Remember XML heirarchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
-	NSXMLElement *item = [[itemSubElement copy] autorelease];
+	NSXMLElement *item = [itemSubElement copy];
 	
 	[self scheduleBlock:^{
 		
 		NSManagedObjectContext *moc = [self managedObjectContext];
 		
-		if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:stream]])
+		if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:(__bridge void *)stream]])
 		{
 			NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 			
@@ -433,7 +433,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 												  inManagedObjectContext:moc];
 		
-		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
 		[fetchRequest setFetchBatchSize:saveThreshold];
 		
@@ -468,10 +468,5 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 #pragma mark Memory Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)dealloc
-{
-	[rosterPopulationSet release];
-	[super dealloc];
-}
 
 @end

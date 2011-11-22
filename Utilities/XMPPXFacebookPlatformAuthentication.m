@@ -32,8 +32,8 @@
         NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
         NSData *decodedData = [base64Data base64Decoded];
             
-        NSString *authStr = [[[NSString alloc] initWithData:decodedData 
-                                                   encoding:NSUTF8StringEncoding] autorelease];
+        NSString *authStr = [[NSString alloc] initWithData:decodedData 
+                                                   encoding:NSUTF8StringEncoding];
             
         XMPPLogVerbose(@"XMPPXFacebookPlatformAuthentication: decoded challenge: %@", authStr);
             
@@ -74,14 +74,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [appId release];
-    [accessToken release];
-    [nonce release];
-    [method release];
-	[super dealloc];
-}
 
 - (NSString *)base64EncodedFullResponse
 {

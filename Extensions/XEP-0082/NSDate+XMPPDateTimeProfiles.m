@@ -70,7 +70,6 @@
 	[dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
 	NSString *str = [dateFormatter stringFromDate:self];
-	[dateFormatter release];
 	
 	return str;
 }

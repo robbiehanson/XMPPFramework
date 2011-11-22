@@ -5,7 +5,7 @@
 
 + (NSNumber *)numberWithPtr:(const void *)ptr
 {
-	return [[[NSNumber alloc] initWithPtr:ptr] autorelease];
+	return [[NSNumber alloc] initWithPtr:ptr];
 }
 
 - (id)initWithPtr:(const void *)ptr
