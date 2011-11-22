@@ -22,7 +22,7 @@
 
 
 
-#if TARGET_OS_IPHONE && 0 // Disabled by default
+#if TARGET_OS_IPHONE
 
 // Since KissXML is a drop in replacement for NSXML,
 // it may be desireable (when writing cross-platform code to be used on both Mac OS X and iOS)

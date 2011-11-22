@@ -187,10 +187,12 @@ NS_INLINE BOOL IsXmlNsPtr(void *kindPtr)
 + (void)removeNamespace:(xmlNsPtr)ns fromNode:(xmlNodePtr)node;
 + (void)removeAllNamespacesFromNode:(xmlNodePtr)node;
 
++ (void)detachAttribute:(xmlAttrPtr)attr andClean:(BOOL)clean;
 + (void)detachAttribute:(xmlAttrPtr)attr;
 + (void)removeAttribute:(xmlAttrPtr)attr;
 + (void)removeAllAttributesFromNode:(xmlNodePtr)node;
 
++ (void)detachChild:(xmlNodePtr)child andClean:(BOOL)clean andFixNamespaces:(BOOL)fixNamespaces;
 + (void)detachChild:(xmlNodePtr)child;
 + (void)removeChild:(xmlNodePtr)child;
 + (void)removeAllChildrenFromNode:(xmlNodePtr)node;
