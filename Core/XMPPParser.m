@@ -90,7 +90,16 @@ static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 
 static void xmpp_onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 {
-	[DDXMLNode detachChild:child fromNode:child->parent];
+	// Detach the child from the xml tree.
+	// 
+	// clean: Nullify next, prev, parent and doc pointers of child.
+	// fixNamespaces: Recurse through subtree, and ensure no namespaces are pointing to xmlNs nodes outside the tree.
+	//                E.G. in a parent node that will no longer be available after the child is detached.
+	// 
+	// We don't need to fix namespaces since we used xmpp_xmlSearchNs() to ensure we never created any
+	// namespaces outside the subtree of the child in the first place.
+	
+	[DDXMLNode detachChild:child andClean:YES andFixNamespaces:NO];
 	
 	DDXMLElement *childWrapper = [DDXMLElement nodeWithElementPrimitive:child owner:nil];
 	
@@ -284,7 +293,7 @@ static void xmpp_addAttributes(NSXMLElement *element, xmlNodePtr node)
  * Recursively adds all the child elements to the given parent.
  * 
  * Note: This method is almost the same as xmpp_nsxmlFromLibxml, with one important difference.
- * It doen't add any objects to the autorelease pool.
+ * It doen't add any objects to the autorelease pool (xmpp_nsxmlFromLibXml has return value).
 **/
 static void xmpp_recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode)
 {
