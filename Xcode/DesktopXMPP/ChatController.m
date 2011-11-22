@@ -1,4 +1,5 @@
 #import "ChatController.h"
+#import "ChatWindowManager.h"
 #import "XMPP.h"
 
 @interface ChatController (PrivateAPI)
@@ -59,13 +60,12 @@
 	NSLog(@"ChatController: windowWillClose");
 	
 	[xmppStream removeDelegate:self];
+	[ChatWindowManager closeChatWindow:self];
 }
 
 - (void)dealloc
 {
 	NSLog(@"Destroying self: %@", self);
-	
-	
 }
 
 - (void)scrollToBottom
