@@ -40,7 +40,6 @@
 	[dict removeAllObjects];
 	
 	dispatch_release(queue);
-	
 }
 
 - (void)addID:(NSString *)elementID target:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout
@@ -203,7 +202,11 @@
 	if (block)
 		block(obj, self);
 	else
+	{
+		// Getting a warning about this?
+		// Use -Wno-arc-performSelector-leaks to quiet the compiler.
 		[target performSelector:selector withObject:obj withObject:self];
+	}
 }
 
 @end
