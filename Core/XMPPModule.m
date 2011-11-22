@@ -78,11 +78,9 @@
 		[self deactivate];
 	}
 	
-	[multicastDelegate release];
 	
 	dispatch_release(moduleQueue);
 	
-	[super dealloc];
 }
 
 /**
@@ -102,7 +100,7 @@
 		}
 		else
 		{
-			xmppStream = [aXmppStream retain];
+			xmppStream = aXmppStream;
 			
 			[xmppStream addDelegate:self delegateQueue:moduleQueue];
 			[xmppStream registerModule:self];
@@ -134,7 +132,6 @@
 			[xmppStream removeDelegate:self delegateQueue:moduleQueue];
 			[xmppStream unregisterModule:self];
 			
-			[xmppStream release];
 			xmppStream = nil;
 		}
 	};
@@ -174,10 +171,10 @@
 		__block XMPPStream *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [xmppStream retain];
+			result = xmppStream;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 

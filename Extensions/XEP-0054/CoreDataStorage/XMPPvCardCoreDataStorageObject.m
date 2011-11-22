@@ -35,7 +35,6 @@
 	
 	NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
 	
-	[fetchRequest release];
 	
 	return (XMPPvCardCoreDataStorageObject *)[results lastObject];
 }

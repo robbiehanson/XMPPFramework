@@ -68,7 +68,6 @@
 			presence = [XMPPPresence presenceFromElement:element];
 			[self setPrimitiveValue:presence forKey:@"presence"];
 			
-			[element release];
 		}
     }
 	

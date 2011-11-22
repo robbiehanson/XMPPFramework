@@ -116,7 +116,7 @@
 		jid->domain = [domain copy];
 		jid->resource = [resource copy];
 		
-		return [jid autorelease];
+		return jid;
 	}
 	
 	return nil;
@@ -136,7 +136,7 @@
 		jid->domain = [domain copy];
 		jid->resource = [resource copy];
 		
-		return [jid autorelease];
+		return jid;
 	}
 	
 	return nil;
@@ -155,7 +155,7 @@
 		jid->domain = [prepDomain copy];
 		jid->resource = [prepResource copy];
 		
-		return [jid autorelease];
+		return jid;
 	}
 	
 	return nil;
@@ -219,7 +219,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
 	// This class is immutable
-	return [self retain];
+	return self;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@
 {
 	if(resource == nil)
 	{
-		return [[self retain] autorelease];
+		return self;
 	}
 	else
 	{
@@ -265,7 +265,7 @@
 {
 	if(user == nil && resource == nil)
 	{
-		return [[self retain] autorelease];
+		return self;
 	}
 	else
 	{
@@ -407,12 +407,5 @@
 	return [self full];
 }
 
-- (void)dealloc
-{
-	[user release];
-	[domain release];
-	[resource release];
-	[super dealloc];
-}
 
 @end

@@ -60,7 +60,7 @@
  * 
  * The default targetJID is nil.
 **/
-@property (readwrite, retain) XMPPJID *targetJID;
+@property (readwrite, strong) XMPPJID *targetJID;
 
 /**
  * Returns the calculated time difference between our machine and the target.

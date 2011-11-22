@@ -12,7 +12,6 @@
 {
 	// You must use initWithDispatchQueue
 	
-	[self release];
 	return nil;
 }
 
@@ -39,11 +38,9 @@
 		[info cancelTimer];
 	}
 	[dict removeAllObjects];
-	[dict release];
 	
 	dispatch_release(queue);
 	
-	[super dealloc];
 }
 
 - (void)addID:(NSString *)elementID target:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout
@@ -54,7 +51,6 @@
 	trackingInfo = [[XMPPBasicTrackingInfo alloc] initWithTarget:target selector:selector timeout:timeout];
 	
 	[self addID:elementID trackingInfo:trackingInfo];
-	[trackingInfo release];
 }
 
 - (void)addID:(NSString *)elementID
@@ -67,7 +63,6 @@
 	trackingInfo = [[XMPPBasicTrackingInfo alloc] initWithBlock:block timeout:timeout];
 	
 	[self addID:elementID trackingInfo:trackingInfo];
-	[trackingInfo release];
 }
 
 - (void)addID:(NSString *)elementID trackingInfo:(id <XMPPTrackingInfo>)trackingInfo
@@ -135,7 +130,6 @@
 {
 	// Use initWithTarget:selector:timeout: or initWithBlock:timeout:
 	
-	[self release];
 	return nil;
 }
 
@@ -159,7 +153,7 @@
 	
 	if ((self = [super init]))
 	{
-		block = Block_copy(aBlock);
+		block = [aBlock copy];
 		timeout = aTimeout;
 	}
 	return self;
@@ -171,15 +165,6 @@
 	
 	target = nil;
 	selector = NULL;
-	
-	if (block) {
-		Block_release(block);
-		block = NULL;
-	}
-	
-	[elementID release];
-	
-	[super dealloc];
 }
 
 - (void)createTimerWithDispatchQueue:(dispatch_queue_t)queue
@@ -191,13 +176,11 @@
 	{
 		timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
 		
-		dispatch_source_set_event_handler(timer, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
 			
 			[self invokeWithObject:nil];
 			
-			[pool drain];
-		});
+		}});
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
 		

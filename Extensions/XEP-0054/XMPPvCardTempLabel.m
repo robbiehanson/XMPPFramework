@@ -67,7 +67,6 @@
 	}
 	
 	NSArray *result = [NSArray arrayWithArray:lines];
-	[lines release];
 	return result;
 }
 

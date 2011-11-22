@@ -16,7 +16,7 @@
 @interface XMPPvCardTempLabel : XMPPvCardTempAdrTypes
 
 
-@property (nonatomic, assign) NSArray *lines;
+@property (nonatomic, weak) NSArray *lines;
 
 
 + (XMPPvCardTempLabel *)vCardLabelFromElement:(NSXMLElement *)elem;

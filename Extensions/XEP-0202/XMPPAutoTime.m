@@ -12,8 +12,8 @@
 
 @interface XMPPAutoTime ()
 
-@property (nonatomic, retain) NSData *lastServerAddress;
-@property (nonatomic, retain) NSDate *systemUptimeChecked;
+@property (nonatomic, strong) NSData *lastServerAddress;
+@property (nonatomic, strong) NSDate *systemUptimeChecked;
 
 - (void)updateRecalibrationTimer;
 - (void)startRecalibrationTimer;
@@ -62,8 +62,7 @@
 
 - (void)deactivate
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		[self stopRecalibrationTimer];
 		
@@ -73,8 +72,7 @@
 		[[NSNotificationCenter defaultCenter] removeObserver:self];
 		
 		[super deactivate];
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -86,16 +84,11 @@
 {
 	// recalibrationTimer released in [self deactivate]
 	
-	[targetJID release];
 	
 	[xmppTime removeDelegate:self];
-	[xmppTime release];
 	xmppTime = nil; // Might be referenced via [super dealloc] -> [self deactivate]
 	
-	[lastServerAddress release];
-	[systemUptimeChecked release];
 	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,9 +158,9 @@
 		__block XMPPJID *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [targetJID retain];
+			result = targetJID;
 		});
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -177,8 +170,7 @@
 		
 		if (![targetJID isEqualToJID:jid])
 		{
-			[targetJID release];
-			targetJID = [jid retain];
+			targetJID = jid;
 		}
 	};
 	
@@ -251,8 +243,7 @@
 	NSDate *now = [NSDate date];
 	NSTimeInterval sysUptime = [[NSProcessInfo processInfo] systemUptime];
 	
-	dispatch_async(moduleQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(moduleQueue, ^{ @autoreleasepool {
 		
 		// Calculate system clock change
 		
@@ -277,8 +268,7 @@
 		self.systemUptimeChecked = now;
 		systemUptime = sysUptime;
 		
-		[pool drain];
-	});
+	}});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -335,13 +325,11 @@
 		newTimer = YES;
 		recalibrationTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
 		
-		dispatch_source_set_event_handler(recalibrationTimer, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_event_handler(recalibrationTimer, ^{ @autoreleasepool {
 			
 			[self handleRecalibrationTimerFire];
 			
-			[pool drain];
-		});
+		}});
 	}
 	
 	[self updateRecalibrationTimer];

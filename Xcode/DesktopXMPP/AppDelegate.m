@@ -95,7 +95,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[turnSockets addObject:turnSocket];
 	
 	[turnSocket startWithDelegate:self delegateQueue:dispatch_get_main_queue()];
-	[turnSocket release];
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
@@ -109,7 +108,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		[turnSockets addObject:turnSocket];
 		
 		[turnSocket startWithDelegate:self delegateQueue:dispatch_get_main_queue()];
-		[turnSocket release];
 		
 		return YES;
 	}

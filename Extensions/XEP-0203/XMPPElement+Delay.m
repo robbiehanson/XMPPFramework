@@ -71,7 +71,6 @@
 		
 		stamp = [dateFormatter dateFromString:stampValue];
 		
-		[dateFormatter release];
 		return stamp;
 	}
 	

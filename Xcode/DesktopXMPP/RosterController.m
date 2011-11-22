@@ -162,7 +162,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	NSString *resource = [resourceField stringValue];
 	if([resource length] == 0)
 	{
-		resource = [(NSString *)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
+		resource = (__bridge_transfer NSString *)SCDynamicStoreCopyComputerName(NULL, NULL);
 	}
 	
 	XMPPJID *jid = [XMPPJID jidWithString:[jidField stringValue] resource:resource];
@@ -537,8 +537,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	[roster release];
-	roster = [[sender sortedUsersByAvailabilityName] retain];
+	roster = [sender sortedUsersByAvailabilityName];
 	
 	[rosterTable abortEditing];
 	[rosterTable selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];

@@ -126,18 +126,17 @@
 
 - (DDListEnumerator *)listEnumerator
 {
-	return [[[DDListEnumerator alloc] initWithList:list reverse:NO] autorelease];
+	return [[DDListEnumerator alloc] initWithList:list reverse:NO];
 }
 
 - (DDListEnumerator *)reverseListEnumerator
 {
-	return [[[DDListEnumerator alloc] initWithList:list reverse:YES] autorelease];
+	return [[DDListEnumerator alloc] initWithList:list reverse:YES];
 }
 
 - (void)dealloc
 {
 	[self removeAllElements];
-	[super dealloc];
 }
 
 @end
@@ -246,7 +245,6 @@
 	{
 		free(elements);
 	}
-	[super dealloc];
 }
 
 @end

@@ -9,13 +9,13 @@
 
 @interface XMPPCapsCoreDataStorageObject : NSManagedObject
 
-@property (nonatomic, retain) NSXMLElement *capabilities;
+@property (nonatomic, strong) NSXMLElement *capabilities;
 
-@property (nonatomic, retain) NSString * hashStr;
-@property (nonatomic, retain) NSString * hashAlgorithm;
-@property (nonatomic, retain) NSString * capabilitiesStr;
+@property (nonatomic, strong) NSString * hashStr;
+@property (nonatomic, strong) NSString * hashAlgorithm;
+@property (nonatomic, strong) NSString * capabilitiesStr;
 
-@property (nonatomic, retain) NSSet * resources;
+@property (nonatomic, strong) NSSet * resources;
 
 @end
 

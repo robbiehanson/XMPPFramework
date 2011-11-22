@@ -18,12 +18,12 @@
 
 @interface XMPPvCardTempModule : XMPPModule
 {
-	id <XMPPvCardTempModuleStorage> _moduleStorage;
+	id <XMPPvCardTempModuleStorage> __unsafe_unretained _moduleStorage;
 }
 
 
 @property(nonatomic, readonly) id <XMPPvCardTempModuleStorage> moduleStorage;
-@property(nonatomic, readonly) XMPPvCardTemp *myvCardTemp;
+@property(weak, nonatomic, readonly) XMPPvCardTemp *myvCardTemp;
 
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage;
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(dispatch_queue_t)queue;

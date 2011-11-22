@@ -15,17 +15,14 @@
 
 @interface XMPPvCardTempAdr : XMPPvCardTempAdrTypes
 
-
-@property (nonatomic, assign) NSString *pobox;
-@property (nonatomic, assign) NSString *extendedAddress;
-@property (nonatomic, assign) NSString *street;
-@property (nonatomic, assign) NSString *locality;
-@property (nonatomic, assign) NSString *region;
-@property (nonatomic, assign) NSString *postalCode;
-@property (nonatomic, assign) NSString *country;
-
-
 + (XMPPvCardTempAdr *)vCardAdrFromElement:(NSXMLElement *)elem;
 
+@property (nonatomic, weak) NSString *pobox;
+@property (nonatomic, weak) NSString *extendedAddress;
+@property (nonatomic, weak) NSString *street;
+@property (nonatomic, weak) NSString *locality;
+@property (nonatomic, weak) NSString *region;
+@property (nonatomic, weak) NSString *postalCode;
+@property (nonatomic, weak) NSString *country;
 
 @end

@@ -46,7 +46,6 @@
 	
 	NSDate *result = [df dateFromString:dateStr];
 	
-	[df release];
 	return result;
 }
 
@@ -85,7 +84,6 @@
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSString *today = [df stringFromDate:[NSDate date]];
-	[df release];
     
 	NSString *dateTimeStr = [NSString stringWithFormat:@"%@T%@", today, timeStr];
 	
@@ -245,7 +243,6 @@
 		result = [df dateFromString:dateTimeStr];
 	}
 	
-	[df release];
 	return result;
 }
 

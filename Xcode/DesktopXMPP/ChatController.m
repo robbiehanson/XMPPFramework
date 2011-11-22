@@ -23,10 +23,10 @@
 {
 	if((self = [super initWithWindowNibName:@"ChatWindow"]))
 	{
-		xmppStream = [stream retain];
-		jid = [fullJID retain];
+		xmppStream = stream;
+		jid = fullJID;
 		
-		firstMessage = [message retain];
+		firstMessage = message;
 	}
 	return self;
 }
@@ -44,7 +44,6 @@
 	if(firstMessage)
 	{
 		[self xmppStream:xmppStream didReceiveMessage:firstMessage];
-		[firstMessage release];
 		firstMessage  = nil;
 	}
 }
@@ -60,18 +59,13 @@
 	NSLog(@"ChatController: windowWillClose");
 	
 	[xmppStream removeDelegate:self];
-	[self autorelease];
 }
 
 - (void)dealloc
 {
 	NSLog(@"Destroying self: %@", self);
 	
-	[xmppStream release];
-	[jid release];
-	[firstMessage release];
 	
-	[super dealloc];
 }
 
 - (void)scrollToBottom
@@ -102,7 +96,7 @@
 		
 		NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
 		
-		NSMutableParagraphStyle *mps = [[[NSMutableParagraphStyle alloc] init] autorelease];
+		NSMutableParagraphStyle *mps = [[NSMutableParagraphStyle alloc] init];
 		[mps setAlignment:NSLeftTextAlignment];
 		
 		NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithCapacity:2];
@@ -110,7 +104,6 @@
 		[attributes setObject:[NSColor colorWithCalibratedRed:250 green:250 blue:250 alpha:1] forKey:NSBackgroundColorAttributeName];
 		
 		NSAttributedString *as = [[NSAttributedString alloc] initWithString:paragraph attributes:attributes];
-		[as autorelease];
 		
 		[[messageView textStorage] appendAttributedString:as];
 	}
@@ -139,14 +132,13 @@
 		
 		NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
 		
-		NSMutableParagraphStyle *mps = [[[NSMutableParagraphStyle alloc] init] autorelease];
+		NSMutableParagraphStyle *mps = [[NSMutableParagraphStyle alloc] init];
 		[mps setAlignment:NSRightTextAlignment];
 		
 		NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithCapacity:2];
 		[attributes setObject:mps forKey:NSParagraphStyleAttributeName];
 		
 		NSAttributedString *as = [[NSAttributedString alloc] initWithString:paragraph attributes:attributes];
-		[as autorelease];
 		
 		[[messageView textStorage] appendAttributedString:as];
 		

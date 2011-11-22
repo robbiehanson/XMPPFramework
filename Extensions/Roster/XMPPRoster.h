@@ -38,7 +38,7 @@
 	dispatch_queue_t moduleQueue;
 	id multicastDelegate;
  */
-	id <XMPPRosterStorage> xmppRosterStorage;
+	__strong id <XMPPRosterStorage> xmppRosterStorage;
 	
 	Byte config;
 	Byte flags;
@@ -64,7 +64,7 @@
  
 */
 
-@property (readonly) id <XMPPRosterStorage> xmppRosterStorage;
+@property (strong, readonly) id <XMPPRosterStorage> xmppRosterStorage;
 
 /**
  * Whether or not to automatically fetch the roster from the server.
