@@ -85,7 +85,6 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	[_xmppvCardTempModule removeDelegate:self];
 
 	_moduleStorage = nil;
-	_xmppvCardTempModule = nil;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

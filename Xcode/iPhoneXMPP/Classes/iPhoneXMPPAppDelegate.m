@@ -79,14 +79,8 @@
 {
 	[self teardownStream];
 
-	[password release];
 
-	[loginButton release];
-	[settingsViewController release];
-	[navigationController release];
-	[window release];
 
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +218,7 @@
 	// The vCard Avatar module works in conjuction with the standard vCard Temp module to download user avatars.
 	// The XMPPRoster will automatically integrate with XMPPvCardAvatarModule to cache roster photos in the roster.
 	
-	xmppvCardStorage = [[XMPPvCardCoreDataStorage sharedInstance] retain];
+	xmppvCardStorage = [XMPPvCardCoreDataStorage sharedInstance];
 	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardStorage];
 	
 	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
@@ -248,7 +242,7 @@
 	// The XMPPCapabilitiesCoreDataStorage is an ideal solution.
 	// It can also be shared amongst multiple streams to further reduce hash lookups.
 	
-	xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage sharedInstance] retain];
+	xmppCapabilitiesStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
     xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
 
     xmppCapabilities.autoFetchHashedCapabilities = YES;
@@ -299,16 +293,6 @@
 	[xmppCapabilities      deactivate];
 	
 	[xmppStream disconnect];
-	
-	[xmppStream release];
-	[xmppReconnect release];
-	[xmppRoster release];
-	[xmppRosterStorage release];
-	[xmppvCardStorage release];
-	[xmppvCardTempModule release];
-	[xmppvCardAvatarModule release];
-	[xmppCapabilities release];
-	[xmppCapabilitiesStorage release];
 	
 	xmppStream = nil;
 	xmppReconnect = nil;
@@ -385,7 +369,6 @@
 		                                          cancelButtonTitle:@"Ok" 
 		                                          otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];
 
 		DDLogError(@"Error connecting: %@", error);
 
@@ -559,7 +542,6 @@
 													cancelButtonTitle:@"Ok" 
 													otherButtonTitles:nil];
 			[alertView show];
-			[alertView release];
 		}
 		else
 		{
@@ -569,7 +551,6 @@
 			localNotification.alertBody = [NSString stringWithFormat:@"From: %@\n\n%@",displayName,body];
 
 			[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-			[localNotification release];
 		}
 	}
 }
@@ -628,7 +609,6 @@
 		                                          cancelButtonTitle:@"Not implemented"
 		                                          otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];
 	} 
 	else 
 	{
@@ -638,7 +618,6 @@
 		localNotification.alertBody = body;
 		
 		[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-		[localNotification release];
 	}
 	
 }

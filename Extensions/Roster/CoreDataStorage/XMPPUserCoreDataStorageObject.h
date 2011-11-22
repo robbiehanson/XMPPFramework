@@ -28,7 +28,7 @@
 @property (nonatomic, strong) NSNumber * unreadMessages;
 
 #if TARGET_OS_IPHONE
-@property (nonatomic, retain) UIImage *photo;
+@property (nonatomic, strong) UIImage *photo;
 #else
 @property (nonatomic, strong) NSImage *photo;
 #endif
