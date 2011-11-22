@@ -118,6 +118,10 @@ static NSMutableArray *proxyCandidates;
 	// This attribute is OPTIONAL.
 	
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	if (query == nil) {
+		return NO;
+	}
+	
 	NSString *queryMode = [[query attributeForName:@"mode"] stringValue];
 	
 	BOOL isTcpBytestreamQuery = YES;
