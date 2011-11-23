@@ -1,5 +1,9 @@
 #import "XMPPIDTracker.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 #define AssertProperQueue() NSAssert(dispatch_get_current_queue() == queue, @"Invoked on incorrect queue")
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

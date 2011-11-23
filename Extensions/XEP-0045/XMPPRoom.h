@@ -10,24 +10,26 @@
 
 @interface XMPPRoom : XMPPModule
 {
-	NSString *roomName;
-	NSString *nickName;
-	NSString *subject;
-	NSString *invitedUser;
+	__strong NSString *roomName;
+	__strong NSString *nickName;
+	__strong NSString *subject;
+	__strong NSString *invitedUser;
+	
 	BOOL _isJoined;
-	NSMutableDictionary *occupants;
+	
+	__strong NSMutableDictionary *occupants;
 }
 
 - (id)initWithRoomName:(NSString *)roomName nickName:(NSString *)nickName;
 - (id)initWithRoomName:(NSString *)roomName nickName:(NSString *)nickName dispatchQueue:(dispatch_queue_t)queue;
 
-@property (readonly) NSString *roomName;
-@property (readonly) NSString *nickName;
-@property (readonly) NSString *subject;
+@property (weak, readonly) NSString *roomName;
+@property (weak, readonly) NSString *nickName;
+@property (weak, readonly) NSString *subject;
 
-@property (readonly, assign) BOOL isJoined;
+@property (readonly) BOOL isJoined;
 
-@property (readonly) NSDictionary *occupants;
+@property (weak, readonly) NSDictionary *occupants;
 
 @property (readwrite, copy) NSString *invitedUser;
 

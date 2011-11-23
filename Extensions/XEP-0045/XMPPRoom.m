@@ -2,6 +2,9 @@
 #import "XMPPMessage+XEP0045.h"
 #import "XMPPLogging.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
@@ -94,15 +97,6 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 	[super deactivate];
 }
 
-- (void)dealloc
-{
-	[roomName release];
-	[nickName release];
-	[subject release];
-	[invitedUser release];
-	[occupants release];
-	[super dealloc];
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
@@ -118,7 +112,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 	{
 		// This variable is readonly - set in init method and never changed.
 		
-		return [[roomName retain] autorelease];
+		return roomName;
 	}
 }
 
@@ -132,7 +126,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 	{
 		// This variable is readonly - set in init method and never changed.
 		
-		return [[nickName retain] autorelease];
+		return nickName;
 	}
 }
 
@@ -147,10 +141,10 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		__block NSString *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [subject retain];
+			result = subject;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -201,7 +195,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 			result = [occupants copy];
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -216,10 +210,10 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		__block NSString *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [invitedUser retain];
+			result = invitedUser;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -229,8 +223,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 	{
 		if (![invitedUser isEqual:newInvitedUser])
 		{
-			[invitedUser release];
-			invitedUser = [newInvitedUser retain];
+			invitedUser = newInvitedUser;
 		}
 	}
 	else
@@ -241,12 +234,10 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 			
 			if (![invitedUser isEqual:newInvitedUserCopy])
 			{
-				[invitedUser release];
-				invitedUser = [newInvitedUserCopy retain];
+				invitedUser = newInvitedUserCopy;
 			}
 		});
 		
-		[newInvitedUserCopy release];
 	}
 }
 
@@ -256,8 +247,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 - (void)createOrJoinRoom
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -274,9 +264,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		[presence addChild:x];
 		
 		[xmppStream sendElement:presence];
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -286,8 +274,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 - (void)sendInstantRoomConfig
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -313,9 +300,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		[iq addChild:query];
 		
 		[xmppStream sendElement:iq];
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -325,8 +310,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 - (void)joinRoom
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -339,8 +323,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		
 		[xmppStream sendElement:presence];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -350,8 +333,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 - (void)leaveRoom
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -366,8 +348,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		[xmppStream sendElement:presence];
 		self.isJoined = NO;
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -382,28 +363,23 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 {
 	NSString *newNickNameCopy = [newNickName copy];
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
 		if (![nickName isEqual:newNickNameCopy])
 		{
-			[nickName release];
-			nickName = [newNickNameCopy retain];
+			nickName = newNickNameCopy;
 			
 			[self joinRoom];
 		}
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
 	
-	[newNickNameCopy release];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -412,8 +388,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 - (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)inviteMessageStr
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -442,8 +417,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		
 		[xmppStream sendElement:message];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -453,16 +427,14 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 - (void)acceptInvitation
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
 		// Just need to send presence to room to accept it. We are done.
 		[self joinRoom];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -477,8 +449,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 - (void)rejectInvitationWithMessage:(NSString *)rejectMessageStr
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -514,8 +485,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		
 		[xmppStream sendElement:message];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -531,8 +501,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 {
 	if ([msg length] == 0) return;
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -549,8 +518,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		
 		[xmppStream sendElement:message];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -573,7 +541,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 	// So we create an immutable copy of the dictionary to send to the delegates.
 	// And we don't have to worry about the XMPPRoomOccupant objects changing as they are immutable.
 	
-	NSDictionary *occupantsCopy = [[occupants copy] autorelease];
+	NSDictionary *occupantsCopy = [occupants copy];
 	
 	[multicastDelegate xmppRoom:self didChangeOccupants:occupantsCopy];
 }

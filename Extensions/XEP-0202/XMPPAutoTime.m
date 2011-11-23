@@ -2,6 +2,10 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
