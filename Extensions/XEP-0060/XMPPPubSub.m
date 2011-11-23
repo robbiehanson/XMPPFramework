@@ -50,7 +50,7 @@
 
 - (BOOL)activate:(XMPPStream *)aXmppStream
 {
-	if ([self activate:aXmppStream])
+	if ([super activate:aXmppStream])
 	{
 	#ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
