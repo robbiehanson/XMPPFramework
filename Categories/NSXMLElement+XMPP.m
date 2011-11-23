@@ -1,4 +1,9 @@
 #import "NSXMLElement+XMPP.h"
+#import "NSNumber+XMPP.h"
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 @implementation NSXMLElement (XMPP)
 
@@ -14,7 +19,7 @@
 
 - (id)initWithName:(NSString *)name xmlns:(NSString *)ns
 {
-	if ([self initWithName:name])
+	if ((self = [self initWithName:name]))
 	{
 		[self setXmlns:ns];
 	}
@@ -28,7 +33,7 @@
 - (NSXMLElement *)elementForName:(NSString *)name
 {
 	NSArray *elements = [self elementsForName:name];
-	if([elements count] > 0)
+	if ([elements count] > 0)
 	{
 		return [elements objectAtIndex:0];
 	}
@@ -64,7 +69,7 @@
 - (NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns
 {
 	NSArray *elements = [self elementsForLocalName:name URI:xmlns];
-	if([elements count] > 0)
+	if ([elements count] > 0)
 	{
 		return [elements objectAtIndex:0];
 	}
@@ -135,6 +140,42 @@
 {
 	return [[self attributeStringValueForName:name] doubleValue];
 }
+- (int32_t)attributeInt32ValueForName:(NSString *)name
+{
+	int32_t result = 0;
+	[NSNumber parseString:[self attributeStringValueForName:name] intoInt32:&result];
+	return result;
+}
+- (uint32_t)attributeUInt32ValueForName:(NSString *)name
+{
+	uint32_t result = 0;
+	[NSNumber parseString:[self attributeStringValueForName:name] intoUInt32:&result];
+	return result;
+}
+- (int64_t)attributeInt64ValueForName:(NSString *)name
+{
+	int64_t result;
+	[NSNumber parseString:[self attributeStringValueForName:name] intoInt64:&result];
+	return result;
+}
+- (uint64_t)attributeUInt64ValueForName:(NSString *)name
+{
+	uint64_t result;
+	[NSNumber parseString:[self attributeStringValueForName:name] intoUInt64:&result];
+	return result;
+}
+- (NSInteger)attributeIntegerValueForName:(NSString *)name
+{
+	NSInteger result;
+	[NSNumber parseString:[self attributeStringValueForName:name] intoNSInteger:&result];
+	return result;
+}
+- (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name
+{
+	NSUInteger result = 0;
+	[NSNumber parseString:[self attributeStringValueForName:name] intoNSUInteger:&result];
+	return result;
+}
 - (NSString *)attributeStringValueForName:(NSString *)name
 {
 	return [[self attributeForName:name] stringValue];
@@ -146,6 +187,38 @@
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name
 {
 	return [NSNumber numberWithBool:[self attributeBoolValueForName:name]];
+}
+- (NSNumber *)attributeNumberFloatValueForName:(NSString *)name
+{
+	return [NSNumber numberWithFloat:[self attributeFloatValueForName:name]];
+}
+- (NSNumber *)attributeNumberDoubleValueForName:(NSString *)name
+{
+	return [NSNumber numberWithDouble:[self attributeDoubleValueForName:name]];
+}
+- (NSNumber *)attributeNumberInt32ValueForName:(NSString *)name
+{
+	return [NSNumber numberWithInt:[self attributeInt32ValueForName:name]];
+}
+- (NSNumber *)attributeNumberUInt32ValueForName:(NSString *)name
+{
+	return [NSNumber numberWithUnsignedInt:[self attributeUInt32ValueForName:name]];
+}
+- (NSNumber *)attributeNumberInt64ValueForName:(NSString *)name
+{
+	return [NSNumber numberWithLongLong:[self attributeInt64ValueForName:name]];
+}
+- (NSNumber *)attributeNumberUInt64ValueForName:(NSString *)name
+{
+	return [NSNumber numberWithUnsignedLongLong:[self attributeUInt64ValueForName:name]];
+}
+- (NSNumber *)attributeNumberIntegerValueForName:(NSString *)name
+{
+	return [NSNumber numberWithInteger:[self attributeIntegerValueForName:name]];
+}
+- (NSNumber *)attributeNumberUnsignedIntegerValueForName:(NSString *)name
+{
+	return [NSNumber numberWithUnsignedInteger:[self attributeUnsignedIntegerValueForName:name]];
 }
 
 /**
@@ -203,6 +276,75 @@
 		[result setObject:[node stringValue] forKey:[node name]];
 	}
 	return result;
+}
+
+/**
+ * The following methods return the corresponding value of the node.
+**/
+
+- (int)stringValueAsInt
+{
+	return [[self stringValue] intValue];
+}
+- (BOOL)stringValueAsBool
+{
+	return [[self stringValue] boolValue];
+}
+- (float)stringValueAsFloat
+{
+	return [[self stringValue] floatValue];
+}
+- (double)stringValueAsDouble
+{
+	return [[self stringValue] doubleValue];
+}
+- (int32_t)stringValueAsInt32
+{
+	int32_t result;
+	if ([NSNumber parseString:[self stringValue] intoInt32:&result])
+		return result;
+	else
+		return 0;
+}
+- (uint32_t)stringValueAsUInt32
+{
+	uint32_t result;
+	if ([NSNumber parseString:[self stringValue] intoUInt32:&result])
+		return result;
+	else
+		return 0;
+}
+- (int64_t)stringValueAsInt64
+{
+	int64_t result = 0;
+	if ([NSNumber parseString:[self stringValue] intoInt64:&result])
+		return result;
+	else
+		return 0;
+}
+- (uint64_t)stringValueAsUInt64
+{
+	uint64_t result = 0;
+	if ([NSNumber parseString:[self stringValue] intoUInt64:&result])
+		return result;
+	else
+		return 0;
+}
+- (NSInteger)stringValueAsNSInteger
+{
+	NSInteger result = 0;
+	if ([NSNumber parseString:[self stringValue] intoNSInteger:&result])
+		return result;
+	else
+		return 0;
+}
+- (NSUInteger)stringValueAsNSUInteger
+{
+	NSUInteger result = 0;
+	if ([NSNumber parseString:[self stringValue] intoNSUInteger:&result])
+		return result;
+	else
+		return 0;
 }
 
 /**
