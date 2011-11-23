@@ -4,13 +4,18 @@
 //
 
 #import "XMPPRoomOccupant.h"
+#import "XMPPJID.h"
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 
 @implementation XMPPRoomOccupant
 
 + (XMPPRoomOccupant *)occupantWithJID:(XMPPJID *)aJid nick:(NSString *)aNick role:(NSString *)aRole
 {
-	return [[[XMPPRoomOccupant alloc] initWithJID:aJid nick:aNick role:aRole] autorelease];
+	return [[XMPPRoomOccupant alloc] initWithJID:aJid nick:aNick role:aRole];
 }
 
 @dynamic jid;
@@ -28,13 +33,6 @@
 	return self;
 }
 
-- (void)dealloc
-{
-	[jid release];
-	[nick release];
-	[role release];
-	[super dealloc];
-}
 
 // Why are these here?
 // Why not just let @synthesize do it for us?

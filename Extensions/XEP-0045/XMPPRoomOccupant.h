@@ -18,8 +18,8 @@
 
 - (id)initWithJID:(XMPPJID *)aJid nick:(NSString *)aNick role:(NSString *)aRole;
 
-@property (readonly) XMPPJID *jid;
-@property (readonly) NSString *nick;
-@property (readonly) NSString *role;
+@property (weak, readonly) XMPPJID *jid;
+@property (weak, readonly) NSString *nick;
+@property (weak, readonly) NSString *role;
 
 @end
