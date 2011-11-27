@@ -641,6 +641,10 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 **/
 - (BOOL)wait:(NSTimeInterval)timeout;
 
+- (void)signalSuccess;
+
+- (void)signalFailure;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
