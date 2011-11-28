@@ -1,18 +1,16 @@
 #import "RootViewController.h"
-#import "SettingsViewController.h"
 #import "iPhoneXMPPAppDelegate.h"
+#import "SettingsViewController.h"
 
-#import "XMPP.h"
-#import "XMPPRosterCoreDataStorage.h"
-#import "XMPPUserCoreDataStorageObject.h"
-#import "XMPPResourceCoreDataStorageObject.h"
-#import "XMPPvCardAvatarModule.h"
-
+#import "XMPPFramework.h"
 #import "DDLog.h"
 
 // Log levels: off, error, warn, info, verbose
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
-
+#if DEBUG
+  static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#else
+  static const int ddLogLevel = LOG_LEVEL_INFO;
+#endif
 
 @implementation RootViewController
 
@@ -23,21 +21,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (iPhoneXMPPAppDelegate *)appDelegate
 {
 	return (iPhoneXMPPAppDelegate *)[[UIApplication sharedApplication] delegate];
-}
-
-- (XMPPStream *)xmppStream
-{
-	return [[self appDelegate] xmppStream];
-}
-
-- (XMPPRoster *)xmppRoster
-{
-	return [[self appDelegate] xmppRoster];
-}
-
-- (XMPPRosterCoreDataStorage *)xmppRosterStorage
-{
-	return [[self xmppRoster] xmppRosterStorage];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +50,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 	self.navigationItem.titleView = titleLabel;
 
-	[titleLabel release];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -78,44 +60,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
   [super viewWillDisappear:animated];
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Core Data
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (NSManagedObjectContext *)managedObjectContext
-{
-	if (managedObjectContext == nil)
-	{
-		managedObjectContext = [[NSManagedObjectContext alloc] init];
-		
-		NSPersistentStoreCoordinator *psc = [[self xmppRosterStorage] persistentStoreCoordinator];
-		[managedObjectContext setPersistentStoreCoordinator:psc];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		                                         selector:@selector(contextDidSave:)
-		                                             name:NSManagedObjectContextDidSaveNotification
-		                                           object:nil];
-	}
-	
-	return managedObjectContext;
-}
-
-- (void)contextDidSave:(NSNotification *)notification
-{
-	NSManagedObjectContext *sender = (NSManagedObjectContext *)[notification object];
-	
-	if (sender != managedObjectContext &&
-      [sender persistentStoreCoordinator] == [managedObjectContext persistentStoreCoordinator])
-	{
-		DDLogError(@"%@: %@", THIS_FILE, THIS_METHOD);
-		
-		[managedObjectContext performSelectorOnMainThread:@selector(mergeChangesFromContextDidSaveNotification:)
-		                                       withObject:notification
-		                                    waitUntilDone:NO];
-    }
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark NSFetchedResultsController
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,8 +68,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	if (fetchedResultsController == nil)
 	{
+		NSManagedObjectContext *moc = [[self appDelegate] managedObjectContext_roster];
+		
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
-		                                          inManagedObjectContext:[self managedObjectContext]];
+		                                          inManagedObjectContext:moc];
 		
 		NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"sectionNum" ascending:YES];
 		NSSortDescriptor *sd2 = [[NSSortDescriptor alloc] initWithKey:@"displayName" ascending:YES];
@@ -138,14 +84,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		[fetchRequest setFetchBatchSize:10];
 		
 		fetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest
-		                                                               managedObjectContext:[self managedObjectContext]
+		                                                               managedObjectContext:moc
 		                                                                 sectionNameKeyPath:@"sectionNum"
 		                                                                          cacheName:nil];
 		[fetchedResultsController setDelegate:self];
 		
-		[sd1 release];
-		[sd2 release];
-		[fetchRequest release];
 		
 		NSError *error = nil;
 		if (![fetchedResultsController performFetch:&error])
@@ -167,24 +110,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark UITableViewCell helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)configurePhotoForCell:(UITableViewCell *)cell user:(id <XMPPUser>)user
+- (void)configurePhotoForCell:(UITableViewCell *)cell user:(XMPPUserCoreDataStorageObject *)user
 {
-  // XMPPRoster will cache photos as they arrive from the xmppvCardAvatarModule, we only need to
-  // ask the avatar module for a photo, if the roster doesn't have it.
-  if (user.photo != nil)
-  {
-    cell.imageView.image = user.photo;
-  } 
-  else
-  {
-    NSData *photoData = [[[self appDelegate] xmppvCardAvatarModule] photoDataForJID:user.jid];
-    
-    if (photoData != nil) {
-      cell.imageView.image = [UIImage imageWithData:photoData];
-    } else {
-      cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
-    }
-  }
+	// Our xmppRosterStorage will cache photos as they arrive from the xmppvCardAvatarModule.
+	// We only need to ask the avatar module for a photo, if the roster doesn't have it.
+	
+	if (user.photo != nil)
+	{
+		cell.imageView.image = user.photo;
+	} 
+	else
+	{
+		NSData *photoData = [[[self appDelegate] xmppvCardAvatarModule] photoDataForJID:user.jid];
+
+		if (photoData != nil)
+			cell.imageView.image = [UIImage imageWithData:photoData];
+		else
+			cell.imageView.image = [UIImage imageNamed:@"defaultPerson"];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,16 +179,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 	if (cell == nil)
 	{
-		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
-		                               reuseIdentifier:CellIdentifier] autorelease];
+		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+		                               reuseIdentifier:CellIdentifier];
 	}
 	
 	XMPPUserCoreDataStorageObject *user = [[self fetchedResultsController] objectAtIndexPath:indexPath];
 	
 	cell.textLabel.text = user.displayName;
-  
-  [self configurePhotoForCell:cell user:user];
-  
+	[self configurePhotoForCell:cell user:user];
+	
 	return cell;
 }
 
@@ -253,17 +195,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark Actions
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (IBAction)settings:(id)sender {
-  [self.navigationController presentModalViewController:[[self appDelegate] settingsViewController] animated:YES];
+- (IBAction)settings:(id)sender
+{
+	[self.navigationController presentModalViewController:[[self appDelegate] settingsViewController] animated:YES];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Init/dealloc
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)dealloc
-{
-	[super dealloc];
-}
 
 @end

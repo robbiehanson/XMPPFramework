@@ -4,6 +4,10 @@
 
 #import <objc/runtime.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 
 @implementation XMPPIQ
 
@@ -38,27 +42,37 @@
 
 + (XMPPIQ *)iq
 {
-	return [[[XMPPIQ alloc] initWithType:nil to:nil elementID:nil child:nil] autorelease];
+	return [[XMPPIQ alloc] initWithType:nil to:nil elementID:nil child:nil];
+}
+
++ (XMPPIQ *)iqWithType:(NSString *)type
+{
+	return [[XMPPIQ alloc] initWithType:type to:nil elementID:nil child:nil];
 }
 
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid
 {
-	return [[[XMPPIQ alloc] initWithType:type to:jid elementID:nil child:nil] autorelease];
+	return [[XMPPIQ alloc] initWithType:type to:jid elementID:nil child:nil];
 }
 
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
 {
-	return [[[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:nil] autorelease];
+	return [[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:nil];
 }
 
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
 {
-	return [[[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:childElement] autorelease];
+	return [[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:childElement];
 }
 
 - (id)init
 {
 	return [self initWithType:nil to:nil elementID:nil child:nil];
+}
+
+- (id)initWithType:(NSString *)type
+{
+	return [self initWithType:type to:nil elementID:nil child:nil];
 }
 
 - (id)initWithType:(NSString *)type to:(XMPPJID *)jid

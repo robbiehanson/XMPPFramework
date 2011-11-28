@@ -10,22 +10,34 @@
  * altered by the XMPPRosterMemoryStorage class should be considered read-only and therefore thread-safe.
 **/
 
-@interface XMPPUserMemoryStorage (Internal)
+#define XMPP_USER_NO_CHANGE        0
+#define XMPP_USER_ADDED_RESOURCE   1
+#define XMPP_USER_UPDATED_RESOURCE 2
+#define XMPP_USER_REMOVED_RESOURCE 3
+
+
+@interface XMPPUserMemoryStorage ()
 
 - (id)initWithJID:(XMPPJID *)aJid;
 - (id)initWithItem:(NSXMLElement *)item;
 
+- (void)updateWithItem:(NSXMLElement *)item;
+
+- (int)updateWithPresence:(XMPPPresence *)presence
+            resourceClass:(Class)resourceClass
+           andGetResource:(XMPPResourceMemoryStorage **)resourcePtr;
+
 - (void)clearAllResources;
 
-- (void)updateWithItem:(NSXMLElement *)item;
-- (void)updateWithPresence:(XMPPPresence *)presence;
-
-- (NSInteger)tag;
-- (void)setTag:(NSInteger)anInt;
+#if TARGET_OS_IPHONE
+@property (nonatomic, strong, readwrite) UIImage *photo;
+#else
+@property (nonatomic, strong, readwrite) NSImage *photo;
+#endif
 
 @end
 
-@interface XMPPResourceMemoryStorage (Internal)
+@interface XMPPResourceMemoryStorage ()
 
 - (id)initWithPresence:(XMPPPresence *)aPresence;
 

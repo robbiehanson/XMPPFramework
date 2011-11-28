@@ -8,22 +8,22 @@
 
 
 #import <Foundation/Foundation.h>
-#import "XMPPModule.h"
+#import "XMPP.h"
 #import "XMPPvCardTemp.h"
 
-@class XMPPJID;
-@class XMPPStream;
+#define _XMPP_VCARD_TEMP_MODULE_H
+
 @protocol XMPPvCardTempModuleStorage;
 
 
 @interface XMPPvCardTempModule : XMPPModule
 {
-	id <XMPPvCardTempModuleStorage> _moduleStorage;
+	id <XMPPvCardTempModuleStorage> __unsafe_unretained _moduleStorage;
 }
 
 
 @property(nonatomic, readonly) id <XMPPvCardTempModuleStorage> moduleStorage;
-@property(nonatomic, readonly) XMPPvCardTemp *myvCardTemp;
+@property(weak, nonatomic, readonly) XMPPvCardTemp *myvCardTemp;
 
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage;
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(dispatch_queue_t)queue;

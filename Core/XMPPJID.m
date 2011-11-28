@@ -1,6 +1,11 @@
 #import "XMPPJID.h"
 #import "LibIDN.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
+
 @implementation XMPPJID
 
 + (BOOL)validateDomain:(NSString *)domain
@@ -116,7 +121,7 @@
 		jid->domain = [domain copy];
 		jid->resource = [resource copy];
 		
-		return [jid autorelease];
+		return jid;
 	}
 	
 	return nil;
@@ -136,7 +141,7 @@
 		jid->domain = [domain copy];
 		jid->resource = [resource copy];
 		
-		return [jid autorelease];
+		return jid;
 	}
 	
 	return nil;
@@ -155,7 +160,7 @@
 		jid->domain = [prepDomain copy];
 		jid->resource = [prepResource copy];
 		
-		return [jid autorelease];
+		return jid;
 	}
 	
 	return nil;
@@ -219,7 +224,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
 	// This class is immutable
-	return [self retain];
+	return self;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +258,7 @@
 {
 	if(resource == nil)
 	{
-		return [[self retain] autorelease];
+		return self;
 	}
 	else
 	{
@@ -265,7 +270,7 @@
 {
 	if(user == nil && resource == nil)
 	{
-		return [[self retain] autorelease];
+		return self;
 	}
 	else
 	{
@@ -355,32 +360,51 @@
 {
 	if ([anObject isMemberOfClass:[self class]])
 	{
-		XMPPJID *aJID = (XMPPJID *)anObject;
-		
+		return [self isEqualToJID:(XMPPJID *)anObject];
+	}
+	return NO;
+}
+
+- (BOOL)isEqualToJID:(XMPPJID *)aJID
+{
+	return [self isEqualToJID:aJID options:XMPPJIDCompareFull];
+}
+
+- (BOOL)isEqualToJID:(XMPPJID *)aJID options:(XMPPJIDCompareOptions)mask
+{
+	if (aJID == nil) return NO;
+	
+	if (mask & XMPPJIDCompareUser)
+	{
 		if (user) {
 			if (![user isEqualToString:aJID->user]) return NO;
 		}
 		else {
 			if (aJID->user) return NO;
 		}
-		
+	}
+	
+	if (mask & XMPPJIDCompareDomain)
+	{
 		if (domain) {
 			if (![domain isEqualToString:aJID->domain]) return NO;
 		}
 		else {
 			if (aJID->domain) return NO;
 		}
-		
+	}
+	
+	if (mask & XMPPJIDCompareResource)
+	{
 		if (resource) {
 			if (![resource isEqualToString:aJID->resource]) return NO;
 		}
 		else {
 			if (aJID->resource) return NO;
 		}
-		
-		return YES;
 	}
-	return NO;
+	
+	return YES;
 }
 
 - (NSString *)description
@@ -388,12 +412,5 @@
 	return [self full];
 }
 
-- (void)dealloc
-{
-	[user release];
-	[domain release];
-	[resource release];
-	[super dealloc];
-}
 
 @end

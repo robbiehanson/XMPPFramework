@@ -1,8 +1,5 @@
 #import "AppDelegate.h"
 #import "RosterController.h"
-#import "XMPP.h"
-#import "TURNSocket.h"
-#import "GCDAsyncSocket.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -37,8 +34,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		xmppRosterStorage = [[XMPPRosterMemoryStorage alloc] init];
 		xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
 		
-		xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
-		xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
+	//	xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
+	//	xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
 		
 	//	xmppCapabilities.autoFetchHashedCapabilities = YES;
 	//	xmppCapabilities.autoFetchNonHashedCapabilities = NO;
@@ -98,7 +95,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[turnSockets addObject:turnSocket];
 	
 	[turnSocket startWithDelegate:self delegateQueue:dispatch_get_main_queue()];
-	[turnSocket release];
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
@@ -112,7 +108,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		[turnSockets addObject:turnSocket];
 		
 		[turnSocket startWithDelegate:self delegateQueue:dispatch_get_main_queue()];
-		[turnSocket release];
 		
 		return YES;
 	}

@@ -2,7 +2,10 @@
 #import "XMPPModule.h"
 #import "XMPPPing.h"
 
+#define _XMPP_AUTO_PING_H
+
 @class XMPPJID;
+
 
 /**
  * The XMPPAutoPing module sends pings on a designated interval to the target.
@@ -12,7 +15,6 @@
  * If the xmpp stream is receiving data from the target, there's no need to send a ping.
  * Only when no data has been received from the target is a ping sent.
 **/
-
 @interface XMPPAutoPing : XMPPModule {
 @private
 	NSTimeInterval pingInterval;
@@ -20,10 +22,10 @@
 	XMPPJID *targetJID;
 	NSString *targetJIDStr;
 	
-	dispatch_time_t lastReceiveTime;
+	NSTimeInterval lastReceiveTime;
 	dispatch_source_t pingIntervalTimer;
-	BOOL awaitingPingResponse;
 	
+	BOOL awaitingPingResponse;
 	XMPPPing *xmppPing;
 }
 
@@ -65,12 +67,13 @@
  * 
  * The default targetJID is nil.
 **/
-@property (readwrite, retain) XMPPJID *targetJID;
+@property (readwrite, strong) XMPPJID *targetJID;
 
 /**
- * The last time data was received from the target.
+ * Corresponds to the last time data was received from the target.
+ * The NSTimeInterval value comes from [NSDate timeIntervalSinceReferenceDate]
 **/
-@property (readonly) dispatch_time_t lastReceiveTime;
+@property (readonly) NSTimeInterval lastReceiveTime;
 
 @end
 

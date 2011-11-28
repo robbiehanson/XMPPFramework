@@ -1,5 +1,9 @@
 #import "DDList.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 
 @interface DDListEnumerator (PrivateAPI)
 
@@ -126,18 +130,17 @@
 
 - (DDListEnumerator *)listEnumerator
 {
-	return [[[DDListEnumerator alloc] initWithList:list reverse:NO] autorelease];
+	return [[DDListEnumerator alloc] initWithList:list reverse:NO];
 }
 
 - (DDListEnumerator *)reverseListEnumerator
 {
-	return [[[DDListEnumerator alloc] initWithList:list reverse:YES] autorelease];
+	return [[DDListEnumerator alloc] initWithList:list reverse:YES];
 }
 
 - (void)dealloc
 {
 	[self removeAllElements];
-	[super dealloc];
 }
 
 @end
@@ -246,7 +249,6 @@
 	{
 		free(elements);
 	}
-	[super dealloc];
 }
 
 @end

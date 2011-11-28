@@ -6,37 +6,30 @@
 
 @implementation ChatWindowManager
 
+static NSMutableArray *chatControllers;
+
++ (void)initialize
+{
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		
+		chatControllers = [[NSMutableArray alloc] init];
+	});
+}
+
 + (ChatController *)chatControllerForJID:(XMPPJID *)jid matchResource:(BOOL)matchResource
 {
-	// Loop through all the open windows, and see if any of them are the one we want...
-	NSArray *windows = [NSApp windows];
+	// Loop through all the open chat windows, and see if any of them are the one we want...
 
-	int i;
-	for(i = 0; i < [windows count]; i++)
+	XMPPJIDCompareOptions options = matchResource ? XMPPJIDCompareFull : XMPPJIDCompareBare;
+	
+	for (ChatController *chatController in chatControllers)
 	{
-		NSWindow *currentWindow = [windows objectAtIndex:i];
-		ChatController *currentWC = [currentWindow windowController];
+		XMPPJID *currentJID = [chatController jid];
 		
-		if([currentWC isKindOfClass:[ChatController class]])
+		if ([currentJID isEqualToJID:jid options:options])
 		{
-			if(matchResource)
-			{
-				XMPPJID *currentJID = [currentWC jid];
-				
-				if([currentJID isEqual:jid])
-				{
-					return currentWC;
-				}
-			}
-			else
-			{
-				XMPPJID *currentJID = [[currentWC jid] bareJID];
-				
-				if([currentJID isEqual:[jid bareJID]])
-				{
-					return currentWC;
-				}
-			}
+			return chatController;
 		}
 	}
 	
@@ -45,39 +38,44 @@
 
 + (void)openChatWindowWithStream:(XMPPStream *)xmppStream forUser:(id <XMPPUser>)user
 {
-	ChatController *cc = [[self class] chatControllerForJID:[user jid] matchResource:NO];
+	ChatController *chatController = [self chatControllerForJID:[user jid] matchResource:NO];
 	
-	if(cc)
+	if (chatController)
 	{
-		[[cc window] makeKeyAndOrderFront:self];
+		[[chatController window] makeKeyAndOrderFront:self];
 	}
 	else
 	{
 		// Create Manual Sync Window
 		XMPPJID *jid = [[user primaryResource] jid];
 		
-		ChatController *temp = [[ChatController alloc] initWithStream:xmppStream jid:jid];
-		[temp showWindow:self];
+		chatController = [[ChatController alloc] initWithStream:xmppStream jid:jid];
+		[chatController showWindow:self];
 		
-		// Note: ChatController will automatically release itself when the user closes the window
+		[chatControllers addObject:chatController];
 	}
+}
+
++ (void)closeChatWindow:(ChatController *)chatController
+{
+	[chatControllers removeObject:chatController];
 }
 
 + (void)handleChatMessage:(XMPPMessage *)message withStream:(XMPPStream *)xmppStream
 {
 	NSLog(@"ChatWindowManager: handleChatMessage");
 	
-	ChatController *cc = [[self class] chatControllerForJID:[message from] matchResource:YES];
+	ChatController *chatController = [self chatControllerForJID:[message from] matchResource:YES];
 	
-	if(!cc)
+	if (chatController == nil)
 	{
 		// Create new chat window
 		XMPPJID *jid = [message from];
 		
-		ChatController *newCC = [[ChatController alloc] initWithStream:xmppStream jid:jid message:message];
-		[newCC showWindow:self];
+		chatController = [[ChatController alloc] initWithStream:xmppStream jid:jid message:message];
+		[chatController showWindow:self];
 		
-		// Note: ChatController will automatically release itself when the user closes the window.
+		[chatControllers addObject:chatController];
 	}
 }
 

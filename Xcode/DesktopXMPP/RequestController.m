@@ -45,9 +45,7 @@
 	[[self xmppStream] removeDelegate:self];
 	[[self xmppRoster] removeDelegate:self];
 	
-	[jids release];
 	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +144,7 @@
 			{
 				NSLog(@"Auto-accepting buddy request, since they already accepted us");
 				
-				[[self xmppRoster] acceptBuddyRequest:[user jid]];
+				[[self xmppRoster] acceptPresenceSubscriptionRequestFrom:[user jid] andAddToRoster:YES];
 			
 				[jids removeObjectAtIndex:currentIndex];
 				
@@ -187,7 +185,7 @@
 {
 	XMPPJID *jid = [jids objectAtIndex:jidIndex];
 	
-	[[self xmppRoster] acceptBuddyRequest:jid];
+	[[self xmppRoster] acceptPresenceSubscriptionRequestFrom:jid andAddToRoster:YES];
 	
 	[self nextRequest];
 }
@@ -196,7 +194,7 @@
 {
 	XMPPJID *jid = [jids objectAtIndex:jidIndex];
 	
-	[[self xmppRoster] rejectBuddyRequest:jid];
+	[[self xmppRoster] rejectPresenceSubscriptionRequestFrom:jid];
 	
 	[self nextRequest];
 }

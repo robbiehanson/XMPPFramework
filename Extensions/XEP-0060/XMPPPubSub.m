@@ -5,7 +5,11 @@
 //
 
 #import "XMPPPubSub.h"
-#import "XMPP.h"
+#import "XMPPFramework.h"
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 #define NS_PUBSUB          @"http://jabber.org/protocol/pubsub"
 #define NS_PUBSUB_EVENT    @"http://jabber.org/protocol/pubsub#event"
@@ -13,13 +17,8 @@
 #define NS_PUBSUB_OWNER    @"http://jabber.org/protocol/pubsub#owner"
 #define NS_DISCO_ITEMS     @"http://jabber.org/protocol/disco#items"
 
-#define INTEGRATE_WITH_CAPABILITIES 1
 
-#if INTEGRATE_WITH_CAPABILITIES
-#import "XMPPCapabilities.h"
-#endif
-
-@implementation XMPPPubSub;
+@implementation XMPPPubSub
 
 @synthesize serviceJID;
 
@@ -51,9 +50,9 @@
 
 - (BOOL)activate:(XMPPStream *)aXmppStream
 {
-	if ([self activate:aXmppStream])
+	if ([super activate:aXmppStream])
 	{
-	#if INTEGRATE_WITH_CAPABILITIES
+	#ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
 		
@@ -65,18 +64,13 @@
 
 - (void)deactivate
 {
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
 	[super deactivate];
 }
 
-- (void)dealloc
-{
-	[serviceJID release];
-	[super dealloc];
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
@@ -146,7 +140,7 @@
 	}
 }
 
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for pubsub support.
 **/

@@ -10,6 +10,10 @@
 #import "XMPPLogging.h"
 #import "XMPPvCardTempModule.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
@@ -23,6 +27,10 @@
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid;
 
 @end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation XMPPvCardTempModule
 
@@ -57,7 +65,7 @@
 	{
     if ([storage configureWithParent:self queue:moduleQueue])
 		{
-			_moduleStorage = [storage retain];
+			_moduleStorage = storage;
 		}
 		else
 		{
@@ -88,10 +96,7 @@
 
 - (void)dealloc
 {
-	[_moduleStorage release];
 	_moduleStorage = nil;
-	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,8 +112,7 @@
 {
 	__block XMPPvCardTemp *result;
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPvCardTemp *vCardTemp = nil;
 		
@@ -123,34 +127,32 @@
 			[xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:jid]];
 		}
 		
-		result = [vCardTemp retain];
-		[pool drain];
-	};
+		result = vCardTemp;
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
 	
-	return [result autorelease];
+	return result;
 }
 
 - (XMPPvCardTemp *)myvCardTemp
 {
-  return [self fetchvCardTempForJID:[xmppStream myJID]];
+	return [self fetchvCardTempForJID:[xmppStream myJID]];
 }
 
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp
 {
-  XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
-  
-  NSString *elemId = [xmppStream generateUUID];
-  XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
-  [xmppStream sendElement:iq];
-  
-  [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
-  
-  [newvCardTemp release];
+	XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
+
+	NSString *elemId = [xmppStream generateUUID];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
+	[xmppStream sendElement:iq];
+
+	[self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,20 +161,17 @@
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
 {
-  // this method could be called from anywhere
-  dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
-    
-    [_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
-    
-    [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
-                                                         didReceivevCardTemp:vCardTemp
-                                                                      forJID:jid];
-    
-    [pool drain];
-	};
+	// this method could be called from anywhere
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
+		
+		[_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
+		
+		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
+		                                                     didReceivevCardTemp:vCardTemp
+		                                                                  forJID:jid];
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();

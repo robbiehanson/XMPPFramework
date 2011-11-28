@@ -1,11 +1,13 @@
 #import <Foundation/Foundation.h>
 
+#define _XMPP_TRANSPORTS_H
+
 @class XMPPStream;
 
 
 @interface XMPPTransports : NSObject
 {
-	XMPPStream *xmppStream;
+	XMPPStream *__weak xmppStream;
 }
 
 - (id)initWithStream:(XMPPStream *)xmppStream;

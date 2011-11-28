@@ -16,8 +16,8 @@
 @private
 }
 
-@property (nonatomic, retain) NSString * name;
-@property (nonatomic, retain) NSSet* users;
+@property (nonatomic, strong) NSString * name;
+@property (nonatomic, strong) NSSet* users;
 
 + (void)clearEmptyGroupsInManagedObjectContext:(NSManagedObjectContext *)moc;
 

@@ -1,14 +1,13 @@
 #import "XMPPPing.h"
-#import "XMPP.h"
 #import "XMPPIDTracker.h"
+#import "XMPPFramework.h"
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 #define DEFAULT_TIMEOUT 30.0 // seconds
 
-#define INTEGRATE_WITH_CAPABILITIES 1
-
-#if INTEGRATE_WITH_CAPABILITIES
-  #import "XMPPCapabilities.h"
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -49,7 +48,7 @@
 {
 	if ([super activate:aXmppStream])
 	{
-	#if INTEGRATE_WITH_CAPABILITIES
+	#ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
 		
@@ -63,19 +62,16 @@
 
 - (void)deactivate
 {
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		[pingTracker removeAllIDs];
-		[pingTracker release];
 		pingTracker = nil;
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -85,13 +81,6 @@
 	[super deactivate];
 }
 
-- (void)dealloc
-{
-	// pingTracker is handled in the deactivate method,
-	// which is automatically called by [super dealloc] if needed.
-	
-	[super dealloc];
-}
 
 - (BOOL)respondsToQueries
 {
@@ -118,18 +107,16 @@
 		{
 			respondsToQueries = flag;
 			
-		#if INTEGRATE_WITH_CAPABILITIES
-			// Capabilities may have changed, need to notify others.
-			
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			XMPPPresence *presence = xmppStream.myPresence;
-			if (presence)
-			{
-				[xmppStream sendElement:presence];
+		#ifdef _XMPP_CAPABILITIES_H
+			@autoreleasepool {
+				// Capabilities may have changed, need to notify others.
+				
+				XMPPPresence *presence = xmppStream.myPresence;
+				if (presence)
+				{
+					[xmppStream sendElement:presence];
+				}
 			}
-			
-			[pool drain];
 		#endif
 		}
 	};
@@ -149,18 +136,15 @@
 	
 	NSString *pingID = [xmppStream generateUUID];
 	
-	dispatch_async(moduleQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(moduleQueue, ^{ @autoreleasepool {
 		
 		XMPPPingInfo *pingInfo = [[XMPPPingInfo alloc] initWithTarget:self
 		                                                     selector:@selector(handlePong:withInfo:)
 		                                                      timeout:timeout];
 		
 		[pingTracker addID:pingID trackingInfo:pingInfo];
-		[pingInfo release];
 		
-		[pool release];
-	});
+	}});
 	
 	return pingID;
 }
@@ -283,7 +267,7 @@
 	[pingTracker removeAllIDs];
 }
 
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for ping.
 **/
@@ -331,10 +315,5 @@
 	return [timeSent timeIntervalSinceNow] * -1.0;
 }
 
-- (void)dealloc
-{
-	[timeSent release];
-	[super dealloc];
-}
 
 @end

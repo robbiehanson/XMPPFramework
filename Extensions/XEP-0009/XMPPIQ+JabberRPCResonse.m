@@ -6,12 +6,14 @@
 //
 
 #import "XMPPIQ+JabberRPCResonse.h"
-
+#import "XMPPJabberRPCModule.h"
+#import "XMPPLogging.h"
 #import "NSData+XMPP.h"
 #import "NSXMLElement+XMPP.h"
-#import "XMPPJabberRPCModule.h"
 
-#import "XMPPLogging.h"
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
@@ -240,7 +242,6 @@
     
     result = [dateFormatter dateFromString: dateString];
     
-    [dateFormatter release];
     
     return result;
 }

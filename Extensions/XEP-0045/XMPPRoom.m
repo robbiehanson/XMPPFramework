@@ -71,14 +71,14 @@ enum XMPPRoomState
 	{
 		if ([storage configureWithParent:self queue:moduleQueue])
 		{
-			xmppRoomStorage = [storage retain];
+			xmppRoomStorage = storage;
 		}
 		else
 		{
 			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
 		}
 		
-		roomJID = [aRoomJID retain];
+		roomJID = aRoomJID;
 	}
 	return self;
 }
@@ -99,8 +99,7 @@ enum XMPPRoomState
 {
 	XMPPLogTrace();
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (self.isJoined)
 		{
@@ -108,11 +107,9 @@ enum XMPPRoomState
 		}
 		
 		[responseTracker removeAllIDs];
-		[responseTracker release];
 		responseTracker = nil;
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -122,48 +119,20 @@ enum XMPPRoomState
 	[super deactivate];
 }
 
-- (void)dealloc
-{
-	[xmppRoomStorage release];
-	[roomJID release];
-	[myRoomJID release];
-	[myNickname release];
-	[myOccupant release];
-	[roomSubject release];
-	
-	[super dealloc];
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (id <XMPPRoomStorage>)xmppRoomStorage
 {
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return xmppRoomStorage;
-	}
-	else
-	{
-		// This variable is readonly - set in init method and never changed.
-		
-		return [[xmppRoomStorage retain] autorelease];
-	}
+	// This variable is readonly - set in init method and never changed.
+	return xmppRoomStorage;
 }
 
 - (XMPPJID *)roomJID
 {
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return roomJID;
-	}
-	else
-	{
-		// This variable is readonly - set in init method and never changed.
-		
-		return [[roomJID retain] autorelease];
-	}
+	// This variable is readonly - set in init method and never changed.
+	return roomJID;
 }
 
 - (XMPPJID *)myRoomJID
@@ -177,10 +146,10 @@ enum XMPPRoomState
 		__block XMPPJID *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [myRoomJID retain];
+			result = myRoomJID;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -195,10 +164,10 @@ enum XMPPRoomState
 		__block NSString *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [myNickname retain];
+			result = myNickname;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -213,10 +182,10 @@ enum XMPPRoomState
 		__block id <XMPPRoomOccupant> result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [myOccupant retain];
+			result = myOccupant;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -231,10 +200,10 @@ enum XMPPRoomState
 		__block NSString *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [roomSubject retain];
+			result = roomSubject;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -283,19 +252,15 @@ enum XMPPRoomState
 		return NO;
 	}
 	
-	[myNickname release];
 	myNickname = [nickname copy];
-	
-	[myRoomJID release];
-	myRoomJID = [[XMPPJID jidWithUser:[roomJID user] domain:[roomJID domain] resource:myNickname] retain];
+	myRoomJID = [XMPPJID jidWithUser:[roomJID user] domain:[roomJID domain] resource:myNickname];
 	
 	return YES;
 }
 
 - (void)createOrJoinRoomUsingNickname:(NSString *)desiredNickname
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace2(@"%@[%@] - %@", THIS_FILE, roomJID, THIS_METHOD);
 		
@@ -303,7 +268,6 @@ enum XMPPRoomState
 		
 		if (![self preJoinWithNickname:desiredNickname])
 		{
-			[pool drain];
 			return;
 		}
 		
@@ -321,8 +285,8 @@ enum XMPPRoomState
 		state |= kXMPPRoomStateCreating;
 		state |= kXMPPRoomStateConfiguring;
 		state |= kXMPPRoomStateJoining;
-		[pool drain];
-	};
+		
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -331,8 +295,7 @@ enum XMPPRoomState
 }
 - (void)joinRoomUsingNickname:(NSString *)desiredNickname
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -340,7 +303,6 @@ enum XMPPRoomState
 		
 		if (![self preJoinWithNickname:desiredNickname])
 		{
-			[pool drain];
 			return;
 		}
 		
@@ -349,8 +311,8 @@ enum XMPPRoomState
 		[xmppStream sendElement:[XMPPPresence presenceWithType:nil to:myRoomJID]];
 		
 		state |= kXMPPRoomStateJoining;
-		[pool drain];
-	};
+		
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -400,8 +362,7 @@ enum XMPPRoomState
 
 - (void)fetchConfigurationForm
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -423,8 +384,7 @@ enum XMPPRoomState
 		              selector:@selector(handleConfigurationFormResponse:withInfo:)
 		               timeout:60.0];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -446,8 +406,7 @@ enum XMPPRoomState
 
 - (void)configureRoomUsingOptions:(NSXMLElement *)roomConfigForm
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -517,9 +476,7 @@ enum XMPPRoomState
 			              selector:@selector(handleConfigureRoomResponse:withInfo:)
 			               timeout:60.0];
 		}
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -564,8 +521,7 @@ enum XMPPRoomState
 
 - (void)fetchBanList
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -593,9 +549,7 @@ enum XMPPRoomState
 		               target:self
 		             selector:@selector(handleFetchBanListResponse:withInfo:)
 		              timeout:60.0];
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -628,8 +582,7 @@ enum XMPPRoomState
 
 - (void)fetchMembersList
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -657,9 +610,7 @@ enum XMPPRoomState
 		               target:self
 		             selector:@selector(handleFetchMembersListResponse:withInfo:)
 		              timeout:60.0];
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -694,8 +645,7 @@ enum XMPPRoomState
 
 - (void)fetchModeratorsList
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		// <iq type='get'
 		//       id='mod3'
@@ -722,8 +672,7 @@ enum XMPPRoomState
 		             selector:@selector(handleFetchModeratorsListResponse:withInfo:)
 		              timeout:60.0];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -745,8 +694,7 @@ enum XMPPRoomState
 
 - (void)editRoomPrivileges:(NSArray *)items
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -776,8 +724,7 @@ enum XMPPRoomState
 		              selector:@selector(handleEditRoomPrivilegesResponse:withInfo:)
 		               timeout:60.0];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -791,8 +738,7 @@ enum XMPPRoomState
 
 - (void)leaveRoom
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -808,8 +754,7 @@ enum XMPPRoomState
 		state &= ~kXMPPRoomStateJoined;
 		state |=  kXMPPRoomStateLeaving;
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -819,15 +764,13 @@ enum XMPPRoomState
 
 - (void)destoryRoom
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
 		// Todo...
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -841,8 +784,7 @@ enum XMPPRoomState
 
 - (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)inviteMessageStr
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -871,8 +813,7 @@ enum XMPPRoomState
 		
 		[xmppStream sendElement:message];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -884,8 +825,7 @@ enum XMPPRoomState
 {
 	if ([msg length] == 0) return;
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -902,8 +842,7 @@ enum XMPPRoomState
 		
 		[xmppStream sendElement:message];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -1045,15 +984,11 @@ enum XMPPRoomState
 	{
 		if (myOccupant != occupant)
 		{
-			[myOccupant release];
-			myOccupant = [occupant retain];
+			myOccupant = occupant;
 		}
 		
-		[myRoomJID release];
-		myRoomJID = [from retain];
-		
-		[myNickname release];
-		myNickname = [[from resource] retain];
+		myRoomJID = from;
+		myNickname = [from resource];
 		
 		if (isAvailable)
 		{
