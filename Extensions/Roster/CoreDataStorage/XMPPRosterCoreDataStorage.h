@@ -3,6 +3,9 @@
 
 #import "XMPPRoster.h"
 #import "XMPPCoreDataStorage.h"
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPGroupCoreDataStorageObject.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 
 /**
  * This class is an example implementation of XMPPRosterStorage using core data.
@@ -29,10 +32,33 @@
 **/
 + (XMPPRosterCoreDataStorage *)sharedInstance;
 
-// 
-// This class inherits from XMPPCoreDataStorage.
-// 
-// Please see the XMPPCoreDataStorage header file for more information.
-// 
+/* Inherited from XMPPCoreDataStorage
+ * Please see the XMPPCoreDataStorage header file for more information.
+ 
+- (id)initWithDatabaseFilename:(NSString *)databaseFileName;
+- (id)initWithInMemoryStore;
+
+@property (readonly) NSString *databaseFileName;
+ 
+@property (readwrite) NSUInteger saveThreshold;
+
+@property (readonly) NSManagedObjectModel *managedObjectModel;
+@property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+ 
+*/
+
+- (XMPPUserCoreDataStorageObject *)myUserForXMPPStream:(XMPPStream *)stream
+                            managedObjectContext:(NSManagedObjectContext *)moc;
+
+- (XMPPResourceCoreDataStorageObject *)myResourceForXMPPStream:(XMPPStream *)stream
+                                          managedObjectContext:(NSManagedObjectContext *)moc;
+
+- (XMPPUserCoreDataStorageObject *)userForJID:(XMPPJID *)jid
+                                   xmppStream:(XMPPStream *)stream
+                         managedObjectContext:(NSManagedObjectContext *)moc;
+
+- (XMPPResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid
+										   xmppStream:(XMPPStream *)stream
+                                 managedObjectContext:(NSManagedObjectContext *)moc;
 
 @end

@@ -7,8 +7,8 @@
 
 @interface ChatController : NSWindowController
 {
-	XMPPStream *xmppStream;
-	XMPPJID *jid;
+	__strong XMPPStream *xmppStream;
+	__strong XMPPJID *jid;
 	XMPPMessage *firstMessage;
 	
     IBOutlet id messageField;

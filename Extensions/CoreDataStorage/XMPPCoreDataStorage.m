@@ -8,6 +8,10 @@
 #import <objc/runtime.h>
 #import <libkern/OSAtomic.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
@@ -213,11 +217,10 @@ static NSMutableSet *databaseFileNames;
 		if (aDatabaseFileName)
 			databaseFileName = [aDatabaseFileName copy];
 		else
-			databaseFileName = [self defaultDatabaseFileName];
+			databaseFileName = [[self defaultDatabaseFileName] copy];
 		
 		if (![[self class] registerDatabaseFileName:databaseFileName])
 		{
-			[self dealloc];
 			return nil;
 		}
 		
@@ -305,23 +308,29 @@ static NSMutableSet *databaseFileNames;
 
 - (XMPPJID *)myJIDForXMPPStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	__block XMPPJID *result = nil;
 	
-	
-	NSNumber *key = [[NSNumber alloc] initWithPtr:stream];
-	
-	XMPPJID *result = (XMPPJID *)[myJidCache objectForKey:key];
-	if (!result)
-	{
-		result = [stream myJID];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if (result)
-			[myJidCache setObject:result forKey:key];
-		else
-			[myJidCache removeObjectForKey:key];
-	}
+		NSNumber *key = [NSNumber numberWithPtr:(__bridge void *)stream];
+		
+		result = (XMPPJID *)[myJidCache objectForKey:key];
+		if (!result)
+		{
+			result = [stream myJID];
+			
+			if (result)
+			{
+				[myJidCache setObject:result forKey:key];
+			}
+		}
+	}};
 	
-	[key release];
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
 	return result;
 }
 
@@ -332,10 +341,9 @@ static NSMutableSet *databaseFileNames;
 	
 	XMPPStream *stream = (XMPPStream *)[notification object];
 	
-	dispatch_async(storageQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(storageQueue, ^{ @autoreleasepool {
 		
-		NSNumber *key = [NSNumber numberWithPtr:stream];
+		NSNumber *key = [NSNumber numberWithPtr:(__bridge void *)stream];
 		if ([myJidCache objectForKey:key])
 		{
 			XMPPJID *newMyJID = [stream myJID];
@@ -346,8 +354,7 @@ static NSMutableSet *databaseFileNames;
 				[myJidCache removeObjectForKey:key];
 		}
 		
-		[pool drain];
-	});
+	}});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -387,14 +394,12 @@ static NSMutableSet *databaseFileNames;
 	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
-	dispatch_block_t block = ^{
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (managedObjectModel)
 		{
 			return;
 		}
-		
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 		XMPPLogVerbose(@"%@: Creating managedObjectModel", [self class]);
 		
@@ -420,8 +425,7 @@ static NSMutableSet *databaseFileNames;
 			XMPPLogWarn(@"%@: Couldn't find managedObjectModel file - %@", [self class], momName);
 		}
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == storageQueue)
 		block();
@@ -436,7 +440,7 @@ static NSMutableSet *databaseFileNames;
 	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
-	dispatch_block_t block = ^{
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (persistentStoreCoordinator)
 		{
@@ -448,8 +452,6 @@ static NSMutableSet *databaseFileNames;
 		{
 			return;
 		}
-		
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 		XMPPLogVerbose(@"%@: Creating persistentStoreCoordinator", [self class]);
 		
@@ -491,8 +493,7 @@ static NSMutableSet *databaseFileNames;
 			}
 		}
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == storageQueue)
 		block();
@@ -624,24 +625,19 @@ static NSMutableSet *databaseFileNames;
 	//          ^
 	
 	OSAtomicIncrement32(&pendingRequests);
-	dispatch_sync(storageQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_sync(storageQueue, ^{ @autoreleasepool {
 		
 		block();
 		
 		// Since this is a synchronous request, we want to return as quickly as possible.
 		// So we delay the maybeSave operation til later.
 		
-		dispatch_async(storageQueue, ^{
-			NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+		dispatch_async(storageQueue, ^{ @autoreleasepool {
 			
 			[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
-			
-			[innerPool drain];
-		});
+		}});
 		
-		[pool drain];
-	});
+	}});
 }
 
 - (void)scheduleBlock:(dispatch_block_t)block
@@ -659,14 +655,11 @@ static NSMutableSet *databaseFileNames;
 	//          ^
 	
 	OSAtomicIncrement32(&pendingRequests);
-	dispatch_async(storageQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(storageQueue, ^{ @autoreleasepool {
 		
 		block();
-		
 		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
-		[pool drain];
-	});
+	}});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -680,21 +673,15 @@ static NSMutableSet *databaseFileNames;
 	if (databaseFileName)
 	{
 		[[self class] unregisterDatabaseFileName:databaseFileName];
-		[databaseFileName release];
 	}
 	
-	[myJidCache release];
 	
 	if (storageQueue)
 	{
 		dispatch_release(storageQueue);
 	}
 	
-	[managedObjectContext release];
-	[persistentStoreCoordinator release];
-	[managedObjectModel release];
 	
-	[super dealloc];
 }
 
 @end

@@ -30,7 +30,7 @@ enum XMPPStreamErrorCode
 {
 	XMPPStreamInvalidType,       // Attempting to access P2P methods in a non-P2P stream, or vice-versa
 	XMPPStreamInvalidState,      // Invalid state for requested action, such as connect when already connected
-	XMPPStreamInvalidProperty,   // Missing a required property, such as hostName or myJID
+	XMPPStreamInvalidProperty,   // Missing a required property, such as myJID
 	XMPPStreamInvalidParameter,  // Invalid parameter, such as a nil JID
 	XMPPStreamUnsupportedAction, // The server doesn't support the requested action
 };
@@ -62,6 +62,9 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	UInt16 hostPort;
 	
 	NSString *tempPassword;
+	BOOL isAccessToken;
+	
+	NSString *appId;
 	
 	XMPPJID *myJID;
 	XMPPJID *remoteJID;
@@ -71,7 +74,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	
 	NSTimeInterval keepAliveInterval;
 	dispatch_source_t keepAliveTimer;
-	dispatch_time_t lastSendReceiveTime;
+	NSTimeInterval lastSendReceiveTime;
 	
 	DDList *registeredModules;
 	NSMutableDictionary *autoDelegateDict;
@@ -104,6 +107,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (id)initP2PFrom:(XMPPJID *)myJID;
 
 /**
+ * Facebook Chat X-FACEBOOK-PLATFORM SASL authentication initialization.
+ * This is a convienence init method to help configure Facebook Chat.
+ **/
+- (id)initWithFacebookAppId:(NSString *)fbAppId;
+
+/**
  * XMPPStream uses a multicast delegate.
  * This allows one to add multiple delegates to a single XMPPStream instance,
  * which makes it easier to separate various components and extensions.
@@ -118,6 +127,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * The appId can be passed to custom authentication classes.
+ * For example, the appId is used for Facebook Chat X-FACEBOOK-PLATFORM SASL authentication.
+**/
+@property (readwrite,copy) NSString *appId;
 
 /**
  * The server's hostname that should be used to make the TCP connection.
@@ -187,7 +202,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 /**
  * Only used in P2P streams.
 **/
-@property (readonly) XMPPJID *remoteJID;
+@property (strong, readonly) XMPPJID *remoteJID;
 
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
@@ -214,7 +229,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * This excludes presence elements sent concerning subscriptions, MUC rooms, etc.
 **/
-@property (readonly) XMPPPresence *myPresence;
+@property (strong, readonly) XMPPPresence *myPresence;
 
 /**
  * Returns the total number of bytes bytes sent/received by the xmpp stream.
@@ -242,7 +257,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The tag property allows you to associate user defined information with the stream.
  * Tag values are not used internally, and should not be used by xmpp modules.
 **/
-@property (readwrite, retain) id tag;
+@property (readwrite, strong) id tag;
 
 #if TARGET_OS_IPHONE
 
@@ -405,12 +420,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 /**
  * Authentication.
  * 
- * The authenticateWithPassword:error: method is asynchronous.
- * It will return immediately, and the delegate methods are used to determine success.
+ * The authenticateWithPassword:error: and authenticateWithFacebookAccessToken:error: methods are asynchronous.
+ * Each will return immediately, and the delegate methods are used to determine success.
  * See the xmppStreamDidAuthenticate: and xmppStream:didNotAuthenticate: methods.
  * 
  * If there is something immediately wrong, such as the stream is not connected,
- * this method will return NO and set the error.
+ * the method will return NO and set the error.
  * 
  * The errPtr parameter is optional - you may pass nil.
  * 
@@ -425,8 +440,10 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (BOOL)supportsAnonymousAuthentication;
 - (BOOL)supportsPlainAuthentication;
 - (BOOL)supportsDigestMD5Authentication;
+- (BOOL)supportsXFacebookPlatformAuthentication;
 - (BOOL)supportsDeprecatedPlainAuthentication;
 - (BOOL)supportsDeprecatedDigestAuthentication;
+- (BOOL)authenticateWithFacebookAccessToken:(NSString *)accessToken error:(NSError **)errPtr;
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
 - (BOOL)authenticateAnonymously:(NSError **)errPtr;
 

@@ -1,44 +1,45 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "XMPPUser.h"
 
-#if TARGET_OS_IPHONE
-  #import "DDXML.h"
+#if !TARGET_OS_IPHONE
+  #import <Cocoa/Cocoa.h>
 #endif
 
-@class XMPPStream;
+#import "XMPPUser.h"
+#import "XMPP.h"
+
 @class XMPPGroupCoreDataStorageObject;
 @class XMPPResourceCoreDataStorageObject;
 
 
 @interface XMPPUserCoreDataStorageObject : NSManagedObject <XMPPUser>
 {
-  NSInteger section;
+	NSInteger section;
 }
 
-@property (nonatomic, retain) XMPPJID *jid;
-@property (nonatomic, retain) NSString * jidStr;
-@property (nonatomic, retain) NSString * streamBareJidStr;
+@property (nonatomic, strong) XMPPJID *jid;
+@property (nonatomic, strong) NSString * jidStr;
+@property (nonatomic, strong) NSString * streamBareJidStr;
 
-@property (nonatomic, retain) NSString * nickname;
-@property (nonatomic, retain) NSString * displayName;
-@property (nonatomic, retain) NSString * subscription;
-@property (nonatomic, retain) NSString * ask;
-@property (nonatomic, retain) NSNumber * unreadMessages;
+@property (nonatomic, strong) NSString * nickname;
+@property (nonatomic, strong) NSString * displayName;
+@property (nonatomic, strong) NSString * subscription;
+@property (nonatomic, strong) NSString * ask;
+@property (nonatomic, strong) NSNumber * unreadMessages;
 
 #if TARGET_OS_IPHONE
-@property (nonatomic, retain) UIImage *photo;
+@property (nonatomic, strong) UIImage *photo;
 #else
-@property (nonatomic, retain) NSImage *photo;
+@property (nonatomic, strong) NSImage *photo;
 #endif
 
 @property (nonatomic, assign) NSInteger section;
-@property (nonatomic, retain) NSString * sectionName;
-@property (nonatomic, retain) NSNumber * sectionNum;
+@property (nonatomic, strong) NSString * sectionName;
+@property (nonatomic, strong) NSNumber * sectionNum;
 
-@property (nonatomic, retain) NSSet * groups;
-@property (nonatomic, retain) XMPPResourceCoreDataStorageObject * primaryResource;
-@property (nonatomic, retain) NSSet * resources;
+@property (nonatomic, strong) NSSet * groups;
+@property (nonatomic, strong) XMPPResourceCoreDataStorageObject * primaryResource;
+@property (nonatomic, strong) NSSet * resources;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                           withItem:(NSXMLElement *)item
@@ -46,6 +47,13 @@
 
 - (void)updateWithItem:(NSXMLElement *)item;
 - (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr;
+
+- (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another;
+- (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another options:(NSStringCompareOptions)mask;
+
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserCoreDataStorageObject *)another;
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserCoreDataStorageObject *)another
+                                        options:(NSStringCompareOptions)mask;
 
 @end
 

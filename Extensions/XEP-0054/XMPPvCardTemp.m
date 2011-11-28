@@ -9,12 +9,15 @@
 
 
 #import "XMPPvCardTemp.h"
+#import "XMPPLogging.h"
+#import "XMPPDateTimeProfiles.h"
+#import "NSData+XMPP.h"
 
 #import <objc/runtime.h>
 
-#import "XMPPLogging.h"
-#import "NSData+XMPP.h"
-#import "XMPPDateTimeProfiles.h"
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
@@ -76,24 +79,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 + (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq
 {
-	// This doesn't work.
-	// It looks like the copy that comes back is of class DDXMLElement.
-	// So maybe the vCardTemp class has to implement its own copy method...
-	// 
-	//return [[[self vCardTempSubElementFromIQ:iq] copy] autorelease];
-	
-	if ([iq isResultIQ])
-	{
-		NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
-		if (query)
-		{
-			NSXMLElement *queryCopy = [[query copy] autorelease];
-			
-			return [self vCardTempFromElement:queryCopy];
-		}
-	}
-	
-	return nil;
+	return [[self vCardTempSubElementFromIQ:iq] copy];
 }
 
 
@@ -406,7 +392,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		NSXMLElement *lat = [geo elementForName:@"LAT"];
 		NSXMLElement *lon = [geo elementForName:@"LON"];
 		
-		loc = [[[CLLocation alloc] initWithLatitude:[[lat stringValue] doubleValue] longitude:[[lon stringValue] doubleValue]] autorelease];
+		loc = [[CLLocation alloc] initWithLatitude:[[lat stringValue] doubleValue] longitude:[[lon stringValue] doubleValue]];
 	}
 	
 	return loc;
@@ -581,7 +567,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		}
 		
 		result = [NSArray arrayWithArray:arr];
-		[arr release];
 	}
 	
 	return result;
@@ -624,7 +609,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		}
 		
 		result = [NSArray arrayWithArray:arr];
-		[arr release];
 	}
 	
 	return result;
@@ -727,7 +711,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (void)setPhoneticSound:(NSString *)phonetic {
 	NSXMLElement *sound = [self elementForName:@"SOUND"];
-	NSXMLElement *elem;
+	NSXMLElement *elem = nil;
 	
 	if (sound == nil && phonetic != nil) {
 		sound = [NSXMLElement elementWithName:@"SOUND"];
@@ -905,7 +889,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (void)setKeyType:(NSString *)type {
 	NSXMLElement *key = [self elementForName:@"KEY"];
-	NSXMLElement *elem;
+	NSXMLElement *elem = nil;
 	
 	if (key == nil && type != nil) {
 		key = [NSXMLElement elementWithName:@"KEY"];

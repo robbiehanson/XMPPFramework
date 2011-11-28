@@ -1,7 +1,6 @@
 #import "FacebookTestAppDelegate.h"
 #import "FacebookTestViewController.h"
 #import "XMPP.h"
-#import "XMPPStreamFacebook.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -15,12 +14,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 // Too bad. You're a developer. Get over it.
 // 
 // Now go read this:
-// http://developers.facebook.com/docs/guides/mobile/
-// 
-// And also this:
+//
 // http://code.google.com/p/xmppframework/wiki/FacebookChatHowTo
 // 
-//#define FACEBOOK_APP_ID @"PUT_YOUR_FACEBOOK_ID_HERE_FOR_EXAMPLE_123456789012345"
+// If the build fails, you may need to run the following command to setup 
+// the facebook-ios-sdk:
+//
+// git submodule update --init
+
+// For testing purposes this project uses the XMPPFacebook FBTest Facebook app.
+#define FACEBOOK_APP_ID @"124242144347927"
 
 
 @implementation FacebookTestAppDelegate
@@ -34,25 +37,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	self.window.rootViewController = self.viewController;
 	[self.window makeKeyAndVisible];
+    
+    self.viewController.statusLabel.text = @"Disconnected";
 	
-	xmppStream = [[XMPPStreamFacebook alloc] init];
-	
-	xmppStream.myJID = [XMPPJID jidWithUser:@"user" domain:@"chat.facebook.com" resource:nil];
+    // it is also possible to use init, but then we need to also set xmppStream.appId and xmppStream.hostName
+	xmppStream = [[XMPPStream alloc] initWithFacebookAppId:FACEBOOK_APP_ID];
 	
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
 	allowSelfSignedCertificates = NO;
-	allowSSLHostNameMismatch = YES;
+	allowSSLHostNameMismatch = NO;
 	
-	facebook = [[Facebook alloc] initWithAppId:FACEBOOK_APP_ID]; // Go set FACEBOOK_APP_ID at top of file
+	facebook = [[Facebook alloc] initWithAppId:FACEBOOK_APP_ID andDelegate:self];
 	
+    self.viewController.statusLabel.text = @"Starting Facebook Authentication";
+    
 	// Note: Be sure to invoke this AFTER the [self.window makeKeyAndVisible] method call above,
 	//       or nothing will happen.
-	
-    [facebook authorize:[XMPPStreamFacebook permissions]
-			   delegate:self
-				appAuth:NO
-			 safariAuth:NO];
+    [facebook authorize:[NSArray arrayWithObject:@"xmpp_login"]];
 	
     return YES;
 }
@@ -76,27 +78,61 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 - (void)fbDidLogin
-{
-	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+{    
+	DDLogVerbose(@"%@: %@\nFacebook login successful!", THIS_FILE, THIS_METHOD);
 	
-	DDLogVerbose(@"%@: facebook.accessToken(%@)", THIS_FILE, facebook.accessToken);
-	DDLogVerbose(@"%@: facebook.expirationDate(%@)", THIS_FILE, facebook.expirationDate);
+	DDLogVerbose(@"%@: facebook.accessToken: %@", THIS_FILE, facebook.accessToken);
+	DDLogVerbose(@"%@: facebook.expirationDate: %@", THIS_FILE, facebook.expirationDate);
 	
+    self.viewController.statusLabel.text = @"XMPP connecting...";
+    
 	NSError *error = nil;
 	if (![xmppStream connect:&error])
 	{
 		DDLogError(@"%@: Error in xmpp connection: %@", THIS_FILE, error);
+        self.viewController.statusLabel.text = @"XMPP connect failed";
 	}
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+    self.viewController.statusLabel.text = @"Facebook login failed";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppStreamDidConnect:(XMPPStream *)sender
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+    if (![xmppStream isSecure])
+    {
+        self.viewController.statusLabel.text = @"XMPP STARTTLS...";
+        NSError *error = nil;
+        BOOL result = [xmppStream secureConnection:&error];
+        
+        if (result == NO)
+        {
+            DDLogError(@"%@: Error in xmpp STARTTLS: %@", THIS_FILE, error);
+            self.viewController.statusLabel.text = @"XMPP STARTTLS failed";
+        }
+    } 
+    else 
+    {
+        self.viewController.statusLabel.text = @"XMPP X-FACEBOOK-PLATFORM SASL...";
+        NSError *error = nil;
+        BOOL result = [xmppStream authenticateWithFacebookAccessToken:facebook.accessToken error:&error];
+        
+        if (result == NO)
+        {
+            DDLogError(@"%@: Error in xmpp auth: %@", THIS_FILE, error);
+            self.viewController.statusLabel.text = @"XMPP authentication failed";
+        }
+    }
+}
 
 - (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
 {
@@ -126,37 +162,25 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)xmppStreamDidSecure:(XMPPStream *)sender
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
-}
-
-- (void)xmppStreamDidConnect:(XMPPStream *)sender
-{
-	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
-	
-	NSError *error = nil;
-	BOOL result = [xmppStream authenticateWithAppId:FACEBOOK_APP_ID       // Go set FACEBOOK_APP_ID at top of file
-										accessToken:facebook.accessToken
-									 expirationDate:facebook.expirationDate
-											  error:&error];
-	
-	if (result == NO)
-	{
-		DDLogError(@"%@: Error in xmpp auth: %@", THIS_FILE, error);
-	}
+    self.viewController.statusLabel.text = @"XMPP STARTTLS...";
 }
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+    self.viewController.statusLabel.text = @"XMPP authenticated";
 }
 
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
 {
 	DDLogVerbose(@"%@: %@ - error: %@", THIS_FILE, THIS_METHOD, error);
+    self.viewController.statusLabel.text = @"XMPP authentication failed";
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+    self.viewController.statusLabel.text = @"XMPP disconnected";
 }
 
 @end

@@ -4,4 +4,6 @@
     
 }
 
+@property(nonatomic,retain) IBOutlet UILabel *statusLabel;
+
 @end

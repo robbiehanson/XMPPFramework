@@ -1,26 +1,19 @@
 #import <Cocoa/Cocoa.h>
-#import "XMPP.h"
-#import "XMPPReconnect.h"
-#import "XMPPRoster.h"
-#import "XMPPRosterMemoryStorage.h"
-#import "XMPPCapabilities.h"
-#import "XMPPCapabilitiesCoreDataStorage.h"
-#import "XMPPPing.h"
-#import "XMPPTime.h"
+#import "XMPPFramework.h"
 
-@class  RosterController;
+@class RosterController;
 
 
 @interface AppDelegate : NSObject
 {
-	XMPPStream *xmppStream;
-	XMPPReconnect *xmppReconnect;
-	XMPPRoster *xmppRoster;
-	XMPPRosterMemoryStorage *xmppRosterStorage;
-	XMPPCapabilities *xmppCapabilities;
-	XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
-	XMPPPing *xmppPing;
-	XMPPTime *xmppTime;
+	__strong XMPPStream *xmppStream;
+	__strong XMPPReconnect *xmppReconnect;
+	__strong XMPPRoster *xmppRoster;
+	__strong XMPPRosterMemoryStorage *xmppRosterStorage;
+	__strong XMPPCapabilities *xmppCapabilities;
+	__strong XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
+	__strong XMPPPing *xmppPing;
+	__strong XMPPTime *xmppTime;
 	
 	NSMutableArray *turnSockets;
 	

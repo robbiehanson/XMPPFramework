@@ -1,12 +1,10 @@
 #import "XMPPTime.h"
-#import "XMPP.h"
 #import "XMPPIDTracker.h"
 #import "XMPPDateTimeProfiles.h"
+#import "XMPPFramework.h"
 
-#define INTEGRATE_WITH_CAPABILITIES 1
-
-#if INTEGRATE_WITH_CAPABILITIES
-  #import "XMPPCapabilities.h"
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
 #define DEFAULT_TIMEOUT  30.0 // seconds
@@ -50,7 +48,7 @@
 {
 	if ([super activate:aXmppStream])
 	{
-	#if INTEGRATE_WITH_CAPABILITIES
+	#ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
 		
@@ -64,19 +62,16 @@
 
 - (void)deactivate
 {
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		[queryTracker removeAllIDs];
-		[queryTracker release];
 		queryTracker = nil;
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -86,13 +81,6 @@
 	[super deactivate];
 }
 
-- (void)dealloc
-{
-	// queryTracker is handled in the deactivate method,
-	// which is automatically called by [super dealloc] if needed.
-	
-	[super dealloc];
-}
 
 - (BOOL)respondsToQueries
 {
@@ -119,18 +107,16 @@
 		{
 			respondsToQueries = flag;
 			
-		#if INTEGRATE_WITH_CAPABILITIES
-			// Capabilities may have changed, need to notify others.
-			
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			XMPPPresence *presence = xmppStream.myPresence;
-			if (presence)
-			{
-				[xmppStream sendElement:presence];
+		#ifdef _XMPP_CAPABILITIES_H
+			@autoreleasepool {
+				// Capabilities may have changed, need to notify others.
+				
+				XMPPPresence *presence = xmppStream.myPresence;
+				if (presence)
+				{
+					[xmppStream sendElement:presence];
+				}
 			}
-			
-			[pool drain];
 		#endif
 		}
 	};
@@ -151,18 +137,15 @@
 	
 	NSString *queryID = [xmppStream generateUUID];
 	
-	dispatch_async(moduleQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(moduleQueue, ^{ @autoreleasepool {
 		
 		XMPPTimeQueryInfo *queryInfo = [[XMPPTimeQueryInfo alloc] initWithTarget:self
 		                                                                selector:@selector(handleResponse:withInfo:)
 		                                                                 timeout:timeout];
 		
 		[queryTracker addID:queryID trackingInfo:queryInfo];
-		[queryInfo release];
 		
-		[pool drain];
-	});
+	}});
 	
 	return queryID;
 }
@@ -234,7 +217,10 @@
 {
 	if (iq)
 	{
-		[multicastDelegate xmppTime:self didReceiveResponse:iq withRTT:[queryInfo rtt]];
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppTime:self didReceiveResponse:iq withRTT:[queryInfo rtt]];
+		else
+			[multicastDelegate xmppTime:self didNotReceiveResponse:[queryInfo elementID] dueToTimeout:-1.0];
 	}
 	else
 	{
@@ -279,10 +265,10 @@
 		NSXMLElement *time = [iq elementForName:@"time" xmlns:@"urn:xmpp:time"];
 		if (time)
 		{
-			NSXMLElement *time = [[self class] timeElement];
+			NSXMLElement *currentTime = [[self class] timeElement];
 			
 			XMPPIQ *response = [XMPPIQ iqWithType:@"result" to:[iq from] elementID:[iq elementID]];
-			[response addChild:time];
+			[response addChild:currentTime];
 			
 			[sender sendElement:response];
 			
@@ -298,7 +284,7 @@
 	[queryTracker removeAllIDs];
 }
 
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for XEP-0202.
 **/
@@ -477,7 +463,6 @@
 	
 	NSString *utcValue = [df stringFromDate:date];
 	
-	[df release];
 	
 	NSInteger tzoInSeconds = [[NSTimeZone systemTimeZone] secondsFromGMTForDate:date];
 	
@@ -520,10 +505,5 @@
 	return [timeSent timeIntervalSinceNow] * -1.0;
 }
 
-- (void)dealloc
-{
-	[timeSent release];
-	[super dealloc];
-}
 
 @end

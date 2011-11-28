@@ -7,11 +7,13 @@
 //  Copyright 2010 Martin Morrison. All rights reserved.
 //
 
-
 #import "XMPPvCardTempBase.h"
 
 #import <objc/runtime.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 @implementation XMPPvCardTempBase
 
@@ -46,10 +48,19 @@
 		xmlString = [coder decodeObject];
 	}
 	
-  NSXMLElement *elem = [self initWithXMLString:xmlString error:nil];
-  object_setClass(elem, [self class]);
-  
-	return elem;
+	// The method [super initWithXMLString:error:] may return a different self.
+	// In other words, it may [self release], and alloc/init/return a new self.
+	// 
+	// So to maintain the proper class (XMPPvCardTempEmail, XMPPvCardTempTel, etc)
+	// we need to get a reference to the class before invoking super.
+	
+	Class selfClass = [self class];
+	
+	if ((self = [super initWithXMLString:xmlString error:nil]))
+	{
+		object_setClass(self, selfClass);
+	}
+	return self;
 }
 
 
@@ -67,5 +78,12 @@
 	}
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+	NSXMLElement *elementCopy = [super copyWithZone:zone];
+	object_setClass(elementCopy, [self class]);
+	
+	return elementCopy;
+}
 
 @end

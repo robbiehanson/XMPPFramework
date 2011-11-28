@@ -3,10 +3,14 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -33,7 +37,7 @@
 		pingInterval = 60;
 		pingTimeout = 10;
 		
-		lastReceiveTime = DISPATCH_TIME_FOREVER;
+		lastReceiveTime = 0;
 		
 		xmppPing = [[XMPPPing alloc] initWithDispatchQueue:queue];
 		xmppPing.respondsToQueries = NO;
@@ -57,38 +61,31 @@
 
 - (void)deactivate
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		[self stopPingIntervalTimer];
 		
-		lastReceiveTime = DISPATCH_TIME_FOREVER;
+		lastReceiveTime = 0;
 		awaitingPingResponse = NO;
 		
 		[xmppPing deactivate];
+		[super deactivate];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
-	
-	[super deactivate];
 }
 
 - (void)dealloc
 {
-	[targetJID release];
-	[targetJIDStr release];
 	
 	[self stopPingIntervalTimer];
 	
 	[xmppPing removeDelegate:self];
-	[xmppPing release];
 	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,24 +118,19 @@
 			pingInterval = interval;
 			
 			// Update the pingTimer.
-			// Depending on new value this may mean starting, stoping, or simply updating the timer.
+			// 
+			// Depending on new value and current state of the pingTimer,
+			// this may mean starting, stoping, or simply updating the timer.
 			
-			if (pingIntervalTimer)
+			if (pingInterval > 0)
 			{
-				if (pingInterval > 0)
-				{
-					// Remember: Only start the pinger after the xmpp stream is up and authenticated
-					if ([xmppStream isAuthenticated])
-						[self updatePingIntervalTimer];
-				}
-				else
-				{
-					[self stopPingIntervalTimer];
-				}
+				// Remember: Only start the pinger after the xmpp stream is up and authenticated
+				if ([xmppStream isAuthenticated])
+					[self startPingIntervalTimer];
 			}
-			else if (pingInterval > 0)
+			else
 			{
-				[self startPingIntervalTimer];
+				[self stopPingIntervalTimer];
 			}
 		}
 	};
@@ -193,9 +185,9 @@
 		__block XMPPJID *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [targetJID retain];
+			result = targetJID;
 		});
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -203,13 +195,11 @@
 {
 	dispatch_block_t block = ^{
 		
-		if (![targetJID isEqual:jid])
+		if (![targetJID isEqualToJID:jid])
 		{
-			[targetJID release];
-			targetJID = [jid retain];
+			targetJID = jid;
 			
-			[targetJIDStr release];
-			targetJIDStr = [[targetJID full] retain];
+			targetJIDStr = [targetJID full];
 		}
 	};
 	
@@ -219,7 +209,7 @@
 		dispatch_async(moduleQueue, block);
 }
 
-- (dispatch_time_t)lastReceiveTime
+- (NSTimeInterval)lastReceiveTime
 {
 	if (dispatch_get_current_queue() == moduleQueue)
 	{
@@ -227,7 +217,7 @@
 	}
 	else
 	{
-		__block dispatch_time_t result;
+		__block NSTimeInterval result;
 		
 		dispatch_sync(moduleQueue, ^{
 			result = lastReceiveTime;
@@ -246,18 +236,18 @@
 	
 	BOOL sendPing = NO;
 	
-	if (lastReceiveTime == DISPATCH_TIME_FOREVER)
+	if (lastReceiveTime == 0)
 	{
 		sendPing = YES;
 	}
 	else
 	{
-		dispatch_time_t now = dispatch_time(DISPATCH_TIME_NOW, 0);
-		NSTimeInterval elapsed = ((double)(now - lastReceiveTime) / (double)NSEC_PER_SEC);
+		NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+		NSTimeInterval elapsed = (now - lastReceiveTime);
 		
 		XMPPLogTrace2(@"%@: %@ - elapsed(%f)", [self class], THIS_METHOD, elapsed);
 		
-		sendPing = (elapsed >= pingInterval);
+		sendPing = ((elapsed < 0) || (elapsed >= pingInterval));
 	}
 	
 	if (sendPing)
@@ -280,14 +270,24 @@
 	NSAssert(pingIntervalTimer != NULL, @"Broken logic (1)");
 	NSAssert(pingInterval > 0, @"Broken logic (2)");
 	
+	// The timer fires every (pingInterval / 4) seconds.
+	// Upon firing it checks when data was last received from the target,
+	// and sends a ping if the elapsed time has exceeded the pingInterval.
+	// Thus the effective resolution of the timer is based on the configured pingInterval.
 	
 	uint64_t interval = ((pingInterval / 4.0) * NSEC_PER_SEC);
-	dispatch_time_t tt;
 	
-	if (lastReceiveTime != DISPATCH_TIME_FOREVER)
-		tt = dispatch_time(lastReceiveTime, interval);
+	// The timer's first fire should occur 'interval' after lastReceiveTime.
+	// If there is no lastReceiveTime, then the timer's first fire should occur 'interval' after now.
+	
+	NSTimeInterval diff;
+	if (lastReceiveTime == 0)
+		diff = 0.0;
 	else
-		tt = dispatch_time(DISPATCH_TIME_NOW, interval);
+		diff = lastReceiveTime - [NSDate timeIntervalSinceReferenceDate];;
+	
+	dispatch_time_t bt = dispatch_time(DISPATCH_TIME_NOW, (diff * NSEC_PER_SEC));
+	dispatch_time_t tt = dispatch_time(bt, interval);
 	
 	dispatch_source_set_timer(pingIntervalTimer, tt, interval, 0);
 }
@@ -309,13 +309,11 @@
 		newTimer = YES;
 		pingIntervalTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
 		
-		dispatch_source_set_event_handler(pingIntervalTimer, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_event_handler(pingIntervalTimer, ^{ @autoreleasepool {
 			
 			[self handlePingIntervalTimerFire];
 			
-			[pool drain];
-		});
+		}});
 	}
 	
 	[self updatePingIntervalTimer];
@@ -363,7 +361,7 @@
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-	lastReceiveTime = dispatch_time(DISPATCH_TIME_NOW, 0);
+	lastReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 	awaitingPingResponse = NO;
 	
 	[self startPingIntervalTimer];
@@ -373,7 +371,7 @@
 {
 	if (targetJID == nil || [targetJIDStr isEqualToString:[iq fromStr]])
 	{
-		lastReceiveTime = dispatch_time(DISPATCH_TIME_NOW, 0);
+		lastReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 	}
 	
 	return NO;
@@ -383,7 +381,7 @@
 {
 	if (targetJID == nil || [targetJIDStr isEqualToString:[message fromStr]])
 	{
-		lastReceiveTime = dispatch_time(DISPATCH_TIME_NOW, 0);
+		lastReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 	}
 }
 
@@ -391,7 +389,7 @@
 {
 	if (targetJID == nil || [targetJIDStr isEqualToString:[presence fromStr]])
 	{
-		lastReceiveTime = dispatch_time(DISPATCH_TIME_NOW, 0);
+		lastReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 	}
 }
 
@@ -399,7 +397,7 @@
 {
 	[self stopPingIntervalTimer];
 	
-	lastReceiveTime = DISPATCH_TIME_FOREVER;
+	lastReceiveTime = 0;
 	awaitingPingResponse = NO;
 }
 

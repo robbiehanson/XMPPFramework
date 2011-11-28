@@ -2,19 +2,10 @@
 
 @class GCDMulticastDelegateEnumerator;
 
-struct GCDMulticastDelegateListNode {
-	id delegate;
-	dispatch_queue_t delegateQueue;
-	struct GCDMulticastDelegateListNode * prev;
-    struct GCDMulticastDelegateListNode * next;
-    int32_t retainCount;
-};
-typedef struct GCDMulticastDelegateListNode GCDMulticastDelegateListNode;
-
 /**
- * This class provides multicast delegate functionality.
- * That is, it provides a means for managing a list of delegates,
- * and any method invocations to an instance of the class are automatically forwarded to all delegates.
+ * This class provides multicast delegate functionality. That is:
+ * - it provides a means for managing a list of delegates
+ * - any method invocations to an instance of this class are automatically forwarded to all delegates
  * 
  * For example:
  * 
@@ -34,9 +25,6 @@ typedef struct GCDMulticastDelegateListNode GCDMulticastDelegateListNode;
 **/
 
 @interface GCDMulticastDelegate : NSObject
-{
-	GCDMulticastDelegateListNode *delegateList;
-}
 
 - (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
@@ -52,12 +40,8 @@ typedef struct GCDMulticastDelegateListNode GCDMulticastDelegateListNode;
 
 @end
 
+
 @interface GCDMulticastDelegateEnumerator : NSObject
-{
-	NSUInteger numDelegates;
-	NSUInteger currentDelegateIndex;
-	GCDMulticastDelegateListNode **delegates;
-}
 
 - (NSUInteger)count;
 - (NSUInteger)countOfClass:(Class)aClass;

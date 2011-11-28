@@ -1,6 +1,10 @@
 #import "XMPPTransports.h"
 #import "XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 
 @implementation XMPPTransports
 
@@ -10,16 +14,11 @@
 {
 	if ((self = [super init]))
 	{
-		xmppStream = [stream retain];
+		xmppStream = stream;
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-	[xmppStream release];
-	[super dealloc];
-}
 
 /**
  * Registration process

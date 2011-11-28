@@ -1,11 +1,9 @@
 #import <Foundation/Foundation.h>
-
-@class XMPPJID;
-@class XMPPIQ;
-@class XMPPPresence;
+#import "XMPP.h"
 
 
 @protocol XMPPResource <NSObject>
+@required
 
 - (XMPPJID *)jid;
 - (XMPPPresence *)presence;

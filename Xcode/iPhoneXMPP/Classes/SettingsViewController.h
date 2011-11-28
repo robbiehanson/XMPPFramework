@@ -19,8 +19,8 @@ extern NSString *const kXMPPmyPassword;
   UITextField *passwordField;
 }
 
-@property (nonatomic,retain) IBOutlet UITextField *jidField;
-@property (nonatomic,retain) IBOutlet UITextField *passwordField;
+@property (nonatomic,strong) IBOutlet UITextField *jidField;
+@property (nonatomic,strong) IBOutlet UITextField *passwordField;
 
 - (IBAction)done:(id)sender;
 - (IBAction)hideKeyboard:(id)sender;

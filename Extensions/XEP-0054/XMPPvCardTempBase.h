@@ -27,6 +27,7 @@
 	{                                                                   \
 		if (elem == nil) {												\
 			elem = [NSXMLElement elementWithName:(Name)];				\
+            [self addChild:elem];                                       \
 		}                                                               \
 		[elem setStringValue:(Value)];									\
 	}                                                                   \
@@ -61,7 +62,7 @@
 	}
 
 
-@interface XMPPvCardTempBase : NSXMLElement <NSCoding> {
+@interface XMPPvCardTempBase : NSXMLElement <NSCoding, NSCopying> {
 
 }
 

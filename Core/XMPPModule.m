@@ -2,6 +2,10 @@
 #import "XMPPStream.h"
 #import "XMPPLogging.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
@@ -78,11 +82,9 @@
 		[self deactivate];
 	}
 	
-	[multicastDelegate release];
 	
 	dispatch_release(moduleQueue);
 	
-	[super dealloc];
 }
 
 /**
@@ -102,7 +104,7 @@
 		}
 		else
 		{
-			xmppStream = [aXmppStream retain];
+			xmppStream = aXmppStream;
 			
 			[xmppStream addDelegate:self delegateQueue:moduleQueue];
 			[xmppStream registerModule:self];
@@ -134,7 +136,6 @@
 			[xmppStream removeDelegate:self delegateQueue:moduleQueue];
 			[xmppStream unregisterModule:self];
 			
-			[xmppStream release];
 			xmppStream = nil;
 		}
 	};
@@ -174,10 +175,10 @@
 		__block XMPPStream *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [xmppStream retain];
+			result = xmppStream;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -229,10 +230,10 @@
 
 - (NSString *)moduleName
 {
-	// Override me to provide a proper module name.
-	// The name may be used as the name of the dispatch_queue which could aid in debugging.
+	// Override me (if needed) to provide a customized module name.
+	// This name is used as the name of the dispatch_queue which could aid in debugging.
 	
-	return @"XMPPModule";
+	return NSStringFromClass([self class]);
 }
 
 @end
