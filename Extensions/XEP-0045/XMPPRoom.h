@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
-#import "XMPPModule.h"
+#import "XMPP.h"
+#import "XMPPRoomMessage.h"
 #import "XMPPRoomOccupant.h"
 
 @class XMPPIDTracker;
@@ -17,15 +18,14 @@
 	id multicastDelegate;
  */
  
- 	id <XMPPRoomStorage> xmppRoomStorage;
+ 	__strong id <XMPPRoomStorage> xmppRoomStorage;
  	
-	XMPPJID *roomJID;
+	__strong XMPPJID *roomJID;
 	
-	XMPPJID *myRoomJID;
-	NSString *myNickname;
-	id <XMPPRoomOccupant> myOccupant;
+	__strong XMPPJID *myRoomJID;
+	__strong NSString *myNickname;
 	
-	NSString *roomSubject;
+	__strong NSString *roomSubject;
 	
 	XMPPIDTracker *responseTracker;
 	
@@ -56,12 +56,10 @@
 
 @property (readonly) XMPPJID * myRoomJID;   // E.g. xmppDevs@muc.deusty.com/robbiehanson
 @property (readonly) NSString * myNickname; // E.g. robbiehanson
-@property (readonly) id <XMPPRoomOccupant> myOccupant;
 
 @property (readonly) NSString *roomSubject;
 
 @property (readonly) BOOL isJoined;
-@property (readonly) BOOL isRoomOwner;
 
 /**
  * Sends a presence element to the join room, and indicating desire to create the room if it doesn't already exist.
@@ -146,9 +144,12 @@
 // 
 // -- PUBLIC METHODS --
 // 
+// There are no public methods required by this protocol.
+// 
+// Each individual storage class will provide a proper way to access/enumerate the
+// occupants/messages according to the underlying storage mechanism.
 // 
 
-- (id <XMPPRoomOccupant>)occupantForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 // 
 // 
@@ -184,14 +185,13 @@
  * Updates and returns the occupant for the given presence element.
  * If the presence type is "available", and the occupant doesn't already exist, then one should be created.
 **/
-- (id <XMPPRoomOccupant>)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)xmppStream;
+- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)xmppStream;
 
 /**
  * Stores or otherwise handles the given message element.
- * If the message has an associated occupant, then the occupant should be returned.
- * If the message does not have an associated occupant, then it may return nil.
 **/
-- (id <XMPPRoomOccupant>)handleMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream;
+- (void)handleOutgoingMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream;
+- (void)handleIncomingMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream;
 
 @end
 
@@ -238,15 +238,15 @@
 - (void)xmppRoomDidJoin:(XMPPRoom *)sender;
 - (void)xmppRoomDidLeave:(XMPPRoom *)sender;
 
-- (void)xmppRoom:(XMPPRoom *)sender occupantDidJoin:(id <XMPPRoomOccupant>)occupant;
-- (void)xmppRoom:(XMPPRoom *)sender occupantDidLeave:(id <XMPPRoomOccupant>)occupant;
+- (void)xmppRoom:(XMPPRoom *)sender occupantDidJoin:(XMPPJID *)occupantJID withPresence:(XMPPPresence *)presence;
+- (void)xmppRoom:(XMPPRoom *)sender occupantDidLeave:(XMPPJID *)occupantJID withPresence:(XMPPPresence *)presence;
+- (void)xmppRoom:(XMPPRoom *)sender occupantDidUpdate:(XMPPJID *)occupantJID withPresence:(XMPPPresence *)presence;
 
 /**
  * Invoked when a message is received.
  * The occupant parameter may be nil if the message came directly from the room, or from a non-occupant.
 **/
-- (void)xmppRoom:(XMPPRoom *)sender didReceiveMessage:(XMPPMessage *)message
-                                         fromOccupant:(id <XMPPRoomOccupant>)occupant;
+- (void)xmppRoom:(XMPPRoom *)sender didReceiveMessage:(XMPPMessage *)message fromOccupant:(XMPPJID *)occupantJID;
 
 - (void)xmppRoom:(XMPPRoom *)sender didFetchBanList:(NSArray *)items;
 - (void)xmppRoom:(XMPPRoom *)sender didNotFetchBanList:(XMPPIQ *)iqError;

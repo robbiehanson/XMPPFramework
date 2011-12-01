@@ -1,10 +1,11 @@
 #import <Foundation/Foundation.h>
+#import "XMPPRoom.h"
+#import "XMPPRoomOccupant.h"
 
-@class XMPPJID;
-@class XMPPPresence;
 
+@interface XMPPRoomOccupantMemoryStorage : NSObject <XMPPRoomOccupant, NSCopying, NSCoding>
 
-@protocol XMPPRoomOccupant <NSObject>
+- (id)initWithPresence:(XMPPPresence *)presence;
 
 @property (readonly) XMPPPresence *presence;
 
@@ -14,5 +15,9 @@
 @property (readonly) NSString * role;
 @property (readonly) NSString * affiliation;
 @property (readonly) XMPPJID  * realJID; // Only available in non-anonymous rooms
+
+- (void)updateWithPresence:(XMPPPresence *)presence;
+
+- (NSComparisonResult)compare:(XMPPRoomOccupantMemoryStorage *)another;
 
 @end

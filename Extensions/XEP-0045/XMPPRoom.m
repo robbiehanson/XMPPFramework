@@ -120,6 +120,18 @@ enum XMPPRoomState
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Internal
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * This method may optionally be used by XMPPRosterStorage classes (declared in XMPPRosterPrivate.h).
+**/
+- (GCDMulticastDelegate *)multicastDelegate
+{
+	return multicastDelegate;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -171,24 +183,6 @@ enum XMPPRoomState
 	}
 }
 
-- (id <XMPPRoomOccupant>)myOccupant
-{
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return myOccupant;
-	}
-	else
-	{
-		__block id <XMPPRoomOccupant> result;
-		
-		dispatch_sync(moduleQueue, ^{
-			result = myOccupant;
-		});
-		
-		return result;
-	}
-}
-
 - (NSString *)roomSubject
 {
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -222,12 +216,15 @@ enum XMPPRoomState
 	
 	return result;
 }
-
+/*
 - (BOOL)isRoomOwner
 {
 	__block BOOL result;
 	
 	dispatch_block_t block = ^{
+		
+		id <XMPPRoomOccupant> myOccupant = [xmppRoomStorage occupantForJID:myRoomJID stream:xmppStream];
+		
 		result = [myOccupant.affiliation isEqualToString:@"owner"];
 	};
 	
@@ -238,6 +235,7 @@ enum XMPPRoomState
 	
 	return result;
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Create & Join
@@ -883,14 +881,14 @@ enum XMPPRoomState
 	
 	XMPPJID *from = [presence from];
 	
-	if (![[from bareJID] isEqual:roomJID])
+	if (![roomJID isEqualToJID:from options:XMPPJIDCompareBare])
 	{
-		return;
+		return; // Stanza isn't for our room
 	}
 	
 	XMPPLogTrace();
 	
-	id <XMPPRoomOccupant> occupant = [xmppRoomStorage handlePresence:presence xmppStream:xmppStream];
+	[xmppRoomStorage handlePresence:presence xmppStream:sender];
 	
 	// My presence:
 	// 
@@ -982,11 +980,6 @@ enum XMPPRoomState
 	
 	if (isMyPresence)
 	{
-		if (myOccupant != occupant)
-		{
-			myOccupant = occupant;
-		}
-		
 		myRoomJID = from;
 		myNickname = [from resource];
 		
@@ -1009,11 +1002,11 @@ enum XMPPRoomState
 	{
 		if (isAvailable)
 		{
-			[multicastDelegate xmppRoom:self occupantDidJoin:occupant];
+			[multicastDelegate xmppRoom:self occupantDidJoin:from withPresence:presence];
 		}
 		else if (isUnavailable)
 		{
-			[multicastDelegate xmppRoom:self occupantDidLeave:occupant];
+			[multicastDelegate xmppRoom:self occupantDidLeave:from withPresence:presence];
 		}
 	}
 }
@@ -1022,40 +1015,67 @@ enum XMPPRoomState
 {
 	// This method is invoked on the moduleQueue.
 	
-	XMPPLogTrace();
-/*	
-	// Check if its group chat, and make sure it's for this Room
-	if ([message isGroupChatMessageWithBody])
+	XMPPJID *from = [message from];
+	
+	if (![roomJID isEqualToJID:from options:XMPPJIDCompareBare])
 	{
-		NSArray *components = [[message fromStr] componentsSeparatedByString:@"/"];
-		
-		NSString *aRoomName = [components count] > 0 ? [components objectAtIndex:0] : nil;
-		NSString *aNickName = [components count] > 1 ? [components objectAtIndex:1] : nil;
-		
-		if (![aRoomName isEqualToString:roomName]) return;
-		
-		if (aNickName == nil)
-		{
-			// Todo - A proper implementation...
-			
-		//	NSString *body = [[message elementForName:@"body"] stringValue];
-		//	
-		//	if ([body isEqualToString:@"This room is locked from entry until configuration is confirmed."])
-		//	{
-		//		[self sendInstantRoomConfig];
-		//		return;
-		//	}
-		//	
-		//	if ([body isEqualToString:@"This room is now unlocked."])
-		//	{
-		//		[multicastDelegate xmppRoomDidCreate:self];
-		//		return;
-		//	}
-		}
-		
-		[multicastDelegate xmppRoom:self didReceiveMessage:message fromNick:aNickName];
+		return; // Stanza isn't for our room
 	}
-*/
+	
+	XMPPLogTrace();
+	
+	// Is this a message we need to store (a chat message)?
+	// 
+	// A message to all recipients MUST be of type groupchat.
+	// A message to an individual recipient would have a <body/>.
+	
+	BOOL isChatMessage;
+	
+	if ([from isFull])
+		isChatMessage = [message isGroupChatMessageWithBody];
+	else
+		isChatMessage = [message isMessageWithBody];
+	
+	if (isChatMessage)
+	{
+		[xmppRoomStorage handleIncomingMessage:message xmppStream:sender];
+		[multicastDelegate xmppRoom:self didReceiveMessage:message fromOccupant:from];
+	}
+	else
+	{
+		// Todo... Handle other types of messages.
+	}
+}
+
+- (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message
+{
+	// This method is invoked on the moduleQueue.
+	
+	XMPPJID *to = [message to];
+	
+	if (![roomJID isEqualToJID:to options:XMPPJIDCompareBare])
+	{
+		return; // Stanza isn't for our room
+	}
+	
+	XMPPLogTrace();
+	
+	// Is this a message we need to store (a chat message)?
+	// 
+	// A message to all recipients MUST be of type groupchat.
+	// A message to an individual recipient would have a <body/>.
+	
+	BOOL isChatMessage;
+	
+	if ([to isFull])
+		isChatMessage = [message isGroupChatMessageWithBody];
+	else
+		isChatMessage = [message isMessageWithBody];
+	
+	if (isChatMessage)
+	{
+		[xmppRoomStorage handleOutgoingMessage:message xmppStream:sender];	
+	}
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
