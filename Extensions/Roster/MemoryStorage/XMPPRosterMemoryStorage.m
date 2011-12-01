@@ -23,8 +23,7 @@
 
 @interface XMPPRosterMemoryStorage ()
 
-@property (assign, readwrite) XMPPRoster *parent;
-@property (readwrite) dispatch_queue_t parentQueue;
+@property (readonly) dispatch_queue_t parentQueue;
 
 @end
 
@@ -51,12 +50,17 @@
 	NSParameterAssert(aParent != nil);
 	NSParameterAssert(queue != NULL);
 	
-	if ((parent == nil) && (parentQueue == NULL))
+	@synchronized(self)
 	{
-		self.parent = aParent;
-		self.parentQueue = queue;
-		
-		return YES;
+		if ((parent == nil) && (parentQueue == NULL))
+		{
+			parent = aParent;
+			parentQueue = queue;
+			
+			dispatch_retain(parentQueue);
+			
+			return YES;
+		}
 	}
 	
 	return NO;
@@ -73,35 +77,31 @@
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@synthesize parent;
 @synthesize userClass;
 @synthesize resourceClass;
 
-- (dispatch_queue_t)parentQueue
+- (XMPPRoster *)parent
 {
-	dispatch_queue_t result = NULL;
+	XMPPRoster *result = nil;
 	
-	@synchronized(self)
+	@synchronized(self) // synchronized with configureWithParent:queue:
 	{
-		result = parentQueue;
+		result = parent;
 	}
 	
 	return result;
 }
 
-- (void)setParentQueue:(dispatch_queue_t)queue
+- (dispatch_queue_t)parentQueue
 {
-	@synchronized(self)
+	dispatch_queue_t result = NULL;
+	
+	@synchronized(self) // synchronized with configureWithParent:queue:
 	{
-		if (parentQueue != queue)
-		{
-			if (parentQueue)
-				dispatch_release(parentQueue);
-			
-			parentQueue = queue;
-			dispatch_retain(parentQueue);
-		}
+		result = parentQueue;
 	}
+	
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

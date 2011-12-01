@@ -13,19 +13,21 @@
 	return self;
 }
 
-- (BOOL)isMUCRoomPresence:(XMPPPresence *)presence
+- (BOOL)isMUCRoomElement:(XMPPElement *)element
 {
-	__block BOOL result;
+	XMPPJID *bareFrom = [[element from] bareJID];
+	if (bareFrom == nil)
+	{
+		return NO;
+	}
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		XMPPJID *bareFrom = [[presence from] bareJID];
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		result = [rooms containsObject:bareFrom];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -34,6 +36,20 @@
 	
 	return result;
 }
+
+- (BOOL)isMUCRoomPresence:(XMPPPresence *)presence
+{
+	return [self isMUCRoomElement:presence];
+}
+
+- (BOOL)isMUCRoomMessage:(XMPPMessage *)message
+{
+	return [self isMUCRoomElement:message];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPStream Delegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module
 {
