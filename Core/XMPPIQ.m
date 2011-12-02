@@ -142,7 +142,10 @@
 	NSArray *children = [self children];
 	for (NSXMLElement *child in children)
 	{
-		if ([[child name] caseInsensitiveCompare:@"error"] != NSOrderedSame)
+		// Careful: NSOrderedSame == 0
+		
+		NSString *childName = [child name];
+		if (childName && ([childName caseInsensitiveCompare:@"error"] != NSOrderedSame))
 		{
 			return child;
 		}
@@ -156,7 +159,10 @@
 	NSArray *children = [self children];
 	for (NSXMLElement *child in children)
 	{
-		if ([[child name] caseInsensitiveCompare:@"error"] == NSOrderedSame)
+		// Careful: NSOrderedSame == 0
+		
+		NSString *childName = [child name];
+		if (childName && ([childName caseInsensitiveCompare:@"error"] == NSOrderedSame))
 		{
 			return child;
 		}

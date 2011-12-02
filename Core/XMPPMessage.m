@@ -45,9 +45,37 @@
 	return [[XMPPMessage alloc] init];
 }
 
++ (XMPPMessage *)messageWithType:(NSString *)type
+{
+	return [[XMPPMessage alloc] initWithType:type to:nil];
+}
+
++ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)to
+{
+	return [[XMPPMessage alloc] initWithType:type to:to];
+}
+
 - (id)init
 {
 	self = [super initWithName:@"message"];
+	return self;
+}
+
+- (id)initWithType:(NSString *)type
+{
+	return [self initWithType:type to:nil];
+}
+
+- (id)initWithType:(NSString *)type to:(XMPPJID *)to
+{
+	if ((self = [super initWithName:@"message"]))
+	{
+		if (type)
+			[self addAttributeWithName:@"type" stringValue:type];
+		
+		if (to)
+			[self addAttributeWithName:@"to" stringValue:[to description]];
+	}
 	return self;
 }
 
