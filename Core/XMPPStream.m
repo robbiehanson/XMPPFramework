@@ -2519,9 +2519,16 @@ enum XMPPStreamConfig
 		if ([settings count] == 0)
 		{
 			// Use the default settings, and set the peer name
-			if ([hostName length] > 0)
+			
+			NSString *expectedCertName = hostName;
+			if (expectedCertName == nil)
 			{
-				[settings setObject:hostName forKey:(NSString *)kCFStreamSSLPeerName];
+				expectedCertName = [myJID domain];
+			}
+			
+			if ([expectedCertName length] > 0)
+			{
+				[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
 			}
 		}
 		

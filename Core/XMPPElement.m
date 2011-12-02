@@ -2,6 +2,8 @@
 #import "XMPPJID.h"
 #import "NSXMLElement+XMPP.h"
 
+#import <objc/runtime.h>
+
 
 @implementation XMPPElement
 
@@ -32,7 +34,19 @@
 		xmlString = [coder decodeObject];
 	}
 	
-	return [super initWithXMLString:xmlString error:nil];
+	// The method [super initWithXMLString:error:] may return a different self.
+	// In other words, it may [self release], and alloc/init/return a new self.
+	// 
+	// So to maintain the proper class (XMPPIQ, XMPPMessage, XMPPPresence, etc)
+	// we need to get a reference to the class before invoking super.
+	
+	Class selfClass = [self class];
+	
+	if ((self = [super initWithXMLString:xmlString error:nil]))
+	{
+		object_setClass(self, selfClass);
+	}
+	return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -47,6 +61,18 @@
 	{
 		[coder encodeObject:xmlString];
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Copying
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	NSXMLElement *elementCopy = [super copyWithZone:zone];
+	object_setClass(elementCopy, [self class]);
+	
+	return elementCopy;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

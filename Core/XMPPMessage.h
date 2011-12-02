@@ -17,8 +17,12 @@
 + (XMPPMessage *)messageFromElement:(NSXMLElement *)element;
 
 + (XMPPMessage *)message;
++ (XMPPMessage *)messageWithType:(NSString *)type;
++ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)to;
 
 - (id)init;
+- (id)initWithType:(NSString *)type;
+- (id)initWithType:(NSString *)type to:(XMPPJID *)to;
 
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;

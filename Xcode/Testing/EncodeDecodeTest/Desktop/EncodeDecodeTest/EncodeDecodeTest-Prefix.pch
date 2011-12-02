@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'EncodeDecodeTest' target in the 'EncodeDecodeTest' project
+//
+
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+#endif
