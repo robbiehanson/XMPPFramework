@@ -7,17 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		072A2E211440E1B9007220BF /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E0A1440E1B9007220BF /* Facebook.m */; };
+		072A2E211440E1B9007220BF /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E0A1440E1B9007220BF /* Facebook.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		072A2E221440E1B9007220BF /* FBDialog.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 072A2E0C1440E1B9007220BF /* FBDialog.bundle */; };
-		072A2E231440E1B9007220BF /* FBDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E0E1440E1B9007220BF /* FBDialog.m */; };
-		072A2E241440E1B9007220BF /* FBLoginDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E101440E1B9007220BF /* FBLoginDialog.m */; };
-		072A2E251440E1B9007220BF /* FBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E121440E1B9007220BF /* FBRequest.m */; };
-		072A2E261440E1B9007220BF /* NSObject+SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E161440E1B9007220BF /* NSObject+SBJSON.m */; };
-		072A2E271440E1B9007220BF /* NSString+SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E181440E1B9007220BF /* NSString+SBJSON.m */; };
-		072A2E281440E1B9007220BF /* SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E1A1440E1B9007220BF /* SBJSON.m */; };
-		072A2E291440E1B9007220BF /* SBJsonBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E1C1440E1B9007220BF /* SBJsonBase.m */; };
-		072A2E2A1440E1B9007220BF /* SBJsonParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E1E1440E1B9007220BF /* SBJsonParser.m */; };
-		072A2E2B1440E1B9007220BF /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E201440E1B9007220BF /* SBJsonWriter.m */; };
+		072A2E231440E1B9007220BF /* FBDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E0E1440E1B9007220BF /* FBDialog.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E241440E1B9007220BF /* FBLoginDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E101440E1B9007220BF /* FBLoginDialog.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E251440E1B9007220BF /* FBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E121440E1B9007220BF /* FBRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E261440E1B9007220BF /* NSObject+SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E161440E1B9007220BF /* NSObject+SBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E271440E1B9007220BF /* NSString+SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E181440E1B9007220BF /* NSString+SBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E281440E1B9007220BF /* SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E1A1440E1B9007220BF /* SBJSON.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E291440E1B9007220BF /* SBJsonBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E1C1440E1B9007220BF /* SBJsonBase.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E2A1440E1B9007220BF /* SBJsonParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E1E1440E1B9007220BF /* SBJsonParser.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		072A2E2B1440E1B9007220BF /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E201440E1B9007220BF /* SBJsonWriter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		072A2E321440EA41007220BF /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E2E1440EA41007220BF /* XMPPDigestAuthentication.m */; };
 		072A2E331440EA41007220BF /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 072A2E311440EA41007220BF /* XMPPXFacebookPlatformAuthentication.m */; };
 		DC3731C5139F098E00A8407D /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731C0139F098E00A8407D /* NSData+XMPP.m */; };
@@ -34,7 +34,7 @@
 		DCC494FC1333043200F3C8F6 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CC1333043200F3C8F6 /* DDList.m */; };
 		DCC494FD1333043200F3C8F6 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */; };
 		DCC494FE1333043200F3C8F6 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D01333043200F3C8F6 /* LibIDN.m */; };
-		DCC495001333043200F3C8F6 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D61333043200F3C8F6 /* GCDAsyncSocket.m */; };
+		DCC495001333043200F3C8F6 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D61333043200F3C8F6 /* GCDAsyncSocket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		DCC495011333043200F3C8F6 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D91333043200F3C8F6 /* DDASLLogger.m */; };
 		DCC495021333043200F3C8F6 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494DB1333043200F3C8F6 /* DDFileLogger.m */; };
 		DCC495031333043200F3C8F6 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494DD1333043200F3C8F6 /* DDLog.m */; };
@@ -460,6 +460,7 @@
 		DCD2809B133302F6002CF80A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = Voalte;
 			};
 			buildConfigurationList = DCD2809E133302F6002CF80A /* Build configuration list for PBXProject "FacebookTest" */;
@@ -610,10 +611,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FacebookTest/FacebookTest-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "FacebookTest/FacebookTest-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -628,9 +631,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FacebookTest/FacebookTest-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "FacebookTest/FacebookTest-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
