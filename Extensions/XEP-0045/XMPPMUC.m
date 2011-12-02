@@ -1,5 +1,5 @@
 #import "XMPPMUC.h"
-#import "XMPPRoom.h"
+#import "XMPPFramework.h"
 
 
 @implementation XMPPMUC
@@ -12,6 +12,33 @@
 	}
 	return self;
 }
+
+- (BOOL)activate:(XMPPStream *)aXmppStream
+{
+	if ([super activate:aXmppStream])
+	{
+#ifdef _XMPP_CAPABILITIES_H
+		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+#endif
+		
+		return YES;
+	}
+	
+	return NO;
+}
+
+- (void)deactivate
+{
+#ifdef _XMPP_CAPABILITIES_H
+	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+#endif
+	
+	[super deactivate];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Public API
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (BOOL)isMUCRoomElement:(XMPPElement *)element
 {
@@ -70,5 +97,32 @@
 		[rooms removeObject:room.roomJID];
 	}
 }
+
+#ifdef _XMPP_CAPABILITIES_H
+/**
+ * If an XMPPCapabilites instance is used we want to advertise our support for MUC.
+**/
+- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query
+{
+	// This method is invoked on the moduleQueue.
+	
+	// <query xmlns="http://jabber.org/protocol/disco#info">
+	//   ...
+	//   <identity category='client' type='pc'/>
+	//   <feature var='http://jabber.org/protocol/muc'/>
+	//   ...
+	// </query>
+	
+	NSXMLElement *identity = [NSXMLElement elementWithName:@"identity"];
+	[identity addAttributeWithName:@"category" stringValue:@"client"];
+	[identity addAttributeWithName:@"type" stringValue:@"facebook"];
+	
+	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
+	[feature addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/muc"];
+	
+	[query addChild:identity];
+	[query addChild:feature];
+}
+#endif
 
 @end

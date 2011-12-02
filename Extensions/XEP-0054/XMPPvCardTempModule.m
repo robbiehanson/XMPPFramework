@@ -63,7 +63,7 @@
 	
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
-    if ([storage configureWithParent:self queue:moduleQueue])
+		if ([storage configureWithParent:self queue:moduleQueue])
 		{
 			_moduleStorage = storage;
 		}
