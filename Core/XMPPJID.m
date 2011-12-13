@@ -166,6 +166,16 @@
 	return nil;
 }
 
++ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
+{
+	XMPPJID *jid = [[XMPPJID alloc] init];
+	jid->user = [user copy];
+	jid->domain = [domain copy];
+	jid->resource = [resource copy];
+	
+	return jid;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Encoding, Decoding:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -262,7 +272,7 @@
 	}
 	else
 	{
-		return [XMPPJID jidWithUser:user domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:user domain:domain resource:nil];
 	}
 }
 
@@ -274,7 +284,7 @@
 	}
 	else
 	{
-		return [XMPPJID jidWithUser:nil domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:nil domain:domain resource:nil];
 	}
 }
 
