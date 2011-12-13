@@ -101,7 +101,7 @@ static NSMutableSet *databaseFileNames;
 {
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// If you are using a database file with non-persistent data (e.g. for memory optimization purposes on iOS),
+	// If you are using a database file with pure non-persistent data (e.g. for memory optimization purposes on iOS),
 	// you may want to delete the database file if it already exists on disk.
 	// 
 	// If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
@@ -233,8 +233,6 @@ static NSMutableSet *databaseFileNames;
 {
 	if ((self = [super init]))
 	{
-		
-		
 		[self commonInit];
 	}
 	return self;

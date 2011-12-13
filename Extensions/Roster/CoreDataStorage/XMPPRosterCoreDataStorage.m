@@ -42,18 +42,11 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 #pragma mark Setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id)init
+- (void)commonInit
 {
-	return [self initWithDatabaseFilename:nil];
-}
-
-- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
-{
-	if ((self = [super initWithDatabaseFilename:aDatabaseFileName]))
-	{
-		rosterPopulationSet = [[NSMutableSet alloc] init];
-	}
-	return self;
+	// This method is invoked by all public init methods of the superclass
+	
+	rosterPopulationSet = [[NSMutableSet alloc] init];
 }
 
 - (BOOL)configureWithParent:(XMPPRoster *)aParent queue:(dispatch_queue_t)queue
@@ -99,6 +92,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if (++unsavedCount >= saveThreshold)
 		{
 			[self save];
+			unsavedCount = 0;
 		}
 	}
 }
@@ -114,7 +108,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	// 
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// For example, if you are using the database for non-persistent data you may want to delete the database
+	// For example, if you are using the database for pure non-persistent data you may want to delete the database
 	// file if it already exists on disk.
 	// 
 	// The default implementation does nothing.
@@ -132,8 +126,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	// 
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// For example, if you are using the database for non-persistent data you may want to delete the database
-	// file if it already exists on disk.
+	// For example, you may want to perform cleanup of any non-persistent data before you start using the database.
 	// 
 	// The default implementation does nothing.
 	
@@ -461,16 +454,12 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			if (++unsavedCount >= saveThreshold)
 			{
 				[self save];
+				unsavedCount = 0;
 			}
 		}
     
 		[XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:moc];
 	}];
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Memory Management
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 @end
