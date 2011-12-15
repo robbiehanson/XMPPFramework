@@ -19,14 +19,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		xmppRoom = [[XMPPRoom alloc] initWithRoomStorage:xmppRoomStorage jid:roomJID];
 		
 		[xmppRoom addDelegate:self delegateQueue:dispatch_get_main_queue()];
+		// xmppRoomStorage automatically inherits the delegate(s) of it's parent xmppRoom
+		
 		[xmppRoom activate:xmppStream];
+		[xmppRoom createOrJoinRoomUsingNickname:@"xmppFrameworkMucTest"];
 	}
 	return self;
-}
-
-- (void)awakeFromNib
-{
-	[xmppRoom createOrJoinRoomUsingNickname:@"xmppFrameworkMucTest"];
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -63,7 +61,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (IBAction)sendMessage:(id)sender
 {
-	
+	// Todo...
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,29 +81,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	if (tableView == messagesTableView)
 	{
 		id <XMPPRoomMessage> message = [messages objectAtIndex:row];
-		NSString *str = [NSString stringWithFormat:@"%@:\n%@", message.nickname, message.body];
 		
-		NSTableColumn *col = [[messagesTableView tableColumns] objectAtIndex:0];
-		NSCell *colDataCell = [col dataCell];
+		NSTableColumn *column = [[messagesTableView tableColumns] objectAtIndex:0];
 		
-		float width = [col width];
-		NSFont *font = [colDataCell font];
+		MessageCellView *messageCell = [tableView makeViewWithIdentifier:@"MessageCell" owner:self];
+		messageCell.nicknameField.stringValue = message.nickname;
+		messageCell.messageField.stringValue = message.body;
 		
-		NSTextStorage *textStorage = [[NSTextStorage alloc] initWithString:str];
-		NSTextContainer *textContainer = [[NSTextContainer alloc] initWithContainerSize:NSMakeSize(width, FLT_MAX)];
-		NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+		[messageCell setFrameSize:NSMakeSize([column width], messageCell.frame.size.height)];
 		
-		[layoutManager addTextContainer:textContainer];
-		[textStorage addLayoutManager:layoutManager];
-		
-		[textStorage addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, [textStorage length])];
-		[textContainer setLineFragmentPadding:0.0];
-		
-		(void) [layoutManager glyphRangeForTextContainer:textContainer];
-		NSRect rct = [layoutManager usedRectForTextContainer:textContainer];
-		
-		float height = rct.size.height;
-		return height;
+		return [messageCell fittingHeight];
 	}
 	else
 	{
@@ -113,20 +98,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 }
 
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex
+- (id)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex
 {
 	if (tableView == messagesTableView)
 	{
 		id <XMPPRoomMessage> message = [messages objectAtIndex:rowIndex];
-		return [NSString stringWithFormat:@"%@:\n%@", message.nickname, message.body];
+		
+		MessageCellView *messageCell = [tableView makeViewWithIdentifier:@"MessageCell" owner:self];
+		messageCell.nicknameField.stringValue = message.nickname;
+		messageCell.messageField.stringValue = message.body;
+		
+		return messageCell;
 	}
 	else
 	{
 		id <XMPPRoomOccupant> occupant = [occupants objectAtIndex:rowIndex];
-		return occupant.nickname;
+		
+		NSTableCellView *cell = [tableView makeViewWithIdentifier:@"OccupantCell" owner:self];
+		cell.textField.stringValue = occupant.nickname;
+		
+		return cell;
 	}
 }
 
+- (void)tableViewColumnDidResize:(NSNotification *)notification
+{
+	if (notification.object == messagesTableView)
+	{
+		[messagesTableView noteHeightOfRowsWithIndexesChanged:
+		    [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [messages count])]];
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPRoom Delegate
@@ -167,6 +169,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	[logField setStringValue:[NSString stringWithFormat:@"did receive msg from: %@", [occupantJID resource]]];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPRoomMemoryStorage Delegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
               occupantDidJoin:(XMPPRoomOccupantMemoryStorage *)occupant
@@ -245,6 +251,31 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[messagesTableView beginUpdates];
 	[messagesTableView insertRowsAtIndexes:indexes withAnimation:NSTableViewAnimationSlideUp];
 	[messagesTableView endUpdates];
+}
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@implementation MessageCellView
+
+@synthesize nicknameField;
+@synthesize messageField;
+
+- (CGFloat)fittingHeight
+{
+	// Calculated how much room we need to fit the message (may span multiple lines).
+	
+	NSRect messageBounds = messageField.bounds;
+	messageBounds.size.height = CGFLOAT_MAX;
+	
+	CGSize messageSize = [[messageField cell] cellSizeForBounds:messageBounds];
+	
+	// The fitting height will be the existing height plus the difference.
+	
+	return (self.frame.size.height + (messageSize.height - messageField.frame.size.height));
 }
 
 @end

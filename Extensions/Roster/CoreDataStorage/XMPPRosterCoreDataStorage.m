@@ -44,6 +44,9 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 
 - (void)commonInit
 {
+	XMPPLogTrace();
+	[super commonInit];
+	
 	// This method is invoked by all public init methods of the superclass
 	
 	rosterPopulationSet = [[NSMutableSet alloc] init];

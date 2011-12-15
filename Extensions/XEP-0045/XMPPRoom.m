@@ -888,7 +888,7 @@ enum XMPPRoomState
 	
 	XMPPLogTrace();
 	
-	[xmppRoomStorage handlePresence:presence xmppStream:sender];
+	[xmppRoomStorage handlePresence:presence room:self];
 	
 	// My presence:
 	// 
@@ -1038,7 +1038,7 @@ enum XMPPRoomState
 	
 	if (isChatMessage)
 	{
-		[xmppRoomStorage handleIncomingMessage:message xmppStream:sender];
+		[xmppRoomStorage handleIncomingMessage:message room:self];
 		[multicastDelegate xmppRoom:self didReceiveMessage:message fromOccupant:from];
 	}
 	else
@@ -1074,7 +1074,7 @@ enum XMPPRoomState
 	
 	if (isChatMessage)
 	{
-		[xmppRoomStorage handleOutgoingMessage:message xmppStream:sender];	
+		[xmppRoomStorage handleOutgoingMessage:message room:self];	
 	}
 }
 

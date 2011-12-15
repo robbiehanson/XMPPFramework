@@ -14,6 +14,8 @@
 /**
  * If your subclass needs to do anything for init, it can do so easily by overriding this method.
  * All public init methods will invoke this method at the end of their implementation.
+ * 
+ * Important: If overriden you must invoke [super commonInit] at some point.
 **/
 - (void)commonInit;
 

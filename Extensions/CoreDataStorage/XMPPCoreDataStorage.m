@@ -225,6 +225,7 @@ static NSMutableSet *databaseFileNames;
 		}
 		
 		[self commonInit];
+		NSAssert(storageQueue != NULL, @"Subclass forgot to invoke [super commonInit]");
 	}
 	return self;
 }
@@ -234,6 +235,7 @@ static NSMutableSet *databaseFileNames;
 	if ((self = [super init]))
 	{
 		[self commonInit];
+		NSAssert(storageQueue != NULL, @"Subclass forgot to invoke [super commonInit]");
 	}
 	return self;
 }

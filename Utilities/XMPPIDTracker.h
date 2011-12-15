@@ -59,7 +59,7 @@
  * 
  * // Same xmppStream:didReceiveIQ: as example 1
  * 
- * ---- EXAMPLE 2 - ADVANCED TRACKING ----
+ * ---- EXAMPLE 3 - ADVANCED TRACKING ----
  * 
  * @interface PingTrackingInfo : XMPPBasicTrackingInfo
  *     ...
