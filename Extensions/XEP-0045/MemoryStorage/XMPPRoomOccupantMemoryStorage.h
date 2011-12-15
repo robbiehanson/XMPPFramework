@@ -6,18 +6,28 @@
 @interface XMPPRoomOccupantMemoryStorage : NSObject <XMPPRoomOccupant, NSCopying, NSCoding>
 
 - (id)initWithPresence:(XMPPPresence *)presence;
+- (void)updateWithPresence:(XMPPPresence *)presence;
+
+/**
+ * The properties below are documented in the XMPPRoomOccupant protocol.
+**/
 
 @property (readonly) XMPPPresence *presence;
 
-@property (readonly) XMPPJID  * jid;      // [presence from]
-@property (readonly) NSString * nickname; // [[presence from] nickname]
+@property (readonly) XMPPJID  * jid;
+@property (readonly) XMPPJID  * roomJID;
+@property (readonly) NSString * nickname;
 
 @property (readonly) NSString * role;
 @property (readonly) NSString * affiliation;
-@property (readonly) XMPPJID  * realJID; // Only available in non-anonymous rooms
+@property (readonly) XMPPJID  * realJID;
 
-- (void)updateWithPresence:(XMPPPresence *)presence;
-
+/**
+ * Compares two occupants based on the nickname.
+ * 
+ * This method provides the ordering used by XMPPRoomMemoryStorage.
+ * Subclasses may override this method to provide an alternative sorting mechanism.
+**/
 - (NSComparisonResult)compare:(XMPPRoomOccupantMemoryStorage *)another;
 
 @end

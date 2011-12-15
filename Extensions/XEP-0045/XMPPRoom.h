@@ -52,9 +52,9 @@
 
 @property (readonly) id <XMPPRoomStorage> xmppRoomStorage;
 
-@property (readonly) XMPPJID * roomJID;     // E.g. xmppDevs@muc.deusty.com
+@property (readonly) XMPPJID * roomJID;     // E.g. xmpp-development@conference.deusty.com
 
-@property (readonly) XMPPJID * myRoomJID;   // E.g. xmppDevs@muc.deusty.com/robbiehanson
+@property (readonly) XMPPJID * myRoomJID;   // E.g. xmpp-development@conference.deusty.com/robbiehanson
 @property (readonly) NSString * myNickname; // E.g. robbiehanson
 
 @property (readonly) NSString *roomSubject;
@@ -185,13 +185,18 @@
  * Updates and returns the occupant for the given presence element.
  * If the presence type is "available", and the occupant doesn't already exist, then one should be created.
 **/
-- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)xmppStream;
+- (void)handlePresence:(XMPPPresence *)presence room:(XMPPRoom *)room;
 
 /**
  * Stores or otherwise handles the given message element.
 **/
-- (void)handleOutgoingMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream;
-- (void)handleIncomingMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream;
+- (void)handleIncomingMessage:(XMPPMessage *)message room:(XMPPRoom *)room;
+- (void)handleOutgoingMessage:(XMPPMessage *)message room:(XMPPRoom *)room;
+
+@optional
+
+- (void)handleDidJoinRoom:(XMPPJID *)roomJID withNickname:(NSString *)nickname;
+- (void)handleDidLeaveRoom:(XMPPJID *)roomJID;
 
 @end
 

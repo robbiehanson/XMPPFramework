@@ -20,7 +20,6 @@
 #ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 #endif
-		
 		return YES;
 	}
 	
@@ -104,23 +103,17 @@
 **/
 - (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query
 {
-	// This method is invoked on the moduleQueue.
+	// This method is invoked on our moduleQueue.
 	
 	// <query xmlns="http://jabber.org/protocol/disco#info">
 	//   ...
-	//   <identity category='client' type='pc'/>
 	//   <feature var='http://jabber.org/protocol/muc'/>
 	//   ...
 	// </query>
 	
-	NSXMLElement *identity = [NSXMLElement elementWithName:@"identity"];
-	[identity addAttributeWithName:@"category" stringValue:@"client"];
-	[identity addAttributeWithName:@"type" stringValue:@"facebook"];
-	
 	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
 	[feature addAttributeWithName:@"var" stringValue:@"http://jabber.org/protocol/muc"];
 	
-	[query addChild:identity];
 	[query addChild:feature];
 }
 #endif

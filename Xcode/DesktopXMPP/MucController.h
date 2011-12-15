@@ -11,8 +11,6 @@
 	NSArray *messages;
 	NSArray *occupants;
 	
-	BOOL started;
-	
 	IBOutlet NSTableView * messagesTableView;
 	IBOutlet NSTextField * sendMessageField;
 	IBOutlet NSTextField * logField;
@@ -26,5 +24,18 @@
 
 
 - (IBAction)sendMessage:(id)sender;
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface MessageCellView : NSTableCellView
+
+@property (nonatomic, strong) IBOutlet NSTextField *nicknameField;
+@property (nonatomic, strong) IBOutlet NSTextField *messageField;
+
+- (CGFloat)fittingHeight;
 
 @end

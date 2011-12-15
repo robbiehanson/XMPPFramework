@@ -6,18 +6,38 @@
 @implementation XMPPRoomMessageMemoryStorage
 {
 	XMPPMessage *message;
-	NSDate *timestamp;
+	XMPPJID *jid;
+	NSDate *localTimestamp;
+	NSDate *remoteTimestamp;
+	BOOL isFromMe;
 }
 
-- (id)initWithMessage:(XMPPMessage *)inMessage
+- (id)initWithIncomingMessage:(XMPPMessage *)inMessage
 {
 	if ((self = [super init]))
 	{
 		message = inMessage;
+		jid = [inMessage from];
+		isFromMe = NO;
 		
-		timestamp = [inMessage delayedDeliveryDate];
-		if (timestamp == nil)
-			timestamp = [[NSDate alloc] init];
+		remoteTimestamp = [inMessage delayedDeliveryDate];
+		if (remoteTimestamp)
+			localTimestamp = remoteTimestamp;
+		else
+			localTimestamp = [[NSDate alloc] init];
+	}
+	return self;
+}
+
+- (id)initWithOutgoingMessage:(XMPPMessage *)inMessage  jid:(XMPPJID *)myRoomJID
+{
+	if ((self = [super init]))
+	{
+		message = inMessage;
+		jid = myRoomJID;
+		isFromMe = YES;
+		
+		localTimestamp = [[NSDate alloc] init];
 	}
 	return self;
 }
@@ -43,13 +63,19 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			message   = [coder decodeObjectForKey:@"message"];
-			timestamp = [coder decodeObjectForKey:@"timestamp"];
+			message         = [coder decodeObjectForKey:@"message"];
+			jid             = [coder decodeObjectForKey:@"jid"];
+			localTimestamp  = [coder decodeObjectForKey:@"localTimestamp"];
+			remoteTimestamp = [coder decodeObjectForKey:@"remoteTimestamp"];
+			isFromMe        = [coder decodeBoolForKey:@"isFromMe"];
 		}
 		else
 		{
-			message   = [coder decodeObject];
-			timestamp = [coder decodeObject];
+			message         = [coder decodeObject];
+			jid             = [coder decodeObject];
+			localTimestamp  = [coder decodeObject];
+			remoteTimestamp = [coder decodeObject];
+			isFromMe        = [[coder decodeObject] boolValue];
 		}
 	}
 	return self;
@@ -59,13 +85,19 @@
 {
 	if ([coder allowsKeyedCoding])
 	{
-		[coder encodeObject:message   forKey:@"message"];
-		[coder encodeObject:timestamp forKey:@"timestamp"];
+		[coder encodeObject:message         forKey:@"message"];
+		[coder encodeObject:jid             forKey:@"jid"];
+		[coder encodeObject:localTimestamp  forKey:@"timestamp"];
+		[coder encodeObject:remoteTimestamp forKey:@"remoteTimestamp"];
+		[coder encodeBool:isFromMe          forKey:@"isFromMe"];
 	}
 	else
 	{
 		[coder encodeObject:message];
-		[coder encodeObject:timestamp];
+		[coder encodeObject:jid];
+		[coder encodeObject:localTimestamp];
+		[coder encodeObject:remoteTimestamp];
+		[coder encodeObject:[NSNumber numberWithBool:isFromMe]];
 	}
 }
 
@@ -80,7 +112,10 @@
 	XMPPRoomMessageMemoryStorage *deepCopy = (XMPPRoomMessageMemoryStorage *)[[[self class] alloc] init];
 	
 	deepCopy->message = [message copy];
-	deepCopy->timestamp = [timestamp copy];
+	deepCopy->jid = [jid copy];
+	deepCopy->localTimestamp = [localTimestamp copy];
+	deepCopy->remoteTimestamp = [remoteTimestamp copy];
+	deepCopy->isFromMe = isFromMe;
 	
 	return deepCopy;
 }
@@ -90,16 +125,19 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @synthesize message;
-@synthesize timestamp;
+@synthesize jid;
+@synthesize localTimestamp;
+@synthesize remoteTimestamp;
+@synthesize isFromMe;
 
-- (XMPPJID *)jid
+- (XMPPJID *)roomJID
 {
-	return [message from];
+	return [jid bareJID];
 }
 
 - (NSString *)nickname
 {
-	return [[message from] resource];
+	return [jid resource];
 }
 
 - (NSString *)body
@@ -113,7 +151,7 @@
 
 - (NSComparisonResult)compare:(XMPPRoomMessageMemoryStorage *)another
 {
-	return [timestamp compare:[another timestamp]];
+	return [localTimestamp compare:[another localTimestamp]];
 }
 
 @end
