@@ -13,7 +13,7 @@ extern NSString *const XMPPSRVResolverErrorDomain;
 
 @interface XMPPSRVResolver : NSObject
 {
-	id delegate;
+	__unsafe_unretained id delegate;
 	dispatch_queue_t delegateQueue;
 	
 	dispatch_queue_t resolverQueue;
