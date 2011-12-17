@@ -460,7 +460,7 @@
 		DCD2809B133302F6002CF80A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 				ORGANIZATIONNAME = Voalte;
 			};
 			buildConfigurationList = DCD2809E133302F6002CF80A /* Build configuration list for PBXProject "FacebookTest" */;

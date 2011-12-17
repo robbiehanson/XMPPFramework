@@ -637,7 +637,6 @@
 	}
 	
 	[self addMessage:roomMessage];
-	XMPPLogError(@"messages: %@", messages);
 }
 
 - (void)handleOutgoingMessage:(XMPPMessage *)message room:(XMPPRoom *)room
