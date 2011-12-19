@@ -7,12 +7,12 @@
 
 @interface XMPPTransports : NSObject
 {
-	XMPPStream *__weak xmppStream;
+	XMPPStream *xmppStream;
 }
 
 - (id)initWithStream:(XMPPStream *)xmppStream;
 
-@property (nonatomic, readonly) XMPPStream *xmppStream;
+@property (nonatomic, strong, readonly) XMPPStream *xmppStream;
 
 - (void)queryGatewayDiscoveryIdentityForLegacyService:(NSString *)service;
 - (void)queryGatewayAgentInfo;
