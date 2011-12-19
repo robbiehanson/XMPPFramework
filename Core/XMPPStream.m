@@ -2364,7 +2364,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	if ( ![self didStartNegotiation])
+	if (![self didStartNegotiation])
 	{
 		// TCP connection was just opened - We need to include the opening XML stanza
 		NSString *s1 = @"<?xml version='1.0'?>";
@@ -2542,20 +2542,20 @@ enum XMPPStreamConfig
 		{
 			// Now we start our negotiation over again...
 			[self sendOpeningNegotiation];
+			
+			// We paused reading from the socket.
+			// We're ready to continue now.
+			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM
+			                          buffer:socketBuffer
+			                    bufferOffset:0
+			                       maxLength:[socketBuffer length]
+			                             tag:TAG_XMPP_READ_STREAM];
 		}
 		else
 		{
 			// First time starting negotiation
 			[self startNegotiation];
 		}
-		
-		// We paused reading from the socket.
-		// We're ready to continue now.
-		[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM
-		                          buffer:socketBuffer
-		                    bufferOffset:0
-		                       maxLength:[socketBuffer length]
-		                             tag:TAG_XMPP_READ_STREAM];
 	}
 }
 
