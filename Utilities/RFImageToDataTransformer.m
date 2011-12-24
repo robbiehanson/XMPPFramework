@@ -40,7 +40,7 @@
 #if TARGET_OS_IPHONE
 	return [[UIImage alloc] initWithData:value];
 #else
-  return [[[NSImage alloc] initWithData:value] autorelease];
+	return [[NSImage alloc] initWithData:value];
 #endif
 }
 
