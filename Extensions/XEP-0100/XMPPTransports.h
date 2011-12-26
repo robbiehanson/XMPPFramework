@@ -12,7 +12,7 @@
 
 - (id)initWithStream:(XMPPStream *)xmppStream;
 
-@property (nonatomic, readonly) XMPPStream *xmppStream;
+@property (nonatomic, strong, readonly) XMPPStream *xmppStream;
 
 - (void)queryGatewayDiscoveryIdentityForLegacyService:(NSString *)service;
 - (void)queryGatewayAgentInfo;

@@ -3,6 +3,10 @@
 #import "XMPPDateTimeProfiles.h"
 #import "XMPPFramework.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 #define DEFAULT_TIMEOUT  30.0 // seconds
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,15 +66,12 @@
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		[queryTracker removeAllIDs];
-		[queryTracker release];
 		queryTracker = nil;
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -80,13 +81,6 @@
 	[super deactivate];
 }
 
-- (void)dealloc
-{
-	// queryTracker is handled in the deactivate method,
-	// which is automatically called by [super dealloc] if needed.
-	
-	[super dealloc];
-}
 
 - (BOOL)respondsToQueries
 {
@@ -114,17 +108,15 @@
 			respondsToQueries = flag;
 			
 		#ifdef _XMPP_CAPABILITIES_H
-			// Capabilities may have changed, need to notify others.
-			
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
-			XMPPPresence *presence = xmppStream.myPresence;
-			if (presence)
-			{
-				[xmppStream sendElement:presence];
+			@autoreleasepool {
+				// Capabilities may have changed, need to notify others.
+				
+				XMPPPresence *presence = xmppStream.myPresence;
+				if (presence)
+				{
+					[xmppStream sendElement:presence];
+				}
 			}
-			
-			[pool drain];
 		#endif
 		}
 	};
@@ -145,18 +137,15 @@
 	
 	NSString *queryID = [xmppStream generateUUID];
 	
-	dispatch_async(moduleQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(moduleQueue, ^{ @autoreleasepool {
 		
 		XMPPTimeQueryInfo *queryInfo = [[XMPPTimeQueryInfo alloc] initWithTarget:self
 		                                                                selector:@selector(handleResponse:withInfo:)
 		                                                                 timeout:timeout];
 		
 		[queryTracker addID:queryID trackingInfo:queryInfo];
-		[queryInfo release];
 		
-		[pool drain];
-	});
+	}});
 	
 	return queryID;
 }
@@ -474,7 +463,6 @@
 	
 	NSString *utcValue = [df stringFromDate:date];
 	
-	[df release];
 	
 	NSInteger tzoInSeconds = [[NSTimeZone systemTimeZone] secondsFromGMTForDate:date];
 	
@@ -517,10 +505,5 @@
 	return [timeSent timeIntervalSinceNow] * -1.0;
 }
 
-- (void)dealloc
-{
-	[timeSent release];
-	[super dealloc];
-}
 
 @end

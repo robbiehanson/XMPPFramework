@@ -13,12 +13,12 @@ extern NSString *const XMPPSRVResolverErrorDomain;
 
 @interface XMPPSRVResolver : NSObject
 {
-	id delegate;
+	__unsafe_unretained id delegate;
 	dispatch_queue_t delegateQueue;
 	
 	dispatch_queue_t resolverQueue;
 	
-	NSString *srvName;
+	__strong NSString *srvName;
 	NSTimeInterval timeout;
 	
     BOOL resolveInProgress;
@@ -37,7 +37,7 @@ extern NSString *const XMPPSRVResolverErrorDomain;
 **/
 - (id)initWithdDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)dq resolverQueue:(dispatch_queue_t)rq;
 
-@property (readonly) NSString *srvName;
+@property (strong, readonly) NSString *srvName;
 @property (readonly) NSTimeInterval timeout;
 
 - (void)startWithSRVName:(NSString *)aSRVName timeout:(NSTimeInterval)aTimeout;

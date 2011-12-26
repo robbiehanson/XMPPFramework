@@ -1,11 +1,15 @@
 #import "NSNumber+XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 
 @implementation NSNumber (XMPP)
 
 + (NSNumber *)numberWithPtr:(const void *)ptr
 {
-	return [[[NSNumber alloc] initWithPtr:ptr] autorelease];
+	return [[NSNumber alloc] initWithPtr:ptr];
 }
 
 - (id)initWithPtr:(const void *)ptr
@@ -13,11 +17,90 @@
 	return [self initWithLong:(long)ptr];
 }
 
-+ (BOOL)parseString:(NSString *)str intoSInt64:(SInt64 *)pNum
++ (BOOL)parseString:(NSString *)str intoInt32:(int32_t *)pNum
 {
-	if(str == nil)
+	if (str == nil)
 	{
-		*pNum = 0;
+		*pNum = (int32_t)0;
+		return NO;
+	}
+	
+	errno = 0;
+	
+	long result = strtol([str UTF8String], NULL, 10);
+	
+	if (LONG_BIT != 32)
+	{
+		if (result > INT32_MAX)
+		{
+			*pNum = INT32_MAX;
+			return NO;
+		}
+		if (result < INT32_MIN)
+		{
+			*pNum = INT32_MIN;
+			return NO;
+		}
+	}
+	
+	// From the manpage:
+	// 
+	// If no conversion could be performed, 0 is returned and the global variable errno is set to EINVAL.
+	// If an overflow or underflow occurs, errno is set to ERANGE and the function return value is clamped.
+	// 
+	// Clamped means it will be TYPE_MAX or TYPE_MIN.
+	// If overflow/underflow occurs, returning a clamped value is more accurate then returning zero.
+	
+	*pNum = (int32_t)result;
+	
+	if (errno != 0)
+		return NO;
+	else
+		return YES;
+}
+
++ (BOOL)parseString:(NSString *)str intoUInt32:(uint32_t *)pNum
+{
+	if (str == nil)
+	{
+		*pNum = (uint32_t)0;
+		return NO;
+	}
+	
+	errno = 0;
+	
+	unsigned long result = strtoul([str UTF8String], NULL, 10);
+	
+	if (LONG_BIT != 32)
+	{
+		if (result > UINT32_MAX)
+		{
+			*pNum = UINT32_MAX;
+			return NO;
+		}
+	}
+	
+	// From the manpage:
+	// 
+	// If no conversion could be performed, 0 is returned and the global variable errno is set to EINVAL.
+	// If an overflow or underflow occurs, errno is set to ERANGE and the function return value is clamped.
+	// 
+	// Clamped means it will be TYPE_MAX or TYPE_MIN.
+	// If overflow/underflow occurs, returning a clamped value is more accurate then returning zero.
+	
+	*pNum = (uint32_t)result;
+	
+	if (errno != 0)
+		return NO;
+	else
+		return YES;
+}
+
++ (BOOL)parseString:(NSString *)str intoInt64:(int64_t *)pNum
+{
+	if (str == nil)
+	{
+		*pNum = (int64_t)0;
 		return NO;
 	}
 	
@@ -27,17 +110,25 @@
 	
 	*pNum = strtoll([str UTF8String], NULL, 10);
 	
-	if(errno != 0)
+	// From the manpage:
+	// 
+	// If no conversion could be performed, 0 is returned and the global variable errno is set to EINVAL.
+	// If an overflow or underflow occurs, errno is set to ERANGE and the function return value is clamped.
+	// 
+	// Clamped means it will be TYPE_MAX or TYPE_MIN.
+	// If overflow/underflow occurs, returning a clamped value is more accurate then returning zero.
+	
+	if (errno != 0)
 		return NO;
 	else
 		return YES;
 }
 
-+ (BOOL)parseString:(NSString *)str intoUInt64:(UInt64 *)pNum
++ (BOOL)parseString:(NSString *)str intoUInt64:(uint64_t *)pNum
 {
-	if(str == nil)
+	if (str == nil)
 	{
-		*pNum = 0;
+		*pNum = (uint64_t)0;
 		return NO;
 	}
 	
@@ -47,7 +138,15 @@
 	
 	*pNum = strtoull([str UTF8String], NULL, 10);
 	
-	if(errno != 0)
+	// From the manpage:
+	// 
+	// If no conversion could be performed, 0 is returned and the global variable errno is set to EINVAL.
+	// If an overflow or underflow occurs, errno is set to ERANGE and the function return value is clamped.
+	// 
+	// Clamped means it will be TYPE_MAX or TYPE_MIN.
+	// If overflow/underflow occurs, returning a clamped value is more accurate then returning zero.
+	
+	if (errno != 0)
 		return NO;
 	else
 		return YES;
@@ -55,44 +154,18 @@
 
 + (BOOL)parseString:(NSString *)str intoNSInteger:(NSInteger *)pNum
 {
-	if(str == nil)
-	{
-		*pNum = 0;
-		return NO;
-	}
-	
-	errno = 0;
-	
-	// On LP64, NSInteger = long = 64 bit
-	// Otherwise, NSInteger = int = long = 32 bit
-	
-	*pNum = strtol([str UTF8String], NULL, 10);
-	
-	if(errno != 0)
-		return NO;
+	if (NSIntegerMax == INT32_MAX)
+		return [self parseString:str intoInt32:(int32_t *)pNum];
 	else
-		return YES;
+		return [self parseString:str intoInt64:(int64_t *)pNum];
 }
 
 + (BOOL)parseString:(NSString *)str intoNSUInteger:(NSUInteger *)pNum
 {
-	if(str == nil)
-	{
-		*pNum = 0;
-		return NO;
-	}
-	
-	errno = 0;
-	
-	// On LP64, NSUInteger = unsigned long = 64 bit
-	// Otherwise, NSUInteger = unsigned int = unsigned long = 32 bit
-	
-	*pNum = strtoul([str UTF8String], NULL, 10);
-	
-	if(errno != 0)
-		return NO;
+	if (NSUIntegerMax == UINT32_MAX)
+		return [self parseString:str intoUInt32:(uint32_t *)pNum];
 	else
-		return YES;
+		return [self parseString:str intoUInt64:(uint64_t *)pNum];
 }
 
 + (UInt8)extractUInt8FromData:(NSData *)data atOffset:(unsigned int)offset

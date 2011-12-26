@@ -23,6 +23,9 @@
 #import "XMPPStream.h"
 #import "XMPPvCardTempModule.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
@@ -69,11 +72,11 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	NSParameterAssert(xmppvCardTempModule != nil);
 
 	if ((self = [super initWithDispatchQueue:queue])) {
-		_xmppvCardTempModule = [xmppvCardTempModule retain];
+		_xmppvCardTempModule = xmppvCardTempModule;
 
 		// we don't need to call the storage configureWithParent:queue: method,
 		// because the vCardTempModule already did that.
-		_moduleStorage = [(id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage retain];
+		_moduleStorage = (id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage;
 
 		[_xmppvCardTempModule addDelegate:self delegateQueue:moduleQueue];
 	}
@@ -84,13 +87,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 - (void)dealloc {
 	[_xmppvCardTempModule removeDelegate:self];
 
-	[_moduleStorage release];
 	_moduleStorage = nil;
-
-	[_xmppvCardTempModule release];
-	_xmppvCardTempModule = nil;
-	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,10 +104,9 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	
 	__block NSData *photoData;
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		photoData = [[_moduleStorage photoDataForJID:jid xmppStream:xmppStream] retain];
+		photoData = [_moduleStorage photoDataForJID:jid xmppStream:xmppStream];
 		
 		if (photoData == nil) 
 		{
@@ -121,7 +117,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		#if TARGET_OS_IPHONE
 			UIImage *photo = [UIImage imageWithData:photoData];
 		#else
-			NSImage *photo = [[[NSImage alloc] initWithData:photoData] autorelease];
+			NSImage *photo = [[NSImage alloc] initWithData:photoData];
 		#endif
 			
 			[multicastDelegate xmppvCardAvatarModule:self 
@@ -129,15 +125,14 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 			                                  forJID:jid];
 		}
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
 	
-	return [photoData autorelease];
+	return photoData;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +217,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	#if TARGET_OS_IPHONE
 		UIImage *photo = [UIImage imageWithData:vCardTemp.photo];
 	#else
-		NSImage *photo = [[[NSImage alloc] initWithData:vCardTemp.photo] autorelease];
+		NSImage *photo = [[NSImage alloc] initWithData:vCardTemp.photo];
 	#endif
 		
 		if (photo != nil)

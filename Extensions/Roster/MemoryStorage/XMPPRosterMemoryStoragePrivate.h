@@ -30,9 +30,9 @@
 - (void)clearAllResources;
 
 #if TARGET_OS_IPHONE
-@property (nonatomic, retain, readwrite) UIImage *photo;
+@property (nonatomic, strong, readwrite) UIImage *photo;
 #else
-@property (nonatomic, retain, readwrite) NSImage *photo;
+@property (nonatomic, strong, readwrite) NSImage *photo;
 #endif
 
 @end

@@ -4,6 +4,27 @@
 #import <libxml/xpath.h>
 #import <libxml/xpathInternals.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
+/**
+ * Welcome to KissXML.
+ * 
+ * The project page has documentation if you have questions.
+ * https://github.com/robbiehanson/KissXML
+ * 
+ * If you're new to the project you may wish to read the "Getting Started" wiki.
+ * https://github.com/robbiehanson/KissXML/wiki/GettingStarted
+ * 
+ * KissXML provides a drop-in replacement for Apple's NSXML class cluster.
+ * The goal is to get the exact same behavior as the NSXML classes.
+ * 
+ * For API Reference, see Apple's excellent documentation,
+ * either via Xcode's Mac OS X documentation, or via the web:
+ * 
+ * https://github.com/robbiehanson/KissXML/wiki/Reference
+**/
 
 @implementation DDXMLNode
 
@@ -59,17 +80,17 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 
 + (id)elementWithName:(NSString *)name
 {
-	return [[[DDXMLElement alloc] initWithName:name] autorelease];
+	return [[DDXMLElement alloc] initWithName:name];
 }
 
 + (id)elementWithName:(NSString *)name stringValue:(NSString *)string
 {
-	return [[[DDXMLElement alloc] initWithName:name stringValue:string] autorelease];
+	return [[DDXMLElement alloc] initWithName:name stringValue:string];
 }
 
 + (id)elementWithName:(NSString *)name children:(NSArray *)children attributes:(NSArray *)attributes
 {
-	DDXMLElement *result = [[[DDXMLElement alloc] initWithName:name] autorelease];
+	DDXMLElement *result = [[DDXMLElement alloc] initWithName:name];
 	[result setChildren:children];
 	[result setAttributes:attributes];
 	
@@ -78,7 +99,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 
 + (id)elementWithName:(NSString *)name URI:(NSString *)URI
 {
-	return [[[DDXMLElement alloc] initWithName:name URI:URI] autorelease];
+	return [[DDXMLElement alloc] initWithName:name URI:URI];
 }
 
 + (id)attributeWithName:(NSString *)name stringValue:(NSString *)stringValue
@@ -87,7 +108,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (attr == NULL) return nil;
 	
-	return [[[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:nil] autorelease];
+	return [[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:nil];
 }
 
 + (id)attributeWithName:(NSString *)name URI:(NSString *)URI stringValue:(NSString *)stringValue
@@ -99,7 +120,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	DDXMLAttributeNode *result = [[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:nil];
 	[result setURI:URI];
 	
-	return [result autorelease];
+	return result;
 }
 
 + (id)namespaceWithName:(NSString *)name stringValue:(NSString *)stringValue
@@ -111,7 +132,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (ns == NULL) return nil;
 	
-	return [[[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:NULL owner:nil] autorelease];
+	return [[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:NULL owner:nil];
 }
 
 + (id)processingInstructionWithName:(NSString *)name stringValue:(NSString *)stringValue
@@ -120,7 +141,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (procInst == NULL) return nil;
 	
-	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)procInst owner:nil] autorelease];
+	return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)procInst owner:nil];
 }
 
 + (id)commentWithStringValue:(NSString *)stringValue
@@ -129,7 +150,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (comment == NULL) return nil;
 	
-	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)comment owner:nil] autorelease];
+	return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)comment owner:nil];
 }
 
 + (id)textWithStringValue:(NSString *)stringValue
@@ -138,7 +159,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	if (text == NULL) return nil;
 	
-	return [[[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)text owner:nil] autorelease];
+	return [[DDXMLNode alloc] initWithPrimitive:(xmlKindPtr)text owner:nil];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +198,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 **/
 + (id)nodeWithPrimitive:(xmlKindPtr)kindPtr owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLNode alloc] initWithPrimitive:kindPtr owner:owner] autorelease];
+	return [[DDXMLNode alloc] initWithPrimitive:kindPtr owner:owner];
 }
 
 /**
@@ -189,13 +210,31 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	if ((self = [super init]))
 	{
 		genericPtr = kindPtr;
-		owner = [inOwner retain];
+		owner = inOwner;
 		
 	#if DDXML_DEBUG_MEMORY_ISSUES
 		MarkBirth(genericPtr, self);
 	#endif
 	}
 	return self;
+}
+
+/**
+ * This method shouldn't be used.
+ * To maintain compatibility with Apple, we return an invalid node.
+**/
+- (id)init
+{
+	self = [super init];
+	
+	if ([self isKindOfClass:[DDXMLInvalidNode class]])
+	{
+		return self;
+	}
+	else
+	{
+		return [[DDXMLInvalidNode alloc] init];
+	}
 }
 
 - (void)dealloc
@@ -250,12 +289,9 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		}
 		else
 		{
-			NSAssert1(NO, @"Cannot free unknown node type: %i", ((xmlKindPtr)genericPtr)->type);
+			NSAssert1(NO, @"Cannot free unknown node type: %i", genericPtr->type);
 		}
 	}
-	
-	[owner release];
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -373,17 +409,35 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 - (NSString *)name
 {
 	// Note: DDXMLNamespaceNode overrides this method
+	// Note: DDXMLAttributeNode overrides this method
 	
 #if DDXML_DEBUG_MEMORY_ISSUES
 	DDXMLNotZombieAssert();
 #endif
 	
-	const char *name = (const char *)((xmlStdPtr)genericPtr)->name;
-	
-	if (name == NULL)
+	const xmlChar *xmlName = ((xmlStdPtr)genericPtr)->name;
+	if (xmlName == NULL)
+	{
 		return nil;
-	else
-		return [NSString stringWithUTF8String:name];
+	}
+	
+	NSString *name = [NSString stringWithUTF8String:(const char *)xmlName];
+	
+	if (IsXmlNodePtr(genericPtr))
+	{
+		xmlNodePtr node = (xmlNodePtr)genericPtr;
+		
+		NSRange range = [name rangeOfString:@":"];
+		if (range.length == 0)
+		{
+			if (node->ns && node->ns->prefix)
+			{
+				return [NSString stringWithFormat:@"%s:%@", node->ns->prefix, name];
+			}
+		}
+	}
+	
+	return name;
 }
 
 - (void)setStringValue:(NSString *)string
@@ -589,7 +643,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		child = child->next;
 	}
 	
-	return [[result copy] autorelease];
+	return [result copy];
 }
 
 /**
@@ -807,9 +861,8 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	{
 		if (IsXmlNodePtr(genericPtr))
 		{
-			[[self class] detachChild:(xmlNodePtr)node fromNode:node->parent];
+			[[self class] detachChild:(xmlNodePtr)node];
 			
-			[owner release];
 			owner = nil;
 		}
 	}
@@ -874,7 +927,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		node = (xmlStdPtr)node->parent;
 	}
 	
-	return [[result copy] autorelease];
+	return [result copy];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -972,6 +1025,58 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	return nil;
 }
 
++ (void)getHasPrefix:(BOOL *)hasPrefixPtr localName:(NSString **)localNamePtr forName:(NSString *)name
+{
+	// This is a private/internal method
+	
+	if (name)
+	{
+		NSRange range = [name rangeOfString:@":"];
+		
+		if (range.length != 0)
+		{
+			if (hasPrefixPtr) *hasPrefixPtr = range.location > 0;
+			if (localNamePtr) *localNamePtr = [name substringFromIndex:(range.location + range.length)];
+		}
+		else
+		{
+			if (hasPrefixPtr) *hasPrefixPtr = NO;
+			if (localNamePtr) *localNamePtr = name;
+		}
+	}
+	else
+	{
+		if (hasPrefixPtr) *hasPrefixPtr = NO;
+		if (localNamePtr) *localNamePtr = nil;
+	}
+}
+
++ (void)getPrefix:(NSString **)prefixPtr localName:(NSString **)localNamePtr forName:(NSString *)name
+{
+	// This is a private/internal method
+	
+	if (name)
+	{
+		NSRange range = [name rangeOfString:@":"];
+		
+		if (range.length != 0)
+		{
+			if (prefixPtr)    *prefixPtr    = [name substringToIndex:range.location];
+			if (localNamePtr) *localNamePtr = [name substringFromIndex:(range.location + range.length)];
+		}
+		else
+		{
+			if (prefixPtr)    *prefixPtr    = @"";
+			if (localNamePtr) *localNamePtr = name;
+		}
+	}
+	else
+	{
+		if (prefixPtr)    *prefixPtr    = @"";
+		if (localNamePtr) *localNamePtr = nil;
+	}
+}
+
 /**
  * Returns the local name from the specified qualified name.
  * 
@@ -985,16 +1090,10 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 {
 	// This is a public/API method
 	
-	if (name)
-	{
-		NSRange range = [name rangeOfString:@":"];
-		
-		if (range.length != 0)
-			return [name substringFromIndex:(range.location + range.length)];
-		else
-			return name;
-	}
-	return nil;
+	NSString *localName;
+	[self getPrefix:NULL localName:&localName forName:name];
+	
+	return localName;
 }
 
 /**
@@ -1011,16 +1110,10 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 {
 	// This is a public/API method
 	
-	if (name)
-	{
-		NSRange range = [name rangeOfString:@":"];
-		
-		if (range.length != 0)
-		{
-			return [name substringToIndex:range.location];
-		}
-	}
-	return @"";
+	NSString *prefix;
+	[self getPrefix:&prefix localName:NULL forName:name];
+	
+	return prefix;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1065,11 +1158,18 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		xmlIndentTreeOutput = 1;
 	}
 	
+	int dumpCnt;
+	
 	xmlBufferPtr bufferPtr = xmlBufferCreate();
 	if (IsXmlNsPtr(genericPtr))
-		xmlNodeDump(bufferPtr, NULL, (xmlNodePtr)genericPtr, 0, format);
+		dumpCnt = xmlNodeDump(bufferPtr, NULL, (xmlNodePtr)genericPtr, 0, format);
 	else
-		xmlNodeDump(bufferPtr, ((xmlStdPtr)genericPtr)->doc, (xmlNodePtr)genericPtr, 0, format);
+		dumpCnt = xmlNodeDump(bufferPtr, ((xmlStdPtr)genericPtr)->doc, (xmlNodePtr)genericPtr, 0, format);
+	
+	if (dumpCnt < 0)
+	{
+		return nil;
+	}
 	
 	if ([self kind] == DDXMLTextKind)
 	{
@@ -1082,11 +1182,11 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	else
 	{
 		NSMutableString *resTmp = [NSMutableString stringWithUTF8String:(const char *)bufferPtr->content];
-		CFStringTrimWhitespace((CFMutableStringRef)resTmp);
+		CFStringTrimWhitespace((__bridge CFMutableStringRef)resTmp);
 		
 		xmlBufferFree(bufferPtr);
 		
-		return [[resTmp copy] autorelease];
+		return [resTmp copy];
 	}
 }
 
@@ -1293,95 +1393,241 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 }
 
 /**
- * Detaches the given attribute from the given node.
- * The attribute's surrounding prev/next pointers are properly updated to remove the attribute from the attr list.
- * Then, if flag is YES, the attribute's parent, prev, next and doc pointers are destroyed.
+ * If node->ns is pointing to the given ns, the pointer is nullified.
+ * The same goes for any attributes and childrend of node.
 **/
-+ (void)detachAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node andNullifyPointers:(BOOL)flag
++ (void)recursiveStripNamespace:(xmlNsPtr)ns fromNode:(xmlNodePtr)node
 {
-	// Update the surrounding prev/next pointers
-	if (attr->prev == NULL)
+	if (node->ns == ns)
 	{
-		if (attr->next == NULL)
-		{
-			node->properties = NULL;
-		}
-		else
-		{
-			node->properties = attr->next;
-			attr->next->prev = NULL;
-		}
-	}
-	else
-	{
-		if (attr->next == NULL)
-		{
-			attr->prev->next = NULL;
-		}
-		else
-		{
-			attr->prev->next = attr->next;
-			attr->next->prev = attr->prev;
-		}
+		node->ns = NULL;
 	}
 	
-	if (flag)
-	{
-		// Nullify pointers
-		attr->parent = NULL;
-		attr->prev   = NULL;
-		attr->next   = NULL;
-		if(attr->doc != NULL) [self stripDocPointersFromAttr:attr];
-	}
-}
-
-/**
- * Detaches the given attribute from the given node.
- * The attribute's surrounding prev/next pointers are properly updated to remove the attribute from the attr list.
- * Then the attribute's parent, prev, next and doc pointers are destroyed.
-**/
-+ (void)detachAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node
-{
-	[self detachAttribute:attr fromNode:node andNullifyPointers:YES];
-}
-
-/**
- * Removes and free's the given attribute from the given node.
- * The attribute's surrounding prev/next pointers are properly updated to remove the attribute from the attr list.
-**/
-+ (void)removeAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node
-{
-#if DDXML_DEBUG_MEMORY_ISSUES
-	MarkZombies(attr);
-#endif
-	
-	// We perform a bit of optimization here.
-	// No need to bother nullifying pointers since we're about to free the node anyway.
-	[self detachAttribute:attr fromNode:node andNullifyPointers:NO];
-	
-	xmlFreeProp(attr);
-}
-
-/**
- * Removes and frees all attributes from the given node.
- * Upon return, the given node's properties pointer is NULL.
-**/
-+ (void)removeAllAttributesFromNode:(xmlNodePtr)node
-{
 	xmlAttrPtr attr = node->properties;
-	while (attr != NULL)
+	while (attr)
 	{
-		xmlAttrPtr nextAttr = attr->next;
-		
-	#if DDXML_DEBUG_MEMORY_ISSUES
-		MarkZombies(attr);
-	#endif
-		
-		xmlFreeProp(attr);
-		attr = nextAttr;
+		if (attr->ns == ns)
+		{
+			attr->ns = NULL;
+		}
+		attr = attr->next;
 	}
 	
-	node->properties = NULL;
+	xmlNodePtr child = node->children;
+	while (child)
+	{
+		[self recursiveStripNamespace:ns fromNode:child];
+		child = child->next;
+	}
+}
+
+/**
+ * If node or any of its attributes or children are referencing the the given old namespace,
+ * they are migrated to reference the new namespace instead.
+ * 
+ * If newNs is NULL, and a reference to oldNs is found, then oldNs is copied,
+ * and the copy is used for the remainder of the recursion.
+ * 
+ * This method makes copies of oldNs as needed so that oldNs can be cleanly detached from the tree.
+**/
++ (void)recursiveMigrateNamespace:(xmlNsPtr)oldNs to:(xmlNsPtr)newNs node:(xmlNodePtr)node
+{
+	// Do we need to copy old namespace?
+	
+	if (newNs == NULL)
+	{
+		// A copy needs to be made if:
+		//  * node->ns == oldNs
+		//  * attr->ns == oldNs
+		// 
+		// Remember: The namespaces in node->nsDef are owned by node.
+		//           That's not what we're migrating.
+		
+		BOOL needsCopy = (node->ns == oldNs);
+		
+		if (!needsCopy)
+		{
+			xmlAttrPtr attr = node->properties;
+			while (attr)
+			{
+				if (attr->ns == oldNs)
+				{
+					needsCopy = YES;
+					break;
+				}
+				attr = attr->next;
+			}
+		}
+		
+		if (needsCopy)
+		{
+			// Copy oldNs, and place at the end of the node's namspace list
+			newNs = xmlNewNs(NULL, oldNs->href, oldNs->prefix);
+			
+			if (node->nsDef == NULL)
+			{
+				node->nsDef = newNs;
+			}
+			else
+			{
+				xmlNsPtr lastNs = node->nsDef;
+				while (lastNs->next)
+				{
+					lastNs = lastNs->next;
+				}
+				
+				lastNs->next = newNs;
+			}
+		}
+	}
+	
+	// Migrate node & attributes
+	
+	if (newNs)
+	{
+		if (node->ns == oldNs)
+		{
+			node->ns = newNs;
+		}
+		
+		xmlAttrPtr attr = node->properties;
+		while (attr)
+		{
+			if (attr->ns == oldNs)
+			{
+				attr->ns = newNs;
+			}
+			attr = attr->next;
+		}
+	}
+	
+	// Migrate children
+	
+	xmlNodePtr child = node->children;
+	while (child)
+	{
+		[self recursiveMigrateNamespace:oldNs to:newNs node:child];
+		child = child->next;
+	}
+}
+
+/**
+ * If node has a default namespace allocated outside the given root,
+ * this method copies the namespace so that the given root can be cleanly detached from its tree.
+**/
++ (void)recursiveFixDefaultNamespacesInNode:(xmlNodePtr)node withNewRoot:(xmlNodePtr)rootNode
+{
+	NSAssert(rootNode != NULL, @"Must specify rootNode.");
+	
+	// Step 1 of 3
+	// 
+	// Copy our namespace.
+	// It's important to do this first (before the other steps).
+	// This way attributes and children can reference our copy. (prevents multiple copies throughout tree)
+	
+	xmlNsPtr nodeNs = node->ns;
+	if (nodeNs)
+	{
+		// Does the namespace reside within the new root somewhere?
+		// We can find out by searching for it in nsDef lists up to the given root.
+		
+		BOOL nsResidesWithinNewRoot = NO;
+		
+		xmlNodePtr treeNode = node;
+		while (treeNode)
+		{
+			xmlNsPtr treeNs = treeNode->nsDef;
+			while (treeNs)
+			{
+				if (treeNs == nodeNs)
+				{
+					nsResidesWithinNewRoot = YES;
+					break;
+				}
+				
+				treeNs = treeNs->next;
+			}
+			
+			if (nsResidesWithinNewRoot || treeNode == rootNode)
+				treeNode = NULL;
+			else
+				treeNode = treeNode->parent;
+		}
+		
+		if (!nsResidesWithinNewRoot)
+		{
+			// Create a copy of the namespace, add to nsDef list, and then set as ns
+			xmlNsPtr nodeNsCopy = xmlNewNs(NULL, nodeNs->href, nodeNs->prefix);
+			
+			nodeNsCopy->next = node->nsDef;
+			node->nsDef = nodeNsCopy;
+			
+			node->ns = nodeNsCopy;
+		}
+	}
+	
+	// Step 2 of 3
+	// 
+	// If any attributes are referencing namespaces outside the new root,
+	// copy the namespaces into node, and have the attributes reference the copy.
+	
+	xmlAttrPtr attr = node->properties;
+	while (attr)
+	{
+		xmlNsPtr attrNs = attr->ns;
+		while (attrNs)
+		{
+			BOOL nsResidesWithinNewRoot = NO;
+			
+			xmlNodePtr treeNode = node;
+			while (treeNode)
+			{
+				xmlNsPtr treeNs = treeNode->nsDef;
+				while (treeNs)
+				{
+					if (treeNs == attrNs)
+					{
+						nsResidesWithinNewRoot = YES;
+						break;
+					}
+					
+					treeNs = treeNs->next;
+				}
+				
+				if (nsResidesWithinNewRoot || treeNode == rootNode)
+					treeNode = NULL;
+				else
+					treeNode = treeNode->parent;
+			}
+			
+			if (!nsResidesWithinNewRoot)
+			{
+				// Create a copy of the namespace, add to node's nsDef list, and then set as attribute's ns
+				xmlNsPtr attrNsCopy = xmlNewNs(NULL, attrNs->href, attrNs->prefix);
+				
+				attrNsCopy->next = node->nsDef;
+				node->nsDef = attrNsCopy;
+				
+				attr->ns = attrNsCopy;
+			}
+			
+			attrNs = attrNs->next;
+		}
+		
+		attr = attr->next;
+	}
+	
+	// Step 3 of 3
+	// 
+	// Copy namespaces into children
+	
+	xmlNodePtr childNode = node->children;
+	while (childNode)
+	{
+		[self recursiveFixDefaultNamespacesInNode:childNode withNewRoot:rootNode];
+		
+		childNode = childNode->next;
+	}
 }
 
 /**
@@ -1391,6 +1637,36 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 **/
 + (void)detachNamespace:(xmlNsPtr)ns fromNode:(xmlNodePtr)node
 {
+	// If node, or any of node's attributes are referring to this namespace,
+	// then we need to nullify those references.
+	// 
+	// However, if any children are referring to this namespace,
+	// then we instruct those children to make copies.
+	
+	if (node->ns == ns)
+	{
+		node->ns = NULL;
+	}
+	
+	xmlAttrPtr attr = node->properties;
+	while (attr)
+	{
+		if (attr->ns == ns)
+		{
+			attr->ns = NULL;
+		}
+		attr = attr->next;
+	}
+	
+	xmlNodePtr child = node->children;
+	while (child)
+	{
+		[self recursiveMigrateNamespace:ns to:NULL node:child];
+		child = child->next;
+	}
+	
+	// Now detach namespace from the namespace list.
+	// 
 	// Namespace nodes have no previous pointer, so we have to search for the node
 	
 	xmlNsPtr previousNs = NULL;
@@ -1410,11 +1686,6 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		
 		previousNs = currentNs;
 		currentNs = currentNs->next;
-	}
-	
-	if (node->ns == ns)
-	{
-		node->ns = NULL;
 	}
 	
 	// Nullify pointers
@@ -1463,23 +1734,120 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 }
 
 /**
- * Detaches the given child from the given node.
- * The child's surrounding prev/next pointers are properly updated to remove the child from the node's children list.
- * Then, if flag is YES, the child's parent, prev, next and doc pointers are destroyed.
+ * Detaches the given attribute from its parent node.
+ * The attribute's surrounding prev/next pointers are properly updated to remove the attribute from the attr list.
+ * Then, if the clean flag is YES, the attribute's parent, prev, next and doc pointers are set to null.
 **/
-+ (void)detachChild:(xmlNodePtr)child fromNode:(xmlNodePtr)node andNullifyPointers:(BOOL)flag
++ (void)detachAttribute:(xmlAttrPtr)attr andClean:(BOOL)clean
 {
+	xmlNodePtr parent = attr->parent;
+	
+	// Update the surrounding prev/next pointers
+	if (attr->prev == NULL)
+	{
+		if (attr->next == NULL)
+		{
+			parent->properties = NULL;
+		}
+		else
+		{
+			parent->properties = attr->next;
+			attr->next->prev = NULL;
+		}
+	}
+	else
+	{
+		if (attr->next == NULL)
+		{
+			attr->prev->next = NULL;
+		}
+		else
+		{
+			attr->prev->next = attr->next;
+			attr->next->prev = attr->prev;
+		}
+	}
+	
+	if (clean)
+	{
+		// Nullify pointers
+		attr->parent = NULL;
+		attr->prev   = NULL;
+		attr->next   = NULL;
+		attr->ns     = NULL;
+		if (attr->doc != NULL) [self stripDocPointersFromAttr:attr];
+	}
+}
+
+/**
+ * Detaches the given attribute from its parent node.
+ * The attribute's surrounding prev/next pointers are properly updated to remove the attribute from the attr list.
+ * Then the attribute's parent, prev, next and doc pointers are destroyed.
+**/
++ (void)detachAttribute:(xmlAttrPtr)attr
+{
+	[self detachAttribute:attr andClean:YES];
+}
+
+/**
+ * Removes and free's the given attribute from its parent node.
+ * The attribute's surrounding prev/next pointers are properly updated to remove the attribute from the attr list.
+**/
++ (void)removeAttribute:(xmlAttrPtr)attr
+{
+#if DDXML_DEBUG_MEMORY_ISSUES
+	MarkZombies(attr);
+#endif
+	
+	// We perform a bit of optimization here.
+	// No need to bother nullifying pointers since we're about to free the node anyway.
+	[self detachAttribute:attr andClean:NO];
+	
+	xmlFreeProp(attr);
+}
+
+/**
+ * Removes and frees all attributes from the given node.
+ * Upon return, the given node's properties pointer is NULL.
+**/
++ (void)removeAllAttributesFromNode:(xmlNodePtr)node
+{
+	xmlAttrPtr attr = node->properties;
+	while (attr != NULL)
+	{
+		xmlAttrPtr nextAttr = attr->next;
+		
+	#if DDXML_DEBUG_MEMORY_ISSUES
+		MarkZombies(attr);
+	#endif
+		
+		xmlFreeProp(attr);
+		attr = nextAttr;
+	}
+	
+	node->properties = NULL;
+}
+
+/**
+ * Detaches the given child from its parent.
+ * The child's surrounding prev/next pointers are properly updated to remove the child from the node's children list.
+ * Then, if the clean flag is YES, the child's parent, prev, next and doc pointers are set to null.
+**/
++ (void)detachChild:(xmlNodePtr)child andClean:(BOOL)clean andFixNamespaces:(BOOL)fixNamespaces
+{
+	xmlNodePtr parent = child->parent;
+	
 	// Update the surrounding prev/next pointers
 	if (child->prev == NULL)
 	{
 		if (child->next == NULL)
 		{
-			node->children = NULL;
-			node->last = NULL;
+			parent->children = NULL;
+			parent->last = NULL;
 		}
 		else
 		{
-			node->children = child->next;
+			parent->children = child->next;
 			child->next->prev = NULL;
 		}
 	}
@@ -1487,7 +1855,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	{
 		if (child->next == NULL)
 		{
-			node->last = child->prev;
+			parent->last = child->prev;
 			child->prev->next = NULL;
 		}
 		else
@@ -1497,35 +1865,41 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 		}
 	}
 	
-	if (flag)
+	if (fixNamespaces)
+	{
+		// Fix namesapces (namespace references that now point outside tree)
+		// Note: This must be done before we nullify pointers so we can search up the tree.
+		[self recursiveFixDefaultNamespacesInNode:child withNewRoot:child];
+	}
+	if (clean)
 	{
 		// Nullify pointers
 		child->parent = NULL;
 		child->prev   = NULL;
 		child->next   = NULL;
-		if(child->doc != NULL) [self recursiveStripDocPointersFromNode:child];
+		if (child->doc != NULL) [self recursiveStripDocPointersFromNode:child];
 	}
 }
 
 /**
- * Detaches the given child from the given node.
+ * Detaches the given child from its parent.
  * The child's surrounding prev/next pointers are properly updated to remove the child from the node's children list.
- * Then the child's parent, prev, next and doc pointers are destroyed.
+ * Then the child's parent, prev, next and doc pointers are set to null.
 **/
-+ (void)detachChild:(xmlNodePtr)child fromNode:(xmlNodePtr)node
++ (void)detachChild:(xmlNodePtr)child
 {
-	[self detachChild:child fromNode:node andNullifyPointers:YES];
+	[self detachChild:child andClean:YES andFixNamespaces:YES];
 }
 
 /**
- * Removes the given child from the given node.
+ * Removes the given child from its parent node.
  * The child's surrounding prev/next pointers are properly updated to remove the child from the node's children list.
  * Then the child is recursively freed if it's no longer being referenced.
  * Otherwise, it's parent, prev, next and doc pointers are destroyed.
  * 
  * During the recursive free, subnodes still being referenced are properly handled.
 **/
-+ (void)removeChild:(xmlNodePtr)child fromNode:(xmlNodePtr)node
++ (void)removeChild:(xmlNodePtr)child
 {
 #if DDXML_DEBUG_MEMORY_ISSUES
 	RecursiveMarkZombiesFromNode(child);
@@ -1533,7 +1907,7 @@ static void MarkDeath(void *xmlPtr, DDXMLNode *wrapper);
 	
 	// We perform a bit of optimization here.
 	// No need to bother nullifying pointers since we're about to free the node anyway.
-	[self detachChild:child fromNode:node andNullifyPointers:NO];
+	[self detachChild:child andClean:NO andFixNamespaces:NO];
 	
 	xmlFreeNode(child);
 }
@@ -1618,7 +1992,7 @@ static void MyErrorHandler(void * userData, xmlErrorPtr error)
 // What is zombie tracking and how does it work?
 // 
 // It is all explained in full detail here:
-// http://code.google.com/p/kissxml/wiki/MemoryManagementThreadSafety
+// https://github.com/robbiehanson/KissXML/wiki/MemoryManagementThreadSafety
 // 
 // But here's a quick overview in case you're on a plane right now
 // (and the plane doesn't have internet access, or charges some ridiculous amount and you don't want to pay for it.)
@@ -1809,7 +2183,7 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 **/
 + (id)nodeWithNsPrimitive:(xmlNsPtr)ns nsParent:(xmlNodePtr)parent owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:parent owner:owner] autorelease];
+	return [[DDXMLNamespaceNode alloc] initWithNsPrimitive:ns nsParent:parent owner:owner];
 }
 
 /**
@@ -1838,7 +2212,6 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
 	NSAssert(NO, @"Use initWithNsPrimitive:nsParent:owner:");
 	
-	[self release];
 	return nil;
 }
 
@@ -2044,9 +2417,7 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	{
 		[DDXMLNode detachNamespace:(xmlNsPtr)genericPtr fromNode:nsParentPtr];
 		
-		[owner release];
 		owner = nil;
-		
 		nsParentPtr = NULL;
 	}
 }
@@ -2146,7 +2517,7 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 
 + (id)nodeWithAttrPrimitive:(xmlAttrPtr)attr owner:(DDXMLNode *)owner
 {
-	return [[[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:owner] autorelease];
+	return [[DDXMLAttributeNode alloc] initWithAttrPrimitive:attr owner:owner];
 }
 
 - (id)initWithAttrPrimitive:(xmlAttrPtr)attr owner:(DDXMLNode *)inOwner
@@ -2168,13 +2539,45 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	// Promote initializers which use proper parameter types to enable compiler to catch more mistakes.
 	NSAssert(NO, @"Use initWithAttrPrimitive:nsParent:owner:");
 	
-	[self release];
 	return nil;
+}
+
+- (void)dealloc
+{
+	if (attrNsPtr) xmlFreeNs(attrNsPtr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)name
+{
+#if DDXML_DEBUG_MEMORY_ISSUES
+	DDXMLNotZombieAssert();
+#endif
+	
+	xmlAttrPtr attr = (xmlAttrPtr)genericPtr;
+	
+	const xmlChar *xmlName = attr->name;
+	if (xmlName == NULL)
+	{
+		return nil;
+	}
+	
+	NSString *name = [NSString stringWithUTF8String:(const char *)xmlName];
+	
+	NSRange range = [name rangeOfString:@":"];
+	if (range.length == 0)
+	{
+		if (attr->ns && attr->ns->prefix)
+		{
+			return [NSString stringWithFormat:@"%s:%@", attr->ns->prefix, name];
+		}
+	}
+	
+	return name;
+}
 
 - (void)setStringValue:(NSString *)string
 {
@@ -2245,9 +2648,24 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	
 	if (attr->parent != NULL)
 	{
-		[[self class] detachAttribute:attr fromNode:attr->parent];
+		// If this attribute is associated with a namespace,
+		// then we need to copy the namespace in order to maintain the association.
+		// 
+		// Remember: attr->ns cannot be an owner of an allocated namespaces,
+		//           so we need to use DDXMLAttributeNode's attrNsPtr.
 		
-		[owner release];
+		if (attr->ns && (attr->ns != attrNsPtr))
+		{
+			attrNsPtr = xmlNewNs(NULL, attr->ns->href, attr->ns->prefix);
+		}
+		
+		[[self class] detachAttribute:attr];
+		
+		if (attrNsPtr)
+		{
+			attr->ns = attrNsPtr;
+		}
+		
 		owner = nil;
 	}
 }
@@ -2280,21 +2698,54 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	DDXMLNotZombieAssert();
 #endif
 	
-	xmlAttrPtr attr = (xmlAttrPtr)genericPtr;
-	if (attr->ns != NULL)
+	// An attribute can only have a single namespace attached to it.
+	// In addition, this namespace can only be accessed via the URI method.
+	// There is no way, within the API, to get a DDXMLNode wrapper for the attribute's namespace.
+	
+	// Remember: attr->ns is simply a pointer to a namespace owned by somebody else.
+	//           Unless that points to our attrNsPtr (defined in DDXMLAttributeNode) we cannot free it.
+	
+	if (attrNsPtr != NULL)
 	{
-		// An attribute can only have a single namespace attached to it.
-		// In addition, this namespace can only be accessed via the URI method.
-		// There is no way, within the API, to get a DDXMLNode wrapper for the attribute's namespace.
-		xmlFreeNs(attr->ns);
-		attr->ns = NULL;
+		xmlFreeNs(attrNsPtr);
+		attrNsPtr = NULL;
 	}
+	
+	xmlAttrPtr attr = (xmlAttrPtr)genericPtr;
+	attr->ns = NULL;
 	
 	if (URI)
 	{
-		// Create a new xmlNsPtr, and make ns point to it
-		xmlNsPtr ns = xmlNewNs(NULL, [URI xmlChar], NULL);
-		attr->ns = ns;
+		// If there's a namespace defined further up the tree with this URI,
+		// then we want attr->ns to point to it.
+		
+		const xmlChar *uri = [URI xmlChar];
+		
+		xmlNodePtr parent = attr->parent;
+		while (parent)
+		{
+			xmlNsPtr ns = parent->nsDef;
+			while (ns)
+			{
+				if (xmlStrEqual(ns->href, uri))
+				{
+					attr->ns = ns;
+					return;
+				}
+				
+				ns = ns->next;
+			}
+			
+			parent = parent->parent;
+		}
+		
+		// There is no namespace further up the tree with this URI.
+		// We'll have to create it ourself...
+		// 
+		// Remember: The attr->ns pointer is not allowed to have direct ownership.
+		
+		attrNsPtr = xmlNewNs(NULL, uri, NULL);
+		attr->ns = attrNsPtr;
 	}
 }
 
@@ -2307,10 +2758,148 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper)
 	xmlAttrPtr attr = (xmlAttrPtr)genericPtr;
 	if (attr->ns != NULL)
 	{
-		return [NSString stringWithUTF8String:((const char *)attr->ns->href)];
+		if (attr->ns->href != NULL)
+		{
+			return [NSString stringWithUTF8String:((const char *)attr->ns->href)];
+		}
+	}
+	
+	// The attribute doesn't explicitly have a namespace.
+	// But if the attribute is something like animal:duck='quack', then we should look for the URI for 'animal'.
+	// 
+	// Note: [self prefix] returns an empty string if there is no prefix. (Not nil)
+	
+	NSString *prefix = [self prefix];
+	if ([prefix length] > 0)
+	{
+		xmlNsPtr ns = xmlSearchNs(attr->doc, attr->parent, [prefix xmlChar]);
+		if (ns && ns->href)
+		{
+			return [NSString stringWithUTF8String:((const char *)ns->href)];
+		}
 	}
 	
 	return nil;
 }
 
 @end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@implementation DDXMLInvalidNode
+
+// #pragma mark Properties
+
+- (DDXMLNodeKind)kind {
+	return DDXMLInvalidKind;
+}
+
+- (void)setName:(NSString *)name { }
+- (NSString *)name {
+	return nil;
+}
+
+- (void)setObjectValue:(id)value { }
+- (id)objectValue {
+	return nil;
+}
+
+- (void)setStringValue:(NSString *)string { }
+- (void)setStringValue:(NSString *)string resolvingEntities:(BOOL)resolve { }
+- (NSString *)stringValue {
+	return nil;
+}
+
+// #pragma mark Tree Navigation
+
+- (NSUInteger)index {
+	return 0;
+}
+
+- (NSUInteger)level {
+	return 0;
+}
+
+- (DDXMLDocument *)rootDocument {
+	return nil;
+}
+
+- (DDXMLNode *)parent {
+	return nil;
+}
+- (NSUInteger)childCount {
+	return 0;
+}
+- (NSArray *)children {
+	return [NSArray array];
+}
+- (DDXMLNode *)childAtIndex:(NSUInteger)index {
+	return nil;
+}
+
+- (DDXMLNode *)previousSibling {
+	return nil;
+}
+- (DDXMLNode *)nextSibling {
+	return nil;
+}
+
+- (DDXMLNode *)previousNode {
+	return nil;
+}
+- (DDXMLNode *)nextNode {
+	return nil;
+}
+
+- (void)detach { }
+
+- (NSString *)XPath {
+	return @"";
+}
+
+// #pragma mark QNames
+
+- (NSString *)localName {
+	return nil;
+}
+- (NSString *)prefix {
+	return @"";
+}
+
+- (void)setURI:(NSString *)URI { }
+- (NSString *)URI {
+	return nil;
+}
+
+// #pragma mark Output
+
+- (NSString *)description {
+	return @"";
+}
+- (NSString *)XMLString {
+	return @"";
+}
+- (NSString *)XMLStringWithOptions:(NSUInteger)options {
+	return @"";
+}
+- (NSString *)canonicalXMLStringPreservingComments:(BOOL)comments {
+	return nil;
+}
+
+// #pragma mark XPath/XQuery
+
+- (NSArray *)nodesForXPath:(NSString *)xpath error:(NSError **)error {
+	return [NSArray array];
+}
+
+- (NSArray *)objectsForXQuery:(NSString *)xquery constants:(NSDictionary *)constants error:(NSError **)error {
+	return [NSArray array];
+}
+- (NSArray *)objectsForXQuery:(NSString *)xquery error:(NSError **)error {
+	return [NSArray array];
+}
+
+@end
+

@@ -4,6 +4,10 @@
 
 #import <objc/runtime.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 
 @implementation XMPPMessage
 
@@ -38,12 +42,40 @@
 
 + (XMPPMessage *)message
 {
-	return [[[XMPPMessage alloc] init] autorelease];
+	return [[XMPPMessage alloc] init];
+}
+
++ (XMPPMessage *)messageWithType:(NSString *)type
+{
+	return [[XMPPMessage alloc] initWithType:type to:nil];
+}
+
++ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)to
+{
+	return [[XMPPMessage alloc] initWithType:type to:to];
 }
 
 - (id)init
 {
 	self = [super initWithName:@"message"];
+	return self;
+}
+
+- (id)initWithType:(NSString *)type
+{
+	return [self initWithType:type to:nil];
+}
+
+- (id)initWithType:(NSString *)type to:(XMPPJID *)to
+{
+	if ((self = [super initWithName:@"message"]))
+	{
+		if (type)
+			[self addAttributeWithName:@"type" stringValue:type];
+		
+		if (to)
+			[self addAttributeWithName:@"to" stringValue:[to description]];
+	}
 	return self;
 }
 
@@ -78,10 +110,11 @@
 
 }
 
-- (BOOL)isMessageWithBody {
-    NSString *body = [[self elementForName:@"body"] stringValue];
-    
-    return ((body != nil) && ([body length] > 0));
+- (BOOL)isMessageWithBody
+{
+	NSString *body = [[self elementForName:@"body"] stringValue];
+	
+	return ([body length] > 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -9,20 +9,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 // This is step #1 of X
 // 
-// But I just want to hit build and go and have everything work for me... <whine/> <pout/>
-// 
-// Too bad. You're a developer. Get over it.
-// 
-// Now go read this:
+// First, start by reading this:
 //
-// http://code.google.com/p/xmppframework/wiki/FacebookChatHowTo
+// https://github.com/robbiehanson/XMPPFramework/wiki/FacebookChatHowTo
 // 
-// If the build fails, you may need to run the following command to setup 
-// the facebook-ios-sdk:
+// If the build fails, you may need to run the following command to setup the facebook-ios-sdk:
 //
 // git submodule update --init
-
-// For testing purposes this project uses the XMPPFacebook FBTest Facebook app.
+//
+//
+// For TESTING purposes this project uses the XMPPFacebook FBTest Facebook app.
+// You MUST replace this with your own appID if you're going to be
+// integrating Facebook XMPP into your own application.
 #define FACEBOOK_APP_ID @"124242144347927"
 
 
@@ -45,9 +43,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	allowSelfSignedCertificates = NO;
-	allowSSLHostNameMismatch = NO;
-	
 	facebook = [[Facebook alloc] initWithAppId:FACEBOOK_APP_ID andDelegate:self];
 	
     self.viewController.statusLabel.text = @"Starting Facebook Authentication";
@@ -59,12 +54,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return YES;
 }
 
-- (void)dealloc
-{
-	[_window release];
-	[_viewController release];
-    [super dealloc];
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Facebook Delegate
@@ -132,31 +121,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             self.viewController.statusLabel.text = @"XMPP authentication failed";
         }
     }
-}
-
-- (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
-{
-	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
-	
-	if (allowSelfSignedCertificates)
-	{
-		[settings setObject:[NSNumber numberWithBool:YES] forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
-	}
-	
-	if (allowSSLHostNameMismatch)
-	{
-		[settings setObject:[NSNull null] forKey:(NSString *)kCFStreamSSLPeerName];
-	}
-	else
-	{
-		NSString *expectedCertName = [sender hostName];
-		if (expectedCertName == nil)
-		{
-			expectedCertName = [[sender myJID] domain];
-		}
-		
-		[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
-	}
 }
 
 - (void)xmppStreamDidSecure:(XMPPStream *)sender

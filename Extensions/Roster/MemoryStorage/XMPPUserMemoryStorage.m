@@ -1,6 +1,9 @@
 #import "XMPP.h"
 #import "XMPPRosterMemoryStoragePrivate.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 @interface XMPPUserMemoryStorage (PrivateAPI)
 - (void)recalculatePrimaryResource;
@@ -16,7 +19,7 @@
 {
 	if ((self = [super init]))
 	{
-		jid = [[aJid bareJID] retain];
+		jid = [aJid bareJID];
 		
 		itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
 		
@@ -30,24 +33,15 @@
 	if ((self = [super init]))
 	{
 		NSString *jidStr = [item attributeStringValueForName:@"jid"];
-		jid = [[[XMPPJID jidWithString:jidStr] bareJID] retain];
+		jid = [[XMPPJID jidWithString:jidStr] bareJID];
 		
-		itemAttributes = [[item attributesAsDictionary] retain];
+		itemAttributes = [item attributesAsDictionary];
 		
 		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-	[jid release];
-	[itemAttributes release];
-	[resources release];
-	[primaryResource release];
-	[photo release];
-	[super dealloc];
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Copying
@@ -69,7 +63,6 @@
 		XMPPResourceMemoryStorage *resourceCopy = [[resources objectForKey:key] copy];
 		
 		[deepCopy->resources setObject:resourceCopy forKey:key];
-		[resourceCopy release];
 	}
 	
 	[deepCopy recalculatePrimaryResource];
@@ -98,7 +91,7 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			jid             = [[coder decodeObjectForKey:@"jid"] retain];
+			jid             = [coder decodeObjectForKey:@"jid"];
 			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
 		#if TARGET_OS_IPHONE
 			photo           = [[UIImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
@@ -106,11 +99,11 @@
 			photo           = [[NSImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
 		#endif
 			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
-			primaryResource = [[coder decodeObjectForKey:@"primaryResource"] retain];
+			primaryResource = [coder decodeObjectForKey:@"primaryResource"];
 		}
 		else
 		{
-			jid             = [[coder decodeObject] retain];
+			jid             = [coder decodeObject];
 			itemAttributes  = [[coder decodeObject] mutableCopy];
 		#if TARGET_OS_IPHONE
 			photo           = [[UIImage alloc] initWithData:[coder decodeObject]];
@@ -118,7 +111,7 @@
 			photo           = [[NSImage alloc] initWithData:[coder decodeObject]];
 		#endif	
 			resources       = [[coder decodeObject] mutableCopy];
-			primaryResource = [[coder decodeObject] retain];
+			primaryResource = [coder decodeObject];
 		}
 	}
 	return self;
@@ -223,7 +216,6 @@
 
 - (void)recalculatePrimaryResource
 {
-	[primaryResource release];
 	primaryResource = nil;
 	
 	NSArray *sortedResources = [[self allResources] sortedArrayUsingSelector:@selector(compare:)];
@@ -234,7 +226,7 @@
 		// Primary resource must have a non-negative priority
 		if ([[possiblePrimary presence] priority] >= 0)
 		{
-			primaryResource = [possiblePrimary retain];
+			primaryResource = possiblePrimary;
 		}
 	}
 }
@@ -247,7 +239,6 @@
 {
 	[resources removeAllObjects];
 	
-	[primaryResource release];
 	primaryResource = nil;
 }
 
@@ -274,7 +265,7 @@
 	
 	if ([presenceType isEqualToString:@"unavailable"] || [presenceType isEqualToString:@"error"])
 	{
-		resource = [[[resources objectForKey:key] retain] autorelease];
+		resource = [resources objectForKey:key];
 		if (resource)
 		{
 			[resources removeObjectForKey:key];
@@ -291,7 +282,7 @@
 		}
 		else
 		{
-			resource = (XMPPResourceMemoryStorage *)[[[resourceClass alloc] initWithPresence:presence] autorelease];
+			resource = (XMPPResourceMemoryStorage *)[[resourceClass alloc] initWithPresence:presence];
 			
 			[resources setObject:resource forKey:key];
 			result = XMPP_USER_ADDED_RESOURCE;

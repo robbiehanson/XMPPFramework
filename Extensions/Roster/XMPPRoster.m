@@ -3,6 +3,10 @@
 #import "XMPPLogging.h"
 #import "XMPPFramework.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
@@ -57,7 +61,7 @@ enum XMPPRosterFlags
 	{
 		if ([storage configureWithParent:self queue:moduleQueue])
 		{
-			xmppRosterStorage = [storage retain];
+			xmppRosterStorage = storage;
 		}
 		else
 		{
@@ -101,12 +105,6 @@ enum XMPPRosterFlags
 	[super deactivate];
 }
 
-- (void)dealloc
-{
-	[xmppRosterStorage release];
-	[earlyPresenceElements release];
-	[super dealloc];
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Internal
@@ -128,7 +126,7 @@ enum XMPPRosterFlags
 {
 	// Note: The xmppRosterStorage variable is read-only (set in the init method)
 	
-	return [[xmppRosterStorage retain] autorelease];
+	return xmppRosterStorage;
 }
 
 - (BOOL)autoFetchRoster
@@ -466,13 +464,11 @@ enum XMPPRosterFlags
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if ([self requestedRoster])
 		{
 			// We've already requested the roster from the server.
-			[pool drain];
 			return;
 		}
 		
@@ -489,9 +485,7 @@ enum XMPPRosterFlags
 		[xmppStream sendElement:iq];
 		
 		[self setRequestedRoster:YES];
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();

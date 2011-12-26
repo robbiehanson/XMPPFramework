@@ -2,30 +2,27 @@
 #import "XMPPElement+Delay.h"
 #import "XMPPRosterMemoryStoragePrivate.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
+
 @implementation XMPPResourceMemoryStorage
 
 - (id)initWithPresence:(XMPPPresence *)aPresence
 {
 	if((self = [super init]))
 	{
-		jid = [[aPresence from] retain];
-		presence = [aPresence retain];
+		jid = [aPresence from];
+		presence = aPresence;
 		
-		presenceDate = [[presence delayedDeliveryDate] retain];
+		presenceDate = [presence delayedDeliveryDate];
 		if (presenceDate == nil)
 		{
 			presenceDate = [[NSDate alloc] init];
 		}
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[jid release];
-	[presence release];
-	[presenceDate release];
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +36,7 @@
 	XMPPResourceMemoryStorage *deepCopy = (XMPPResourceMemoryStorage *)[[[self class] alloc] init];
 	
 	deepCopy->jid = [jid copy];
-	deepCopy->presence = [presence retain]; // No need to bother with a copy sicne we don't alter presence
+	deepCopy->presence = presence; // No need to bother with a copy sicne we don't alter presence
 	deepCopy->presenceDate = [presenceDate copy];
 	
 	return deepCopy;
@@ -66,15 +63,15 @@
 	{
 		if([coder allowsKeyedCoding])
 		{
-			jid          = [[coder decodeObjectForKey:@"jid"] retain];
-			presence     = [[coder decodeObjectForKey:@"presence"] retain];
-			presenceDate = [[coder decodeObjectForKey:@"presenceDate"] retain];
+			jid          = [coder decodeObjectForKey:@"jid"];
+			presence     = [coder decodeObjectForKey:@"presence"];
+			presenceDate = [coder decodeObjectForKey:@"presenceDate"];
 		}
 		else
 		{
-			jid          = [[coder decodeObject] retain];
-			presence     = [[coder decodeObject] retain];
-			presenceDate = [[coder decodeObject] retain];
+			jid          = [coder decodeObject];
+			presence     = [coder decodeObject];
+			presenceDate = [coder decodeObject];
 		}
 	}
 	return self;
@@ -121,11 +118,9 @@
 
 - (void)updateWithPresence:(XMPPPresence *)aPresence
 {
-	[presence release];
-	presence = [aPresence retain];
+	presence = aPresence;
 	
-	[presenceDate release];
-	presenceDate = [[presence delayedDeliveryDate] retain];
+	presenceDate = [presence delayedDeliveryDate];
 	if (presenceDate == nil)
 	{
 		presenceDate = [[NSDate alloc] init];

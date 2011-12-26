@@ -1,6 +1,9 @@
 #import "XMPPDateTimeProfiles.h"
 #import "NSNumber+XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 @interface XMPPDateTimeProfiles (PrivateAPI)
 + (NSDate *)parseDateTime:(NSString *)dateTimeStr withMandatoryTimeZone:(BOOL)mandatoryTZ;
@@ -46,7 +49,6 @@
 	
 	NSDate *result = [df dateFromString:dateStr];
 	
-	[df release];
 	return result;
 }
 
@@ -85,7 +87,6 @@
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSString *today = [df stringFromDate:[NSDate date]];
-	[df release];
     
 	NSString *dateTimeStr = [NSString stringWithFormat:@"%@T%@", today, timeStr];
 	
@@ -245,7 +246,6 @@
 		result = [df dateFromString:dateTimeStr];
 	}
 	
-	[df release];
 	return result;
 }
 

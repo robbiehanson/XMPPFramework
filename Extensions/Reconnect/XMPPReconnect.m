@@ -3,6 +3,9 @@
 #import "XMPPLogging.h"
 #import "NSXMLElement+XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 #define IMPOSSIBLE_REACHABILITY_FLAGS 0xFFFFFFFF
 
@@ -89,7 +92,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	else
 		dispatch_sync(moduleQueue, block);
 	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,8 +203,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)manualStart
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
 		{
@@ -211,9 +212,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 			[self setupReconnectTimer];
 			[self setupNetworkMonitoring];
 		}
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -223,8 +222,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (void)stop
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		// Clear all flags to disable any further reconnect attemts regardless of the state we're in.
 		
@@ -237,8 +235,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		[self teardownReconnectTimer];
 		[self teardownNetworkMonitoring];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -341,13 +338,11 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		int ticket = ++reconnectTicket;
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (0.1 * NSEC_PER_SEC));
-		dispatch_after(tt, moduleQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_after(tt, moduleQueue, ^{ @autoreleasepool {
 			
 			[self maybeAttemptReconnectWithTicket:ticket];
 			
-			[pool drain];
-		});
+		}});
 		
 		// Note: We delay the method call.
 		// This allows the other delegates to be notified of the closed stream prior to our reconnect attempt.
@@ -360,12 +355,11 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
 	
-	XMPPReconnect *instance = (XMPPReconnect *)info;
-	[instance maybeAttemptReconnectWithReachabilityFlags:flags];
-	
-	[pool release];
+		XMPPReconnect *instance = (__bridge XMPPReconnect *)info;
+		[instance maybeAttemptReconnectWithReachabilityFlags:flags];
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -386,11 +380,11 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 		
 		reconnectTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
 		
-		dispatch_source_set_event_handler(reconnectTimer, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_event_handler(reconnectTimer, ^{ @autoreleasepool {
+			
 			[self maybeAttemptReconnect];
-			[pool drain];
-		});
+			
+		}});
 		
 		dispatch_source_t theReconnectTimer = reconnectTimer;
 		
@@ -443,7 +437,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 		
 		if (reachability)
 		{
-			SCNetworkReachabilityContext context = {0, self, NULL, NULL, NULL};
+			SCNetworkReachabilityContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
 			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
 			
 			CFRunLoopRef xmppRunLoop = [[xmppStream xmppUtilityRunLoop] getCFRunLoop];
@@ -531,11 +525,11 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 {
 	if (dispatch_get_current_queue() != moduleQueue)
 	{
-		dispatch_async(moduleQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_async(moduleQueue, ^{ @autoreleasepool {
+			
 			[self maybeAttemptReconnectWithReachabilityFlags:reachabilityFlags];
-			[pool drain];
-		});
+			
+		}});
 		
 		return;
 	}
@@ -566,23 +560,19 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 			
 			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 			{
-				dispatch_group_async(delGroup, dq, ^{
-					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+				dispatch_group_async(delGroup, dq, ^{ @autoreleasepool {
 					
 					if (![del xmppReconnect:self shouldAttemptAutoReconnect:reachabilityFlags])
 					{
 						dispatch_semaphore_signal(delSemaphore);
 					}
-					
-					[innerPool release];
-				});
+				}});
 			}
 			
 			[self setQueryingDelegates:YES];
 			
 			dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-			dispatch_async(concurrentQueue, ^{
-				NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
+			dispatch_async(concurrentQueue, ^{ @autoreleasepool {
 				
 				dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
 				
@@ -598,8 +588,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 					shouldAttemptReconnect = (dispatch_semaphore_wait(delSemaphore, DISPATCH_TIME_NOW) != 0);
 				}
 				
-				dispatch_async(moduleQueue, ^{
-					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+				dispatch_async(moduleQueue, ^{ @autoreleasepool {
 					
 					[self setQueryingDelegates:NO];
 					
@@ -622,14 +611,12 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 						previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 					}
 					
-					[innerPool drain];
-				});
+				}});
 				
 				dispatch_release(delSemaphore);
 				dispatch_release(delGroup);
 				
-				[outerPool drain];
-			});
+			}});
 			
 		}
 		else

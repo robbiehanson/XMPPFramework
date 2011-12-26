@@ -1,5 +1,11 @@
 #import "ChatController.h"
-#import "XMPP.h"
+#import "WindowManager.h"
+#import "XMPPFramework.h"
+#import "DDLog.h"
+
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @interface ChatController (PrivateAPI)
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message;
@@ -14,19 +20,19 @@
 @synthesize xmppStream;
 @synthesize jid;
 
-- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)fullJID
+- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)aJid
 {
-	return [self initWithStream:stream jid:fullJID message:nil];
+	return [self initWithStream:stream jid:aJid message:nil];
 }
 
-- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)fullJID message:(XMPPMessage *)message
+- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)aJid message:(XMPPMessage *)message
 {
-	if((self = [super initWithWindowNibName:@"ChatWindow"]))
+	if ((self = [super initWithWindowNibName:@"ChatWindow"]))
 	{
-		xmppStream = [stream retain];
-		jid = [fullJID retain];
+		xmppStream = stream;
+		jid = aJid;
 		
-		firstMessage = [message retain];
+		firstMessage = message;
 	}
 	return self;
 }
@@ -35,16 +41,14 @@
 {
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	
 	[messageView setString:@""];
 	
 	[[self window] setTitle:[jid full]];
 	[[self window] makeFirstResponder:messageField];
 	
-	if(firstMessage)
+	if (firstMessage)
 	{
 		[self xmppStream:xmppStream didReceiveMessage:firstMessage];
-		[firstMessage release];
 		firstMessage  = nil;
 	}
 }
@@ -57,21 +61,15 @@
 **/
 - (void)windowWillClose:(NSNotification *)aNotification
 {
-	NSLog(@"ChatController: windowWillClose");
+	DDLogVerbose(@"ChatController: windowWillClose");
 	
 	[xmppStream removeDelegate:self];
-	[self autorelease];
+	[WindowManager closeChatWindow:self];
 }
 
 - (void)dealloc
 {
-	NSLog(@"Destroying self: %@", self);
-	
-	[xmppStream release];
-	[jid release];
-	[firstMessage release];
-	
-	[super dealloc];
+	DDLogVerbose(@"Destroying self: %@", self);
 }
 
 - (void)scrollToBottom
@@ -102,7 +100,7 @@
 		
 		NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
 		
-		NSMutableParagraphStyle *mps = [[[NSMutableParagraphStyle alloc] init] autorelease];
+		NSMutableParagraphStyle *mps = [[NSMutableParagraphStyle alloc] init];
 		[mps setAlignment:NSLeftTextAlignment];
 		
 		NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithCapacity:2];
@@ -110,7 +108,6 @@
 		[attributes setObject:[NSColor colorWithCalibratedRed:250 green:250 blue:250 alpha:1] forKey:NSBackgroundColorAttributeName];
 		
 		NSAttributedString *as = [[NSAttributedString alloc] initWithString:paragraph attributes:attributes];
-		[as autorelease];
 		
 		[[messageView textStorage] appendAttributedString:as];
 	}
@@ -139,14 +136,13 @@
 		
 		NSString *paragraph = [NSString stringWithFormat:@"%@\n\n", messageStr];
 		
-		NSMutableParagraphStyle *mps = [[[NSMutableParagraphStyle alloc] init] autorelease];
+		NSMutableParagraphStyle *mps = [[NSMutableParagraphStyle alloc] init];
 		[mps setAlignment:NSRightTextAlignment];
 		
 		NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithCapacity:2];
 		[attributes setObject:mps forKey:NSParagraphStyleAttributeName];
 		
 		NSAttributedString *as = [[NSAttributedString alloc] initWithString:paragraph attributes:attributes];
-		[as autorelease];
 		
 		[[messageView textStorage] appendAttributedString:as];
 		

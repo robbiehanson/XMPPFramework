@@ -12,11 +12,19 @@
 #pragma mark Override Me
 
 /**
+ * If your subclass needs to do anything for init, it can do so easily by overriding this method.
+ * All public init methods will invoke this method at the end of their implementation.
+ * 
+ * Important: If overriden you must invoke [super commonInit] at some point.
+**/
+- (void)commonInit;
+
+/**
  * Override me, if needed, to provide customized behavior.
  * 
  * This method is queried to get the name of the ManagedObjectModel within the app bundle.
  * It should return the name of the appropriate file (*.xdatamodel / *.mom / *.momd) sans file extension.
- *  
+ * 
  * The default implementation returns the name of the subclass, stripping any suffix of "CoreDataStorage".
  * E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtension".
  * 
@@ -30,7 +38,7 @@
  * This method is queried if the initWithDatabaseFileName method is invoked with a nil parameter.
  * The default implementation returns:
  * 
- * [NSString stringWithFormat:@"%@.sqlite", [self defaultFileName]];
+ * [NSString stringWithFormat:@"%@.sqlite", [self managedObjectModelName]];
  * 
  * You are encouraged to use the sqlite file extension.
 **/
@@ -39,7 +47,7 @@
 /**
  * Override me, if needed, to provide customized behavior.
  * 
- * If you are using a database file with non-persistent data (e.g. for memory optimization purposes on iOS),
+ * If you are using a database file with pure non-persistent data (e.g. for memory optimization purposes on iOS),
  * you may want to delete the database file if it already exists on disk.
  * 
  * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.

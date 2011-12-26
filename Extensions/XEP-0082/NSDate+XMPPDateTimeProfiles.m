@@ -11,16 +11,19 @@
 #import "NSDate+XMPPDateTimeProfiles.h"
 #import "XMPPDateTimeProfiles.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 @interface NSDate(XMPPDateTimeProfilesPrivate)
 - (NSString *)xmppStringWithDateFormat:(NSString *)dateFormat;
 @end
 
+#pragma mark -
 
 @implementation NSDate(XMPPDateTimeProfiles)
 
 
-#pragma mark -
 #pragma mark Convert from XMPP string to NSDate
 
 
@@ -39,7 +42,6 @@
 }
 
 
-#pragma mark -
 #pragma mark Convert from NSDate to XMPP string
 
 
@@ -58,7 +60,6 @@
 }
 
 
-#pragma mark -
 #pragma mark XMPPDateTimeProfilesPrivate methods
 
 
@@ -70,7 +71,6 @@
 	[dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
 	NSString *str = [dateFormatter stringFromDate:self];
-	[dateFormatter release];
 	
 	return str;
 }

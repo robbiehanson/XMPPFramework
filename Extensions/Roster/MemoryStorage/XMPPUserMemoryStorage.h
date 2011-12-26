@@ -51,9 +51,9 @@
  * and we'll save the the user photos after they've been downloaded.
 **/
 #if TARGET_OS_IPHONE
-@property (nonatomic, retain, readonly) UIImage *photo;
+@property (nonatomic, strong, readonly) UIImage *photo;
 #else
-@property (nonatomic, retain, readonly) NSImage *photo;
+@property (nonatomic, strong, readonly) NSImage *photo;
 #endif
 
 /**

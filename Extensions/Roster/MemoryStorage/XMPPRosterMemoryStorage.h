@@ -11,7 +11,7 @@
 
 @interface XMPPRosterMemoryStorage : NSObject <XMPPRosterStorage>
 {
-	XMPPRoster *parent;
+	__unsafe_unretained XMPPRoster *parent;
 	dispatch_queue_t parentQueue;
 	
 	Class userClass;
@@ -26,7 +26,7 @@
 
 - (id)init;
 
-@property (assign, readonly) XMPPRoster *parent;
+@property (unsafe_unretained, readonly) XMPPRoster *parent;
 
 /**
  * You can optionally extend the XMPPUserMemoryStorage and XMPPResourceMemoryStorage classes.

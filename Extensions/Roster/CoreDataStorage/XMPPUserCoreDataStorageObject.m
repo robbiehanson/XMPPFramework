@@ -5,15 +5,20 @@
 #import "XMPPGroupCoreDataStorageObject.h"
 #import "NSNumber+XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
+
 @interface XMPPUserCoreDataStorageObject ()
 
-@property(nonatomic,retain) XMPPJID *primitiveJid;
-@property(nonatomic,retain) NSString *primitiveJidStr;
+@property(nonatomic,strong) XMPPJID *primitiveJid;
+@property(nonatomic,strong) NSString *primitiveJidStr;
 
-@property(nonatomic,retain) NSString *primitiveDisplayName;
+@property(nonatomic,strong) NSString *primitiveDisplayName;
 @property(nonatomic,assign) NSInteger primitiveSection;
-@property(nonatomic,retain) NSString *primitiveSectionName;
-@property(nonatomic,retain) NSNumber *primitiveSectionNum;
+@property(nonatomic,strong) NSString *primitiveSectionName;
+@property(nonatomic,strong) NSNumber *primitiveSectionNum;
 
 @end
 

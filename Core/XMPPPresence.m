@@ -1,7 +1,12 @@
 #import "XMPPPresence.h"
+#import "XMPPJID.h"
 #import "NSXMLElement+XMPP.h"
 
 #import <objc/runtime.h>
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 
 @implementation XMPPPresence
@@ -37,17 +42,17 @@
 
 + (XMPPPresence *)presence
 {
-	return [[[XMPPPresence alloc] init] autorelease];
+	return [[XMPPPresence alloc] init];
 }
 
 + (XMPPPresence *)presenceWithType:(NSString *)type
 {
-	return [[[XMPPPresence alloc] initWithType:type to:nil] autorelease];
+	return [[XMPPPresence alloc] initWithType:type to:nil];
 }
 
 + (XMPPPresence *)presenceWithType:(NSString *)type to:(XMPPJID *)to
 {
-	return [[[XMPPPresence alloc] initWithType:type to:to] autorelease];
+	return [[XMPPPresence alloc] initWithType:type to:to];
 }
 
 - (id)init

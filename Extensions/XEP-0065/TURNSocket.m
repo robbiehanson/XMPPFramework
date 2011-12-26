@@ -5,6 +5,10 @@
 #import "NSData+XMPP.h"
 #import "NSNumber+XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
@@ -158,7 +162,7 @@ static NSMutableArray *proxyCandidates;
 	{
 		XMPPLogTrace();
 		
-		result = [[proxyCandidates copy] autorelease];
+		result = [proxyCandidates copy];
 	}
 	
 	return result;
@@ -190,15 +194,15 @@ static NSMutableArray *proxyCandidates;
 		XMPPLogTrace();
 		
 		// Store references
-		xmppStream = [stream retain];
-		jid = [aJid retain];
+		xmppStream = stream;
+		jid = aJid;
 		
 		// Create a uuid to be used as the id for all messages in the stun communication.
 		// This helps differentiate various turn messages between various turn sockets.
 		// Relying only on JID's is troublesome, because client A could be initiating a connection to server B,
 		// while at the same time client B could be initiating a connection to server A.
 		// So an incoming connection from JID clientB@deusty.com/home would be for which turn socket?
-		uuid = [[xmppStream generateUUID] retain];
+		uuid = [xmppStream generateUUID];
 		
 		// Setup initial state for a client connection
 		state = STATE_INIT;
@@ -206,7 +210,7 @@ static NSMutableArray *proxyCandidates;
 		
 		// Get list of proxy candidates
 		// Each host in this list will be queried to see if it can be used as a proxy
-		proxyCandidates = [[[self class] proxyCandidates] retain];
+		proxyCandidates = [[self class] proxyCandidates];
 		
 		// Configure everything else
 		[self performPostInitSetup];
@@ -225,8 +229,8 @@ static NSMutableArray *proxyCandidates;
 		XMPPLogTrace();
 		
 		// Store references
-		xmppStream = [stream retain];
-		jid = [[iq from] retain];
+		xmppStream = stream;
+		jid = [iq from];
 		
 		// Store a copy of the ID (which will be our uuid)
 		uuid = [[iq elementID] copy];
@@ -281,9 +285,6 @@ static NSMutableArray *proxyCandidates;
 	if (turnQueue)
 		dispatch_release(turnQueue);
 	
-	[xmppStream release];
-	[jid release];
-	[uuid release];
 	
 	if (delegateQueue)
 		dispatch_release(delegateQueue);
@@ -294,30 +295,20 @@ static NSMutableArray *proxyCandidates;
 		dispatch_release(turnTimer);
 	}
 	
-	[discoUUID release];
 	if (discoTimer)
 	{
 		dispatch_source_cancel(discoTimer);
 		dispatch_release(discoTimer);
 	}
 	
-	[proxyCandidates release];
-	[candidateJIDs release];
-	[streamhosts release];
-	[proxyJID release];
-	[proxyHost release];
 	
 	if ([asyncSocket delegate] == self)
 	{
 		[asyncSocket setDelegate:nil delegateQueue:NULL];
 		[asyncSocket disconnect];
 	}
-	[asyncSocket release];
 	
-	[startTime release];
-	[finishTime release];
 	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,8 +324,7 @@ static NSMutableArray *proxyCandidates;
 	NSParameterAssert(aDelegate != nil);
 	NSParameterAssert(aDelegateQueue != NULL);
 	
-	dispatch_async(turnQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(turnQueue, ^{ @autoreleasepool {
 		
 		if (state != STATE_INIT)
 		{
@@ -362,13 +352,11 @@ static NSMutableArray *proxyCandidates;
 		
 		turnTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, turnQueue);
 		
-		dispatch_source_set_event_handler(turnTimer, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_event_handler(turnTimer, ^{ @autoreleasepool {
 			
 			[self doTotalTimeout];
 			
-			[pool drain];
-		});
+		}});
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (TIMEOUT_TOTAL * NSEC_PER_SEC));
 		
@@ -382,8 +370,7 @@ static NSMutableArray *proxyCandidates;
 		else
 			[self targetConnect];
 		
-		[pool drain];
-	});
+	}});
 }
 
 /**
@@ -403,12 +390,10 @@ static NSMutableArray *proxyCandidates;
 **/
 - (void)abort
 {
-	dispatch_block_t block = ^{
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if ((state > STATE_INIT) && (state < STATE_DONE))
 		{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-			
 			// The only thing we really have to do here is move the state to failure.
 			// This simple act should prevent any further action from being taken in this TUNRSocket object,
 			// since every action is dictated based on the current state.
@@ -416,10 +401,8 @@ static NSMutableArray *proxyCandidates;
 			
 			// And don't forget to cleanup after ourselves
 			[self cleanup];
-			
-			[pool drain];
 		}
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == turnQueue)
 		block();
@@ -612,7 +595,6 @@ static NSMutableArray *proxyCandidates;
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/disco#items"];
 	NSArray *items = [query elementsForName:@"item"];
 	
-	[candidateJIDs release];
 	candidateJIDs = [[NSMutableArray alloc] initWithCapacity:[items count]];
 	
 	NSUInteger i;
@@ -754,14 +736,13 @@ static NSMutableArray *proxyCandidates;
 		{
 			NSAssert(proxyJID == nil && proxyHost == nil, @"proxy and proxyHost are expected to be nil");
 			
-			proxyJID = [[XMPPJID jidWithString:streamhostJID] retain];
+			proxyJID = [XMPPJID jidWithString:streamhostJID];
 			
 			proxyHost = [[streamhost attributeForName:@"host"] stringValue];
 			if([proxyHost isEqualToString:@"0.0.0.0"])
 			{
 				proxyHost = [proxyJID full];
 			}
-			[proxyHost retain];
 			
 			proxyPort = [[[streamhost attributeForName:@"port"] stringValue] intValue];
 			
@@ -813,8 +794,7 @@ static NSMutableArray *proxyCandidates;
 **/
 - (void)updateDiscoUUID
 {
-	[discoUUID release];
-	discoUUID = [[xmppStream generateUUID] retain];
+	discoUUID = [xmppStream generateUUID];
 }
 
 /**
@@ -919,10 +899,8 @@ static NSMutableArray *proxyCandidates;
 		
 		if (proxyRange.length > 0)
 		{
-			[candidateJID retain];
 			[candidateJIDs removeObjectAtIndex:i];
 			[candidateJIDs insertObject:candidateJID atIndex:0];
-			[candidateJID release];
 		}
 	}
 	
@@ -1015,17 +993,14 @@ static NSMutableArray *proxyCandidates;
 	{
 		NSXMLElement *streamhost = [streamhosts objectAtIndex:streamhostIndex];
 		
-		[proxyJID release];
-		[proxyHost release];
 		
-		proxyJID = [[XMPPJID jidWithString:[[streamhost attributeForName:@"jid"] stringValue]] retain];
+		proxyJID = [XMPPJID jidWithString:[[streamhost attributeForName:@"jid"] stringValue]];
 		
 		proxyHost = [[streamhost attributeForName:@"host"] stringValue];
 		if([proxyHost isEqualToString:@"0.0.0.0"])
 		{
 			proxyHost = [proxyJID full];
 		}
-		[proxyHost retain];
 		
 		proxyPort = [[[streamhost attributeForName:@"port"] stringValue] intValue];
 		
@@ -1369,11 +1344,10 @@ static NSMutableArray *proxyCandidates;
 	
 	NSString *theUUID = discoUUID;
 	
-	dispatch_source_set_event_handler(discoTimer, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_source_set_event_handler(discoTimer, ^{ @autoreleasepool {
+		
 		[self doDiscoItemsTimeout:theUUID];
-		[pool drain];
-	});
+	}});
 }
 
 - (void)setupDiscoTimerForDiscoInfo
@@ -1384,11 +1358,10 @@ static NSMutableArray *proxyCandidates;
 	
 	NSString *theUUID = discoUUID;
 	
-	dispatch_source_set_event_handler(discoTimer, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_source_set_event_handler(discoTimer, ^{ @autoreleasepool {
+		
 		[self doDiscoInfoTimeout:theUUID];
-		[pool drain];
-	});
+	}});
 }
 
 - (void)setupDiscoTimerForDiscoAddress
@@ -1399,11 +1372,10 @@ static NSMutableArray *proxyCandidates;
 	
 	NSString *theUUID = discoUUID;
 	
-	dispatch_source_set_event_handler(discoTimer, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_source_set_event_handler(discoTimer, ^{ @autoreleasepool {
+		
 		[self doDiscoAddressTimeout:theUUID];
-		[pool drain];
-	});
+	}});
 }
 
 - (void)doDiscoItemsTimeout:(NSString *)theUUID
@@ -1487,16 +1459,13 @@ static NSMutableArray *proxyCandidates;
 	// Update state
 	state = STATE_DONE;
 	
-	dispatch_async(delegateQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(delegateQueue, ^{ @autoreleasepool {
 		
 		if ([delegate respondsToSelector:@selector(turnSocket:didSucceed:)])
 		{
 			[delegate turnSocket:self didSucceed:asyncSocket];
 		}
-		
-		[pool drain];
-	});
+	}});
 	
 	[self cleanup];
 }
@@ -1513,16 +1482,14 @@ static NSMutableArray *proxyCandidates;
 	// Update state
 	state = STATE_FAILURE;
 	
-	dispatch_async(delegateQueue, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_async(delegateQueue, ^{ @autoreleasepool {
 		
 		if ([delegate respondsToSelector:@selector(turnSocketDidFail:)])
 		{
 			[delegate turnSocketDidFail:self];
 		}
 		
-		[pool drain];
-	});
+	}});
 	
 	[self cleanup];
 }

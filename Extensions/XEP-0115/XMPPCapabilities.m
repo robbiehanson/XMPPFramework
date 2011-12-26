@@ -3,6 +3,10 @@
 #import "XMPPCapabilities.h"
 #import "NSData+XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
@@ -107,7 +111,7 @@
 	{
 		if ([storage configureWithParent:self queue:moduleQueue])
 		{
-			xmppCapabilitiesStorage = [storage retain];
+			xmppCapabilitiesStorage = storage;
 		}
 		else
 		{
@@ -164,21 +168,14 @@
 
 - (void)dealloc
 {
-	[xmppCapabilitiesStorage release];
 	
-	[myCapabilitiesQuery release];
-	[myCapabilitiesC release];
 	
-	[discoRequestJidSet release];
-	[discoRequestHashDict release];
 	
 	for (GCDTimerWrapper *timerWrapper in discoTimerJidDict)
 	{
 		[timerWrapper cancel];
 	}
-	[discoTimerJidDict release];
 	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -628,8 +625,8 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		return;
 	}
 	
-	[myCapabilitiesQuery release]; myCapabilitiesQuery = nil;
-	[myCapabilitiesC release]; myCapabilitiesC = nil;
+	 myCapabilitiesQuery = nil;
+	 myCapabilitiesC = nil;
 	
 	collectingMyCapabilities = YES;
 	
@@ -670,8 +667,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
 		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-		dispatch_async(concurrentQueue, ^{
-			NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
+		dispatch_async(concurrentQueue, ^{ @autoreleasepool {
 			
 			// Allow delegates to modify outgoing element
 			
@@ -680,25 +676,18 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			
 			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 			{
-				dispatch_sync(dq, ^{
-					NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+				dispatch_sync(dq, ^{ @autoreleasepool {
 					
 					[del xmppCapabilities:self collectingMyCapabilities:query];
-					
-					[innerPool release];
-				});
+				}});
 			}
 			
-			dispatch_async(moduleQueue, ^{
-				NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+			dispatch_async(moduleQueue, ^{ @autoreleasepool {
 				
 				[self continueCollectMyCapabilities:query];
-				
-				[innerPool release];
-			});
+			}});
 			
-			[outerPool drain];
-		});
+		}});
 	}
 }
 
@@ -711,7 +700,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	collectingMyCapabilities = NO;
 	
-	myCapabilitiesQuery = [query retain];
+	myCapabilitiesQuery = query;
 	
 	XMPPLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
 				   [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
@@ -760,13 +749,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		[self collectMyCapabilities];
-		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -803,13 +789,11 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if ([discoRequestJidSet containsObject:jid])
 		{
 			// We're already requesting capabilities concerning this JID
-			[pool drain];
 			return;
 		}
 		
@@ -834,13 +818,11 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		if (areCapabilitiesKnown)
 		{
 			// We already know the capabilities for this JID
-			[pool drain];
 			return;
 		}
 		if (haveFailedFetchingBefore)
 		{
 			// We've already sent a fetch request to the JID in the past, which failed.
-			[pool drain];
 			return;
 		}
 		
@@ -872,7 +854,6 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 				[jids addObject:jid];
 				[discoRequestJidSet addObject:jid];
 				
-				[pool drain];
 				return;
 			}
 			
@@ -905,8 +886,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			[self setupTimeoutForDiscoRequestFromJID:jid];
 		}
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -1147,7 +1127,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		//   </query>
 		// </iq>
 		
-		NSXMLElement *query = [[myCapabilitiesQuery copy] autorelease];
+		NSXMLElement *query = [myCapabilitiesQuery copy];
 		if (node)
 		{
 			[query addAttributeWithName:@"node" stringValue:node];
@@ -1174,7 +1154,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	// Remember XML hiearchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it asynchronously to storge / delegate(s).
-	NSXMLElement *query = [[querySubElement copy] autorelease];
+	NSXMLElement *query = [querySubElement copy];
 	
 	NSString *hash = nil;
 	NSString *hashAlg = nil;
@@ -1525,7 +1505,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		}
 		else if (myCapabilitiesC)
 		{
-			NSXMLElement *c = [[myCapabilitiesC copy] autorelease];
+			NSXMLElement *c = [myCapabilitiesC copy];
 			
 			[presence addChild:c];
 		}
@@ -1549,16 +1529,14 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
 	
-	dispatch_source_set_event_handler(timer, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
 		
 		[self processTimeoutWithJID:jid];
 		
 		dispatch_source_cancel(timer);
 		dispatch_release(timer);
 		
-		[pool drain];
-	});
+	}});
 	
 	dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (CAPABILITIES_REQUEST_TIMEOUT * NSEC_PER_SEC));
 	
@@ -1571,7 +1549,6 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
 	
 	[discoTimerJidDict setObject:timerWrapper forKey:jid];
-	[timerWrapper release];
 }
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid withHashKey:(NSString *)key
@@ -1587,16 +1564,14 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		
 	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
 	
-	dispatch_source_set_event_handler(timer, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
 		
 		[self processTimeoutWithHashKey:key];
 		
 		dispatch_source_cancel(timer);
 		dispatch_release(timer);
 		
-		[pool drain];
-	});
+	}});
 	
 	dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (CAPABILITIES_REQUEST_TIMEOUT * NSEC_PER_SEC));
 	
@@ -1609,7 +1584,6 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
 	
 	[discoTimerJidDict setObject:timerWrapper forKey:jid];
-	[timerWrapper release];
 }
 
 - (void)cancelTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
@@ -1689,7 +1663,6 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)dealloc
 {
 	[self cancel];
-	[super dealloc];
 }
 
 @end

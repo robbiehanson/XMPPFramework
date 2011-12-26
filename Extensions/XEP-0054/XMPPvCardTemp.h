@@ -42,53 +42,53 @@ extern NSString *const kXMPPvCardTempElement;
 @interface XMPPvCardTemp : XMPPvCardTempBase
 
 
-@property (nonatomic, assign) NSDate *bday;
-@property (nonatomic, assign) NSData *photo;
-@property (nonatomic, assign) NSString *nickname;
-@property (nonatomic, assign) NSString *formattedName;
-@property (nonatomic, assign) NSString *familyName;
-@property (nonatomic, assign) NSString *givenName;
-@property (nonatomic, assign) NSString *middleName;
-@property (nonatomic, assign) NSString *prefix;
-@property (nonatomic, assign) NSString *suffix;
+@property (nonatomic, strong) NSDate *bday;
+@property (nonatomic, strong) NSData *photo;
+@property (nonatomic, strong) NSString *nickname;
+@property (nonatomic, strong) NSString *formattedName;
+@property (nonatomic, strong) NSString *familyName;
+@property (nonatomic, strong) NSString *givenName;
+@property (nonatomic, strong) NSString *middleName;
+@property (nonatomic, strong) NSString *prefix;
+@property (nonatomic, strong) NSString *suffix;
 
-@property (nonatomic, assign) NSArray *addresses;
-@property (nonatomic, assign) NSArray *labels;
-@property (nonatomic, assign) NSArray *telecomsAddresses;
-@property (nonatomic, assign) NSArray *emailAddresses;
+@property (nonatomic, strong) NSArray *addresses;
+@property (nonatomic, strong) NSArray *labels;
+@property (nonatomic, strong) NSArray *telecomsAddresses;
+@property (nonatomic, strong) NSArray *emailAddresses;
 
-@property (nonatomic, assign) XMPPJID *jid;
-@property (nonatomic, assign) NSString *mailer;
+@property (nonatomic, strong) XMPPJID *jid;
+@property (nonatomic, strong) NSString *mailer;
 
-@property (nonatomic, assign) NSTimeZone *timeZone;
-@property (nonatomic, assign) CLLocation *location;
+@property (nonatomic, strong) NSTimeZone *timeZone;
+@property (nonatomic, strong) CLLocation *location;
 
-@property (nonatomic, assign) NSString *title;
-@property (nonatomic, assign) NSString *role;
-@property (nonatomic, assign) NSData *logo;
-@property (nonatomic, assign) XMPPvCardTemp *agent;
-@property (nonatomic, assign) NSString *orgName;
+@property (nonatomic, strong) NSString *title;
+@property (nonatomic, strong) NSString *role;
+@property (nonatomic, strong) NSData *logo;
+@property (nonatomic, strong) XMPPvCardTemp *agent;
+@property (nonatomic, strong) NSString *orgName;
 
 /*
  * ORGUNITs can only be set if there is already an ORGNAME. Otherwise, changes are ignored.
  */
-@property (nonatomic, assign) NSArray *orgUnits;
+@property (nonatomic, strong) NSArray *orgUnits;
 
-@property (nonatomic, assign) NSArray *categories;
-@property (nonatomic, assign) NSString *note;
-@property (nonatomic, assign) NSString *prodid;
-@property (nonatomic, assign) NSDate *revision;
-@property (nonatomic, assign) NSString *sortString;
-@property (nonatomic, assign) NSString *phoneticSound;
-@property (nonatomic, assign) NSData *sound;
-@property (nonatomic, assign) NSString *uid;
-@property (nonatomic, assign) NSString *url;
-@property (nonatomic, assign) NSString *version;
-@property (nonatomic, assign) NSString *description;
+@property (nonatomic, strong) NSArray *categories;
+@property (nonatomic, strong) NSString *note;
+@property (nonatomic, strong) NSString *prodid;
+@property (nonatomic, strong) NSDate *revision;
+@property (nonatomic, strong) NSString *sortString;
+@property (nonatomic, strong) NSString *phoneticSound;
+@property (nonatomic, strong) NSData *sound;
+@property (nonatomic, strong) NSString *uid;
+@property (nonatomic, strong) NSString *url;
+@property (nonatomic, strong) NSString *version;
+@property (nonatomic, strong) NSString *description;
 
 @property (nonatomic, assign) XMPPvCardTempClass privacyClass;
-@property (nonatomic, assign) NSData *key;
-@property (nonatomic, assign) NSString *keyType;
+@property (nonatomic, strong) NSData *key;
+@property (nonatomic, strong) NSString *keyType;
 
 
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)element;
