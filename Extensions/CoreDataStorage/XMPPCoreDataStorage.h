@@ -98,7 +98,7 @@
  * then you need to go read the documentation for core data,
  * specifically the section entitled "Concurrency with Core Data".
 **/
-@property (readonly) NSManagedObjectModel *managedObjectModel;
-@property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+@property (strong, readonly) NSManagedObjectModel *managedObjectModel;
+@property (strong, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @end

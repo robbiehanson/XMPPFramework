@@ -1,6 +1,10 @@
 #import "GCDMulticastDelegate.h"
 #import <libkern/OSAtomic.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 /**
  * How does this class work?
  * 
@@ -16,35 +20,38 @@
  * In other words, it is NOT thread-safe, and should only be used from within the external dedicated dispatch_queue.
 **/
 
-@interface GCDMulticastDelegate (PrivateAPI)
+@interface GCDMulticastDelegateNode : NSObject
+{
+	__unsafe_unretained id delegate;
+	dispatch_queue_t delegateQueue;
+}
+
+@property (nonatomic, unsafe_unretained) id delegate;
+@property (nonatomic, /* strong */) dispatch_queue_t delegateQueue;
+
+@end
+
+
+@interface GCDMulticastDelegate ()
+{
+	NSMutableArray *delegateNodes;
+}
 
 - (NSInvocation *)duplicateInvocation:(NSInvocation *)origInvocation;
 
 @end
 
-@interface GCDMulticastDelegateEnumerator (PrivateAPI)
 
-- (id)initWithDelegateList:(GCDMulticastDelegateListNode *)delegateList;
+@interface GCDMulticastDelegateEnumerator ()
+{
+	NSUInteger numNodes;
+	NSUInteger currentNodeIndex;
+	NSArray *delegateNodes;
+}
+
+- (id)initFromDelegateNodes:(NSMutableArray *)inDelegateNodes;
 
 @end
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-static void GCDMulticastDelegateListNodeRetain(GCDMulticastDelegateListNode *node)
-{
-	OSAtomicIncrement32Barrier(&node->retainCount);
-}
-
-static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *node)
-{
-	int32_t newRetainCount = OSAtomicDecrement32Barrier(&node->retainCount);
-    if (newRetainCount == 0)
-    {
-        free(node);
-    }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -56,7 +63,7 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 {
 	if ((self = [super init]))
 	{
-		delegateList = NULL;
+		delegateNodes = [[NSMutableArray alloc] init];
 	}
 	return self;
 }
@@ -66,78 +73,31 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 	if (delegate == nil) return;
 	if (delegateQueue == NULL) return;
 	
-	GCDMulticastDelegateListNode *node = malloc(sizeof(GCDMulticastDelegateListNode));
+	GCDMulticastDelegateNode *node = [[GCDMulticastDelegateNode alloc] init];
+	node.delegate = delegate;
+	node.delegateQueue = delegateQueue;
 	
-    node->delegate = delegate;
-	node->delegateQueue = delegateQueue;
-    node->retainCount = 1;
-	
-	dispatch_retain(delegateQueue);
-	
-	// Remember: The delegateList is a linked list of MulticastDelegateListNode objects.
-	// Each node object is allocated and placed in the list.
-	// It is not deallocated until it is later removed from the linked list.
-	
-	if (delegateList == NULL)
-	{
-		node->prev = NULL;
-        node->next = NULL;
-	}
-    else
-    {
-        node->prev = NULL;
-		node->next = delegateList;
-		node->next->prev = node;
-    }
-	
-	delegateList = node;
+	[delegateNodes addObject:node];
 }
 
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue
 {
 	if (delegate == nil) return;
 	
-	GCDMulticastDelegateListNode *node = delegateList;
-	while (node != NULL)
+	NSUInteger i;
+	for (i = [delegateNodes count]; i > 0; i--)
 	{
-		if (delegate == node->delegate)
+		GCDMulticastDelegateNode *node = [delegateNodes objectAtIndex:(i-1)];
+		
+		if (delegate == node.delegate)
 		{
-			if ((delegateQueue == NULL) || (delegateQueue == node->delegateQueue))
+			if ((delegateQueue == NULL) || (delegateQueue == node.delegateQueue))
 			{
-				// Remove the node from the list.
-				// This is done by editing the pointers of the node's neighbors to skip it.
-				// 
-				// In other words:
-				// node->prev->next = node->next
-				// node->next->prev = node->prev
-				// 
-				// We also want to properly update our delegateList pointer,
-				// which always points to the "first" element in the list. (Most recently added.)
+				node.delegate = nil;
+				node.delegateQueue = NULL;
 				
-				if(node->prev != NULL)
-					node->prev->next = node->next;
-				else
-					delegateList = node->next;
-				
-				if(node->next != NULL)
-					node->next->prev = node->prev;
-				
-				node->prev = NULL;
-				node->next = NULL;
-				
-				dispatch_release(node->delegateQueue);
-				
-				node->delegate = nil;
-				node->delegateQueue = NULL;
-				
-				GCDMulticastDelegateListNodeRelease(node);
-				
-				break;
+				[delegateNodes removeObjectAtIndex:(i-1)];
 			}
-		}
-		else
-		{
-			node = node->next;
 		}
 	}
 }
@@ -149,49 +109,27 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 
 - (void)removeAllDelegates
 {
-	GCDMulticastDelegateListNode *node = delegateList;
-	
-	while (node != NULL)
+	for (GCDMulticastDelegateNode *node in delegateNodes)
 	{
-		GCDMulticastDelegateListNode *next = node->next;
-		
-		node->prev = NULL;
-		node->next = NULL;
-		
-		dispatch_release(node->delegateQueue);
-		
-		node->delegate = nil;
-		node->delegateQueue = NULL;
-		
-        GCDMulticastDelegateListNodeRelease(node);
-		
-		node = next;
+		node.delegate = nil;
+		node.delegateQueue = NULL;
 	}
 	
-	delegateList = NULL;
+	[delegateNodes removeAllObjects];
 }
 
 - (NSUInteger)count
 {
-	NSUInteger count = 0;
-	
-	GCDMulticastDelegateListNode *node;
-	for (node = delegateList; node != NULL; node = node->next)
-	{
-		count++;
-	}
-	
-	return count;
+	return [delegateNodes count];
 }
 
 - (NSUInteger)countOfClass:(Class)aClass
 {
 	NSUInteger count = 0;
 	
-	GCDMulticastDelegateListNode *node;
-	for (node = delegateList; node != NULL; node = node->next)
+	for (GCDMulticastDelegateNode *node in delegateNodes)
 	{
-		if ([node->delegate isKindOfClass:aClass])
+		if ([node.delegate isKindOfClass:aClass])
 		{
 			count++;
 		}
@@ -204,10 +142,9 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 {
 	NSUInteger count = 0;
 	
-	GCDMulticastDelegateListNode *node;
-	for (node = delegateList; node != NULL; node = node->next)
+	for (GCDMulticastDelegateNode *node in delegateNodes)
 	{
-		if ([node->delegate respondsToSelector:aSelector])
+		if ([node.delegate respondsToSelector:aSelector])
 		{
 			count++;
 		}
@@ -218,15 +155,14 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 
 - (GCDMulticastDelegateEnumerator *)delegateEnumerator
 {
-	return [[[GCDMulticastDelegateEnumerator alloc] initWithDelegateList:delegateList] autorelease];
+	return [[GCDMulticastDelegateEnumerator alloc] initFromDelegateNodes:delegateNodes];
 }
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
 {
-	GCDMulticastDelegateListNode *node;
-	for (node = delegateList; node != NULL; node = node->next)
+	for (GCDMulticastDelegateNode *node in delegateNodes)
 	{
-		NSMethodSignature *result = [node->delegate methodSignatureForSelector:aSelector];
+		NSMethodSignature *result = [node.delegate methodSignatureForSelector:aSelector];
 		
 		if (result != nil)
 		{
@@ -245,49 +181,28 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 
 - (void)forwardInvocation:(NSInvocation *)origInvocation
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
 	
-	// All delegates MUST be invoked ASYNCHRONOUSLY.
-	
-	GCDMulticastDelegateListNode *node = delegateList;
-	
-	if (node != NULL)
-	{
-		// Recall that new delegates are added to the beginning of the linked list.
-		// The last delegate in the list is the first delegate that was added, so it will be the first that's invoked.
-		// We're going to be moving backwards through the linked list as we invoke the delegates.
-		// 
-		// Loop through the linked list so we can get a reference to the last delegate in the list.
-		
-		while (node->next != NULL)
-		{
-			node = node->next;
-		}
-		
 		SEL selector = [origInvocation selector];
 		
-		while (node != NULL)
+		for (GCDMulticastDelegateNode *node in delegateNodes)
 		{
-			id delegate = node->delegate;
+			id delegate = node.delegate;
 			
 			if ([delegate respondsToSelector:selector])
 			{
+				// All delegates MUST be invoked ASYNCHRONOUSLY.
+				
 				NSInvocation *dupInvocation = [self duplicateInvocation:origInvocation];
 				
-				dispatch_async(node->delegateQueue, ^{
-					NSAutoreleasePool *delegatePool = [[NSAutoreleasePool alloc] init];
+				dispatch_async(node.delegateQueue, ^{ @autoreleasepool {
 					
 					[dupInvocation invokeWithTarget:delegate];
 					
-					[delegatePool drain];
-				});
+				}});
 			}
-			
-			node = node->prev;
 		}
 	}
-	
-	[pool release];
 }
 
 - (void)doesNotRecognizeSelector:(SEL)aSelector
@@ -300,7 +215,6 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 - (void)dealloc
 {
 	[self removeAllDelegates];
-	[super dealloc];
 }
 
 - (NSInvocation *)duplicateInvocation:(NSInvocation *)origInvocation
@@ -365,7 +279,7 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 		}
 		else if (*type == '@')
 		{
-			id value;
+			void *value;
 			[origInvocation getArgument:&value atIndex:i];
 			[dupInvocation setArgument:&value atIndex:i];
 		}
@@ -391,93 +305,67 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+@implementation GCDMulticastDelegateNode
+
+@synthesize delegate;
+@synthesize delegateQueue;
+
+- (void)setDelegateQueue:(dispatch_queue_t)dq
+{
+	if (delegateQueue != dq)
+	{
+		if (delegateQueue)
+			dispatch_release(delegateQueue);
+		
+		if (dq)
+			dispatch_retain(dq);
+		
+		delegateQueue = dq;
+	}
+}
+
+- (void)dealloc
+{
+	if (delegateQueue) {
+		dispatch_release(delegateQueue);
+	}
+}
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 @implementation GCDMulticastDelegateEnumerator
 
-- (id)initWithDelegateList:(GCDMulticastDelegateListNode *)delegateList
+- (id)initFromDelegateNodes:(NSMutableArray *)inDelegateNodes
 {
 	if ((self = [super init]))
 	{
-		numDelegates = 0;
-		currentDelegateIndex = 0;
+		delegateNodes = [inDelegateNodes copy];
 		
-		// The delegate enumerator will provide a snapshot of the current delegate list.
-		// 
-		// So, technically, delegates could be added/removed from the list while we're enumerating.
-		
-		GCDMulticastDelegateListNode *node = delegateList;
-		
-		// First we loop through the linked list so we can:
-		// 
-		// - Get a count of the number of delegates
-		// - Get a reference to the last delegate in the list
-		// 
-		// Recall that new delegates are added to the beginning of the linked list.
-		// The last delegate in the list is the first delegate that was added, so it will be the first that's invoked.
-		// We're going to be moving backwards through the linked list as we add the delegates to our array.
-		
-		if (node != NULL)
-		{
-			numDelegates++;
-			
-			while (node->next != NULL)
-			{
-				numDelegates++;
-				node = node->next;
-			}
-			
-			// Note: The node variable is now pointing to the last node in the list.
-		}
-		
-		// We're now going to create an array of all the nodes.
-		// 
-		// Note: We're creating an array of pointers.
-		// Each pointer points to the dynamically allocated struct.
-		// We also retain each node, to prevent it from disappearing while we're enumerating the list.
-		
-		size_t ptrSize = sizeof(node);
-		
-		delegates = malloc(ptrSize * numDelegates);
-		
-		// Remember that delegates is a pointer to an array of pointers.
-		// It's going to look something like this in memory:
-		// 
-		// delegates ---> |ptr1|ptr2|ptr3|...|
-		// 
-		// So delegates points to ptr1.
-		// And due to pointer arithmetic, delegates+1 points to ptr2.
-		
-		NSUInteger i;
-		for (i = 0; i < numDelegates; i++)
-		{
-			memcpy(delegates + i, &node, ptrSize);
-			GCDMulticastDelegateListNodeRetain(node);
-			
-			node = node->prev;
-		}
+		numNodes = [delegateNodes count];
+		currentNodeIndex = 0;
 	}
 	return self;
 }
 
 - (NSUInteger)count
 {
-	return numDelegates;
+	return numNodes;
 }
 
 - (NSUInteger)countOfClass:(Class)aClass
 {
 	NSUInteger count = 0;
-	NSUInteger index = 0;
 	
-	while (index < numDelegates)
+	for (GCDMulticastDelegateNode *node in delegateNodes)
 	{
-		GCDMulticastDelegateListNode *node = *(delegates + index);
-		
-		if ([node->delegate isKindOfClass:aClass])
+		if ([node.delegate isKindOfClass:aClass])
 		{
 			count++;
 		}
-		
-		index++;
 	}
 	
 	return count;
@@ -486,18 +374,13 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 - (NSUInteger)countForSelector:(SEL)aSelector
 {
 	NSUInteger count = 0;
-	NSUInteger index = 0;
 	
-	while (index < numDelegates)
+	for (GCDMulticastDelegateNode *node in delegateNodes)
 	{
-		GCDMulticastDelegateListNode *node = *(delegates + index);
-		
-		if ([node->delegate respondsToSelector:aSelector])
+		if ([node.delegate respondsToSelector:aSelector])
 		{
 			count++;
 		}
-		
-		index++;
 	}
 	
 	return count;
@@ -505,15 +388,15 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 
 - (BOOL)getNextDelegate:(id *)delPtr delegateQueue:(dispatch_queue_t *)dqPtr
 {
-	while (currentDelegateIndex < numDelegates)
+	while (currentNodeIndex < numNodes)
 	{
-		GCDMulticastDelegateListNode *node = *(delegates + currentDelegateIndex);
-		currentDelegateIndex++;
+		GCDMulticastDelegateNode *node = [delegateNodes objectAtIndex:currentNodeIndex];
+		currentNodeIndex++;
 		
-		if (node->delegate)
+		if (node.delegate)
 		{
-			if (delPtr) *delPtr = node->delegate;
-			if (dqPtr)  *dqPtr  = node->delegateQueue;
+			if (delPtr) *delPtr = node.delegate;
+			if (dqPtr)  *dqPtr  = node.delegateQueue;
 			
 			return YES;
 		}
@@ -524,15 +407,15 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 
 - (BOOL)getNextDelegate:(id *)delPtr delegateQueue:(dispatch_queue_t *)dqPtr ofClass:(Class)aClass
 {
-	while (currentDelegateIndex < numDelegates)
+	while (currentNodeIndex < numNodes)
 	{
-		GCDMulticastDelegateListNode *node = *(delegates + currentDelegateIndex);
-		currentDelegateIndex++;
+		GCDMulticastDelegateNode *node = [delegateNodes objectAtIndex:currentNodeIndex];
+		currentNodeIndex++;
 		
-		if ([node->delegate isKindOfClass:aClass])
+		if ([node.delegate isKindOfClass:aClass])
 		{
-			if (delPtr) *delPtr = node->delegate;
-			if (dqPtr)  *dqPtr  = node->delegateQueue;
+			if (delPtr) *delPtr = node.delegate;
+			if (dqPtr)  *dqPtr  = node.delegateQueue;
 			
 			return YES;
 		}
@@ -543,15 +426,15 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 
 - (BOOL)getNextDelegate:(id *)delPtr delegateQueue:(dispatch_queue_t *)dqPtr forSelector:(SEL)aSelector
 {
-	while (currentDelegateIndex < numDelegates)
+	while (currentNodeIndex < numNodes)
 	{
-		GCDMulticastDelegateListNode *node = *(delegates + currentDelegateIndex);
-		currentDelegateIndex++;
+		GCDMulticastDelegateNode *node = [delegateNodes objectAtIndex:currentNodeIndex];
+		currentNodeIndex++;
 		
-		if ([node->delegate respondsToSelector:aSelector])
+		if ([node.delegate respondsToSelector:aSelector])
 		{
-			if (delPtr) *delPtr = node->delegate;
-			if (dqPtr)  *dqPtr  = node->delegateQueue;
+			if (delPtr) *delPtr = node.delegate;
+			if (dqPtr)  *dqPtr  = node.delegateQueue;
 			
 			return YES;
 		}
@@ -560,18 +443,5 @@ static void GCDMulticastDelegateListNodeRelease(GCDMulticastDelegateListNode *no
 	return NO;
 }
 
-- (void)dealloc
-{
-	NSUInteger i;
-	for (i = 0; i < numDelegates; i++)
-	{
-		GCDMulticastDelegateListNode *node = *(delegates + i);
-		GCDMulticastDelegateListNodeRelease(node);
-	}
-	
-	free(delegates);
-	
-	[super dealloc];
-}
 
 @end

@@ -3,10 +3,14 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -57,8 +61,7 @@
 
 - (void)deactivate
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		[self stopPingIntervalTimer];
 		
@@ -68,8 +71,7 @@
 		[xmppPing deactivate];
 		[super deactivate];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -79,15 +81,11 @@
 
 - (void)dealloc
 {
-	[targetJID release];
-	[targetJIDStr release];
 	
 	[self stopPingIntervalTimer];
 	
 	[xmppPing removeDelegate:self];
-	[xmppPing release];
 	
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,9 +185,9 @@
 		__block XMPPJID *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [targetJID retain];
+			result = targetJID;
 		});
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -199,11 +197,9 @@
 		
 		if (![targetJID isEqualToJID:jid])
 		{
-			[targetJID release];
-			targetJID = [jid retain];
+			targetJID = jid;
 			
-			[targetJIDStr release];
-			targetJIDStr = [[targetJID full] retain];
+			targetJIDStr = [targetJID full];
 		}
 	};
 	
@@ -313,13 +309,11 @@
 		newTimer = YES;
 		pingIntervalTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
 		
-		dispatch_source_set_event_handler(pingIntervalTimer, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_source_set_event_handler(pingIntervalTimer, ^{ @autoreleasepool {
 			
 			[self handlePingIntervalTimerFire];
 			
-			[pool drain];
-		});
+		}});
 	}
 	
 	[self updatePingIntervalTimer];

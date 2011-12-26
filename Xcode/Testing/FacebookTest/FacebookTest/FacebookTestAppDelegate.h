@@ -9,12 +9,9 @@
 {
 	Facebook *facebook;
 	XMPPStream *xmppStream;
-	
-	BOOL allowSelfSignedCertificates;
-	BOOL allowSSLHostNameMismatch;
 }
 
-@property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet FacebookTestViewController *viewController;
+@property (nonatomic, strong) IBOutlet UIWindow *window;
+@property (nonatomic, strong) IBOutlet FacebookTestViewController *viewController;
 
 @end

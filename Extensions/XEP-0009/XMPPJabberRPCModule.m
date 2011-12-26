@@ -10,6 +10,11 @@
 #import "XMPPIQ+JabberRPC.h"
 #import "XMPPIQ+JabberRPCResonse.h"
 #import "XMPPLogging.h"
+#import "XMPPFramework.h"
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
@@ -17,13 +22,6 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
-#endif
-
-// can turn off if not acting as a Jabber-RPC server 
-#define INTEGRATE_WITH_CAPABILITIES 1
-
-#if INTEGRATE_WITH_CAPABILITIES
-#import "XMPPCapabilities.h"
 #endif
 
 NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
@@ -87,9 +85,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 - (void)dealloc
 {
 	[self cancelTimer];
-	[rpcID release];
 	
-	[super dealloc];
 }
 
 @end
@@ -158,7 +154,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 	
 	if ([super activate:aXmppStream])
 	{
-	#if INTEGRATE_WITH_CAPABILITIES
+	#ifdef _XMPP_CAPABILITIES_H
 		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 	#endif
 		
@@ -172,7 +168,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 {
 	XMPPLogTrace();
 	
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
 #endif
 	
@@ -183,8 +179,6 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 {
 	XMPPLogTrace();
 	
-	[rpcIDs release];
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,13 +198,10 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 	
 	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
 	
-	dispatch_source_set_event_handler(timer, ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
 		
-		[self timeoutRemoveRpcID:elementID];
-		
-		[pool drain];
-	});
+			[self timeoutRemoveRpcID:elementID];
+	}});
 	
 	dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
 	
@@ -220,7 +211,6 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 	RPCID *rpcID = [[RPCID alloc] initWithRpcID:elementID timer:timer];
 	
 	[rpcIDs setObject:rpcID forKey:elementID];
-	[rpcID release];
 	
 	[xmppStream sendElement:iq];
 	
@@ -310,7 +300,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 			[rpcID cancelTimer];
 			[rpcIDs removeObjectForKey:elementID];
 			
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 		} else if ([iq isSetIQ]) {
 			// we would receive set when implementing Jabber-RPC server
 			
@@ -327,7 +317,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 #pragma mark XMPPCapabilities delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if INTEGRATE_WITH_CAPABILITIES
+#ifdef _XMPP_CAPABILITIES_H
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for JabberRPC.
 **/

@@ -1,6 +1,10 @@
 #import "NSData+XMPP.h"
 #import <CommonCrypto/CommonDigest.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 
 @implementation NSData (XMPP)
 
@@ -39,7 +43,7 @@ static char encodingTable[64] = {
         [stringBuffer appendFormat:@"%02x", (unsigned long)dataBuffer[i]];
 	}
     
-    return [[stringBuffer copy] autorelease];
+    return [stringBuffer copy];
 }
 
 - (NSString *)base64Encoded

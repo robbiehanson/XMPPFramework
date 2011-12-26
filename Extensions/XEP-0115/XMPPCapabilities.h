@@ -18,7 +18,7 @@
 **/
 @interface XMPPCapabilities : XMPPModule
 {
-	id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
+	__strong id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
 	
 	NSXMLElement *myCapabilitiesQuery; // Full list of capabilites <query/>
 	NSXMLElement *myCapabilitiesC;     // Hashed element <c/>
@@ -39,7 +39,7 @@
 - (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
 - (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-@property (nonatomic, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
+@property (nonatomic, strong, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
 
 /**
  * Defines fetching behavior for entities using the XEP-0115 standard.

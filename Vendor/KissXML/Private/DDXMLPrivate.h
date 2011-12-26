@@ -131,9 +131,35 @@ NS_INLINE BOOL IsXmlNsPtr(void *kindPtr)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @interface DDXMLAttributeNode : DDXMLNode
+{
+	// The xmlAttrPtr type doesn't allow for ownership of a namespace.
+	// 
+	// In other types, such as xmlNodePtr:
+	// - nsDef stores namespaces that are owned by the node (have been alloced by the node).
+	// - ns is simply a pointer to the default namespace of the node, which may or may not reside in its own nsDef list.
+	// 
+	// The xmlAttrPtr only has a ns, it doesn't have a nsDef list.
+	// Which completely makes sense really, since namespaces have to be defined elsewhere.
+	// 
+	// This is here to maintain compatibility with the NSXML classes,
+	// where one can assign a namespace to an attribute independently.
+	xmlNsPtr attrNsPtr;
+}
 
 + (id)nodeWithAttrPrimitive:(xmlAttrPtr)attr owner:(DDXMLNode *)owner;
 - (id)initWithAttrPrimitive:(xmlAttrPtr)attr owner:(DDXMLNode *)owner;
+
+// Overrides several methods in DDXMLNode
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface DDXMLInvalidNode : DDXMLNode
+{
+}
 
 // Overrides several methods in DDXMLNode
 
@@ -152,18 +178,23 @@ NS_INLINE BOOL IsXmlNsPtr(void *kindPtr)
 
 - (BOOL)_hasParent;
 
-+ (void)recursiveStripDocPointersFromNode:(xmlNodePtr)node;
++ (void)getHasPrefix:(BOOL *)hasPrefixPtr localName:(NSString **)localNamePtr forName:(NSString *)name;
++ (void)getPrefix:(NSString **)prefixPtr localName:(NSString **)localNamePtr forName:(NSString *)name;
 
-+ (void)detachAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node;
-+ (void)removeAttribute:(xmlAttrPtr)attr fromNode:(xmlNodePtr)node;
-+ (void)removeAllAttributesFromNode:(xmlNodePtr)node;
++ (void)recursiveStripDocPointersFromNode:(xmlNodePtr)node;
 
 + (void)detachNamespace:(xmlNsPtr)ns fromNode:(xmlNodePtr)node;
 + (void)removeNamespace:(xmlNsPtr)ns fromNode:(xmlNodePtr)node;
 + (void)removeAllNamespacesFromNode:(xmlNodePtr)node;
 
-+ (void)detachChild:(xmlNodePtr)child fromNode:(xmlNodePtr)node;
-+ (void)removeChild:(xmlNodePtr)child fromNode:(xmlNodePtr)node;
++ (void)detachAttribute:(xmlAttrPtr)attr andClean:(BOOL)clean;
++ (void)detachAttribute:(xmlAttrPtr)attr;
++ (void)removeAttribute:(xmlAttrPtr)attr;
++ (void)removeAllAttributesFromNode:(xmlNodePtr)node;
+
++ (void)detachChild:(xmlNodePtr)child andClean:(BOOL)clean andFixNamespaces:(BOOL)fixNamespaces;
++ (void)detachChild:(xmlNodePtr)child;
++ (void)removeChild:(xmlNodePtr)child;
 + (void)removeAllChildrenFromNode:(xmlNodePtr)node;
 
 BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper);
@@ -180,8 +211,6 @@ BOOL DDXMLIsZombie(void *xmlPtr, DDXMLNode *wrapper);
 
 + (id)nodeWithElementPrimitive:(xmlNodePtr)node owner:(DDXMLNode *)owner;
 - (id)initWithElementPrimitive:(xmlNodePtr)node owner:(DDXMLNode *)owner;
-
-- (NSArray *)_elementsForName:(NSString *)name uri:(NSString *)URI;
 
 - (DDXMLNode *)_recursiveResolveNamespaceForPrefix:(NSString *)prefix atNode:(xmlNodePtr)nodePtr;
 - (NSString *)_recursiveResolvePrefixForURI:(NSString *)uri atNode:(xmlNodePtr)nodePtr;

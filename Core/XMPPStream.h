@@ -30,7 +30,7 @@ enum XMPPStreamErrorCode
 {
 	XMPPStreamInvalidType,       // Attempting to access P2P methods in a non-P2P stream, or vice-versa
 	XMPPStreamInvalidState,      // Invalid state for requested action, such as connect when already connected
-	XMPPStreamInvalidProperty,   // Missing a required property, such as hostName or myJID
+	XMPPStreamInvalidProperty,   // Missing a required property, such as myJID
 	XMPPStreamInvalidParameter,  // Invalid parameter, such as a nil JID
 	XMPPStreamUnsupportedAction, // The server doesn't support the requested action
 };
@@ -62,9 +62,9 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	UInt16 hostPort;
 	
 	NSString *tempPassword;
-  BOOL isAccessToken;
-  
-  NSString *appId;
+	BOOL isAccessToken;
+	
+	NSString *appId;
 	
 	XMPPJID *myJID;
 	XMPPJID *remoteJID;
@@ -202,7 +202,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 /**
  * Only used in P2P streams.
 **/
-@property (readonly) XMPPJID *remoteJID;
+@property (strong, readonly) XMPPJID *remoteJID;
 
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
@@ -229,7 +229,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * This excludes presence elements sent concerning subscriptions, MUC rooms, etc.
 **/
-@property (readonly) XMPPPresence *myPresence;
+@property (strong, readonly) XMPPPresence *myPresence;
 
 /**
  * Returns the total number of bytes bytes sent/received by the xmpp stream.
@@ -257,7 +257,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The tag property allows you to associate user defined information with the stream.
  * Tag values are not used internally, and should not be used by xmpp modules.
 **/
-@property (readwrite, retain) id tag;
+@property (readwrite, strong) id tag;
 
 #if TARGET_OS_IPHONE
 

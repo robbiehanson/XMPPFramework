@@ -26,11 +26,11 @@
 
 @interface XMPPvCardAvatarModule : XMPPModule <XMPPvCardTempModuleDelegate>
 {
-	XMPPvCardTempModule *_xmppvCardTempModule;
-	id <XMPPvCardAvatarStorage> _moduleStorage;
+	__strong XMPPvCardTempModule *_xmppvCardTempModule;
+	__strong id <XMPPvCardAvatarStorage> _moduleStorage;
 }
 
-@property(nonatomic,readonly) XMPPvCardTempModule *xmppvCardTempModule;
+@property(nonatomic, strong, readonly) XMPPvCardTempModule *xmppvCardTempModule;
 
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;

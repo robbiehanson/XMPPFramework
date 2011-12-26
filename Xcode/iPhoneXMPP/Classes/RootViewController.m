@@ -47,10 +47,10 @@
 	{
 		titleLabel.text = @"No JID";
 	}
+	
+	[titleLabel sizeToFit];
 
 	self.navigationItem.titleView = titleLabel;
-
-	[titleLabel release];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -90,14 +90,11 @@
 		                                                                          cacheName:nil];
 		[fetchedResultsController setDelegate:self];
 		
-		[sd1 release];
-		[sd2 release];
-		[fetchRequest release];
 		
 		NSError *error = nil;
 		if (![fetchedResultsController performFetch:&error])
 		{
-			NSLog(@"Error performing fetch: %@", error);
+			DDLogError(@"Error performing fetch: %@", error);
 		}
 	
 	}
@@ -183,8 +180,8 @@
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 	if (cell == nil)
 	{
-		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
-		                               reuseIdentifier:CellIdentifier] autorelease];
+		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+		                               reuseIdentifier:CellIdentifier];
 	}
 	
 	XMPPUserCoreDataStorageObject *user = [[self fetchedResultsController] objectAtIndexPath:indexPath];
@@ -202,15 +199,6 @@
 - (IBAction)settings:(id)sender
 {
 	[self.navigationController presentModalViewController:[[self appDelegate] settingsViewController] animated:YES];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Init/dealloc
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)dealloc
-{
-	[super dealloc];
 }
 
 @end

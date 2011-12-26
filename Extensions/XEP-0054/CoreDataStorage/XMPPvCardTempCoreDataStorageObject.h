@@ -17,7 +17,7 @@
 
 @interface XMPPvCardTempCoreDataStorageObject : NSManagedObject
 
-@property (nonatomic, retain) XMPPvCardTemp * vCardTemp;
-@property (nonatomic, retain) XMPPvCardCoreDataStorageObject * vCard;
+@property (nonatomic, strong) XMPPvCardTemp * vCardTemp;
+@property (nonatomic, strong) XMPPvCardCoreDataStorageObject * vCard;
 
 @end

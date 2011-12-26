@@ -1,8 +1,9 @@
 #import "RosterController.h"
 #import "RequestController.h"
-#import "ChatWindowManager.h"
+#import "WindowManager.h"
 #import "AppDelegate.h"
 #import "DDLog.h"
+#import "SSKeychain.h"
 
 #import <SystemConfiguration/SystemConfiguration.h>
 
@@ -50,20 +51,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
 	
-	[serverField      setObjectValue:[dflts objectForKey:@"Account.Server"]];
-	[resourceField    setObjectValue:[dflts objectForKey:@"Account.Resource"]];
-	[portField        setObjectValue:[dflts objectForKey:@"Account.Port"]];
-	[jidField         setObjectValue:[dflts objectForKey:@"Account.JID"]];
-	[sslButton        setObjectValue:[dflts objectForKey:@"Account.UseSSL"]];
-	[selfSignedButton setObjectValue:[dflts objectForKey:@"Account.AllowSelfSignedCert"]];
-	[mismatchButton   setObjectValue:[dflts objectForKey:@"Account.AllowSSLHostNameMismatch"]];
+	[serverField              setObjectValue:[dflts objectForKey:@"Account.Server"]];
+	[portField                setObjectValue:[dflts objectForKey:@"Account.Port"]];
+	[sslButton                setObjectValue:[dflts objectForKey:@"Account.UseSSL"]];
+	[selfSignedButton         setObjectValue:[dflts objectForKey:@"Account.AllowSelfSignedCert"]];
+	[mismatchButton           setObjectValue:[dflts objectForKey:@"Account.AllowSSLHostNameMismatch"]];
+	[jidField                 setObjectValue:[dflts objectForKey:@"Account.JID"]];
+	[rememberPasswordCheckbox setObjectValue:[dflts objectForKey:@"Account.RememberPassword"]];
+	[resourceField            setObjectValue:[dflts objectForKey:@"Account.Resource"]];
 	
+	if ([rememberPasswordCheckbox state] == NSOnState)
+	{
+		NSString *jidStr = [[jidField stringValue] lowercaseString];
+		
+		NSString *password = [SSKeychain passwordForService:@"XMPPFramework" account:jidStr];
+		if (password)
+		{
+			[passwordField setStringValue:password];
+		}
+		
+		// If user was prompted for keychain permission, we may need to restore focus to our application
+		[NSApp activateIgnoringOtherApps:YES];
+	}
+							  
 	[NSApp beginSheet:signInSheet
 	   modalForWindow:window
 	    modalDelegate:self
 	   didEndSelector:nil
 	      contextInfo:nil];
 	
+	// Set keyboard focus
+							  
 	if ([[portField stringValue] length] > 0)
 	{
 		if ([[jidField stringValue] length] > 0)
@@ -82,6 +100,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			[signInSheet makeFirstResponder:portField];
 		}
 	}
+	
+	// Update domain placeholder
 	
 	[self jidDidChange:nil];
 }
@@ -116,6 +136,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 				[[serverField cell] setPlaceholderString:[jid domain]];
 			}
 		}
+		
+		if ([rememberPasswordCheckbox state] == NSOnState)
+		{
+			// Autofill password if there's a saved password for this JID
+			
+			NSString *jidStr = [[jidField stringValue] lowercaseString];
+			
+			NSString *password = [SSKeychain passwordForService:@"XMPPFramework" account:jidStr];
+			if (password)
+			{
+				[passwordField setStringValue:password];
+			}
+		}
 	}
 }
 
@@ -130,6 +163,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	[jidField setEnabled:enabled];
 	[passwordField setEnabled:enabled];
+	[rememberPasswordCheckbox setEnabled:enabled];
 	
 	[resourceField setEnabled:enabled];
 	
@@ -155,35 +189,53 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	int port = [portField intValue];
 	[[self xmppStream] setHostPort:port];
 	
-	useSSL = ([sslButton state] == NSOnState);
+	useSSL                      = ([sslButton state] == NSOnState);
 	allowSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
-	allowSSLHostNameMismatch = ([mismatchButton state] == NSOnState);
+	allowSSLHostNameMismatch    = ([mismatchButton state] == NSOnState);
 	
 	NSString *resource = [resourceField stringValue];
-	if([resource length] == 0)
+	if ([resource length] == 0)
 	{
-		resource = [(NSString *)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
+		resource = (__bridge_transfer NSString *)SCDynamicStoreCopyComputerName(NULL, NULL);
 	}
 	
 	XMPPJID *jid = [XMPPJID jidWithString:[jidField stringValue] resource:resource];
 	
 	[[self xmppStream] setMyJID:jid];
     
-	// Update persistent defaults:
+	// Update persistent info
+	
 	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
+	
 	[dflts setObject:domain forKey:@"Account.Server"];
-	[dflts setObject:[resourceField stringValue]
-			  forKey:@"Account.Resource"];
+	
 	[dflts setObject:(port ? [NSNumber numberWithInt:port] : nil)
 			  forKey:@"Account.Port"];
+	
 	[dflts setObject:[jidField stringValue]
 			  forKey:@"Account.JID"];
-	[dflts setBool:useSSL 
-			forKey:@"Account.UseSSL"];
-	[dflts setBool:allowSelfSignedCertificates 
-			forKey:@"Account.AllowSelfSignedCert"];
-	[dflts setBool:allowSSLHostNameMismatch 
-			forKey:@"Account.AllowSSLHostNameMismatch"];
+	
+	[dflts setObject:[resourceField stringValue]
+			  forKey:@"Account.Resource"];
+	
+	[dflts setBool:useSSL                      forKey:@"Account.UseSSL"];
+	[dflts setBool:allowSelfSignedCertificates forKey:@"Account.AllowSelfSignedCert"];
+	[dflts setBool:allowSSLHostNameMismatch    forKey:@"Account.AllowSSLHostNameMismatch"];
+	
+	if ([rememberPasswordCheckbox state] == NSOnState)
+	{
+		NSString *jidStr   = [jidField stringValue];
+		NSString *password = [passwordField stringValue];
+		
+		[SSKeychain setPassword:password forService:@"XMPPFramework" account:jidStr];
+		
+		[dflts setBool:YES forKey:@"Account.RememberPassword"];
+	}
+	else
+	{
+		[dflts setBool:NO forKey:@"Account.RememberPassword"];
+	}
+	
 	[dflts synchronize];
 }
 
@@ -252,6 +304,31 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark MUC Sheet
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (IBAction)mucCancel:(id)sender
+{
+	// Close the sheet
+	[mucSheet orderOut:self];
+	[NSApp endSheet:mucSheet];
+}
+
+- (IBAction)mucJoin:(id)sender
+{
+	// Close the sheet
+	[mucSheet orderOut:self];
+	[NSApp endSheet:mucSheet];
+	
+	// Open MUC window
+	XMPPJID *jid = [XMPPJID jidWithString:[mucRoomField stringValue]];
+	if (jid)
+	{
+		[WindowManager openMucWindowWithStream:[self xmppStream] forRoom:jid];
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Presence Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -283,8 +360,41 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Buddy Management
+#pragma mark IBActions
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (IBAction)muc:(id)sender
+{
+	[NSApp beginSheet:mucSheet
+	   modalForWindow:window
+	    modalDelegate:self
+	   didEndSelector:nil
+	      contextInfo:nil];
+}
+
+- (IBAction)connectViaXEP65:(id)sender
+{
+	int selectedRow = [rosterTable selectedRow];
+	if(selectedRow >= 0)
+	{
+		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
+		id <XMPPResource> resource = [user primaryResource];
+		
+		[[NSApp delegate] connectViaXEP65:[resource jid]];
+	}
+}
+
+- (IBAction)chat:(id)sender
+{
+	int selectedRow = [rosterTable selectedRow];
+	if (selectedRow >= 0)
+	{
+		XMPPStream *stream = [self xmppStream];
+		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
+		
+		[WindowManager openChatWindowWithStream:stream forUser:user];
+	}
+}
 
 - (IBAction)addBuddy:(id)sender
 {
@@ -307,34 +417,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Messages:
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (IBAction)chat:(id)sender
-{
-	int selectedRow = [rosterTable selectedRow];
-	if(selectedRow >= 0)
-	{
-		XMPPStream *stream = [self xmppStream];
-		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
-		
-		[ChatWindowManager openChatWindowWithStream:stream forUser:user];
-	}
-}
-
-- (IBAction)connectViaXEP65:(id)sender
-{
-	int selectedRow = [rosterTable selectedRow];
-	if(selectedRow >= 0)
-	{
-		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
-		id <XMPPResource> resource = [user primaryResource];
-		
-		[[NSApp delegate] connectViaXEP65:[resource jid]];
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Roster Table Data Source
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -343,11 +425,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	return [roster count];
 }
 
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)rowIndex
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex
 {
 	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
 	
-	if([[tableColumn identifier] isEqualToString:@"name"])
+	if ([[tableColumn identifier] isEqualToString:@"name"])
 		return [user nickname];
 	else
 		return [user jid];
@@ -356,20 +438,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 - (void)tableView:(NSTableView *)tableView
-   setObjectValue:(id)anObject
-   forTableColumn:(NSTableColumn *)tableColumn
-			  row:(int)rowIndex
-{
-	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
-	NSString *newName = (NSString *)anObject;
-	
-	[[self xmppRoster] setNickname:newName forUser:[user jid]];
-}
-
-- (void)tableView:(NSTableView *)tableView
   willDisplayCell:(id)cell
    forTableColumn:(NSTableColumn *)tableColumn 
-			  row:(int)rowIndex
+			  row:(NSInteger)rowIndex
 {
 	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
 	
@@ -400,6 +471,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			
 		[cell setTextColor:grayColor];
 	}
+}
+
+- (BOOL)tableView:(NSTableView *)aTableView shouldEditTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
+{
+	DDLogVerbose(@"tableView:shouldEditTableColumn:\"%@\" row:%li", [aTableColumn identifier], (long)rowIndex);
+	
+	if ([[aTableColumn identifier] isEqualToString:@"name"])
+	{
+		return YES;
+	}
+	else
+	{
+		XMPPStream *stream = [self xmppStream];
+		id <XMPPUser> user = [roster objectAtIndex:rowIndex];
+		
+		DDLogVerbose(@"user: %@", user);
+		if (user)
+		{
+			[WindowManager openChatWindowWithStream:stream forUser:user];
+		}
+		
+		return NO;
+	}
+}
+
+- (void)tableView:(NSTableView *)tableView
+   setObjectValue:(id)anObject
+   forTableColumn:(NSTableColumn *)tableColumn
+			  row:(int)rowIndex
+{
+	id <XMPPUser> user = [roster objectAtIndex:rowIndex];
+	NSString *newName = (NSString *)anObject;
+	
+	[[self xmppRoster] setNickname:newName forUser:[user jid]];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -537,8 +642,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	[roster release];
-	roster = [[sender sortedUsersByAvailabilityName] retain];
+	roster = [sender sortedUsersByAvailabilityName];
 	
 	[rosterTable abortEditing];
 	[rosterTable selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
@@ -549,9 +653,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	if([message isChatMessageWithBody])
+	if ([message isChatMessageWithBody])
 	{
-		[ChatWindowManager handleChatMessage:message withStream:sender];
+		[WindowManager handleMessage:message withStream:sender];
 	}
 }
 

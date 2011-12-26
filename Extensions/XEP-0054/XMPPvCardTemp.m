@@ -9,12 +9,15 @@
 
 
 #import "XMPPvCardTemp.h"
+#import "XMPPLogging.h"
+#import "XMPPDateTimeProfiles.h"
+#import "NSData+XMPP.h"
 
 #import <objc/runtime.h>
 
-#import "XMPPLogging.h"
-#import "NSData+XMPP.h"
-#import "XMPPDateTimeProfiles.h"
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
@@ -76,7 +79,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 + (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq
 {
-	return [[[self vCardTempSubElementFromIQ:iq] copy] autorelease];
+	return [[self vCardTempSubElementFromIQ:iq] copy];
 }
 
 
@@ -389,7 +392,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		NSXMLElement *lat = [geo elementForName:@"LAT"];
 		NSXMLElement *lon = [geo elementForName:@"LON"];
 		
-		loc = [[[CLLocation alloc] initWithLatitude:[[lat stringValue] doubleValue] longitude:[[lon stringValue] doubleValue]] autorelease];
+		loc = [[CLLocation alloc] initWithLatitude:[[lat stringValue] doubleValue] longitude:[[lon stringValue] doubleValue]];
 	}
 	
 	return loc;
@@ -564,7 +567,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		}
 		
 		result = [NSArray arrayWithArray:arr];
-		[arr release];
 	}
 	
 	return result;
@@ -607,7 +609,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		}
 		
 		result = [NSArray arrayWithArray:arr];
-		[arr release];
 	}
 	
 	return result;

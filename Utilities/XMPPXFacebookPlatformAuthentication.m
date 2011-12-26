@@ -12,12 +12,17 @@
 #import "XMPPLogging.h"
 #import "XMPPStream.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
     static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
 #else
     static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
+
 
 @implementation XMPPXFacebookPlatformAuthentication
 
@@ -32,8 +37,8 @@
         NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
         NSData *decodedData = [base64Data base64Decoded];
             
-        NSString *authStr = [[[NSString alloc] initWithData:decodedData 
-                                                   encoding:NSUTF8StringEncoding] autorelease];
+        NSString *authStr = [[NSString alloc] initWithData:decodedData 
+                                                   encoding:NSUTF8StringEncoding];
             
         XMPPLogVerbose(@"XMPPXFacebookPlatformAuthentication: decoded challenge: %@", authStr);
             
@@ -74,14 +79,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [appId release];
-    [accessToken release];
-    [nonce release];
-    [method release];
-	[super dealloc];
-}
 
 - (NSString *)base64EncodedFullResponse
 {

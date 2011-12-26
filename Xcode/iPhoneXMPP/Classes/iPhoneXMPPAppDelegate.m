@@ -68,8 +68,13 @@
 	[window setRootViewController:navigationController];
 	[window makeKeyAndVisible];
 
-	if (![self connect]) {
-		[navigationController presentModalViewController:settingsViewController animated:YES];
+	if (![self connect])
+	{
+		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.0 * NSEC_PER_SEC);
+		dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+			
+			[navigationController presentModalViewController:settingsViewController animated:YES];
+		});
 	}
 		
 	return YES;
@@ -78,15 +83,6 @@
 - (void)dealloc
 {
 	[self teardownStream];
-
-	[password release];
-
-	[loginButton release];
-	[settingsViewController release];
-	[navigationController release];
-	[window release];
-
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +220,7 @@
 	// The vCard Avatar module works in conjuction with the standard vCard Temp module to download user avatars.
 	// The XMPPRoster will automatically integrate with XMPPvCardAvatarModule to cache roster photos in the roster.
 	
-	xmppvCardStorage = [[XMPPvCardCoreDataStorage sharedInstance] retain];
+	xmppvCardStorage = [XMPPvCardCoreDataStorage sharedInstance];
 	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardStorage];
 	
 	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
@@ -248,7 +244,7 @@
 	// The XMPPCapabilitiesCoreDataStorage is an ideal solution.
 	// It can also be shared amongst multiple streams to further reduce hash lookups.
 	
-	xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage sharedInstance] retain];
+	xmppCapabilitiesStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
     xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
 
     xmppCapabilities.autoFetchHashedCapabilities = YES;
@@ -299,16 +295,6 @@
 	[xmppCapabilities      deactivate];
 	
 	[xmppStream disconnect];
-	
-	[xmppStream release];
-	[xmppReconnect release];
-	[xmppRoster release];
-	[xmppRosterStorage release];
-	[xmppvCardStorage release];
-	[xmppvCardTempModule release];
-	[xmppvCardAvatarModule release];
-	[xmppCapabilities release];
-	[xmppCapabilitiesStorage release];
 	
 	xmppStream = nil;
 	xmppReconnect = nil;
@@ -362,14 +348,11 @@
 	//
 	// If you don't want to use the Settings view to set the JID, 
 	// uncomment the section below to hard code a JID and password.
-	//
-	// Replace me with the proper JID and password:
-	//	myJID = @"user@gmail.com/xmppframework";
-	//	myPassword = @"";
-
+	// 
+	// myJID = @"user@gmail.com/xmppframework";
+	// myPassword = @"";
+	
 	if (myJID == nil || myPassword == nil) {
-		DDLogWarn(@"JID and password must be set before connecting!");
-
 		return NO;
 	}
 
@@ -385,7 +368,6 @@
 		                                          cancelButtonTitle:@"Ok" 
 		                                          otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];
 
 		DDLogError(@"Error connecting: %@", error);
 
@@ -395,10 +377,10 @@
 	return YES;
 }
 
-- (void)disconnect {
-  [self goOffline];
-  
-  [xmppStream disconnect];
+- (void)disconnect
+{
+	[self goOffline];
+	[xmppStream disconnect];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -559,7 +541,6 @@
 													cancelButtonTitle:@"Ok" 
 													otherButtonTitles:nil];
 			[alertView show];
-			[alertView release];
 		}
 		else
 		{
@@ -569,7 +550,6 @@
 			localNotification.alertBody = [NSString stringWithFormat:@"From: %@\n\n%@",displayName,body];
 
 			[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-			[localNotification release];
 		}
 	}
 }
@@ -628,7 +608,6 @@
 		                                          cancelButtonTitle:@"Not implemented"
 		                                          otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];
 	} 
 	else 
 	{
@@ -638,7 +617,6 @@
 		localNotification.alertBody = body;
 		
 		[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-		[localNotification release];
 	}
 	
 }

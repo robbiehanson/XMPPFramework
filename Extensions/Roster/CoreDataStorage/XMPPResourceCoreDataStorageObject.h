@@ -9,27 +9,27 @@
 
 @interface XMPPResourceCoreDataStorageObject : NSManagedObject <XMPPResource>
 
-@property (nonatomic, retain) XMPPJID *jid;
-@property (nonatomic, retain) XMPPPresence *presence;
+@property (nonatomic, strong) XMPPJID *jid;
+@property (nonatomic, strong) XMPPPresence *presence;
 
 @property (nonatomic, assign) int priority;
 @property (nonatomic, assign) int intShow;
 
-@property (nonatomic, retain) NSString * jidStr;
-@property (nonatomic, retain) NSString * presenceStr;
+@property (nonatomic, strong) NSString * jidStr;
+@property (nonatomic, strong) NSString * presenceStr;
 
-@property (nonatomic, retain) NSString * streamBareJidStr;
+@property (nonatomic, strong) NSString * streamBareJidStr;
 
-@property (nonatomic, retain) NSString * type;
-@property (nonatomic, retain) NSString * show;
-@property (nonatomic, retain) NSString * status;
+@property (nonatomic, strong) NSString * type;
+@property (nonatomic, strong) NSString * show;
+@property (nonatomic, strong) NSString * status;
 
-@property (nonatomic, retain) NSDate * presenceDate;
+@property (nonatomic, strong) NSDate * presenceDate;
 
-@property (nonatomic, retain) NSNumber * priorityNum;
-@property (nonatomic, retain) NSNumber * showNum;
+@property (nonatomic, strong) NSNumber * priorityNum;
+@property (nonatomic, strong) NSNumber * showNum;
 
-@property (nonatomic, retain) XMPPUserCoreDataStorageObject * user;
+@property (nonatomic, strong) XMPPUserCoreDataStorageObject * user;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                       withPresence:(XMPPPresence *)presence

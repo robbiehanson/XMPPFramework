@@ -8,9 +8,13 @@
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -38,18 +42,14 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 #pragma mark Setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id)init
+- (void)commonInit
 {
-	return [self initWithDatabaseFilename:nil];
-}
-
-- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
-{
-	if ((self = [super initWithDatabaseFilename:aDatabaseFileName]))
-	{
-		rosterPopulationSet = [[NSMutableSet alloc] init];
-	}
-	return self;
+	XMPPLogTrace();
+	[super commonInit];
+	
+	// This method is invoked by all public init methods of the superclass
+	
+	rosterPopulationSet = [[NSMutableSet alloc] init];
 }
 
 - (BOOL)configureWithParent:(XMPPRoster *)aParent queue:(dispatch_queue_t)queue
@@ -71,7 +71,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:moc];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setFetchBatchSize:saveThreshold];
 	
@@ -95,6 +95,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if (++unsavedCount >= saveThreshold)
 		{
 			[self save];
+			unsavedCount = 0;
 		}
 	}
 }
@@ -110,7 +111,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	// 
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// For example, if you are using the database for non-persistent data you may want to delete the database
+	// For example, if you are using the database for pure non-persistent data you may want to delete the database
 	// file if it already exists on disk.
 	// 
 	// The default implementation does nothing.
@@ -128,8 +129,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	// 
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// For example, if you are using the database for non-persistent data you may want to delete the database
-	// file if it already exists on disk.
+	// For example, you may want to perform cleanup of any non-persistent data before you start using the database.
 	// 
 	// The default implementation does nothing.
 	
@@ -197,7 +197,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
 					 bareJIDStr, [[self myJIDForXMPPStream:stream] bare]];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setIncludesPendingChanges:YES];
@@ -231,7 +231,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@",
 					 fullJIDStr, [[self myJIDForXMPPStream:stream] bare]];
 	
-	NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
 	[fetchRequest setPredicate:predicate];
 	[fetchRequest setIncludesPendingChanges:YES];
@@ -252,7 +252,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet addObject:[NSNumber numberWithPtr:stream]];
+		[rosterPopulationSet addObject:[NSNumber numberWithPtr:(__bridge void *)stream]];
     
 		// Clear anything already in the roster core data store.
 		// 
@@ -264,7 +264,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 		                                          inManagedObjectContext:moc];
 		
-		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
 		[fetchRequest setFetchBatchSize:saveThreshold];
 		
@@ -294,7 +294,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet removeObject:[NSNumber numberWithPtr:stream]];
+		[rosterPopulationSet removeObject:[NSNumber numberWithPtr:(__bridge void *)stream]];
 	}];
 }
 
@@ -304,13 +304,13 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	// Remember XML heirarchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
-	NSXMLElement *item = [[itemSubElement copy] autorelease];
+	NSXMLElement *item = [itemSubElement copy];
 	
 	[self scheduleBlock:^{
 		
 		NSManagedObjectContext *moc = [self managedObjectContext];
 		
-		if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:stream]])
+		if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:(__bridge void *)stream]])
 		{
 			NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 			
@@ -433,7 +433,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
 												  inManagedObjectContext:moc];
 		
-		NSFetchRequest *fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
 		[fetchRequest setFetchBatchSize:saveThreshold];
 		
@@ -457,21 +457,12 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			if (++unsavedCount >= saveThreshold)
 			{
 				[self save];
+				unsavedCount = 0;
 			}
 		}
     
 		[XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:moc];
 	}];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Memory Management
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)dealloc
-{
-	[rosterPopulationSet release];
-	[super dealloc];
 }
 
 @end

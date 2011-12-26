@@ -1,23 +1,20 @@
-//
-//  XMPPDigestAuthentication.m
-//  iPhoneXMPP
-//
-//  Created by Eric Chamberlain on 10/1/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
-//
-
 #import "XMPPDigestAuthentication.h"
 
 #import "NSData+XMPP.h"
 #import "XMPPLogging.h"
 #import "XMPPStream.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
-static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
 #else
-static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
+
 
 @implementation XMPPDigestAuthentication
 
@@ -29,7 +26,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
 		NSData *decodedData = [base64Data base64Decoded];
 		
-		NSString *authStr = [[[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding] autorelease];
+		NSString *authStr = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
 		
 		XMPPLogVerbose(@"%@: Decoded challenge: %@", THIS_FILE, authStr);
 		
@@ -49,8 +46,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 				NSMutableString *key = [[component substringToIndex:separator.location] mutableCopy];
 				NSMutableString *value = [[component substringFromIndex:separator.location+1] mutableCopy];
 				
-				if(key) CFStringTrimWhitespace((CFMutableStringRef)key);
-				if(value) CFStringTrimWhitespace((CFMutableStringRef)value);
+				if(key) CFStringTrimWhitespace((__bridge CFMutableStringRef)key);
+				if(value) CFStringTrimWhitespace((__bridge CFMutableStringRef)value);
 				
 				if([value hasPrefix:@"\""] && [value hasSuffix:@"\""] && [value length] > 2)
 				{
@@ -61,8 +58,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 				
 				[auth setObject:value forKey:key];
 				
-				[value release];
-				[key release];
 			}
 		}
 		
@@ -73,40 +68,26 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		qop = [[auth objectForKey:@"qop"] copy];
 		
 		// Generate cnonce
-		cnonce = [[XMPPStream generateUUID] retain];
+		cnonce = [XMPPStream generateUUID];
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-	[rspauth release];
-	[realm release];
-	[nonce release];
-	[qop release];
-	[username release];
-	[password release];
-	[cnonce release];
-	[nc release];
-	[digestURI release];
-	[super dealloc];
-}
 
 - (NSString *)rspauth
 {
-	return [[rspauth copy] autorelease];
+	return [rspauth copy];
 }
 
 - (NSString *)realm
 {
-	return [[realm copy] autorelease];
+	return [realm copy];
 }
 
 - (void)setRealm:(NSString *)newRealm
 {
 	if(![realm isEqual:newRealm])
 	{
-		[realm release];
 		realm = [newRealm copy];
 	}
 }
@@ -115,7 +96,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
 	if(![digestURI isEqual:newDigestURI])
 	{
-		[digestURI release];
 		digestURI = [newDigestURI copy];
 	}
 }
@@ -124,13 +104,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
 	if(![username isEqual:newUsername])
 	{
-		[username release];
 		username = [newUsername copy];
 	}
 	
 	if(![password isEqual:newPassword])
 	{
-		[password release];
 		password = [newPassword copy];
 	}
 }

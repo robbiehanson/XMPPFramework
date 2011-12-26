@@ -1,4 +1,6 @@
+#import "XMPP.h"
 #import "XMPPRoom.h"
+#import "XMPPIDTracker.h"
 #import "XMPPMessage+XEP0045.h"
 #import "XMPPLogging.h"
 
@@ -11,12 +13,26 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-static NSString *const XMPPMUCNamespaceName      = @"http://jabber.org/protocol/muc";
-static NSString *const XMPPMUCUserNamespaceName  = @"http://jabber.org/protocol/muc#user";
-static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/muc#owner";
+static NSString *const XMPPMUCNamespace      = @"http://jabber.org/protocol/muc";
+static NSString *const XMPPMUCUserNamespace  = @"http://jabber.org/protocol/muc#user";
+static NSString *const XMPPMUCAdminNamespace = @"http://jabber.org/protocol/muc#admin";
+static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#owner";
+
+enum XMPPRoomState
+{
+	kXMPPRoomStateNone        = 0,
+	kXMPPRoomStateCreating    = 1 << 0,
+	kXMPPRoomStateCreated     = 1 << 1,
+	kXMPPRoomStateConfiguring = 1 << 2,
+	kXMPPRoomStateJoining     = 1 << 3,
+	kXMPPRoomStateJoined      = 1 << 4,
+	kXMPPRoomStateLeaving     = 1 << 5,
+};
 
 @interface XMPPRoom ()
-@property (readwrite, assign) BOOL isJoined;
+
+// List private methods here
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,19 +41,12 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 
 @implementation XMPPRoom
 
-@dynamic roomName;
-@dynamic nickName;
-@dynamic subject;
-@dynamic isJoined;
-@dynamic occupants;
-@dynamic invitedUser;
-
 - (id)init
 {
 	// This will cause a crash - it's designed to.
 	// Only the init methods listed in XMPPRoom.h are supported.
 	
-	return [self initWithRoomName:nil nickName:nil dispatchQueue:NULL];
+	return [self initWithRoomStorage:nil jid:nil dispatchQueue:NULL];
 }
 
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue
@@ -45,27 +54,31 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 	// This will cause a crash - it's designed to.
 	// Only the init methods listed in XMPPRoom.h are supported.
 	
-	return [self initWithRoomName:nil nickName:nil dispatchQueue:NULL];
+	return [self initWithRoomStorage:nil jid:nil dispatchQueue:queue];
 }
 
-- (id)initWithRoomName:(NSString *)aRoomName nickName:(NSString *)aNickName
+- (id)initWithRoomStorage:(id <XMPPRoomStorage>)storage jid:(XMPPJID *)aRoomJID
 {
-	return [self initWithRoomName:aRoomName nickName:aNickName dispatchQueue:NULL];
+	return [self initWithRoomStorage:storage jid:aRoomJID dispatchQueue:NULL];
 }
 
-- (id)initWithRoomName:(NSString *)aRoomName nickName:(NSString *)aNickName dispatchQueue:(dispatch_queue_t)queue
+- (id)initWithRoomStorage:(id <XMPPRoomStorage>)storage jid:(XMPPJID *)aRoomJID dispatchQueue:(dispatch_queue_t)queue
 {
-	NSParameterAssert(aRoomName != nil);
-	NSParameterAssert(aNickName != nil);
+	NSParameterAssert(storage != nil);
+	NSParameterAssert(aRoomJID != nil);
 	
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
-		roomName = [aRoomName copy];
-		nickName = [aNickName copy];
+		if ([storage configureWithParent:self queue:moduleQueue])
+		{
+			xmppRoomStorage = storage;
+		}
+		else
+		{
+			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
+		}
 		
-		occupants = [[NSMutableDictionary alloc] init];
-		
-		XMPPLogTrace2(@"%@: init -> roomName(%@) nickName(%@)", [self class], roomName, nickName);
+		roomJID = aRoomJID;
 	}
 	return self;
 }
@@ -74,7 +87,7 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 {
 	if ([super activate:aXmppStream])
 	{
-		// Custom code goes here (if needed)
+		responseTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
 		
 		return YES;
 	}
@@ -86,197 +99,218 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 {
 	XMPPLogTrace();
 	
-	if (self.isJoined)
-	{
-		[self leaveRoom];
-	}
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		if (self.isJoined)
+		{
+			[self leaveRoom];
+		}
+		
+		[responseTracker removeAllIDs];
+		responseTracker = nil;
+		
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
 	
 	[super deactivate];
 }
 
-- (void)dealloc
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Internal
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * This method may optionally be used by XMPPRosterStorage classes (declared in XMPPRosterPrivate.h).
+**/
+- (GCDMulticastDelegate *)multicastDelegate
 {
-	[roomName release];
-	[nickName release];
-	[subject release];
-	[invitedUser release];
-	[occupants release];
-	[super dealloc];
+	return multicastDelegate;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)roomName
+- (id <XMPPRoomStorage>)xmppRoomStorage
 {
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return roomName;
-	}
-	else
-	{
-		// This variable is readonly - set in init method and never changed.
-		
-		return [[roomName retain] autorelease];
-	}
+	// This variable is readonly - set in init method and never changed.
+	return xmppRoomStorage;
 }
 
-- (NSString *)nickName
+- (XMPPJID *)roomJID
 {
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return nickName;
-	}
-	else
-	{
-		// This variable is readonly - set in init method and never changed.
-		
-		return [[nickName retain] autorelease];
-	}
+	// This variable is readonly - set in init method and never changed.
+	return roomJID;
 }
 
-- (NSString *)subject
+- (XMPPJID *)myRoomJID
 {
 	if (dispatch_get_current_queue() == moduleQueue)
 	{
-		return subject;
+		return myRoomJID;
 	}
 	else
 	{
-		__block NSString *result;
+		__block XMPPJID *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [subject retain];
-		});
-		
-		return [result autorelease];
-	}
-}
-
-- (BOOL)isJoined
-{
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return _isJoined;
-	}
-	else
-	{
-		__block BOOL result;
-		
-		dispatch_sync(moduleQueue, ^{
-			result = _isJoined;
+			result = myRoomJID;
 		});
 		
 		return result;
 	}
 }
 
-- (void)setIsJoined:(BOOL)newIsJoined
-{
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-	
-	if (_isJoined != newIsJoined)
-	{
-		_isJoined = newIsJoined;
-		
-		if (newIsJoined)
-			[multicastDelegate xmppRoomDidEnter:self];
-		else
-			[multicastDelegate xmppRoomDidLeave:self];
-	}
-}
-
-- (NSDictionary *)occupants
+- (NSString *)myNickname
 {
 	if (dispatch_get_current_queue() == moduleQueue)
 	{
-		return occupants;
-	}
-	else
-	{
-		__block NSDictionary *result;
-		
-		dispatch_sync(moduleQueue, ^{
-			result = [occupants copy];
-		});
-		
-		return [result autorelease];
-	}
-}
-
-- (NSString *)invitedUser
-{
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return invitedUser;
+		return myNickname;
 	}
 	else
 	{
 		__block NSString *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [invitedUser retain];
+			result = myNickname;
 		});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
-- (void)setInvitedUser:(NSString *)newInvitedUser
+- (NSString *)roomSubject
 {
 	if (dispatch_get_current_queue() == moduleQueue)
 	{
-		if (![invitedUser isEqual:newInvitedUser])
-		{
-			[invitedUser release];
-			invitedUser = [newInvitedUser retain];
-		}
+		return roomSubject;
 	}
 	else
 	{
-		NSString *newInvitedUserCopy = [newInvitedUser copy];
+		__block NSString *result;
 		
-		dispatch_async(moduleQueue, ^{
-			
-			if (![invitedUser isEqual:newInvitedUserCopy])
-			{
-				[invitedUser release];
-				invitedUser = [newInvitedUserCopy retain];
-			}
+		dispatch_sync(moduleQueue, ^{
+			result = roomSubject;
 		});
 		
-		[newInvitedUserCopy release];
+		return result;
 	}
 }
 
+- (BOOL)isJoined
+{
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		result = (state & kXMPPRoomStateJoined) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+/*
+- (BOOL)isRoomOwner
+{
+	__block BOOL result;
+	
+	dispatch_block_t block = ^{
+		
+		id <XMPPRoomOccupant> myOccupant = [xmppRoomStorage occupantForJID:myRoomJID stream:xmppStream];
+		
+		result = [myOccupant.affiliation isEqualToString:@"owner"];
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+*/
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Room Methods
+#pragma mark Create & Join
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)createOrJoinRoom
+- (BOOL)preJoinWithNickname:(NSString *)nickname
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	if ((state != kXMPPRoomStateNone) && (state != kXMPPRoomStateLeaving))
+	{
+		XMPPLogWarn(@"%@[%@] - Cannot create/join room when already creating/joining/joined", THIS_FILE, roomJID);
 		
-		XMPPLogTrace();
+		return NO;
+	}
+	
+	myNickname = [nickname copy];
+	myRoomJID = [XMPPJID jidWithUser:[roomJID user] domain:[roomJID domain] resource:myNickname];
+	
+	return YES;
+}
+
+- (void)createOrJoinRoomUsingNickname:(NSString *)desiredNickname
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPLogTrace2(@"%@[%@] - %@", THIS_FILE, roomJID, THIS_METHOD);
+		
+		// Check state and update variables
+		
+		if (![self preJoinWithNickname:desiredNickname])
+		{
+			return;
+		}
 		
 		// <presence to='darkcave@chat.shakespeare.lit/firstwitch'>
 		//   <x xmlns='http://jabber.org/protocol/muc'/>
 		// </presence>
 		
-		NSString *to = [NSString stringWithFormat:@"%@/%@", roomName, nickName];
+		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCNamespace];
 		
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCNamespaceName];
-		
-		XMPPPresence *presence = [XMPPPresence presence];
-		[presence addAttributeWithName:@"to" stringValue:to];
+		XMPPPresence *presence = [XMPPPresence presenceWithType:nil to:myRoomJID];
 		[presence addChild:x];
 		
 		[xmppStream sendElement:presence];
 		
-		[pool drain];
-	};
+		state |= kXMPPRoomStateCreating;
+		state |= kXMPPRoomStateConfiguring;
+		state |= kXMPPRoomStateJoining;
+		
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+- (void)joinRoomUsingNickname:(NSString *)desiredNickname
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPLogTrace();
+		
+		// Check state and update variables
+		
+		if (![self preJoinWithNickname:desiredNickname])
+		{
+			return;
+		}
+		
+		// <presence to='darkcave@chat.shakespeare.lit/thirdwitch'/>
+		
+		[xmppStream sendElement:[XMPPPresence presenceWithType:nil to:myRoomJID]];
+		
+		state |= kXMPPRoomStateJoining;
+		
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -284,38 +318,411 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)sendInstantRoomConfig
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Room Configuration
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)handleConfigurationFormResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	XMPPLogTrace();
+	
+	if ([[iq type] isEqualToString:@"result"])
+	{
+		// <iq type='result'
+		//     from='coven@chat.shakespeare.lit'
+		//       id='create1'>
+		//   <query xmlns='http://jabber.org/protocol/muc#owner'>
+		//     <x xmlns='jabber:x:data' type='form'>
+		//       <title>Configuration for "coven" Room</title>
+		//       <field type='hidden'
+		//               var='FORM_TYPE'>
+		//         <value>http://jabber.org/protocol/muc#roomconfig</value>
+		//       </field>
+		//       <field label='Natural-Language Room Name'
+		//               type='text-single'
+		//                var='muc#roomconfig_roomname'/>
+		//       <field label='Enable Public Logging?'
+		//               type='boolean'
+		//                var='muc#roomconfig_enablelogging'>
+		//         <value>0</value>
+		//       </field>
+		//       ...
+		//     </x>
+		//   </query>
+		// </iq>
+		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCOwnerNamespace];
+		NSXMLElement *x = [query elementForName:@"x" xmlns:@"jabber:x:data"];
+		
+		[multicastDelegate xmppRoom:self didFetchConfigurationForm:x];
+	}
+}
+
+- (void)fetchConfigurationForm
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPLogTrace();
+		
+		// <iq type='get'
+		//       id='config1'
+		//       to='coven@chat.shakespeare.lit'>
+		//   <query xmlns='http://jabber.org/protocol/muc#owner'/>
+		// </iq>
+		
+		NSString *fetchID = [xmppStream generateUUID];
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
+		
+		[xmppStream sendElement:iq];
+		
+		[responseTracker addID:fetchID
+		                target:self
+		              selector:@selector(handleConfigurationFormResponse:withInfo:)
+		               timeout:60.0];
+		
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)handleConfigureRoomResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+	XMPPLogTrace();
+	
+	if ([[iq type] isEqualToString:@"result"])
+	{
+	}
+	else
+	{
+	}
+}
+
+- (void)configureRoomUsingOptions:(NSXMLElement *)roomConfigForm
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPLogTrace();
+		
+		if (roomConfigForm)
+		{
+			// <iq type='set'
+			//       id='create2'
+			//       to='coven@chat.shakespeare.lit'>
+			//   <query xmlns='http://jabber.org/protocol/muc#owner'>
+			//     <x xmlns='jabber:x:data' type='submit'>
+			//       <field var='FORM_TYPE'>
+			//         <value>http://jabber.org/protocol/muc#roomconfig</value>
+			//       </field>
+			//       <field var='muc#roomconfig_roomname'>
+			//         <value>A Dark Cave</value>
+			//       </field>
+			//       <field var='muc#roomconfig_enablelogging'>
+			//         <value>0</value>
+			//       </field>
+			//       ...
+			//     </x>
+			//   </query>
+			// </iq>
+			
+			NSXMLElement *x = roomConfigForm;
+			[x addAttributeWithName:@"type" stringValue:@"submit"];
+			
+			NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+			[query addChild:x];
+			
+			NSString *iqID = [xmppStream generateUUID];
+			
+			XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:roomJID elementID:iqID child:query];
+			
+			[xmppStream sendElement:iq];
+			
+			[responseTracker addID:iqID
+			                target:self
+			              selector:@selector(handleConfigureRoomResponse:withInfo:)
+			               timeout:60.0];
+		}
+		else
+		{
+			// <iq type='set'
+			//     from='crone1@shakespeare.lit/desktop'
+			//       id='create1'
+			//       to='darkcave@chat.shakespeare.lit'>
+			//   <query xmlns='http://jabber.org/protocol/muc#owner'>
+			//     <x xmlns='jabber:x:data' type='submit'/>
+			//   </query>
+			// </iq>
+			
+			NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
+			[x addAttributeWithName:@"type" stringValue:@"submit"];
+			
+			NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+			[query addChild:x];
+			
+			NSString *iqID = [xmppStream generateUUID];
+			
+			XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:roomJID elementID:iqID child:query];
+			
+			[xmppStream sendElement:iq];
+			
+			[responseTracker addID:iqID
+			                target:self
+			              selector:@selector(handleConfigureRoomResponse:withInfo:)
+			               timeout:60.0];
+		}
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)chageNickname:(NSString *)newNickname
+{
+	// Todo
+}
+
+- (void)changeRoomSubject:(NSString *)newRoomSubject
+{
+	// Todo
+}
+
+- (void)handleFetchBanListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+	if ([[iq type] isEqualToString:@"result"])
+	{
+		// <iq type='result'
+		//     from='southampton@henryv.shakespeare.lit'
+		//       id='ban2'>
+		//   <query xmlns='http://jabber.org/protocol/muc#admin'>
+		//     <item affiliation='outcast' jid='earlofcambridge@shakespeare.lit'>
+		//       <reason>Treason</reason>
+		//     </item>
+		//   </query>
+		// </iq>
+		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSArray *items = [query elementsForName:@"items"];
+		
+		[multicastDelegate xmppRoom:self didFetchBanList:items];
+	}
+	else
+	{
+		[multicastDelegate xmppRoom:self didNotFetchBanList:iq];
+	}
+}
+
+- (void)fetchBanList
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPLogTrace();
+		
+		// <iq type='get'
+		//       id='ban2'
+		//       to='southampton@henryv.shakespeare.lit'>
+		//   <query xmlns='http://jabber.org/protocol/muc#admin'>
+		//     <item affiliation='outcast'/>
+		//   </query>
+		// </iq>
+		
+		NSString *fetchID = [xmppStream generateUUID];
+		
+		NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+		[item addAttributeWithName:@"affiliation" stringValue:@"outcast"];
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		[query addChild:item];
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
+		
+		[xmppStream sendElement:iq];
+		
+		[responseTracker addID:fetchID
+		               target:self
+		             selector:@selector(handleFetchBanListResponse:withInfo:)
+		              timeout:60.0];
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)handleFetchMembersListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+	if ([[iq type] isEqualToString:@"result"])
+	{
+		// <iq type='result'
+		//     from='coven@chat.shakespeare.lit'
+		//       id='member3'>
+		//   <query xmlns='http://jabber.org/protocol/muc#admin'>
+		//     <item affiliation='member' jid='hag66@shakespeare.lit' nick='thirdwitch' role='participant'/>
+		//   </query>
+		// </iq>
+		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSArray *items = [query elementsForName:@"items"];
+		
+		[multicastDelegate xmppRoom:self didFetchMembersList:items];
+	}
+	else
+	{
+		[multicastDelegate xmppRoom:self didNotFetchMembersList:iq];
+	}
+}
+
+- (void)fetchMembersList
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPLogTrace();
+		
+		// <iq type='get'
+		//       id='member3'
+		//       to='coven@chat.shakespeare.lit'>
+		//   <query xmlns='http://jabber.org/protocol/muc#admin'>
+		//     <item affiliation='member'/>
+		//   </query>
+		// </iq>
+		
+		NSString *fetchID = [xmppStream generateUUID];
+		
+		NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+		[item addAttributeWithName:@"affiliation" stringValue:@"member"];
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		[query addChild:item];
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
+		
+		[xmppStream sendElement:iq];
+		
+		[responseTracker addID:fetchID
+		               target:self
+		             selector:@selector(handleFetchMembersListResponse:withInfo:)
+		              timeout:60.0];
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+	
+	
+}
+
+- (void)handleFetchModeratorsListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+	if ([[iq type] isEqualToString:@"result"])
+	{
+		// <iq type='result'
+		//       id='mod3'
+		//       to='crone1@shakespeare.lit/desktop'>
+		//   <query xmlns='http://jabber.org/protocol/muc#admin'>
+		//     <item affiliation='member' jid='hag66@shakespeare.lit/pda' nick='thirdwitch' role='moderator'/>
+		//   </query>
+		// </iq>
+		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSArray *items = [query elementsForName:@"items"];
+		
+		[multicastDelegate xmppRoom:self didFetchModeratorsList:items];
+	}
+	else
+	{
+		[multicastDelegate xmppRoom:self didNotFetchModeratorsList:iq];
+	}
+}
+
+- (void)fetchModeratorsList
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		// <iq type='get'
+		//       id='mod3'
+		//       to='coven@chat.shakespeare.lit'>
+		//   <query xmlns='http://jabber.org/protocol/muc#admin'>
+		//     <item role='moderator'/>
+		//   </query>
+		// </iq>
+		
+		NSString *fetchID = [xmppStream generateUUID];
+		
+		NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+		[item addAttributeWithName:@"role" stringValue:@"moderator"];
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		[query addChild:item];
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
+		
+		[xmppStream sendElement:iq];
+		
+		[responseTracker addID:fetchID
+		               target:self
+		             selector:@selector(handleFetchModeratorsListResponse:withInfo:)
+		              timeout:60.0];
+		
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)handleEditRoomPrivilegesResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+	if ([[iq type] isEqualToString:@"result"])
+	{
+		[multicastDelegate xmppRoomDidEditPrivileges:self];
+	}
+	else
+	{
+		[multicastDelegate xmppRoom:self didNotEditPrivileges:iq];
+	}
+}
+
+- (void)editRoomPrivileges:(NSArray *)items
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
 		// <iq type='set'
-		//     from='crone1@shakespeare.lit/desktop'
-		//       id='create1'
-		//       to='darkcave@chat.shakespeare.lit'>
-		//   <query xmlns='http://jabber.org/protocol/muc#owner'>
-		//     <x xmlns='jabber:x:data' type='submit'/>
+		//       id='mod4'
+		//       to='coven@chat.shakespeare.lit'>
+		//   <query xmlns='http://jabber.org/protocol/muc#admin'>
+		//     <item jid='hag66@shakespeare.lit/pda' role='participant'/>
+		//     <item jid='hecate@shakespeare.lit/broom' role='moderator'/>
 		//   </query>
 		// </iq>
 		
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
-		[x addAttributeWithName:@"type" stringValue:@"submit"];
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		for (NSXMLElement *item in items)
+		{
+			[query addChild:item];
+		}
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespaceName];
-		[query addChild:x];
+		NSString *iqID = [xmppStream generateUUID];
 		
-		XMPPIQ *iq = [XMPPIQ iq];
-		[iq addAttributeWithName:@"id" stringValue:[NSString stringWithFormat:@"inroom-cr%@", roomName]];
-		[iq addAttributeWithName:@"to" stringValue:roomName];
-		[iq addAttributeWithName:@"type" stringValue:@"set"];
-		[iq addChild:query];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:roomJID elementID:iqID child:query];
 		
 		[xmppStream sendElement:iq];
 		
-		[pool drain];
-	};
+		[responseTracker addID:iqID
+		                target:self
+		              selector:@selector(handleEditRoomPrivilegesResponse:withInfo:)
+		               timeout:60.0];
+		
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -323,51 +730,29 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)joinRoom
-{
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		XMPPLogTrace();
-		
-		// <presence to='darkcave@chat.shakespeare.lit/thirdwitch'/>
-		
-		NSString *to = [NSString stringWithFormat:@"%@/%@", roomName, nickName];
-		
-		XMPPPresence *presence = [XMPPPresence presence];
-		[presence addAttributeWithName:@"to" stringValue:to];
-		
-		[xmppStream sendElement:presence];
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
-	else
-		dispatch_async(moduleQueue, block);
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Leave & Destroy
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)leaveRoom
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
 		// <presence type='unavailable' to='darkcave@chat.shakespeare.lit/thirdwitch'/>
 		
-		NSString *to = [NSString stringWithFormat:@"%@/%@", roomName, nickName];
-		
 		XMPPPresence *presence = [XMPPPresence presence];
-		[presence addAttributeWithName:@"to" stringValue:to];
+		[presence addAttributeWithName:@"to" stringValue:[myRoomJID full]];
 		[presence addAttributeWithName:@"type" stringValue:@"unavailable"];
 		
 		[xmppStream sendElement:presence];
-		self.isJoined = NO;
 		
-		[pool drain];
-	};
+		state &= ~kXMPPRoomStateJoining;
+		state &= ~kXMPPRoomStateJoined;
+		state |=  kXMPPRoomStateLeaving;
+		
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -375,45 +760,29 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		dispatch_async(moduleQueue, block);
 }
 
-/**
- * Changes the nickname for room by joining room again with new nick.
-**/
-- (void)chageNickForRoom:(NSString *)newNickName
+- (void)destoryRoom
 {
-	NSString *newNickNameCopy = [newNickName copy];
-	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
-		if (![nickName isEqual:newNickNameCopy])
-		{
-			[nickName release];
-			nickName = [newNickNameCopy retain];
-			
-			[self joinRoom];
-		}
+		// Todo...
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
-	
-	[newNickNameCopy release];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark RoomInvite Methods
+#pragma mark Messages
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)inviteMessageStr
 {
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -433,106 +802,28 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		[invite addAttributeWithName:@"to" stringValue:[jid full]];
 		[invite addChild:reason];
 		
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespaceName];
+		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
 		[x addChild:invite];
 		
 		XMPPMessage *message = [XMPPMessage message];
-		[message addAttributeWithName:@"to" stringValue:roomName];
+		[message addAttributeWithName:@"to" stringValue:[roomJID full]];
 		[message addChild:x];
 		
 		[xmppStream sendElement:message];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
 }
-
-- (void)acceptInvitation
-{
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		XMPPLogTrace();
-		
-		// Just need to send presence to room to accept it. We are done.
-		[self joinRoom];
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
-	else
-		dispatch_async(moduleQueue, block);
-}
-
-- (void)rejectInvitation
-{
-	[self rejectInvitationWithMessage:nil];
-}
-
-- (void)rejectInvitationWithMessage:(NSString *)rejectMessageStr
-{
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		
-		XMPPLogTrace();
-		
-		// <message to='darkcave@chat.shakespeare.lit'>
-		//   <x xmlns='http://jabber.org/protocol/muc#user'>
-		//     <decline to='crone1@shakespeare.lit'>
-		//       <reason>
-		//         Sorry, I'm too busy right now.
-		//       </reason>
-		//     </decline>
-		//   </x>
-		// </message>
-		
-		NSXMLElement *reason = nil;
-		if (rejectMessageStr)
-		{
-			reason = [NSXMLElement elementWithName:@"reason" stringValue:rejectMessageStr];
-		}
-		
-		NSXMLElement *decline = [NSXMLElement elementWithName:@"decline"];
-		[decline addAttributeWithName:@"to" stringValue:invitedUser];
-		if (reason)
-		{
-			[decline addChild:reason];
-		}
-		
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespaceName];
-		[x addChild:decline];
-		
-		NSXMLElement *message = [XMPPMessage message];
-		[message addAttributeWithName:@"to" stringValue:roomName];
-		[message addChild:x];
-		
-		[xmppStream sendElement:message];
-		
-		[pool drain];
-	};
-	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
-	else
-		dispatch_async(moduleQueue, block);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Message Methods
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)sendMessage:(NSString *)msg
 {
 	if ([msg length] == 0) return;
 	
-	dispatch_block_t block = ^{
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
@@ -543,14 +834,13 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 		NSXMLElement *body = [NSXMLElement elementWithName:@"body" stringValue:msg];
 		
 		XMPPMessage *message = [XMPPMessage message];
-		[message addAttributeWithName:@"to" stringValue:roomName];
+		[message addAttributeWithName:@"to" stringValue:[roomJID full]];
 		[message addAttributeWithName:@"type" stringValue:@"groupchat"];
 		[message addChild:body];
 		
 		[xmppStream sendElement:message];
 		
-		[pool drain];
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
 		block();
@@ -562,147 +852,271 @@ static NSString *const XMPPMUCOwnerNamespaceName = @"http://jabber.org/protocol/
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)onDidChangeOccupants
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-	// We cannot directly pass our NSMutableDictionary *occupants
-	// to the delegates as NSMutableDictionary is not thread-safe.
-	// 
-	// And even if it was, we don't want this dictionary changing on them.
-	// That's what this delegate method is for.
-	// 
-	// So we create an immutable copy of the dictionary to send to the delegates.
-	// And we don't have to worry about the XMPPRoomOccupant objects changing as they are immutable.
+	// This method is invoked on the moduleQueue.
 	
-	NSDictionary *occupantsCopy = [[occupants copy] autorelease];
+	XMPPLogTrace();
 	
-	[multicastDelegate xmppRoom:self didChangeOccupants:occupantsCopy];
+	state = kXMPPRoomStateNone;
+	
+	// Auto-rejoin?
+}
+
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+{
+	NSString *type = [iq type];
+	
+	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
+	{
+		return [responseTracker invokeForID:[iq elementID] withObject:iq];
+	}
+	
+	return NO;
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
-	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	// This method is invoked on the moduleQueue.
 	
-	NSArray *components = [[presence fromStr] componentsSeparatedByString:@"/"];
+	XMPPJID *from = [presence from];
 	
-	NSString *aRoomName = [components count] > 0 ? [components objectAtIndex:0] : nil;
-	NSString *aNickName = [components count] > 1 ? [components objectAtIndex:1] : nil;
-	
-	if (![aRoomName isEqualToString:roomName]) return;
-	
-	XMPPLogTrace2(@"%@: didReceivePresence: ROOM: %@", [self class], roomName);
-	
-	NSXMLElement *priorityElement = [presence elementForName:@"priority"];
-	if (priorityElement)
-		XMPPLogVerbose(@"%@: didReceivePresence: priority:%@", [self class], [priorityElement stringValue]);
-	
-	NSXMLElement *x = [presence elementForName:@"x" xmlns:XMPPMUCUserNamespaceName];
-	NSXMLElement *xItem = [x elementForName:@"item"];
-	
-	NSString *jidStr  = [xItem attributeStringValueForName:@"jid"];
-	NSString *role    = [xItem attributeStringValueForName:@"role"];
-	NSString *newNick = [xItem attributeStringValueForName:@"nick"];
-	
-	XMPPLogVerbose(@"%@: didReceivePresence: nick:%@ role:%@ newnick:%@ jid:%@",
-				   [self class], aNickName, role, newNick, jidStr);
-	
-	if (newNick)
+	if (![roomJID isEqualToJID:from options:XMPPJIDCompareBare])
 	{
-		// We are joined, getting presence for room
-		self.isJoined = YES;
-		
-		// Handle nick Change having "nick" in <item> element.
-		[occupants removeObjectForKey:aNickName];
-		
-		// Add new room occupant
-		XMPPJID *jid = [XMPPJID jidWithString:jidStr];
-		XMPPRoomOccupant *occupant = [XMPPRoomOccupant occupantWithJID:jid nick:newNick role:role];
-		
-		[occupants setObject:occupant forKey:newNick];
-		[self onDidChangeOccupants];
-		
-		return;
+		return; // Stanza isn't for our room
 	}
-	else if (aNickName)
+	
+	XMPPLogTrace();
+	
+	[xmppRoomStorage handlePresence:presence room:self];
+	
+	// My presence:
+	// 
+	// <presence from='coven@chat.shakespeare.lit/thirdwitch'>
+	//   <x xmlns='http://jabber.org/protocol/muc#user'>
+	//     <item affiliation='member' role='participant'/>
+	//     <status code='110'/>
+	//     <status code='210'/>
+	//   </x>
+	// </presence>
+	// 
+	// 
+	// Another's presence:
+	// 
+	// <presence from='coven@chat.shakespeare.lit/firstwitch'>
+	//   <x xmlns='http://jabber.org/protocol/muc#user'>
+	//     <item affiliation='owner' role='moderator'/>
+	//   </x>
+	// </presence>
+	
+	NSXMLElement *x = [presence elementForName:@"x" xmlns:XMPPMUCUserNamespace];
+	
+	// Process status codes.
+	// 
+	// 110 - Inform user that presence refers to one of its own room occupants.
+	// 201 - Inform user that a new room has been created.
+	// 210 - Inform user that service has assigned or modified occupant's roomnick.
+	// 303 - Inform all occupants of new room nickname.
+	
+	BOOL isMyPresence = NO;
+	BOOL didCreateRoom = NO;
+	BOOL isNicknameChange = NO;
+	
+	for (NSXMLElement *status in [x elementsForName:@"status"])
 	{
-		if ([[presence type] isEqualToString:@"unavailable"])
+		switch ([status attributeIntValueForName:@"code"])
 		{
-			if ([aNickName isEqualToString:nickName])
+			case 110 : isMyPresence = YES;     break;
+			case 201 : didCreateRoom = YES;    break;
+			case 210 :
+			case 303 : isNicknameChange = YES; break;
+		}
+	}
+	
+	// Extract presence type
+	
+	NSString *presenceType = [presence type];
+	
+	BOOL isAvailable   = [presenceType isEqualToString:@"available"];
+	BOOL isUnavailable = [presenceType isEqualToString:@"unavailable"];
+	
+	// Server's don't always properly send the statusCodes in every situation.
+	// So we have some extra checks to ensure the boolean variables are correct.
+	
+	if (didCreateRoom || isNicknameChange)
+	{
+		isMyPresence = YES;
+	}
+	if (!isMyPresence)
+	{
+		if ([[from resource] isEqualToString:myNickname])
+			isMyPresence = YES;
+	}
+	
+	XMPPLogVerbose(@"%@[%@] - isMyPresence = %@", THIS_FILE, roomJID, (isMyPresence ? @"YES" : @"NO"));
+	XMPPLogVerbose(@"%@[%@] - didCreateRoom = %@", THIS_FILE, roomJID, (didCreateRoom ? @"YES" : @"NO"));
+	XMPPLogVerbose(@"%@[%@] - isNicknameChange = %@", THIS_FILE, roomJID, (isNicknameChange ? @"YES" : @"NO"));
+	
+	// Process presence
+	
+	if (didCreateRoom)
+	{
+		state &= ~kXMPPRoomStateCreating;
+		state |=  kXMPPRoomStateCreated;
+		
+		[multicastDelegate xmppRoomDidCreate:self];
+	}
+	else if (isMyPresence)
+	{
+		if (state & kXMPPRoomStateCreating)
+		{
+			// The room wasn't created. It already existed, and we just joined it.
+			
+			state &= ~kXMPPRoomStateCreating;
+			state &= ~kXMPPRoomStateConfiguring;
+		}
+	}
+	
+	
+	if (isMyPresence)
+	{
+		myRoomJID = from;
+		myNickname = [from resource];
+		
+		if (isAvailable)
+		{
+			if (state & kXMPPRoomStateJoining)
 			{
-				// We got presence from our nick to us about leaving.
-				self.isJoined = NO;
+				state &= ~kXMPPRoomStateJoining;
+				state |=  kXMPPRoomStateJoined;
 				
-				[occupants removeAllObjects];
-				[self onDidChangeOccupants];
-			}
-			else
-			{
-				// We're getting presence from the room, so that means we are joined
-				self.isJoined = YES;
-				
-				// This is about some one else leaving the Room.
-				// Remove them and notify delegate.
-				
-				[occupants removeObjectForKey:aNickName];
-				[self onDidChangeOccupants];
+				[multicastDelegate xmppRoomDidJoin:self];
 			}
 		}
-		else
+		else if (isUnavailable && !isNicknameChange)
 		{
-			// We're getting presence from the room, so that means we are joined
-			self.isJoined = YES;
-			
-			// This is about some sort of available presence. i don't mind even if they are busy.
-			// if the user is there. no need to notify. let's check that.
-			XMPPRoomOccupant *occupant = [occupants objectForKey:aNickName];
-			if (!occupant)
-			{
-				XMPPJID *jid = [XMPPJID jidWithString:jidStr];
-				occupant = [XMPPRoomOccupant occupantWithJID:jid nick:aNickName role:role];
-				
-				[occupants setObject:occupant forKey:aNickName];
-				[self onDidChangeOccupants];
-			}
+			[multicastDelegate xmppRoomDidLeave:self];
+		}
+	}
+	else
+	{
+		if (isAvailable)
+		{
+			[multicastDelegate xmppRoom:self occupantDidJoin:from withPresence:presence];
+		}
+		else if (isUnavailable)
+		{
+			[multicastDelegate xmppRoom:self occupantDidLeave:from withPresence:presence];
 		}
 	}
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	// This method is invoked on the moduleQueue.
 	
-	// Check if its group chat, and make sure it's for this Room
-	if ([message isGroupChatMessageWithBody])
+	XMPPJID *from = [message from];
+	
+	if (![roomJID isEqualToJID:from options:XMPPJIDCompareBare])
 	{
-		NSArray *components = [[message fromStr] componentsSeparatedByString:@"/"];
-		
-		NSString *aRoomName = [components count] > 0 ? [components objectAtIndex:0] : nil;
-		NSString *aNickName = [components count] > 1 ? [components objectAtIndex:1] : nil;
-		
-		if (![aRoomName isEqualToString:roomName]) return;
-		
-		if (aNickName == nil)
-		{
-			// Todo - A proper implementation...
-			
-		//	NSString *body = [[message elementForName:@"body"] stringValue];
-		//	
-		//	if ([body isEqualToString:@"This room is locked from entry until configuration is confirmed."])
-		//	{
-		//		[self sendInstantRoomConfig];
-		//		return;
-		//	}
-		//	
-		//	if ([body isEqualToString:@"This room is now unlocked."])
-		//	{
-		//		[multicastDelegate xmppRoomDidCreate:self];
-		//		return;
-		//	}
-		}
-		
-		[multicastDelegate xmppRoom:self didReceiveMessage:message fromNick:aNickName];
+		return; // Stanza isn't for our room
 	}
+	
+	XMPPLogTrace();
+	
+	// Is this a message we need to store (a chat message)?
+	// 
+	// A message to all recipients MUST be of type groupchat.
+	// A message to an individual recipient would have a <body/>.
+	
+	BOOL isChatMessage;
+	
+	if ([from isFull])
+		isChatMessage = [message isGroupChatMessageWithBody];
+	else
+		isChatMessage = [message isMessageWithBody];
+	
+	if (isChatMessage)
+	{
+		[xmppRoomStorage handleIncomingMessage:message room:self];
+		[multicastDelegate xmppRoom:self didReceiveMessage:message fromOccupant:from];
+	}
+	else
+	{
+		// Todo... Handle other types of messages.
+	}
+}
+
+- (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message
+{
+	// This method is invoked on the moduleQueue.
+	
+	XMPPJID *to = [message to];
+	
+	if (![roomJID isEqualToJID:to options:XMPPJIDCompareBare])
+	{
+		return; // Stanza isn't for our room
+	}
+	
+	XMPPLogTrace();
+	
+	// Is this a message we need to store (a chat message)?
+	// 
+	// A message to all recipients MUST be of type groupchat.
+	// A message to an individual recipient would have a <body/>.
+	
+	BOOL isChatMessage;
+	
+	if ([to isFull])
+		isChatMessage = [message isGroupChatMessageWithBody];
+	else
+		isChatMessage = [message isMessageWithBody];
+	
+	if (isChatMessage)
+	{
+		[xmppRoomStorage handleOutgoingMessage:message room:self];	
+	}
+}
+
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+	// This method is invoked on the moduleQueue.
+	
+	XMPPLogTrace();
+	
+	[responseTracker removeAllIDs];
+	
+	state = kXMPPRoomStateNone;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Class Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
++ (NSXMLElement *)itemWithAffiliation:(NSString *)affiliation jid:(XMPPJID *)jid
+{
+	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+	
+	if (affiliation)
+		[item addAttributeWithName:@"affiliation" stringValue:affiliation];
+	
+	if (jid)
+		[item addAttributeWithName:@"jid" stringValue:[jid full]];
+	
+	return item;
+}
+
++ (NSXMLElement *)itemWithRole:(NSString *)role jid:(XMPPJID *)jid
+{
+	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+	
+	if (role)
+		[item addAttributeWithName:@"role" stringValue:role];
+	
+	if (jid)
+		[item addAttributeWithName:@"jid" stringValue:[jid full]];
+	
+	return item;
 }
 
 @end

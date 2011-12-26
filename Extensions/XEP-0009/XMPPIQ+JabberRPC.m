@@ -5,10 +5,14 @@
 //  Created by Eric Chamberlain on 5/16/10.
 //
 
-#import "XMPPIQ+JabberRPC.h"
 
-#import "NSData+XMPP.h"
+#import "XMPPIQ+JabberRPC.h"
 #import "XMPP.h"
+#import "NSData+XMPP.h"
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 
 
 @implementation XMPPIQ(JabberRPC)
@@ -102,8 +106,8 @@
         return [self valueElementFromArray: object];
     } else if ([object isKindOfClass: [NSDictionary class]]) {
         return [self valueElementFromDictionary: object];
-    } else if (((CFBooleanRef)object == kCFBooleanTrue) || ((CFBooleanRef)object == kCFBooleanFalse)) {
-        return [self valueElementFromBoolean: (CFBooleanRef)object];
+    } else if (((__bridge CFBooleanRef)object == kCFBooleanTrue) || ((__bridge CFBooleanRef)object == kCFBooleanFalse)) {
+        return [self valueElementFromBoolean: (__bridge CFBooleanRef)object];
     } else if ([object isKindOfClass: [NSNumber class]]) {
         return [self valueElementFromNumber: object];
     } else if ([object isKindOfClass: [NSString class]]) {
