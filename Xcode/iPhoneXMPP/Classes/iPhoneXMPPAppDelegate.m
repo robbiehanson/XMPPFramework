@@ -68,8 +68,13 @@
 	[window setRootViewController:navigationController];
 	[window makeKeyAndVisible];
 
-	if (![self connect]) {
-		[navigationController presentModalViewController:settingsViewController animated:YES];
+	if (![self connect])
+	{
+		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.0 * NSEC_PER_SEC);
+		dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+			
+			[navigationController presentModalViewController:settingsViewController animated:YES];
+		});
 	}
 		
 	return YES;
@@ -78,9 +83,6 @@
 - (void)dealloc
 {
 	[self teardownStream];
-
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -346,14 +348,11 @@
 	//
 	// If you don't want to use the Settings view to set the JID, 
 	// uncomment the section below to hard code a JID and password.
-	//
-	// Replace me with the proper JID and password:
-	//	myJID = @"user@gmail.com/xmppframework";
-	//	myPassword = @"";
-
+	// 
+	// myJID = @"user@gmail.com/xmppframework";
+	// myPassword = @"";
+	
 	if (myJID == nil || myPassword == nil) {
-		DDLogWarn(@"JID and password must be set before connecting!");
-
 		return NO;
 	}
 
@@ -378,10 +377,10 @@
 	return YES;
 }
 
-- (void)disconnect {
-  [self goOffline];
-  
-  [xmppStream disconnect];
+- (void)disconnect
+{
+	[self goOffline];
+	[xmppStream disconnect];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

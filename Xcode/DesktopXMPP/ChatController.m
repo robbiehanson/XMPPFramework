@@ -1,6 +1,11 @@
 #import "ChatController.h"
-#import "ChatWindowManager.h"
-#import "XMPP.h"
+#import "WindowManager.h"
+#import "XMPPFramework.h"
+#import "DDLog.h"
+
+// Log levels: off, error, warn, info, verbose
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @interface ChatController (PrivateAPI)
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message;
@@ -15,17 +20,17 @@
 @synthesize xmppStream;
 @synthesize jid;
 
-- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)fullJID
+- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)aJid
 {
-	return [self initWithStream:stream jid:fullJID message:nil];
+	return [self initWithStream:stream jid:aJid message:nil];
 }
 
-- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)fullJID message:(XMPPMessage *)message
+- (id)initWithStream:(XMPPStream *)stream jid:(XMPPJID *)aJid message:(XMPPMessage *)message
 {
-	if((self = [super initWithWindowNibName:@"ChatWindow"]))
+	if ((self = [super initWithWindowNibName:@"ChatWindow"]))
 	{
 		xmppStream = stream;
-		jid = fullJID;
+		jid = aJid;
 		
 		firstMessage = message;
 	}
@@ -36,13 +41,12 @@
 {
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	
 	[messageView setString:@""];
 	
 	[[self window] setTitle:[jid full]];
 	[[self window] makeFirstResponder:messageField];
 	
-	if(firstMessage)
+	if (firstMessage)
 	{
 		[self xmppStream:xmppStream didReceiveMessage:firstMessage];
 		firstMessage  = nil;
@@ -57,15 +61,15 @@
 **/
 - (void)windowWillClose:(NSNotification *)aNotification
 {
-	NSLog(@"ChatController: windowWillClose");
+	DDLogVerbose(@"ChatController: windowWillClose");
 	
 	[xmppStream removeDelegate:self];
-	[ChatWindowManager closeChatWindow:self];
+	[WindowManager closeChatWindow:self];
 }
 
 - (void)dealloc
 {
-	NSLog(@"Destroying self: %@", self);
+	DDLogVerbose(@"Destroying self: %@", self);
 }
 
 - (void)scrollToBottom

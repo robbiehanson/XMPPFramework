@@ -47,9 +47,10 @@
 	{
 		titleLabel.text = @"No JID";
 	}
+	
+	[titleLabel sizeToFit];
 
 	self.navigationItem.titleView = titleLabel;
-
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -93,7 +94,7 @@
 		NSError *error = nil;
 		if (![fetchedResultsController performFetch:&error])
 		{
-			NSLog(@"Error performing fetch: %@", error);
+			DDLogError(@"Error performing fetch: %@", error);
 		}
 	
 	}
@@ -199,10 +200,5 @@
 {
 	[self.navigationController presentModalViewController:[[self appDelegate] settingsViewController] animated:YES];
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Init/dealloc
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 @end
