@@ -1,3 +1,4 @@
 [submodule "Vendor/facebook-ios-sdk"]
 	path = Vendor/facebook-ios-sdk
 	url = git://github.com/facebook/facebook-ios-sdk.git
+	ignore = dirty

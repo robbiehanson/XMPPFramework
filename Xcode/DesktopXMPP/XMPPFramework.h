@@ -27,14 +27,26 @@
 // List the modules you're using in your project here.
 
 #import "XMPPReconnect.h"
+
 #import "XMPPRoster.h"
 #import "XMPPRosterMemoryStorage.h"
+
+#import "XMPPMUC.h"
+#import "XMPPRoom.h"
+#import "XMPPRoomMemoryStorage.h"
+#import "XMPPRoomCoreDataStorage.h"
+
 #import "XMPPvCardTempModule.h"
+
 #import "TURNSocket.h"
+
 #import "XMPPCapabilities.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
+
 #import "XMPPvCardAvatarModule.h"
+
 #import "XMPPPing.h"
 #import "XMPPAutoPing.h"
+
 #import "XMPPTime.h"
 #import "XMPPAutoTime.h"

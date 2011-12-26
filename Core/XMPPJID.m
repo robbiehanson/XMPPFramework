@@ -59,7 +59,7 @@
 	
 	NSRange atRange = [jidStr rangeOfString:@"@"];
 	
-	if(atRange.location != NSNotFound)
+	if (atRange.location != NSNotFound)
 	{
 		rawUser = [jidStr substringToIndex:atRange.location];
 		
@@ -67,7 +67,7 @@
 		
 		NSRange slashRange = [minusUser rangeOfString:@"/"];
 		
-		if(slashRange.location != NSNotFound)
+		if (slashRange.location != NSNotFound)
 		{
 			rawDomain = [minusUser substringToIndex:slashRange.location];
 			rawResource = [minusUser substringFromIndex:slashRange.location+1];
@@ -81,7 +81,7 @@
 	{
 		NSRange slashRange = [jidStr rangeOfString:@"/"];
 				
-		if(slashRange.location != NSNotFound)
+		if (slashRange.location != NSNotFound)
 		{
 			rawDomain = [jidStr substringToIndex:slashRange.location];
 			rawResource = [jidStr substringFromIndex:slashRange.location+1];
@@ -96,7 +96,7 @@
 	NSString *prepDomain = [LibIDN prepDomain:rawDomain];
 	NSString *prepResource = [LibIDN prepResource:rawResource];
 	
-	if([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
+	if ([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
 	{
 		if(user)     *user = prepUser;
 		if(domain)   *domain = prepDomain;
@@ -114,7 +114,7 @@
 	NSString *domain;
 	NSString *resource;
 	
-	if([XMPPJID parse:jidStr outUser:&user outDomain:&domain outResource:&resource])
+	if ([XMPPJID parse:jidStr outUser:&user outDomain:&domain outResource:&resource])
 	{
 		XMPPJID *jid = [[XMPPJID alloc] init];
 		jid->user = [user copy];
@@ -129,12 +129,12 @@
 
 + (XMPPJID *)jidWithString:(NSString *)jidStr resource:(NSString *)resource
 {
-	if(![self validateResource:resource]) return nil;
+	if (![self validateResource:resource]) return nil;
 	
 	NSString *user;
 	NSString *domain;
 	
-	if([XMPPJID parse:jidStr outUser:&user outDomain:&domain outResource:nil])
+	if ([XMPPJID parse:jidStr outUser:&user outDomain:&domain outResource:nil])
 	{
 		XMPPJID *jid = [[XMPPJID alloc] init];
 		jid->user = [user copy];
@@ -153,7 +153,7 @@
 	NSString *prepDomain = [LibIDN prepDomain:domain];
 	NSString *prepResource = [LibIDN prepResource:resource];
 	
-	if([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
+	if ([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
 	{
 		XMPPJID *jid = [[XMPPJID alloc] init];
 		jid->user = [prepUser copy];
@@ -164,6 +164,16 @@
 	}
 	
 	return nil;
+}
+
++ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
+{
+	XMPPJID *jid = [[XMPPJID alloc] init];
+	jid->user = [user copy];
+	jid->domain = [domain copy];
+	jid->resource = [resource copy];
+	
+	return jid;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,9 +193,9 @@
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
-		if([coder allowsKeyedCoding])
+		if ([coder allowsKeyedCoding])
 		{
 			user     = [[coder decodeObjectForKey:@"user"] copy];
 			domain   = [[coder decodeObjectForKey:@"domain"] copy];
@@ -203,7 +213,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	if([coder allowsKeyedCoding])
+	if ([coder allowsKeyedCoding])
 	{
 		[coder encodeObject:user     forKey:@"user"];
 		[coder encodeObject:domain   forKey:@"domain"];
@@ -256,31 +266,31 @@
 
 - (XMPPJID *)bareJID
 {
-	if(resource == nil)
+	if (resource == nil)
 	{
 		return self;
 	}
 	else
 	{
-		return [XMPPJID jidWithUser:user domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:user domain:domain resource:nil];
 	}
 }
 
 - (XMPPJID *)domainJID
 {
-	if(user == nil && resource == nil)
+	if (user == nil && resource == nil)
 	{
 		return self;
 	}
 	else
 	{
-		return [XMPPJID jidWithUser:nil domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:nil domain:domain resource:nil];
 	}
 }
 
 - (NSString *)bare
 {
-	if(user)
+	if (user)
 		return [NSString stringWithFormat:@"%@@%@", user, domain];
 	else
 		return domain;
@@ -288,16 +298,16 @@
 
 - (NSString *)full
 {
-	if(user)
+	if (user)
 	{
-		if(resource)
+		if (resource)
 			return [NSString stringWithFormat:@"%@@%@/%@", user, domain, resource];
 		else
 			return [NSString stringWithFormat:@"%@@%@", user, domain];
 	}
 	else
 	{
-		if(resource)
+		if (resource)
 			return [NSString stringWithFormat:@"%@/%@", domain, resource];
 		else
 			return domain;
@@ -344,17 +354,10 @@
 #pragma mark NSObject Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-- (unsigned)hash
-{
-	return [[self full] hash];
-}
-#else
 - (NSUInteger)hash
 {
 	return [[self full] hash];
 }
-#endif
 
 - (BOOL)isEqual:(id)anObject
 {
