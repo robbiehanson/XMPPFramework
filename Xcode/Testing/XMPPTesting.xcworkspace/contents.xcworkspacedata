@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:MUCTesting/MUCTesting.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:FacebookTest/FacebookTest.xcodeproj">
    </FileRef>
    <FileRef
