@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56F8340814C7672900AF62B3 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8340414C7672900AF62B3 /* XMPPDigestAuthentication.m */; };
+		56F8340914C7672900AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8340714C7672900AF62B3 /* XMPPXFacebookPlatformAuthentication.m */; };
 		DC17CD3E1355ED29007A32CC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC17CD3D1355ED29007A32CC /* Cocoa.framework */; };
 		DC17CD481355ED29007A32CC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DC17CD461355ED29007A32CC /* InfoPlist.strings */; };
 		DC17CD4B1355ED29007A32CC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD4A1355ED29007A32CC /* main.m */; };
@@ -48,6 +50,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		56F8340314C7672900AF62B3 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestAuthentication.h; sourceTree = "<group>"; };
+		56F8340414C7672900AF62B3 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestAuthentication.m; sourceTree = "<group>"; };
+		56F8340514C7672900AF62B3 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		56F8340614C7672900AF62B3 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		56F8340714C7672900AF62B3 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		DC17CD391355ED29007A32CC /* AutoPingTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutoPingTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC17CD3D1355ED29007A32CC /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		DC17CD401355ED29007A32CC /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -298,6 +305,11 @@
 		DC597F2C14101FBF0050774C /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				56F8340314C7672900AF62B3 /* XMPPDigestAuthentication.h */,
+				56F8340414C7672900AF62B3 /* XMPPDigestAuthentication.m */,
+				56F8340514C7672900AF62B3 /* XMPPSASLAuthentication.h */,
+				56F8340614C7672900AF62B3 /* XMPPXFacebookPlatformAuthentication.h */,
+				56F8340714C7672900AF62B3 /* XMPPXFacebookPlatformAuthentication.m */,
 				DC597F2D14101FBF0050774C /* DDList.h */,
 				DC597F2E14101FBF0050774C /* DDList.m */,
 				DC597F2F14101FBF0050774C /* GCDMulticastDelegate.h */,
@@ -387,6 +399,9 @@
 /* Begin PBXProject section */
 		DC17CD301355ED29007A32CC /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = DC17CD331355ED29007A32CC /* Build configuration list for PBXProject "AutoPingTest" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -451,6 +466,8 @@
 				DC597F9D14101FBF0050774C /* DDFileLogger.m in Sources */,
 				DC597F9E14101FBF0050774C /* DDLog.m in Sources */,
 				DC597F9F14101FBF0050774C /* DDTTYLogger.m in Sources */,
+				56F8340814C7672900AF62B3 /* XMPPDigestAuthentication.m in Sources */,
+				56F8340914C7672900AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
