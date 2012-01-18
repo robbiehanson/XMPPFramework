@@ -2,6 +2,12 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:EncodeDecodeTest/Mobile/EncodeDecodeTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:EncodeDecodeTest/Desktop/EncodeDecodeTest.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:AutoTimeTest/Mobile/AutoTimeTest/AutoTimeTest.xcodeproj">
    </FileRef>
    <FileRef
