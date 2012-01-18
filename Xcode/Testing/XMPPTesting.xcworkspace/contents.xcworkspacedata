@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:FacebookTest/FacebookTest.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:EncodeDecodeTest/Mobile/EncodeDecodeTest.xcodeproj">
    </FileRef>
    <FileRef
