@@ -29,3 +29,4 @@
 #import "XMPPDateTimeProfiles.h"
 #import "XMPPPing.h"
 #import "XMPPAutoPing.h"
+#import "XMPPAutoTime.h"

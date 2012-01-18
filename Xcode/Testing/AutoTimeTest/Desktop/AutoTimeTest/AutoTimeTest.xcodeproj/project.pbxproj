@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56F8342D14C76FA100AF62B3 /* XMPPAutoPing.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8342A14C76FA100AF62B3 /* XMPPAutoPing.m */; };
+		56F8342E14C76FA100AF62B3 /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8342C14C76FA100AF62B3 /* XMPPPing.m */; };
+		56F8343414C76FCB00AF62B3 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8343014C76FCB00AF62B3 /* XMPPDigestAuthentication.m */; };
+		56F8343514C76FCB00AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8343314C76FCB00AF62B3 /* XMPPXFacebookPlatformAuthentication.m */; };
 		DC41732713F1D34800ED8D43 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC41732613F1D34800ED8D43 /* Cocoa.framework */; };
 		DC41733113F1D34800ED8D43 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DC41732F13F1D34800ED8D43 /* InfoPlist.strings */; };
 		DC41733313F1D34800ED8D43 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41733213F1D34800ED8D43 /* main.m */; };
@@ -47,6 +51,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		56F8342914C76FA100AF62B3 /* XMPPAutoPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAutoPing.h; sourceTree = "<group>"; };
+		56F8342A14C76FA100AF62B3 /* XMPPAutoPing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAutoPing.m; sourceTree = "<group>"; };
+		56F8342B14C76FA100AF62B3 /* XMPPPing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPing.h; sourceTree = "<group>"; };
+		56F8342C14C76FA100AF62B3 /* XMPPPing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPing.m; sourceTree = "<group>"; };
+		56F8342F14C76FCB00AF62B3 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestAuthentication.h; sourceTree = "<group>"; };
+		56F8343014C76FCB00AF62B3 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestAuthentication.m; sourceTree = "<group>"; };
+		56F8343114C76FCB00AF62B3 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		56F8343214C76FCB00AF62B3 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		56F8343314C76FCB00AF62B3 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		DC41732213F1D34800ED8D43 /* AutoTimeTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutoTimeTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC41732613F1D34800ED8D43 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		DC41732913F1D34800ED8D43 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -142,6 +155,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		56F8342814C76FA100AF62B3 /* XEP-0199 */ = {
+			isa = PBXGroup;
+			children = (
+				56F8342914C76FA100AF62B3 /* XMPPAutoPing.h */,
+				56F8342A14C76FA100AF62B3 /* XMPPAutoPing.m */,
+				56F8342B14C76FA100AF62B3 /* XMPPPing.h */,
+				56F8342C14C76FA100AF62B3 /* XMPPPing.m */,
+			);
+			name = "XEP-0199";
+			path = "../../../../../Extensions/XEP-0199";
+			sourceTree = "<group>";
+		};
 		DC41731713F1D34800ED8D43 = {
 			isa = PBXGroup;
 			children = (
@@ -262,6 +287,11 @@
 		DC41735F13F1D37300ED8D43 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				56F8342F14C76FCB00AF62B3 /* XMPPDigestAuthentication.h */,
+				56F8343014C76FCB00AF62B3 /* XMPPDigestAuthentication.m */,
+				56F8343114C76FCB00AF62B3 /* XMPPSASLAuthentication.h */,
+				56F8343214C76FCB00AF62B3 /* XMPPXFacebookPlatformAuthentication.h */,
+				56F8343314C76FCB00AF62B3 /* XMPPXFacebookPlatformAuthentication.m */,
 				DC41736013F1D37300ED8D43 /* DDList.h */,
 				DC41736113F1D37300ED8D43 /* DDList.m */,
 				DC41736213F1D37300ED8D43 /* GCDMulticastDelegate.h */,
@@ -330,6 +360,7 @@
 			isa = PBXGroup;
 			children = (
 				DC4173B213F1D3D400ED8D43 /* XEP-0082 */,
+				56F8342814C76FA100AF62B3 /* XEP-0199 */,
 				DC4173AB13F1D3BB00ED8D43 /* XEP-0202 */,
 			);
 			name = Extensions;
@@ -384,6 +415,9 @@
 /* Begin PBXProject section */
 		DC41731913F1D34800ED8D43 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = DC41731C13F1D34800ED8D43 /* Build configuration list for PBXProject "AutoTimeTest" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -448,6 +482,10 @@
 				DC4173B113F1D3BB00ED8D43 /* XMPPTime.m in Sources */,
 				DC4173B713F1D3D500ED8D43 /* NSDate+XMPPDateTimeProfiles.m in Sources */,
 				DC4173B813F1D3D500ED8D43 /* XMPPDateTimeProfiles.m in Sources */,
+				56F8342D14C76FA100AF62B3 /* XMPPAutoPing.m in Sources */,
+				56F8342E14C76FA100AF62B3 /* XMPPPing.m in Sources */,
+				56F8343414C76FCB00AF62B3 /* XMPPDigestAuthentication.m in Sources */,
+				56F8343514C76FCB00AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
