@@ -469,6 +469,9 @@
 /* Begin PBXProject section */
 		DC9CE2451410159B00E92491 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = DC9CE2481410159B00E92491 /* Build configuration list for PBXProject "AutoTimeTest" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
