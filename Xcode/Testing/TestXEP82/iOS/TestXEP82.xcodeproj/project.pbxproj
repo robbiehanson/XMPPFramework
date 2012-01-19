@@ -147,6 +147,7 @@
 		DCDA2A091355494E00B98971 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = Voalte;
 			};
 			buildConfigurationList = DCDA2A0C1355494E00B98971 /* Build configuration list for PBXProject "TestXEP82" */;
