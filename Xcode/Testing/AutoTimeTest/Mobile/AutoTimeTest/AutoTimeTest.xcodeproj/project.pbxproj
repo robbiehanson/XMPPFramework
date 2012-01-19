@@ -48,7 +48,6 @@
 		DC9CE2D5141015FC00E92491 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DC9CE2C2141015FC00E92491 /* DDXMLDocument.m */; };
 		DC9CE2D6141015FC00E92491 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC9CE2C4141015FC00E92491 /* DDXMLElement.m */; };
 		DC9CE2D7141015FC00E92491 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DC9CE2C6141015FC00E92491 /* DDXMLNode.m */; };
-		DC9CE2D8141015FC00E92491 /* libidn-1.15.tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = DC9CE2CB141015FC00E92491 /* libidn-1.15.tar.gz */; };
 		DC9CE2D9141015FC00E92491 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC9CE2CC141015FC00E92491 /* libidn.a */; };
 		DC9CE2DB1410161800E92491 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC9CE2DA1410161800E92491 /* CFNetwork.framework */; };
 		DC9CE2DD1410166800E92491 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DC9CE2DC1410166800E92491 /* libxml2.dylib */; };
@@ -144,7 +143,6 @@
 		DC9CE2C6141015FC00E92491 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLNode.m; sourceTree = "<group>"; };
 		DC9CE2C8141015FC00E92491 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLPrivate.h; sourceTree = "<group>"; };
 		DC9CE2CA141015FC00E92491 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "idn-int.h"; sourceTree = "<group>"; };
-		DC9CE2CB141015FC00E92491 /* libidn-1.15.tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = "libidn-1.15.tar.gz"; sourceTree = "<group>"; };
 		DC9CE2CC141015FC00E92491 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libidn.a; sourceTree = "<group>"; };
 		DC9CE2CD141015FC00E92491 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringprep.h; sourceTree = "<group>"; };
 		DC9CE2DA1410161800E92491 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -403,7 +401,6 @@
 			isa = PBXGroup;
 			children = (
 				DC9CE2CA141015FC00E92491 /* idn-int.h */,
-				DC9CE2CB141015FC00E92491 /* libidn-1.15.tar.gz */,
 				DC9CE2CC141015FC00E92491 /* libidn.a */,
 				DC9CE2CD141015FC00E92491 /* stringprep.h */,
 			);
@@ -497,7 +494,6 @@
 				DC9CE25D1410159B00E92491 /* InfoPlist.strings in Resources */,
 				DC9CE2661410159B00E92491 /* MainWindow.xib in Resources */,
 				DC9CE26C1410159B00E92491 /* AutoTimeTestViewController.xib in Resources */,
-				DC9CE2D8141015FC00E92491 /* libidn-1.15.tar.gz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
