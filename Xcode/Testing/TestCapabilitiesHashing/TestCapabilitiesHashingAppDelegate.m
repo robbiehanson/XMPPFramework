@@ -155,7 +155,7 @@
 {
 	// IPHONE TEST
 	
-	XMPPCapabilitiesCoreDataStorage *storage = [[[XMPPCapabilitiesCoreDataStorage alloc] init] autorelease];
+	XMPPCapabilitiesCoreDataStorage *storage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
 	capabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:storage];
 	
 	[self test1];

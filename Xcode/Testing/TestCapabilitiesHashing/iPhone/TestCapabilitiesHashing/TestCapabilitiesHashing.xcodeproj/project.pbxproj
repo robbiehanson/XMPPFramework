@@ -15,6 +15,10 @@
 		2899E5220DE3E06400AC0155 /* TestCapabilitiesHashingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* TestCapabilitiesHashingViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* TestCapabilitiesHashingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* TestCapabilitiesHashingViewController.m */; };
+		56F8385F14C7962300AF62B3 /* RFImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8385714C7962300AF62B3 /* RFImageToDataTransformer.m */; };
+		56F8386014C7962300AF62B3 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8385914C7962300AF62B3 /* XMPPDigestAuthentication.m */; };
+		56F8386114C7962300AF62B3 /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8385B14C7962300AF62B3 /* XMPPIDTracker.m */; };
+		56F8386214C7962300AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8385E14C7962300AF62B3 /* XMPPXFacebookPlatformAuthentication.m */; };
 		DC3731EF139F09CB00A8407D /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731EA139F09CB00A8407D /* NSData+XMPP.m */; };
 		DC3731F0139F09CB00A8407D /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731EC139F09CB00A8407D /* NSNumber+XMPP.m */; };
 		DC3731F1139F09CB00A8407D /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731EE139F09CB00A8407D /* NSXMLElement+XMPP.m */; };
@@ -26,7 +30,7 @@
 		DCC0C3361303495900EC45D2 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C3301303495900EC45D2 /* DDFileLogger.m */; };
 		DCC0C3371303495900EC45D2 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C3321303495900EC45D2 /* DDLog.m */; };
 		DCC0C3381303495900EC45D2 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C3341303495900EC45D2 /* DDTTYLogger.m */; };
-		DCC0C33B1303496E00EC45D2 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C33A1303496E00EC45D2 /* GCDAsyncSocket.m */; };
+		DCC0C33B1303496E00EC45D2 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C33A1303496E00EC45D2 /* GCDAsyncSocket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		DCC0C348130349A600EC45D2 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C341130349A600EC45D2 /* DDList.m */; };
 		DCC0C349130349A600EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C343130349A600EC45D2 /* GCDMulticastDelegate.m */; };
 		DCC0C34A130349A600EC45D2 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C345130349A600EC45D2 /* LibIDN.m */; };
@@ -65,6 +69,15 @@
 		28D7ACF70DDB3853001CB0EB /* TestCapabilitiesHashingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCapabilitiesHashingViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* TestCapabilitiesHashing_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCapabilitiesHashing_Prefix.pch; sourceTree = "<group>"; };
+		56F8385614C7962300AF62B3 /* RFImageToDataTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RFImageToDataTransformer.h; path = ../../../../../Utilities/RFImageToDataTransformer.h; sourceTree = "<group>"; };
+		56F8385714C7962300AF62B3 /* RFImageToDataTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RFImageToDataTransformer.m; path = ../../../../../Utilities/RFImageToDataTransformer.m; sourceTree = "<group>"; };
+		56F8385814C7962300AF62B3 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPDigestAuthentication.h; path = ../../../../../Utilities/XMPPDigestAuthentication.h; sourceTree = "<group>"; };
+		56F8385914C7962300AF62B3 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDigestAuthentication.m; path = ../../../../../Utilities/XMPPDigestAuthentication.m; sourceTree = "<group>"; };
+		56F8385A14C7962300AF62B3 /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPIDTracker.h; path = ../../../../../Utilities/XMPPIDTracker.h; sourceTree = "<group>"; };
+		56F8385B14C7962300AF62B3 /* XMPPIDTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPIDTracker.m; path = ../../../../../Utilities/XMPPIDTracker.m; sourceTree = "<group>"; };
+		56F8385C14C7962300AF62B3 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSASLAuthentication.h; path = ../../../../../Utilities/XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		56F8385D14C7962300AF62B3 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPXFacebookPlatformAuthentication.h; path = ../../../../../Utilities/XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		56F8385E14C7962300AF62B3 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPXFacebookPlatformAuthentication.m; path = ../../../../../Utilities/XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TestCapabilitiesHashing-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TestCapabilitiesHashing-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		DC3731E9139F09CB00A8407D /* NSData+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSData+XMPP.h"; path = "../../../../../Categories/NSData+XMPP.h"; sourceTree = "<group>"; };
 		DC3731EA139F09CB00A8407D /* NSData+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+XMPP.m"; path = "../../../../../Categories/NSData+XMPP.m"; sourceTree = "<group>"; };
@@ -330,6 +343,15 @@
 		DCC0C33F1303499300EC45D2 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				56F8385614C7962300AF62B3 /* RFImageToDataTransformer.h */,
+				56F8385714C7962300AF62B3 /* RFImageToDataTransformer.m */,
+				56F8385814C7962300AF62B3 /* XMPPDigestAuthentication.h */,
+				56F8385914C7962300AF62B3 /* XMPPDigestAuthentication.m */,
+				56F8385A14C7962300AF62B3 /* XMPPIDTracker.h */,
+				56F8385B14C7962300AF62B3 /* XMPPIDTracker.m */,
+				56F8385C14C7962300AF62B3 /* XMPPSASLAuthentication.h */,
+				56F8385D14C7962300AF62B3 /* XMPPXFacebookPlatformAuthentication.h */,
+				56F8385E14C7962300AF62B3 /* XMPPXFacebookPlatformAuthentication.m */,
 				DCC0C344130349A600EC45D2 /* LibIDN.h */,
 				DCC0C345130349A600EC45D2 /* LibIDN.m */,
 				DCC0C342130349A600EC45D2 /* GCDMulticastDelegate.h */,
@@ -506,6 +528,10 @@
 				DC3731EF139F09CB00A8407D /* NSData+XMPP.m in Sources */,
 				DC3731F0139F09CB00A8407D /* NSNumber+XMPP.m in Sources */,
 				DC3731F1139F09CB00A8407D /* NSXMLElement+XMPP.m in Sources */,
+				56F8385F14C7962300AF62B3 /* RFImageToDataTransformer.m in Sources */,
+				56F8386014C7962300AF62B3 /* XMPPDigestAuthentication.m in Sources */,
+				56F8386114C7962300AF62B3 /* XMPPIDTracker.m in Sources */,
+				56F8386214C7962300AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -516,6 +542,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -534,6 +561,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TestCapabilitiesHashing_Prefix.pch;
