@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:TestIDTracker/TestIDTracker.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:TestElementReceipt/TestElementReceipt.xcodeproj">
    </FileRef>
    <FileRef
