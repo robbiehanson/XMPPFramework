@@ -34,7 +34,7 @@
 		DC41739B13F1D37300ED8D43 /* RFImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41736713F1D37300ED8D43 /* RFImageToDataTransformer.m */; };
 		DC41739C13F1D37300ED8D43 /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41736913F1D37300ED8D43 /* XMPPIDTracker.m */; };
 		DC41739D13F1D37300ED8D43 /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41736B13F1D37300ED8D43 /* XMPPSRVResolver.m */; };
-		DC41739E13F1D37300ED8D43 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41736F13F1D37300ED8D43 /* GCDAsyncSocket.m */; };
+		DC41739E13F1D37300ED8D43 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41736F13F1D37300ED8D43 /* GCDAsyncSocket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		DC41739F13F1D37300ED8D43 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41737213F1D37300ED8D43 /* DDAbstractDatabaseLogger.m */; };
 		DC4173A013F1D37300ED8D43 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41737413F1D37300ED8D43 /* DDASLLogger.m */; };
 		DC4173A113F1D37300ED8D43 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC41737613F1D37300ED8D43 /* DDFileLogger.m */; };
@@ -569,6 +569,7 @@
 		DC41734113F1D34900ED8D43 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AutoTimeTest/AutoTimeTest-Prefix.pch";
 				INFOPLIST_FILE = "AutoTimeTest/AutoTimeTest-Info.plist";
@@ -584,6 +585,7 @@
 		DC41734213F1D34900ED8D43 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AutoTimeTest/AutoTimeTest-Prefix.pch";
 				INFOPLIST_FILE = "AutoTimeTest/AutoTimeTest-Info.plist";
