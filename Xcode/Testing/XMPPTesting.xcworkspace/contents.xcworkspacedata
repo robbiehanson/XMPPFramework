@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:TestCapabilitiesHashing/iPhone/TestCapabilitiesHashing/TestCapabilitiesHashing.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:TestCapabilitiesHashing/Mac/TestCapabilitiesHashing/TestCapabilitiesHashing.xcodeproj">
    </FileRef>
    <FileRef
