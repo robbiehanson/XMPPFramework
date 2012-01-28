@@ -42,11 +42,11 @@
 // The thread-safety comes from the fact that the copied data will not be altered,
 // so it can therefore be used from multiple threads/queues if needed.
 
-- (id <XMPPUser>)myUser;
-- (id <XMPPResource>)myResource;
+- (XMPPUserMemoryStorage *)myUser;
+- (XMPPResourceMemoryStorage *)myResource;
 
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid;
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
+- (XMPPUserMemoryStorage *)userForJID:(XMPPJID *)jid;
+- (XMPPResourceMemoryStorage *)resourceForJID:(XMPPJID *)jid;
 
 - (NSArray *)sortedUsersByName;
 - (NSArray *)sortedUsersByAvailabilityName;

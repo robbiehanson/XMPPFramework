@@ -15,6 +15,16 @@
 
 @implementation XMPPUserMemoryStorage
 
+- (void)commonInit
+{
+	// This method is here to more easily support subclassing.
+	// That way subclasses can optionally override just commonInit, instead of each individual init method.
+	// 
+	// If you override this method, don't forget to invoke [super commonInit];
+	
+	resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+}
+
 - (id)initWithJID:(XMPPJID *)aJid
 {
 	if ((self = [super init]))
@@ -23,7 +33,7 @@
 		
 		itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
 		
-		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+		[self commonInit];
 	}
 	return self;
 }
@@ -37,7 +47,7 @@
 		
 		itemAttributes = [item attributesAsDictionary];
 		
-		resources = [[NSMutableDictionary alloc] initWithCapacity:1];
+		[self commonInit];
 	}
 	return self;
 }
@@ -211,11 +221,36 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Helper Methods
+#pragma mark Hooks
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)didAddResource:(XMPPResourceMemoryStorage *)resource withPresence:(XMPPPresence *)presence
+{
+	// Override / customization hook
+}
+
+- (void)willUpdateResource:(XMPPResourceMemoryStorage *)resource withPresence:(XMPPPresence *)presence
+{
+	// Override / customization hook
+}
+
+- (void)didUpdateResource:(XMPPResourceMemoryStorage *)resource withPresence:(XMPPPresence *)presence
+{
+	// Override / customization hook
+}
+
+- (void)didRemoveResource:(XMPPResourceMemoryStorage *)resource withPresence:(XMPPPresence *)presence
+{
+	// Override / customization hook
+}
 
 - (void)recalculatePrimaryResource
 {
+	// Override me to customize how the primary resource is chosen.
+	// 
+	// This method uses the [XMPPResourceMemoryStorage compare:] method to sort the resources,
+	// and properly supports negative (bot) priorities.
+	
 	primaryResource = nil;
 	
 	NSArray *sortedResources = [[self allResources] sortedArrayUsingSelector:@selector(compare:)];
@@ -269,6 +304,8 @@
 		if (resource)
 		{
 			[resources removeObjectForKey:key];
+			[self didRemoveResource:resource withPresence:presence];
+			
 			result = XMPP_USER_REMOVED_RESOURCE;
 		}
 	}
@@ -277,7 +314,10 @@
 		resource = [resources objectForKey:key];
 		if (resource)
 		{
+			[self willUpdateResource:resource withPresence:presence];
 			[resource updateWithPresence:presence];
+			[self didUpdateResource:resource withPresence:presence];
+			
 			result = XMPP_USER_UPDATED_RESOURCE;
 		}
 		else
@@ -285,6 +325,8 @@
 			resource = (XMPPResourceMemoryStorage *)[[resourceClass alloc] initWithPresence:presence];
 			
 			[resources setObject:resource forKey:key];
+			[self didAddResource:resource withPresence:presence];
+			
 			result = XMPP_USER_ADDED_RESOURCE;
 		}
 	}

@@ -113,7 +113,7 @@
 	return (GCDMulticastDelegate <XMPPRosterMemoryStorageDelegate> *)[parent multicastDelegate];
 }
 
-- (id <XMPPUser>)_userForJID:(XMPPJID *)jid
+- (XMPPUserMemoryStorage *)_userForJID:(XMPPJID *)jid
 {
 	AssertPrivateQueue();
 	
@@ -135,12 +135,12 @@
 	return nil;
 }
 
-- (id <XMPPResource>)_resourceForJID:(XMPPJID *)jid
+- (XMPPResourceMemoryStorage *)_resourceForJID:(XMPPJID *)jid
 {
 	AssertPrivateQueue();
 	
-	XMPPUserMemoryStorage *user = (XMPPUserMemoryStorage *)[self _userForJID:jid];
-	return [user resourceForJID:jid];
+	XMPPUserMemoryStorage *user = [self _userForJID:jid];
+	return (XMPPResourceMemoryStorage *)[user resourceForJID:jid];
 }
 
 - (NSArray *)_unsortedUsers
@@ -255,7 +255,7 @@
 #pragma mark Roster Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id <XMPPUser>)myUser
+- (XMPPUserMemoryStorage *)myUser
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
@@ -281,7 +281,7 @@
 	}
 }
 
-- (id <XMPPResource>)myResource
+- (XMPPResourceMemoryStorage *)myResource
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
@@ -293,7 +293,7 @@
 	
 	if (dispatch_get_current_queue() == parentQueue)
 	{
-		return [myUser resourceForJID:myJID];
+		return (XMPPResourceMemoryStorage *)[myUser resourceForJID:myJID];
 	}
 	else
 	{
@@ -308,7 +308,7 @@
 	}
 }
 
-- (id <XMPPUser>)userForJID:(XMPPJID *)jid
+- (XMPPUserMemoryStorage *)userForJID:(XMPPJID *)jid
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
@@ -328,7 +328,7 @@
 		
 		dispatch_sync(parentQueue, ^{ @autoreleasepool {
 			
-			XMPPUserMemoryStorage *user = (XMPPUserMemoryStorage *)[self _userForJID:jid];
+			XMPPUserMemoryStorage *user = [self _userForJID:jid];
 			result = [user copy];
 			
 		}});
@@ -337,7 +337,7 @@
 	}
 }
 
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid
+- (XMPPResourceMemoryStorage *)resourceForJID:(XMPPJID *)jid
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
@@ -357,7 +357,7 @@
 		
 		dispatch_sync(parentQueue, ^{ @autoreleasepool {
 			
-			XMPPResourceMemoryStorage *resource = (XMPPResourceMemoryStorage *)[self _resourceForJID:jid];
+			XMPPResourceMemoryStorage *resource = [self _resourceForJID:jid];
 			result = [resource copy];
 			
 		}});
@@ -701,21 +701,31 @@
 	XMPPJID *jidKey = [[presence from] bareJID];
 	
 	user = [roster objectForKey:jidKey];
-	if (user)
+	if (user == nil)
 	{
-		change = [user updateWithPresence:presence resourceClass:self.resourceClass andGetResource:&resource];
-	}
-	else
-	{
-		// Not a presence element for anyone in our roster.
-		// Is it a presence element for our user (either our resource or another resource)?
+		// Not a presence element from anyone in our roster (that we know of).
 		
 		if ([[myJID bareJID] isEqualToJID:jidKey])
 		{
+			// It's a presence element for our user, either our resource or another resource.
+			
 			user = myUser;
-			change = [myUser updateWithPresence:presence resourceClass:self.resourceClass andGetResource:&resource];
+		}
+		else
+		{
+			// Unknown user (this is the first time we've encountered them).
+			// This happens if the roster is in rosterlessOperation mode.
+			
+			user = (XMPPUserMemoryStorage *)[[self.userClass alloc] initWithJID:jidKey];
+			
+			[roster setObject:user forKey:jidKey];
+			
+			[[self multicastDelegate] xmppRoster:self didAddUser:user];
+			[[self multicastDelegate] xmppRosterDidChange:self];
 		}
 	}
+	
+	change = [user updateWithPresence:presence resourceClass:self.resourceClass andGetResource:&resource];
 	
 	XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
 	

@@ -18,6 +18,8 @@
 
 @interface XMPPUserMemoryStorage ()
 
+- (void)commonInit;
+
 - (id)initWithJID:(XMPPJID *)aJid;
 - (id)initWithItem:(NSXMLElement *)item;
 

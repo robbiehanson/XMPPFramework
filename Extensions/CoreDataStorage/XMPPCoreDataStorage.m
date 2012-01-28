@@ -308,6 +308,8 @@ static NSMutableSet *databaseFileNames;
 
 - (XMPPJID *)myJIDForXMPPStream:(XMPPStream *)stream
 {
+	if (stream == nil) return nil;
+	
 	__block XMPPJID *result = nil;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {

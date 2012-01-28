@@ -14,6 +14,15 @@
 	NSDate *presenceDate;
 }
 
-// See the XMPPResource protocol for available methods.
+/* From the XMPPResource protocol
+
+- (XMPPJID *)jid;
+- (XMPPPresence *)presence;
+
+- (NSDate *)presenceDate;
+
+- (NSComparisonResult)compare:(id <XMPPResource>)another;
+
+*/
 
 @end

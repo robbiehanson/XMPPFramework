@@ -42,6 +42,10 @@
 @property (nonatomic, strong) NSSet * resources;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withJID:(XMPPJID *)jid
+                  streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                           withItem:(NSXMLElement *)item
                   streamBareJidStr:(NSString *)streamBareJidStr;
 

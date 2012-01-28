@@ -19,6 +19,7 @@ enum XMPPRosterConfig
 {
 	kAutoFetchRoster = 1 << 0,                   // If set, we automatically fetch roster after authentication
 	kAutoAcceptKnownPresenceSubscriptionRequests = 1 << 1, // See big description in header file... :D
+	kRosterlessOperation = 1 << 2,
 };
 enum XMPPRosterFlags
 {
@@ -185,6 +186,38 @@ enum XMPPRosterFlags
 			config |= kAutoAcceptKnownPresenceSubscriptionRequests;
 		else
 			config &= ~kAutoAcceptKnownPresenceSubscriptionRequests;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)allowRosterlessOperation
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		result = (config & kRosterlessOperation) ? YES : NO;
+	};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAllowRosterlessOperation:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		
+		if (flag)
+			config |= kRosterlessOperation;
+		else
+			config &= ~kRosterlessOperation;
 	};
 	
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -570,7 +603,7 @@ enum XMPPRosterFlags
 	
 	XMPPLogTrace();
 	
-	if (![self hasRoster])
+	if (![self hasRoster] && ![self allowRosterlessOperation])
 	{
 		// We received a presence notification,
 		// but we don't have a roster to apply it to yet.
