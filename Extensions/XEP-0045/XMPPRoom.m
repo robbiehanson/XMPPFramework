@@ -13,11 +13,6 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-static NSString *const XMPPMUCNamespace      = @"http://jabber.org/protocol/muc";
-static NSString *const XMPPMUCUserNamespace  = @"http://jabber.org/protocol/muc#user";
-static NSString *const XMPPMUCAdminNamespace = @"http://jabber.org/protocol/muc#admin";
-static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#owner";
-
 enum XMPPRoomState
 {
 	kXMPPRoomStateNone        = 0,
@@ -78,7 +73,7 @@ enum XMPPRoomState
 			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
 		}
 		
-		roomJID = aRoomJID;
+		roomJID = [aRoomJID bareJID];
 	}
 	return self;
 }
@@ -203,7 +198,7 @@ enum XMPPRoomState
 
 - (BOOL)isJoined
 {
-	__block BOOL result;
+	__block BOOL result = 0;
 	
 	dispatch_block_t block = ^{
 		result = (state & kXMPPRoomStateJoined) ? YES : NO;
@@ -396,9 +391,11 @@ enum XMPPRoomState
 	
 	if ([[iq type] isEqualToString:@"result"])
 	{
+		[multicastDelegate xmppRoom:self didConfigure:iq];
 	}
 	else
 	{
+		[multicastDelegate xmppRoom:self didNotConfigure:iq];
 	}
 }
 
@@ -410,6 +407,8 @@ enum XMPPRoomState
 		
 		if (roomConfigForm)
 		{
+			// Explicit configuration using given form.
+			// 
 			// <iq type='set'
 			//       id='create2'
 			//       to='coven@chat.shakespeare.lit'>
@@ -448,6 +447,8 @@ enum XMPPRoomState
 		}
 		else
 		{
+			// Default room configuration (as per server settings).
+			// 
 			// <iq type='set'
 			//     from='crone1@shakespeare.lit/desktop'
 			//       id='create1'
@@ -682,7 +683,7 @@ enum XMPPRoomState
 {
 	if ([[iq type] isEqualToString:@"result"])
 	{
-		[multicastDelegate xmppRoomDidEditPrivileges:self];
+		[multicastDelegate xmppRoom:self didEditPrivileges:iq];
 	}
 	else
 	{
@@ -690,8 +691,10 @@ enum XMPPRoomState
 	}
 }
 
-- (void)editRoomPrivileges:(NSArray *)items
+- (NSString *)editRoomPrivileges:(NSArray *)items
 {
+	NSString *iqID = [xmppStream generateUUID];
+	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
@@ -711,8 +714,6 @@ enum XMPPRoomState
 			[query addChild:item];
 		}
 		
-		NSString *iqID = [xmppStream generateUUID];
-		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:roomJID elementID:iqID child:query];
 		
 		[xmppStream sendElement:iq];
@@ -728,6 +729,8 @@ enum XMPPRoomState
 		block();
 	else
 		dispatch_async(moduleQueue, block);
+	
+	return iqID;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -760,13 +763,47 @@ enum XMPPRoomState
 		dispatch_async(moduleQueue, block);
 }
 
+- (void)handleDestroyRoomResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+	XMPPLogTrace();
+	
+	if ([[iq type] isEqualToString:@"result"])
+	{
+		[multicastDelegate xmppRoomDidDestroy:self];
+	}
+	else
+	{
+		// Todo...
+	}
+}
+
 - (void)destoryRoom
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
 		
-		// Todo...
+		// <iq type="set" to="roomName" id="abc123">
+		//   <query xmlns="http://jabber.org/protocol/muc#owner">
+		//     <destroy/>
+		//   </query>
+		// </iq>
+		
+		NSXMLElement *destroy = [NSXMLElement elementWithName:@"destroy"];
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+		[query addChild:destroy];
+		
+		NSString *iqID = [xmppStream generateUUID];
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:roomJID elementID:iqID child:query];
+		
+		[xmppStream sendElement:iq];
+		
+		[responseTracker addID:iqID
+			                target:self
+			              selector:@selector(handleDestroyRoomResponse:withInfo:)
+			               timeout:60.0];
 		
 	}};
 	

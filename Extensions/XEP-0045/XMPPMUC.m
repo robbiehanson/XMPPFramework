@@ -97,6 +97,78 @@
 	}
 }
 
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
+{
+	// Examples from XEP-0045:
+	// 
+	// 
+	// Example 124. Room Sends Invitation to New Member:
+	// 
+	// <message from='darkcave@chat.shakespeare.lit' to='hecate@shakespeare.lit'>
+	//   <x xmlns='http://jabber.org/protocol/muc#user'>
+	//     <invite from='bard@shakespeare.lit'/>
+	//     <password>cauldronburn</password>
+	//   </x>
+	// </message>
+	// 
+	// 
+	// Example 125. Service Returns Error on Attempt by Mere Member to Invite Others to a Members-Only Room
+	// 
+	// <message from='darkcave@chat.shakespeare.lit' to='hag66@shakespeare.lit/pda' type='error'>
+	//   <x xmlns='http://jabber.org/protocol/muc#user'>
+	//     <invite to='hecate@shakespeare.lit'>
+	//       <reason>
+	//         Hey Hecate, this is the place for all good witches!
+	//       </reason>
+	//     </invite>
+	//   </x>
+	//   <error type='auth'>
+	//     <forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+	//   </error>
+	// </message>
+	// 
+	// 
+	// Example 50. Room Informs Invitor that Invitation Was Declined
+	// 
+	// <message from='darkcave@chat.shakespeare.lit' to='crone1@shakespeare.lit/desktop'>
+	//   <x xmlns='http://jabber.org/protocol/muc#user'>
+	//     <decline from='hecate@shakespeare.lit'>
+	//       <reason>
+	//         Sorry, I'm too busy right now.
+	//       </reason>
+	//     </decline>
+	//   </x>
+	// </message>
+	// 
+	// 
+	// Examples from XEP-0249:
+	// 
+	// 
+	// Example 1. A direct invitation
+	// 
+	// <message from='crone1@shakespeare.lit/desktop' to='hecate@shakespeare.lit'>
+	//   <x xmlns='jabber:x:conference'
+	//      jid='darkcave@macbeth.shakespeare.lit'
+	//      password='cauldronburn'
+	//      reason='Hey Hecate, this is the place for all good witches!'/>
+	// </message>
+	
+	NSXMLElement * x = [message elementForName:@"x" xmlns:XMPPMUCUserNamespace];
+	NSXMLElement * invite  = [x elementForName:@"invite"];
+	NSXMLElement * decline = [x elementForName:@"decline"];
+	
+	NSXMLElement * directInvite = [message elementForName:@"x" xmlns:@"jabber:x:conference"];
+	
+	if (invite || directInvite)
+	{
+		[multicastDelegate xmppMUC:self didReceiveRoomInvitation:message];
+	}
+	else if (decline)
+	{
+		[multicastDelegate xmppMUC:self didReceiveRoomInvitationDecline:message];
+	}
+}
+
 #ifdef _XMPP_CAPABILITIES_H
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for MUC.

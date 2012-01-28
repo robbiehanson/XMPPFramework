@@ -39,6 +39,9 @@
  
 */
 
+@property (strong, readwrite) NSString * messageEntityName;
+@property (strong, readwrite) NSString * occupantEntityName;
+
 /**
  * It is likely you don't want the message history to persist forever.
  * Doing so would allow the database to grow infinitely large over time.
@@ -67,18 +70,46 @@
 - (void)resumeOldMessageDeletionForRoom:(XMPPJID *)roomJID;
 
 /**
+ * Convenience method to get the message/occupant entity description.
+ * 
+ * @see messageEntityName
+ * @see occupantEntityName
+**/
+- (NSEntityDescription *)messageEntity:(NSManagedObjectContext *)moc;
+- (NSEntityDescription *)occupantEntity:(NSManagedObjectContext *)moc;
+
+/**
  * Returns the timestamp of the most recent message stored in the database for the given room.
  * This may be used when requesting the message history from the server,
  * to prevent redownloading messages you already have.
  * 
- * Keep in mind that the 
+ * @param roomJID    - The JID of the room (a bare JID)
+ * 
+ * @param xmppStream - This class can support multiple concurrent xmppStreams.
+ *                     Optionally pass the xmppStream the room applies to.
+ *                     If you're using this claass with a single xmppStream, you can pass nil.
+ *
+ * @param moc        - The managedObjectContext to use when doing the lookups.
+ *                     This should match the thread you're currently using.
 **/
-- (NSDate *)mostRecentMessageTimestampForRoom:(XMPPJID *)roomJID;
-- (NSDate *)mostRecentMessageTimestampForRoom:(XMPPJID *)roomJID stream:(XMPPStream *)stream;
+- (NSDate *)mostRecentMessageTimestampForRoom:(XMPPJID *)roomJID
+                                       stream:(XMPPStream *)xmppStream
+                                    inContext:(NSManagedObjectContext *)moc;
 
 /**
- * Returns the occupant for the given jid.
+ * Returns the occupant for the given full jid.
+ * 
+ * @param jid        - The full jid of the room occupant (including resource).
+ * 
+ * @param xmppStream - This class can support multiple concurrent xmppStreams.
+ *                     Optionally pass the xmppStream the room applies to.
+ *                     If you're using this claass with a single xmppStream, you can pass nil.
+ * 
+ * @param moc        - The managedObjectContext to use when doing the lookups.
+ *                     This should match the thread you're currently using.
 **/
-- (XMPPRoomOccupantCoreDataStorageObject *)occupantForJID:(XMPPJID *)jid inContext:(NSManagedObjectContext *)moc;
+- (XMPPRoomOccupantCoreDataStorageObject *)occupantForJID:(XMPPJID *)jid
+                                                   stream:(XMPPStream *)xmppStream
+                                                inContext:(NSManagedObjectContext *)moc;
 
 @end

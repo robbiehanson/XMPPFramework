@@ -37,6 +37,8 @@
 @dynamic isFromMe;
 @dynamic fromMe;
 
+@dynamic type;
+
 @dynamic streamBareJidStr;
 
 #pragma mark Transient roomJID

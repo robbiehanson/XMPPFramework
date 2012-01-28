@@ -113,6 +113,24 @@
 @property (assign) BOOL autoAcceptKnownPresenceSubscriptionRequests;
 
 /**
+ * Allows the roster module to function without ever fetching the full roster.
+ * This is helpful for situations in which the roster is very big, yet the application only cares about online users.
+ * 
+ * Typically, the roster module creates users based on the fetched full roster,
+ * and then creates resources based on received presence.
+ * 
+ * In this mode, the roster module will automatically create a user once a presence is received,
+ * if the user has never been seen before.
+ * 
+ * If allowRosterlessOperation is enabled, and autoFetchRoster is disabled (and roster is never manually fetched),
+ * then XMPPUser's will be missing certain information that is only available via a roster fetch
+ * (such as nickname, group, and subscription information).
+ * 
+ * The default value is NO.
+**/
+@property (assign) BOOL allowRosterlessOperation;
+
+/**
  * Manually fetch the roster from the server.
  * Useful if you disable autoFetchRoster.
 **/
@@ -190,8 +208,8 @@
 // Rember, XMPPRoster is just the scaffolding for a complete and customizable roster solution.
 // The roster storage classes hold the majority of the magic.
 // 
-// And since you're free to plug-n-play storage classes, and customize them as much as you want,
-// this is where you can really tailor the xmpp stack to meet the needs of your application.
+// And since you're free to plug-n-play storage classes, and customize them as much as you want.
+// This is where you can really tailor the xmpp stack to meet the needs of your application.
 // 
 // 
 

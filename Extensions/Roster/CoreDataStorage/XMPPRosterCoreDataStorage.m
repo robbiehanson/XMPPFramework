@@ -361,14 +361,20 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		XMPPJID *jid = [presence from];
 		NSManagedObjectContext *moc = [self managedObjectContext];
 		
+		NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+		
 		XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 		
-		if (user)
+		if (user == nil)
 		{
-			NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+			// This may happen if the roster is in rosterlessOperation mode.
 			
-			[user updateWithPresence:presence streamBareJidStr:streamBareJidStr];
+			user = [XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
+			                                                           withJID:[presence from]
+			                                                  streamBareJidStr:streamBareJidStr];
 		}
+		
+		[user updateWithPresence:presence streamBareJidStr:streamBareJidStr];
 	}];
 }
 

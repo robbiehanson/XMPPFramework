@@ -30,6 +30,15 @@
 @property (nonatomic, strong) NSNumber * fromMe;
 
 /**
+ * The 'type' property can be used to inject event messages.
+ * For example: "JohnDoe entered the room".
+ * 
+ * You can define your own types to suit your needs.
+ * All normal messages will have a type of zero.
+**/
+@property (nonatomic, strong) NSNumber * type;
+
+/**
  * If a single instance of XMPPRoomCoreDataStorage is shared between multiple xmppStream's,
  * this may be needed to distinguish between the streams.
 **/

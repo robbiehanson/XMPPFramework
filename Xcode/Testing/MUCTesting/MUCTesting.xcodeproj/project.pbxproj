@@ -515,6 +515,9 @@
 /* Begin PBXProject section */
 		DCC88FA313EB5CF500CDAB56 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = DCC88FA613EB5CF500CDAB56 /* Build configuration list for PBXProject "MUCTesting" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -721,6 +724,7 @@
 				DCC88FCC13EB5CF600CDAB56 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

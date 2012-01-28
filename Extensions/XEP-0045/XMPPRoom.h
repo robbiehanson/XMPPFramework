@@ -7,6 +7,11 @@
 @protocol XMPPRoomStorage;
 @protocol XMPPRoomDelegate;
 
+static NSString *const XMPPMUCNamespace      = @"http://jabber.org/protocol/muc";
+static NSString *const XMPPMUCUserNamespace  = @"http://jabber.org/protocol/muc#user";
+static NSString *const XMPPMUCAdminNamespace = @"http://jabber.org/protocol/muc#admin";
+static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#owner";
+
 
 @interface XMPPRoom : XMPPModule
 {
@@ -50,6 +55,8 @@
  
 */
 
+#pragma mark Properties
+
 @property (readonly) id <XMPPRoomStorage> xmppRoomStorage;
 
 @property (readonly) XMPPJID * roomJID;     // E.g. xmpp-development@conference.deusty.com
@@ -60,6 +67,8 @@
 @property (readonly) NSString *roomSubject;
 
 @property (readonly) BOOL isJoined;
+
+#pragma mark Room Lifecycle
 
 /**
  * Sends a presence element to the join room, and indicating desire to create the room if it doesn't already exist.
@@ -101,12 +110,16 @@
 - (void)leaveRoom;
 - (void)destoryRoom;
 
+#pragma mark Room Interaction
+
 - (void)chageNickname:(NSString *)newNickname;
 - (void)changeRoomSubject:(NSString *)newRoomSubject;
 
 - (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)invitationMessage;
 
 - (void)sendMessage:(NSString *)msg;
+
+#pragma mark Room Moderation
 
 - (void)fetchBanList;
 - (void)fetchMembersList;
@@ -125,8 +138,14 @@
  * @see itemWithRole:jid:
  * 
  * The authenticated user must be an admin or owner of the room, or the server will deny the request.
+ * 
+ * To add a member: <item 
+ * 
+ * 
+ * @return The id of the XMPPIQ that was sent.
+ *         This may be used to match multiple change requests with the responses in xmppRoom:didEditPrivileges:.
 **/
-- (void)editRoomPrivileges:(NSArray *)items;
+- (NSString *)editRoomPrivileges:(NSArray *)items;
 
 + (NSXMLElement *)itemWithAffiliation:(NSString *)affiliation jid:(XMPPJID *)jid;
 + (NSXMLElement *)itemWithRole:(NSString *)role jid:(XMPPJID *)jid;
@@ -238,10 +257,14 @@
 - (void)xmppRoom:(XMPPRoom *)sender didFetchConfigurationForm:(NSXMLElement *)configForm;
 
 - (void)xmppRoom:(XMPPRoom *)sender willSendConfiguration:(XMPPIQ *)roomConfigForm;
-- (void)xmppRoomDidConfigure:(XMPPRoom *)sender;
+
+- (void)xmppRoom:(XMPPRoom *)sender didConfigure:(XMPPIQ *)iqResult;
+- (void)xmppRoom:(XMPPRoom *)sender didNotConfigure:(XMPPIQ *)iqResult;
 
 - (void)xmppRoomDidJoin:(XMPPRoom *)sender;
 - (void)xmppRoomDidLeave:(XMPPRoom *)sender;
+
+- (void)xmppRoomDidDestroy:(XMPPRoom *)sender;
 
 - (void)xmppRoom:(XMPPRoom *)sender occupantDidJoin:(XMPPJID *)occupantJID withPresence:(XMPPPresence *)presence;
 - (void)xmppRoom:(XMPPRoom *)sender occupantDidLeave:(XMPPJID *)occupantJID withPresence:(XMPPPresence *)presence;
@@ -262,7 +285,7 @@
 - (void)xmppRoom:(XMPPRoom *)sender didFetchModeratorsList:(NSArray *)items;
 - (void)xmppRoom:(XMPPRoom *)sender didNotFetchModeratorsList:(XMPPIQ *)iqError;
 
-- (void)xmppRoomDidEditPrivileges:(XMPPRoom *)sender;
+- (void)xmppRoom:(XMPPRoom *)sender didEditPrivileges:(XMPPIQ *)iqResult;
 - (void)xmppRoom:(XMPPRoom *)sender didNotEditPrivileges:(XMPPIQ *)iqError;
 
 @end
