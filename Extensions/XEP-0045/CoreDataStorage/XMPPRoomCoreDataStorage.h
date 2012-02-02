@@ -39,6 +39,12 @@
  
 */
 
+/**
+ * You may choose to extend this class, and/or the message/occupant classes for customized functionality.
+ * These properties allow for such customization.
+ * 
+ * You must set your desired entity names, if different from default, before you begin using the storage class.
+**/
 @property (strong, readwrite) NSString * messageEntityName;
 @property (strong, readwrite) NSString * occupantEntityName;
 

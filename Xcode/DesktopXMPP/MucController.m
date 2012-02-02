@@ -175,7 +175,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-              occupantDidJoin:(XMPPRoomOccupantMemoryStorage *)occupant
+              occupantDidJoin:(XMPPRoomOccupantMemoryStorageObject *)occupant
                       atIndex:(NSUInteger)index
                       inArray:(NSArray *)allOccupants {
 	
@@ -192,7 +192,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-             occupantDidLeave:(XMPPRoomOccupantMemoryStorage *)occupant
+             occupantDidLeave:(XMPPRoomOccupantMemoryStorageObject *)occupant
                       atIndex:(NSUInteger)index
                     fromArray:(NSArray *)allOccupants {
 	
@@ -209,7 +209,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-            occupantDidUpdate:(XMPPRoomOccupantMemoryStorage *)occupant
+            occupantDidUpdate:(XMPPRoomOccupantMemoryStorageObject *)occupant
                     fromIndex:(NSUInteger)oldIndex
                       toIndex:(NSUInteger)newIndex
                       inArray:(NSArray *)allOccupants {
@@ -238,7 +238,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
 			didReceiveMessage:(XMPPRoomMessageMemoryStorage *)message
-                 fromOccupant:(XMPPRoomOccupantMemoryStorage *)occupantJID
+                 fromOccupant:(XMPPRoomOccupantMemoryStorageObject *)occupantJID
                       atIndex:(NSUInteger)index
                       inArray:(NSArray *)allMessages {
 	
