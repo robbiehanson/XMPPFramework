@@ -24,8 +24,8 @@
 		DC34A24A1484E5F1004F0A03 /* MucWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = DC34A2481484E5F1004F0A03 /* MucWindow.xib */; };
 		DC34A2501484EB7A004F0A03 /* XMPPMUC.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A24F1484EB7A004F0A03 /* XMPPMUC.m */; };
 		DC34A2571484F295004F0A03 /* XMPPRoomMemoryStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2561484F295004F0A03 /* XMPPRoomMemoryStorage.m */; };
-		DC34A25A1484F308004F0A03 /* XMPPRoomOccupantMemoryStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2591484F308004F0A03 /* XMPPRoomOccupantMemoryStorage.m */; };
-		DC34A25E148573C3004F0A03 /* XMPPRoomMessageMemoryStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A25D148573C3004F0A03 /* XMPPRoomMessageMemoryStorage.m */; };
+		DC34A25A1484F308004F0A03 /* XMPPRoomOccupantMemoryStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2591484F308004F0A03 /* XMPPRoomOccupantMemoryStorageObject.m */; };
+		DC34A25E148573C3004F0A03 /* XMPPRoomMessageMemoryStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A25D148573C3004F0A03 /* XMPPRoomMessageMemoryStorageObject.m */; };
 		DC34A26A1486BDCF004F0A03 /* SSKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2691486BDCF004F0A03 /* SSKeychain.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		DC37306E139E9ECE00A8407D /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = DC37306D139E9ECE00A8407D /* XMPPReconnect.m */; };
 		DC373088139E9EE500A8407D /* XMPPGroupCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DC373073139E9EE500A8407D /* XMPPGroupCoreDataStorageObject.m */; };
@@ -146,11 +146,11 @@
 		DC34A2511484F059004F0A03 /* XMPPRoomPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPRoomPrivate.h; sourceTree = "<group>"; };
 		DC34A2551484F295004F0A03 /* XMPPRoomMemoryStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPRoomMemoryStorage.h; path = MemoryStorage/XMPPRoomMemoryStorage.h; sourceTree = "<group>"; };
 		DC34A2561484F295004F0A03 /* XMPPRoomMemoryStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomMemoryStorage.m; path = MemoryStorage/XMPPRoomMemoryStorage.m; sourceTree = "<group>"; };
-		DC34A2581484F308004F0A03 /* XMPPRoomOccupantMemoryStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPRoomOccupantMemoryStorage.h; path = MemoryStorage/XMPPRoomOccupantMemoryStorage.h; sourceTree = "<group>"; };
-		DC34A2591484F308004F0A03 /* XMPPRoomOccupantMemoryStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomOccupantMemoryStorage.m; path = MemoryStorage/XMPPRoomOccupantMemoryStorage.m; sourceTree = "<group>"; };
+		DC34A2581484F308004F0A03 /* XMPPRoomOccupantMemoryStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; name = XMPPRoomOccupantMemoryStorageObject.h; path = MemoryStorage/XMPPRoomOccupantMemoryStorageObject.h; sourceTree = "<group>"; };
+		DC34A2591484F308004F0A03 /* XMPPRoomOccupantMemoryStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomOccupantMemoryStorageObject.m; path = MemoryStorage/XMPPRoomOccupantMemoryStorageObject.m; sourceTree = "<group>"; };
 		DC34A25B14857332004F0A03 /* XMPPRoomMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPRoomMessage.h; sourceTree = "<group>"; };
-		DC34A25C148573C3004F0A03 /* XMPPRoomMessageMemoryStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPRoomMessageMemoryStorage.h; path = MemoryStorage/XMPPRoomMessageMemoryStorage.h; sourceTree = "<group>"; };
-		DC34A25D148573C3004F0A03 /* XMPPRoomMessageMemoryStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomMessageMemoryStorage.m; path = MemoryStorage/XMPPRoomMessageMemoryStorage.m; sourceTree = "<group>"; };
+		DC34A25C148573C3004F0A03 /* XMPPRoomMessageMemoryStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; name = XMPPRoomMessageMemoryStorageObject.h; path = MemoryStorage/XMPPRoomMessageMemoryStorageObject.h; sourceTree = "<group>"; };
+		DC34A25D148573C3004F0A03 /* XMPPRoomMessageMemoryStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomMessageMemoryStorageObject.m; path = MemoryStorage/XMPPRoomMessageMemoryStorageObject.m; sourceTree = "<group>"; };
 		DC34A2681486BDCF004F0A03 /* SSKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SSKeychain.h; path = SSKeychain/SSKeychain.h; sourceTree = "<group>"; };
 		DC34A2691486BDCF004F0A03 /* SSKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SSKeychain.m; path = SSKeychain/SSKeychain.m; sourceTree = "<group>"; };
 		DC37306C139E9ECE00A8407D /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
@@ -457,10 +457,10 @@
 			children = (
 				DC34A2551484F295004F0A03 /* XMPPRoomMemoryStorage.h */,
 				DC34A2561484F295004F0A03 /* XMPPRoomMemoryStorage.m */,
-				DC34A25C148573C3004F0A03 /* XMPPRoomMessageMemoryStorage.h */,
-				DC34A25D148573C3004F0A03 /* XMPPRoomMessageMemoryStorage.m */,
-				DC34A2581484F308004F0A03 /* XMPPRoomOccupantMemoryStorage.h */,
-				DC34A2591484F308004F0A03 /* XMPPRoomOccupantMemoryStorage.m */,
+				DC34A25C148573C3004F0A03 /* XMPPRoomMessageMemoryStorageObject.h */,
+				DC34A25D148573C3004F0A03 /* XMPPRoomMessageMemoryStorageObject.m */,
+				DC34A2581484F308004F0A03 /* XMPPRoomOccupantMemoryStorageObject.h */,
+				DC34A2591484F308004F0A03 /* XMPPRoomOccupantMemoryStorageObject.m */,
 			);
 			name = MemoryStorage;
 			sourceTree = "<group>";
@@ -1071,8 +1071,8 @@
 				DC70A7AE147C626600BC8FC7 /* XMPPRoom.m in Sources */,
 				DC34A2501484EB7A004F0A03 /* XMPPMUC.m in Sources */,
 				DC34A2571484F295004F0A03 /* XMPPRoomMemoryStorage.m in Sources */,
-				DC34A25A1484F308004F0A03 /* XMPPRoomOccupantMemoryStorage.m in Sources */,
-				DC34A25E148573C3004F0A03 /* XMPPRoomMessageMemoryStorage.m in Sources */,
+				DC34A25A1484F308004F0A03 /* XMPPRoomOccupantMemoryStorageObject.m in Sources */,
+				DC34A25E148573C3004F0A03 /* XMPPRoomMessageMemoryStorageObject.m in Sources */,
 				DC34A26A1486BDCF004F0A03 /* SSKeychain.m in Sources */,
 				DCC220F51492E37C00736DC1 /* XMPPRoomCoreDataStorage.m in Sources */,
 				DCC220F91492E58200736DC1 /* XMPPRoom.xcdatamodeld in Sources */,

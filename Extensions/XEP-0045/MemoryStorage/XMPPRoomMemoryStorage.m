@@ -51,8 +51,8 @@
 		occupantsArray = [[NSMutableArray alloc] init];
 		occupantsDict  = [[NSMutableDictionary alloc] init];
 		
-		messageClass = [XMPPRoomMessageMemoryStorage class];
-		occupantClass = [XMPPRoomOccupantMemoryStorage class];
+		messageClass = [XMPPRoomMessageMemoryStorageObject class];
+		occupantClass = [XMPPRoomOccupantMemoryStorageObject class];
 	}
 	return self;
 }
@@ -127,7 +127,7 @@
 	return (GCDMulticastDelegate <XMPPRoomMemoryStorageDelegate> *)[parent multicastDelegate];
 }
 
-- (NSUInteger)insertMessage:(XMPPRoomMessageMemoryStorage *)message
+- (NSUInteger)insertMessage:(XMPPRoomMessageMemoryStorageObject *)message
 {
 	NSUInteger count = [messages count];
 	
@@ -139,7 +139,7 @@
 	
 	// Shortcut - Most (if not all) messages are inserted at the end
 	
-	XMPPRoomMessageMemoryStorage *lastMessage = [messages objectAtIndex:(count - 1)];
+	XMPPRoomMessageMemoryStorageObject *lastMessage = [messages objectAtIndex:(count - 1)];
 	if ([message compare:lastMessage] != NSOrderedAscending)
 	{
 		[messages addObject:message];
@@ -156,7 +156,7 @@
 	while (YES)
 	{
 		mid = (min + max) / 2;
-		XMPPRoomMessageMemoryStorage *currentMessage = [messages objectAtIndex:mid];
+		XMPPRoomMessageMemoryStorageObject *currentMessage = [messages objectAtIndex:mid];
 		
 		NSComparisonResult cmp = [message compare:currentMessage];
 		if (cmp == NSOrderedAscending)
@@ -208,7 +208,7 @@
 	return (NSUInteger)mid;
 }
 
-- (NSUInteger)insertOccupant:(XMPPRoomOccupantMemoryStorage *)occupant
+- (NSUInteger)insertOccupant:(XMPPRoomOccupantMemoryStorageObject *)occupant
 {
 	NSUInteger count = [occupantsArray count];
 	
@@ -227,7 +227,7 @@
 	while (YES)
 	{
 		mid = (min + max) / 2;
-		XMPPRoomOccupantMemoryStorage *currentOccupant = [occupantsArray objectAtIndex:mid];
+		XMPPRoomOccupantMemoryStorageObject *currentOccupant = [occupantsArray objectAtIndex:mid];
 		
 		NSComparisonResult cmp = [occupant compare:currentOccupant];
 		if (cmp == NSOrderedAscending)
@@ -261,7 +261,7 @@
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (XMPPRoomOccupantMemoryStorage *)occupantForJID:(XMPPJID *)jid
+- (XMPPRoomOccupantMemoryStorageObject *)occupantForJID:(XMPPJID *)jid
 {
 	XMPPLogTrace();
 	
@@ -271,7 +271,7 @@
 		return nil;
 	}
 	
-	__block XMPPRoomOccupantMemoryStorage *occupant = nil;
+	__block XMPPRoomOccupantMemoryStorageObject *occupant = nil;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
@@ -401,7 +401,7 @@
 	
 	if ([[presence type] isEqualToString:@"unavailable"])
 	{
-		XMPPRoomOccupantMemoryStorage *occupant = [occupantsDict objectForKey:from];
+		XMPPRoomOccupantMemoryStorageObject *occupant = [occupantsDict objectForKey:from];
 		if (occupant)
 		{
 			// Occupant did leave - remove
@@ -413,7 +413,7 @@
 			
 			// Notify delegate(s)
 			
-			XMPPRoomOccupantMemoryStorage *occupantCopy = [occupant copy];
+			XMPPRoomOccupantMemoryStorageObject *occupantCopy = [occupant copy];
 			NSMutableArray *occupantsCopy = [occupantsArray copy];
 			
 			[[self multicastDelegate] xmppRoomMemoryStorage:self
@@ -424,7 +424,7 @@
 	}
 	else
 	{
-		XMPPRoomOccupantMemoryStorage *occupant = [occupantsDict objectForKey:from];
+		XMPPRoomOccupantMemoryStorageObject *occupant = [occupantsDict objectForKey:from];
 		if (occupant == nil)
 		{
 			// Occupant did join - add
@@ -436,7 +436,7 @@
 			
 			// Notify delegate(s)
 			
-			XMPPRoomOccupantMemoryStorage *occupantCopy = [occupant copy];
+			XMPPRoomOccupantMemoryStorageObject *occupantCopy = [occupant copy];
 			NSMutableArray *occupantsCopy = [occupantsArray copy];
 			
 			[[self multicastDelegate] xmppRoomMemoryStorage:self
@@ -456,7 +456,7 @@
 			
 			// Notify delegate(s)
 			
-			XMPPRoomOccupantMemoryStorage *occupantCopy = [occupant copy];
+			XMPPRoomOccupantMemoryStorageObject *occupantCopy = [occupant copy];
 			NSMutableArray *occupantsCopy = [occupantsArray copy];
 			
 			[[self multicastDelegate] xmppRoomMemoryStorage:self
@@ -468,14 +468,14 @@
 	}
 }
 
-- (void)addMessage:(XMPPRoomMessageMemoryStorage *)roomMsg
+- (void)addMessage:(XMPPRoomMessageMemoryStorageObject *)roomMsg
 {
 	NSUInteger index = [self insertMessage:roomMsg];
 	
-	XMPPRoomOccupantMemoryStorage *occupant = [occupantsDict objectForKey:[roomMsg jid]];
+	XMPPRoomOccupantMemoryStorageObject *occupant = [occupantsDict objectForKey:[roomMsg jid]];
 	
-	XMPPRoomMessageMemoryStorage *roomMsgCopy = [roomMsg copy];
-	XMPPRoomOccupantMemoryStorage *occupantCopy = [occupant copy];
+	XMPPRoomMessageMemoryStorageObject *roomMsgCopy = [roomMsg copy];
+	XMPPRoomOccupantMemoryStorageObject *occupantCopy = [occupant copy];
 	NSArray *messagesCopy = [messages copy];
 	
 	[[self multicastDelegate] xmppRoomMemoryStorage:self
@@ -498,7 +498,7 @@
 		return;
 	}
 	
-	XMPPRoomMessageMemoryStorage *roomMessage = [[self.messageClass alloc] initWithIncomingMessage:message];
+	XMPPRoomMessageMemoryStorageObject *roomMessage = [[self.messageClass alloc] initWithIncomingMessage:message];
 	
 	if (roomMessage.remoteTimestamp && ([messages count] > 0))
 	{
@@ -545,7 +545,7 @@
 		while (YES)
 		{
 			mid = (min + max) / 2;
-			XMPPRoomMessageMemoryStorage *currentMessage = [messages objectAtIndex:mid];
+			XMPPRoomMessageMemoryStorageObject *currentMessage = [messages objectAtIndex:mid];
 			
 			NSComparisonResult cmp = [minLocalTimestamp compare:[currentMessage localTimestamp]];
 			if (cmp == NSOrderedAscending)
@@ -582,7 +582,7 @@
 		NSInteger index;
 		for (index = range.location; index < [messages count]; index++)
 		{
-			XMPPRoomMessageMemoryStorage *currentMessage = [messages objectAtIndex:index];
+			XMPPRoomMessageMemoryStorageObject *currentMessage = [messages objectAtIndex:index];
 			
 			NSComparisonResult cmp = [maxLocalTimestamp compare:[currentMessage localTimestamp]];
 			if (cmp == NSOrderedAscending)
@@ -601,7 +601,7 @@
 		
 		for (index = range.location; index < range.length; index++)
 		{
-			XMPPRoomMessageMemoryStorage *currentMessage = [messages objectAtIndex:mid];
+			XMPPRoomMessageMemoryStorageObject *currentMessage = [messages objectAtIndex:mid];
 			
 			if ([currentMessage.jid isEqualToJID:roomMessage.jid])
 			{
@@ -646,7 +646,9 @@
 	
 	XMPPJID *msgJID = room.myRoomJID;
 	
-	XMPPRoomMessageMemoryStorage *roomMsg = [[self.messageClass alloc] initWithOutgoingMessage:message jid:msgJID];
+	XMPPRoomMessageMemoryStorageObject *roomMsg;
+	roomMsg = [[self.messageClass alloc] initWithOutgoingMessage:message jid:msgJID];
+	
 	[self addMessage:roomMsg];
 }
 

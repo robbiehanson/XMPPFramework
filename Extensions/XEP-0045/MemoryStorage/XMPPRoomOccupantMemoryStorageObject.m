@@ -1,7 +1,7 @@
-#import "XMPPRoomOccupantMemoryStorage.h"
+#import "XMPPRoomOccupantMemoryStorageObject.h"
 
 
-@implementation XMPPRoomOccupantMemoryStorage
+@implementation XMPPRoomOccupantMemoryStorageObject
 {
 	XMPPPresence *presence;
 	XMPPJID *jid;
@@ -72,7 +72,7 @@
 {
 	// We use [self class] to support subclassing
 	
-	XMPPRoomOccupantMemoryStorage *deepCopy = (XMPPRoomOccupantMemoryStorage *)[[[self class] alloc] init];
+	XMPPRoomOccupantMemoryStorageObject *deepCopy = (XMPPRoomOccupantMemoryStorageObject *)[[[self class] alloc] init];
 	
 	deepCopy->presence = [presence copy];
 	deepCopy->jid = [jid copy];
@@ -153,7 +153,7 @@
 #pragma mark Comparisons
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSComparisonResult)compare:(XMPPRoomOccupantMemoryStorage *)another
+- (NSComparisonResult)compare:(XMPPRoomOccupantMemoryStorageObject *)another
 {
 	return [self.nickname compare:another.nickname];
 }
@@ -171,7 +171,7 @@
 {
 	if ([anObject isMemberOfClass:[self class]])
 	{
-		XMPPRoomOccupantMemoryStorage *another = (XMPPRoomOccupantMemoryStorage *)anObject;
+		XMPPRoomOccupantMemoryStorageObject *another = (XMPPRoomOccupantMemoryStorageObject *)anObject;
 		
 		return [jid isEqualToJID:[another jid]];
 	}

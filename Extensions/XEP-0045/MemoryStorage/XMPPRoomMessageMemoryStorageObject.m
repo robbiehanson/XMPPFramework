@@ -1,9 +1,9 @@
-#import "XMPPRoomMessageMemoryStorage.h"
+#import "XMPPRoomMessageMemoryStorageObject.h"
 #import "XMPP.h"
 #import "XMPPElement+Delay.h"
 
 
-@implementation XMPPRoomMessageMemoryStorage
+@implementation XMPPRoomMessageMemoryStorageObject
 {
 	XMPPMessage *message;
 	XMPPJID *jid;
@@ -109,7 +109,7 @@
 {
 	// We use [self class] to support subclassing
 	
-	XMPPRoomMessageMemoryStorage *deepCopy = (XMPPRoomMessageMemoryStorage *)[[[self class] alloc] init];
+	XMPPRoomMessageMemoryStorageObject *deepCopy = (XMPPRoomMessageMemoryStorageObject *)[[[self class] alloc] init];
 	
 	deepCopy->message = [message copy];
 	deepCopy->jid = [jid copy];
@@ -149,7 +149,7 @@
 #pragma mark Comparisons
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSComparisonResult)compare:(XMPPRoomMessageMemoryStorage *)another
+- (NSComparisonResult)compare:(XMPPRoomMessageMemoryStorageObject *)another
 {
 	return [localTimestamp compare:[another localTimestamp]];
 }

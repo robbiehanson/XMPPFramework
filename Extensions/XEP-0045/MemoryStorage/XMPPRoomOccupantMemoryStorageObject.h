@@ -3,7 +3,7 @@
 #import "XMPPRoomOccupant.h"
 
 
-@interface XMPPRoomOccupantMemoryStorage : NSObject <XMPPRoomOccupant, NSCopying, NSCoding>
+@interface XMPPRoomOccupantMemoryStorageObject : NSObject <XMPPRoomOccupant, NSCopying, NSCoding>
 
 - (id)initWithPresence:(XMPPPresence *)presence;
 - (void)updateWithPresence:(XMPPPresence *)presence;
@@ -28,6 +28,6 @@
  * This method provides the ordering used by XMPPRoomMemoryStorage.
  * Subclasses may override this method to provide an alternative sorting mechanism.
 **/
-- (NSComparisonResult)compare:(XMPPRoomOccupantMemoryStorage *)another;
+- (NSComparisonResult)compare:(XMPPRoomOccupantMemoryStorageObject *)another;
 
 @end

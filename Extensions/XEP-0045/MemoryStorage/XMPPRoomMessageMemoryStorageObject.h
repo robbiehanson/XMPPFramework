@@ -2,7 +2,7 @@
 #import "XMPPRoomMessage.h"
 
 
-@interface XMPPRoomMessageMemoryStorage : NSObject <XMPPRoomMessage, NSCopying, NSCoding>
+@interface XMPPRoomMessageMemoryStorageObject : NSObject <XMPPRoomMessage, NSCopying, NSCoding>
 
 - (id)initWithIncomingMessage:(XMPPMessage *)message;
 - (id)initWithOutgoingMessage:(XMPPMessage *)message  jid:(XMPPJID *)myRoomJID;
@@ -29,6 +29,6 @@
  * This method provides the ordering used by XMPPRoomMemoryStorage.
  * Subclasses may override this method to provide an alternative sorting mechanism.
 **/
-- (NSComparisonResult)compare:(XMPPRoomMessageMemoryStorage *)another;
+- (NSComparisonResult)compare:(XMPPRoomMessageMemoryStorageObject *)another;
 
 @end

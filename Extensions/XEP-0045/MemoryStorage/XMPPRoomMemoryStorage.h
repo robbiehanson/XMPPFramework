@@ -1,8 +1,9 @@
 #import <Foundation/Foundation.h>
 #import "XMPPRoom.h"
 #import "XMPPRoomOccupant.h"
-#import "XMPPRoomOccupantMemoryStorage.h"
-#import "XMPPRoomMessageMemoryStorage.h"
+#import "XMPPRoomMessageMemoryStorageObject.h"
+#import "XMPPRoomOccupantMemoryStorageObject.h"
+
 
 
 @interface XMPPRoomMemoryStorage : NSObject <XMPPRoomStorage>
@@ -12,10 +13,10 @@
 @property (unsafe_unretained, readonly) XMPPRoom *parent;
 
 /**
- * You can optionally extend the XMPPRoomMessageMemoryStorage and XMPPRoomOccupantMemoryStorage classes.
+ * You can optionally extend the XMPPRoomMessageMemoryStorageObject and XMPPRoomOccupantMemoryStorageObject classes.
  * Then just set the classes here, and your subclasses will automatically get used.
  * 
- * You must set your desired class(es) before you begin using the storage class.
+ * You must set your desired class(es), if different from default, before you begin using the storage class.
 **/
 @property (assign, readwrite) Class messageClass;
 @property (assign, readwrite) Class occupantClass;
@@ -23,7 +24,7 @@
 /**
  * Returns the occupant with the given full JID.
 **/
-- (XMPPRoomOccupantMemoryStorage *)occupantForJID:(XMPPJID *)jid;
+- (XMPPRoomOccupantMemoryStorageObject *)occupantForJID:(XMPPJID *)jid;
 
 /**
  * Returns the messages in sorted order.
@@ -38,7 +39,7 @@
 - (NSArray *)occupants;
 
 /**
- * This method is designed for subclasses of XMPPRoomMessageMemoryStorage
+ * This method is designed for subclasses of XMPPRoomMessageMemoryStorageObject
  * which may dynamically change the operation of the overriden compare: method.
  * 
  * If changed, this method should be invoked to force a resort.
@@ -46,7 +47,7 @@
 - (NSArray *)resortMessages;
 
 /**
- * This method is designed for subclasses of XMPPRoomOccupantMemoryStorage
+ * This method is designed for subclasses of XMPPRoomOccupantMemoryStorageObject
  * which may dynamically change the operation of the overriden compare: method.
  * 
  * If changed, this method should be invoked to force a resort.
@@ -76,7 +77,7 @@
  * The given occupant will be included in the given array at the given index.
 **/
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-              occupantDidJoin:(XMPPRoomOccupantMemoryStorage *)occupant
+              occupantDidJoin:(XMPPRoomOccupantMemoryStorageObject *)occupant
                       atIndex:(NSUInteger)index
                       inArray:(NSArray *)allOccupants;
 
@@ -91,7 +92,7 @@
  * It's previous location is given by the index.
 **/
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-             occupantDidLeave:(XMPPRoomOccupantMemoryStorage *)occupant
+             occupantDidLeave:(XMPPRoomOccupantMemoryStorageObject *)occupant
                       atIndex:(NSUInteger)index
                     fromArray:(NSArray *)allOccupants;
 
@@ -106,7 +107,7 @@
  * If the location of the occupant didn't change, then the oldIndex and newIndex will be the same.
 **/
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-            occupantDidUpdate:(XMPPRoomOccupantMemoryStorage *)occupant
+            occupantDidUpdate:(XMPPRoomOccupantMemoryStorageObject *)occupant
                     fromIndex:(NSUInteger)oldIndex
                       toIndex:(NSUInteger)newIndex
                       inArray:(NSArray *)allOccupants;
@@ -121,8 +122,8 @@
  * The given message will be included in the given array at the given index.
 **/
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-			didReceiveMessage:(XMPPRoomMessageMemoryStorage *)message
-                 fromOccupant:(XMPPRoomOccupantMemoryStorage *)occupantJID
+			didReceiveMessage:(XMPPRoomMessageMemoryStorageObject *)message
+                 fromOccupant:(XMPPRoomOccupantMemoryStorageObject *)occupant
                       atIndex:(NSUInteger)index
                       inArray:(NSArray *)allMessages;
 
