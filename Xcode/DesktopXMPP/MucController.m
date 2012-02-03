@@ -22,7 +22,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		// xmppRoomStorage automatically inherits the delegate(s) of it's parent xmppRoom
 		
 		[xmppRoom activate:xmppStream];
-		[xmppRoom createOrJoinRoomUsingNickname:@"xmppFrameworkMucTest"];
+		[xmppRoom joinRoomUsingNickname:@"xmppFrameowrkMucTest" history:nil];
 	}
 	return self;
 }
@@ -237,7 +237,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 - (void)xmppRoomMemoryStorage:(XMPPRoomMemoryStorage *)sender
-			didReceiveMessage:(XMPPRoomMessageMemoryStorage *)message
+			didReceiveMessage:(XMPPRoomMessageMemoryStorageObject *)message
                  fromOccupant:(XMPPRoomOccupantMemoryStorageObject *)occupantJID
                       atIndex:(NSUInteger)index
                       inArray:(NSArray *)allMessages {

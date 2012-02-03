@@ -16,9 +16,7 @@
 enum XMPPRoomState
 {
 	kXMPPRoomStateNone        = 0,
-	kXMPPRoomStateCreating    = 1 << 0,
 	kXMPPRoomStateCreated     = 1 << 1,
-	kXMPPRoomStateConfiguring = 1 << 2,
 	kXMPPRoomStateJoining     = 1 << 3,
 	kXMPPRoomStateJoined      = 1 << 4,
 	kXMPPRoomStateLeaving     = 1 << 5,
@@ -251,7 +249,12 @@ enum XMPPRoomState
 	return YES;
 }
 
-- (void)createOrJoinRoomUsingNickname:(NSString *)desiredNickname
+- (void)joinRoomUsingNickname:(NSString *)desiredNickname history:(NSXMLElement *)history
+{
+	[self joinRoomUsingNickname:desiredNickname history:history password:nil];
+}
+
+- (void)joinRoomUsingNickname:(NSString *)desiredNickname history:(NSXMLElement *)history password:(NSString *)passwd
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
@@ -266,42 +269,25 @@ enum XMPPRoomState
 		
 		// <presence to='darkcave@chat.shakespeare.lit/firstwitch'>
 		//   <x xmlns='http://jabber.org/protocol/muc'/>
+		//     <history/>
+		//     <password>passwd</password>
+		//   </x>
 		// </presence>
 		
 		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCNamespace];
+		if (history)
+		{
+			[x addChild:history];
+		}
+		if (passwd)
+		{
+			[x addChild:[NSXMLElement elementWithName:@"password" stringValue:passwd]];
+		}
 		
 		XMPPPresence *presence = [XMPPPresence presenceWithType:nil to:myRoomJID];
 		[presence addChild:x];
 		
 		[xmppStream sendElement:presence];
-		
-		state |= kXMPPRoomStateCreating;
-		state |= kXMPPRoomStateConfiguring;
-		state |= kXMPPRoomStateJoining;
-		
-	}};
-	
-	if (dispatch_get_current_queue() == moduleQueue)
-		block();
-	else
-		dispatch_async(moduleQueue, block);
-}
-- (void)joinRoomUsingNickname:(NSString *)desiredNickname
-{
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		XMPPLogTrace();
-		
-		// Check state and update variables
-		
-		if (![self preJoinWithNickname:desiredNickname])
-		{
-			return;
-		}
-		
-		// <presence to='darkcave@chat.shakespeare.lit/thirdwitch'/>
-		
-		[xmppStream sendElement:[XMPPPresence presenceWithType:nil to:myRoomJID]];
 		
 		state |= kXMPPRoomStateJoining;
 		
@@ -833,11 +819,13 @@ enum XMPPRoomState
 		//   </x>
 		// </message>
 		
-		NSXMLElement *reason = [NSXMLElement elementWithName:@"reason" stringValue:inviteMessageStr];
-		
 		NSXMLElement *invite = [NSXMLElement elementWithName:@"invite"];
 		[invite addAttributeWithName:@"to" stringValue:[jid full]];
-		[invite addChild:reason];
+		
+		if ([inviteMessageStr length] > 0)
+		{
+			[invite addChild:[NSXMLElement elementWithName:@"reason" stringValue:inviteMessageStr]];
+		}
 		
 		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
 		[x addChild:invite];
@@ -998,22 +986,10 @@ enum XMPPRoomState
 	
 	if (didCreateRoom)
 	{
-		state &= ~kXMPPRoomStateCreating;
-		state |=  kXMPPRoomStateCreated;
+		state |= kXMPPRoomStateCreated;
 		
 		[multicastDelegate xmppRoomDidCreate:self];
 	}
-	else if (isMyPresence)
-	{
-		if (state & kXMPPRoomStateCreating)
-		{
-			// The room wasn't created. It already existed, and we just joined it.
-			
-			state &= ~kXMPPRoomStateCreating;
-			state &= ~kXMPPRoomStateConfiguring;
-		}
-	}
-	
 	
 	if (isMyPresence)
 	{

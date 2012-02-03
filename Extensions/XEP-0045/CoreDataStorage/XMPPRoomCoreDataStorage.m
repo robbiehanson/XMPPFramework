@@ -694,6 +694,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	occupant.role = role;
 	occupant.affiliation = affiliation;
 	occupant.realJID = realJID;
+	occupant.createdAt = [NSDate date];
 	occupant.streamBareJidStr = streamBareJidStr;
 	
 	[moc insertObject:occupant];       // Hook if subclassing XMPPRoomOccupantCoreDataStorageObject (awakeFromInsert)
@@ -776,46 +777,61 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 
 - (NSDate *)mostRecentMessageTimestampForRoom:(XMPPJID *)roomJID
                                        stream:(XMPPStream *)xmppStream
-                                    inContext:(NSManagedObjectContext *)moc
+                                    inContext:(NSManagedObjectContext *)inMoc
 {
 	if (roomJID == nil) return nil;
 	
-	NSEntityDescription *entity = [self messageEntity:moc];
+	// It's possible to use our internal managedObjectContext only because we're not returning a NSManagedObject.
 	
-	NSPredicate *predicate;
-	if (xmppStream)
-	{
-		NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+	__block NSDate *result = nil;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSString *predicateFormat = @"roomJIDStr == %@ AND streamBareJidStr == %@";
-		predicate = [NSPredicate predicateWithFormat:predicateFormat, roomJID, streamBareJidStr];
-	}
-	else
-	{
-		predicate = [NSPredicate predicateWithFormat:@"roomJIDStr == %@", roomJID];
-	}
-	
-	NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"localTimestamp" ascending:NO];
-	NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
-	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	[fetchRequest setEntity:entity];
-	[fetchRequest setPredicate:predicate];
-	[fetchRequest setSortDescriptors:sortDescriptors];
-	[fetchRequest setFetchLimit:1];
-	
-	NSError *error = nil;
-	XMPPRoomMessageCoreDataStorageObject *message = [[moc executeFetchRequest:fetchRequest error:&error] lastObject];
+		NSManagedObjectContext *moc = inMoc ? inMoc : [self managedObjectContext];
+		
+		NSEntityDescription *entity = [self messageEntity:moc];
+		
+		NSPredicate *predicate;
+		if (xmppStream)
+		{
+			NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+			
+			NSString *predicateFormat = @"roomJIDStr == %@ AND streamBareJidStr == %@";
+			predicate = [NSPredicate predicateWithFormat:predicateFormat, roomJID, streamBareJidStr];
+		}
+		else
+		{
+			predicate = [NSPredicate predicateWithFormat:@"roomJIDStr == %@", roomJID];
+		}
+		
+		NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"localTimestamp" ascending:NO];
+		NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+		
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+		[fetchRequest setEntity:entity];
+		[fetchRequest setPredicate:predicate];
+		[fetchRequest setSortDescriptors:sortDescriptors];
+		[fetchRequest setFetchLimit:1];
+		
+		NSError *error = nil;
+		XMPPRoomMessageCoreDataStorageObject *message = [[moc executeFetchRequest:fetchRequest error:&error] lastObject];
 
-	if (error)
-	{
-		XMPPLogError(@"%@: %@ - fetchRequest error: %@", THIS_FILE, THIS_METHOD, error);
-		return nil;
-	}
+		if (error)
+		{
+			XMPPLogError(@"%@: %@ - fetchRequest error: %@", THIS_FILE, THIS_METHOD, error);
+		}
+		else
+		{
+			result = [message.localTimestamp copy];
+		}
+	}};
+	
+	if (inMoc == nil)
+		dispatch_sync(storageQueue, block);
 	else
-	{
-		return message.localTimestamp;
-	}
+		block();
+	
+	return result;
 }
 
 - (XMPPRoomOccupantCoreDataStorageObject *)occupantForJID:(XMPPJID *)jid
@@ -823,6 +839,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
                                                 inContext:(NSManagedObjectContext *)moc
 {
 	if (jid == nil) return nil;
+	if (moc == nil) return nil;
 	
 	NSEntityDescription *entity = [self occupantEntity:moc];
 	

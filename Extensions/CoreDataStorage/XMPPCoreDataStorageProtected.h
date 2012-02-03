@@ -90,6 +90,11 @@
 **/
 - (void)didCreateManagedObjectContext;
 
+/**
+ * Override me if you need to do anything special after changes have been saved to disk. 
+**/
+- (void)didSaveManagedObjectContext;
+
 #pragma mark Setup
 
 /**

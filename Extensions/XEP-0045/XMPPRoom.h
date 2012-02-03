@@ -71,24 +71,31 @@ static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#
 #pragma mark Room Lifecycle
 
 /**
- * Sends a presence element to the join room, and indicating desire to create the room if it doesn't already exist.
+ * Sends a presence element to the join room.
+ * 
+ * If the room already exists, then the xmppRoomDidJoin: delegate method will be invoked upon
+ * notifiaction from the server that we successfully joined the room.
  * 
  * If the room did not already exist, and the authenticated user is allowed to create the room,
- * then the xmppRoomDidCreate: delegate method will be invoked.
- * At this point you'll need to configure the room before others can join.
+ * then the server will automatically create the room,
+ * and the xmppRoomDidCreate: delegate method will be invoked (followed by xmppRoomDidJoin:).
+ * You'll then need to configure the room before others can join.
  * 
- * If the room already exists, then the xmppRoomDidJoin: delegate method will be invoked.
+ * @param desiredNickname (required)
+ *        The nickname to use within the room.
+ *        If the room is anonymous, this is the only identifier other occupants of the room will see.
+ * 
+ * @param history (optional)
+ *        A history element specifying how much discussion history to request from the server.
+ *        E.g. <history maxstanzas='100'/>
+ *        For more information, please see XEP-0045, Section 7.1.16 - Managing Discussion History.
+ *        You may also want to query your storage module to see how old the most recent stored message for this room is.
  * 
  * @see fetchConfigurationForm
  * @see configureRoomUsingOptions:
 **/
-- (void)createOrJoinRoomUsingNickname:(NSString *)desiredNickname;
-
-/**
- * Sends a presence element to join the room.
- * If successful, the xmppRoomDidJoin: delegate method will be invoked.
-**/
-- (void)joinRoomUsingNickname:(NSString *)desiredNickname;
+- (void)joinRoomUsingNickname:(NSString *)desiredNickname history:(NSXMLElement *)history;
+- (void)joinRoomUsingNickname:(NSString *)desiredNickname history:(NSXMLElement *)history password:(NSString *)passwd;
 
 /**
  * There are two ways to configure a room.

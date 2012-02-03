@@ -96,7 +96,11 @@
  *                     If you're using this claass with a single xmppStream, you can pass nil.
  *
  * @param moc        - The managedObjectContext to use when doing the lookups.
- *                     This should match the thread you're currently using.
+ *                     If non-nil, this should match the thread you're currently using.
+ *                     If nil, the operation is dispatch_sync'd onto the internal queue,
+ *                     and uses the internal managedObjectContext.
+ * 
+ * The moc may optionally be nil strictly because this method does not return a NSManagedObject.
 **/
 - (NSDate *)mostRecentMessageTimestampForRoom:(XMPPJID *)roomJID
                                        stream:(XMPPStream *)xmppStream
@@ -112,7 +116,7 @@
  *                     If you're using this claass with a single xmppStream, you can pass nil.
  * 
  * @param moc        - The managedObjectContext to use when doing the lookups.
- *                     This should match the thread you're currently using.
+ *                     This must not be nil, and should match the thread you're currently using.
 **/
 - (XMPPRoomOccupantCoreDataStorageObject *)occupantForJID:(XMPPJID *)jid
                                                    stream:(XMPPStream *)xmppStream
