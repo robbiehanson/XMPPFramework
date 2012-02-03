@@ -186,6 +186,11 @@ static NSMutableSet *databaseFileNames;
 	// For example, you may want to perform cleanup of any non-persistent data before you start using the database.
 }
 
+- (void)didSaveManagedObjectContext
+{
+	// Override me if you need to do anything special after changes have been saved to disk.
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -571,7 +576,11 @@ static NSMutableSet *databaseFileNames;
 	// called from maybeSave below, which already does this check.
 	
 	NSError *error = nil;
-	if (![[self managedObjectContext] save:&error])
+	if ([[self managedObjectContext] save:&error])
+	{
+		[self didSaveManagedObjectContext];
+	}
+	else
 	{
 		XMPPLogWarn(@"%@: Error saving - %@ %@", [self class], error, [error userInfo]);
 		

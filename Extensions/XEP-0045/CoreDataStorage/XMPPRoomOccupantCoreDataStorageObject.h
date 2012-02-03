@@ -28,6 +28,8 @@
 @property (nonatomic, strong) XMPPJID * realJID;       // Transient (proper type, not on disk)
 @property (nonatomic, strong) NSString * realJIDStr;   // Shadow (binary data, written to disk)
 
+@property (nonatomic, strong) NSDate * createdAt;
+
 /**
  * If a single instance of XMPPRoomCoreDataStorage is shared between multiple xmppStream's,
  * this may be needed to distinguish between the streams.

@@ -38,6 +38,7 @@
 @dynamic affiliation;
 @dynamic realJID, primitiveRealJID;
 @dynamic realJIDStr, primitiveRealJIDStr;
+@dynamic createdAt;
 @dynamic streamBareJidStr;
 
 #pragma mark Transient presence
