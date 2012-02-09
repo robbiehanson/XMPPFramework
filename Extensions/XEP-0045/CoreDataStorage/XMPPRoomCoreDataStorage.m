@@ -960,4 +960,16 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	}];
 }
 
+- (void)handleDidLeaveRoom:(XMPPRoom *)room
+{
+	XMPPLogTrace();
+	
+	XMPPJID *roomJID = room.roomJID;
+	
+	[self scheduleBlock:^{
+		
+		[self clearAllOccupantsFromRoom:roomJID];
+	}];
+}
+
 @end
