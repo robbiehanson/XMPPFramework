@@ -1,5 +1,5 @@
-#import "XMPPUserMemoryStorage.h"
-#import "XMPPResourceMemoryStorage.h"
+#import "XMPPUserMemoryStorageObject.h"
+#import "XMPPResourceMemoryStorageObject.h"
 
 /**
  * The following methods are designed to be invoked ONLY from
@@ -16,7 +16,7 @@
 #define XMPP_USER_REMOVED_RESOURCE 3
 
 
-@interface XMPPUserMemoryStorage ()
+@interface XMPPUserMemoryStorageObject ()
 
 - (void)commonInit;
 
@@ -27,7 +27,7 @@
 
 - (int)updateWithPresence:(XMPPPresence *)presence
             resourceClass:(Class)resourceClass
-           andGetResource:(XMPPResourceMemoryStorage **)resourcePtr;
+           andGetResource:(XMPPResourceMemoryStorageObject **)resourcePtr;
 
 - (void)clearAllResources;
 
@@ -39,7 +39,7 @@
 
 @end
 
-@interface XMPPResourceMemoryStorage ()
+@interface XMPPResourceMemoryStorageObject ()
 
 - (id)initWithPresence:(XMPPPresence *)aPresence;
 
