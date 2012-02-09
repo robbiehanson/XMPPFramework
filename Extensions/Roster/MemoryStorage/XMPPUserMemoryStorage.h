@@ -57,7 +57,7 @@
 #endif
 
 /**
- * 
+ * Simple comparison methods.
 **/
 
 - (NSComparisonResult)compareByName:(XMPPUserMemoryStorage *)another;
