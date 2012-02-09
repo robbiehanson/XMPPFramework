@@ -47,6 +47,7 @@
 	NSManagedObjectModel *managedObjectModel;
 	NSPersistentStoreCoordinator *persistentStoreCoordinator;
 	NSManagedObjectContext *managedObjectContext;
+	NSManagedObjectContext *mainThreadManagedObjectContext;
 	
 @protected
 	
@@ -97,8 +98,27 @@
  * If you think you can simply add a property for the private managedObjectContext,
  * then you need to go read the documentation for core data,
  * specifically the section entitled "Concurrency with Core Data".
+ * 
+ * @see mainThreadManagedObjectContext
 **/
 @property (strong, readonly) NSManagedObjectModel *managedObjectModel;
 @property (strong, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+/**
+ * Convenience method to get a managedObjectContext appropriate for use on the main thread.
+ * This context should only be used from the main thread.
+ * 
+ * NSManagedObjectContext is a light-weight thread-UNsafe component of the CoreData stack.
+ * Thus a managedObjectContext should only be accessed from a single thread, or from a serialized queue.
+ * 
+ * A managedObjectContext is associated with a persistent store.
+ * In most cases the persistent store is an sqlite database file.
+ * So think of a managedObjectContext as a thread-specific cache for the underlying database.
+ * 
+ * This method lazily creates a proper managedObjectContext,
+ * associated with the persistent store of this instance,
+ * and configured to automatically merge changesets from other threads.
+**/
+@property (strong, readonly) NSManagedObjectContext *mainThreadManagedObjectContext;
 
 @end
