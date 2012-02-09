@@ -117,7 +117,15 @@ enum XMPPRoomState
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This method may optionally be used by XMPPRosterStorage classes (declared in XMPPRosterPrivate.h).
+ * This method may optionally be used by XMPPRosterStorage classes (method declared in XMPPRosterPrivate.h)
+**/
+- (dispatch_queue_t)moduleQueue
+{
+	return moduleQueue;
+}
+
+/**
+ * This method may optionally be used by XMPPRosterStorage classes (method declared in XMPPRosterPrivate.h).
 **/
 - (GCDMulticastDelegate *)multicastDelegate
 {
@@ -1003,11 +1011,14 @@ enum XMPPRoomState
 				state &= ~kXMPPRoomStateJoining;
 				state |=  kXMPPRoomStateJoined;
 				
+				if ([xmppRoomStorage respondsToSelector:@selector(handleDidJoinRoom:withNickname:)])
+					[xmppRoomStorage handleDidJoinRoom:self withNickname:myNickname];
 				[multicastDelegate xmppRoomDidJoin:self];
 			}
 		}
 		else if (isUnavailable && !isNicknameChange)
 		{
+			[xmppRoomStorage handleDidLeaveRoom:self];
 			[multicastDelegate xmppRoomDidLeave:self];
 		}
 	}

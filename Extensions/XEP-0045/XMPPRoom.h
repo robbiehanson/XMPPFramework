@@ -219,10 +219,18 @@ static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#
 - (void)handleIncomingMessage:(XMPPMessage *)message room:(XMPPRoom *)room;
 - (void)handleOutgoingMessage:(XMPPMessage *)message room:(XMPPRoom *)room;
 
+/**
+ * Handles leaving the room, which generally means clearing the list of occupants.
+**/
+- (void)handleDidLeaveRoom:(XMPPRoom *)room;
+
 @optional
 
-- (void)handleDidJoinRoom:(XMPPJID *)roomJID withNickname:(NSString *)nickname;
-- (void)handleDidLeaveRoom:(XMPPJID *)roomJID;
+/**
+ * May be used if there's anything special to do when joining a room.
+**/
+- (void)handleDidJoinRoom:(XMPPRoom *)room withNickname:(NSString *)nickname;
+
 
 @end
 
