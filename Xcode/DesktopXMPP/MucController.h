@@ -6,10 +6,7 @@
 {
 	__strong XMPPStream * xmppStream;
 	__strong XMPPRoom   * xmppRoom;
-	__strong XMPPRoomMemoryStorage *xmppRoomStorage;
-	
-	NSArray *messages;
-	NSArray *occupants;
+	__strong id <XMPPRoomStorage> xmppRoomStorage;
 	
 	IBOutlet NSTableView * messagesTableView;
 	IBOutlet NSTextField * sendMessageField;
