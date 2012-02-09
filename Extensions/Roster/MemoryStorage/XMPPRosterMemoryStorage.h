@@ -5,7 +5,9 @@
 
 
 /**
- * This class is an example implementation of XMPPRosterStorage using core data.
+ * This class is an example implementation of the XMPPRosterStorage protocol.
+ * It simply keeps all roster informatin in memory.
+ * 
  * You are free to substitute your own storage class.
 **/
 
@@ -35,12 +37,15 @@
 @property (readwrite, assign) Class userClass;
 @property (readwrite, assign) Class resourceClass;
 
-// The methods below provide access to the roster data.
-// If invoked from a dispatch queue other than the roster's queue,
-// the methods return snapshots (copies) of the roster data.
-// These snapshots provide a thread-safe version of the roster data.
-// The thread-safety comes from the fact that the copied data will not be altered,
-// so it can therefore be used from multiple threads/queues if needed.
+/**
+ * The methods below provide access to the roster data.
+ * 
+ * If invoked from a dispatch queue other than the roster's queue,
+ * the methods return snapshots (copies) of the roster data.
+ * These snapshots provide a thread-safe version of the roster data.
+ * The thread-safety comes from the fact that the copied data will not be altered,
+ * so it can therefore be used from multiple threads/queues if needed.
+**/
 
 - (XMPPUserMemoryStorage *)myUser;
 - (XMPPResourceMemoryStorage *)myResource;
