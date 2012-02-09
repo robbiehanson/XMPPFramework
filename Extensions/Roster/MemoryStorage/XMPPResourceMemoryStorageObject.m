@@ -7,7 +7,7 @@
 #endif
 
 
-@implementation XMPPResourceMemoryStorage
+@implementation XMPPResourceMemoryStorageObject
 
 - (id)initWithPresence:(XMPPPresence *)aPresence
 {
@@ -33,7 +33,7 @@
 {
 	// We use [self class] to support subclassing
 	
-	XMPPResourceMemoryStorage *deepCopy = (XMPPResourceMemoryStorage *)[[[self class] alloc] init];
+	XMPPResourceMemoryStorageObject *deepCopy = (XMPPResourceMemoryStorageObject *)[[[self class] alloc] init];
 	
 	deepCopy->jid = [jid copy];
 	deepCopy->presence = presence; // No need to bother with a copy sicne we don't alter presence
@@ -59,7 +59,7 @@
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-	if((self = [super init]))
+	if ((self = [super init]))
 	{
 		if([coder allowsKeyedCoding])
 		{
@@ -79,7 +79,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	if([coder allowsKeyedCoding])
+	if ([coder allowsKeyedCoding])
 	{
 		[coder encodeObject:jid          forKey:@"jid"];
 		[coder encodeObject:presence     forKey:@"presence"];
@@ -175,7 +175,7 @@
 {
 	if([anObject isMemberOfClass:[self class]])
 	{
-		XMPPResourceMemoryStorage *another = (XMPPResourceMemoryStorage *)anObject;
+		XMPPResourceMemoryStorageObject *another = (XMPPResourceMemoryStorageObject *)anObject;
 		
 		return [jid isEqualToJID:[another jid]];
 	}

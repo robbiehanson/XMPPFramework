@@ -6,7 +6,7 @@
 @class XMPPPresence;
 
 
-@interface XMPPResourceMemoryStorage : NSObject <XMPPResource, NSCopying, NSCoding>
+@interface XMPPResourceMemoryStorageObject : NSObject <XMPPResource, NSCopying, NSCoding>
 {
 	XMPPJID *jid;
 	XMPPPresence *presence;

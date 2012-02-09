@@ -6,16 +6,16 @@
   #import <Cocoa/Cocoa.h>
 #endif
 
-@class XMPPResourceMemoryStorage;
+@class XMPPResourceMemoryStorageObject;
 
 
-@interface XMPPUserMemoryStorage : NSObject <XMPPUser, NSCopying, NSCoding>
+@interface XMPPUserMemoryStorageObject : NSObject <XMPPUser, NSCopying, NSCoding>
 {
 	XMPPJID *jid;
 	NSMutableDictionary *itemAttributes;
 	
 	NSMutableDictionary *resources;
-	XMPPResourceMemoryStorage *primaryResource;
+	XMPPResourceMemoryStorageObject *primaryResource;
 	
 #if TARGET_OS_IPHONE
 	UIImage *photo;
@@ -60,10 +60,11 @@
  * Simple comparison methods.
 **/
 
-- (NSComparisonResult)compareByName:(XMPPUserMemoryStorage *)another;
-- (NSComparisonResult)compareByName:(XMPPUserMemoryStorage *)another options:(NSStringCompareOptions)mask;
+- (NSComparisonResult)compareByName:(XMPPUserMemoryStorageObject *)another;
+- (NSComparisonResult)compareByName:(XMPPUserMemoryStorageObject *)another options:(NSStringCompareOptions)mask;
 
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUserMemoryStorage *)another;
-- (NSComparisonResult)compareByAvailabilityName:(XMPPUserMemoryStorage *)another options:(NSStringCompareOptions)mask;
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserMemoryStorageObject *)another;
+- (NSComparisonResult)compareByAvailabilityName:(XMPPUserMemoryStorageObject *)another
+                                        options:(NSStringCompareOptions)mask;
 
 @end

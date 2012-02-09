@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "XMPPRoster.h"
-#import "XMPPUserMemoryStorage.h"
-#import "XMPPResourceMemoryStorage.h"
+#import "XMPPUserMemoryStorageObject.h"
+#import "XMPPResourceMemoryStorageObject.h"
 
 
 /**
@@ -23,7 +23,7 @@
 	NSMutableDictionary *roster;
 	
 	XMPPJID *myJID;
-	XMPPUserMemoryStorage *myUser;
+	XMPPUserMemoryStorageObject *myUser;
 }
 
 - (id)init;
@@ -47,11 +47,11 @@
  * so it can therefore be used from multiple threads/queues if needed.
 **/
 
-- (XMPPUserMemoryStorage *)myUser;
-- (XMPPResourceMemoryStorage *)myResource;
+- (XMPPUserMemoryStorageObject *)myUser;
+- (XMPPResourceMemoryStorageObject *)myResource;
 
-- (XMPPUserMemoryStorage *)userForJID:(XMPPJID *)jid;
-- (XMPPResourceMemoryStorage *)resourceForJID:(XMPPJID *)jid;
+- (XMPPUserMemoryStorageObject *)userForJID:(XMPPJID *)jid;
+- (XMPPResourceMemoryStorageObject *)resourceForJID:(XMPPJID *)jid;
 
 - (NSArray *)sortedUsersByName;
 - (NSArray *)sortedUsersByAvailabilityName;
@@ -101,23 +101,23 @@
  * 
  * This does not include when resources simply go online / offline.
 **/
-- (void)xmppRoster:(XMPPRosterMemoryStorage *)sender didAddUser:(XMPPUserMemoryStorage *)user;
-- (void)xmppRoster:(XMPPRosterMemoryStorage *)sender didUpdateUser:(XMPPUserMemoryStorage *)user;
-- (void)xmppRoster:(XMPPRosterMemoryStorage *)sender didRemoveUser:(XMPPUserMemoryStorage *)user;
+- (void)xmppRoster:(XMPPRosterMemoryStorage *)sender didAddUser:(XMPPUserMemoryStorageObject *)user;
+- (void)xmppRoster:(XMPPRosterMemoryStorage *)sender didUpdateUser:(XMPPUserMemoryStorageObject *)user;
+- (void)xmppRoster:(XMPPRosterMemoryStorage *)sender didRemoveUser:(XMPPUserMemoryStorageObject *)user;
 
 /**
  * Notifications when resources go online / offline.
 **/
 - (void)xmppRoster:(XMPPRosterMemoryStorage *)sender
-    didAddResource:(XMPPResourceMemoryStorage *)resource
-          withUser:(XMPPUserMemoryStorage *)user;
+    didAddResource:(XMPPResourceMemoryStorageObject *)resource
+          withUser:(XMPPUserMemoryStorageObject *)user;
 
 - (void)xmppRoster:(XMPPRosterMemoryStorage *)sender
- didUpdateResource:(XMPPResourceMemoryStorage *)resource
-          withUser:(XMPPUserMemoryStorage *)user;
+ didUpdateResource:(XMPPResourceMemoryStorageObject *)resource
+          withUser:(XMPPUserMemoryStorageObject *)user;
 
 - (void)xmppRoster:(XMPPRosterMemoryStorage *)sender
- didRemoveResource:(XMPPResourceMemoryStorage *)resource
-          withUser:(XMPPUserMemoryStorage *)user;
+ didRemoveResource:(XMPPResourceMemoryStorageObject *)resource
+          withUser:(XMPPUserMemoryStorageObject *)user;
 
 @end
