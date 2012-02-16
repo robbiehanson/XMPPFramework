@@ -21,18 +21,8 @@
 
 @interface XMPPRoomHybridStorage ()
 {
-	/* Inherited from XMPPCoreDataStorage
-	
-	NSString *databaseFileName;
-	NSUInteger saveThreshold;
-	
-	dispatch_queue_t storageQueue;
-	
-	*/
-	
-	NSMutableDictionary * occupantsGlobalDict; // Key=xmppStream.myJid, Value=occupantsRoomsDict
-//	NSMutableDictionary * occupantsRoomsDict;  // Key=xmppRoomJid, Value=occupantsRoomDict
-//	NSMutableDictionary * occupantsRoomDict;   // Key=occupantJid, Value=XMPPRoomOccupantHybridMemoryStorageObject
+	// Protected variables are listed in the header file.
+	// These are the private variables.
 	
 	NSString *messageEntityName;
 	Class occupantClass;
@@ -45,8 +35,6 @@
 	dispatch_time_t lastDeleteTime;
 	dispatch_source_t deleteTimer;
 }
-
-- (NSEntityDescription *)messageEntity:(NSManagedObjectContext *)moc;
 
 - (void)performDelete;
 - (void)destroyDeleteTimer;
@@ -476,8 +464,8 @@ static XMPPRoomHybridStorage *sharedInstance;
 **/
 - (void)didInsertMessage:(XMPPRoomMessageHybridCoreDataStorageObject *)message
 {
-	// Override me if you're extending the XMPPRoomMessageHybridCoreDataStorageObject class to add additional properties.
-	// You can update your additional properties here.
+	// Override me if you're extending the XMPPRoomMessageHybridCoreDataStorageObject class
+	// to add additional properties, which you can set here.
 	// 
 	// At this point the standard properties have already been set.
 	// So you can, for example, access the XMPPMessage via message.message.
@@ -525,7 +513,50 @@ static XMPPRoomHybridStorage *sharedInstance;
 	roomMessage.streamBareJidStr = streamBareJidStr;
 	
 	[moc insertObject:roomMessage];      // Hook if subclassing XMPPRoomMessageHybridCDSO (awakeFromInsert)
-	[self didInsertMessage:roomMessage]; // Hook if subclassing XMPPRoomCoreDataStorage
+	[self didInsertMessage:roomMessage]; // Hook if subclassing XMPPRoomHybridStorage
+}
+
+/**
+ * Optional override hook for general extensions.
+ * 
+ * @see insertOccupantWithPresence:room:stream:
+**/
+- (void)didInsertOccupant:(XMPPRoomOccupantHybridMemoryStorageObject *)occupant
+{
+	// Override me if you're extending the XMPPRoomOccupantHybridMemoryStorageObject class
+	// to add additional properties, which you can set here.
+	// 
+	// At this point the standard properties have already been set.
+	// So you can, for example, access the XMPPPresence via occupant.presece.
+}
+
+/**
+ * Optional override hook for general extensions.
+ *
+ * @see updateOccupant:withPresence:room:stream:
+**/
+- (void)didUpdateOccupant:(XMPPRoomOccupantHybridMemoryStorageObject *)occupant
+{
+	// Override me if you're extending the XMPPRoomOccupantHybridMemoryStorageObject class,
+	// and you have additional properties that may need to be updated.
+	// 
+	// At this point the standard properties have already been updated.
+}
+
+/**
+ * Optional override hook for general extensions.
+**/
+- (void)willRemoveOccupant:(XMPPRoomOccupantHybridMemoryStorageObject *)occupant
+{
+	// Override me if you have any custom work to do before an occupant leaves (is removed from storage).
+}
+
+/**
+ * Optional override hook for general extensions.
+**/
+- (void)didRemoveOccupant:(XMPPRoomOccupantHybridMemoryStorageObject *)occupant
+{
+	// Override me if you have any custom work to do after an occupant leaves (is removed from storage).
 }
 
 /**
@@ -607,7 +638,14 @@ static XMPPRoomHybridStorage *sharedInstance;
 	// This method should be thread-safe.
 	// So be sure to access the entity name through the property accessor.
 	
-	return [NSEntityDescription entityForName:[self messageEntityName] inManagedObjectContext:moc];
+	if (moc == nil)
+	{
+		XMPPLogWarn(@"%@: %@ - Invalid parameter, moc is nil", THIS_FILE, THIS_METHOD);
+		return nil;
+	}
+	
+	NSString *entityName = self.messageEntityName;
+	return [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
 }
 
 - (NSDate *)mostRecentMessageTimestampForRoom:(XMPPJID *)roomJID
@@ -717,11 +755,11 @@ static XMPPRoomHybridStorage *sharedInstance;
 
 - (NSArray *)occupantsForRoom:(XMPPJID *)roomJid stream:(XMPPStream *)xmppStream
 {
+	roomJid = [roomJid bareJID]; // Just in case a full jid is accidentally passed
+	
 	__block NSArray *results = nil;
 	
 	void (^block)(BOOL) = ^(BOOL shouldCopy){ @autoreleasepool {
-		
-		XMPPJID *roomJid = [roomJid bareJID]; // Just in case a full jid is accidentally passed
 		
 		if (xmppStream)
 		{
@@ -784,7 +822,9 @@ static XMPPRoomHybridStorage *sharedInstance;
 			{
 				// Occupant did leave - remove
 				
+				[self willRemoveOccupant:occupant];
 				[self removeOccupant:occupant withPresence:presence room:room stream:xmppStream];
+				[self didRemoveOccupant:occupant];
 				
 				// Notify delegate(s)
 				
@@ -807,6 +847,13 @@ static XMPPRoomHybridStorage *sharedInstance;
 				// Occupant did join - add
 				
 				occupant = [self insertOccupantWithPresence:presence room:room stream:xmppStream];
+				if (occupant == nil)
+				{
+					// Subclasses may choose to ignore occupants for whatever reason.
+					return;
+				}
+				
+				[self didInsertOccupant:occupant];
 				
 				// Notify delegate(s)
 				
@@ -825,6 +872,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 				// Occupant did update - move
 				
 				[self updateOccupant:occupant withPresence:presence room:room stream:xmppStream];
+				[self didUpdateOccupant:occupant];
 				
 				// Notify delegate(s)
 				

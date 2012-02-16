@@ -15,6 +15,25 @@
 **/
 
 @interface XMPPRoomHybridStorage : XMPPCoreDataStorage <XMPPRoomStorage>
+{
+	@protected
+	
+	/* Inherited from XMPPCoreDataStorage
+	 
+	 NSString *databaseFileName;
+	 NSUInteger saveThreshold;
+	 
+	 dispatch_queue_t storageQueue;
+	 
+	*/
+	
+	// The occupantsGlobalDict holds all occupants in a heirarchy.
+	// It is a dictionary of dictionaries of dictionaries.
+	
+	NSMutableDictionary * occupantsGlobalDict; // Key=xmppStream.myJid, Value=occupantsRoomsDict
+//	NSMutableDictionary * occupantsRoomsDict;  // Key=xmppRoomJid, Value=occupantsRoomDict
+//	NSMutableDictionary * occupantsRoomDict;   // Key=occupantJid, Value=XMPPRoomOccupantHybridMemoryStorageObject
+}
 
 /**
  * Convenience method to get an instance with the default database name.
