@@ -39,7 +39,7 @@
 @property (nonatomic, strong) NSNumber * type;
 
 /**
- * If a single instance of XMPPRoomCoreDataStorage is shared between multiple xmppStream's,
+ * If a single instance of XMPPRoomHybridStorage is shared between multiple xmppStream's,
  * this may be needed to distinguish between the streams.
 **/
 @property (nonatomic, strong) NSString *streamBareJidStr;
