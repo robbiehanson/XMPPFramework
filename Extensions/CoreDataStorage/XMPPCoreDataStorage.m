@@ -401,16 +401,19 @@ static NSMutableSet *databaseFileNames;
 	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
+	__block NSManagedObjectModel *result = nil;
+	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (managedObjectModel)
 		{
+			result = managedObjectModel;
 			return;
 		}
 		
-		XMPPLogVerbose(@"%@: Creating managedObjectModel", [self class]);
-		
 		NSString *momName = [self managedObjectModelName];
+		
+		XMPPLogVerbose(@"%@: Creating managedObjectModel (%@)", [self class], momName);
 		
 		NSString *momPath = [[NSBundle mainBundle] pathForResource:momName ofType:@"mom"];
 		if (momPath == nil)
@@ -432,6 +435,7 @@ static NSMutableSet *databaseFileNames;
 			XMPPLogWarn(@"%@: Couldn't find managedObjectModel file - %@", [self class], momName);
 		}
 		
+		result = managedObjectModel;
 	}};
 	
 	if (dispatch_get_current_queue() == storageQueue)
@@ -439,7 +443,7 @@ static NSMutableSet *databaseFileNames;
 	else
 		dispatch_sync(storageQueue, block);
 	
-	return managedObjectModel;
+	return result;
 }
 
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator
@@ -447,10 +451,13 @@ static NSMutableSet *databaseFileNames;
 	// This is a public method.
 	// It may be invoked on any thread/queue.
 	
+	__block NSPersistentStoreCoordinator *result = nil;
+	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (persistentStoreCoordinator)
 		{
+			result = persistentStoreCoordinator;
 			return;
 		}
 		
@@ -484,7 +491,8 @@ static NSMutableSet *databaseFileNames;
 			}
 			else
 			{
-				XMPPLogWarn(@"%@: Error creating persistentStoreCoordinator - Nil persistentStoreDirectory", [self class]);
+				XMPPLogWarn(@"%@: Error creating persistentStoreCoordinator - Nil persistentStoreDirectory",
+							[self class]);
 			}
 		}
 		else
@@ -500,6 +508,8 @@ static NSMutableSet *databaseFileNames;
 			}
 		}
 		
+		result = persistentStoreCoordinator;
+		
 	}};
 	
 	if (dispatch_get_current_queue() == storageQueue)
@@ -507,7 +517,7 @@ static NSMutableSet *databaseFileNames;
 	else
 		dispatch_sync(storageQueue, block);
 
-    return persistentStoreCoordinator;
+    return result;
 }
 
 - (NSManagedObjectContext *)managedObjectContext
@@ -590,13 +600,13 @@ static NSMutableSet *databaseFileNames;
 		XMPPLogVerbose(@"%@: Creating mainThreadManagedObjectContext", [self class]);
 		
 		if ([NSManagedObjectContext instancesRespondToSelector:@selector(initWithConcurrencyType:)])
-			managedObjectContext =
+			mainThreadManagedObjectContext =
 			    [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
 		else
-			managedObjectContext = [[NSManagedObjectContext alloc] init];
+			mainThreadManagedObjectContext = [[NSManagedObjectContext alloc] init];
 		
-		managedObjectContext.persistentStoreCoordinator = coordinator;
-		managedObjectContext.undoManager = nil;
+		mainThreadManagedObjectContext.persistentStoreCoordinator = coordinator;
+		mainThreadManagedObjectContext.undoManager = nil;
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self
 		                                         selector:@selector(managedObjectContextDidSave:)
