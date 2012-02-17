@@ -158,6 +158,18 @@
 - (void)removeUser:(XMPPJID *)jid;
 
 /**
+ * If we don't currently receive presence from the given user,
+ * this method requests a subscription to start receiving presence updates from the given user.
+ * 
+ * This is similar to following in the twitter model.
+ * 
+ * Note: If the given user isn't already in the roster, it is recommended to instead use addUser:withNickname:.
+ * 
+ * @see addUser:withNickname:
+**/
+- (void)subscribePresenceToUser:(XMPPJID *)jid;
+
+/**
  * If we currently have a presence subscription to the given user,
  * this method then removes the subscription.
  * 
