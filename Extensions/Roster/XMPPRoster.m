@@ -384,6 +384,26 @@ enum XMPPRosterFlags
 	[xmppStream sendElement:iq];
 }
 
+- (void)subscribePresenceToUser:(XMPPJID *)jid
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	if (jid == nil) return;
+	
+	XMPPJID *myJID = xmppStream.myJID;
+	
+	if ([myJID isEqualToJID:jid options:XMPPJIDCompareBare])
+	{
+		XMPPLogInfo(@"%@: %@ - Ignoring request to subscribe presence to myself", [self class], THIS_METHOD);
+		return;
+	}
+	
+	// <presence to='bareJID' type='subscribe'/>
+	
+	XMPPPresence *presence = [XMPPPresence presenceWithType:@"subscribe" to:[jid bareJID]];
+	[xmppStream sendElement:presence];
+}
+
 - (void)unsubscribePresenceFromUser:(XMPPJID *)jid
 {
 	// This is a public method, so it may be invoked on any thread/queue.
