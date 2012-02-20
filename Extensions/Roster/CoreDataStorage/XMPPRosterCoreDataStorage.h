@@ -45,6 +45,8 @@
 
 @property (readonly) NSManagedObjectModel *managedObjectModel;
 @property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+@property (readonly) NSManagedObjectContext *mainThreadManagedObjectContext;
  
 */
 
