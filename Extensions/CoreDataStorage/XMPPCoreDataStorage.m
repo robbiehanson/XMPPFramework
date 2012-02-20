@@ -325,7 +325,6 @@ static NSMutableSet *databaseFileNames;
 		if (!result)
 		{
 			result = [stream myJID];
-			
 			if (result)
 			{
 				[myJidCache setObject:result forKey:key];
@@ -770,13 +769,10 @@ static NSMutableSet *databaseFileNames;
 		[[self class] unregisterDatabaseFileName:databaseFileName];
 	}
 	
-	
 	if (storageQueue)
 	{
 		dispatch_release(storageQueue);
 	}
-	
-	
 }
 
 @end

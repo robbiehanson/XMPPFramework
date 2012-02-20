@@ -11,7 +11,14 @@
 
 @interface XMPPCapabilitiesCoreDataStorage : XMPPCoreDataStorage <XMPPCapabilitiesStorage>
 {
-	// Inherits protected variables from XMPPCoreDataStorage
+	/* Inherited protected variables from XMPPCoreDataStorage
+	
+	NSString *databaseFileName;
+	NSUInteger saveThreshold;
+	
+	dispatch_queue_t storageQueue;
+	 
+	*/
 }
 
 /**
@@ -26,10 +33,22 @@
 **/
 + (XMPPCapabilitiesCoreDataStorage *)sharedInstance;
 
-// 
-// This class inherits from XMPPCoreDataStorage.
-// 
-// Please see the XMPPCoreDataStorage header file for more information.
-// 
+
+/* Inherited from XMPPCoreDataStorage
+ * Please see the XMPPCoreDataStorage header file for extensive documentation.
+ 
+- (id)initWithDatabaseFilename:(NSString *)databaseFileName;
+- (id)initWithInMemoryStore;
+
+@property (readonly) NSString *databaseFileName;
+ 
+@property (readwrite) NSUInteger saveThreshold;
+
+@property (readonly) NSManagedObjectModel *managedObjectModel;
+@property (readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+@property (readonly) NSManagedObjectContext *mainThreadManagedObjectContext;
+ 
+*/
 
 @end
