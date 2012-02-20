@@ -3001,7 +3001,7 @@ enum XMPPStreamConfig
 	else
 	{
         // It appears the server didn't allow our resource choice
-        // First check if we want an try and alternative resource
+        // First check if we want to try an alternative resource
         
         NSString *alternativeResource = nil;
         
