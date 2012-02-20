@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="878" systemVersion="11D50b" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="XMPPMessageArchivingCoreDataObject" representedClassName="XMPPMessageArchivingCoreDataObject" syncable="YES">
+        <attribute name="bareJid" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="bareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="message" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="messageStr" attributeType="String" syncable="YES"/>
+        <attribute name="outgoing" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="thread" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="XMPPMessageArchivingCoreDataObject" positionX="160" positionY="192" width="128" height="150"/>
+    </elements>
+</model>
