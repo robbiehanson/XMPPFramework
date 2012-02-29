@@ -1,7 +1,7 @@
-#import "XMPPMessageArchivingCoreDataStorageObject.h"
+#import "XMPPMessageArchiving_Message_CoreDataObject.h"
 
 
-@interface XMPPMessageArchivingCoreDataStorageObject ()
+@interface XMPPMessageArchiving_Message_CoreDataObject ()
 
 @property(nonatomic,strong) XMPPMessage * primitiveMessage;
 @property(nonatomic,strong) NSString * primitiveMessageStr;
@@ -11,14 +11,16 @@
 
 @end
 
-@implementation XMPPMessageArchivingCoreDataStorageObject
+@implementation XMPPMessageArchiving_Message_CoreDataObject
 
 @dynamic message, primitiveMessage;
 @dynamic messageStr, primitiveMessageStr;
 @dynamic bareJid, primitiveBareJid;
 @dynamic bareJidStr, primitiveBareJidStr;
-@dynamic outgoing;
+@dynamic body;
 @dynamic thread;
+@dynamic outgoing;
+@dynamic timestamp;
 @dynamic streamBareJidStr;
 
 #pragma mark Transient message
@@ -115,6 +117,26 @@
 	
 	[self didChangeValueForKey:@"bareJid"];
 	[self didChangeValueForKey:@"bareJidStr"];
+}
+
+#pragma mark Helper isOutgoing
+
+- (BOOL)isOutgoing
+{
+	return [self.outgoing boolValue];
+}
+
+- (void)setIsOutgoing:(BOOL)flag
+{
+	self.outgoing = [NSNumber numberWithBool:flag];
+}
+
+#pragma mark Hooks
+
+- (void)willInsertObject
+{
+	// If you extend XMPPMessageArchiving_Message_CoreDataObject,
+	// you can override this method to use as a hook to set your own custom properties.
 }
 
 @end
