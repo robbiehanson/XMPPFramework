@@ -2,7 +2,8 @@
 
 #import "XMPPCoreDataStorage.h"
 #import "XMPPMessageArchiving.h"
-#import "XMPPMessageArchivingCoreDataStorageObject.h"
+#import "XMPPMessageArchiving_Message_CoreDataObject.h"
+#import "XMPPMessageArchiving_Contact_CoreDataObject.h"
 
 
 @interface XMPPMessageArchivingCoreDataStorage : XMPPCoreDataStorage <XMPPMessageArchivingStorage>
@@ -29,6 +30,13 @@
  * concurrent writes to multiple databases.
 **/
 + (XMPPMessageArchivingCoreDataStorage *)sharedInstance;
+
+
+@property (strong) NSString *messageEntityName;
+@property (strong) NSString *contactEntityName;
+
+- (NSEntityDescription *)messageEntity:(NSManagedObjectContext *)moc;
+- (NSEntityDescription *)contactEntity:(NSManagedObjectContext *)moc;
 
 
 /* Inherited from XMPPCoreDataStorage

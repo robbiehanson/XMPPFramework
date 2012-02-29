@@ -42,12 +42,12 @@
  *       you can still take advantage of the preference methods to configure various options,
  *       such as how long to store messages, prefs for individual contacts, etc.
 **/
-@property (readwrite) BOOL clientSideMessageArchivingOnly;
+@property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
 
 /**
  * 
 **/
-@property (readwrite) NSXMLElement *preferences;
+@property (readwrite, copy) NSXMLElement *preferences;
 
 @end
 

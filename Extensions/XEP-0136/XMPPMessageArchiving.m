@@ -295,7 +295,28 @@
 		match = [preferences elementForName:@"default"];
 	}
 	
-	return [match attributeBoolValueForName:@"save" withDefaultValue:YES];
+	if (match == nil)
+	{
+		XMPPLogWarn(@"%@: No message archive rule found for message! Discarding...");
+		return NO;
+	}
+	
+	// The 'save' attribute specifies the user's default setting for Save Mode.
+	// The allowable values are:
+	// 
+	// - body    : the saving entity SHOULD save only <body/> elements.
+	// - false   : the saving entity MUST save nothing.
+	// - message : the saving entity SHOULD save the full XML content of each <message/> element.
+	// - stream  : the saving entity SHOULD save every byte that passes over the stream in either direction.
+	// 
+	// Note: We currently only support body, and treat values of 'message' or 'stream' the same as 'body'.
+	
+	NSString *save = [[match attributeStringValueForName:@"save"] lowercaseString];
+	
+	if ([save isEqualToString:@"false"])
+		return NO;
+	else
+		return YES;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
