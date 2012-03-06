@@ -38,6 +38,15 @@
 - (NSEntityDescription *)messageEntity:(NSManagedObjectContext *)moc;
 - (NSEntityDescription *)contactEntity:(NSManagedObjectContext *)moc;
 
+- (XMPPMessageArchiving_Contact_CoreDataObject *)contactForMessage:(XMPPMessageArchiving_Message_CoreDataObject *)msg;
+
+- (XMPPMessageArchiving_Contact_CoreDataObject *)contactWithJid:(XMPPJID *)contactJid
+                                                      streamJid:(XMPPJID *)streamJid
+                                           managedObjectContext:(NSManagedObjectContext *)moc;
+
+- (XMPPMessageArchiving_Contact_CoreDataObject *)contactWithBareJidStr:(NSString *)contactBareJidStr
+                                                      streamBareJidStr:(NSString *)streamBareJidStr
+                                                  managedObjectContext:(NSManagedObjectContext *)moc;
 
 /* Inherited from XMPPCoreDataStorage
  * Please see the XMPPCoreDataStorage header file for extensive documentation.

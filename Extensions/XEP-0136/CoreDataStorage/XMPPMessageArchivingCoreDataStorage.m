@@ -62,14 +62,59 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 #pragma mark Internal API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (XMPPMessageArchiving_Contact_CoreDataObject *)contactWithBareJidStr:(NSString *)bareJidStr
-                                                      streamBareJidStr:(NSString *)streamBareJidStr
+- (void)willInsertMessage:(XMPPMessageArchiving_Message_CoreDataObject *)message
 {
-	NSManagedObjectContext *moc = [self managedObjectContext];
+	// Override hook
+}
+
+- (void)willInsertContact:(XMPPMessageArchiving_Contact_CoreDataObject *)contact
+{
+	// Override hook
+}
+
+- (void)didUpdateContact:(XMPPMessageArchiving_Contact_CoreDataObject *)contact
+{
+	// Override hook
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Public API
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (XMPPMessageArchiving_Contact_CoreDataObject *)contactForMessage:(XMPPMessageArchiving_Message_CoreDataObject *)msg
+{
+	// Potential override hook
+	
+	return [self contactWithBareJidStr:msg.bareJidStr
+	                  streamBareJidStr:msg.streamBareJidStr
+	              managedObjectContext:msg.managedObjectContext];
+}
+
+- (XMPPMessageArchiving_Contact_CoreDataObject *)contactWithJid:(XMPPJID *)contactJid
+                                                      streamJid:(XMPPJID *)streamJid
+                                           managedObjectContext:(NSManagedObjectContext *)moc
+{
+	return [self contactWithBareJidStr:[contactJid bare]
+	                  streamBareJidStr:[streamJid bare]
+	              managedObjectContext:moc];
+}
+
+- (XMPPMessageArchiving_Contact_CoreDataObject *)contactWithBareJidStr:(NSString *)contactBareJidStr
+                                                      streamBareJidStr:(NSString *)streamBareJidStr
+                                                  managedObjectContext:(NSManagedObjectContext *)moc
+{
 	NSEntityDescription *entity = [self contactEntity:moc];
 	
-	NSPredicate *predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ AND streamBareJidStr == %@",
-	                                                              bareJidStr, streamBareJidStr];
+	NSPredicate *predicate;
+	if (streamBareJidStr)
+	{
+		predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ AND streamBareJidStr == %@",
+	                                                              contactBareJidStr, streamBareJidStr];
+	}
+	else
+	{
+		predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@", contactBareJidStr];
+	}
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 	[fetchRequest setEntity:entity];
@@ -89,10 +134,6 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 		return (XMPPMessageArchiving_Contact_CoreDataObject *)[results lastObject];
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Public API
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (NSString *)messageEntityName
 {
@@ -187,6 +228,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	[self scheduleBlock:^{
 		
 		NSManagedObjectContext *moc = [self managedObjectContext];
+		XMPPJID *myJid = [self myJIDForXMPPStream:xmppStream];
 		
 		// Insert new message
 		
@@ -210,16 +252,15 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 		archivedMessage.thread = [[message elementForName:@"thread"] stringValue];
 		archivedMessage.isOutgoing = isOutgoing;
 		
-		archivedMessage.streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+		archivedMessage.streamBareJidStr = [myJid bare];
 		
-		[archivedMessage willInsertObject]; // Override hook
+		[archivedMessage willInsertObject];       // Override hook
+		[self willInsertMessage:archivedMessage]; // Override hook
 		[moc insertObject:archivedMessage];
 		
 		// Create or update contact
 		
-		XMPPMessageArchiving_Contact_CoreDataObject *contact =
-		    [self contactWithBareJidStr:archivedMessage.bareJidStr streamBareJidStr:archivedMessage.streamBareJidStr];
-		
+		XMPPMessageArchiving_Contact_CoreDataObject *contact = [self contactForMessage:archivedMessage];
 		if (contact == nil)
 		{
 			contact = (XMPPMessageArchiving_Contact_CoreDataObject *)
@@ -232,16 +273,20 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 			contact.mostRecentMessageBody = archivedMessage.body;
 			contact.mostRecentMessageOutgoing = [NSNumber numberWithBool:isOutgoing];
 			
-			[contact willInsertObject]; // Override hook
+			[contact willInsertObject];       // Override hook
+			[self willInsertContact:contact]; // Override hook
 			[moc insertObject:contact];
 		}
 		else
 		{
+			contact.bareJid = archivedMessage.bareJid; // Always set to be safe (subclassing)
+			
 			contact.mostRecentMessageTimestamp = [[NSDate alloc] init];
 			contact.mostRecentMessageBody = archivedMessage.body;
 			contact.mostRecentMessageOutgoing = [NSNumber numberWithBool:isOutgoing];
 			
-			[contact didUpdateObject];  // Override hook
+			[contact didUpdateObject];       // Override hook
+			[self didUpdateContact:contact]; // Override hook
 		}
 	}];
 }

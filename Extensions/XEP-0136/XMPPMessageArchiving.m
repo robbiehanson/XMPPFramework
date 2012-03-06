@@ -352,12 +352,49 @@
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	if ([iq isResultIQ])
+	NSString *type = [iq type];
+	
+	if ([type isEqualToString:@"result"])
 	{
 		NSXMLElement *pref = [iq elementForName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
 		if (pref)
 		{
 			[self setPreferences:pref];
+		}
+	}
+	else if ([type isEqualToString:@"set"])
+	{
+		// We receive the following type of IQ when we send a chat message within facebook from another device:
+		// 
+		// <iq from="chat.facebook.com" to="-121201407@chat.facebook.com/e49b026a_4BA226A73192D type="set">
+		//   <own-message xmlns="http://www.facebook.com/xmpp/messages" to="-123@chat.facebook.com" self="false">
+		//     <body>Hi Jilr</body>
+		//   </own-message>
+		// </iq>
+		
+		NSXMLElement *ownMessage = [iq elementForName:@"own-message" xmlns:@"http://www.facebook.com/xmpp/messages"];
+		if (ownMessage)
+		{
+			BOOL isSelf = [ownMessage attributeBoolValueForName:@"self" withDefaultValue:NO];
+			if (!isSelf)
+			{
+				NSString *bodyStr = [[ownMessage elementForName:@"body"] stringValue];
+				if ([bodyStr length] > 0)
+				{
+					NSXMLElement *body = [NSXMLElement elementWithName:@"body" stringValue:bodyStr];
+					
+					XMPPJID *to = [XMPPJID jidWithString:[ownMessage attributeStringValueForName:@"to"]];
+					XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:to];
+					[message addChild:body];
+					
+					if ([self shouldArchiveMessage:message outgoing:YES xmppStream:sender])
+					{
+						[xmppMessageArchivingStorage archiveMessage:message outgoing:YES xmppStream:sender];
+					}
+				}
+			}
+			
+			return YES;
 		}
 	}
 	
