@@ -44,10 +44,15 @@
 
 - (void)setBareJid:(XMPPJID *)bareJid
 {
+	if ([self.bareJid isEqualToJID:bareJid options:XMPPJIDCompareBare])
+	{
+		return; // No change
+	}
+	
 	[self willChangeValueForKey:@"bareJid"];
 	[self willChangeValueForKey:@"bareJidStr"];
 	
-	self.primitiveBareJid = bareJid;
+	self.primitiveBareJid = [bareJid bareJID];
 	self.primitiveBareJidStr = [bareJid bare];
 	
 	[self didChangeValueForKey:@"bareJid"];

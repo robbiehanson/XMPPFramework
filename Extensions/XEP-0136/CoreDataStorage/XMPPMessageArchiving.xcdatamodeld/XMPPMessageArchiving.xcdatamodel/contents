@@ -5,8 +5,7 @@
         <attribute name="bareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="mostRecentMessageBody" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="mostRecentMessageOutgoing" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
-        <attribute name="mostRecentMessageTimestamp" attributeType="Date" indexed="YES" syncable="YES"/>
-        <attribute name="profileImageUrl" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="mostRecentMessageTimestamp" optional="YES" attributeType="Date" indexed="YES" syncable="YES"/>
         <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
     </entity>
     <entity name="XMPPMessageArchiving_Message_CoreDataObject" representedClassName="XMPPMessageArchiving_Message_CoreDataObject" syncable="YES">
@@ -21,7 +20,7 @@
         <attribute name="timestamp" attributeType="Date" syncable="YES"/>
     </entity>
     <elements>
-        <element name="XMPPMessageArchiving_Contact_CoreDataObject" positionX="160" positionY="192" width="128" height="150"/>
+        <element name="XMPPMessageArchiving_Contact_CoreDataObject" positionX="160" positionY="192" width="128" height="135"/>
         <element name="XMPPMessageArchiving_Message_CoreDataObject" positionX="160" positionY="192" width="128" height="180"/>
     </elements>
 </model>
