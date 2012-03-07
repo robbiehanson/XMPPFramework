@@ -66,7 +66,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	
 	NSString *appId;
 	
-	XMPPJID *myJID;
+	XMPPJID *myJID_setByClient;
+	XMPPJID *myJID_setByServer;
 	XMPPJID *remoteJID;
 	
 	XMPPPresence *myPresence;

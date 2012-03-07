@@ -120,7 +120,7 @@ enum XMPPStreamConfig
 	numberOfBytesSent = 0;
 	numberOfBytesReceived = 0;
 	
-	parser = [(XMPPParser *)[XMPPParser alloc] initWithDelegate:self];
+	parser = [[XMPPParser alloc] initWithDelegate:self];
 	
 	hostPort = 5222;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
@@ -150,7 +150,7 @@ enum XMPPStreamConfig
 		[self commonInit];
 		
 		// Initialize socket
-		asyncSocket = [(GCDAsyncSocket *)[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
+		asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
 	}
 	return self;
 }
@@ -167,7 +167,7 @@ enum XMPPStreamConfig
 		[self commonInit];
 		
 		// Store JID
-		myJID = jid;
+		myJID_setByClient = jid;
         
         // We do not initialize the socket, since the connectP2PWithSocket: method might be used.
         
@@ -184,13 +184,20 @@ enum XMPPStreamConfig
 **/
 - (id)initWithFacebookAppId:(NSString *)fbAppId 
 {
-    if ((self = [self init]))
-    {
-        self.appId = fbAppId;
-        self.myJID = [XMPPJID jidWithString:XMPPFacebookChatHostName];
-        self.hostName = XMPPFacebookChatHostName;
-    }
-    return self;
+	if ((self = [self init]))
+	{
+		appId = fbAppId;
+		myJID_setByClient = [XMPPJID jidWithString:XMPPFacebookChatHostName];
+		
+		// As of October 8, 2011, Facebook doesn't have their XMPP SRV records set.
+		// And, as per the XMPP specification, we MUST check the XMPP SRV records for an IP address,
+		// before falling back to a traditional A record lookup.
+		// 
+		// So we're setting the hostname as a minor optimization to avoid the SRV timeout delay.
+		
+		hostName = XMPPFacebookChatHostName;
+	}
+	return self;
 }
 
 /**
@@ -202,22 +209,15 @@ enum XMPPStreamConfig
 	dispatch_release(xmppQueue);
 	dispatch_release(parserQueue);
 	
-	
 	[asyncSocket setDelegate:nil delegateQueue:NULL];
 	[asyncSocket disconnect];
 	
 	[parser setDelegate:nil];
 	
-	
-	
-	
-	
 	if (keepAliveTimer)
 	{
 		dispatch_source_cancel(keepAliveTimer);
 	}
-	
-	
     
 	for (XMPPElementReceipt *receipt in receipts)
 	{
@@ -228,8 +228,6 @@ enum XMPPStreamConfig
 	                     onThread:xmppUtilityThread
 	                   withObject:nil
 	                waitUntilDone:NO];
-	
-	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,40 +342,81 @@ enum XMPPStreamConfig
 
 - (XMPPJID *)myJID
 {
+	__block XMPPJID *result = nil;
+	
+	dispatch_block_t block = ^{
+		
+		if (myJID_setByServer)
+			result = myJID_setByServer;
+		else
+			result = myJID_setByClient;
+	};
+	
 	if (dispatch_get_current_queue() == xmppQueue)
-	{
-		return myJID;
-	}
+		block();
 	else
-	{
-		__block XMPPJID *result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = myJID;
-		});
-		
-		return result;
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
-- (void)setMyJID:(XMPPJID *)newMyJID
+- (void)setMyJID_setByClient:(XMPPJID *)newMyJID
 {
 	// XMPPJID is an immutable class (copy == retain)
 	
 	dispatch_block_t block = ^{
-	
-		if (myJID != newMyJID)
-		{
-			myJID = newMyJID;
-		}
 		
-		[[NSNotificationCenter defaultCenter] postNotificationName:XMPPStreamDidChangeMyJIDNotification object:self];
+		if (![myJID_setByClient isEqualToJID:newMyJID])
+		{
+			myJID_setByClient = newMyJID;
+			
+			if (myJID_setByServer == nil)
+			{
+				[[NSNotificationCenter defaultCenter] postNotificationName:XMPPStreamDidChangeMyJIDNotification
+				                                                    object:self];
+			}
+		}
 	};
 	
 	if (dispatch_get_current_queue() == xmppQueue)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
+}
+
+- (void)setMyJID_setByServer:(XMPPJID *)newMyJID
+{
+	// XMPPJID is an immutable class (copy == retain)
+	
+	dispatch_block_t block = ^{
+		
+		if (![myJID_setByServer isEqualToJID:newMyJID])
+		{
+			XMPPJID *oldMyJID;
+			if (myJID_setByServer)
+				oldMyJID = myJID_setByServer;
+			else
+				oldMyJID = myJID_setByClient;
+			
+			myJID_setByServer = newMyJID;
+			
+			if (![oldMyJID isEqualToJID:newMyJID])
+			{
+				[[NSNotificationCenter defaultCenter] postNotificationName:XMPPStreamDidChangeMyJIDNotification
+				                                                    object:self];
+			}
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
+}
+
+- (void)setMyJID:(XMPPJID *)newMyJID
+{
+	[self setMyJID_setByClient:newMyJID];
 }
 
 - (XMPPJID *)remoteJID
@@ -774,7 +813,7 @@ enum XMPPStreamConfig
 			return_from_block;
 		}
 		
-		if (myJID == nil)
+		if (myJID_setByClient == nil)
 		{
 			// Note: If you wish to use anonymous authentication, you should still set myJID prior to calling connect.
 			// You can simply set it to something like "anonymous@<domain>", where "<domain>" is the proper domain.
@@ -801,14 +840,6 @@ enum XMPPStreamConfig
 
 		// Notify delegates
 		[multicastDelegate xmppStreamWillConnect:self];
-        
-        // Check for Facebook Chat and set hostName if not set.
-        // As of October 8, 2011, Facebook doesn't have their XMPP SRV records configured properly
-        // and we have to wait for the SRV timeout before trying the A record.
-        if ([hostName length] == 0 && [myJID.domain isEqualToString:XMPPFacebookChatHostName])
-        {
-            self.hostName = XMPPFacebookChatHostName;
-        }
 
 		if ([hostName length] == 0)
 		{
@@ -821,7 +852,7 @@ enum XMPPStreamConfig
 			srvResults = nil;
 			srvResultsIndex = 0;
 			
-			NSString *srvName = [XMPPSRVResolver srvNameFromXMPPDomain:[myJID domain]];
+			NSString *srvName = [XMPPSRVResolver srvNameFromXMPPDomain:[myJID_setByClient domain]];
 			
 			[srvResolver startWithSRVName:srvName timeout:30.0];
 			
@@ -1347,7 +1378,7 @@ enum XMPPStreamConfig
 			return_from_block;
 		}
 		
-		if (myJID == nil)
+		if (myJID_setByClient == nil)
 		{
 			NSString *errMsg = @"You must set myJID before calling registerWithPassword:error:.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
@@ -1369,7 +1400,7 @@ enum XMPPStreamConfig
 			return_from_block;
 		}
 		
-		NSString *username = [myJID user];
+		NSString *username = [myJID_setByClient user];
 		
 		NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
 		[queryElement addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
@@ -1737,7 +1768,7 @@ enum XMPPStreamConfig
 			return_from_block;
 		}
 		
-		if (myJID == nil)
+		if (myJID_setByClient == nil)
 		{
 			NSString *errMsg = @"You must set myJID before calling authenticateWithPassword:error:.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
@@ -1776,7 +1807,7 @@ enum XMPPStreamConfig
 			// authcid: authentication identity (username)
 			// passwd : password for authcid
 			
-			NSString *username = [myJID user];
+			NSString *username = [myJID_setByClient user];
 			
 			NSString *payload = [NSString stringWithFormat:@"%C%@%C%@", 0, username, 0, password];
 			NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] base64Encoded];
@@ -1803,8 +1834,8 @@ enum XMPPStreamConfig
 			// The server does not appear to support SASL authentication (at least any type we can use)
 			// So we'll revert back to the old fashioned jabber:iq:auth mechanism
 			
-			NSString *username = [myJID user];
-			NSString *resource = [myJID resource];
+			NSString *username = [myJID_setByClient user];
+			NSString *resource = [myJID_setByClient resource];
 			
 			if ([resource length] == 0)
 			{
@@ -1931,20 +1962,18 @@ enum XMPPStreamConfig
 
 - (BOOL)isAuthenticated
 {
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		result = (flags & kIsAuthenticated) ? YES : NO;
+	};
+	
 	if (dispatch_get_current_queue() == xmppQueue)
-	{
-		return (flags & kIsAuthenticated) ? YES : NO;
-	}
+		block();
 	else
-	{
-		__block BOOL result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = (flags & kIsAuthenticated) ? YES : NO;
-		});
-		
-		return result;
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
 - (void)setIsAuthenticated:(BOOL)flag
@@ -2408,15 +2437,15 @@ enum XMPPStreamConfig
 	NSString *temp, *s2;
     if ([self isP2P])
     {
-		if (myJID && remoteJID)
+		if (myJID_setByClient && remoteJID)
 		{
 			temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' from='%@' to='%@'>";
-			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID bare], [remoteJID bare]];
+			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID_setByClient bare], [remoteJID bare]];
 		}
-		else if (myJID)
+		else if (myJID_setByClient)
 		{
 			temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' from='%@'>";
-			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID bare]];
+			s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID_setByClient bare]];
 		}
 		else if (remoteJID)
 		{
@@ -2431,10 +2460,10 @@ enum XMPPStreamConfig
     }
     else
     {
-		if (myJID)
+		if (myJID_setByClient)
 		{
 			temp = @"<stream:stream xmlns='%@' xmlns:stream='%@' version='1.0' to='%@'>";
-            s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID domain]];
+            s2 = [NSString stringWithFormat:temp, xmlns, xmlns_stream, [myJID_setByClient domain]];
 		}
         else if ([hostName length] > 0)
         {
@@ -2523,7 +2552,7 @@ enum XMPPStreamConfig
 			NSString *expectedCertName = hostName;
 			if (expectedCertName == nil)
 			{
-				expectedCertName = [myJID domain];
+				expectedCertName = [myJID_setByClient domain];
 			}
 			
 			if ([expectedCertName length] > 0)
@@ -2606,7 +2635,7 @@ enum XMPPStreamConfig
 		// Binding is required for this connection
 		state = STATE_XMPP_BINDING;
 		
-		NSString *requestedResource = [myJID resource];
+		NSString *requestedResource = [myJID_setByClient resource];
 		
 		if ([requestedResource length] > 0)
 		{
@@ -2732,7 +2761,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-  if ([self supportsDigestMD5Authentication] || isAccessToken)
+	if ([self supportsDigestMD5Authentication] || isAccessToken)
 	{
 		// We're expecting a challenge response
 		// If we get anything else we can safely assume it's the equivalent of a failure response
@@ -2747,46 +2776,49 @@ enum XMPPStreamConfig
 		{
 			// Create authentication object from the given challenge
 			// We'll release this object at the end of this else block
-      id<XMPPSASLAuthentication> auth = nil;
-      
-      if (isAccessToken)
-      {
-        auth = [[XMPPXFacebookPlatformAuthentication alloc] initWithChallenge:response 
-                                                                        appId:self.appId 
-                                                                    accessToken:tempPassword];
-
-        // Update state
-          state = STATE_XMPP_AUTH_3;
-      }
-      else
-      {
-        auth = [[XMPPDigestAuthentication alloc] initWithChallenge:response];
-        
-        NSString *virtualHostName = [myJID domain];
-        NSString *serverHostName = hostName;
-        
-        // Sometimes the realm isn't specified
-        // In this case I believe the realm is implied as the virtual host name
-        if (![(XMPPDigestAuthentication *)auth realm])
-        {
-          if([virtualHostName length] > 0)
-            [(XMPPDigestAuthentication *)auth setRealm:virtualHostName];
-          else
-            [(XMPPDigestAuthentication *)auth setRealm:serverHostName];
-        }
-        
-        // Set digest-uri
-        if([virtualHostName length] > 0)
-          [(XMPPDigestAuthentication *)auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", virtualHostName]];
-        else
-          [(XMPPDigestAuthentication *)auth setDigestURI:[NSString stringWithFormat:@"xmpp/%@", serverHostName]];
-        
-        // Set username and password
-        [(XMPPDigestAuthentication *)auth setUsername:[myJID user] password:tempPassword];
-
-        // Update state
-        state = STATE_XMPP_AUTH_2;
-      }
+			id<XMPPSASLAuthentication> auth = nil;
+			
+			if (isAccessToken)
+			{
+				auth = [[XMPPXFacebookPlatformAuthentication alloc] initWithChallenge:response
+				                                                                appId:self.appId
+				                                                          accessToken:tempPassword];
+				
+				// Update state
+				state = STATE_XMPP_AUTH_3;
+			}
+			else
+			{
+				auth = [[XMPPDigestAuthentication alloc] initWithChallenge:response];
+				
+				NSString *virtualHostName = [myJID_setByClient domain];
+				NSString *serverHostName = hostName;
+				
+				// Sometimes the realm isn't specified.
+				// In this case I believe the realm is implied as the virtual host name.
+				if (![(XMPPDigestAuthentication *)auth realm])
+				{
+					if ([virtualHostName length] > 0)
+						[(XMPPDigestAuthentication *)auth setRealm:virtualHostName];
+					else
+						[(XMPPDigestAuthentication *)auth setRealm:serverHostName];
+				}
+				
+				// Set digestURI
+				NSString *digestURI;
+				if ([virtualHostName length] > 0)
+					digestURI = [NSString stringWithFormat:@"xmpp/%@", virtualHostName];
+				else
+					digestURI = [NSString stringWithFormat:@"xmpp/%@", serverHostName];
+				
+				[(XMPPDigestAuthentication *)auth setDigestURI:digestURI];
+				
+				// Set username and password
+				[(XMPPDigestAuthentication *)auth setUsername:[myJID_setByClient user] password:tempPassword];
+				
+				// Update state
+				state = STATE_XMPP_AUTH_2;
+			}
 			
 			// Create and send challenge response element
 			NSXMLElement *cr = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
@@ -2959,7 +2991,7 @@ enum XMPPStreamConfig
 		// Extract and save our resource (it may not be what we originally requested)
 		NSString *fullJIDStr = [r_jid stringValue];
 		
-		[self setMyJID:[XMPPJID jidWithString:fullJIDStr]];
+		[self setMyJID_setByServer:[XMPPJID jidWithString:fullJIDStr]];
 		
 		// And we may now have to do one last thing before we're ready - start an IM session
 		NSXMLElement *features = [rootElement elementForName:@"stream:features"];
@@ -3086,7 +3118,7 @@ enum XMPPStreamConfig
 		// 
 		// In other words, just try connecting to the domain specified in the JID.
 		
-		success = [self connectToHost:[myJID domain] onPort:5222 error:&connectError];
+		success = [self connectToHost:[myJID_setByClient domain] onPort:5222 error:&connectError];
 	}
 	
 	if (!success)
@@ -3289,8 +3321,9 @@ enum XMPPStreamConfig
 		tempPassword = nil;
 		
 		// Clear stored elements
-		 myPresence = nil;
-		 rootElement = nil;
+		myJID_setByServer = nil;
+		myPresence = nil;
+		rootElement = nil;
 		
 		// Stop the keep alive timer
 		if (keepAliveTimer)
