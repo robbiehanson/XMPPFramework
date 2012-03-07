@@ -24,6 +24,9 @@
 @property (nonatomic, strong) NSNumber * outgoing;    // Use isOutgoing
 @property (nonatomic, assign) BOOL isOutgoing;        // Convenience property
 
+@property (nonatomic, strong) NSNumber * composing;   // Use isComposing
+@property (nonatomic, assign) BOOL isComposing;       // Convenience property
+
 @property (nonatomic, strong) NSDate * timestamp;
 
 @property (nonatomic, strong) NSString * streamBareJidStr;
@@ -36,5 +39,14 @@
  * you can use this method as a hook to set your custom properties.
 **/
 - (void)willInsertObject;
+
+/**
+ * This method is called immediately after the message has been changed.
+ * At this point, all normal properties have been updated.
+ * 
+ * If you extend XMPPMessageArchiving_Message_CoreDataObject,
+ * you can use this method as a hook to set your custom properties.
+**/
+- (void)didUpdateObject;
 
 @end
