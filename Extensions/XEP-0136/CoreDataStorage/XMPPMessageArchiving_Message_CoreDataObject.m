@@ -20,6 +20,7 @@
 @dynamic body;
 @dynamic thread;
 @dynamic outgoing;
+@dynamic composing;
 @dynamic timestamp;
 @dynamic streamBareJidStr;
 
@@ -119,7 +120,7 @@
 	[self didChangeValueForKey:@"bareJidStr"];
 }
 
-#pragma mark Helper isOutgoing
+#pragma mark Convenience properties
 
 - (BOOL)isOutgoing
 {
@@ -131,9 +132,25 @@
 	self.outgoing = [NSNumber numberWithBool:flag];
 }
 
+- (BOOL)isComposing
+{
+	return [self.composing boolValue];
+}
+
+- (void)setIsComposing:(BOOL)flag
+{
+	self.composing = [NSNumber numberWithBool:flag];
+}
+
 #pragma mark Hooks
 
 - (void)willInsertObject
+{
+	// If you extend XMPPMessageArchiving_Message_CoreDataObject,
+	// you can override this method to use as a hook to set your own custom properties.
+}
+
+- (void)didUpdateObject
 {
 	// If you extend XMPPMessageArchiving_Message_CoreDataObject,
 	// you can override this method to use as a hook to set your own custom properties.
