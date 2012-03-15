@@ -18,6 +18,12 @@
 - (id)initWithName:(NSString *)name xmlns:(NSString *)ns;
 
 /**
+ * Extracting multiple elements.
+**/
+
+- (NSArray *)elementsForXmlns:(NSString *)ns;
+
+/**
  * Extracting a single element.
 **/
 

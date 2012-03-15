@@ -26,6 +26,26 @@
 	return self;
 }
 
+- (NSArray *)elementsForXmlns:(NSString *)ns
+{
+	NSMutableArray *elements = [NSMutableArray array];
+	
+	for (NSXMLNode *node in [self children])
+	{
+		if ([node isKindOfClass:[NSXMLElement class]])
+		{
+			NSXMLElement *element = (NSXMLElement *)node;
+			
+			if ([[element xmlns] isEqual:ns])
+			{
+				[elements addObject:element];
+			}
+		}
+	}
+	
+	return elements;
+}
+
 /**
  * This method returns the first child element for the given name (as an NSXMLElement).
  * If no child elements exist for the given name, nil is returned.
