@@ -102,7 +102,17 @@
 					return YES;
 				}
 			}
-		}
+		} else {
+            //Check if it was a publish
+            NSString *elementID = [iq attributeStringValueForName:@"id"];
+            if (elementID) {
+                NSArray * elementIDComp = [elementID componentsSeparatedByString:@":"];
+                if (elementIDComp > 0 && [[elementIDComp objectAtIndex:1] isEqualToString:@"publish_node"]) {
+                    [multicastDelegate xmppPubSub:self didPublish:iq];
+                    return YES;
+                }
+            }
+        }
 		
 		[multicastDelegate xmppPubSub:self didReceiveResult:iq];
 		return YES;
@@ -362,6 +372,45 @@
 
 	[xmppStream sendElement:iq];
 
+	return sid;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - publication methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry {
+    //<iq type='set' from='hamlet@denmark.lit/blogbot' to='pubsub.shakespeare.lit' id='publish1'>
+    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    //      <publish node='princely_musings'>
+    //          <item id='bnd81g37d61f49fgn581'>
+    //              Some content
+    //          </item>
+    //      </publish>
+    //  </pubsub>
+    //</iq>
+    
+	NSString *sid = [NSString stringWithFormat:@"%@:publish_node", xmppStream.generateUUID];
+    
+    //create iq message
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
+    
+    //create child nodes
+    NSXMLElement * pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+    
+    NSXMLElement * publish = [NSXMLElement elementWithName:@"publish"];
+    [publish addAttributeWithName:@"node" stringValue:node];
+    
+    NSXMLElement * item = [NSXMLElement elementWithName:@"item"];
+    
+    //create node hierarchy
+    [item addChild:entry];
+    [publish addChild:item];
+    [pubsub addChild:publish];
+    [iq addChild:pubsub];
+
+	[xmppStream sendElement:iq];
+    
 	return sid;
 }
 
