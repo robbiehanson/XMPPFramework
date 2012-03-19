@@ -16,7 +16,6 @@
 @class XMPPJID;
 @class XMPPIQ;
 @class XMPPMessage;
-@class XMPPItem;
 
 @interface XMPPPubSub : XMPPModule
 {
