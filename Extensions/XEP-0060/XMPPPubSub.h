@@ -2,15 +2,21 @@
 //  XMPPPubSub.h
 //
 //  Created by Duncan Robertson [duncan@whomwah.com]
+//  Updated by Nadim for Novedia Group - Hubiquitus project[hubiquitus.com]
 //
 
 #import <Foundation/Foundation.h>
 #import "XMPPModule.h"
 
+#if TARGET_OS_IPHONE
+#import "DDXML.h"
+#endif
+
 @class XMPPStream;
 @class XMPPJID;
 @class XMPPIQ;
 @class XMPPMessage;
+@class XMPPItem;
 
 @interface XMPPPubSub : XMPPModule
 {
@@ -28,6 +34,8 @@
 - (NSString *)deleteNode:(NSString *)node;
 - (NSString *)configureNode:(NSString *)node;
 - (NSString *)allItemsForNode:(NSString *)node;
+- (NSString *)publishToNode:(NSString*)node entry:(NSXMLElement*)entry;
+
 
 @end
 
@@ -39,5 +47,6 @@
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveMessage:(XMPPMessage *)message;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveError:(XMPPIQ *)iq;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveResult:(XMPPIQ *)iq;
+- (void)xmppPubSub:(XMPPPubSub *)sender didPublish:(XMPPIQ *)iq;
 
 @end
