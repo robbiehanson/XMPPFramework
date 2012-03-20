@@ -107,9 +107,17 @@
             NSString *elementID = [iq attributeStringValueForName:@"id"];
             if (elementID) {
                 NSArray * elementIDComp = [elementID componentsSeparatedByString:@":"];
-                if (elementIDComp > 0 && [[elementIDComp objectAtIndex:1] isEqualToString:@"publish_node"]) {
-                    [multicastDelegate xmppPubSub:self didPublish:iq];
-                    return YES;
+                if (elementIDComp > 0) {
+                    NSString * opType = [elementIDComp objectAtIndex:1];
+                    
+                    if ([opType isEqualToString:@"publish_node"]) {
+                        [multicastDelegate xmppPubSub:self didPublish:iq];
+                        return YES;
+                        
+                    } else if([opType isEqualToString:@"unsubscribe_node"]) {
+                        [multicastDelegate xmppPubSub:self didUnsubscribe:iq];
+                        return YES;
+                    }
                 }
             }
         }

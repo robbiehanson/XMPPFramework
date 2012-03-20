@@ -16,7 +16,6 @@
 @class XMPPJID;
 @class XMPPIQ;
 @class XMPPMessage;
-@class XMPPItem;
 
 @interface XMPPPubSub : XMPPModule
 {
@@ -43,6 +42,7 @@
 @optional
 
 - (void)xmppPubSub:(XMPPPubSub *)sender didSubscribe:(XMPPIQ *)iq;
+- (void)xmppPubSub:(XMPPPubSub *)sender didUnsubscribe:(XMPPIQ *)iq;
 - (void)xmppPubSub:(XMPPPubSub *)sender didCreateNode:(NSString *)node withIQ:(XMPPIQ *)iq;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveMessage:(XMPPMessage *)message;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveError:(XMPPIQ *)iq;
