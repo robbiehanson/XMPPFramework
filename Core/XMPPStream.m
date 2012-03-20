@@ -2289,7 +2289,7 @@ enum XMPPStreamConfig
 }
 
 /**
- * This methods handles sending an XML fragment.
+ * This methods handles sending an XML stanza.
  * If the XMPPStream is not connected, this method does nothing.
 **/
 - (void)sendElement:(NSXMLElement *)element
@@ -2311,7 +2311,7 @@ enum XMPPStreamConfig
 }
 
 /**
- * This method handles sending an XML fragment.
+ * This method handles sending an XML stanza.
  * If the XMPPStream is not connected, this method does nothing.
  * 
  * After the element has been successfully sent,
@@ -2348,6 +2348,22 @@ enum XMPPStreamConfig
 		
 		*receiptPtr = receipt;
 	}
+}
+
+- (void)resendMyPresence
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		if (myPresence && [[myPresence type] isEqualToString:@"available"])
+		{
+			[self sendElement:myPresence];
+		}
+	}};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
