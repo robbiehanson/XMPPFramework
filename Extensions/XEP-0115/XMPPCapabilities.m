@@ -737,11 +737,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// and ended up taking so long as to not be available when the presence was sent,
 	// we should re-broadcast our presence now that we know what our capabilities are.
 	
-	XMPPPresence *myPresence = [xmppStream myPresence];
-	if (myPresence)
-	{
-		[xmppStream sendElement:myPresence];
-	}
+	[xmppStream resendMyPresence];
 }
 
 - (void)recollectMyCapabilities

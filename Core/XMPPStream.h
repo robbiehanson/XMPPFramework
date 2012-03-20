@@ -229,6 +229,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * In other words, it represents the presence as others see us.
  * 
  * This excludes presence elements sent concerning subscriptions, MUC rooms, etc.
+ * 
+ * @see resendMyPresence
 **/
 @property (strong, readonly) XMPPPresence *myPresence;
 
@@ -514,6 +516,20 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
 - (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt **)receiptPtr;
+
+/**
+ * Fetches and resends the myPresence element (if available) in a single atomic operation.
+ * 
+ * There are various xmpp extensions that hook into the xmpp stream and append information to outgoing presence stanzas.
+ * For example, the XMPPCapabilities module automatically appends capabilities information (as a hash).
+ * When these modules need to update/change their appended information,
+ * they should use this method to do so.
+ * 
+ * The alternative is to fetch the myPresence element, and resend it manually using the sendElement method.
+ * However, that is 2 seperate operations, and the user, may send a different presence element inbetween.
+ * Using this method guarantees everything is done as an atomic operation.
+**/
+- (void)resendMyPresence;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Module Plug-In System
