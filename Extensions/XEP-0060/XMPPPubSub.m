@@ -339,7 +339,7 @@
 }
 
 
-- (NSString*)allItemsForNode:(NSString*)node
+- (NSString*)discoverItemsForNode:(NSString*)node
 {
 	// <iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='nodes2'>
 	//   <query xmlns='http://jabber.org/protocol/disco#items' node='blogs'/>
@@ -357,6 +357,33 @@
 
 	[xmppStream sendElement:iq];
 
+	return sid;
+}
+
+- (NSString*)allItemsForNode:(NSString*)node
+{
+	//<iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='items1'>
+    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    //      <items node='princely_musings'/>
+    //  </pubsub>
+    //</iq>
+    
+	NSString *sid = [NSString stringWithFormat:@"%@:allitems_for_node", xmppStream.generateUUID];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
+    NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+    NSXMLElement *items = [NSXMLElement elementWithName:@"items"];
+    
+    if (node != nil) {
+        [items addAttributeWithName:@"node" stringValue:node];
+    }
+
+    [pubsub addChild:items];
+    [iq addChild:pubsub];
+    
+	[xmppStream sendElement:iq];
+    
+    NSLog(@"command : %@", iq);
+    
 	return sid;
 }
 

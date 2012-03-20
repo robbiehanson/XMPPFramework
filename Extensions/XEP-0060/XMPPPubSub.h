@@ -34,6 +34,7 @@
 - (NSString *)configureNode:(NSString *)node;
 - (NSString *)allItemsForNode:(NSString *)node;
 - (NSString *)publishToNode:(NSString*)node entry:(NSXMLElement*)entry;
+- (NSString*)discoverItemsForNode:(NSString*)node;
 
 
 @end
