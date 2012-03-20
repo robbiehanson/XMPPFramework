@@ -382,8 +382,6 @@
     
 	[xmppStream sendElement:iq];
     
-    NSLog(@"command : %@", iq);
-    
 	return sid;
 }
 
