@@ -28,13 +28,16 @@
 @property (nonatomic, readonly) XMPPJID *serviceJID;
 
 - (NSString *)subscribeToNode:(NSString *)node withOptions:(NSDictionary *)options;
+- (NSString *)unsubscribeFromNode:(NSString *)node withSubid:(NSString *)subid;
 - (NSString *)unsubscribeFromNode:(NSString *)node;
 - (NSString *)createNode:(NSString *)node withOptions:(NSDictionary *)options;
 - (NSString *)deleteNode:(NSString *)node;
 - (NSString *)configureNode:(NSString *)node;
 - (NSString *)allItemsForNode:(NSString *)node;
 - (NSString *)publishToNode:(NSString*)node entry:(NSXMLElement*)entry;
-- (NSString*)discoverItemsForNode:(NSString*)node;
+- (NSString *)discoverItemsForNode:(NSString*)node;
+- (NSString *)getSubscriptions;
+- (NSString *)getSubscriptionsForNode:(NSString*)node;
 
 
 @end

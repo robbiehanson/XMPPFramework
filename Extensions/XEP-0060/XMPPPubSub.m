@@ -210,8 +210,11 @@
 	return sid;
 }
 
+- (NSString *)unsubscribeFromNode:(NSString*)node {
+    return [self unsubscribeFromNode:node withSubid:nil];
+}
 
-- (NSString *)unsubscribeFromNode:(NSString*)node
+- (NSString *)unsubscribeFromNode:(NSString *)node withSubid:(NSString *)subid 
 {
 	// <iq type='set' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='unsub1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
@@ -225,7 +228,11 @@
 	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
 	NSXMLElement *subscribe = [NSXMLElement elementWithName:@"unsubscribe"];
 	[subscribe addAttributeWithName:@"node" stringValue:node];
-	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID full]];
+	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID bare]];
+    
+    if (subid) {
+        [subscribe addAttributeWithName:@"subid" stringValue:subid];
+    }
 
 	// join them all together
 	[ps addChild:subscribe];
@@ -236,6 +243,36 @@
 	return sid;
 }
 
+- (NSString *)getSubscriptions {
+    return [self getSubscriptionsForNode:nil];
+}
+
+- (NSString *)getSubscriptionsForNode:(NSString *)node {
+    //<iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='subscriptions1'>
+    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    //      <subscriptions/>
+    //  </pubsub>
+    //</iq>
+    
+	NSString *sid = [NSString stringWithFormat:@"%@:subscriptions_for_node", xmppStream.generateUUID]; 
+    
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
+	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+	NSXMLElement *subscriptions = [NSXMLElement elementWithName:@"subscriptions"];
+    
+    if (node) {
+        [subscriptions addAttributeWithName:@"node" stringValue:node];
+    }
+    
+	// join them all together
+	[ps addChild:subscriptions];
+	[iq addChild:ps];
+    
+	[xmppStream sendElement:iq];
+    
+	return sid;
+    
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Node Admin
