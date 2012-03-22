@@ -91,9 +91,36 @@
 - (void)didCreateManagedObjectContext;
 
 /**
- * Override me if you need to do anything special after changes have been saved to disk. 
+ * Override me if you need to do anything special just before changes are saved to disk.
+ * 
+ * This method will be invoked on the storageQueue.
+ * The default implementation does nothing.
+**/
+- (void)willSaveManagedObjectContext;
+
+/**
+ * Override me if you need to do anything special after changes have been saved to disk.
+ * 
+ * This method will be invoked on the storageQueue.
+ * The default implementation does nothing.
 **/
 - (void)didSaveManagedObjectContext;
+
+/**
+ * This method will be invoked on the main thread,
+ * after the mainThreadManagedObjectContext has merged changes from another context.
+ * 
+ * This method may be useful if you have code dependent upon when changes the datastore hit the user interface.
+ * For example, you want to play a sound when a message is received.
+ * You could play the sound right away, from the background queue, but the timing may be slightly off because
+ * the user interface won't update til the changes have been saved to disk,
+ * and then propogated to the managedObjectContext of the main thread.
+ * Alternatively you could set a flag, and then hook into this method
+ * to play the sound at the exact moment the propogation hits the main thread.
+ * 
+ * The default implementation does nothing.
+**/
+- (void)mainThreadManagedObjectContextDidMergeChanges;
 
 #pragma mark Setup
 

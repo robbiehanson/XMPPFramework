@@ -53,6 +53,7 @@
 	
 	NSString *databaseFileName;
 	NSUInteger saveThreshold;
+	NSUInteger saveCount;
 	
 	dispatch_queue_t storageQueue;
 }
@@ -89,11 +90,12 @@
 @property (readwrite) NSUInteger saveThreshold;
 
 /**
- * Provides access the the thread-safe components of the CoreData stack.
+ * Provides access to the the thread-safe components of the CoreData stack.
  * 
  * Please note:
  * The managedObjectContext is private to the storageQueue.
- * You must create and use your own managedObjectContext.
+ * If you're on the main thread you can use the mainThreadManagedObjectContext.
+ * Otherwise you must create and use your own managedObjectContext.
  *  
  * If you think you can simply add a property for the private managedObjectContext,
  * then you need to go read the documentation for core data,

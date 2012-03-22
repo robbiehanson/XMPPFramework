@@ -157,7 +157,14 @@ static NSMutableSet *databaseFileNames;
     // Override me, if needed, to provide customized behavior.
 	// 
 	// For example, if you are using the database for non-persistent data and the model changes, 
-    // you may want to delete the database file if it already exists on disk.
+	// you may want to delete the database file if it already exists on disk.
+	// 
+	// E.g:
+	// 
+	// [[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
+	// [self addPersistentStoreWithPath:storePath error:NULL];
+	//
+	// This method is invoked on the storageQueue.
     
 #if TARGET_OS_IPHONE
     XMPPLogError(@"%@:\n"
@@ -182,13 +189,30 @@ static NSMutableSet *databaseFileNames;
 - (void)didCreateManagedObjectContext
 {
 	// Override me to provide customized behavior.
-	// 
 	// For example, you may want to perform cleanup of any non-persistent data before you start using the database.
+	// 
+	// This method is invoked on the storageQueue.
+}
+
+- (void)willSaveManagedObjectContext
+{
+	// Override me if you need to do anything special just before changes are saved to disk.
+	// 
+	// This method is invoked on the storageQueue.
 }
 
 - (void)didSaveManagedObjectContext
 {
 	// Override me if you need to do anything special after changes have been saved to disk.
+	// 
+	// This method is invoked on the storageQueue.
+}
+
+- (void)mainThreadManagedObjectContextDidMergeChanges
+{
+	// Override me if you want to do anything special when changes get propogated to the main thread.
+	// 
+	// This method is invoked on the main thread.
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -631,6 +655,7 @@ static NSMutableSet *databaseFileNames;
 		dispatch_async(dispatch_get_main_queue(), ^{
 			
 			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+			[self mainThreadManagedObjectContextDidMergeChanges];
 		});
     }
 }
@@ -658,9 +683,12 @@ static NSMutableSet *databaseFileNames;
 	// So there's no need for us to do it here, especially since this method is usually
 	// called from maybeSave below, which already does this check.
 	
+	[self willSaveManagedObjectContext];
+	
 	NSError *error = nil;
 	if ([[self managedObjectContext] save:&error])
 	{
+		saveCount++;
 		[self didSaveManagedObjectContext];
 	}
 	else
