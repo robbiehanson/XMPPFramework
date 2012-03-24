@@ -102,7 +102,25 @@
 					return YES;
 				}
 			}
-		}
+		} else {
+            //Check if it was a publish
+            NSString *elementID = [iq attributeStringValueForName:@"id"];
+            if (elementID) {
+                NSArray * elementIDComp = [elementID componentsSeparatedByString:@":"];
+                if (elementIDComp > 0) {
+                    NSString * opType = [elementIDComp objectAtIndex:1];
+                    
+                    if ([opType isEqualToString:@"publish_node"]) {
+                        [multicastDelegate xmppPubSub:self didPublish:iq];
+                        return YES;
+                        
+                    } else if([opType isEqualToString:@"unsubscribe_node"]) {
+                        [multicastDelegate xmppPubSub:self didUnsubscribe:iq];
+                        return YES;
+                    }
+                }
+            }
+        }
 		
 		[multicastDelegate xmppPubSub:self didReceiveResult:iq];
 		return YES;
@@ -192,8 +210,11 @@
 	return sid;
 }
 
+- (NSString *)unsubscribeFromNode:(NSString*)node {
+    return [self unsubscribeFromNode:node withSubid:nil];
+}
 
-- (NSString *)unsubscribeFromNode:(NSString*)node
+- (NSString *)unsubscribeFromNode:(NSString *)node withSubid:(NSString *)subid 
 {
 	// <iq type='set' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='unsub1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
@@ -207,7 +228,11 @@
 	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
 	NSXMLElement *subscribe = [NSXMLElement elementWithName:@"unsubscribe"];
 	[subscribe addAttributeWithName:@"node" stringValue:node];
-	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID full]];
+	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID bare]];
+    
+    if (subid) {
+        [subscribe addAttributeWithName:@"subid" stringValue:subid];
+    }
 
 	// join them all together
 	[ps addChild:subscribe];
@@ -218,6 +243,36 @@
 	return sid;
 }
 
+- (NSString *)getSubscriptions {
+    return [self getSubscriptionsForNode:nil];
+}
+
+- (NSString *)getSubscriptionsForNode:(NSString *)node {
+    //<iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='subscriptions1'>
+    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    //      <subscriptions/>
+    //  </pubsub>
+    //</iq>
+    
+	NSString *sid = [NSString stringWithFormat:@"%@:subscriptions_for_node", xmppStream.generateUUID]; 
+    
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
+	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+	NSXMLElement *subscriptions = [NSXMLElement elementWithName:@"subscriptions"];
+    
+    if (node) {
+        [subscriptions addAttributeWithName:@"node" stringValue:node];
+    }
+    
+	// join them all together
+	[ps addChild:subscriptions];
+	[iq addChild:ps];
+    
+	[xmppStream sendElement:iq];
+    
+	return sid;
+    
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Node Admin
@@ -321,7 +376,7 @@
 }
 
 
-- (NSString*)allItemsForNode:(NSString*)node
+- (NSString*)discoverItemsForNode:(NSString*)node
 {
 	// <iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='nodes2'>
 	//   <query xmlns='http://jabber.org/protocol/disco#items' node='blogs'/>
@@ -339,6 +394,31 @@
 
 	[xmppStream sendElement:iq];
 
+	return sid;
+}
+
+- (NSString*)allItemsForNode:(NSString*)node
+{
+	//<iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='items1'>
+    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    //      <items node='princely_musings'/>
+    //  </pubsub>
+    //</iq>
+    
+	NSString *sid = [NSString stringWithFormat:@"%@:allitems_for_node", xmppStream.generateUUID];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
+    NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+    NSXMLElement *items = [NSXMLElement elementWithName:@"items"];
+    
+    if (node != nil) {
+        [items addAttributeWithName:@"node" stringValue:node];
+    }
+
+    [pubsub addChild:items];
+    [iq addChild:pubsub];
+    
+	[xmppStream sendElement:iq];
+    
 	return sid;
 }
 
@@ -362,6 +442,45 @@
 
 	[xmppStream sendElement:iq];
 
+	return sid;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - publication methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry {
+    //<iq type='set' from='hamlet@denmark.lit/blogbot' to='pubsub.shakespeare.lit' id='publish1'>
+    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    //      <publish node='princely_musings'>
+    //          <item id='bnd81g37d61f49fgn581'>
+    //              Some content
+    //          </item>
+    //      </publish>
+    //  </pubsub>
+    //</iq>
+    
+	NSString *sid = [NSString stringWithFormat:@"%@:publish_node", xmppStream.generateUUID];
+    
+    //create iq message
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
+    
+    //create child nodes
+    NSXMLElement * pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+    
+    NSXMLElement * publish = [NSXMLElement elementWithName:@"publish"];
+    [publish addAttributeWithName:@"node" stringValue:node];
+    
+    NSXMLElement * item = [NSXMLElement elementWithName:@"item"];
+    
+    //create node hierarchy
+    [item addChild:entry];
+    [publish addChild:item];
+    [pubsub addChild:publish];
+    [iq addChild:pubsub];
+
+	[xmppStream sendElement:iq];
+    
 	return sid;
 }
 
