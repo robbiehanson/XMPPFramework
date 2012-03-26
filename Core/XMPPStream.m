@@ -1233,20 +1233,6 @@ enum XMPPStreamConfig
 	return result;
 }
 
-- (void)sendSASLRequestForMechanism:(NSString *)mechanism
-{
-  NSString *auth = [NSString stringWithFormat:@"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='%@'/>", mechanism];
-  
-  NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
-  
-  XMPPLogSend(@"SEND: %@", auth);
-  numberOfBytesSent += [outgoingData length];
-  
-  [asyncSocket writeData:outgoingData
-             withTimeout:TIMEOUT_XMPP_WRITE
-                     tag:TAG_XMPP_WRITE_STREAM];
-}
-
 - (void)sendStartTLSRequest
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
@@ -1642,6 +1628,25 @@ enum XMPPStreamConfig
 		dispatch_sync(xmppQueue, block);
 	
 	return result;
+}
+
+- (void)sendSASLRequestForMechanism:(NSString *)mechanism
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
+	NSString *authFrmt = @"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='%@'/>";
+	NSString *auth = [NSString stringWithFormat:authFrmt, mechanism];
+	
+	NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", auth);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:TAG_XMPP_WRITE_STREAM];
 }
 
 /**
