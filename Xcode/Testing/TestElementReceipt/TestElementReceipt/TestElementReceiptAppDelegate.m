@@ -20,7 +20,7 @@
 {
 	NSLog(@"========== test1 ==========");
 	
-	XMPPElementReceipt *receipt = [[[XMPPElementReceipt alloc] init] autorelease];
+	XMPPElementReceipt *receipt = [[XMPPElementReceipt alloc] init];
 	
 	BOOL result = [receipt wait:0.0];
 	NSLog(@"NO =?= %@", (result ? @"YES" : @"NO"));
@@ -30,7 +30,7 @@
 {
 	NSLog(@"========== test2 ==========");
 	
-	XMPPElementReceipt *receipt = [[[XMPPElementReceipt alloc] init] autorelease];
+	XMPPElementReceipt *receipt = [[XMPPElementReceipt alloc] init];
 	
 	dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	
@@ -48,7 +48,7 @@
 {
 	NSLog(@"========== test3 ==========");
 	
-	XMPPElementReceipt *receipt = [[[XMPPElementReceipt alloc] init] autorelease];
+	XMPPElementReceipt *receipt = [[XMPPElementReceipt alloc] init];
 	
 	dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	
@@ -69,7 +69,7 @@
 {
 	NSLog(@"========== test4 ==========");
 	
-	XMPPElementReceipt *receipt = [[[XMPPElementReceipt alloc] init] autorelease];
+	XMPPElementReceipt *receipt = [[XMPPElementReceipt alloc] init];
 	
 	dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	
@@ -90,7 +90,7 @@
 {
 	NSLog(@"========== test5 ==========");
 	
-	XMPPElementReceipt *receipt = [[[XMPPElementReceipt alloc] init] autorelease];
+	XMPPElementReceipt *receipt = [[XMPPElementReceipt alloc] init];
 	
 	dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	

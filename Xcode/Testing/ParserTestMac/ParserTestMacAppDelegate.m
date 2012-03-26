@@ -147,7 +147,6 @@
 				NSLog(@"\n\n%@\n", [doc XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 			}
 			
-			[doc release];
 			[mData setLength:0];
 		}
 		

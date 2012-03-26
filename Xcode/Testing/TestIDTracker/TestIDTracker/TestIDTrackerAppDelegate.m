@@ -30,11 +30,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	CFUUIDRef uuid = CFUUIDCreate(NULL);
 	if (uuid)
 	{
-		result = NSMakeCollectable(CFUUIDCreateString(NULL, uuid));
+		result = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
 		CFRelease(uuid);
 	}
 	
-	return [result autorelease];
+	return result;
 }
 
 - (void)scheduleFakeFetchResponseWithID:(NSString *)elementID obj:(id)obj timeout:(NSTimeInterval)timeout
@@ -55,10 +55,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	idTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:dispatch_get_main_queue()];
 	
-	fetch1 = [[self generateUUID] retain];
-	fetch2 = [[self generateUUID] retain];
-	fetch3 = [[self generateUUID] retain];
-	fetch4 = [[self generateUUID] retain];
+	fetch1 = [self generateUUID];
+	fetch2 = [self generateUUID];
+	fetch3 = [self generateUUID];
+	fetch4 = [self generateUUID];
 	
 	[idTracker addID:fetch1 target:self selector:@selector(simpleProcessFetch:withInfo:) timeout:2.0];
 	[idTracker addID:fetch2 target:self selector:@selector(simpleProcessFetch:withInfo:) timeout:4.0];
@@ -76,10 +76,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	[self scheduleFakeFetchResponseWithID:fetch4 obj:@"moo" timeout:7.0];
 	
-	fetch5 = [[self generateUUID] retain];
-	fetch6 = [[self generateUUID] retain];
-	fetch7 = [[self generateUUID] retain];
-	fetch8 = [[self generateUUID] retain];
+	fetch5 = [self generateUUID];
+	fetch6 = [self generateUUID];
+	fetch7 = [self generateUUID];
+	fetch8 = [self generateUUID];
 	
 	SEL selector = @selector(advancedProcessFetch:withInfo:);
 	
