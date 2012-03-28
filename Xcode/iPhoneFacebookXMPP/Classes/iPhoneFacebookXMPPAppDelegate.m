@@ -36,8 +36,7 @@
 // For TESTING purposes this project uses the XMPPFacebook FBTest Facebook app.
 // You MUST replace this with your own appID if you're going to be
 // integrating Facebook XMPP into your own application.
-//#define FACEBOOK_APP_ID @"124242144347927"
-#define FACEBOOK_APP_ID @"120647127954516"
+#define FACEBOOK_APP_ID @"124242144347927"
 
 @interface iPhoneFacebookXMPPAppDelegate()
 
