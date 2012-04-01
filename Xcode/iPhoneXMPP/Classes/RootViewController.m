@@ -53,12 +53,12 @@
 	self.navigationItem.titleView = titleLabel;
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
-  [[self appDelegate] disconnect];
-  
-  [[[self appDelegate] xmppvCardTempModule] removeDelegate:self];
-  
-  [super viewWillDisappear:animated];
+- (void)viewWillDisappear:(BOOL)animated
+{
+	[[self appDelegate] disconnect];
+	[[[self appDelegate] xmppvCardTempModule] removeDelegate:self];
+	
+	[super viewWillDisappear:animated];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
