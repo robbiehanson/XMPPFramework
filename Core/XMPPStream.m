@@ -3877,10 +3877,7 @@ enum XMPPStreamConfig
 		
 		// Add the delegate to all currently registered modules of the given class.
 		
-		DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
-		XMPPModule *module;
-		
-		while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
+		for (XMPPModule *module in registeredModules)
 		{
 			if ([module isKindOfClass:aClass])
 			{
@@ -3926,10 +3923,7 @@ enum XMPPStreamConfig
 		{
 			// Remove the delegate from all currently registered modules of ANY class.
 			
-			DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
-			XMPPModule *module;
-			
-			while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
+			for (XMPPModule *module in registeredModules)
 			{
 				[module removeDelegate:delegate delegateQueue:delegateQueue];
 			}
@@ -3948,10 +3942,7 @@ enum XMPPStreamConfig
 			
 			// Remove the delegate from all currently registered modules of the given class.
 			
-			DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
-			XMPPModule *module;
-			
-			while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
+			for (XMPPModule *module in registeredModules)
 			{
 				if ([module isKindOfClass:aClass])
 				{

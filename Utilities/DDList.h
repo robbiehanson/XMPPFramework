@@ -22,9 +22,10 @@ typedef struct DDListNode DDListNode;
  * This class is NOT thread-safe.
  * It is designed to be used within a thread-safe context (e.g. within a single dispatch_queue).
 **/
-@interface DDList : NSObject
+@interface DDList : NSObject <NSFastEnumeration>
 {
-	DDListNode *list;
+	DDListNode *listHead;
+	DDListNode *listTail;
 }
 
 - (void)add:(void *)element;

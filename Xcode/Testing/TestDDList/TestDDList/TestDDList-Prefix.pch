@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'TestDDList' target in the 'TestDDList' project
+//
+
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+#endif
