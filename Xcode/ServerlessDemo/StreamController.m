@@ -1,9 +1,9 @@
 #import "StreamController.h"
 #import "ServerlessDemoAppDelegate.h"
 #import "GCDAsyncSocket.h"
-#import "XMPPStream.h"
 #import "Service.h"
 #import "Message.h"
+#import "XMPP.h"
 #import "NSXMLElement+XMPP.h"
 #import "NSString+DDXML.h"
 #import "DDLog.h"
@@ -31,7 +31,6 @@ static StreamController *sharedInstance;
 	// Only allow one instance of this class to ever be created
 	if(sharedInstance)
 	{
-		[self release];
 		return nil;
 	}
 	

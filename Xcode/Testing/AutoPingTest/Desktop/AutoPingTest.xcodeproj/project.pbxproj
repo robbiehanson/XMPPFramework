@@ -17,6 +17,8 @@
 		DC17CDDF1355F11A007A32CC /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC17CDDE1355F11A007A32CC /* SystemConfiguration.framework */; };
 		DC17CDE11355F122007A32CC /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC17CDE01355F122007A32CC /* Security.framework */; };
 		DC17CDE31355F151007A32CC /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DC17CDE21355F151007A32CC /* libresolv.dylib */; };
+		DC26A2AE1528EBF3004B71C0 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC26A2AA1528EBF3004B71C0 /* XMPPDigestAuthentication.m */; };
+		DC26A2AF1528EBF3004B71C0 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC26A2AD1528EBF3004B71C0 /* XMPPXFacebookPlatformAuthentication.m */; };
 		DC597F5A14101FBF0050774C /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC597E9C14101FBF0050774C /* NSData+XMPP.m */; };
 		DC597F5B14101FBF0050774C /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC597E9E14101FBF0050774C /* NSNumber+XMPP.m */; };
 		DC597F5C14101FBF0050774C /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC597EA014101FBF0050774C /* NSXMLElement+XMPP.m */; };
@@ -65,6 +67,11 @@
 		DC17CDDE1355F11A007A32CC /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		DC17CDE01355F122007A32CC /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC17CDE21355F151007A32CC /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
+		DC26A2A91528EBF3004B71C0 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestAuthentication.h; sourceTree = "<group>"; };
+		DC26A2AA1528EBF3004B71C0 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestAuthentication.m; sourceTree = "<group>"; };
+		DC26A2AB1528EBF3004B71C0 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		DC26A2AC1528EBF3004B71C0 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		DC26A2AD1528EBF3004B71C0 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		DC597E9414101F860050774C /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPFramework.h; path = ../../AutoTimeTest/XMPPFramework.h; sourceTree = "<group>"; };
 		DC597E9B14101FBF0050774C /* NSData+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+XMPP.h"; sourceTree = "<group>"; };
 		DC597E9C14101FBF0050774C /* NSData+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+XMPP.m"; sourceTree = "<group>"; };
@@ -298,6 +305,11 @@
 		DC597F2C14101FBF0050774C /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				DC26A2AB1528EBF3004B71C0 /* XMPPSASLAuthentication.h */,
+				DC26A2A91528EBF3004B71C0 /* XMPPDigestAuthentication.h */,
+				DC26A2AA1528EBF3004B71C0 /* XMPPDigestAuthentication.m */,
+				DC26A2AC1528EBF3004B71C0 /* XMPPXFacebookPlatformAuthentication.h */,
+				DC26A2AD1528EBF3004B71C0 /* XMPPXFacebookPlatformAuthentication.m */,
 				DC597F2D14101FBF0050774C /* DDList.h */,
 				DC597F2E14101FBF0050774C /* DDList.m */,
 				DC597F2F14101FBF0050774C /* GCDMulticastDelegate.h */,
@@ -451,6 +463,8 @@
 				DC597F9D14101FBF0050774C /* DDFileLogger.m in Sources */,
 				DC597F9E14101FBF0050774C /* DDLog.m in Sources */,
 				DC597F9F14101FBF0050774C /* DDTTYLogger.m in Sources */,
+				DC26A2AE1528EBF3004B71C0 /* XMPPDigestAuthentication.m in Sources */,
+				DC26A2AF1528EBF3004B71C0 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -522,6 +536,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -541,6 +556,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;

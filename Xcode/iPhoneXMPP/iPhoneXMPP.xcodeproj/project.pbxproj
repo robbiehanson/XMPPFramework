@@ -82,7 +82,7 @@
 		DC90AC6C147C28850022DF52 /* DispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90AC64147C28850022DF52 /* DispatchQueueLogFormatter.m */; };
 		DC90AC6D147C28850022DF52 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC90AC65147C28850022DF52 /* README.txt */; };
 		DCB4243F1353FFA000572C70 /* RFImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB4243E1353FFA000572C70 /* RFImageToDataTransformer.m */; };
-		DCC0BED81301CDFB00EC45D2 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BED71301CDFB00EC45D2 /* GCDAsyncSocket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		DCC0BED81301CDFB00EC45D2 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BED71301CDFB00EC45D2 /* GCDAsyncSocket.m */; };
 		DCC0BEEB1301CE3D00EC45D2 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEE61301CE3D00EC45D2 /* DDList.m */; };
 		DCC0BEED1301CE3D00EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0BEEA1301CE3D00EC45D2 /* GCDMulticastDelegate.m */; };
 		DCC22139149A61F000736DC1 /* XMPPRoom.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DCC22121149A61F000736DC1 /* XMPPRoom.xcdatamodeld */; };

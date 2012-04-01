@@ -306,11 +306,10 @@
 
 - (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr
 {
-	XMPPResourceCoreDataStorageObject *resource;
-	resource = (XMPPResourceCoreDataStorageObject *)[self resourceForJID:[presence from]];
+	XMPPResourceCoreDataStorageObject *resource =
+	    (XMPPResourceCoreDataStorageObject *)[self resourceForJID:[presence from]];
 	
-	if ([[presence type] isEqualToString:@"unavailable"] ||
-      [presence isErrorPresence])
+	if ([[presence type] isEqualToString:@"unavailable"] || [presence isErrorPresence])
 	{
 		if (resource)
 		{
@@ -320,7 +319,7 @@
 	}
 	else
 	{
-		if(resource)
+		if (resource)
 		{
 			[resource updateWithPresence:presence];
 		}

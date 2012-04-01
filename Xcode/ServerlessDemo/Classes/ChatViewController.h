@@ -21,8 +21,8 @@
 	NSManagedObjectContext *managedObjectContext;
 }
 
-@property (nonatomic, retain) Service *service;
-@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic) Service *service;
+@property (nonatomic) NSManagedObjectContext *managedObjectContext;
 
 - (void)sendMessage:(id)sender;
 
