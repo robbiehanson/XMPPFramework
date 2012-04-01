@@ -91,71 +91,12 @@
 
 - (NSManagedObjectContext *)managedObjectContext_roster
 {
-	NSAssert([NSThread isMainThread],
-	         @"NSManagedObjectContext is not thread safe. It must always be used on the same thread/queue");
-	
-	if (managedObjectContext_roster == nil)
-	{
-		managedObjectContext_roster = [[NSManagedObjectContext alloc] init];
-		
-		NSPersistentStoreCoordinator *psc = [xmppRosterStorage persistentStoreCoordinator];
-		[managedObjectContext_roster setPersistentStoreCoordinator:psc];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		                                         selector:@selector(contextDidSave:)
-		                                             name:NSManagedObjectContextDidSaveNotification
-		                                           object:nil];
-	}
-	
-	return managedObjectContext_roster;
+	return [xmppRosterStorage mainThreadManagedObjectContext];
 }
 
 - (NSManagedObjectContext *)managedObjectContext_capabilities
 {
-	NSAssert([NSThread isMainThread],
-	         @"NSManagedObjectContext is not thread safe. It must always be used on the same thread/queue");
-	
-	if (managedObjectContext_capabilities == nil)
-	{
-		managedObjectContext_capabilities = [[NSManagedObjectContext alloc] init];
-		
-		NSPersistentStoreCoordinator *psc = [xmppCapabilitiesStorage persistentStoreCoordinator];
-		[managedObjectContext_roster setPersistentStoreCoordinator:psc];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		                                         selector:@selector(contextDidSave:)
-		                                             name:NSManagedObjectContextDidSaveNotification
-		                                           object:nil];
-	}
-	
-	return managedObjectContext_capabilities;
-}
-
-- (void)contextDidSave:(NSNotification *)notification
-{
-	NSManagedObjectContext *sender = (NSManagedObjectContext *)[notification object];
-	
-	if (sender != managedObjectContext_roster &&
-	    [sender persistentStoreCoordinator] == [managedObjectContext_roster persistentStoreCoordinator])
-	{
-		DDLogVerbose(@"%@: %@ - Merging changes into managedObjectContext_roster", THIS_FILE, THIS_METHOD);
-		
-		dispatch_async(dispatch_get_main_queue(), ^{
-			
-			[managedObjectContext_roster mergeChangesFromContextDidSaveNotification:notification];
-		});
-    }
-	
-	if (sender != managedObjectContext_capabilities &&
-	    [sender persistentStoreCoordinator] == [managedObjectContext_capabilities persistentStoreCoordinator])
-	{
-		DDLogVerbose(@"%@: %@ - Merging changes into managedObjectContext_capabilities", THIS_FILE, THIS_METHOD);
-		
-		dispatch_async(dispatch_get_main_queue(), ^{
-			
-			[managedObjectContext_capabilities mergeChangesFromContextDidSaveNotification:notification];
-		});
-	}
+	return [xmppCapabilitiesStorage mainThreadManagedObjectContext];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
