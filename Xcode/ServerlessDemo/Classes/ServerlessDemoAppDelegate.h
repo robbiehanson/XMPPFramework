@@ -15,14 +15,14 @@
 	UINavigationController *navigationController;
 }
 
-@property (nonatomic, retain, readonly) NSManagedObjectModel *managedObjectModel;
-@property (nonatomic, retain, readonly) NSManagedObjectContext *managedObjectContext;
-@property (nonatomic, retain, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+@property (nonatomic, readonly) NSManagedObjectModel *managedObjectModel;
+@property (nonatomic, readonly) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
-@property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet UINavigationController *navigationController;
+@property (nonatomic) IBOutlet UIWindow *window;
+@property (nonatomic) IBOutlet UINavigationController *navigationController;
 
-@property (nonatomic, retain) XMPPJID *myJID;
+@property (nonatomic) XMPPJID *myJID;
 
 - (NSString *)applicationDocumentsDirectory;
 
