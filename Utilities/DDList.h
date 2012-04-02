@@ -33,6 +33,8 @@ typedef struct DDListNode DDListNode;
 - (void)removeAll:(void *)element;
 - (void)removeAllElements;
 
+- (BOOL)contains:(void *)element;
+
 - (NSUInteger)count;
 
 /**

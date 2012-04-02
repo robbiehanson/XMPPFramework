@@ -122,6 +122,20 @@
 	listTail = NULL;
 }
 
+- (BOOL)contains:(void *)element
+{
+	DDListNode *node;
+	for (node = listHead; node != NULL; node = node->next)
+	{
+		if (node->element == element)
+		{
+			return YES;
+		}
+	}
+	
+	return NO;
+}
+
 - (NSUInteger)count
 {
 	NSUInteger count = 0;
