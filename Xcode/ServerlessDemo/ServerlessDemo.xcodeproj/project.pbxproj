@@ -20,6 +20,7 @@
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
 		DC26A2C51528EDD3004B71C0 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC26A2C11528EDD3004B71C0 /* XMPPDigestAuthentication.m */; };
 		DC26A2C61528EDD3004B71C0 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC26A2C41528EDD3004B71C0 /* XMPPXFacebookPlatformAuthentication.m */; };
+		DC26A534152A3EBF004B71C0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC26A533152A3EBF004B71C0 /* Security.framework */; };
 		DC3731A1139F091B00A8407D /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC37319C139F091B00A8407D /* NSData+XMPP.m */; };
 		DC3731A2139F091B00A8407D /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC37319E139F091B00A8407D /* NSNumber+XMPP.m */; };
 		DC3731A3139F091B00A8407D /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3731A0139F091B00A8407D /* NSXMLElement+XMPP.m */; };
@@ -82,6 +83,7 @@
 		DC26A2C21528EDD3004B71C0 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSASLAuthentication.h; path = ../../Utilities/XMPPSASLAuthentication.h; sourceTree = "<group>"; };
 		DC26A2C31528EDD3004B71C0 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPXFacebookPlatformAuthentication.h; path = ../../Utilities/XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
 		DC26A2C41528EDD3004B71C0 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPXFacebookPlatformAuthentication.m; path = ../../Utilities/XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
+		DC26A533152A3EBF004B71C0 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC37319B139F091B00A8407D /* NSData+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSData+XMPP.h"; path = "../../Categories/NSData+XMPP.h"; sourceTree = "<group>"; };
 		DC37319C139F091B00A8407D /* NSData+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+XMPP.m"; path = "../../Categories/NSData+XMPP.m"; sourceTree = "<group>"; };
 		DC37319D139F091B00A8407D /* NSNumber+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSNumber+XMPP.h"; path = "../../Categories/NSNumber+XMPP.h"; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC26A534152A3EBF004B71C0 /* Security.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
@@ -243,6 +246,7 @@
 				28860BE40F44EE6400985440 /* CoreData.framework */,
 				DCE60E1D10F941D500E20271 /* CFNetwork.framework */,
 				DC84BCCC12440ECC0055A459 /* SystemConfiguration.framework */,
+				DC26A533152A3EBF004B71C0 /* Security.framework */,
 				DC84BCD212440EE60055A459 /* libidn.a */,
 				DC84BCD612440EFC0055A459 /* libresolv.dylib */,
 			);
