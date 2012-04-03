@@ -1018,6 +1018,9 @@ enum XMPPRoomState
 		}
 		else if (isUnavailable && !isNicknameChange)
 		{
+			state = kXMPPRoomStateNone;
+			[responseTracker removeAllIDs];
+			
 			[xmppRoomStorage handleDidLeaveRoom:self];
 			[multicastDelegate xmppRoomDidLeave:self];
 		}
@@ -1108,9 +1111,11 @@ enum XMPPRoomState
 	
 	XMPPLogTrace();
 	
+	state = kXMPPRoomStateNone;
 	[responseTracker removeAllIDs];
 	
-	state = kXMPPRoomStateNone;
+	[xmppRoomStorage handleDidLeaveRoom:self];
+	[multicastDelegate xmppRoomDidLeave:self];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
