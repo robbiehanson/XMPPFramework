@@ -200,7 +200,7 @@
 	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
 	NSXMLElement *subscribe = [NSXMLElement elementWithName:@"subscribe"];
 	[subscribe addAttributeWithName:@"node" stringValue:node];
-	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID full]];
+	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID bare]];
 
 	[ps addChild:subscribe];
 	[iq addChild:ps];
@@ -211,36 +211,45 @@
 }
 
 - (NSString *)unsubscribeFromNode:(NSString*)node {
-    return [self unsubscribeFromNode:node withSubid:nil];
+    return [self unsubscribeFromNode:node withJid:nil andSubid:nil];
 }
 
-- (NSString *)unsubscribeFromNode:(NSString *)node withSubid:(NSString *)subid 
-{
-	// <iq type='set' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='unsub1'>
+- (NSString *)unsubscribeFromNode:(NSString *)node withJid:(NSString *)ajid andSubid:(NSString *)subid {
+    // <iq type='set' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='unsub1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
 	//     <unsubscribe node='princely_musings' jid='francisco@denmark.lit'/>
 	//   </pubsub>
 	// </iq>
-
+    
 	NSString *sid = [NSString stringWithFormat:@"%@:unsubscribe_node", xmppStream.generateUUID]; 
-
+    
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
 	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
 	NSXMLElement *subscribe = [NSXMLElement elementWithName:@"unsubscribe"];
 	[subscribe addAttributeWithName:@"node" stringValue:node];
-	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID bare]];
+    
+    NSString * jid = [xmppStream.myJID bare];
+    if (ajid) {
+        jid = ajid;
+    }
+    
+	[subscribe addAttributeWithName:@"jid" stringValue:jid];
     
     if (subid) {
         [subscribe addAttributeWithName:@"subid" stringValue:subid];
     }
-
+    
 	// join them all together
 	[ps addChild:subscribe];
 	[iq addChild:ps];
-
+    
 	[xmppStream sendElement:iq];
-
+    
 	return sid;
+}
+
+- (NSString *)unsubscribeFromNode:(NSString *)node withSubid:(NSString *)subid {
+	return [self unsubscribeFromNode:node withJid:nil andSubid:subid];
 }
 
 - (NSString *)getSubscriptions {
