@@ -364,6 +364,13 @@ static NSMutableSet *databaseFileNames;
 	return result;
 }
 
+- (void)didChangeCachedMyJID:(XMPPJID *)cachedMyJID forXMPPStream:(XMPPStream *)stream
+{
+	// Override me if you'd like to do anything special when this happens.
+	// 
+	// For example, if your custom storage class prefetches data related to the current user.
+}
+
 - (void)updateJidCache:(NSNotification *)notification
 {
 	// Notifications are delivered on the thread/queue that posted them.
@@ -371,20 +378,35 @@ static NSMutableSet *databaseFileNames;
 	
 	XMPPStream *stream = (XMPPStream *)[notification object];
 	
-	dispatch_async(storageQueue, ^{ @autoreleasepool {
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		NSNumber *key = [NSNumber numberWithPtr:(__bridge void *)stream];
-		if ([myJidCache objectForKey:key])
-		{
-			XMPPJID *newMyJID = [stream myJID];
-			
-			if (newMyJID)
-				[myJidCache setObject:newMyJID forKey:key];
-			else
-				[myJidCache removeObjectForKey:key];
-		}
+		XMPPJID *cachedJID = [myJidCache objectForKey:key];
 		
-	}});
+		if (cachedJID)
+		{
+			XMPPJID *newJID = [stream myJID];
+			
+			if (newJID)
+			{
+				if (![cachedJID isEqualToJID:newJID])
+				{
+					[myJidCache setObject:newJID forKey:key];
+					[self didChangeCachedMyJID:newJID forXMPPStream:stream];
+				}
+			}
+			else
+			{
+				[myJidCache removeObjectForKey:key];
+				[self didChangeCachedMyJID:nil forXMPPStream:stream];
+			}
+		}
+	}};
+	
+	if (dispatch_get_current_queue() == storageQueue)
+		block();
+	else
+		dispatch_async(storageQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

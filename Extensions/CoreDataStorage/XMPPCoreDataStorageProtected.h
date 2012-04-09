@@ -168,6 +168,23 @@
 **/
 - (XMPPJID *)myJIDForXMPPStream:(XMPPStream *)stream;
 
+/**
+ * This method is invoked if the cached myJID changes for a particular xmpp stream.
+ * 
+ * This method works in correlation with the myJIDForXMPPStream method.
+ * In other words, calling myJIDForXMPPStream will cache the value.
+ * If that value later changes, this method is invoked.
+ * 
+ * So if the myJID of an xmpp stream changes, but there was no cached value for that xmpp stream,
+ * then this method is never called. E.g. this method is only called for streams we're actually interested in.
+ * 
+ * You may wish to override this method if your storage class prefetches data related to the current user.
+ * 
+ * This method will be invoked on the storageQueue.
+ * The default implementation does nothing.
+**/
+- (void)didChangeCachedMyJID:(XMPPJID *)cachedMyJID forXMPPStream:(XMPPStream *)stream;
+
 #pragma mark Core Data
 
 /**
@@ -185,6 +202,7 @@
  * The primary purpose of this class is to optimize disk IO by buffering save operations to the managedObjectContext.
  * It does this using the methods outlined in the 'Performance Optimizations' section below.
  * If you manually save the managedObjectContext you are destroying these optimizations.
+ * See the documentation for executeBlock & scheduleBlock below for proper usage surrounding the optimizations.
 **/
 @property (readonly) NSManagedObjectContext *managedObjectContext;
 
