@@ -1,47 +1,57 @@
-/* stringprep.h --- Header file for stringprep functions.             -*- c -*-
- * Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007  Simon Josefsson
- *
- * This file is part of GNU Libidn.
- *
- * GNU Libidn is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * GNU Libidn is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with GNU Libidn; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
- *
- */
+/* stringprep.h --- Header file for stringprep functions.
+   Copyright (C) 2002-2012 Simon Josefsson
 
-#ifndef _STRINGPREP_H
-#define _STRINGPREP_H
+   This file is part of GNU Libidn.
 
-#ifdef __cplusplus
+   GNU Libidn is free software: you can redistribute it and/or
+   modify it under the terms of either:
+
+     * the GNU Lesser General Public License as published by the Free
+       Software Foundation; either version 3 of the License, or (at
+       your option) any later version.
+
+   or
+
+     * the GNU General Public License as published by the Free
+       Software Foundation; either version 2 of the License, or (at
+       your option) any later version.
+
+   or both in parallel, as here.
+
+   GNU Libidn is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received copies of the GNU General Public License and
+   the GNU Lesser General Public License along with this program.  If
+   not, see <http://www.gnu.org/licenses/>. */
+
+#ifndef STRINGPREP_H
+# define STRINGPREP_H
+
+# ifndef IDNAPI
+#  if defined LIBIDN_BUILDING && defined HAVE_VISIBILITY && HAVE_VISIBILITY
+#   define IDNAPI __attribute__((__visibility__("default")))
+#  elif defined LIBIDN_BUILDING && defined _MSC_VER && ! defined LIBIDN_STATIC
+#   define IDNAPI __declspec(dllexport)
+#  elif defined _MSC_VER && ! defined LIBIDN_STATIC
+#   define IDNAPI __declspec(dllimport)
+#  else
+#   define IDNAPI
+#  endif
+# endif
+
+# include <stddef.h>		/* size_t */
+# include <sys/types.h>		/* ssize_t */
+# include "idn-int.h"		/* uint32_t */
+
+# ifdef __cplusplus
 extern "C"
 {
-#endif
+# endif
 
-#include <stddef.h>   /* size_t */
-#include <unistd.h>   /* ssize_t */
-#include "idn-int.h"  /* uint32_t */
-
-  /* On Windows, variables that may be in a DLL must be marked
-   * specially.  This is only active when not building libidn itself
-   * (!LIBIDN_BUILDING).  It is only used for MinGW which declare
-   * __DECLSPEC_SUPPORTED or MSVC (_MSC_VER && _DLL). */
-#if !defined (LIBIDN_BUILDING) && (defined(__DECLSPEC_SUPPORTED) || (defined(_MSC_VER) && defined(_DLL)))
-# define IDN_DLL_VAR __declspec (dllimport)
-#else
-# define IDN_DLL_VAR
-#endif
-
-#define STRINGPREP_VERSION "1.9"
+# define STRINGPREP_VERSION "1.24"
 
 /* Error codes. */
   typedef enum
@@ -84,7 +94,7 @@ extern "C"
     STRINGPREP_BIDI_L_TABLE = 8
   } Stringprep_profile_steps;
 
-#define STRINGPREP_MAX_MAP_CHARS 4
+# define STRINGPREP_MAX_MAP_CHARS 4
 
   struct Stringprep_table_element
   {
@@ -109,115 +119,123 @@ extern "C"
   };
   typedef struct Stringprep_profiles Stringprep_profiles;
 
-  extern IDN_DLL_VAR const Stringprep_profiles stringprep_profiles[];
+  extern IDNAPI const Stringprep_profiles stringprep_profiles[];
 
 /* Profiles */
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_A_1[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_B_1[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_B_2[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_B_3[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_1_1[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_1_2[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_2_1[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_2_2[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_3[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_4[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_5[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_6[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_7[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_8[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_C_9[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_D_1[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_rfc3454_D_2[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_A_1[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_B_1[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_B_2[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_B_3[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_1_1[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_1_2[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_2_1[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_2_2[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_3[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_4[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_5[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_6[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_7[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_8[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_C_9[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_D_1[];
+  extern IDNAPI const Stringprep_table_element stringprep_rfc3454_D_2[];
 
   /* Nameprep */
 
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_nameprep[];
+  extern IDNAPI const Stringprep_profile stringprep_nameprep[];
 
-#define stringprep_nameprep(in, maxlen)			\
+# define stringprep_nameprep(in, maxlen)			\
   stringprep(in, maxlen, 0, stringprep_nameprep)
 
-#define stringprep_nameprep_no_unassigned(in, maxlen)			\
+# define stringprep_nameprep_no_unassigned(in, maxlen)			\
   stringprep(in, maxlen, STRINGPREP_NO_UNASSIGNED, stringprep_nameprep)
 
   /* SASL */
 
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_saslprep[];
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_plain[];
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_trace[];
+  extern IDNAPI const Stringprep_profile stringprep_saslprep[];
+  extern IDNAPI const Stringprep_table_element stringprep_saslprep_space_map[];
+  extern IDNAPI const Stringprep_profile stringprep_plain[];
+  extern IDNAPI const Stringprep_profile stringprep_trace[];
 
-#define stringprep_plain(in, maxlen)		\
+# define stringprep_plain(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_plain)
 
   /* Kerberos */
 
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_kerberos5[];
+  extern IDNAPI const Stringprep_profile stringprep_kerberos5[];
 
-#define stringprep_kerberos5(in, maxlen)		\
+# define stringprep_kerberos5(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_kerberos5)
 
   /* XMPP */
 
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_xmpp_nodeprep[];
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_xmpp_resourceprep[];
-  extern IDN_DLL_VAR const Stringprep_table_element stringprep_xmpp_nodeprep_prohibit[];
+  extern IDNAPI const Stringprep_profile stringprep_xmpp_nodeprep[];
+  extern IDNAPI const Stringprep_profile stringprep_xmpp_resourceprep[];
+  extern IDNAPI const Stringprep_table_element stringprep_xmpp_nodeprep_prohibit[];
 
-#define stringprep_xmpp_nodeprep(in, maxlen)		\
+# define stringprep_xmpp_nodeprep(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_xmpp_nodeprep)
-#define stringprep_xmpp_resourceprep(in, maxlen)		\
+# define stringprep_xmpp_resourceprep(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_xmpp_resourceprep)
 
   /* iSCSI */
 
-  extern IDN_DLL_VAR const Stringprep_profile stringprep_iscsi[];
+  extern IDNAPI const Stringprep_profile stringprep_iscsi[];
+  extern IDNAPI const Stringprep_table_element stringprep_iscsi_prohibit[];
 
-#define stringprep_iscsi(in, maxlen)		\
+# define stringprep_iscsi(in, maxlen)		\
   stringprep(in, maxlen, 0, stringprep_iscsi)
 
   /* API */
 
-  extern int stringprep_4i (uint32_t * ucs4, size_t * len, size_t maxucs4len,
-			    Stringprep_profile_flags flags,
-			    const Stringprep_profile * profile);
-  extern int stringprep_4zi (uint32_t * ucs4, size_t maxucs4len,
-			     Stringprep_profile_flags flags,
-			     const Stringprep_profile * profile);
-  extern int stringprep (char *in, size_t maxlen,
-			 Stringprep_profile_flags flags,
-			 const Stringprep_profile * profile);
+  extern IDNAPI int stringprep_4i (uint32_t * ucs4, size_t * len,
+				   size_t maxucs4len,
+				   Stringprep_profile_flags flags,
+				   const Stringprep_profile * profile);
+  extern IDNAPI int stringprep_4zi (uint32_t * ucs4, size_t maxucs4len,
+				    Stringprep_profile_flags flags,
+				    const Stringprep_profile * profile);
+  extern IDNAPI int stringprep (char *in, size_t maxlen,
+				Stringprep_profile_flags flags,
+				const Stringprep_profile * profile);
 
-  extern int stringprep_profile (const char *in,
-				 char **out,
-				 const char *profile,
-				 Stringprep_profile_flags flags);
+  extern IDNAPI int stringprep_profile (const char *in,
+					char **out,
+					const char *profile,
+					Stringprep_profile_flags flags);
 
-  extern const char *stringprep_strerror (Stringprep_rc rc);
+  extern IDNAPI const char *stringprep_strerror (Stringprep_rc rc);
 
-  extern const char *stringprep_check_version (const char *req_version);
+  extern IDNAPI const char *stringprep_check_version (const char
+						      *req_version);
 
 /* Utility */
 
-  extern int stringprep_unichar_to_utf8 (uint32_t c, char *outbuf);
-  extern uint32_t stringprep_utf8_to_unichar (const char *p);
+  extern IDNAPI int stringprep_unichar_to_utf8 (uint32_t c, char *outbuf);
+  extern IDNAPI uint32_t stringprep_utf8_to_unichar (const char *p);
 
-  extern uint32_t *stringprep_utf8_to_ucs4 (const char *str, ssize_t len,
-					    size_t * items_written);
-  extern char *stringprep_ucs4_to_utf8 (const uint32_t * str, ssize_t len,
-					size_t * items_read,
-					size_t * items_written);
+  extern IDNAPI uint32_t *stringprep_utf8_to_ucs4 (const char *str,
+						   ssize_t len,
+						   size_t * items_written);
+  extern IDNAPI char *stringprep_ucs4_to_utf8 (const uint32_t * str,
+					       ssize_t len,
+					       size_t * items_read,
+					       size_t * items_written);
 
-  extern char *stringprep_utf8_nfkc_normalize (const char *str, ssize_t len);
-  extern uint32_t *stringprep_ucs4_nfkc_normalize (uint32_t * str,
-						   ssize_t len);
+  extern IDNAPI char *stringprep_utf8_nfkc_normalize (const char *str,
+						      ssize_t len);
+  extern IDNAPI uint32_t *stringprep_ucs4_nfkc_normalize (const uint32_t * str,
+							  ssize_t len);
 
-  extern const char *stringprep_locale_charset (void);
-  extern char *stringprep_convert (const char *str,
-				   const char *to_codeset,
-				   const char *from_codeset);
-  extern char *stringprep_locale_to_utf8 (const char *str);
-  extern char *stringprep_utf8_to_locale (const char *str);
+  extern IDNAPI const char *stringprep_locale_charset (void);
+  extern IDNAPI char *stringprep_convert (const char *str,
+					  const char *to_codeset,
+					  const char *from_codeset);
+  extern IDNAPI char *stringprep_locale_to_utf8 (const char *str);
+  extern IDNAPI char *stringprep_utf8_to_locale (const char *str);
 
-#ifdef __cplusplus
+# ifdef __cplusplus
 }
-#endif
-#endif				/* _STRINGPREP_H */
+# endif
+
+#endif				/* STRINGPREP_H */
