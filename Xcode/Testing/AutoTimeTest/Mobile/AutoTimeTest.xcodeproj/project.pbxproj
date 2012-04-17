@@ -29,10 +29,8 @@
 		DC30E3FE153DFE52001B9E6D /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E361153DFE52001B9E6D /* GCDMulticastDelegate.m */; };
 		DC30E3FF153DFE52001B9E6D /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E363153DFE52001B9E6D /* LibIDN.m */; };
 		DC30E400153DFE52001B9E6D /* RFImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E365153DFE52001B9E6D /* RFImageToDataTransformer.m */; };
-		DC30E401153DFE52001B9E6D /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E367153DFE52001B9E6D /* XMPPDigestAuthentication.m */; };
 		DC30E402153DFE52001B9E6D /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E369153DFE52001B9E6D /* XMPPIDTracker.m */; };
 		DC30E403153DFE52001B9E6D /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E36C153DFE52001B9E6D /* XMPPSRVResolver.m */; };
-		DC30E404153DFE52001B9E6D /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E36E153DFE52001B9E6D /* XMPPXFacebookPlatformAuthentication.m */; };
 		DC30E405153DFE52001B9E6D /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E372153DFE52001B9E6D /* GCDAsyncSocket.m */; };
 		DC30E406153DFE52001B9E6D /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E375153DFE52001B9E6D /* DDAbstractDatabaseLogger.m */; };
 		DC30E407153DFE52001B9E6D /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E377153DFE52001B9E6D /* DDASLLogger.m */; };
@@ -51,6 +49,12 @@
 		DC30E45C153DFF39001B9E6D /* NSDate+XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E459153DFF39001B9E6D /* NSDate+XMPPDateTimeProfiles.m */; };
 		DC30E45D153DFF39001B9E6D /* XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E45B153DFF39001B9E6D /* XMPPDateTimeProfiles.m */; };
 		DC30E45F153DFF4D001B9E6D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC30E45E153DFF4D001B9E6D /* Security.framework */; };
+		DC30E831153E0AF0001B9E6D /* XMPPAnonymousAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E820153E0AF0001B9E6D /* XMPPAnonymousAuthentication.m */; };
+		DC30E832153E0AF0001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E823153E0AF0001B9E6D /* XMPPDeprecatedDigestAuthentication.m */; };
+		DC30E833153E0AF0001B9E6D /* XMPPDeprecatedPlainAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E826153E0AF0001B9E6D /* XMPPDeprecatedPlainAuthentication.m */; };
+		DC30E834153E0AF0001B9E6D /* XMPPDigestMD5Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E829153E0AF0001B9E6D /* XMPPDigestMD5Authentication.m */; };
+		DC30E835153E0AF0001B9E6D /* XMPPPlainAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E82C153E0AF0001B9E6D /* XMPPPlainAuthentication.m */; };
+		DC30E836153E0AF0001B9E6D /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E82F153E0AF0001B9E6D /* XMPPXFacebookPlatformAuthentication.m */; };
 		DC9CE2531410159B00E92491 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC9CE2521410159B00E92491 /* UIKit.framework */; };
 		DC9CE2551410159B00E92491 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC9CE2541410159B00E92491 /* Foundation.framework */; };
 		DC9CE2571410159B00E92491 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC9CE2561410159B00E92491 /* CoreGraphics.framework */; };
@@ -104,15 +108,10 @@
 		DC30E363153DFE52001B9E6D /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
 		DC30E364153DFE52001B9E6D /* RFImageToDataTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFImageToDataTransformer.h; sourceTree = "<group>"; };
 		DC30E365153DFE52001B9E6D /* RFImageToDataTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RFImageToDataTransformer.m; sourceTree = "<group>"; };
-		DC30E366153DFE52001B9E6D /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestAuthentication.h; sourceTree = "<group>"; };
-		DC30E367153DFE52001B9E6D /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestAuthentication.m; sourceTree = "<group>"; };
 		DC30E368153DFE52001B9E6D /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIDTracker.h; sourceTree = "<group>"; };
 		DC30E369153DFE52001B9E6D /* XMPPIDTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIDTracker.m; sourceTree = "<group>"; };
-		DC30E36A153DFE52001B9E6D /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
 		DC30E36B153DFE52001B9E6D /* XMPPSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSRVResolver.h; sourceTree = "<group>"; };
 		DC30E36C153DFE52001B9E6D /* XMPPSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSRVResolver.m; sourceTree = "<group>"; };
-		DC30E36D153DFE52001B9E6D /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
-		DC30E36E153DFE52001B9E6D /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		DC30E371153DFE52001B9E6D /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncSocket.h; sourceTree = "<group>"; };
 		DC30E372153DFE52001B9E6D /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncSocket.m; sourceTree = "<group>"; };
 		DC30E374153DFE52001B9E6D /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
@@ -153,6 +152,19 @@
 		DC30E45A153DFF39001B9E6D /* XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDateTimeProfiles.h; sourceTree = "<group>"; };
 		DC30E45B153DFF39001B9E6D /* XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDateTimeProfiles.m; sourceTree = "<group>"; };
 		DC30E45E153DFF4D001B9E6D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		DC30E81F153E0AF0001B9E6D /* XMPPAnonymousAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAnonymousAuthentication.h; sourceTree = "<group>"; };
+		DC30E820153E0AF0001B9E6D /* XMPPAnonymousAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAnonymousAuthentication.m; sourceTree = "<group>"; };
+		DC30E822153E0AF0001B9E6D /* XMPPDeprecatedDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDeprecatedDigestAuthentication.h; sourceTree = "<group>"; };
+		DC30E823153E0AF0001B9E6D /* XMPPDeprecatedDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDeprecatedDigestAuthentication.m; sourceTree = "<group>"; };
+		DC30E825153E0AF0001B9E6D /* XMPPDeprecatedPlainAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDeprecatedPlainAuthentication.h; sourceTree = "<group>"; };
+		DC30E826153E0AF0001B9E6D /* XMPPDeprecatedPlainAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDeprecatedPlainAuthentication.m; sourceTree = "<group>"; };
+		DC30E828153E0AF0001B9E6D /* XMPPDigestMD5Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestMD5Authentication.h; sourceTree = "<group>"; };
+		DC30E829153E0AF0001B9E6D /* XMPPDigestMD5Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestMD5Authentication.m; sourceTree = "<group>"; };
+		DC30E82B153E0AF0001B9E6D /* XMPPPlainAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPlainAuthentication.h; sourceTree = "<group>"; };
+		DC30E82C153E0AF0001B9E6D /* XMPPPlainAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPlainAuthentication.m; sourceTree = "<group>"; };
+		DC30E82E153E0AF0001B9E6D /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		DC30E82F153E0AF0001B9E6D /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
+		DC30E830153E0AF0001B9E6D /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
 		DC9CE24E1410159B00E92491 /* AutoTimeTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutoTimeTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC9CE2521410159B00E92491 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		DC9CE2541410159B00E92491 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -245,15 +257,10 @@
 				DC30E363153DFE52001B9E6D /* LibIDN.m */,
 				DC30E364153DFE52001B9E6D /* RFImageToDataTransformer.h */,
 				DC30E365153DFE52001B9E6D /* RFImageToDataTransformer.m */,
-				DC30E366153DFE52001B9E6D /* XMPPDigestAuthentication.h */,
-				DC30E367153DFE52001B9E6D /* XMPPDigestAuthentication.m */,
 				DC30E368153DFE52001B9E6D /* XMPPIDTracker.h */,
 				DC30E369153DFE52001B9E6D /* XMPPIDTracker.m */,
-				DC30E36A153DFE52001B9E6D /* XMPPSASLAuthentication.h */,
 				DC30E36B153DFE52001B9E6D /* XMPPSRVResolver.h */,
 				DC30E36C153DFE52001B9E6D /* XMPPSRVResolver.m */,
-				DC30E36D153DFE52001B9E6D /* XMPPXFacebookPlatformAuthentication.h */,
-				DC30E36E153DFE52001B9E6D /* XMPPXFacebookPlatformAuthentication.m */,
 			);
 			name = Utilities;
 			path = ../../../../Utilities;
@@ -357,6 +364,7 @@
 			isa = PBXGroup;
 			children = (
 				DC30E456153DFF22001B9E6D /* XMPPFramework.h */,
+				DC30E81D153E0AF0001B9E6D /* Authentication */,
 				DC30E341153DFE52001B9E6D /* Categories */,
 				DC30E348153DFE52001B9E6D /* Core */,
 				DC30E44E153DFE91001B9E6D /* Extensions */,
@@ -397,6 +405,75 @@
 			);
 			name = "XEP-0082";
 			path = "../../../../Extensions/XEP-0082";
+			sourceTree = "<group>";
+		};
+		DC30E81D153E0AF0001B9E6D /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				DC30E81E153E0AF0001B9E6D /* Anonymous */,
+				DC30E821153E0AF0001B9E6D /* Deprecated-Digest */,
+				DC30E824153E0AF0001B9E6D /* Deprecated-Plain */,
+				DC30E827153E0AF0001B9E6D /* Digest-MD5 */,
+				DC30E82A153E0AF0001B9E6D /* Plain */,
+				DC30E82D153E0AF0001B9E6D /* X-Facebook-Platform */,
+				DC30E830153E0AF0001B9E6D /* XMPPSASLAuthentication.h */,
+			);
+			name = Authentication;
+			path = ../../../../Authentication;
+			sourceTree = "<group>";
+		};
+		DC30E81E153E0AF0001B9E6D /* Anonymous */ = {
+			isa = PBXGroup;
+			children = (
+				DC30E81F153E0AF0001B9E6D /* XMPPAnonymousAuthentication.h */,
+				DC30E820153E0AF0001B9E6D /* XMPPAnonymousAuthentication.m */,
+			);
+			path = Anonymous;
+			sourceTree = "<group>";
+		};
+		DC30E821153E0AF0001B9E6D /* Deprecated-Digest */ = {
+			isa = PBXGroup;
+			children = (
+				DC30E822153E0AF0001B9E6D /* XMPPDeprecatedDigestAuthentication.h */,
+				DC30E823153E0AF0001B9E6D /* XMPPDeprecatedDigestAuthentication.m */,
+			);
+			path = "Deprecated-Digest";
+			sourceTree = "<group>";
+		};
+		DC30E824153E0AF0001B9E6D /* Deprecated-Plain */ = {
+			isa = PBXGroup;
+			children = (
+				DC30E825153E0AF0001B9E6D /* XMPPDeprecatedPlainAuthentication.h */,
+				DC30E826153E0AF0001B9E6D /* XMPPDeprecatedPlainAuthentication.m */,
+			);
+			path = "Deprecated-Plain";
+			sourceTree = "<group>";
+		};
+		DC30E827153E0AF0001B9E6D /* Digest-MD5 */ = {
+			isa = PBXGroup;
+			children = (
+				DC30E828153E0AF0001B9E6D /* XMPPDigestMD5Authentication.h */,
+				DC30E829153E0AF0001B9E6D /* XMPPDigestMD5Authentication.m */,
+			);
+			path = "Digest-MD5";
+			sourceTree = "<group>";
+		};
+		DC30E82A153E0AF0001B9E6D /* Plain */ = {
+			isa = PBXGroup;
+			children = (
+				DC30E82B153E0AF0001B9E6D /* XMPPPlainAuthentication.h */,
+				DC30E82C153E0AF0001B9E6D /* XMPPPlainAuthentication.m */,
+			);
+			path = Plain;
+			sourceTree = "<group>";
+		};
+		DC30E82D153E0AF0001B9E6D /* X-Facebook-Platform */ = {
+			isa = PBXGroup;
+			children = (
+				DC30E82E153E0AF0001B9E6D /* XMPPXFacebookPlatformAuthentication.h */,
+				DC30E82F153E0AF0001B9E6D /* XMPPXFacebookPlatformAuthentication.m */,
+			);
+			path = "X-Facebook-Platform";
 			sourceTree = "<group>";
 		};
 		DC9CE2431410159B00E92491 = {
@@ -527,10 +604,8 @@
 				DC30E3FE153DFE52001B9E6D /* GCDMulticastDelegate.m in Sources */,
 				DC30E3FF153DFE52001B9E6D /* LibIDN.m in Sources */,
 				DC30E400153DFE52001B9E6D /* RFImageToDataTransformer.m in Sources */,
-				DC30E401153DFE52001B9E6D /* XMPPDigestAuthentication.m in Sources */,
 				DC30E402153DFE52001B9E6D /* XMPPIDTracker.m in Sources */,
 				DC30E403153DFE52001B9E6D /* XMPPSRVResolver.m in Sources */,
-				DC30E404153DFE52001B9E6D /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 				DC30E405153DFE52001B9E6D /* GCDAsyncSocket.m in Sources */,
 				DC30E406153DFE52001B9E6D /* DDAbstractDatabaseLogger.m in Sources */,
 				DC30E407153DFE52001B9E6D /* DDASLLogger.m in Sources */,
@@ -547,6 +622,12 @@
 				DC30E455153DFEAC001B9E6D /* XMPPTime.m in Sources */,
 				DC30E45C153DFF39001B9E6D /* NSDate+XMPPDateTimeProfiles.m in Sources */,
 				DC30E45D153DFF39001B9E6D /* XMPPDateTimeProfiles.m in Sources */,
+				DC30E831153E0AF0001B9E6D /* XMPPAnonymousAuthentication.m in Sources */,
+				DC30E832153E0AF0001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */,
+				DC30E833153E0AF0001B9E6D /* XMPPDeprecatedPlainAuthentication.m in Sources */,
+				DC30E834153E0AF0001B9E6D /* XMPPDigestMD5Authentication.m in Sources */,
+				DC30E835153E0AF0001B9E6D /* XMPPPlainAuthentication.m in Sources */,
+				DC30E836153E0AF0001B9E6D /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
