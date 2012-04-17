@@ -14,7 +14,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		DC5016AF10DBDD0100562A7B /* Class1.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5016AE10DBDD0100562A7B /* Class1.m */; };
 		DC5016B210DBDD0B00562A7B /* Class2.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5016B110DBDD0B00562A7B /* Class2.m */; };
-		DCC0C1541302FABC00EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C1531302FABC00EC45D2 /* GCDMulticastDelegate.m */; };
+		DCC0C1541302FABC00EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C1531302FABC00EC45D2 /* GCDMulticastDelegate.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -244,6 +244,7 @@
 				INFOPLIST_FILE = "MulticastDelegateTest-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = MulticastDelegateTest;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -261,6 +262,7 @@
 				INFOPLIST_FILE = "MulticastDelegateTest-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = MulticastDelegateTest;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
