@@ -207,9 +207,10 @@
 		block(obj, self);
 	else
 	{
-		// Getting a warning about this?
-		// Use -Wno-arc-performSelector-leaks to quiet the compiler.
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 		[target performSelector:selector withObject:obj withObject:self];
+		#pragma clang diagnostic pop
 	}
 }
 

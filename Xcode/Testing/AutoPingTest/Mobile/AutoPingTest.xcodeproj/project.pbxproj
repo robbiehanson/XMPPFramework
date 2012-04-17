@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DC26A2D11528EEE9004B71C0 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC26A2CD1528EEE9004B71C0 /* XMPPDigestAuthentication.m */; };
-		DC26A2D21528EEE9004B71C0 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC26A2D01528EEE9004B71C0 /* XMPPXFacebookPlatformAuthentication.m */; };
+		56F8341414C767AE00AF62B3 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8341014C767AE00AF62B3 /* XMPPDigestAuthentication.m */; };
+		56F8341514C767AE00AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8341314C767AE00AF62B3 /* XMPPXFacebookPlatformAuthentication.m */; };
+		DC30E328153DFD3E001B9E6D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC30E327153DFD3E001B9E6D /* Security.framework */; };
 		DC597FBD141023930050774C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC597FBC141023930050774C /* UIKit.framework */; };
 		DC597FBF141023930050774C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC597FBE141023930050774C /* Foundation.framework */; };
 		DC597FC1141023930050774C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC597FC0141023930050774C /* CoreGraphics.framework */; };
@@ -56,11 +57,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		DC26A2CC1528EEE9004B71C0 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestAuthentication.h; sourceTree = "<group>"; };
-		DC26A2CD1528EEE9004B71C0 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestAuthentication.m; sourceTree = "<group>"; };
-		DC26A2CE1528EEE9004B71C0 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
-		DC26A2CF1528EEE9004B71C0 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
-		DC26A2D01528EEE9004B71C0 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
+		56F8340F14C767AE00AF62B3 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestAuthentication.h; sourceTree = "<group>"; };
+		56F8341014C767AE00AF62B3 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestAuthentication.m; sourceTree = "<group>"; };
+		56F8341114C767AE00AF62B3 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		56F8341214C767AE00AF62B3 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		56F8341314C767AE00AF62B3 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
+		DC30E327153DFD3E001B9E6D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC597FB8141023930050774C /* AutoPingTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutoPingTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC597FBC141023930050774C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		DC597FBE141023930050774C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -156,6 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC30E328153DFD3E001B9E6D /* Security.framework in Frameworks */,
 				DC5980F1141025770050774C /* CFNetwork.framework in Frameworks */,
 				DC5980EF141025530050774C /* libresolv.dylib in Frameworks */,
 				DC5980ED141025470050774C /* libxml2.dylib in Frameworks */,
@@ -172,6 +175,7 @@
 		DC597FAD141023930050774C = {
 			isa = PBXGroup;
 			children = (
+				DC30E327153DFD3E001B9E6D /* Security.framework */,
 				DC5980E8141023B10050774C /* XMPP */,
 				DC597FC2141023930050774C /* AutoPingTest */,
 				DC597FBB141023930050774C /* Frameworks */,
@@ -314,11 +318,11 @@
 		DC59818E141033210050774C /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				DC26A2CE1528EEE9004B71C0 /* XMPPSASLAuthentication.h */,
-				DC26A2CC1528EEE9004B71C0 /* XMPPDigestAuthentication.h */,
-				DC26A2CD1528EEE9004B71C0 /* XMPPDigestAuthentication.m */,
-				DC26A2CF1528EEE9004B71C0 /* XMPPXFacebookPlatformAuthentication.h */,
-				DC26A2D01528EEE9004B71C0 /* XMPPXFacebookPlatformAuthentication.m */,
+				56F8340F14C767AE00AF62B3 /* XMPPDigestAuthentication.h */,
+				56F8341014C767AE00AF62B3 /* XMPPDigestAuthentication.m */,
+				56F8341114C767AE00AF62B3 /* XMPPSASLAuthentication.h */,
+				56F8341214C767AE00AF62B3 /* XMPPXFacebookPlatformAuthentication.h */,
+				56F8341314C767AE00AF62B3 /* XMPPXFacebookPlatformAuthentication.m */,
 				DC59818F141033210050774C /* DDList.h */,
 				DC598190141033210050774C /* DDList.m */,
 				DC598191141033210050774C /* GCDMulticastDelegate.h */,
@@ -514,8 +518,8 @@
 				DC598203141033210050774C /* DDXMLDocument.m in Sources */,
 				DC598204141033210050774C /* DDXMLElement.m in Sources */,
 				DC598205141033210050774C /* DDXMLNode.m in Sources */,
-				DC26A2D11528EEE9004B71C0 /* XMPPDigestAuthentication.m in Sources */,
-				DC26A2D21528EEE9004B71C0 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
+				56F8341414C767AE00AF62B3 /* XMPPDigestAuthentication.m in Sources */,
+				56F8341514C767AE00AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
