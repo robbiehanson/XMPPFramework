@@ -1,6 +1,8 @@
 #import <Foundation/Foundation.h>
+#import "XMPPSASLAuthentication.h"
 #import "GCDAsyncSocket.h"
 #import "GCDMulticastDelegate.h"
+
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
 #endif
@@ -61,10 +63,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	NSString *hostName;
 	UInt16 hostPort;
 	
-	NSString *tempPassword;
-	BOOL isAccessToken;
-	
-	NSString *appId;
+	id <XMPPSASLAuthentication> auth;
 	
 	XMPPJID *myJID_setByClient;
 	XMPPJID *myJID_setByServer;
@@ -108,12 +107,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (id)initP2PFrom:(XMPPJID *)myJID;
 
 /**
- * Facebook Chat X-FACEBOOK-PLATFORM SASL authentication initialization.
- * This is a convienence init method to help configure Facebook Chat.
- **/
-- (id)initWithFacebookAppId:(NSString *)fbAppId;
-
-/**
  * XMPPStream uses a multicast delegate.
  * This allows one to add multiple delegates to a single XMPPStream instance,
  * which makes it easier to separate various components and extensions.
@@ -128,12 +121,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * The appId can be passed to custom authentication classes.
- * For example, the appId is used for Facebook Chat X-FACEBOOK-PLATFORM SASL authentication.
-**/
-@property (readwrite,copy) NSString *appId;
 
 /**
  * The server's hostname that should be used to make the TCP connection.
@@ -421,36 +408,76 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Authentication.
+ * Returns the server's list of supported authentication mechanisms.
+ * Each item in the array will be of type NSString.
  * 
- * The authenticateWithPassword:error: and authenticateWithFacebookAccessToken:error: methods are asynchronous.
- * Each will return immediately, and the delegate methods are used to determine success.
- * See the xmppStreamDidAuthenticate: and xmppStream:didNotAuthenticate: methods.
+ * For example, if the server supplied this stanza within it's reported stream:features:
+ * 
+ * <mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl">
+ *     <mechanism>DIGEST-MD5</mechanism>
+ *     <mechanism>PLAIN</mechanism>
+ * </mechanisms>
+ * 
+ * Then this method would return [@"DIGEST-MD5", @"PLAIN"].
+**/
+- (NSArray *)supportedAuthenticationMechanisms;
+
+/**
+ * Returns whether or not the given authentication mechanism name was specified in the
+ * server's list of supported authentication mechanisms.
+ * 
+ * Note: The authentication classes often provide a category on XMPPStream, adding useful methods.
+ * 
+ * @see XMPPPlainAuthentication - supportsPlainAuthentication
+ * @see XMPPDigestMD5Authentication - supportsDigestMD5Authentication
+ * @see XMPPXFacebookPlatformAuthentication - supportsXFacebookPlatformAuthentication
+ * @see XMPPDeprecatedPlainAuthentication - supportsDeprecatedPlainAuthentication
+ * @see XMPPDeprecatedDigestAuthentication - supportsDeprecatedDigestAuthentication
+**/
+- (BOOL)supportsAuthenticationMechanism:(NSString *)mechanism;
+
+/**
+ * This is the root authentication method.
+ * All other authentication methods go through this one.
+ * 
+ * This method attempts to start the authentication process given the auth instance.
+ * That is, this method will invoke start: on the given auth instance.
+ * If it returns YES, then the stream will enter into authentication mode.
+ * It will then continually invoke the handleAuth: method on the given instance until authentication is complete.
+ * 
+ * This method is asynchronous.
  * 
  * If there is something immediately wrong, such as the stream is not connected,
  * the method will return NO and set the error.
+ * Otherwise the delegate callbacks are used to communicate auth success or failure.
  * 
- * The errPtr parameter is optional - you may pass nil.
+ * @see xmppStreamDidAuthenticate:
+ * @see xmppStream:didNotAuthenticate:
  * 
- * The authenticateWithPassword:error: method will choose the most secure protocol to send the password.
+ * @see authenticateWithPassword:error:
  * 
- * Security Note:
- * Care should be taken if sending passwords in the clear is not acceptable.
- * You may use the supportsXAuthentication methods below to determine
- * if an acceptable authentication protocol is supported.
+ * Note: The security process is abstracted in order to provide flexibility,
+ *       and allow developers to easily implement their own custom authentication protocols.
+ *       The authentication classes often provide a category on XMPPStream, adding useful methods.
+ * 
+ * @see XMPPXFacebookPlatformAuthentication - authenticateWithFacebookAccessToken:error:
+**/
+- (BOOL)authenticate:(id <XMPPSASLAuthentication>)auth error:(NSError **)errPtr;
+
+/**
+ * This method applies to standard password authentication schemes only.
+ * This is NOT the primary authentication method.
+ * 
+ * @see authenticate:error:
+ * 
+ * This method exists for backwards compatibility, and may disappear in future versions.
+**/
+- (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
+
+/**
+ * Returns whether or not the xmpp stream has successfully authenticated with the server.
 **/
 - (BOOL)isAuthenticated;
-- (BOOL)supportsAnonymousAuthentication;
-- (BOOL)supportsPlainAuthentication;
-- (BOOL)supportsDigestMD5Authentication;
-- (BOOL)supportsXFacebookPlatformAuthentication;
-- (BOOL)supportsDeprecatedPlainAuthentication;
-- (BOOL)supportsDeprecatedDigestAuthentication;
-- (BOOL)authenticateWithFacebookAccessToken:(NSString *)accessToken error:(NSError **)errPtr;
-- (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
-- (BOOL)authenticateAnonymously:(NSError **)errPtr;
-
-- (void)handleAuth1:(NSXMLElement *)response;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Server Info
@@ -463,7 +490,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * If multiple <stream:features/> have been received during the course of stream negotiation,
  * the root element contains only the most recent (current) version.
  * 
- * Note: The rootElement is "empty", in so much as it does not contain all the XML elements the stream has
+ * Note: The rootElement is "empty", in-so-far as it does not contain all the XML elements the stream has
  * received during it's connection. This is done for performance reasons and for the obvious benefit
  * of being more memory efficient.
 **/

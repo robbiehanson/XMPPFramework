@@ -101,7 +101,11 @@
 // We follow the default configuration,
 // but we reserve a special macro to easily disable asynchronous logging for debugging purposes.
 
-#define XMPP_LOG_ASYNC_ENABLED   YES
+#if DEBUG
+#define XMPP_LOG_ASYNC_ENABLED  NO
+#else
+#define XMPP_LOG_ASYNC_ENABLED  YES
+#endif
 
 #define XMPP_LOG_ASYNC_ERROR     ( NO && XMPP_LOG_ASYNC_ENABLED)
 #define XMPP_LOG_ASYNC_WARN      (YES && XMPP_LOG_ASYNC_ENABLED)

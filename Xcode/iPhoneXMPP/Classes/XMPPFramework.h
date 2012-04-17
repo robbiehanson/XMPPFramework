@@ -4,7 +4,7 @@
 //  As you pick and choose which parts of the framework you need for your application, add them to this header file.
 //  
 //  Various modules available within the framework optionally interact with each other.
-//  E.g. The XMPPPing module utilizes the XMPPCapabilities module to advertise support XEP-0199.
+//  E.g. The XMPPPing module will utilize the XMPPCapabilities module (if available) to advertise support XEP-0199.
 // 
 //  However, the modules can only interact if they're both added to your xcode project.
 //  E.g. If XMPPCapabilities isn't a part of your xcode project, then XMPPPing shouldn't attempt to reference it.
