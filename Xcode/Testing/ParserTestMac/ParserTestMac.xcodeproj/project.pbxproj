@@ -3,16 +3,26 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		256AC3DA0F4B6AC300CF3369 /* ParserTestMacAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 256AC3D90F4B6AC300CF3369 /* ParserTestMacAppDelegate.m */; };
+		56F835EC14C77E1D00AF62B3 /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F834B714C77E1D00AF62B3 /* NSData+XMPP.m */; };
+		56F835ED14C77E1D00AF62B3 /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F834B914C77E1D00AF62B3 /* NSNumber+XMPP.m */; };
+		56F835EE14C77E1D00AF62B3 /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F834BB14C77E1D00AF62B3 /* NSXMLElement+XMPP.m */; };
+		56F835F414C77E1D00AF62B3 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F834CC14C77E1D00AF62B3 /* XMPPParser.m */; };
+		56F8363514C77E1D00AF62B3 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8356F14C77E1D00AF62B3 /* DDAbstractDatabaseLogger.m */; };
+		56F8363614C77E1D00AF62B3 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8357114C77E1D00AF62B3 /* DDASLLogger.m */; };
+		56F8363714C77E1D00AF62B3 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8357314C77E1D00AF62B3 /* DDFileLogger.m */; };
+		56F8363814C77E1D00AF62B3 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8357514C77E1D00AF62B3 /* DDLog.m */; };
+		56F8363914C77E1D00AF62B3 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8357714C77E1D00AF62B3 /* DDTTYLogger.m */; };
+		56F8363A14C77E1D00AF62B3 /* ContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8357A14C77E1D00AF62B3 /* ContextFilterLogFormatter.m */; };
+		56F8363B14C77E1D00AF62B3 /* DispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8357C14C77E1D00AF62B3 /* DispatchQueueLogFormatter.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		DCC0C6AF1308C46800EC45D2 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C6AE1308C46800EC45D2 /* XMPPParser.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,10 +36,31 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		56F834B614C77E1D00AF62B3 /* NSData+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+XMPP.h"; sourceTree = "<group>"; };
+		56F834B714C77E1D00AF62B3 /* NSData+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+XMPP.m"; sourceTree = "<group>"; };
+		56F834B814C77E1D00AF62B3 /* NSNumber+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNumber+XMPP.h"; sourceTree = "<group>"; };
+		56F834B914C77E1D00AF62B3 /* NSNumber+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNumber+XMPP.m"; sourceTree = "<group>"; };
+		56F834BA14C77E1D00AF62B3 /* NSXMLElement+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSXMLElement+XMPP.h"; sourceTree = "<group>"; };
+		56F834BB14C77E1D00AF62B3 /* NSXMLElement+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSXMLElement+XMPP.m"; sourceTree = "<group>"; };
+		56F834C614C77E1D00AF62B3 /* XMPPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPLogging.h; sourceTree = "<group>"; };
+		56F834CB14C77E1D00AF62B3 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
+		56F834CC14C77E1D00AF62B3 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
+		56F8356E14C77E1D00AF62B3 /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
+		56F8356F14C77E1D00AF62B3 /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
+		56F8357014C77E1D00AF62B3 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
+		56F8357114C77E1D00AF62B3 /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogger.m; sourceTree = "<group>"; };
+		56F8357214C77E1D00AF62B3 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
+		56F8357314C77E1D00AF62B3 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
+		56F8357414C77E1D00AF62B3 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		56F8357514C77E1D00AF62B3 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		56F8357614C77E1D00AF62B3 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
+		56F8357714C77E1D00AF62B3 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
+		56F8357914C77E1D00AF62B3 /* ContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextFilterLogFormatter.h; sourceTree = "<group>"; };
+		56F8357A14C77E1D00AF62B3 /* ContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContextFilterLogFormatter.m; sourceTree = "<group>"; };
+		56F8357B14C77E1D00AF62B3 /* DispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DispatchQueueLogFormatter.h; sourceTree = "<group>"; };
+		56F8357C14C77E1D00AF62B3 /* DispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DispatchQueueLogFormatter.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* ParserTestMac-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ParserTestMac-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ParserTestMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParserTestMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DCC0C6AD1308C46800EC45D2 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPParser.h; path = ../../../Core/XMPPParser.h; sourceTree = SOURCE_ROOT; };
-		DCC0C6AE1308C46800EC45D2 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPParser.m; path = ../../../Core/XMPPParser.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,11 +151,75 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		56F834B514C77E1D00AF62B3 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				56F834B614C77E1D00AF62B3 /* NSData+XMPP.h */,
+				56F834B714C77E1D00AF62B3 /* NSData+XMPP.m */,
+				56F834B814C77E1D00AF62B3 /* NSNumber+XMPP.h */,
+				56F834B914C77E1D00AF62B3 /* NSNumber+XMPP.m */,
+				56F834BA14C77E1D00AF62B3 /* NSXMLElement+XMPP.h */,
+				56F834BB14C77E1D00AF62B3 /* NSXMLElement+XMPP.m */,
+			);
+			name = Categories;
+			path = ../../../Categories;
+			sourceTree = "<group>";
+		};
+		56F834BC14C77E1D00AF62B3 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				56F834C614C77E1D00AF62B3 /* XMPPLogging.h */,
+				56F834CB14C77E1D00AF62B3 /* XMPPParser.h */,
+				56F834CC14C77E1D00AF62B3 /* XMPPParser.m */,
+			);
+			name = Core;
+			path = ../../../Core;
+			sourceTree = "<group>";
+		};
+		56F8356914C77E1D00AF62B3 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				56F8356D14C77E1D00AF62B3 /* CocoaLumberjack */,
+			);
+			name = Vendor;
+			path = ../../../Vendor;
+			sourceTree = "<group>";
+		};
+		56F8356D14C77E1D00AF62B3 /* CocoaLumberjack */ = {
+			isa = PBXGroup;
+			children = (
+				56F8356E14C77E1D00AF62B3 /* DDAbstractDatabaseLogger.h */,
+				56F8356F14C77E1D00AF62B3 /* DDAbstractDatabaseLogger.m */,
+				56F8357014C77E1D00AF62B3 /* DDASLLogger.h */,
+				56F8357114C77E1D00AF62B3 /* DDASLLogger.m */,
+				56F8357214C77E1D00AF62B3 /* DDFileLogger.h */,
+				56F8357314C77E1D00AF62B3 /* DDFileLogger.m */,
+				56F8357414C77E1D00AF62B3 /* DDLog.h */,
+				56F8357514C77E1D00AF62B3 /* DDLog.m */,
+				56F8357614C77E1D00AF62B3 /* DDTTYLogger.h */,
+				56F8357714C77E1D00AF62B3 /* DDTTYLogger.m */,
+				56F8357814C77E1D00AF62B3 /* Extensions */,
+			);
+			path = CocoaLumberjack;
+			sourceTree = "<group>";
+		};
+		56F8357814C77E1D00AF62B3 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				56F8357914C77E1D00AF62B3 /* ContextFilterLogFormatter.h */,
+				56F8357A14C77E1D00AF62B3 /* ContextFilterLogFormatter.m */,
+				56F8357B14C77E1D00AF62B3 /* DispatchQueueLogFormatter.h */,
+				56F8357C14C77E1D00AF62B3 /* DispatchQueueLogFormatter.m */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		DCC0C6A31308C40400EC45D2 /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
-				DCC0C6AD1308C46800EC45D2 /* XMPPParser.h */,
-				DCC0C6AE1308C46800EC45D2 /* XMPPParser.m */,
+				56F834B514C77E1D00AF62B3 /* Categories */,
+				56F834BC14C77E1D00AF62B3 /* Core */,
+				56F8356914C77E1D00AF62B3 /* Vendor */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -155,8 +250,11 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ParserTestMac" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -164,6 +262,7 @@
 				Japanese,
 				French,
 				German,
+				en,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* ParserTestMac */;
 			projectDirPath = "";
@@ -193,7 +292,17 @@
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				256AC3DA0F4B6AC300CF3369 /* ParserTestMacAppDelegate.m in Sources */,
-				DCC0C6AF1308C46800EC45D2 /* XMPPParser.m in Sources */,
+				56F835EC14C77E1D00AF62B3 /* NSData+XMPP.m in Sources */,
+				56F835ED14C77E1D00AF62B3 /* NSNumber+XMPP.m in Sources */,
+				56F835EE14C77E1D00AF62B3 /* NSXMLElement+XMPP.m in Sources */,
+				56F835F414C77E1D00AF62B3 /* XMPPParser.m in Sources */,
+				56F8363514C77E1D00AF62B3 /* DDAbstractDatabaseLogger.m in Sources */,
+				56F8363614C77E1D00AF62B3 /* DDASLLogger.m in Sources */,
+				56F8363714C77E1D00AF62B3 /* DDFileLogger.m in Sources */,
+				56F8363814C77E1D00AF62B3 /* DDLog.m in Sources */,
+				56F8363914C77E1D00AF62B3 /* DDTTYLogger.m in Sources */,
+				56F8363A14C77E1D00AF62B3 /* ContextFilterLogFormatter.m in Sources */,
+				56F8363B14C77E1D00AF62B3 /* DispatchQueueLogFormatter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -223,16 +332,22 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ParserTestMac_Prefix.pch;
 				INFOPLIST_FILE = "ParserTestMac-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../Vendor/libidn\"",
+				);
 				PRODUCT_NAME = ParserTestMac;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -240,13 +355,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ParserTestMac_Prefix.pch;
 				INFOPLIST_FILE = "ParserTestMac-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../Vendor/libidn\"",
+				);
 				PRODUCT_NAME = ParserTestMac;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -262,8 +384,7 @@
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lxml2";
-				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -276,8 +397,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				OTHER_LDFLAGS = "-lxml2";
-				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};

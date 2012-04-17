@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AutoTimeTestAppDelegate.h"
 
 int main(int argc, char *argv[])
 {
-	@autoreleasepool {
-		int retVal = UIApplicationMain(argc, argv, nil, nil);
-		return retVal;
-	}
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AutoTimeTestAppDelegate class]));
+    }
 }
