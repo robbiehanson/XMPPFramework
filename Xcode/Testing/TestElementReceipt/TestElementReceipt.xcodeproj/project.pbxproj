@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56F8386D14C796A200AF62B3 /* XMPPDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8386914C796A200AF62B3 /* XMPPDigestAuthentication.m */; };
+		56F8386E14C796A200AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8386C14C796A200AF62B3 /* XMPPXFacebookPlatformAuthentication.m */; };
 		DCC8908B13EBF8EC00CDAB56 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC8908A13EBF8EC00CDAB56 /* Cocoa.framework */; };
 		DCC8909513EBF8EC00CDAB56 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DCC8909313EBF8EC00CDAB56 /* InfoPlist.strings */; };
 		DCC8909713EBF8EC00CDAB56 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC8909613EBF8EC00CDAB56 /* main.m */; };
@@ -43,6 +45,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		56F8386814C796A200AF62B3 /* XMPPDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestAuthentication.h; sourceTree = "<group>"; };
+		56F8386914C796A200AF62B3 /* XMPPDigestAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDigestAuthentication.m; sourceTree = "<group>"; };
+		56F8386A14C796A200AF62B3 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		56F8386B14C796A200AF62B3 /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
+		56F8386C14C796A200AF62B3 /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		DCC8908613EBF8EC00CDAB56 /* TestElementReceipt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestElementReceipt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCC8908A13EBF8EC00CDAB56 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		DCC8908D13EBF8EC00CDAB56 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -247,6 +254,11 @@
 		DCC890C313EBF90C00CDAB56 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				56F8386814C796A200AF62B3 /* XMPPDigestAuthentication.h */,
+				56F8386914C796A200AF62B3 /* XMPPDigestAuthentication.m */,
+				56F8386A14C796A200AF62B3 /* XMPPSASLAuthentication.h */,
+				56F8386B14C796A200AF62B3 /* XMPPXFacebookPlatformAuthentication.h */,
+				56F8386C14C796A200AF62B3 /* XMPPXFacebookPlatformAuthentication.m */,
 				DCC890C413EBF90C00CDAB56 /* DDList.h */,
 				DCC890C513EBF90C00CDAB56 /* DDList.m */,
 				DCC890C613EBF90C00CDAB56 /* GCDMulticastDelegate.h */,
@@ -336,6 +348,9 @@
 /* Begin PBXProject section */
 		DCC8907D13EBF8EC00CDAB56 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
 			buildConfigurationList = DCC8908013EBF8EC00CDAB56 /* Build configuration list for PBXProject "TestElementReceipt" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -396,6 +411,8 @@
 				DCC8910513EBF90C00CDAB56 /* DDFileLogger.m in Sources */,
 				DCC8910613EBF90C00CDAB56 /* DDLog.m in Sources */,
 				DCC8910713EBF90C00CDAB56 /* DDTTYLogger.m in Sources */,
+				56F8386D14C796A200AF62B3 /* XMPPDigestAuthentication.m in Sources */,
+				56F8386E14C796A200AF62B3 /* XMPPXFacebookPlatformAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -479,6 +496,7 @@
 		DCC890A513EBF8ED00CDAB56 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TestElementReceipt/TestElementReceipt-Prefix.pch";
 				INFOPLIST_FILE = "TestElementReceipt/TestElementReceipt-Info.plist";
@@ -494,6 +512,7 @@
 		DCC890A613EBF8ED00CDAB56 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TestElementReceipt/TestElementReceipt-Prefix.pch";
 				INFOPLIST_FILE = "TestElementReceipt/TestElementReceipt-Info.plist";
@@ -525,6 +544,7 @@
 				DCC890A613EBF8ED00CDAB56 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

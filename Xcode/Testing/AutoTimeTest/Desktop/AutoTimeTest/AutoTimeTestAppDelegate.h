@@ -7,7 +7,7 @@
 	XMPPStream *xmppStream;
 	XMPPAutoTime *xmppAutoTime;
 	
-	NSWindow *__unsafe_unretained window;
+	__unsafe_unretained NSWindow *window;
 }
 
 @property (unsafe_unretained) IBOutlet NSWindow *window;

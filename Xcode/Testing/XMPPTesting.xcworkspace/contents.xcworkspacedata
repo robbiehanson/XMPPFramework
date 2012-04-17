@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:AutoPingTest/Desktop/AutoPingTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:AutoPingTest/Mobile/AutoPingTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:AutoTimeTest/Desktop/AutoTimeTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:AutoTimeTest/Mobile/AutoTimeTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:EncodeDecodeTest/Desktop/EncodeDecodeTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:EncodeDecodeTest/Mobile/EncodeDecodeTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:FacebookTest/FacebookTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:MulticastDelegateTest/MulticastDelegateTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:MUCTesting/MUCTesting.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ParserTestMac/ParserTestMac.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ParserTestPhone/ParserTestPhone.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestCapabilitiesHashing/Mac/TestCapabilitiesHashing/TestCapabilitiesHashing.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestCapabilitiesHashing/iPhone/TestCapabilitiesHashing/TestCapabilitiesHashing.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestElementReceipt/TestElementReceipt.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestIDTracker/TestIDTracker.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestSRVResolver/TestSRVResolver.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestXEP82/Mac/TestXEP82.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestXEP82/iOS/TestXEP82.xcodeproj">
+   </FileRef>
+</Workspace>
