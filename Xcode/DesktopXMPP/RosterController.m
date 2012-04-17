@@ -570,18 +570,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	NSString *password = [passwordField stringValue];
 	
 	NSError *error = nil;
-	BOOL success;
+	BOOL operationInProgress;
 	
-	if(isRegistering)
+	if (isRegistering)
 	{
-		success = [[self xmppStream] registerWithPassword:password error:&error];
+		// Start **_asynchronous_** operation.
+		// 
+		// If there's some kind of problem, the method will return NO and report the reason.
+		// For example: "server doesn't support in-band-registration"
+		// 
+		operationInProgress = [[self xmppStream] registerWithPassword:password error:&error];
 	}
 	else
 	{
-		success = [[self xmppStream] authenticateWithPassword:password error:&error];
+		// Start **_asynchronous_** operation.
+		// 
+		// If there's some kind of problem, the method will return NO and report the reason.
+		// For example: "xmpp stream isn't connected"
+		// 
+		operationInProgress = [[self xmppStream] authenticateWithPassword:password error:&error];
 	}
 	
-	if (!success)
+	if (!operationInProgress)
 	{
 		[messageField setStringValue:[error localizedDescription]];
 	}

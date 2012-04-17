@@ -1,17 +1,9 @@
-#import "XMPPStream.h"
-#import "XMPPInternal.h"
+#import "XMPP.h"
 #import "XMPPParser.h"
-#import "XMPPJID.h"
-#import "XMPPIQ.h"
-#import "XMPPMessage.h"
-#import "XMPPPresence.h"
-#import "XMPPModule.h"
 #import "XMPPLogging.h"
-#import "NSData+XMPP.h"
-#import "NSXMLElement+XMPP.h"
-#import "XMPPDigestAuthentication.h"
-#import "XMPPXFacebookPlatformAuthentication.h"
+#import "XMPPInternal.h"
 #import "XMPPSRVResolver.h"
+#import "NSData+XMPP.h"
 #import "DDList.h"
 
 #import <libkern/OSAtomic.h>
@@ -23,6 +15,13 @@
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
+// Log levels: off, error, warn, info, verbose
+#if DEBUG
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
+#else
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
 #if TARGET_OS_IPHONE
@@ -38,18 +37,9 @@
 **/
 #define return_from_block  return
 
-// Log levels: off, error, warn, info, verbose
-#if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
-#else
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
-#endif
-
 
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
 NSString *const XMPPStreamDidChangeMyJIDNotification = @"XMPPStreamDidChangeMyJID";
-
-static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
 
 
 enum XMPPStreamFlags
@@ -177,29 +167,6 @@ enum XMPPStreamConfig
 	return self;
 }
 
-
-/**
- * Facebook Chat X-FACEBOOK-PLATFORM SASL authentication initialization.
- * This is a convienence init method to help configure Facebook Chat.
-**/
-- (id)initWithFacebookAppId:(NSString *)fbAppId 
-{
-	if ((self = [self init]))
-	{
-		appId = fbAppId;
-		myJID_setByClient = [XMPPJID jidWithString:XMPPFacebookChatHostName];
-		
-		// As of October 8, 2011, Facebook doesn't have their XMPP SRV records set.
-		// And, as per the XMPP specification, we MUST check the XMPP SRV records for an IP address,
-		// before falling back to a traditional A record lookup.
-		// 
-		// So we're setting the hostname as a minor optimization to avoid the SRV timeout delay.
-		
-		hostName = XMPPFacebookChatHostName;
-	}
-	return self;
-}
-
 /**
  * Standard deallocation method.
  * Every object variable declared in the header file should be released here.
@@ -234,42 +201,20 @@ enum XMPPStreamConfig
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)appId
+- (XMPPStreamState)state
 {
+	__block XMPPStreamState result = STATE_XMPP_DISCONNECTED;
+	
+	dispatch_block_t block = ^{
+		result = (XMPPStreamState)state;
+	};
+	
 	if (dispatch_get_current_queue() == xmppQueue)
-	{
-		return appId;
-	}
+		block();
 	else
-	{
-		__block NSString *result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = appId;
-		});
-		
-		return result;
-	}
-}
-
-- (void)setAppId:(NSString *)newAppId
-{
-	if (dispatch_get_current_queue() == xmppQueue)
-	{
-		if (appId != newAppId)
-		{
-			appId = [newAppId copy];
-		}
-	}
-	else
-	{
-		NSString *newAppIdCopy = [newAppId copy];
-		
-		dispatch_async(xmppQueue, ^{
-			appId = newAppIdCopy;
-		});
-		
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
 - (NSString *)hostName
@@ -1426,18 +1371,15 @@ enum XMPPStreamConfig
 #pragma mark Authentication
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * This method checks the stream features of the connected server to determine if SASL Anonymous Authentication (XEP-0175)
- * is supported. If we are not connected to a server, this method simply returns NO.
- **/
-- (BOOL)supportsAnonymousAuthentication
+- (NSArray *)supportedAuthenticationMechanisms
 {
-	__block BOOL result = NO;
+	__block NSMutableArray *result = [[NSMutableArray alloc] init];
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		// The root element can be properly queried for authentication mechanisms anytime after the
-		// stream:features are received, and TLS has been setup (if required)
+		// stream:features are received, and TLS has been setup (if required).
+		
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
 			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
@@ -1447,11 +1389,7 @@ enum XMPPStreamConfig
 			
 			for (NSXMLElement *mechanism in mechanisms)
 			{
-				if ([[mechanism stringValue] isEqualToString:@"ANONYMOUS"])
-				{
-					result = YES;
-					break;
-				}
+				[result addObject:[mechanism stringValue]];
 			}
 		}
 	}};
@@ -1465,96 +1403,20 @@ enum XMPPStreamConfig
 }
 
 /**
- * This method checks the stream features of the connected server to determine if plain authentication is supported.
- * If we are not connected to a server, this method simply returns NO.
-**/
-- (BOOL)supportsPlainAuthentication
-{
-	__block BOOL result = NO;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		// The root element can be properly queried for authentication mechanisms anytime after the
-		//stream:features are received, and TLS has been setup (if required)
-		if (state >= STATE_XMPP_POST_NEGOTIATION)
-		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *mech = [features elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-			
-			NSArray *mechanisms = [mech elementsForName:@"mechanism"];
-			
-			for (NSXMLElement *mechanism in mechanisms)
-			{
-				if ([[mechanism stringValue] isEqualToString:@"PLAIN"])
-				{
-					result = YES;
-					break;
-				}
-			}
-		}
-	}};
-	
-	if (dispatch_get_current_queue() == xmppQueue)
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	return result;
-}
-
-/**
- * This method checks the stream features of the connected server to determine if digest authentication is supported.
- * If we are not connected to a server, this method simply returns NO.
+ * This method checks the stream features of the connected server to determine
+ * if the given authentication mechanism is supported.
  * 
- * This is the preferred authentication technique, and will be used if the server supports it.
-**/
-- (BOOL)supportsDigestMD5Authentication
-{
-	__block BOOL result = NO;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		// The root element can be properly queried for authentication mechanisms anytime after the
-		// stream:features are received, and TLS has been setup (if required)
-		if (state >= STATE_XMPP_POST_NEGOTIATION)
-		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *mech = [features elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-			
-			NSArray *mechanisms = [mech elementsForName:@"mechanism"];
-			
-			for (NSXMLElement *mechanism in mechanisms)
-			{
-				if ([[mechanism stringValue] isEqualToString:@"DIGEST-MD5"])
-				{
-					result = YES;
-					break;
-				}
-			}
-		}
-	}};
-	
-	if (dispatch_get_current_queue() == xmppQueue)
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	return result;
-}
-
-/**
- * This method checks the stream features of the connected server to
- * determine if X-FACEBOOK-PLATFORM authentication is supported.
  * If we are not connected to a server, this method simply returns NO.
- **/
-- (BOOL)supportsXFacebookPlatformAuthentication
+**/
+- (BOOL)supportsAuthenticationMechanism:(NSString *)mechanismType
 {
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		// The root element can be properly queried for authentication mechanisms anytime after the
-		// stream:features are received, and TLS has been setup (if required)
+		// stream:features are received, and TLS has been setup (if required).
+		
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
 			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
@@ -1564,7 +1426,7 @@ enum XMPPStreamConfig
 			
 			for (NSXMLElement *mechanism in mechanisms)
 			{
-				if ([[mechanism stringValue] isEqualToString:@"X-FACEBOOK-PLATFORM"])
+				if ([[mechanism stringValue] isEqualToString:mechanismType])
 				{
 					result = YES;
 					break;
@@ -1581,161 +1443,54 @@ enum XMPPStreamConfig
 	return result;
 }
 
-/**
- * This method only applies to servers that don't support XMPP version 1.0, as defined in RFC 3920.
- * With these servers, we attempt to discover supported authentication modes via the jabber:iq:auth namespace.
-**/
-- (BOOL)supportsDeprecatedPlainAuthentication
-{
-	__block BOOL result = NO;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		// The root element can be properly queried for authentication mechanisms anytime after the
-		// stream:features are received, and TLS has been setup (if required)
-		if (state >= STATE_XMPP_POST_NEGOTIATION)
-		{
-			// Search for an iq element within the rootElement.
-			// Recall that some servers might stupidly add a "jabber:client" namespace which might cause problems
-			// if we simply used the elementForName method.
-			
-			NSXMLElement *iq = nil;
-			
-			NSUInteger i, count = [rootElement childCount];
-			for (i = 0; i < count; i++)
-			{
-				NSXMLNode *childNode = [rootElement childAtIndex:i];
-				
-				if ([childNode kind] == NSXMLElementKind)
-				{
-					if ([[childNode name] isEqualToString:@"iq"])
-					{
-						iq = (NSXMLElement *)childNode;
-					}
-				}
-			}
-			
-			NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:auth"];
-			NSXMLElement *plain = [query elementForName:@"password"];
-			
-			result = (plain != nil);
-		}
-	}};
-	
-	if (dispatch_get_current_queue() == xmppQueue)
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	return result;
-}
-
-- (void)sendSASLRequestForMechanism:(NSString *)mechanism
-{
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
-	
-	XMPPLogTrace();
-	
-	NSString *authFrmt = @"<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='%@'/>";
-	NSString *auth = [NSString stringWithFormat:authFrmt, mechanism];
-	
-	NSData *outgoingData = [auth dataUsingEncoding:NSUTF8StringEncoding];
-	
-	XMPPLogSend(@"SEND: %@", auth);
-	numberOfBytesSent += [outgoingData length];
-	
-	[asyncSocket writeData:outgoingData
-	           withTimeout:TIMEOUT_XMPP_WRITE
-	                   tag:TAG_XMPP_WRITE_STREAM];
-}
-
-/**
- * This method only applies to servers that don't support XMPP version 1.0, as defined in RFC 3920.
- * With these servers, we attempt to discover supported authentication modes via the jabber:iq:auth namespace.
-**/
-- (BOOL)supportsDeprecatedDigestAuthentication
-{
-	__block BOOL result = NO;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		// The root element can be properly queried for authentication mechanisms anytime after the
-		// stream:features are received, and TLS has been setup (if required)
-		if (state >= STATE_XMPP_POST_NEGOTIATION)
-		{
-			// Search for an iq element within the rootElement.
-			// Recall that some servers might stupidly add a "jabber:client" namespace which might cause problems
-			// if we simply used the elementForName method.
-			
-			NSXMLElement *iq = nil;
-			
-			NSUInteger i, count = [rootElement childCount];
-			for (i = 0; i < count; i++)
-			{
-				NSXMLNode *childNode = [rootElement childAtIndex:i];
-				
-				if ([childNode kind] == NSXMLElementKind)
-				{
-					if ([[childNode name] isEqualToString:@"iq"])
-					{
-						iq = (NSXMLElement *)childNode;
-					}
-				}
-			}
-			
-			NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:auth"];
-			NSXMLElement *digest = [query elementForName:@"digest"];
-			
-			result = (digest != nil);
-		}
-	}};
-	
-	if (dispatch_get_current_queue() == xmppQueue)
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	return result;
-}
-
-/**
- * This method attempts to connect to the Facebook Chat servers 
- * using the Facebook OAuth token returned by the Facebook OAuth 2.0 authentication process.
-**/
-- (BOOL)authenticateWithFacebookAccessToken:(NSString *)accessToken error:(NSError **)errPtr
+- (BOOL)authenticate:(id <XMPPSASLAuthentication>)inAuth error:(NSError **)errPtr
 {
 	XMPPLogTrace();
 	
-	__block BOOL result = YES;
+	__block BOOL result = NO;
 	__block NSError *err = nil;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
-				
-		if (![self supportsXFacebookPlatformAuthentication])
+		
+		if (state != STATE_XMPP_CONNECTED)
 		{
-			NSString *errMsg = @"The server does not support X-FACEBOOK-PLATFORM authentication.";
+			NSString *errMsg = @"Please wait until the stream is connected.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-
-			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
-
+			
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+			
 			result = NO;
 			return_from_block;
 		}
-
-		// Save authentication information
-		isAccessToken = YES;
-		tempPassword = [accessToken copy];
-
-		NSError *authErr = nil;
-		result = [self authenticateWithPassword:accessToken error:&authErr];
-    
-		if (!result)
+		
+		if (myJID_setByClient == nil)
 		{
-			err = authErr;
+			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
+			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+			
+			result = NO;
+			return_from_block;
 		}
 		
+		// Change state.
+		// We do this now because when we invoke the start method below,
+		// it may in turn invoke our sendAuthElement method, which expects us to be in STATE_XMPP_AUTH.
+		state = STATE_XMPP_AUTH;
+		
+		if ([inAuth start:&err])
+		{
+			auth = inAuth;
+			result = YES;
+		}
+		else
+		{
+			// Unable to start authentication for some reason.
+			// Revert back to connected state.
+			state = STATE_XMPP_CONNECTED;
+		}
 	}};
-	
 	
 	if (dispatch_get_current_queue() == xmppQueue)
 		block();
@@ -1749,9 +1504,12 @@ enum XMPPStreamConfig
 }
 
 /**
- * This method attempts to sign-in to the server using the configured myJID and given password.
- * This method also works with Facebook Chat and the Facebook user's password, but authenticating
- * with authenticateWithFacebookAccessToken:error: is preferred by Facebook.
+ * This method applies to standard password authentication schemes only.
+ * This is NOT the primary authentication method.
+ * 
+ * @see authenticate:error:
+ * 
+ * This method exists for backwards compatibility, and may disappear in future versions.
 **/
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr
 {
@@ -1775,7 +1533,7 @@ enum XMPPStreamConfig
 		
 		if (myJID_setByClient == nil)
 		{
-			NSString *errMsg = @"You must set myJID before calling authenticateWithPassword:error:.";
+			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
 			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
@@ -1784,175 +1542,43 @@ enum XMPPStreamConfig
 			return_from_block;
 		}
 		
-        // Facebook authentication
-        if (isAccessToken)
-        {
-            [self sendSASLRequestForMechanism:@"X-FACEBOOK-PLATFORM"];
-      			
-			// Update state
-			state = STATE_XMPP_AUTH_1;
-		} 
-        else if ([self supportsDigestMD5Authentication])
+		// Choose the best authentication method.
+		// 
+		// P.S. - This method is deprecated.
+		
+		id <XMPPSASLAuthentication> someAuth = nil;
+		
+		if ([self supportsDigestMD5Authentication])
 		{
-            [self sendSASLRequestForMechanism:@"DIGEST-MD5"];
-			
-			// Save authentication information
-            isAccessToken = NO;
-			tempPassword = [password copy];
-			
-			// Update state
-			state = STATE_XMPP_AUTH_1;
+			someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
+			result = [self authenticate:someAuth error:&err];
 		}
 		else if ([self supportsPlainAuthentication])
 		{
-			// From RFC 4616 - PLAIN SASL Mechanism:
-			// [authzid] UTF8NUL authcid UTF8NUL passwd
-			// 
-			// authzid: authorization identity
-			// authcid: authentication identity (username)
-			// passwd : password for authcid
-			
-			NSString *username = [myJID_setByClient user];
-			
-			NSString *payload = [NSString stringWithFormat:@"%C%@%C%@", 0, username, 0, password];
-			NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] base64Encoded];
-			
-			NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-			[auth addAttributeWithName:@"mechanism" stringValue:@"PLAIN"];
-			[auth setStringValue:base64];
-			
-			NSString *outgoingStr = [auth compactXMLString];
-			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-			
-			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
-			
-			[asyncSocket writeData:outgoingData
-					   withTimeout:TIMEOUT_XMPP_WRITE
-							   tag:TAG_XMPP_WRITE_STREAM];
-			
-			// Update state
-			state = STATE_XMPP_AUTH_1;
+			someAuth = [[XMPPPlainAuthentication alloc] initWithStream:self password:password];
+			result = [self authenticate:someAuth error:&err];
+		}
+		else if ([self supportsDeprecatedDigestAuthentication])
+		{
+			someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:password];
+			result = [self authenticate:someAuth error:&err];
+		}
+		else if ([self supportsDeprecatedPlainAuthentication])
+		{
+			someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:password];
+			result = [self authenticate:someAuth error:&err];
 		}
 		else
 		{
-			// The server does not appear to support SASL authentication (at least any type we can use)
-			// So we'll revert back to the old fashioned jabber:iq:auth mechanism
-			
-			NSString *username = [myJID_setByClient user];
-			NSString *resource = [myJID_setByClient resource];
-			
-			if ([resource length] == 0)
-			{
-				// If resource is nil or empty, we need to auto-create one
-				
-				resource = [self generateUUID];
-			}
-			
-			NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
-			[queryElement addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
-			[queryElement addChild:[NSXMLElement elementWithName:@"resource" stringValue:resource]];
-			
-			if ([self supportsDeprecatedDigestAuthentication])
-			{
-				NSString *rootID = [[[self rootElement] attributeForName:@"id"] stringValue];
-				NSString *digestStr = [NSString stringWithFormat:@"%@%@", rootID, password];
-				NSData *digestData = [digestStr dataUsingEncoding:NSUTF8StringEncoding];
-				
-				NSString *digest = [[digestData sha1Digest] hexStringValue];
-				
-				[queryElement addChild:[NSXMLElement elementWithName:@"digest" stringValue:digest]];
-			}
-			else
-			{
-				[queryElement addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
-			}
-			
-			NSXMLElement *iqElement = [NSXMLElement elementWithName:@"iq"];
-			[iqElement addAttributeWithName:@"type" stringValue:@"set"];
-			[iqElement addChild:queryElement];
-			
-			NSString *outgoingStr = [iqElement compactXMLString];
-			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-			
-			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
-			
-			[asyncSocket writeData:outgoingData
-					   withTimeout:TIMEOUT_XMPP_WRITE
-							   tag:TAG_XMPP_WRITE_STREAM];
-			
-			// Update state
-			state = STATE_XMPP_AUTH_1;
-		}
-		
-	}};
-	
-	
-	if (dispatch_get_current_queue() == xmppQueue)
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	if (errPtr)
-		*errPtr = err;
-	
-	return result;
-}
-
-/**
- * This method attempts to sign-in to the using SASL Anonymous Authentication (XEP-0175)
-**/
-- (BOOL)authenticateAnonymously:(NSError **)errPtr
-{
-	XMPPLogTrace();
-	
-	__block BOOL result = YES;
-	__block NSError *err = nil;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		if (state != STATE_XMPP_CONNECTED)
-		{
-			NSString *errMsg = @"Please wait until the stream is connected.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-			
-			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
-			
-			result = NO;
-			return_from_block;
-		}
-		
-		if (![self supportsAnonymousAuthentication])
-		{
-			NSString *errMsg = @"The server does not support anonymous authentication.";
+			NSString *errMsg = @"No suitable authentication method found";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
 			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
 			
 			result = NO;
-			return_from_block;
 		}
-		
-		NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-		[auth addAttributeWithName:@"mechanism" stringValue:@"ANONYMOUS"];
-		
-		NSString *outgoingStr = [auth compactXMLString];
-		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-		
-		XMPPLogSend(@"SEND: %@", outgoingStr);
-		numberOfBytesSent += [outgoingData length];
-		
-		[asyncSocket writeData:outgoingData
-		           withTimeout:TIMEOUT_XMPP_WRITE
-		                   tag:TAG_XMPP_WRITE_STREAM];
-		
-		isAccessToken = NO;
-    
-		// Update state
-		state = STATE_XMPP_AUTH_3;
-		
 	}};
+	
 	
 	if (dispatch_get_current_queue() == xmppQueue)
 		block();
@@ -2299,15 +1925,13 @@ enum XMPPStreamConfig
 **/
 - (void)sendElement:(NSXMLElement *)element
 {
-	dispatch_block_t block = ^{
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (state == STATE_XMPP_CONNECTED)
 		{
-			@autoreleasepool {
-				[self sendElement:element withTag:TAG_XMPP_WRITE_STREAM];
-			}
+			[self sendElement:element withTag:TAG_XMPP_WRITE_STREAM];
 		}
-	};
+	}};
 	
 	if (dispatch_get_current_queue() == xmppQueue)
 		block();
@@ -2332,19 +1956,16 @@ enum XMPPStreamConfig
 	{
 		__block XMPPElementReceipt *receipt = nil;
 		
-		dispatch_block_t block = ^{
+		dispatch_block_t block = ^{ @autoreleasepool {
 			
 			if (state == STATE_XMPP_CONNECTED)
 			{
-				@autoreleasepool {
+				receipt = [[XMPPElementReceipt alloc] init]; // autoreleased below
+				[receipts addObject:receipt];
 				
-					receipt = [[XMPPElementReceipt alloc] init]; // autoreleased below
-					[receipts addObject:receipt];
-					
-					[self sendElement:element withTag:TAG_XMPP_WRITE_RECEIPT];
-				}
+				[self sendElement:element withTag:TAG_XMPP_WRITE_RECEIPT];
 			}
-		};
+		}};
 		
 		if (dispatch_get_current_queue() == xmppQueue)
 			block();
@@ -2355,6 +1976,10 @@ enum XMPPStreamConfig
 	}
 }
 
+/**
+ * Retrieves the current presence and resends it in once atomic operation.
+ * Useful for various components that need to update injected information in the presence stanza.
+**/
 - (void)resendMyPresence
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
@@ -2362,6 +1987,37 @@ enum XMPPStreamConfig
 		if (myPresence && [[myPresence type] isEqualToString:@"available"])
 		{
 			[self sendElement:myPresence];
+		}
+	}};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
+}
+
+/**
+ * 
+**/
+- (void)sendAuthElement:(NSXMLElement *)element
+{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		if (state == STATE_XMPP_AUTH)
+		{
+			NSString *outgoingStr = [element compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+			
+			XMPPLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
+			           withTimeout:TIMEOUT_XMPP_WRITE
+			                   tag:TAG_XMPP_WRITE_STREAM];
+		}
+		else
+		{
+			XMPPLogWarn(@"Unable to send element while not in STATE_XMPP_AUTH: %@", [element compactXMLString]);
 		}
 	}};
 	
@@ -2776,224 +2432,66 @@ enum XMPPStreamConfig
  * challenge response.  If plain sasl was used, we sent our authentication information, and we're waiting for a 
  * success response.
 **/
-- (void)handleAuth1:(NSXMLElement *)response
+- (void)handleAuth:(NSXMLElement *)authResponse
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
-	if ([self supportsDigestMD5Authentication] || isAccessToken)
+	XMPPHandleAuthResponse result = [auth handleAuth:authResponse];
+	
+	if (result == XMPP_AUTH_SUCCESS)
 	{
-		// We're expecting a challenge response
-		// If we get anything else we can safely assume it's the equivalent of a failure response
-		if ( ![[response name] isEqualToString:@"challenge"])
+		// We are successfully authenticated (via sasl:digest-md5)
+		[self setIsAuthenticated:YES];
+		
+		BOOL shouldRenegotiate = YES;
+		if ([auth respondsToSelector:@selector(shouldResendOpeningNegotiationAfterSuccessfulAuthentication)])
 		{
-			// Revert back to connected state (from authenticating state)
-			state = STATE_XMPP_CONNECTED;
-			
-			[multicastDelegate xmppStream:self didNotAuthenticate:response];
+			shouldRenegotiate = [auth shouldResendOpeningNegotiationAfterSuccessfulAuthentication];
 		}
-		else
+		
+		if (shouldRenegotiate)
 		{
-			// Create authentication object from the given challenge
-			// We'll release this object at the end of this else block
-			id<XMPPSASLAuthentication> auth = nil;
-			
-			if (isAccessToken)
-			{
-				auth = [[XMPPXFacebookPlatformAuthentication alloc] initWithChallenge:response
-				                                                                appId:self.appId
-				                                                          accessToken:tempPassword];
-				
-				// Update state
-				state = STATE_XMPP_AUTH_3;
-			}
-			else
-			{
-				auth = [[XMPPDigestAuthentication alloc] initWithChallenge:response];
-				
-				NSString *virtualHostName = [myJID_setByClient domain];
-				NSString *serverHostName = hostName;
-				
-				// Sometimes the realm isn't specified.
-				// In this case I believe the realm is implied as the virtual host name.
-				if (![(XMPPDigestAuthentication *)auth realm])
-				{
-					if ([virtualHostName length] > 0)
-						[(XMPPDigestAuthentication *)auth setRealm:virtualHostName];
-					else
-						[(XMPPDigestAuthentication *)auth setRealm:serverHostName];
-				}
-				
-				// Set digestURI
-				NSString *digestURI;
-				if ([virtualHostName length] > 0)
-					digestURI = [NSString stringWithFormat:@"xmpp/%@", virtualHostName];
-				else
-					digestURI = [NSString stringWithFormat:@"xmpp/%@", serverHostName];
-				
-				[(XMPPDigestAuthentication *)auth setDigestURI:digestURI];
-				
-				// Set username and password
-				[(XMPPDigestAuthentication *)auth setUsername:[myJID_setByClient user] password:tempPassword];
-				
-				// Update state
-				state = STATE_XMPP_AUTH_2;
-			}
-			
-			// Create and send challenge response element
-			NSXMLElement *cr = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-			[cr setStringValue:[auth base64EncodedFullResponse]];
-			
-			NSString *outgoingStr = [cr compactXMLString];
-			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-			
-			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
-			
-			[asyncSocket writeData:outgoingData
-					   withTimeout:TIMEOUT_XMPP_WRITE
-							   tag:TAG_XMPP_WRITE_STREAM];
-			
-			// Release unneeded resources
-			isAccessToken = NO;
-			tempPassword = nil;
-		}
-	}
-	else if ([self supportsPlainAuthentication])
-	{
-		// We're expecting a success response
-		// If we get anything else we can safely assume it's the equivalent of a failure response
-		if ( ![[response name] isEqualToString:@"success"])
-		{
-			// Revert back to connected state (from authenticating state)
-			state = STATE_XMPP_CONNECTED;
-			
-			[multicastDelegate xmppStream:self didNotAuthenticate:response];
-		}
-		else
-		{
-			// We are successfully authenticated (via sasl:plain)
-			[self setIsAuthenticated:YES];
-			
 			// Now we start our negotiation over again...
 			[self sendOpeningNegotiation];
 		}
-	}
-	else
-	{
-		// We used the old fashioned jabber:iq:auth mechanism
-		
-		if ([[response attributeStringValueForName:@"type"] isEqualToString:@"error"])
-		{
-			// Revert back to connected state (from authenticating state)
-			state = STATE_XMPP_CONNECTED;
-			
-			[multicastDelegate xmppStream:self didNotAuthenticate:response];
-		}
 		else
 		{
-			// We are successfully authenticated (via non-sasl:digest)
-			// And we've binded our resource as well
-			[self setIsAuthenticated:YES];
-			
 			// Revert back to connected state (from authenticating state)
 			state = STATE_XMPP_CONNECTED;
 			
 			[multicastDelegate xmppStreamDidAuthenticate:self];
 		}
-	}
-}
-
-/**
- * This method handles the result of our challenge response we sent in handleAuth1 using digest-md5 sasl.
-**/
-- (void)handleAuth2:(NSXMLElement *)response
-{
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
-	
-	XMPPLogTrace();
-	
-	if ([[response name] isEqualToString:@"challenge"])
-	{
-		XMPPDigestAuthentication *auth = [[XMPPDigestAuthentication alloc] initWithChallenge:response];
 		
-		if(![auth rspauth])
-		{
-			// We're getting another challenge???
-			// I'm not sure what this could possibly be, so for now I'll assume it's a failure
-			
-			// Revert back to connected state (from authenticating state)
-			state = STATE_XMPP_CONNECTED;
-			
-			[multicastDelegate xmppStream:self didNotAuthenticate:response];
-		}
-		else
-		{
-			// We received another challenge, but it's really just an rspauth
-			// This is supposed to be included in the success element (according to the updated RFC)
-			// but many implementations incorrectly send it inside a second challenge request.
-			
-			// Create and send empty challenge response element
-			NSXMLElement *cr = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-			
-			NSString *outgoingStr = [cr compactXMLString];
-			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-			
-			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
-			
-			[asyncSocket writeData:outgoingData
-					   withTimeout:TIMEOUT_XMPP_WRITE
-							   tag:TAG_XMPP_WRITE_STREAM];
-			
-			// The state remains in STATE_XMPP_AUTH_2
-		}
-	}
-	else if ([[response name] isEqualToString:@"success"])
-	{
-		// We are successfully authenticated (via sasl:digest-md5)
-		[self setIsAuthenticated:YES];
+		// Done with auth
+		auth = nil;
 		
-		// Now we start our negotiation over again...
-		[self sendOpeningNegotiation];
 	}
-	else
-	{
-		// We received some kind of <failure/> element
-		
-		// Revert back to connected state (from authenticating state)
-		state = STATE_XMPP_CONNECTED;
-		
-		[multicastDelegate xmppStream:self didNotAuthenticate:response];
-	}
-}
-
-/**
- * This method handles the result of our SASL Anonymous Authentication challenge
-**/
-- (void)handleAuth3:(NSXMLElement *)response
-{
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
-	
-	XMPPLogTrace();
-	
-	// We're expecting a success response
-	// If we get anything else we can safely assume it's the equivalent of a failure response
-	if ( ![[response name] isEqualToString:@"success"])
+	else if (result == XMPP_AUTH_FAIL)
 	{
 		// Revert back to connected state (from authenticating state)
 		state = STATE_XMPP_CONNECTED;
 		
-		[multicastDelegate xmppStream:self didNotAuthenticate:response];
+		// Notify delegate
+		[multicastDelegate xmppStream:self didNotAuthenticate:authResponse];
+		
+		// Done with auth
+		auth = nil;
+		
+	}
+	else if (result == XMPP_AUTH_CONTINUE)
+	{
+		// Authentication continues.
+		// State doesn't change.
 	}
 	else
 	{
-		// We are successfully authenticated (via sasl:x-facebook-platform or sasl:plain)
-		[self setIsAuthenticated:YES];
+		XMPPLogError(@"Authentication class (%@) returned invalid response code (%i)",
+		           NSStringFromClass([auth class]), (int)result);
 		
-		// Now we start our negotiation over again...
-		[self sendOpeningNegotiation];
+		NSAssert(NO, @"Authentication class (%@) returned invalid response code (%i)",
+		             NSStringFromClass([auth class]), (int)result);
 	}
 }
 
@@ -3338,8 +2836,7 @@ enum XMPPStreamConfig
 		parser = nil;
 		
 		// Clear any saved authentication information
-		isAccessToken = NO;
-		tempPassword = nil;
+		auth = nil;
 		
 		// Clear stored elements
 		myJID_setByServer = nil;
@@ -3534,20 +3031,10 @@ enum XMPPStreamConfig
 			// The iq response from our registration request
 			[self handleRegistration:element];
 		}
-		else if (state == STATE_XMPP_AUTH_1)
+		else if (state == STATE_XMPP_AUTH)
 		{
-			// The challenge response from our auth message
-			[self handleAuth1:element];
-		}
-		else if (state == STATE_XMPP_AUTH_2)
-		{
-			// The response from our challenge response
-			[self handleAuth2:element];
-		}
-		else if (state == STATE_XMPP_AUTH_3)
-		{
-			// The response from our x-facebook-platform or authenticateAnonymously challenge
-			[self handleAuth3:element];
+			// Some response to the authentication process
+			[self handleAuth:element];
 		}
 		else if (state == STATE_XMPP_BINDING)
 		{
@@ -3973,13 +3460,10 @@ enum XMPPStreamConfig
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		DDListEnumerator *registeredModulesEnumerator = [registeredModules listEnumerator];
-		
-		XMPPModule *module;
 		NSUInteger i = 0;
 		BOOL stop = NO;
 		
-		while ((module = (XMPPModule *)[registeredModulesEnumerator nextElement]))
+		for (XMPPModule *module in registeredModules)
 		{
 			enumBlock(module, i, &stop);
 			
@@ -3988,7 +3472,6 @@ enum XMPPStreamConfig
 			else
 				i++;
 		}
-		
 	}};
 	
 	// Synchronous operation
