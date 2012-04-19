@@ -19,6 +19,8 @@
 
 static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
 
+static char facebookAppIdKey;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +243,7 @@ static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
 	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
-		result = objc_getAssociatedObject(self, "facebookAppId");
+		result = objc_getAssociatedObject(self, &facebookAppIdKey);
 	};
 	
 	if (dispatch_get_current_queue() == xmppQueue)
@@ -257,7 +259,7 @@ static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
 	NSString *newFacebookAppId = [inFacebookAppId copy];
 	
 	dispatch_block_t block = ^{
-		objc_setAssociatedObject(self, @"facebookAppId", newFacebookAppId, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+		objc_setAssociatedObject(self, &facebookAppIdKey, newFacebookAppId, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	};
 	
 	if (dispatch_get_current_queue() == xmppQueue)
@@ -288,7 +290,7 @@ static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
 		{
 			XMPPXFacebookPlatformAuthentication *facebookAuth =
 			    [[XMPPXFacebookPlatformAuthentication alloc] initWithStream:self
-			                                                          appId:nil
+			                                                          appId:self.facebookAppId
 			                                                    accessToken:accessToken];
 			
 			result = [self authenticate:facebookAuth error:&err];
