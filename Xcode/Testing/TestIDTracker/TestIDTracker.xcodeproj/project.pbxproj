@@ -166,6 +166,9 @@
 /* Begin PBXProject section */
 		DCC88A6D13E7770D00CDAB56 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
 			buildConfigurationList = DCC88A7013E7770D00CDAB56 /* Build configuration list for PBXProject "TestIDTracker" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -290,6 +293,7 @@
 		DCC88A9513E7770E00CDAB56 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TestIDTracker/TestIDTracker-Prefix.pch";
 				INFOPLIST_FILE = "TestIDTracker/TestIDTracker-Info.plist";
@@ -301,6 +305,7 @@
 		DCC88A9613E7770E00CDAB56 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TestIDTracker/TestIDTracker-Prefix.pch";
 				INFOPLIST_FILE = "TestIDTracker/TestIDTracker-Info.plist";
@@ -328,6 +333,7 @@
 				DCC88A9613E7770E00CDAB56 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

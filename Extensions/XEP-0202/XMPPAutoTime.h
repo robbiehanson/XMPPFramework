@@ -86,6 +86,18 @@
 **/
 @property (readonly) dispatch_time_t lastCalibrationTime;
 
+/**
+ * XMPPAutoTime is used to automatically query a target for its time (and calculate the difference).
+ * Sometimes the target is also sending time requests to us as well.
+ * If so, you may optionally set respondsToQueries to YES to allow the module to respond to incoming time queries.
+ * 
+ * If you create multiple instances of XMPPAutoTime or XMPPTime,
+ * then only one instance should respond to queries. 
+ * 
+ * The default value is NO.
+**/
+@property (readwrite) BOOL respondsToQueries;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

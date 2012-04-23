@@ -23,7 +23,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	multicastDelegate = [[GCDMulticastDelegate alloc] init];
+	multicastDelegate = (GCDMulticastDelegate <MyProtocol> *)[[GCDMulticastDelegate alloc] init];
 	
 	del1 = [[Class1 alloc] init];
 	del2 = [[Class2 alloc] init];
@@ -69,16 +69,13 @@
 	
 	while ([delegateEnum getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 	{
-		dispatch_group_async(delGroup, dq, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_group_async(delGroup, dq, ^{ @autoreleasepool {
 			
 			if ([del shouldSing])
 			{
 				dispatch_semaphore_signal(semaphore);
 			}
-			
-			[pool drain];
-		});
+		}});
 	}
 	
 	dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
@@ -115,16 +112,13 @@
 	
 	while ([delegateEnum getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 	{
-		dispatch_group_async(delGroup, dq, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_group_async(delGroup, dq, ^{ @autoreleasepool {
 			
 			if ([del shouldDance])
 			{
 				OSAtomicIncrement32(&value);
 			}
-			
-			[pool drain];
-		});
+		}});
 	}
 	
 	dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);

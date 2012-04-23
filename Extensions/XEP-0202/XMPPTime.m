@@ -110,12 +110,7 @@
 		#ifdef _XMPP_CAPABILITIES_H
 			@autoreleasepool {
 				// Capabilities may have changed, need to notify others.
-				
-				XMPPPresence *presence = xmppStream.myPresence;
-				if (presence)
-				{
-					[xmppStream sendElement:presence];
-				}
+				[xmppStream resendMyPresence];
 			}
 		#endif
 		}

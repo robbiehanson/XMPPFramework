@@ -73,8 +73,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     UITableViewCell *cell = [sender dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil)
 	{
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
-		                               reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
+		                               reuseIdentifier:CellIdentifier];
 		
 	//	UIButton *unreadIndicator = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 33, 22)];
 		UIButton *unreadIndicator = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 30, 20)];
@@ -88,7 +88,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    forState:UIControlStateDisabled];
         
         cell.accessoryView = unreadIndicator;
-        [unreadIndicator release];
     }
     
 	Service *service = [fetchedResultsController objectAtIndexPath:indexPath];
@@ -124,7 +123,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	[self.navigationController pushViewController:chatVC animated:YES];
 	
-	[chatVC release];
 	
 	[sender deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -167,10 +165,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 			DDLogError(@"%@: Error fetching messages: %@ %@", THIS_FILE, error, [error userInfo]);
         }
         
-        [statusSD release];
-		[nameSD release];
-		[sortDescriptors release];
-        [fetchRequest release];
     }
     
 	return fetchedResultsController;
@@ -194,12 +188,5 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[super didReceiveMemoryWarning];
 }
 
-- (void)dealloc
-{
-	[fetchedResultsController release];
-	[managedObjectContext release];
-	
-    [super dealloc];
-}
 
 @end

@@ -2,9 +2,9 @@
 
 @interface TestXEP82AppDelegate : NSObject <NSApplicationDelegate>
 {
-	NSWindow *window;
+	__unsafe_unretained NSWindow *window;
 }
 
-@property (assign) IBOutlet NSWindow *window;
+@property (unsafe_unretained) IBOutlet NSWindow *window;
 
 @end

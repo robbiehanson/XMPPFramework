@@ -487,8 +487,24 @@ static XMPPRoomHybridStorage *sharedInstance;
 	XMPPJID *roomJID = room.roomJID;
 	XMPPJID *messageJID = isOutgoing ? room.myRoomJID : [message from];
 	
-	NSDate *localTimestamp = [[NSDate alloc] init];
-	NSDate *remoteTimestamp = isOutgoing ? nil : [message delayedDeliveryDate];
+	NSDate *localTimestamp;
+	NSDate *remoteTimestamp;
+	
+	if (isOutgoing)
+	{
+		localTimestamp = [[NSDate alloc] init];
+		remoteTimestamp = nil;
+	}
+	else
+	{
+		remoteTimestamp = [message delayedDeliveryDate];
+		if (remoteTimestamp) {
+			localTimestamp = remoteTimestamp;
+		}
+		else {
+			localTimestamp = [[NSDate alloc] init];
+		}
+	}
 	
 	NSString *messageBody = [[message elementForName:@"body"] stringValue];
 	
@@ -911,8 +927,11 @@ static XMPPRoomHybridStorage *sharedInstance;
 	
 	if ([myRoomJID isEqualToJID:messageJID])
 	{
-		// Ignore - we already stored message in handleOutgoingMessage:room:
-		return;
+		if (![message wasDelayed])
+		{
+			// Ignore - we already stored message in handleOutgoingMessage:room:
+			return;
+		}
 	}
 	
 	XMPPStream *xmppStream = room.xmppStream;

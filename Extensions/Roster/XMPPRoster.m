@@ -2,6 +2,7 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "XMPPFramework.h"
+#import "DDList.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -73,6 +74,8 @@ enum XMPPRosterFlags
 		flags = 0;
 		
 		earlyPresenceElements = [[NSMutableArray alloc] initWithCapacity:2];
+		
+		mucModules = [[DDList alloc] init];
 	}
 	return self;
 }
@@ -86,7 +89,27 @@ enum XMPPRosterFlags
 		XMPPLogVerbose(@"%@: Activated", THIS_FILE);
 		
 		#ifdef _XMPP_VCARD_AVATAR_MODULE_H
-		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPvCardAvatarModule class]];
+		{
+			// Automatically tie into the vCard system so we can store user photos.
+			
+			[xmppStream autoAddDelegate:self
+			              delegateQueue:moduleQueue
+			           toModulesOfClass:[XMPPvCardAvatarModule class]];
+		}
+		#endif
+		
+		#ifdef _XMPP_MUC_H
+		{
+			// Automatically tie into the MUC system so we can ignore non-roster presence stanzas.
+			
+			[xmppStream enumerateModulesWithBlock:^(XMPPModule *module, NSUInteger idx, BOOL *stop) {
+				
+				if ([module isKindOfClass:[XMPPMUC class]])
+				{
+					[mucModules add:(__bridge void *)module];
+				}
+			}];
+		}
 		#endif
 		
 		return YES;
@@ -100,7 +123,9 @@ enum XMPPRosterFlags
 	XMPPLogTrace();
 	
 	#ifdef _XMPP_VCARD_AVATAR_MODULE_H
-	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPvCardAvatarModule class]];
+	{
+		[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPvCardAvatarModule class]];
+	}
 	#endif
 	
 	[super deactivate];
@@ -676,6 +701,20 @@ enum XMPPRosterFlags
 	}
 	else
 	{
+		#ifdef _XMPP_MUC_H
+		
+		// Ignore MUC related presence items
+		
+		for (XMPPMUC *muc in mucModules)
+		{
+			if ([muc isMUCRoomPresence:presence])
+			{
+				return;
+			}
+		}
+		
+		#endif
+		
 		[xmppRosterStorage handlePresence:presence xmppStream:xmppStream];
 	}
 }
@@ -717,6 +756,29 @@ enum XMPPRosterFlags
 	
 	[earlyPresenceElements removeAllObjects];
 }
+
+#ifdef _XMPP_MUC_H
+
+- (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module
+{
+	if ([module isKindOfClass:[XMPPMUC class]])
+	{
+		if (![mucModules contains:(__bridge void *)module])
+		{
+			[mucModules add:(__bridge void *)module];
+		}
+	}
+}
+
+- (void)xmppStream:(XMPPStream *)sender willUnregisterModule:(id)module
+{
+	if ([module isKindOfClass:[XMPPMUC class]])
+	{
+		[mucModules remove:(__bridge void *)module];
+	}
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPvCardAvatarDelegate

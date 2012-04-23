@@ -27,5 +27,5 @@
 // List the modules you're using here.
 
 #import "XMPPDateTimeProfiles.h"
-#import "XMPPPing.h"
-#import "XMPPAutoPing.h"
+#import "XMPPTime.h"
+#import "XMPPAutoTime.h"

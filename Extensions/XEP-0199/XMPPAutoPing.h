@@ -75,6 +75,18 @@
 **/
 @property (readonly) NSTimeInterval lastReceiveTime;
 
+/**
+ * XMPPAutoPing is used to automatically send pings on a regular interval.
+ * Sometimes the target is also sending pings to us as well.
+ * If so, you may optionally set respondsToQueries to YES to allow the module to respond to incoming pings.
+ * 
+ * If you create multiple instances of XMPPAutoPing or XMPPPing,
+ * then only one instance should respond to queries. 
+ * 
+ * The default value is NO.
+**/
+@property (readwrite) BOOL respondsToQueries;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
