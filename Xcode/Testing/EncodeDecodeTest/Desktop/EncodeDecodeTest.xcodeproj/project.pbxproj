@@ -135,10 +135,10 @@
 		DC34A2CA14889F8A004F0A03 /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
-				DC34A2E61488A14F004F0A03 /* Vendor */,
 				DC34A2D81488A0E9004F0A03 /* Categories */,
 				DC34A2CB14889F97004F0A03 /* Core */,
 				DC34A2E21488A13E004F0A03 /* Utilities */,
+				DC34A2E61488A14F004F0A03 /* Vendor */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -225,7 +225,7 @@
 		DC34A29B14889EE2004F0A03 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = DC34A29E14889EE2004F0A03 /* Build configuration list for PBXProject "EncodeDecodeTest" */;
 			compatibilityVersion = "Xcode 3.2";

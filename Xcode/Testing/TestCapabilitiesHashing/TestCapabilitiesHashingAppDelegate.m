@@ -33,7 +33,7 @@
 	[s appendString:@"  <feature var='http://jabber.org/protocol/muc'/>"];
 	[s appendString:@"</query>"];
 	
-	NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:s options:0 error:nil] autorelease];
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:nil];
 	
 	NSXMLElement *query = [doc rootElement];
 //	NSLog(@"query:\n%@", [query prettyXMLString]);
@@ -81,7 +81,7 @@
 	[s appendString:@"  </x>"];
 	[s appendString:@"</query>"];
 	
-	NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:s options:0 error:nil] autorelease];
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:nil];
 	
 	NSXMLElement *query = [doc rootElement];
 //	NSLog(@"query:\n%@", [query prettyXMLString]);
@@ -138,7 +138,7 @@
 	[s appendString:@"  <feature var='http://jabber.org/protocol/ibb'/>"];
 	[s appendString:@"</query>"];
 	
-	NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:s options:0 error:nil] autorelease];
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:nil];
 	
 	NSXMLElement *query = [doc rootElement];
 //	NSLog(@"query:\n%@", [query prettyXMLString]);
@@ -155,7 +155,7 @@
 {
 	// IPHONE TEST
 	
-	XMPPCapabilitiesCoreDataStorage *storage = [[[XMPPCapabilitiesCoreDataStorage alloc] init] autorelease];
+	XMPPCapabilitiesCoreDataStorage *storage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
 	capabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:storage];
 	
 	[self test1];
@@ -172,7 +172,7 @@
 {
 	// MAC TEST
 	
-	XMPPCapabilitiesCoreDataStorage *storage = [[[XMPPCapabilitiesCoreDataStorage alloc] init] autorelease];
+	XMPPCapabilitiesCoreDataStorage *storage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
 	capabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:storage];
 	
 	[self test1];

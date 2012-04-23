@@ -81,9 +81,9 @@
 {
 	if ([module isKindOfClass:[XMPPRoom class]])
 	{
-		XMPPRoom *room = (XMPPRoom *)module;
+		XMPPJID *roomJID = [(XMPPRoom *)module roomJID];
 		
-		[rooms addObject:room.roomJID];
+		[rooms addObject:roomJID];
 	}
 }
 
@@ -91,9 +91,20 @@
 {
 	if ([module isKindOfClass:[XMPPRoom class]])
 	{
-		XMPPRoom *room = (XMPPRoom *)module;
+		XMPPJID *roomJID = [(XMPPRoom *)module roomJID];
 		
-		[rooms removeObject:room.roomJID];
+		// It's common for the room to get deactivated and deallocated before
+		// we've received the goodbye presence from the server.
+		// So we're going to postpone for a bit removing the roomJID from the list.
+		// This way the isMUCRoomElement will still remain accurate
+		// for presence elements that may arrive momentarily.
+		
+		double delayInSeconds = 30.0;
+		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+		dispatch_after(popTime, moduleQueue, ^{ @autoreleasepool {
+			
+			[rooms removeObject:roomJID];
+		}});
 	}
 }
 

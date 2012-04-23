@@ -7,6 +7,6 @@
 	NSManagedObjectContext *managedObjectContext;
 }
 
-@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic) NSManagedObjectContext *managedObjectContext;
 
 @end

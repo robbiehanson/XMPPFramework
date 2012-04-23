@@ -270,7 +270,7 @@
 		DC34A2F01488AAC2004F0A03 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = DC34A2F31488AAC2004F0A03 /* Build configuration list for PBXProject "EncodeDecodeTest" */;
 			compatibilityVersion = "Xcode 3.2";

@@ -666,8 +666,11 @@
 	
 	if ([room.myRoomJID isEqualToJID:msgJID])
 	{
-		// Ignore - we already stored message in handleOutgoingMessage:room:
-		return;
+		if (![message wasDelayed])
+		{
+			// Ignore - we already stored message in handleOutgoingMessage:room:
+			return;
+		}
 	}
 	
 	if ([self existsMessage:message])

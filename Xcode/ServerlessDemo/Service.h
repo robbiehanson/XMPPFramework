@@ -13,24 +13,24 @@ typedef enum StatusType StatusType;
 
 // NSNetService Properties
 
-@property (nonatomic, retain) NSString * serviceType;
-@property (nonatomic, retain) NSString * serviceName;
-@property (nonatomic, retain) NSString * serviceDomain;
-@property (nonatomic, retain) NSString * serviceDescription;
+@property (nonatomic) NSString * serviceType;
+@property (nonatomic) NSString * serviceName;
+@property (nonatomic) NSString * serviceDomain;
+@property (nonatomic) NSString * serviceDescription;
 
 // TXTRecord Properties
 
-@property (nonatomic, retain) NSNumber * status;
-@property (nonatomic, retain) NSString * statusMessage;
-@property (nonatomic, retain) NSString * firstName;
-@property (nonatomic, retain) NSString * lastName;
-@property (nonatomic, retain) NSString * nickname;
-@property (nonatomic, retain) NSString * displayName;
-@property (nonatomic, retain) NSString * lastResolvedAddress;
+@property (nonatomic) NSNumber * status;
+@property (nonatomic) NSString * statusMessage;
+@property (nonatomic) NSString * firstName;
+@property (nonatomic) NSString * lastName;
+@property (nonatomic) NSString * nickname;
+@property (nonatomic) NSString * displayName;
+@property (nonatomic) NSString * lastResolvedAddress;
 
 // Relationship Properties
 
-@property (nonatomic, retain) NSSet * messages;
+@property (nonatomic) NSSet * messages;
 
 // Convenience Properties
 
