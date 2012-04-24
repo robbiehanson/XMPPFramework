@@ -1,6 +1,5 @@
 #import "XMPPMessageArchiving_Contact_CoreDataObject.h"
-#import "YapXmppManager.h"
-#import "YapUserManager.h"
+
 
 @interface XMPPMessageArchiving_Contact_CoreDataObject ()
 
