@@ -3600,11 +3600,16 @@ enum XMPPStreamConfig
 
 @implementation XMPPElementReceipt
 
+static const uint32_t receipt_unknown = 0 << 0;
+static const uint32_t receipt_failure = 1 << 0;
+static const uint32_t receipt_success = 1 << 1;
+
+
 - (id)init
 {
 	if ((self = [super init]))
 	{
-		atomicFlags = 0;
+		atomicFlags = receipt_unknown;
 		semaphore = dispatch_semaphore_create(0);
 	}
 	return self;
@@ -3612,7 +3617,7 @@ enum XMPPStreamConfig
 
 - (void)signalSuccess
 {
-	uint32_t mask = 3;
+	uint32_t mask = receipt_success;
 	OSAtomicOr32Barrier(mask, &atomicFlags);
 	
 	dispatch_semaphore_signal(semaphore);
@@ -3620,7 +3625,7 @@ enum XMPPStreamConfig
 
 - (void)signalFailure
 {
-	uint32_t mask = 1;
+	uint32_t mask = receipt_failure;
 	OSAtomicOr32Barrier(mask, &atomicFlags);
 	
 	dispatch_semaphore_signal(semaphore);
@@ -3631,12 +3636,12 @@ enum XMPPStreamConfig
 	uint32_t mask = 0;
 	uint32_t flags = OSAtomicOr32Barrier(mask, &atomicFlags);
 	
-	if (flags > 0) return (flags > 1);
+	if (flags != receipt_unknown) return (flags == receipt_success);
 	
 	dispatch_time_t timeout_nanos;
 	
-	if (timeout_seconds < 0.0)
-		timeout_nanos = DISPATCH_TIME_NOW;
+	if (isless(timeout_seconds, 0.0))
+		timeout_nanos = DISPATCH_TIME_FOREVER;
 	else
 		timeout_nanos = dispatch_time(DISPATCH_TIME_NOW, (timeout_seconds * NSEC_PER_SEC));
 	
@@ -3655,10 +3660,11 @@ enum XMPPStreamConfig
 	{
 		flags = OSAtomicOr32Barrier(mask, &atomicFlags);
 		
-		return (flags > 1);
+		return (flags == receipt_success);
 	}
 	else
 	{
+		// Timed out waiting...
 		return NO;
 	}
 }
@@ -3666,7 +3672,6 @@ enum XMPPStreamConfig
 - (void)dealloc
 {
 	dispatch_release(semaphore);
-	
 }
 
 @end
