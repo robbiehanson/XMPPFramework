@@ -793,6 +793,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;
 
 /**
+ * This method is called if the XMPP server doesn't allow are resource of choice because it conflicts with an existing resource.
+ * Return an alternative resource or return nil to let the server pick a resource.
+ **/
+- (NSString *)xmppStream:(XMPPStream *)sender alternativeResourceForConflictingResource:(NSString *)conflictingResource;
+
+/**
  * These methods are called after their respective XML elements are received on the stream.
  * 
  * In the case of an IQ, the delegate method should return YES if it has or will respond to the given IQ.
