@@ -793,9 +793,11 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;
 
 /**
- * This method is called if the XMPP server doesn't allow are resource of choice because it conflicts with an existing resource.
- * Return an alternative resource or return nil to let the server pick a resource.
- **/
+ * This method is called if the XMPP server doesn't allow our resource of choice
+ * because it conflicts with an existing resource.
+ * 
+ * Return an alternative resource or return nil to let the server automatically pick a resource for us.
+**/
 - (NSString *)xmppStream:(XMPPStream *)sender alternativeResourceForConflictingResource:(NSString *)conflictingResource;
 
 /**

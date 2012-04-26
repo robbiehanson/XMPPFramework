@@ -129,7 +129,8 @@
 
 + (XMPPJID *)jidWithString:(NSString *)jidStr resource:(NSString *)resource
 {
-	if (![self validateResource:resource]) return nil;
+	NSString *prepResource = [LibIDN prepResource:resource];
+	if (![self validateResource:prepResource]) return nil;
 	
 	NSString *user;
 	NSString *domain;
@@ -139,7 +140,7 @@
 		XMPPJID *jid = [[XMPPJID alloc] init];
 		jid->user = [user copy];
 		jid->domain = [domain copy];
-		jid->resource = [resource copy];
+		jid->resource = [prepResource copy];
 		
 		return jid;
 	}
@@ -166,12 +167,29 @@
 	return nil;
 }
 
-+ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
++ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user
+                  prevalidatedDomain:(NSString *)domain
+                prevalidatedResource:(NSString *)resource
 {
 	XMPPJID *jid = [[XMPPJID alloc] init];
 	jid->user = [user copy];
 	jid->domain = [domain copy];
 	jid->resource = [resource copy];
+	
+	return jid;
+}
+
++ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user
+                  prevalidatedDomain:(NSString *)domain
+                            resource:(NSString *)resource
+{
+	NSString *prepResource = [LibIDN prepResource:resource];
+	if (![self validateResource:prepResource]) return nil;
+	
+	XMPPJID *jid = [[XMPPJID alloc] init];
+	jid->user = [user copy];
+	jid->domain = [domain copy];
+	jid->resource = [prepResource copy];
 	
 	return jid;
 }
@@ -272,7 +290,7 @@
 	}
 	else
 	{
-		return [XMPPJID jidWithPrevalidatedUser:user domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:user prevalidatedDomain:domain prevalidatedResource:nil];
 	}
 }
 
@@ -284,7 +302,7 @@
 	}
 	else
 	{
-		return [XMPPJID jidWithPrevalidatedUser:nil domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:nil prevalidatedDomain:domain prevalidatedResource:nil];
 	}
 }
 
@@ -350,6 +368,11 @@
 	return (user == nil);
 }
 
+- (XMPPJID *)jidWithNewResource:(NSString *)newResource
+{
+	return [XMPPJID jidWithPrevalidatedUser:user prevalidatedDomain:domain resource:newResource];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark NSObject Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +386,7 @@
 {
 	if ([anObject isMemberOfClass:[self class]])
 	{
-		return [self isEqualToJID:(XMPPJID *)anObject];
+		return [self isEqualToJID:(XMPPJID *)anObject options:XMPPJIDCompareFull];
 	}
 	return NO;
 }

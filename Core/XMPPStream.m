@@ -72,6 +72,7 @@ enum XMPPStreamConfig
 - (void)startNegotiation;
 - (void)sendOpeningNegotiation;
 - (void)continueStartTLS:(NSMutableDictionary *)settings;
+- (void)continueHandleBinding:(NSString *)alternativeResource;
 - (void)setupKeepAliveTimer;
 - (void)keepAlive;
 
@@ -2551,69 +2552,121 @@ enum XMPPStreamConfig
 	}
 	else
 	{
-        // It appears the server didn't allow our resource choice
-        // First check if we want to try an alternative resource
-        
-        NSString *alternativeResource = nil;
-        
-        NSXMLElement *r_error = [response elementForName:@"error"];
-        NSXMLElement *r_conflict = [r_error elementForName:@"conflict" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
-        
-        if(r_conflict)
-        {
-            alternativeResource = [multicastDelegate xmppStream:self alternativeResourceForConflictingResource:[[self myJID] resource]];
-        }
-        
-        if([alternativeResource length])
-        {
-            XMPPJID *alternativeJID = [XMPPJID jidWithUser:[[self myJID] user] domain:[[self myJID] domain] resource:alternativeResource];
-            [self setMyJID:alternativeJID];
-
-            NSXMLElement *resource = [NSXMLElement elementWithName:@"resource"];
-            [resource setStringValue:alternativeResource];
-            
-            NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
-            [bind addChild:resource];
-            
-            NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-            [iq addAttributeWithName:@"type" stringValue:@"set"];
-            [iq addChild:bind];
-            
-            NSString *outgoingStr = [iq compactXMLString];
-            NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-            
-            XMPPLogSend(@"SEND: %@", outgoingStr);
-            numberOfBytesSent += [outgoingData length];
-            
-            [asyncSocket writeData:outgoingData
-                       withTimeout:TIMEOUT_XMPP_WRITE
-                               tag:TAG_XMPP_WRITE_STREAM];
-            
-            // The state remains in STATE_XMPP_BINDING
-            
-        }else{
-            
-            // We'll simply let the server choose then
+		// It appears the server didn't allow our resource choice
+		// First check if we want to try an alternative resource
 		
-            NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
-            
-            NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-            [iq addAttributeWithName:@"type" stringValue:@"set"];
-            [iq addChild:bind];
-            
-            NSString *outgoingStr = [iq compactXMLString];
-            NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-            
-            XMPPLogSend(@"SEND: %@", outgoingStr);
-            numberOfBytesSent += [outgoingData length];
-            
-            [asyncSocket writeData:outgoingData
-                       withTimeout:TIMEOUT_XMPP_WRITE
-                               tag:TAG_XMPP_WRITE_STREAM];
-            
-            // The state remains in STATE_XMPP_BINDING
-            
+		NSXMLElement *r_error = [response elementForName:@"error"];
+		NSXMLElement *r_conflict = [r_error elementForName:@"conflict" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
+        
+		if (r_conflict)
+		{
+			SEL selector = @selector(xmppStream:alternativeResourceForConflictingResource:);
+			
+			if ([multicastDelegate countForSelector:selector] == 0)
+			{
+				// None of the delegates implement the method.
+				// Use a shortcut.
+				
+				[self continueHandleBinding:nil];
+			}
+			else
+			{
+				// Query all interested delegates.
+				// This must be done serially to maintain thread safety.
+				
+				GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+				
+				dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+				dispatch_async(concurrentQueue, ^{ @autoreleasepool {
+					
+					// Query delegates for alternative resource
+					
+					NSString *currentResource = [[self myJID] resource];
+					__block NSString *alternativeResource = nil;
+					
+					id delegate;
+					dispatch_queue_t dq;
+					
+					while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+					{
+						dispatch_sync(dq, ^{ @autoreleasepool {
+							
+							NSString *delegateAlternativeResource =
+							    [delegate xmppStream:self alternativeResourceForConflictingResource:currentResource];
+							
+							if (delegateAlternativeResource)
+							{
+								alternativeResource = delegateAlternativeResource;
+							}
+						}});
+					}
+					
+					dispatch_async(xmppQueue, ^{ @autoreleasepool {
+						
+						[self continueHandleBinding:alternativeResource];
+						
+					}});
+					
+				}});
+			}
         }
+		else
+		{
+			// Appears to be a conflicting resource, but server didn't specify conflict
+			[self continueHandleBinding:nil];
+		}
+	}
+}
+
+- (void)continueHandleBinding:(NSString *)alternativeResource
+{
+	if ([alternativeResource length] > 0)
+	{
+		// Update myJID
+		
+		[self setMyJID_setByClient:[myJID_setByClient jidWithNewResource:alternativeResource]];
+		
+		NSXMLElement *resource = [NSXMLElement elementWithName:@"resource"];
+		[resource setStringValue:alternativeResource];
+		
+		NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+		[bind addChild:resource];
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+		[iq addChild:bind];
+		
+		NSString *outgoingStr = [iq compactXMLString];
+		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+		
+		XMPPLogSend(@"SEND: %@", outgoingStr);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
+		           withTimeout:TIMEOUT_XMPP_WRITE
+		                   tag:TAG_XMPP_WRITE_STREAM];
+		
+		// The state remains in STATE_XMPP_BINDING
+	}
+	else
+	{
+		// We'll simply let the server choose then
+		
+		NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+		[iq addChild:bind];
+		
+		NSString *outgoingStr = [iq compactXMLString];
+		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+		
+		XMPPLogSend(@"SEND: %@", outgoingStr);
+		numberOfBytesSent += [outgoingData length];
+		
+		[asyncSocket writeData:outgoingData
+		           withTimeout:TIMEOUT_XMPP_WRITE
+		                   tag:TAG_XMPP_WRITE_STREAM];
+		
+		// The state remains in STATE_XMPP_BINDING
 	}
 }
 
