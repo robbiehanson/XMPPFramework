@@ -19,11 +19,11 @@
 
 @implementation XMPPPlainAuthentication
 {
-	#if __has_feature(objc_arc_weak)
+  #if __has_feature(objc_arc_weak)
 	__weak XMPPStream *xmppStream;
-	#else
+  #else
 	__unsafe_unretained XMPPStream *xmppStream;
-	#endif
+  #endif
 	
 	NSString *password;
 }
