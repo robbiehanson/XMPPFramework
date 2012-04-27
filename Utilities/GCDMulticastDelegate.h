@@ -16,7 +16,7 @@
  * which in turn makes development easier as there can be proper separation of logically different code sections.
  * 
  * In addition, this makes module development easier,
- * as multiple delegates can be handled in the same manner as the traditional single delegate paradigm.
+ * as multiple delegates can usually be handled in a manner similar to the traditional single delegate paradigm.
  * 
  * This class also provides proper support for GCD queues.
  * So each delegate specifies which queue they would like their delegate invocations to be dispatched onto.
