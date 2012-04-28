@@ -70,7 +70,6 @@
 {
 	if (parentQueue)
 		dispatch_release(parentQueue);
-	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,7 +258,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -285,7 +284,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -313,7 +312,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -342,7 +341,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -371,7 +370,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -401,7 +400,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -431,7 +430,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -460,7 +459,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -489,7 +488,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -518,7 +517,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -547,7 +546,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -576,7 +575,7 @@
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (self.parentQueue == nil)
+	if (self.parentQueue == NULL)
 	{
 		// Haven't been attached to parent yet
 		return nil;
@@ -612,7 +611,7 @@
 	
 	isRosterPopulation = YES;
 	
-	myJID = parent.xmppStream.myJID;
+	myJID = self.parent.xmppStream.myJID;
 	
 	myUser = [[self.userClass alloc] initWithJID:myJID];
 }
