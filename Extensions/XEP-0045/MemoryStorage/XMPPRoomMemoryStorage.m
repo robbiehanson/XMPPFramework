@@ -23,7 +23,11 @@
 
 @interface XMPPRoomMemoryStorage ()
 {
+  #if __has_feature(objc_arc_weak)
+	__weak XMPPRoom *parent;
+  #else
 	__unsafe_unretained XMPPRoom *parent;
+  #endif
 	dispatch_queue_t parentQueue;
 	
 	NSMutableArray * messages;
@@ -90,7 +94,6 @@
 {
 	if (parentQueue)
 		dispatch_release(parentQueue);
-	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
