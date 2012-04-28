@@ -61,6 +61,10 @@
 
 #import "DDLog.h"
 
+// Global flag to enable/disable logging throughout the entire xmpp framework.
+
+#define XMPP_LOGGING_ENABLED 1
+
 // Define logging context for every log message coming from the XMPP framework.
 // The logging context can be extracted from the DDLogMessage from within the logging framework.
 // This gives loggers, formatters, and filters the ability to optionally process them differently.
@@ -88,7 +92,6 @@
 
 #define XMPP_LOG_FLAG_TRACE     (1 << 4) // 0...10000
 
-
 // Setup the usual boolean macros.
 
 #define XMPP_LOG_ERROR   (xmppLogLevel & XMPP_LOG_FLAG_ERROR)
@@ -114,42 +117,50 @@
 #define XMPP_LOG_ASYNC_TRACE     (YES && XMPP_LOG_ASYNC_ENABLED)
 
 // Define logging primitives.
+// These are primarily wrappers around the macros defined in Lumberjack's DDLog.h header file.
 
-#define XMPPLogError(frmt, ...)    LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_ERROR,   xmppLogLevel, XMPP_LOG_FLAG_ERROR,  \
+#define XMPP_LOG_OBJC_MAYBE(async, lvl, flg, ctx, frmt, ...) \
+    do{ if(XMPP_LOGGING_ENABLED) LOG_MAYBE(async, lvl, flg, ctx, sel_getName(_cmd), frmt, ##__VA_ARGS__); } while(0)
+
+#define XMPP_LOG_C_MAYBE(async, lvl, flg, ctx, frmt, ...) \
+    do{ if(XMPP_LOGGING_ENABLED) LOG_MAYBE(async, lvl, flg, ctx, __FUNCTION__, frmt, ##__VA_ARGS__); } while(0)
+
+
+#define XMPPLogError(frmt, ...)    XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_ERROR,   xmppLogLevel, XMPP_LOG_FLAG_ERROR,  \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogWarn(frmt, ...)     LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_WARN,    xmppLogLevel, XMPP_LOG_FLAG_WARN,   \
+#define XMPPLogWarn(frmt, ...)     XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_WARN,    xmppLogLevel, XMPP_LOG_FLAG_WARN,   \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogInfo(frmt, ...)     LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_INFO,    xmppLogLevel, XMPP_LOG_FLAG_INFO,    \
+#define XMPPLogInfo(frmt, ...)     XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_INFO,    xmppLogLevel, XMPP_LOG_FLAG_INFO,    \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogVerbose(frmt, ...)  LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_VERBOSE, xmppLogLevel, XMPP_LOG_FLAG_VERBOSE, \
+#define XMPPLogVerbose(frmt, ...)  XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_VERBOSE, xmppLogLevel, XMPP_LOG_FLAG_VERBOSE, \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogTrace()             LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
+#define XMPPLogTrace()             XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
                                                   XMPP_LOG_CONTEXT, @"%@: %@", THIS_FILE, THIS_METHOD)
 
-#define XMPPLogTrace2(frmt, ...)   LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
+#define XMPPLogTrace2(frmt, ...)   XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
 
-#define XMPPLogCError(frmt, ...)      LOG_C_MAYBE(XMPP_LOG_ASYNC_ERROR,   xmppLogLevel, XMPP_LOG_FLAG_ERROR,   \
+#define XMPPLogCError(frmt, ...)      XMPP_LOG_C_MAYBE(XMPP_LOG_ASYNC_ERROR,   xmppLogLevel, XMPP_LOG_FLAG_ERROR,   \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogCWarn(frmt, ...)       LOG_C_MAYBE(XMPP_LOG_ASYNC_WARN,    xmppLogLevel, XMPP_LOG_FLAG_WARN,    \
+#define XMPPLogCWarn(frmt, ...)       XMPP_LOG_C_MAYBE(XMPP_LOG_ASYNC_WARN,    xmppLogLevel, XMPP_LOG_FLAG_WARN,    \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogCInfo(frmt, ...)       LOG_C_MAYBE(XMPP_LOG_ASYNC_INFO,    xmppLogLevel, XMPP_LOG_FLAG_INFO,    \
+#define XMPPLogCInfo(frmt, ...)       XMPP_LOG_C_MAYBE(XMPP_LOG_ASYNC_INFO,    xmppLogLevel, XMPP_LOG_FLAG_INFO,    \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogCVerbose(frmt, ...)    LOG_C_MAYBE(XMPP_LOG_ASYNC_VERBOSE, xmppLogLevel, XMPP_LOG_FLAG_VERBOSE, \
+#define XMPPLogCVerbose(frmt, ...)    XMPP_LOG_C_MAYBE(XMPP_LOG_ASYNC_VERBOSE, xmppLogLevel, XMPP_LOG_FLAG_VERBOSE, \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
-#define XMPPLogCTrace()               LOG_C_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
+#define XMPPLogCTrace()               XMPP_LOG_C_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
                                                   XMPP_LOG_CONTEXT, @"%@: %s", THIS_FILE, __FUNCTION__)
 
-#define XMPPLogCTrace2(frmt, ...)     LOG_C_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
+#define XMPPLogCTrace2(frmt, ...)     XMPP_LOG_C_MAYBE(XMPP_LOG_ASYNC_TRACE,   xmppLogLevel, XMPP_LOG_FLAG_TRACE, \
                                                   XMPP_LOG_CONTEXT, frmt, ##__VA_ARGS__)
 
 // Setup logging for XMPPStream (and subclasses such as XMPPStreamFacebook)
@@ -168,11 +179,11 @@
 #define XMPP_LOG_ASYNC_RECV_PRE  (YES && XMPP_LOG_ASYNC_ENABLED)
 #define XMPP_LOG_ASYNC_RECV_POST (YES && XMPP_LOG_ASYNC_ENABLED)
 
-#define XMPPLogSend(format, ...)     LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_SEND, xmppLogLevel, XMPP_LOG_FLAG_SEND, \
-                                                    XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
+#define XMPPLogSend(format, ...)     XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_SEND, xmppLogLevel, \
+                                                XMPP_LOG_FLAG_SEND, XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
 
-#define XMPPLogRecvPre(format, ...)  LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_RECV_PRE, xmppLogLevel, XMPP_LOG_FLAG_RECV_PRE, \
-                                                    XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
+#define XMPPLogRecvPre(format, ...)  XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_RECV_PRE, xmppLogLevel, \
+                                                XMPP_LOG_FLAG_RECV_PRE, XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
 
-#define XMPPLogRecvPost(format, ...) LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_RECV_POST, xmppLogLevel, XMPP_LOG_FLAG_RECV_POST, \
-                                                    XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
+#define XMPPLogRecvPost(format, ...) XMPP_LOG_OBJC_MAYBE(XMPP_LOG_ASYNC_RECV_POST, xmppLogLevel, \
+                                                XMPP_LOG_FLAG_RECV_POST, XMPP_LOG_CONTEXT, format, ##__VA_ARGS__)
