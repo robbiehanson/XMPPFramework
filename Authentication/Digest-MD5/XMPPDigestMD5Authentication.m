@@ -35,6 +35,16 @@
 	NSString *password;
 }
 
+// The properties are hooks (primarily for testing)
+
+@property (nonatomic, strong) NSString *realm;
+@property (nonatomic, strong) NSString *nonce;
+@property (nonatomic, strong) NSString *qop;
+@property (nonatomic, strong) NSString *cnonce;
+@property (nonatomic, strong) NSString *digestURI;
+@property (nonatomic, strong) NSString *username;
+@property (nonatomic, strong) NSString *password;
+
 - (NSDictionary *)dictionaryFromChallenge:(NSXMLElement *)challenge;
 - (NSString *)base64EncodedFullResponse;
 
@@ -50,6 +60,14 @@
 {
 	return @"DIGEST-MD5";
 }
+
+@synthesize realm;
+@synthesize nonce;
+@synthesize qop;
+@synthesize cnonce;
+@synthesize digestURI;
+@synthesize username;
+@synthesize password;
 
 - (id)initWithStream:(XMPPStream *)stream password:(NSString *)inPassword
 {
@@ -119,7 +137,9 @@
 	else
 		digestURI = [NSString stringWithFormat:@"xmpp/%@", serverHostName];
 	
-	cnonce = [XMPPStream generateUUID];
+	if (cnonce == nil)
+		cnonce = [XMPPStream generateUUID];
+	
 	username = [myJID user];
 	
 	// Create and send challenge response element
@@ -234,21 +254,36 @@
 	NSString *HA1str = [NSString stringWithFormat:@"%@:%@:%@", username, realm, password];
 	NSString *HA2str = [NSString stringWithFormat:@"AUTHENTICATE:%@", digestURI];
 	
+	XMPPLogVerbose(@"HA1str: %@", HA1str);
+	XMPPLogVerbose(@"HA2str: %@", HA2str);
+	
 	NSData *HA1dataA = [[HA1str dataUsingEncoding:NSUTF8StringEncoding] md5Digest];
 	NSData *HA1dataB = [[NSString stringWithFormat:@":%@:%@", nonce, cnonce] dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogVerbose(@"HA1dataA: %@", HA1dataA);
+	XMPPLogVerbose(@"HA1dataB: %@", HA1dataB);
 	
 	NSMutableData *HA1data = [NSMutableData dataWithCapacity:([HA1dataA length] + [HA1dataB length])];
 	[HA1data appendData:HA1dataA];
 	[HA1data appendData:HA1dataB];
 	
+	XMPPLogVerbose(@"HA1data: %@", HA1data);
+	
 	NSString *HA1 = [[HA1data md5Digest] hexStringValue];
 	
 	NSString *HA2 = [[[HA2str dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
 	
+	XMPPLogVerbose(@"HA1: %@", HA1);
+	XMPPLogVerbose(@"HA2: %@", HA2);
+	
 	NSString *responseStr = [NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
                            HA1, nonce, cnonce, HA2];
 	
+	XMPPLogVerbose(@"responseStr: %@", responseStr);
+	
 	NSString *response = [[[responseStr dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
+	
+	XMPPLogVerbose(@"response: %@", response);
 	
 	return response;
 }
@@ -266,7 +301,7 @@
 	[buffer appendFormat:@"response=%@,", [self response]];
 	[buffer appendFormat:@"charset=utf-8"];
 	
-	XMPPLogSend(@"decoded response: %@", buffer);
+	XMPPLogVerbose(@"%@: Decoded response: %@", THIS_FILE, buffer);
 	
 	NSData *utf8data = [buffer dataUsingEncoding:NSUTF8StringEncoding];
 	
