@@ -1512,9 +1512,13 @@ enum XMPPStreamConfig
  * 
  * This method exists for backwards compatibility, and may disappear in future versions.
 **/
-- (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr
+- (BOOL)authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
 {
 	XMPPLogTrace();
+	
+	// The given password parameter could be mutable
+	NSString *password = [inPassword copy];
+	
 	
 	__block BOOL result = YES;
 	__block NSError *err = nil;
