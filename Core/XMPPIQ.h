@@ -27,6 +27,9 @@
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid;
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
 + (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid;
++ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (XMPPIQ *)iqWithType:(NSString *)type child:(NSXMLElement *)childElement;
 
 /**
  * Creates and returns a new XMPPIQ element.
@@ -37,6 +40,9 @@
 - (id)initWithType:(NSString *)type to:(XMPPJID *)jid;
 - (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
 - (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
+- (id)initWithType:(NSString *)type elementID:(NSString *)eid;
+- (id)initWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
+- (id)initWithType:(NSString *)type child:(NSXMLElement *)childElement;
 
 /**
  * Returns the type attribute of the IQ.
