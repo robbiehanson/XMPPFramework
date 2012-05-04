@@ -8,7 +8,6 @@
 #endif
 
 @class XMPPSRVResolver;
-@class DDList;
 @class XMPPParser;
 @class XMPPJID;
 @class XMPPIQ;
@@ -77,7 +76,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	NSTimeInterval lastSendReceiveTime;
 	NSData *keepAliveData;
 	
-	DDList *registeredModules;
+	NSMutableArray *registeredModules;
 	NSMutableDictionary *autoDelegateDict;
 	
 	XMPPSRVResolver *srvResolver;
