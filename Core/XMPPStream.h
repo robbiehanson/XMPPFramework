@@ -75,6 +75,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 	NSTimeInterval keepAliveInterval;
 	dispatch_source_t keepAliveTimer;
 	NSTimeInterval lastSendReceiveTime;
+	NSData *keepAliveData;
 	
 	DDList *registeredModules;
 	NSMutableDictionary *autoDelegateDict;
@@ -210,6 +211,17 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Thus the effective resolution of the keepalive timer is based on the interval.
 **/
 @property (readwrite, assign) NSTimeInterval keepAliveInterval;
+
+/**
+ * The keep-alive mechanism sends whitespace which is ignored by the xmpp protocol.
+ * The default whitespace character is a space (' ').
+ * 
+ * This can be changed, for whatever reason, to another whitespace character.
+ * Valid whitespace characters are space(' '), tab('\t') and newline('\n').
+ * 
+ * If you attempt to set the character to any non-whitespace character, the attempt is ignored.
+**/
+@property (readwrite, assign) char keepAliveWhitespaceCharacter;
 
 /**
  * Represents the last sent presence element concerning the presence of myJID on the server.

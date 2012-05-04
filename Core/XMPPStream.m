@@ -115,6 +115,7 @@ enum XMPPStreamConfig
 	
 	hostPort = 5222;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
+	keepAliveData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
 	
 	registeredModules = [[DDList alloc] init];
 	autoDelegateDict = [[NSMutableDictionary alloc] init];
@@ -403,20 +404,18 @@ enum XMPPStreamConfig
 
 - (NSTimeInterval)keepAliveInterval
 {
+	__block NSTimeInterval result = 0.0;
+	
+	dispatch_block_t block = ^{
+		result = keepAliveInterval;
+	};
+	
 	if (dispatch_get_current_queue() == xmppQueue)
-	{
-		return keepAliveInterval;
-	}
+		block();
 	else
-	{
-		__block NSTimeInterval result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = keepAliveInterval;
-		});
-		
-		return result;
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
 - (void)setKeepAliveInterval:(NSTimeInterval)interval
@@ -431,6 +430,43 @@ enum XMPPStreamConfig
 				keepAliveInterval = MAX(interval, MIN_KEEPALIVE_INTERVAL);
 			
 			[self setupKeepAliveTimer];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
+}
+
+- (char)keepAliveWhitespaceCharacter
+{
+	__block char keepAliveChar = ' ';
+	
+	dispatch_block_t block = ^{
+		
+		NSString *keepAliveString = [[NSString alloc] initWithData:keepAliveData encoding:NSUTF8StringEncoding];
+		if ([keepAliveString length] > 0)
+		{
+			keepAliveChar = (char)[keepAliveString characterAtIndex:0];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return keepAliveChar;
+}
+
+- (void)setKeepAliveWhitespaceCharacter:(char)keepAliveChar
+{
+	dispatch_block_t block = ^{
+		
+		if (keepAliveChar == ' ' || keepAliveChar == '\n' || keepAliveChar == '\t')
+		{
+			keepAliveData = [[NSString stringWithFormat:@"%c", keepAliveChar] dataUsingEncoding:NSUTF8StringEncoding];
 		}
 	};
 	
@@ -3349,11 +3385,9 @@ enum XMPPStreamConfig
 		
 		if (elapsed < 0 || elapsed >= keepAliveInterval)
 		{
-			NSData *outgoingData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
+			numberOfBytesSent += [keepAliveData length];
 			
-			numberOfBytesSent += [outgoingData length];
-			
-			[asyncSocket writeData:outgoingData
+			[asyncSocket writeData:keepAliveData
 			           withTimeout:TIMEOUT_XMPP_WRITE
 			                   tag:TAG_XMPP_WRITE_STREAM];
 			
