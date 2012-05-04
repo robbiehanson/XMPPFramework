@@ -22,17 +22,6 @@ static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
 static char facebookAppIdKey;
 
 @interface XMPPXFacebookPlatformAuthentication ()
-
-- (NSDictionary *)dictionaryFromChallenge:(NSXMLElement *)challenge;
-- (NSString *)base64EncodedFullResponse;
-
-@end
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@implementation XMPPXFacebookPlatformAuthentication
 {
   #if __has_feature(objc_arc_weak)
 	__weak XMPPStream *xmppStream;
@@ -47,6 +36,17 @@ static char facebookAppIdKey;
 	NSString *nonce;
 	NSString *method;
 }
+
+- (NSDictionary *)dictionaryFromChallenge:(NSXMLElement *)challenge;
+- (NSString *)base64EncodedFullResponse;
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@implementation XMPPXFacebookPlatformAuthentication
 
 + (NSString *)mechanismName
 {
