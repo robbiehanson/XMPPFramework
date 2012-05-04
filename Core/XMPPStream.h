@@ -331,18 +331,23 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * Disconnects from the remote host by closing the underlying TCP socket connection.
+ * The terminating </stream:stream> element is not sent to the server.
  * 
- * The disconnect method is synchronous.
+ * This method is synchronous.
  * Meaning that the disconnect will happen immediately, even if there are pending elements yet to be sent.
- * The xmppStreamDidDisconnect:withError: method will be invoked before the disconnect method returns.
  * 
- * The disconnectAfterSending method is asynchronous.
- * The disconnect will happen after all pending elements have been sent.
- * Attempting to send elements after this method is called will not result in the elements getting sent.
- * The disconnectAfterSending method will return immediately,
- * and the xmppStreamDidDisconnect:withError: delegate method will be invoked at a later time.
+ * The xmppStreamDidDisconnect:withError: delegate method will immediately be dispatched onto the delegate queue.
 **/
 - (void)disconnect;
+
+/**
+ * Disconnects from the remote host by sending the terminating </stream:stream> element,
+ * and then closing the underlying TCP socket connection.
+ * 
+ * This method is asynchronous.
+ * The disconnect will happen after all pending elements have been sent.
+ * Attempting to send elements after this method has been called will not work (the elements won't get sent).
+**/
 - (void)disconnectAfterSending;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
