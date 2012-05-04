@@ -1137,6 +1137,13 @@ enum XMPPStreamConfig
 			}
 			else
 			{
+				NSString *termStr = @"</stream:stream>";
+				NSData *termData = [termStr dataUsingEncoding:NSUTF8StringEncoding];
+				
+				XMPPLogSend(@"SEND: %@", termStr);
+				numberOfBytesSent += [termData length];
+				
+				[asyncSocket writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STREAM];
 				[asyncSocket disconnectAfterWriting];
 				
 				// Everthing will be handled in socketDidDisconnect:withError:
