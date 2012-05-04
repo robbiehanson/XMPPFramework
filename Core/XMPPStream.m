@@ -119,7 +119,7 @@ enum XMPPStreamConfig
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
 	keepAliveData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
 	
-	registeredModules = [[DDList alloc] init];
+	registeredModules = [[NSMutableArray alloc] init];
 	autoDelegateDict = [[NSMutableDictionary alloc] init];
 	
 	receipts = [[NSMutableArray alloc] init];
@@ -3468,7 +3468,7 @@ enum XMPPStreamConfig
 		
 		// Register module
 		
-		[registeredModules add:(__bridge void *)module];
+		[registeredModules addObject:module];
 		
 		// Add auto delegates (if there are any)
 		
@@ -3526,7 +3526,7 @@ enum XMPPStreamConfig
 		
 		// Unregister modules
 		
-		[registeredModules remove:(__bridge void *)module];
+		[registeredModules removeObject:module];
 		
 	}};
 	
@@ -3563,7 +3563,6 @@ enum XMPPStreamConfig
 		// It will be added as a delegate to future registered modules of the given class.
 		
 		id delegates = [autoDelegateDict objectForKey:className];
-		
 		if (delegates == nil)
 		{
 			delegates = [[GCDMulticastDelegate alloc] init];
@@ -3629,6 +3628,11 @@ enum XMPPStreamConfig
 			
 			GCDMulticastDelegate *delegates = [autoDelegateDict objectForKey:className];
 			[delegates removeDelegate:delegate delegateQueue:delegateQueue];
+			
+			if ([delegates count] == 0)
+			{
+				[autoDelegateDict removeObjectForKey:className];
+			}
 		}
 		
 	}};
