@@ -68,7 +68,9 @@ enum XMPPStreamConfig
 - (void)cleanup;
 - (void)setIsSecure:(BOOL)flag;
 - (void)setIsAuthenticated:(BOOL)flag;
-- (void)continueSendElement:(NSXMLElement *)element withTag:(long)tag;
+- (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag;
+- (void)continueSendMessage:(XMPPMessage *)message withTag:(long)tag;
+- (void)continueSendPresence:(XMPPPresence *)presence withTag:(long)tag;
 - (void)startNegotiation;
 - (void)sendOpeningNegotiation;
 - (void)continueStartTLS:(NSMutableDictionary *)settings;
@@ -1739,7 +1741,7 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueSendElement:iq withTag:tag];
+		[self continueSendIQ:iq withTag:tag];
 	}
 	else
 	{
@@ -1767,8 +1769,9 @@ enum XMPPStreamConfig
 			
 			dispatch_async(xmppQueue, ^{ @autoreleasepool {
 				
-				[self continueSendElement:iq withTag:tag];
-				
+				if (state == STATE_XMPP_CONNECTED) {
+					[self continueSendIQ:iq withTag:tag];
+				}
 			}});
 			
 		}});
@@ -1791,7 +1794,7 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueSendElement:message withTag:tag];
+		[self continueSendMessage:message withTag:tag];
 	}
 	else
 	{
@@ -1819,8 +1822,9 @@ enum XMPPStreamConfig
 			
 			dispatch_async(xmppQueue, ^{ @autoreleasepool {
 				
-				[self continueSendElement:message withTag:tag];
-				
+				if (state == STATE_XMPP_CONNECTED) {
+					[self continueSendMessage:message withTag:tag];
+				}
 			}});
 			
 		}});
@@ -1843,7 +1847,7 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueSendElement:presence withTag:tag];
+		[self continueSendPresence:presence withTag:tag];
 	}
 	else
 	{
@@ -1871,60 +1875,98 @@ enum XMPPStreamConfig
 			
 			dispatch_async(xmppQueue, ^{ @autoreleasepool {
 				
-				[self continueSendElement:presence withTag:tag];
-				
+				if (state == STATE_XMPP_CONNECTED) {
+					[self continueSendPresence:presence withTag:tag];
+				}
 			}});
 			
 		}});
 	}
 }
 
+- (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
+	
+	NSString *outgoingStr = [iq compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
+	
+	[multicastDelegate xmppStream:self didSendIQ:iq];
+}
+
+- (void)continueSendMessage:(XMPPMessage *)message withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
+	
+	NSString *outgoingStr = [message compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
+	
+	[multicastDelegate xmppStream:self didSendMessage:message];
+}
+
+- (void)continueSendPresence:(XMPPPresence *)presence withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
+	
+	NSString *outgoingStr = [presence compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
+	
+	// Update myPresence if this is a normal presence element.
+	// In other words, ignore presence subscription stuff, MUC room stuff, etc.
+	// 
+	// We use the built-in [presence type] which guarantees lowercase strings,
+	// and will return @"available" if there was no set type (as available is implicit).
+	
+	NSString *type = [presence type];
+	if ([type isEqualToString:@"available"] || [type isEqualToString:@"unavailable"])
+	{
+		if ([presence toStr] == nil && myPresence != presence)
+		{
+			myPresence = presence;
+		}
+	}
+	
+	[multicastDelegate xmppStream:self didSendPresence:presence];
+}
+
 - (void)continueSendElement:(NSXMLElement *)element withTag:(long)tag
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
-	if (state == STATE_XMPP_CONNECTED)
-	{
-		NSString *outgoingStr = [element compactXMLString];
-		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-		
-		XMPPLogSend(@"SEND: %@", outgoingStr);
-		numberOfBytesSent += [outgoingData length];
-		
-		[asyncSocket writeData:outgoingData
-		           withTimeout:TIMEOUT_XMPP_WRITE
-		                   tag:tag];
-		
-		if ([element isKindOfClass:[XMPPIQ class]])
-		{
-			[multicastDelegate xmppStream:self didSendIQ:(XMPPIQ *)element];
-		}
-		else if ([element isKindOfClass:[XMPPMessage class]])
-		{
-			[multicastDelegate xmppStream:self didSendMessage:(XMPPMessage *)element];
-		}
-		else if ([element isKindOfClass:[XMPPPresence class]])
-		{
-			// Update myPresence if this is a normal presence element.
-			// In other words, ignore presence subscription stuff, MUC room stuff, etc.
-			
-			XMPPPresence *presence = (XMPPPresence *)element;
-			
-			// We use the built-in [presence type] which guarantees lowercase strings,
-			// and will return @"available" if there was no set type (as available is implicit).
-			
-			NSString *type = [presence type];
-			if ([type isEqualToString:@"available"] || [type isEqualToString:@"unavailable"])
-			{
-				if ([presence toStr] == nil && myPresence != presence)
-				{
-					myPresence = presence;
-				}
-			}
-			
-			[multicastDelegate xmppStream:self didSendPresence:(XMPPPresence *)element];
-		}
-	}
+	NSString *outgoingStr = [element compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
 }
 
 /**
@@ -1963,6 +2005,10 @@ enum XMPPStreamConfig
 		else if ([elementName isEqualToString:@"presence"])
 		{
 			[self sendPresence:[XMPPPresence presenceFromElement:element] withTag:tag];
+		}
+		else
+		{
+			[self continueSendElement:element withTag:tag];
 		}
 	}
 }
