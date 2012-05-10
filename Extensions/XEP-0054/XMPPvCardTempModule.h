@@ -19,6 +19,7 @@
 @interface XMPPvCardTempModule : XMPPModule
 {
 	id <XMPPvCardTempModuleStorage> __strong _moduleStorage;
+    NSString *myvCardElementID; 
 }
 
 
@@ -47,6 +48,11 @@
 - (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule 
         didReceivevCardTemp:(XMPPvCardTemp *)vCardTemp 
                      forJID:(XMPPJID *)jid;
+
+- (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule;
+
+- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule failedToUpdateMyvCard:(NSXMLElement *)error;
+
 
 @end
 

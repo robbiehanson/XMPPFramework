@@ -147,10 +147,10 @@
 {
 	XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
 
-	NSString *elemId = [xmppStream generateUUID];
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
+	myvCardElementID = [xmppStream generateUUID];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:myvCardElementID child:newvCardTemp];
 	[xmppStream sendElement:iq];
-
+    
 	[self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
 
 }
@@ -161,6 +161,10 @@
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
 {
+    if(jid == nil){
+        return;
+    }
+    
 	// this method could be called from anywhere
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
@@ -199,6 +203,21 @@
 		
 		return YES;
 	}
+    
+    if([[iq elementID] isEqualToString:myvCardElementID])
+    {
+        if([iq isResultIQ])
+        {
+            [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModuleDidUpdateMyvCard:self];
+        }else if([iq isErrorIQ])
+        {
+            NSXMLElement *errorElement = [iq elementForName:@"error"];
+            [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToUpdateMyvCard:errorElement];
+            
+        }
+        
+        myvCardElementID = nil;
+    }
 	
 	return NO;
 }
