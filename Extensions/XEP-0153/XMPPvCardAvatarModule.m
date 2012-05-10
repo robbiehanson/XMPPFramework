@@ -5,15 +5,6 @@
 //  Created by Eric Chamberlain on 3/9/11.
 //  Copyright 2011 RF.com. All rights reserved.
 
-
-// TODO: publish after upload vCard
-/*
- * XEP-0153 Section 4.2 rule 1
- *
- * However, a client MUST advertise an image if it has just uploaded the vCard with a new avatar 
- * image. In this case, the client MAY choose not to redownload the vCard to verify its contents.
- */
-
 #import "XMPPvCardAvatarModule.h"
 
 #import "NSData+XMPP.h"
