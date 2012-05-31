@@ -68,7 +68,9 @@ enum XMPPStreamConfig
 - (void)cleanup;
 - (void)setIsSecure:(BOOL)flag;
 - (void)setIsAuthenticated:(BOOL)flag;
-- (void)continueSendElement:(NSXMLElement *)element withTag:(long)tag;
+- (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag;
+- (void)continueSendMessage:(XMPPMessage *)message withTag:(long)tag;
+- (void)continueSendPresence:(XMPPPresence *)presence withTag:(long)tag;
 - (void)startNegotiation;
 - (void)sendOpeningNegotiation;
 - (void)continueStartTLS:(NSMutableDictionary *)settings;
@@ -115,8 +117,9 @@ enum XMPPStreamConfig
 	
 	hostPort = 5222;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
+	keepAliveData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
 	
-	registeredModules = [[DDList alloc] init];
+	registeredModules = [[NSMutableArray alloc] init];
 	autoDelegateDict = [[NSMutableDictionary alloc] init];
 	
 	receipts = [[NSMutableArray alloc] init];
@@ -403,20 +406,18 @@ enum XMPPStreamConfig
 
 - (NSTimeInterval)keepAliveInterval
 {
+	__block NSTimeInterval result = 0.0;
+	
+	dispatch_block_t block = ^{
+		result = keepAliveInterval;
+	};
+	
 	if (dispatch_get_current_queue() == xmppQueue)
-	{
-		return keepAliveInterval;
-	}
+		block();
 	else
-	{
-		__block NSTimeInterval result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = keepAliveInterval;
-		});
-		
-		return result;
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
 - (void)setKeepAliveInterval:(NSTimeInterval)interval
@@ -431,6 +432,43 @@ enum XMPPStreamConfig
 				keepAliveInterval = MAX(interval, MIN_KEEPALIVE_INTERVAL);
 			
 			[self setupKeepAliveTimer];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_async(xmppQueue, block);
+}
+
+- (char)keepAliveWhitespaceCharacter
+{
+	__block char keepAliveChar = ' ';
+	
+	dispatch_block_t block = ^{
+		
+		NSString *keepAliveString = [[NSString alloc] initWithData:keepAliveData encoding:NSUTF8StringEncoding];
+		if ([keepAliveString length] > 0)
+		{
+			keepAliveChar = (char)[keepAliveString characterAtIndex:0];
+		}
+	};
+	
+	if (dispatch_get_current_queue() == xmppQueue)
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return keepAliveChar;
+}
+
+- (void)setKeepAliveWhitespaceCharacter:(char)keepAliveChar
+{
+	dispatch_block_t block = ^{
+		
+		if (keepAliveChar == ' ' || keepAliveChar == '\n' || keepAliveChar == '\t')
+		{
+			keepAliveData = [[NSString stringWithFormat:@"%c", keepAliveChar] dataUsingEncoding:NSUTF8StringEncoding];
 		}
 	};
 	
@@ -1101,6 +1139,13 @@ enum XMPPStreamConfig
 			}
 			else
 			{
+				NSString *termStr = @"</stream:stream>";
+				NSData *termData = [termStr dataUsingEncoding:NSUTF8StringEncoding];
+				
+				XMPPLogSend(@"SEND: %@", termStr);
+				numberOfBytesSent += [termData length];
+				
+				[asyncSocket writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STREAM];
 				[asyncSocket disconnectAfterWriting];
 				
 				// Everthing will be handled in socketDidDisconnect:withError:
@@ -1512,9 +1557,13 @@ enum XMPPStreamConfig
  * 
  * This method exists for backwards compatibility, and may disappear in future versions.
 **/
-- (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr
+- (BOOL)authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
 {
 	XMPPLogTrace();
+	
+	// The given password parameter could be mutable
+	NSString *password = [inPassword copy];
+	
 	
 	__block BOOL result = YES;
 	__block NSError *err = nil;
@@ -1692,7 +1741,7 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueSendElement:iq withTag:tag];
+		[self continueSendIQ:iq withTag:tag];
 	}
 	else
 	{
@@ -1720,8 +1769,9 @@ enum XMPPStreamConfig
 			
 			dispatch_async(xmppQueue, ^{ @autoreleasepool {
 				
-				[self continueSendElement:iq withTag:tag];
-				
+				if (state == STATE_XMPP_CONNECTED) {
+					[self continueSendIQ:iq withTag:tag];
+				}
 			}});
 			
 		}});
@@ -1744,7 +1794,7 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueSendElement:message withTag:tag];
+		[self continueSendMessage:message withTag:tag];
 	}
 	else
 	{
@@ -1772,8 +1822,9 @@ enum XMPPStreamConfig
 			
 			dispatch_async(xmppQueue, ^{ @autoreleasepool {
 				
-				[self continueSendElement:message withTag:tag];
-				
+				if (state == STATE_XMPP_CONNECTED) {
+					[self continueSendMessage:message withTag:tag];
+				}
 			}});
 			
 		}});
@@ -1796,7 +1847,7 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueSendElement:presence withTag:tag];
+		[self continueSendPresence:presence withTag:tag];
 	}
 	else
 	{
@@ -1824,60 +1875,98 @@ enum XMPPStreamConfig
 			
 			dispatch_async(xmppQueue, ^{ @autoreleasepool {
 				
-				[self continueSendElement:presence withTag:tag];
-				
+				if (state == STATE_XMPP_CONNECTED) {
+					[self continueSendPresence:presence withTag:tag];
+				}
 			}});
 			
 		}});
 	}
 }
 
+- (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
+	
+	NSString *outgoingStr = [iq compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
+	
+	[multicastDelegate xmppStream:self didSendIQ:iq];
+}
+
+- (void)continueSendMessage:(XMPPMessage *)message withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
+	
+	NSString *outgoingStr = [message compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
+	
+	[multicastDelegate xmppStream:self didSendMessage:message];
+}
+
+- (void)continueSendPresence:(XMPPPresence *)presence withTag:(long)tag
+{
+	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
+	
+	NSString *outgoingStr = [presence compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
+	
+	// Update myPresence if this is a normal presence element.
+	// In other words, ignore presence subscription stuff, MUC room stuff, etc.
+	// 
+	// We use the built-in [presence type] which guarantees lowercase strings,
+	// and will return @"available" if there was no set type (as available is implicit).
+	
+	NSString *type = [presence type];
+	if ([type isEqualToString:@"available"] || [type isEqualToString:@"unavailable"])
+	{
+		if ([presence toStr] == nil && myPresence != presence)
+		{
+			myPresence = presence;
+		}
+	}
+	
+	[multicastDelegate xmppStream:self didSendPresence:presence];
+}
+
 - (void)continueSendElement:(NSXMLElement *)element withTag:(long)tag
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
-	if (state == STATE_XMPP_CONNECTED)
-	{
-		NSString *outgoingStr = [element compactXMLString];
-		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
-		
-		XMPPLogSend(@"SEND: %@", outgoingStr);
-		numberOfBytesSent += [outgoingData length];
-		
-		[asyncSocket writeData:outgoingData
-		           withTimeout:TIMEOUT_XMPP_WRITE
-		                   tag:tag];
-		
-		if ([element isKindOfClass:[XMPPIQ class]])
-		{
-			[multicastDelegate xmppStream:self didSendIQ:(XMPPIQ *)element];
-		}
-		else if ([element isKindOfClass:[XMPPMessage class]])
-		{
-			[multicastDelegate xmppStream:self didSendMessage:(XMPPMessage *)element];
-		}
-		else if ([element isKindOfClass:[XMPPPresence class]])
-		{
-			// Update myPresence if this is a normal presence element.
-			// In other words, ignore presence subscription stuff, MUC room stuff, etc.
-			
-			XMPPPresence *presence = (XMPPPresence *)element;
-			
-			// We use the built-in [presence type] which guarantees lowercase strings,
-			// and will return @"available" if there was no set type (as available is implicit).
-			
-			NSString *type = [presence type];
-			if ([type isEqualToString:@"available"] || [type isEqualToString:@"unavailable"])
-			{
-				if ([presence toStr] == nil && myPresence != presence)
-				{
-					myPresence = presence;
-				}
-			}
-			
-			[multicastDelegate xmppStream:self didSendPresence:(XMPPPresence *)element];
-		}
-	}
+	NSString *outgoingStr = [element compactXMLString];
+	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogSend(@"SEND: %@", outgoingStr);
+	numberOfBytesSent += [outgoingData length];
+	
+	[asyncSocket writeData:outgoingData
+	           withTimeout:TIMEOUT_XMPP_WRITE
+	                   tag:tag];
 }
 
 /**
@@ -1916,6 +2005,10 @@ enum XMPPStreamConfig
 		else if ([elementName isEqualToString:@"presence"])
 		{
 			[self sendPresence:[XMPPPresence presenceFromElement:element] withTag:tag];
+		}
+		else
+		{
+			[self continueSendElement:element withTag:tag];
 		}
 	}
 }
@@ -3345,11 +3438,9 @@ enum XMPPStreamConfig
 		
 		if (elapsed < 0 || elapsed >= keepAliveInterval)
 		{
-			NSData *outgoingData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
+			numberOfBytesSent += [keepAliveData length];
 			
-			numberOfBytesSent += [outgoingData length];
-			
-			[asyncSocket writeData:outgoingData
+			[asyncSocket writeData:keepAliveData
 			           withTimeout:TIMEOUT_XMPP_WRITE
 			                   tag:TAG_XMPP_WRITE_STREAM];
 			
@@ -3377,7 +3468,7 @@ enum XMPPStreamConfig
 		
 		// Register module
 		
-		[registeredModules add:(__bridge void *)module];
+		[registeredModules addObject:module];
 		
 		// Add auto delegates (if there are any)
 		
@@ -3435,7 +3526,7 @@ enum XMPPStreamConfig
 		
 		// Unregister modules
 		
-		[registeredModules remove:(__bridge void *)module];
+		[registeredModules removeObject:module];
 		
 	}};
 	
@@ -3472,7 +3563,6 @@ enum XMPPStreamConfig
 		// It will be added as a delegate to future registered modules of the given class.
 		
 		id delegates = [autoDelegateDict objectForKey:className];
-		
 		if (delegates == nil)
 		{
 			delegates = [[GCDMulticastDelegate alloc] init];
@@ -3538,6 +3628,11 @@ enum XMPPStreamConfig
 			
 			GCDMulticastDelegate *delegates = [autoDelegateDict objectForKey:className];
 			[delegates removeDelegate:delegate delegateQueue:delegateQueue];
+			
+			if ([delegates count] == 0)
+			{
+				[autoDelegateDict removeObjectForKey:className];
+			}
 		}
 		
 	}};
