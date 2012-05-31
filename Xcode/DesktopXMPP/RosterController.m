@@ -184,10 +184,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (void)updateAccountInfo
 {
 	NSString *domain = [serverField stringValue];
-	[[self xmppStream] setHostName:domain];
+	self.xmppStream.hostName = domain;
 	
 	int port = [portField intValue];
-	[[self xmppStream] setHostPort:port];
+	self.xmppStream.hostPort = port;
 	
 	useSSL                      = ([sslButton state] == NSOnState);
 	allowSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
@@ -200,9 +200,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 	
 	XMPPJID *jid = [XMPPJID jidWithString:[jidField stringValue] resource:resource];
+	self.xmppStream.myJID = jid;
 	
-	[[self xmppStream] setMyJID:jid];
-    
 	// Update persistent info
 	
 	NSUserDefaults *dflts = [NSUserDefaults standardUserDefaults];
@@ -273,6 +272,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (IBAction)signIn:(id)sender
 {
+	[signInSheet makeFirstResponder:nil]; // workaround for some odd UI bug I don't understand
+	
 	[self updateAccountInfo];
 	
 	NSError *error = nil;
