@@ -50,6 +50,7 @@
         file:__FILE__                                             \
     function:fnct                                                 \
         line:__LINE__                                             \
+         tag:nil                                                  \
       format:(frmt), ##__VA_ARGS__]
 
 
@@ -195,9 +196,9 @@
  * For example: DDLogWarn(@"%@: Unable to find thingy", THIS_FILE) -> @"MyViewController: Unable to find thingy"
 **/
 
-NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
+NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 
-#define THIS_FILE (ExtractFileNameWithoutExtension(__FILE__, NO))
+#define THIS_FILE (DDExtractFileNameWithoutExtension(__FILE__, NO))
 
 /**
  * The THIS_METHOD macro gives you the name of the current objective-c method.
@@ -238,7 +239,25 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
        file:(const char *)file
    function:(const char *)function
        line:(int)line
-     format:(NSString *)format, ...;
+        tag:(id)tag
+     format:(NSString *)format, ... __attribute__ ((format (__NSString__, 9, 10)));
+
+/**
+ * Logging Primitive.
+ * 
+ * This method can be used if you have a prepared va_list.
+ */
++ (void)log:(BOOL)asynchronous
+      level:(int)level
+       flag:(int)flag
+    context:(int)context
+       file:(const char *)file
+   function:(const char *)function
+       line:(int)line
+        tag:(id)tag
+     format:(NSString *)format
+       args:(va_list)argList;
+
 
 /**
  * Since logging can be asynchronous, there may be times when you want to flush the logs.
@@ -422,31 +441,26 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 	mach_port_t machThreadID;
     char *queueLabel;
 	NSString *threadName;
-
-// The private variables below are only calculated if needed.
-// You should use the public methods to access this information.
-	
-@private
-	NSString *threadID;
-	NSString *fileName;
-	NSString *methodName;
+	id tag; // For 3rd party extensions to the framework, where flags and contexts aren't enough.
 }
 
-// The initializer is somewhat reserved for internal use.
-// However, if you find need to manually create logMessage objects,
-// there is one thing you should be aware of.
-// The initializer expects the file and function parameters to be string literals.
-// That is, it expects the given strings to exist for the duration of the object's lifetime,
-// and it expects the given strings to be immutable.
-// In other words, it does not copy these strings, it simply points to them.
-
+/**
+ * The initializer is somewhat reserved for internal use.
+ * However, if you find need to manually create logMessage objects, there is one thing you should be aware of:
+ * 
+ * The initializer expects the file and function parameters to be string literals.
+ * That is, it expects the given strings to exist for the duration of the object's lifetime,
+ * and it expects the given strings to be immutable.
+ * In other words, it does not copy these strings, it simply points to them.
+**/
 - (id)initWithLogMsg:(NSString *)logMsg
                level:(int)logLevel
                 flag:(int)logFlag
              context:(int)logContext
                 file:(const char *)file
             function:(const char *)function
-                line:(int)line;
+                line:(int)line
+                 tag:(id)tag;
 
 /**
  * Returns the threadID as it appears in NSLog.
@@ -455,7 +469,7 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 - (NSString *)threadID;
 
 /**
- * Convenience method to get just the file name, as the file variable is generally the full file path.
+ * Convenience property to get just the file name, as the file variable is generally the full file path.
  * This method does not include the file extension, which is generally unwanted for logging purposes.
 **/
 - (NSString *)fileName;
