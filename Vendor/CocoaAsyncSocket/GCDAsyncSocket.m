@@ -3,13 +3,14 @@
 //  
 //  This class is in the public domain.
 //  Originally created by Robbie Hanson in Q4 2010.
-//  Updated and maintained by Deusty LLC and the Mac development community.
+//  Updated and maintained by Deusty LLC and the Apple development community.
 //
-//  http://code.google.com/p/cocoaasyncsocket/
+//  https://github.com/robbiehanson/CocoaAsyncSocket
 //
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+// For more information see: https://github.com/robbiehanson/CocoaAsyncSocket/wiki/ARC
 #endif
 
 #import "GCDAsyncSocket.h"
@@ -263,6 +264,158 @@ enum GCDAsyncSocketConfig
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
+ * A PreBuffer is used when there is more data available on the socket
+ * than is being requested by current read request.
+ * In this case we slurp up all data from the socket (to minimize sys calls),
+ * and store additional yet unread data in a "prebuffer".
+ * 
+ * The prebuffer is entirely drained before we read from the socket again.
+ * In other words, a large chunk of data is written is written to the prebuffer.
+ * The prebuffer is then drained via a series of one or more reads (for subsequent read request(s)).
+ * 
+ * A ring buffer was once used for this purpose.
+ * But a ring buffer takes up twice as much memory as needed (double the size for mirroring).
+ * In fact, it generally takes up more than twice the needed size as everything has to be rounded up to vm_page_size.
+ * And since the prebuffer is always completely drained after being written to, a full ring buffer isn't needed.
+ * 
+ * The current design is very simple and straight-forward, while also keeping memory requirements lower.
+**/
+
+@interface GCDAsyncSocketPreBuffer : NSObject
+{
+	uint8_t *preBuffer;
+	size_t preBufferSize;
+	
+	uint8_t *readPointer;
+	uint8_t *writePointer;
+}
+
+- (id)initWithCapacity:(size_t)numBytes;
+
+- (void)ensureCapacityForWrite:(size_t)numBytes;
+
+- (size_t)availableBytes;
+- (uint8_t *)readBuffer;
+
+- (void)getReadBuffer:(uint8_t **)bufferPtr availableBytes:(size_t *)availableBytesPtr;
+
+- (size_t)availableSpace;
+- (uint8_t *)writeBuffer;
+
+- (void)getWriteBuffer:(uint8_t **)bufferPtr availableSpace:(size_t *)availableSpacePtr;
+
+- (void)didRead:(size_t)bytesRead;
+- (void)didWrite:(size_t)bytesWritten;
+
+- (void)reset;
+
+@end
+
+@implementation GCDAsyncSocketPreBuffer
+
+- (id)initWithCapacity:(size_t)numBytes
+{
+	if ((self = [super init]))
+	{
+		preBufferSize = numBytes;
+		preBuffer = malloc(preBufferSize);
+		
+		readPointer = preBuffer;
+		writePointer = preBuffer;
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	if (preBuffer)
+		free(preBuffer);
+}
+
+- (void)ensureCapacityForWrite:(size_t)numBytes
+{
+	size_t availableSpace = preBufferSize - (writePointer - readPointer);
+	
+	if (numBytes > availableSpace)
+	{
+		size_t additionalBytes = numBytes - availableSpace;
+		
+		size_t newPreBufferSize = preBufferSize + additionalBytes;
+		uint8_t *newPreBuffer = realloc(preBuffer, newPreBufferSize);
+		
+		size_t readPointerOffset = readPointer - preBuffer;
+		size_t writePointerOffset = writePointer - preBuffer;
+		
+		preBuffer = newPreBuffer;
+		preBufferSize = newPreBufferSize;
+		
+		readPointer = preBuffer + readPointerOffset;
+		writePointer = preBuffer + writePointerOffset;
+	}
+}
+
+- (size_t)availableBytes
+{
+	return writePointer - readPointer;
+}
+
+- (uint8_t *)readBuffer
+{
+	return readPointer;
+}
+
+- (void)getReadBuffer:(uint8_t **)bufferPtr availableBytes:(size_t *)availableBytesPtr
+{
+	if (bufferPtr) *bufferPtr = readPointer;
+	if (availableBytesPtr) *availableBytesPtr = writePointer - readPointer;
+}
+
+- (void)didRead:(size_t)bytesRead
+{
+	readPointer += bytesRead;
+	
+	if (readPointer == writePointer)
+	{
+		// The prebuffer has been drained. Reset pointers.
+		readPointer  = preBuffer;
+		writePointer = preBuffer;
+	}
+}
+
+- (size_t)availableSpace
+{
+	return preBufferSize - (writePointer - readPointer);
+}
+
+- (uint8_t *)writeBuffer
+{
+	return writePointer;
+}
+
+- (void)getWriteBuffer:(uint8_t **)bufferPtr availableSpace:(size_t *)availableSpacePtr
+{
+	if (bufferPtr) *bufferPtr = writePointer;
+	if (availableSpacePtr) *availableSpacePtr = preBufferSize - (writePointer - readPointer);
+}
+
+- (void)didWrite:(size_t)bytesWritten
+{
+	writePointer += bytesWritten;
+}
+
+- (void)reset
+{
+	readPointer  = preBuffer;
+	writePointer = preBuffer;
+}
+
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
  * The GCDAsyncReadPacket encompasses the instructions for any given read.
  * The content of a read packet allows the code to determine if we're:
  *  - reading to a certain length
@@ -297,7 +450,7 @@ enum GCDAsyncSocketConfig
 
 - (NSUInteger)readLengthForNonTermWithHint:(NSUInteger)bytesAvailable;
 - (NSUInteger)readLengthForTermWithHint:(NSUInteger)bytesAvailable shouldPreBuffer:(BOOL *)shouldPreBufferPtr;
-- (NSUInteger)readLengthForTermWithPreBuffer:(NSData *)preBuffer found:(BOOL *)foundPtr;
+- (NSUInteger)readLengthForTermWithPreBuffer:(GCDAsyncSocketPreBuffer *)preBuffer found:(BOOL *)foundPtr;
 
 - (NSInteger)searchForTermAfterPreBuffering:(ssize_t)numBytes;
 
@@ -561,13 +714,13 @@ enum GCDAsyncSocketConfig
  * 
  * It is assumed the terminator has not already been read.
 **/
-- (NSUInteger)readLengthForTermWithPreBuffer:(NSData *)preBuffer found:(BOOL *)foundPtr
+- (NSUInteger)readLengthForTermWithPreBuffer:(GCDAsyncSocketPreBuffer *)preBuffer found:(BOOL *)foundPtr
 {
 	NSAssert(term != nil, @"This method does not apply to non-term reads");
-	NSAssert([preBuffer length] > 0, @"Invoked with empty pre buffer!");
+	NSAssert([preBuffer availableBytes] > 0, @"Invoked with empty pre buffer!");
 	
 	// We know that the terminator, as a whole, doesn't exist in our own buffer.
-	// But it is possible that a portion of it exists in our buffer.
+	// But it is possible that a _portion_ of it exists in our buffer.
 	// So we're going to look for the terminator starting with a portion of our own buffer.
 	// 
 	// Example:
@@ -604,7 +757,7 @@ enum GCDAsyncSocketConfig
 	BOOL found = NO;
 	
 	NSUInteger termLength = [term length];
-	NSUInteger preBufferLength = [preBuffer length];
+	NSUInteger preBufferLength = [preBuffer availableBytes];
 	
 	if ((bytesDone + preBufferLength) < termLength)
 	{
@@ -629,11 +782,11 @@ enum GCDAsyncSocketConfig
 	uint8_t *buf = (uint8_t *)[buffer mutableBytes] + startOffset + bytesDone - bufLen;
 	
 	NSUInteger preLen = termLength - bufLen;
-	const uint8_t *pre = [preBuffer bytes];
+	const uint8_t *pre = [preBuffer readBuffer];
 	
 	NSUInteger loopCount = bufLen + maxPreBufferLength - termLength + 1; // Plus one. See example above.
 	
-	NSUInteger result = preBufferLength;
+	NSUInteger result = maxPreBufferLength;
 	
 	NSUInteger i;
 	for (i = 0; i < loopCount; i++)
@@ -662,7 +815,7 @@ enum GCDAsyncSocketConfig
 			
 			if (memcmp(pre, termBuf, termLength) == 0)
 			{
-				NSUInteger preOffset = pre - (const uint8_t *)[preBuffer bytes]; // pointer arithmetic
+				NSUInteger preOffset = pre - [preBuffer readBuffer]; // pointer arithmetic
 				
 				result = preOffset + termLength;
 				found = YES;
@@ -853,7 +1006,7 @@ enum GCDAsyncSocketConfig
 		writeQueue = [[NSMutableArray alloc] initWithCapacity:5];
 		currentWrite = nil;
 		
-		partialReadBuffer = [[NSMutableData alloc] init];
+		preBuffer = [[GCDAsyncSocketPreBuffer alloc] initWithCapacity:(1024 * 4)];
 	}
 	return self;
 }
@@ -1273,6 +1426,7 @@ enum GCDAsyncSocketConfig
 			NSString *reason = @"Error enabling non-blocking IO on socket (fcntl)";
 			err = [self errnoErrorWithReason:reason];
 			
+			LogVerbose(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1284,6 +1438,7 @@ enum GCDAsyncSocketConfig
 			NSString *reason = @"Error enabling address reuse (setsockopt)";
 			err = [self errnoErrorWithReason:reason];
 			
+			LogVerbose(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1296,6 +1451,7 @@ enum GCDAsyncSocketConfig
 			NSString *reason = @"Error in bind() function";
 			err = [self errnoErrorWithReason:reason];
 			
+			LogVerbose(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1308,6 +1464,7 @@ enum GCDAsyncSocketConfig
 			NSString *reason = @"Error in listen() function";
 			err = [self errnoErrorWithReason:reason];
 			
+			LogVerbose(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1424,6 +1581,7 @@ enum GCDAsyncSocketConfig
 			{
 				if (socket4FD != SOCKET_NULL)
 				{
+					LogVerbose(@"close(socket4FD)");
 					close(socket4FD);
 				}
 				
@@ -2361,7 +2519,6 @@ enum GCDAsyncSocketConfig
 		return;
 	}
 	
-	[self endConnectTimeout];
 	[self closeWithError:error];
 }
 
@@ -2444,7 +2601,7 @@ enum GCDAsyncSocketConfig
 	[readQueue removeAllObjects];
 	[writeQueue removeAllObjects];
 	
-	[partialReadBuffer setLength:0];
+	[preBuffer reset];
 	
 	#if TARGET_OS_IPHONE
 	{
@@ -2471,7 +2628,9 @@ enum GCDAsyncSocketConfig
 	#endif
 	#if SECURE_TRANSPORT_MAYBE_AVAILABLE
 	{
-		[sslReadBuffer setLength:0];
+		[sslPreBuffer reset];
+		sslErrCode = noErr;
+		
 		if (sslContext)
 		{
 			// Getting a linker error here about the SSLx() functions?
@@ -2494,61 +2653,71 @@ enum GCDAsyncSocketConfig
 	// So we have to unpause the source if needed.
 	// This allows the cancel handler to be run, which in turn releases the source and closes the socket.
 	
-	if (accept4Source)
+	if (!accept4Source && !accept6Source && !readSource && !writeSource)
 	{
-		LogVerbose(@"dispatch_source_cancel(accept4Source)");
-		dispatch_source_cancel(accept4Source);
-		
-		// We never suspend accept4Source
-		
-		accept4Source = NULL;
-	}
-	
-	if (accept6Source)
-	{
-		LogVerbose(@"dispatch_source_cancel(accept6Source)");
-		dispatch_source_cancel(accept6Source);
-		
-		// We never suspend accept6Source
-		
-		accept6Source = NULL;
-	}
-	if (!readSource && !writeSource) {
 		LogVerbose(@"manually closing close");
 
-		if (socket4FD) {
+		if (socket4FD != SOCKET_NULL)
+		{
+			LogVerbose(@"close(socket4FD)");
 			close(socket4FD);
+			socket4FD = SOCKET_NULL;
 		}
 
-		if (socket6FD) {
+		if (socket6FD != SOCKET_NULL)
+		{
+			LogVerbose(@"close(socket6FD)");
 			close(socket6FD);
+			socket6FD = SOCKET_NULL;
 		}
 	}
-
-	if (readSource)
+	else
 	{
-		LogVerbose(@"dispatch_source_cancel(readSource)");
-		dispatch_source_cancel(readSource);
+		if (accept4Source)
+		{
+			LogVerbose(@"dispatch_source_cancel(accept4Source)");
+			dispatch_source_cancel(accept4Source);
+			
+			// We never suspend accept4Source
+			
+			accept4Source = NULL;
+		}
 		
-		[self resumeReadSource];
+		if (accept6Source)
+		{
+			LogVerbose(@"dispatch_source_cancel(accept6Source)");
+			dispatch_source_cancel(accept6Source);
+			
+			// We never suspend accept6Source
+			
+			accept6Source = NULL;
+		}
+	
+		if (readSource)
+		{
+			LogVerbose(@"dispatch_source_cancel(readSource)");
+			dispatch_source_cancel(readSource);
+			
+			[self resumeReadSource];
+			
+			readSource = NULL;
+		}
 		
-		readSource = NULL;
+		if (writeSource)
+		{
+			LogVerbose(@"dispatch_source_cancel(writeSource)");
+			dispatch_source_cancel(writeSource);
+			
+			[self resumeWriteSource];
+			
+			writeSource = NULL;
+		}
+		
+		// The sockets will be closed by the cancel handlers of the corresponding source
+		
+		socket4FD = SOCKET_NULL;
+		socket6FD = SOCKET_NULL;
 	}
-	
-	if (writeSource)
-	{
-		LogVerbose(@"dispatch_source_cancel(writeSource)");
-		dispatch_source_cancel(writeSource);
-		
-		[self resumeWriteSource];
-		
-		writeSource = NULL;
-	}
-	
-	// The sockets will be closed by the cancel handlers of the corresponding source
-	
-	socket4FD = SOCKET_NULL;
-	socket6FD = SOCKET_NULL;
 	
 	// If the client has passed the connect/accept method, then the connection has at least begun.
 	// Notify delegate that it is now ending.
@@ -3702,6 +3871,50 @@ enum GCDAsyncSocketConfig
 	// as the queue might get released without the block completing.
 }
 
+- (float)progressOfReadReturningTag:(long *)tagPtr bytesDone:(NSUInteger *)donePtr total:(NSUInteger *)totalPtr
+{
+	__block float result = 0.0F;
+	
+	dispatch_block_t block = ^{
+		
+		if (!currentRead || ![currentRead isKindOfClass:[GCDAsyncReadPacket class]])
+		{
+			// We're not reading anything right now.
+			
+			if (tagPtr != NULL)   *tagPtr = 0;
+			if (donePtr != NULL)  *donePtr = 0;
+			if (totalPtr != NULL) *totalPtr = 0;
+			
+			result = NAN;
+		}
+		else
+		{
+			// It's only possible to know the progress of our read if we're reading to a certain length.
+			// If we're reading to data, we of course have no idea when the data will arrive.
+			// If we're reading to timeout, then we have no idea when the next chunk of data will arrive.
+			
+			NSUInteger done = currentRead->bytesDone;
+			NSUInteger total = currentRead->readLength;
+			
+			if (tagPtr != NULL)   *tagPtr = currentRead->tag;
+			if (donePtr != NULL)  *donePtr = done;
+			if (totalPtr != NULL) *totalPtr = total;
+			
+			if (total > 0)
+				result = (float)done / (float)total;
+			else
+				result = 1.0F;
+		}
+	};
+	
+	if (dispatch_get_current_queue() == socketQueue)
+		block();
+	else
+		dispatch_sync(socketQueue, block);
+	
+	return result;
+}
+
 /**
  * This method starts a new read, if needed.
  * 
@@ -3776,7 +3989,7 @@ enum GCDAsyncSocketConfig
 			// 
 			// Be sure callbacks are enabled so we're notified about a disconnection.
 			
-			if ([partialReadBuffer length] == 0)
+			if ([preBuffer availableBytes] == 0)
 			{
 				if ([self usingCFStreamForTLS]) {
 					// Callbacks never disabled
@@ -3795,10 +4008,10 @@ enum GCDAsyncSocketConfig
 	
 	NSAssert((flags & kSocketSecure), @"Cannot flush ssl buffers on non-secure socket");
 	
-	if ([partialReadBuffer length] > 0)
+	if ([preBuffer availableBytes] > 0)
 	{
-		// Only flush the ssl buffers if the partialReadBuffer is empty.
-		// This is to avoid growing the partialReadBuffer inifinitely large.
+		// Only flush the ssl buffers if the prebuffer is empty.
+		// This is to avoid growing the prebuffer inifinitely large.
 		
 		return;
 	}
@@ -3809,25 +4022,20 @@ enum GCDAsyncSocketConfig
 	{
 		if ((flags & kSecureSocketHasBytesAvailable) && CFReadStreamHasBytesAvailable(readStream))
 		{
-			LogVerbose(@"%@ - Flushing ssl buffers into partialReadBuffer...", THIS_METHOD);
+			LogVerbose(@"%@ - Flushing ssl buffers into prebuffer...", THIS_METHOD);
 			
-			CFIndex defaultBytesToRead = (1024 * 16);
+			CFIndex defaultBytesToRead = (1024 * 4);
 			
-			NSUInteger partialReadBufferOffset = [partialReadBuffer length];
-			[partialReadBuffer increaseLengthBy:defaultBytesToRead];
+			[preBuffer ensureCapacityForWrite:defaultBytesToRead];
 			
-			uint8_t *buffer = [partialReadBuffer mutableBytes] + partialReadBufferOffset;
+			uint8_t *buffer = [preBuffer writeBuffer];
 			
 			CFIndex result = CFReadStreamRead(readStream, buffer, defaultBytesToRead);
 			LogVerbose(@"%@ - CFReadStreamRead(): result = %i", THIS_METHOD, (int)result);
 			
-			if (result <= 0)
+			if (result > 0)
 			{
-				[partialReadBuffer setLength:partialReadBufferOffset];
-			}
-			else
-			{
-				[partialReadBuffer setLength:(partialReadBufferOffset + result)];
+				[preBuffer didWrite:result];
 			}
 			
 			flags &= ~kSecureSocketHasBytesAvailable;
@@ -3845,15 +4053,15 @@ enum GCDAsyncSocketConfig
 		
 		// Figure out if there is any data available to be read
 		// 
-		// socketFDBytesAvailable <- Number of encrypted bytes we haven't read from the bsd socket
-		// [sslReadBuffer length] <- Number of encrypted bytes we've buffered from bsd socket
-		// sslInternalBufSize     <- Number of decrypted bytes SecureTransport has buffered
+		// socketFDBytesAvailable        <- Number of encrypted bytes we haven't read from the bsd socket
+		// [sslPreBuffer availableBytes] <- Number of encrypted bytes we've buffered from bsd socket
+		// sslInternalBufSize            <- Number of decrypted bytes SecureTransport has buffered
 		// 
 		// We call the variable "estimated" because we don't know how many decrypted bytes we'll get
-		// from the encrypted bytes in the sslReadBuffer.
+		// from the encrypted bytes in the sslPreBuffer.
 		// However, we do know this is an upper bound on the estimation.
 		
-		estimatedBytesAvailable = socketFDBytesAvailable + [sslReadBuffer length];
+		estimatedBytesAvailable = socketFDBytesAvailable + [sslPreBuffer availableBytes];
 		
 		size_t sslInternalBufSize = 0;
 		SSLGetBufferedReadSize(sslContext, &sslInternalBufSize);
@@ -3865,28 +4073,31 @@ enum GCDAsyncSocketConfig
 	
 	if (estimatedBytesAvailable > 0)
 	{
-		LogVerbose(@"%@ - Flushing ssl buffers into partialReadBuffer...", THIS_METHOD);
+		LogVerbose(@"%@ - Flushing ssl buffers into prebuffer...", THIS_METHOD);
 		
 		BOOL done = NO;
 		do
 		{
 			LogVerbose(@"%@ - estimatedBytesAvailable = %lu", THIS_METHOD, (unsigned long)estimatedBytesAvailable);
 			
-			// Make room in the partialReadBuffer
+			// Make sure there's enough room in the prebuffer
 			
-			NSUInteger partialReadBufferOffset = [partialReadBuffer length];
-			[partialReadBuffer increaseLengthBy:estimatedBytesAvailable];
+			[preBuffer ensureCapacityForWrite:estimatedBytesAvailable];
 			
-			uint8_t *buffer = (uint8_t *)[partialReadBuffer mutableBytes] + partialReadBufferOffset;
+			// Read data into prebuffer
+			
+			uint8_t *buffer = [preBuffer writeBuffer];
 			size_t bytesRead = 0;
-			
-			// Read data into partialReadBuffer
 			
 			OSStatus result = SSLRead(sslContext, buffer, (size_t)estimatedBytesAvailable, &bytesRead);
 			LogVerbose(@"%@ - read from secure socket = %u", THIS_METHOD, (unsigned)bytesRead);
 			
-			[partialReadBuffer setLength:(partialReadBufferOffset + bytesRead)];
-			LogVerbose(@"%@ - partialReadBuffer.length = %lu", THIS_METHOD, (unsigned long)[partialReadBuffer length]);
+			if (bytesRead > 0)
+			{
+				[preBuffer didWrite:bytesRead];
+			}
+			
+			LogVerbose(@"%@ - prebuffer.length = %zu", THIS_METHOD, [preBuffer availableBytes]);
 			
 			if (result != noErr)
 			{
@@ -3993,9 +4204,9 @@ enum GCDAsyncSocketConfig
 			// This has to do with the encypted packets that are coming across the TCP stream.
 			// But it's non-optimal to do a bunch of small reads from the BSD socket.
 			// So our SSLReadFunction reads all available data from the socket (optimizing the sys call)
-			// and may store excess in the sslReadBuffer.
+			// and may store excess in the sslPreBuffer.
 			
-			estimatedBytesAvailable += [sslReadBuffer length];
+			estimatedBytesAvailable += [sslPreBuffer availableBytes];
 			
 			// The second buffer is within SecureTransport.
 			// As mentioned earlier, there are encrypted packets coming across the TCP stream.
@@ -4020,7 +4231,7 @@ enum GCDAsyncSocketConfig
 		#endif
 	}
 	
-	if ((hasBytesAvailable == NO) && ([partialReadBuffer length] == 0))
+	if ((hasBytesAvailable == NO) && ([preBuffer availableBytes] == 0))
 	{
 		LogVerbose(@"No data available to read...");
 		
@@ -4081,9 +4292,7 @@ enum GCDAsyncSocketConfig
 	// STEP 1 - READ FROM PREBUFFER
 	// 
 	
-	NSUInteger partialReadBufferLength = [partialReadBuffer length];
-	
-	if (partialReadBufferLength > 0)
+	if ([preBuffer availableBytes] > 0)
 	{
 		// There are 3 types of read packets:
 		// 
@@ -4097,13 +4306,13 @@ enum GCDAsyncSocketConfig
 		{
 			// Read type #3 - read up to a terminator
 			
-			bytesToCopy = [currentRead readLengthForTermWithPreBuffer:partialReadBuffer found:&done];
+			bytesToCopy = [currentRead readLengthForTermWithPreBuffer:preBuffer found:&done];
 		}
 		else
 		{
 			// Read type #1 or #2
 			
-			bytesToCopy = [currentRead readLengthForNonTermWithHint:partialReadBufferLength];
+			bytesToCopy = [currentRead readLengthForNonTermWithHint:[preBuffer availableBytes]];
 		}
 		
 		// Make sure we have enough room in the buffer for our read.
@@ -4115,13 +4324,12 @@ enum GCDAsyncSocketConfig
 		uint8_t *buffer = (uint8_t *)[currentRead->buffer mutableBytes] + currentRead->startOffset +
 		                                                                  currentRead->bytesDone;
 		
-		memcpy(buffer, [partialReadBuffer bytes], bytesToCopy);
+		memcpy(buffer, [preBuffer readBuffer], bytesToCopy);
 		
-		// Remove the copied bytes from the partial read buffer
-		[partialReadBuffer replaceBytesInRange:NSMakeRange(0, bytesToCopy) withBytes:NULL length:0];
-		partialReadBufferLength -= bytesToCopy;
+		// Remove the copied bytes from the preBuffer
+		[preBuffer didRead:bytesToCopy];
 		
-		LogVerbose(@"copied(%lu) partialReadBufferLength(%lu)", bytesToCopy, partialReadBufferLength);
+		LogVerbose(@"copied(%lu) preBufferLength(%zu)", (unsigned long)bytesToCopy, [preBuffer availableBytes]);
 		
 		// Update totals
 		
@@ -4175,7 +4383,7 @@ enum GCDAsyncSocketConfig
 	
 	if (!done && !error && !socketEOF && !waiting && hasBytesAvailable)
 	{
-		NSAssert((partialReadBufferLength == 0), @"Invalid logic");
+		NSAssert(([preBuffer availableBytes] == 0), @"Invalid logic");
 		
 		// There are 3 types of read packets:
 		// 
@@ -4183,7 +4391,7 @@ enum GCDAsyncSocketConfig
 		// 2) Read a specific length of data.
 		// 3) Read up to a particular terminator.
 		
-		BOOL readIntoPartialReadBuffer = NO;
+		BOOL readIntoPreBuffer = NO;
 		NSUInteger bytesToRead;
 		
 		if ([self usingCFStreamForTLS])
@@ -4200,7 +4408,7 @@ enum GCDAsyncSocketConfig
 			NSUInteger defaultReadLength = (1024 * 32);
 			
 			bytesToRead = [currentRead optimalReadLengthWithDefault:defaultReadLength
-			                                        shouldPreBuffer:&readIntoPartialReadBuffer];
+			                                        shouldPreBuffer:&readIntoPreBuffer];
 		}
 		else
 		{
@@ -4209,7 +4417,7 @@ enum GCDAsyncSocketConfig
 				// Read type #3 - read up to a terminator
 				
 				bytesToRead = [currentRead readLengthForTermWithHint:estimatedBytesAvailable
-													 shouldPreBuffer:&readIntoPartialReadBuffer];
+													 shouldPreBuffer:&readIntoPreBuffer];
 			}
 			else
 			{
@@ -4227,18 +4435,15 @@ enum GCDAsyncSocketConfig
 		// Make sure we have enough room in the buffer for our read.
 		// 
 		// We are either reading directly into the currentRead->buffer,
-		// or we're reading into the temporary partialReadBuffer.
+		// or we're reading into the temporary preBuffer.
 		
 		uint8_t *buffer;
 		
-		if (readIntoPartialReadBuffer)
+		if (readIntoPreBuffer)
 		{
-			if (bytesToRead > partialReadBufferLength)
-			{
-				[partialReadBuffer setLength:bytesToRead];
-			}
-			
-			buffer = [partialReadBuffer mutableBytes];
+			[preBuffer ensureCapacityForWrite:bytesToRead];
+						
+			buffer = [preBuffer writeBuffer];
 		}
 		else
 		{
@@ -4263,16 +4468,10 @@ enum GCDAsyncSocketConfig
 				if (result < 0)
 				{
 					error = (__bridge_transfer NSError *)CFReadStreamCopyError(readStream);
-					
-					if (readIntoPartialReadBuffer)
-						[partialReadBuffer setLength:0];
 				}
 				else if (result == 0)
 				{
 					socketEOF = YES;
-					
-					if (readIntoPartialReadBuffer)
-						[partialReadBuffer setLength:0];
 				}
 				else
 				{
@@ -4319,18 +4518,26 @@ enum GCDAsyncSocketConfig
 					if (result == errSSLWouldBlock)
 						waiting = YES;
 					else
-						error = [self sslError:result];
-					
-					// It's possible that bytesRead > 0, yet the result is errSSLWouldBlock.
+					{
+						if (result == errSSLClosedGraceful || result == errSSLClosedAbort)
+						{
+							// We've reached the end of the stream.
+							// Handle this the same way we would an EOF from the socket.
+							socketEOF = YES;
+							sslErrCode = result;
+						}
+						else
+						{
+							error = [self sslError:result];
+						}
+					}
+					// It's possible that bytesRead > 0, even if the result was errSSLWouldBlock.
 					// This happens when the SSLRead function is able to read some data,
 					// but not the entire amount we requested.
 					
 					if (bytesRead <= 0)
 					{
 						bytesRead = 0;
-						
-						if (readIntoPartialReadBuffer)
-							[partialReadBuffer setLength:0];
 					}
 				}
 				
@@ -4355,17 +4562,11 @@ enum GCDAsyncSocketConfig
 					error = [self errnoErrorWithReason:@"Error in read() function"];
 				
 				socketFDBytesAvailable = 0;
-				
-				if (readIntoPartialReadBuffer)
-					[partialReadBuffer setLength:0];
 			}
 			else if (result == 0)
 			{
 				socketEOF = YES;
 				socketFDBytesAvailable = 0;
-				
-				if (readIntoPartialReadBuffer)
-					[partialReadBuffer setLength:0];
 			}
 			else
 			{
@@ -4403,7 +4604,7 @@ enum GCDAsyncSocketConfig
 				// 
 				// Note: We should never be using a prebuffer when we're reading a specific length of data.
 				
-				NSAssert(readIntoPartialReadBuffer == NO, @"Invalid logic");
+				NSAssert(readIntoPreBuffer == NO, @"Invalid logic");
 				
 				currentRead->bytesDone += bytesRead;
 				totalBytesReadForCurrentRead += bytesRead;
@@ -4414,18 +4615,17 @@ enum GCDAsyncSocketConfig
 			{
 				// Read type #3 - read up to a terminator
 				
-				if (readIntoPartialReadBuffer)
+				if (readIntoPreBuffer)
 				{
-					// We just read a big chunk of data into the partialReadBuffer.
-					// Search for the terminating sequence.
-					// 
-					// Note: We are depending upon [partialReadBuffer length] to tell us how much data is
-					// available in the partialReadBuffer. So we need to be sure this matches how many bytes
-					// have actually been read into said buffer.
+					// We just read a big chunk of data into the preBuffer
 					
-					[partialReadBuffer setLength:bytesRead];
+					[preBuffer didWrite:bytesRead];
+					LogVerbose(@"read data into preBuffer - preBuffer.length = %zu", [preBuffer availableBytes]);
 					
-					bytesToRead = [currentRead readLengthForTermWithPreBuffer:partialReadBuffer found:&done];
+					// Search for the terminating sequence
+					
+					bytesToRead = [currentRead readLengthForTermWithPreBuffer:preBuffer found:&done];
+					LogVerbose(@"copying %lu bytes from preBuffer", (unsigned long)bytesToRead);
 					
 					// Ensure there's room on the read packet's buffer
 					
@@ -4433,14 +4633,14 @@ enum GCDAsyncSocketConfig
 					
 					// Copy bytes from prebuffer into read buffer
 					
-					uint8_t *preBuf = [partialReadBuffer mutableBytes];
 					uint8_t *readBuf = (uint8_t *)[currentRead->buffer mutableBytes] + currentRead->startOffset
-					                                                             + currentRead->bytesDone;
+					                                                                 + currentRead->bytesDone;
 					
-					memcpy(readBuf, preBuf, bytesToRead);
+					memcpy(readBuf, [preBuffer readBuffer], bytesToRead);
 					
 					// Remove the copied bytes from the prebuffer
-					[partialReadBuffer replaceBytesInRange:NSMakeRange(0, bytesToRead) withBytes:NULL length:0];
+					[preBuffer didRead:bytesToRead];
+					LogVerbose(@"preBuffer.length = %zu", [preBuffer availableBytes]);
 					
 					// Update totals
 					currentRead->bytesDone += bytesToRead;
@@ -4473,10 +4673,16 @@ enum GCDAsyncSocketConfig
 						
 						NSInteger underflow = bytesRead - overflow;
 						
-						// Copy excess data into partialReadBuffer
-						void *overflowBuffer = buffer + currentRead->bytesDone + underflow;
+						// Copy excess data into preBuffer
 						
-						[partialReadBuffer appendBytes:overflowBuffer length:overflow];
+						LogVerbose(@"copying %ld overflow bytes into preBuffer", (long)overflow);
+						[preBuffer ensureCapacityForWrite:overflow];
+						
+						uint8_t *overflowBuffer = buffer + underflow;
+						memcpy([preBuffer writeBuffer], overflowBuffer, overflow);
+						
+						[preBuffer didWrite:overflow];
+						LogVerbose(@"preBuffer.length = %zu", [preBuffer availableBytes]);
 						
 						// Note: The completeCurrentRead method will trim the buffer for us.
 						
@@ -4509,34 +4715,30 @@ enum GCDAsyncSocketConfig
 			{
 				// Read type #1 - read all available data
 				
-				if (readIntoPartialReadBuffer)
+				if (readIntoPreBuffer)
 				{
-					// We just read a chunk of data into the partialReadBuffer.
-					// Copy the data into the read packet.
+					// We just read a chunk of data into the preBuffer
+					
+					[preBuffer didWrite:bytesRead];
+					
+					// Now copy the data into the read packet.
 					// 
 					// Recall that we didn't read directly into the packet's buffer to avoid
 					// over-allocating memory since we had no clue how much data was available to be read.
 					// 
-					// Note: We are depending upon [partialReadBuffer length] to tell us how much data is
-					// available in the partialReadBuffer. So we need to be sure this matches how many bytes
-					// have actually been read into said buffer.
-					
-					[partialReadBuffer setLength:bytesRead];
-					
 					// Ensure there's room on the read packet's buffer
 					
 					[currentRead ensureCapacityForAdditionalDataOfLength:bytesRead];
 					
 					// Copy bytes from prebuffer into read buffer
 					
-					uint8_t *preBuf = [partialReadBuffer mutableBytes];
 					uint8_t *readBuf = (uint8_t *)[currentRead->buffer mutableBytes] + currentRead->startOffset
-					                                                             + currentRead->bytesDone;
+					                                                                 + currentRead->bytesDone;
 					
-					memcpy(readBuf, preBuf, bytesRead);
+					memcpy(readBuf, [preBuffer readBuffer], bytesRead);
 					
 					// Remove the copied bytes from the prebuffer
-					[partialReadBuffer replaceBytesInRange:NSMakeRange(0, bytesRead) withBytes:NULL length:0];
+					[preBuffer didRead:bytesRead];
 					
 					// Update totals
 					currentRead->bytesDone += bytesRead;
@@ -4571,7 +4773,7 @@ enum GCDAsyncSocketConfig
 	{
 		[self completeCurrentRead];
 		
-		if (!error && (!socketEOF || partialReadBufferLength > 0))
+		if (!error && (!socketEOF || [preBuffer availableBytes] > 0))
 		{
 			[self maybeDequeueRead];
 		}
@@ -4583,11 +4785,11 @@ enum GCDAsyncSocketConfig
 		if (delegateQueue && [delegate respondsToSelector:@selector(socket:didReadPartialDataOfLength:tag:)])
 		{
 			__strong id theDelegate = delegate;
-			GCDAsyncReadPacket *theRead = currentRead;
+			long theReadTag = currentRead->tag;
 			
 			dispatch_async(delegateQueue, ^{ @autoreleasepool {
 				
-				[theDelegate socket:self didReadPartialDataOfLength:totalBytesReadForCurrentRead tag:theRead->tag];
+				[theDelegate socket:self didReadPartialDataOfLength:totalBytesReadForCurrentRead tag:theReadTag];
 			}});
 		}
 	}
@@ -4619,14 +4821,14 @@ enum GCDAsyncSocketConfig
 	LogTrace();
 	
 	// This method may be called more than once.
-	// If the EOF is read while there is still data in the partialReadBuffer,
+	// If the EOF is read while there is still data in the preBuffer,
 	// then this method may be called continually after invocations of doReadData to see if it's time to disconnect.
 	
 	flags |= kSocketHasReadEOF;
 	
 	if (flags & kSocketSecure)
 	{
-		// If the SSL layer has any buffered data, flush it into the partialReadBuffer now.
+		// If the SSL layer has any buffered data, flush it into the preBuffer now.
 		
 		[self flushSSLBuffers];
 	}
@@ -4650,7 +4852,7 @@ enum GCDAsyncSocketConfig
 	}
 	else if (flags & kReadStreamClosed)
 	{
-		// The partialReadBuffer has already been drained.
+		// The preBuffer has already been drained.
 		// The config allows half-duplex connections.
 		// We've previously checked the socket, and it appeared writeable.
 		// So we marked the read stream as closed and notified the delegate.
@@ -4660,7 +4862,7 @@ enum GCDAsyncSocketConfig
 		
 		shouldDisconnect = NO;
 	}
-	else if ([partialReadBuffer length] > 0)
+	else if ([preBuffer availableBytes] > 0)
 	{
 		LogVerbose(@"Socket reached EOF, but there is still data available in prebuffer");
 		
@@ -4720,7 +4922,23 @@ enum GCDAsyncSocketConfig
 	{
 		if (error == nil)
 		{
-			error = [self connectionClosedError];
+			if ([self usingSecureTransportForTLS])
+			{
+				#if SECURE_TRANSPORT_MAYBE_AVAILABLE
+				if (sslErrCode != noErr && sslErrCode != errSSLClosedGraceful)
+				{
+					error = [self sslError:sslErrCode];
+				}
+				else
+				{
+					error = [self connectionClosedError];
+				}
+				#endif
+			}
+			else
+			{
+				error = [self connectionClosedError];
+			}
 		}
 		[self closeWithError:error];
 	}
@@ -4906,6 +5124,43 @@ enum GCDAsyncSocketConfig
 	// as the queue might get released without the block completing.
 }
 
+- (float)progressOfWriteReturningTag:(long *)tagPtr bytesDone:(NSUInteger *)donePtr total:(NSUInteger *)totalPtr
+{
+	__block float result = 0.0F;
+	
+	dispatch_block_t block = ^{
+		
+		if (!currentWrite || ![currentWrite isKindOfClass:[GCDAsyncWritePacket class]])
+		{
+			// We're not writing anything right now.
+			
+			if (tagPtr != NULL)   *tagPtr = 0;
+			if (donePtr != NULL)  *donePtr = 0;
+			if (totalPtr != NULL) *totalPtr = 0;
+			
+			result = NAN;
+		}
+		else
+		{
+			NSUInteger done = currentWrite->bytesDone;
+			NSUInteger total = [currentWrite->buffer length];
+			
+			if (tagPtr != NULL)   *tagPtr = currentWrite->tag;
+			if (donePtr != NULL)  *donePtr = done;
+			if (totalPtr != NULL) *totalPtr = total;
+			
+			result = (float)done / (float)total;
+		}
+	};
+	
+	if (dispatch_get_current_queue() == socketQueue)
+		block();
+	else
+		dispatch_sync(socketQueue, block);
+	
+	return result;
+}
+
 /**
  * Conditionally starts a new write.
  * 
@@ -5052,7 +5307,7 @@ enum GCDAsyncSocketConfig
 		return;
 	}
 	
-	// Note: This method is not called if theCurrentWrite is an GCDAsyncSpecialPacket (startTLS packet)
+	// Note: This method is not called if currentWrite is a GCDAsyncSpecialPacket (startTLS packet)
 	
 	BOOL waiting = NO;
 	NSError *error = nil;
@@ -5337,11 +5592,11 @@ enum GCDAsyncSocketConfig
 			if (delegateQueue && [delegate respondsToSelector:@selector(socket:didWritePartialDataOfLength:tag:)])
 			{
 				__strong id theDelegate = delegate;
-				GCDAsyncWritePacket *theWrite = currentWrite;
+				long theWriteTag = currentWrite->tag;
 				
 				dispatch_async(delegateQueue, ^{ @autoreleasepool {
 					
-					[theDelegate socket:self didWritePartialDataOfLength:bytesWritten tag:theWrite->tag];
+					[theDelegate socket:self didWritePartialDataOfLength:bytesWritten tag:theWriteTag];
 				}});
 			}
 		}
@@ -5367,11 +5622,11 @@ enum GCDAsyncSocketConfig
 	if (delegateQueue && [delegate respondsToSelector:@selector(socket:didWriteDataWithTag:)])
 	{
 		__strong id theDelegate = delegate;
-		GCDAsyncWritePacket *theWrite = currentWrite;
+		long theWriteTag = currentWrite->tag;
 		
 		dispatch_async(delegateQueue, ^{ @autoreleasepool {
 			
-			[theDelegate socket:self didWriteDataWithTag:theWrite->tag];
+			[theDelegate socket:self didWriteDataWithTag:theWriteTag];
 		}});
 	}
 	
@@ -5573,7 +5828,7 @@ enum GCDAsyncSocketConfig
 {
 	LogVerbose(@"sslReadWithBuffer:%p length:%lu", buffer, (unsigned long)*bufferLength);
 	
-	if ((socketFDBytesAvailable == 0) && ([sslReadBuffer length] == 0))
+	if ((socketFDBytesAvailable == 0) && ([sslPreBuffer availableBytes] == 0))
 	{
 		LogVerbose(@"%@ - No data available to read...", THIS_METHOD);
 		
@@ -5598,25 +5853,24 @@ enum GCDAsyncSocketConfig
 	// STEP 1 : READ FROM SSL PRE BUFFER
 	// 
 	
-	NSUInteger sslReadBufferLength = [sslReadBuffer length];
+	size_t sslPreBufferLength = [sslPreBuffer availableBytes];
 	
-	if (sslReadBufferLength > 0)
+	if (sslPreBufferLength > 0)
 	{
 		LogVerbose(@"%@: Reading from SSL pre buffer...", THIS_METHOD);
 		
 		size_t bytesToCopy;
-		if (sslReadBufferLength > totalBytesLeftToBeRead)
+		if (sslPreBufferLength > totalBytesLeftToBeRead)
 			bytesToCopy = totalBytesLeftToBeRead;
 		else
-			bytesToCopy = (size_t)sslReadBufferLength;
+			bytesToCopy = sslPreBufferLength;
 		
-		LogVerbose(@"%@: Copying %zu bytes from sslReadBuffer", THIS_METHOD, bytesToCopy);
+		LogVerbose(@"%@: Copying %zu bytes from sslPreBuffer", THIS_METHOD, bytesToCopy);
 		
-		memcpy(buffer, [sslReadBuffer mutableBytes], bytesToCopy);
+		memcpy(buffer, [sslPreBuffer readBuffer], bytesToCopy);
+		[sslPreBuffer didRead:bytesToCopy];
 		
-		[sslReadBuffer replaceBytesInRange:NSMakeRange(0, bytesToCopy) withBytes:NULL length:0];
-		
-		LogVerbose(@"%@: sslReadBuffer.length = %lu", THIS_METHOD, (unsigned long)[sslReadBuffer length]);
+		LogVerbose(@"%@: sslPreBuffer.length = %zu", THIS_METHOD, [sslPreBuffer availableBytes]);
 		
 		totalBytesRead += bytesToCopy;
 		totalBytesLeftToBeRead -= bytesToCopy;
@@ -5642,19 +5896,16 @@ enum GCDAsyncSocketConfig
 		
 		if (socketFDBytesAvailable > totalBytesLeftToBeRead)
 		{
-			// Read all available data from socket into sslReadBuffer.
+			// Read all available data from socket into sslPreBuffer.
 			// Then copy requested amount into dataBuffer.
 			
-			LogVerbose(@"%@: Reading into sslReadBuffer...", THIS_METHOD);
+			LogVerbose(@"%@: Reading into sslPreBuffer...", THIS_METHOD);
 			
-			if ([sslReadBuffer length] < socketFDBytesAvailable)
-			{
-				[sslReadBuffer setLength:socketFDBytesAvailable];
-			}
+			[sslPreBuffer ensureCapacityForWrite:socketFDBytesAvailable];
 			
 			readIntoPreBuffer = YES;
 			bytesToRead = (size_t)socketFDBytesAvailable;
-			buf = [sslReadBuffer mutableBytes];
+			buf = [sslPreBuffer writeBuffer];
 		}
 		else
 		{
@@ -5680,11 +5931,6 @@ enum GCDAsyncSocketConfig
 			}
 			
 			socketFDBytesAvailable = 0;
-			
-			if (readIntoPreBuffer)
-			{
-				[sslReadBuffer setLength:0];
-			}
 		}
 		else if (result == 0)
 		{
@@ -5692,11 +5938,6 @@ enum GCDAsyncSocketConfig
 			
 			socketError = YES;
 			socketFDBytesAvailable = 0;
-			
-			if (readIntoPreBuffer)
-			{
-				[sslReadBuffer setLength:0];
-			}
 		}
 		else
 		{
@@ -5709,19 +5950,19 @@ enum GCDAsyncSocketConfig
 			
 			if (readIntoPreBuffer)
 			{
+				[sslPreBuffer didWrite:bytesReadFromSocket];
+				
 				size_t bytesToCopy = MIN(totalBytesLeftToBeRead, bytesReadFromSocket);
 				
-				LogVerbose(@"%@: Copying %zu bytes out of sslReadBuffer", THIS_METHOD, bytesToCopy);
+				LogVerbose(@"%@: Copying %zu bytes out of sslPreBuffer", THIS_METHOD, bytesToCopy);
 				
-				memcpy((uint8_t *)buffer + totalBytesRead, [sslReadBuffer bytes], bytesToCopy);
-				
-				[sslReadBuffer setLength:bytesReadFromSocket];
-				[sslReadBuffer replaceBytesInRange:NSMakeRange(0, bytesToCopy) withBytes:NULL length:0];
+				memcpy((uint8_t *)buffer + totalBytesRead, [sslPreBuffer readBuffer], bytesToCopy);
+				[sslPreBuffer didRead:bytesToCopy];
 				
 				totalBytesRead += bytesToCopy;
 				totalBytesLeftToBeRead -= bytesToCopy;
 				
-				LogVerbose(@"%@: sslReadBuffer.length = %lu", THIS_METHOD, (unsigned long)[sslReadBuffer length]);
+				LogVerbose(@"%@: sslPreBuffer.length = %zu", THIS_METHOD, [sslPreBuffer availableBytes]);
 			}
 			else
 			{
@@ -6171,19 +6412,25 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	}
 	#endif
 	
-	// Setup the sslReadBuffer
+	// Setup the sslPreBuffer
 	// 
-	// If there is any data in the partialReadBuffer,
-	// this needs to be moved into the sslReadBuffer,
+	// Any data in the preBuffer needs to be moved into the sslPreBuffer,
 	// as this data is now part of the secure read stream.
 	
-	sslReadBuffer = [[NSMutableData alloc] init];
+	sslPreBuffer = [[GCDAsyncSocketPreBuffer alloc] initWithCapacity:(1024 * 4)];
 	
-	if ([partialReadBuffer length] > 0)
+	size_t preBufferLength  = [preBuffer availableBytes];
+	
+	if (preBufferLength > 0)
 	{
-		[sslReadBuffer appendData:partialReadBuffer];
-		[partialReadBuffer setLength:0];
+		[sslPreBuffer ensureCapacityForWrite:preBufferLength];
+		
+		memcpy([sslPreBuffer writeBuffer], [preBuffer readBuffer], preBufferLength);
+		[preBuffer didRead:preBufferLength];
+		[sslPreBuffer didWrite:preBufferLength];
 	}
+	
+	sslErrCode = noErr;
 	
 	// Start the SSL Handshake process
 	
@@ -6295,7 +6542,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	
 	LogVerbose(@"Starting TLS (via CFStream)...");
 	
-	if ([partialReadBuffer length] > 0)
+	if ([preBuffer availableBytes] > 0)
 	{
 		NSString *msg = @"Invalid TLS transition. Handshake has already been read from socket.";
 		
@@ -6406,7 +6653,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	// So we'll just create a timer that will never fire - unless the server runs for decades.
 	[NSTimer scheduledTimerWithTimeInterval:[[NSDate distantFuture] timeIntervalSinceNow]
 	                                 target:self
-	                               selector:@selector(ignore:)
+	                               selector:@selector(doNothingAtAll:)
 	                               userInfo:nil
 	                                repeats:YES];
 	
