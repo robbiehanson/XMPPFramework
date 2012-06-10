@@ -407,6 +407,7 @@
 #endif
 @synthesize delegateQueue;  // non-atomic
 
+#if !TARGET_OS_IPHONE
 static BOOL SupportsWeakReferences(id delegate)
 {
 	// From Apple's documentation:
@@ -439,6 +440,7 @@ static BOOL SupportsWeakReferences(id delegate)
 	
 	return YES;
 }
+#endif
 
 - (id)initWithDelegate:(id)inDelegate delegateQueue:(dispatch_queue_t)inDelegateQueue
 {
