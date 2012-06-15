@@ -20,8 +20,8 @@
 	
 }
 
-- (id)initWithXMPPStream:(XMPPStream *)xmppStream;
-
+- (id)initWithXMPPStream:(XMPPStream *)xmppStream withVersionTag:(NSString *)version;
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue withVersionTag:(NSString *)version;
 @end
 
 @protocol XMPPVersionDelegate

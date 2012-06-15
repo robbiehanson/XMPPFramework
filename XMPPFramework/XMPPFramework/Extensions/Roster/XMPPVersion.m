@@ -18,20 +18,25 @@
 #if TARGET_OS_IPHONE  
 #import <UIKit/UIKit.h>
 #endif
+@interface XMPPVersion ()
+{
+    NSString *versionTag;
+}
+@end
 
 @implementation XMPPVersion
 
 
 - (id)init
 {
-    return [self initWithDispatchQueue:NULL];
+    return [self initWithDispatchQueue:NULL withVersionTag:@"iPhone/App"];
 }
 
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue withVersionTag:(NSString *)aversion;
 {
     if ((self = [super initWithDispatchQueue:queue]))
     {
-        
+        versionTag = [aversion copy];
     }
     return self;
 }
@@ -69,11 +74,11 @@
     [super deactivate];
 }
 
-- (id)initWithXMPPStream:(XMPPStream *)aXmppStream
+- (id)initWithXMPPStream:(XMPPStream *)aXmppStream withVersionTag:(NSString *)aversion
 {
     if ((self = [self init]))
     {
-        
+        versionTag = [aversion copy];
         
     }
     return self;
@@ -81,6 +86,7 @@
 
 - (void)dealloc
 {
+    [versionTag release];
     [super dealloc];
 }
 
@@ -102,7 +108,7 @@
         NSXMLElement *version = [iq elementForName:@"query" xmlns:@"jabber:iq:version"];
         if (version)
         {
-            NSString *applicationVersion = @"iPhone/SocialNoise";
+            NSString *applicationVersion = versionTag;
             // Format current device description
             UIDevice *deviceInfo = [UIDevice currentDevice];
             NSMutableString *deviceDescription = [NSMutableString stringWithCapacity: 0];
