@@ -709,7 +709,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	if (hash == nil)
 	{
-		XMPPLogWarn(@"%@: Unable to hash capabilites (in order to send in presense element)\n",
+		XMPPLogWarn(@"%@: Unable to hash capabilites (in order to send in presense element)\n"
 					"Perhaps there are duplicate advertised features...\n%@", THIS_FILE,
 					[query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 		return;
