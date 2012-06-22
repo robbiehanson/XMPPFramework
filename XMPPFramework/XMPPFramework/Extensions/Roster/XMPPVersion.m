@@ -84,12 +84,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [versionTag release];
-    [super dealloc];
-}
-
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
     NSString *type = [[iq attributeForName:@"type"] stringValue];

@@ -221,7 +221,7 @@
 		846EC0E1157E9C7900460DB9 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846EC0D8157E9C7900460DB9 /* SystemConfiguration.framework */; };
 		846EC0E2157E9C7900460DB9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846EC0D9157E9C7900460DB9 /* UIKit.framework */; };
 		846EC131157EB69200460DB9 /* XMPPVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 846EC12F157EB69200460DB9 /* XMPPVersion.h */; };
-		846EC132157EB69200460DB9 /* XMPPVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 846EC130157EB69200460DB9 /* XMPPVersion.m */; };
+		846EC132157EB69200460DB9 /* XMPPVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 846EC130157EB69200460DB9 /* XMPPVersion.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
