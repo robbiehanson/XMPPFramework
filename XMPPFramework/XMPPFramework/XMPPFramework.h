@@ -36,12 +36,14 @@
 #import "XMPPCapabilities.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
 
-//#import "XMPPRoster.h"
-//#import "XMPPvCardTempModule.h"
+#import "XMPPRoster.h"
+#import "XMPPvCardTempModule.h"
+
 //#import "XMPPPubSub.h"
 //#import "XMPPTransports.h"
 //#import "XMPPCapabilities.h"
-//#import "XMPPvCardAvatarModule.h"
+#import "XMPPvCardAvatarModule.h"
+#import "XMPPvCardCoreDataStorage.h"
 //#import "XMPPPing.h"
 //#import "XMPPAutoPing.h"
 //#import "XMPPTime.h"
