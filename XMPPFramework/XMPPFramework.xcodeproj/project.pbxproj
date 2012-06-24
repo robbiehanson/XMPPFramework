@@ -222,6 +222,8 @@
 		846EC0E2157E9C7900460DB9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846EC0D9157E9C7900460DB9 /* UIKit.framework */; };
 		846EC131157EB69200460DB9 /* XMPPVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 846EC12F157EB69200460DB9 /* XMPPVersion.h */; };
 		846EC132157EB69200460DB9 /* XMPPVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 846EC130157EB69200460DB9 /* XMPPVersion.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		84F5DE3E15958B6A009F88AB /* XMPPPass.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F5DE3C15958B6A009F88AB /* XMPPPass.h */; };
+		84F5DE3F15958B6A009F88AB /* XMPPPass.m in Sources */ = {isa = PBXBuildFile; fileRef = 84F5DE3D15958B6A009F88AB /* XMPPPass.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -446,6 +448,8 @@
 		846EC0D9157E9C7900460DB9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		846EC12F157EB69200460DB9 /* XMPPVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPVersion.h; sourceTree = "<group>"; };
 		846EC130157EB69200460DB9 /* XMPPVersion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPVersion.m; sourceTree = "<group>"; };
+		84F5DE3C15958B6A009F88AB /* XMPPPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPass.h; sourceTree = "<group>"; };
+		84F5DE3D15958B6A009F88AB /* XMPPPass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPass.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -549,6 +553,7 @@
 		846EBE8E157E9A1300460DB9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				84F5DE3A15958B42009F88AB /* XEP-0003 */,
 				846EC133157EB69A00460DB9 /* XEP-0092 */,
 				846EBE8F157E9A1300460DB9 /* BandwidthMonitor */,
 				846EBE92157E9A1300460DB9 /* CoreDataStorage */,
@@ -1098,6 +1103,15 @@
 			path = Roster;
 			sourceTree = "<group>";
 		};
+		84F5DE3A15958B42009F88AB /* XEP-0003 */ = {
+			isa = PBXGroup;
+			children = (
+				84F5DE3C15958B6A009F88AB /* XMPPPass.h */,
+				84F5DE3D15958B6A009F88AB /* XMPPPass.m */,
+			);
+			path = "XEP-0003";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1213,6 +1227,7 @@
 				846EC0C5157E9A7000460DB9 /* idn-int.h in Headers */,
 				846EC0C7157E9A7000460DB9 /* stringprep.h in Headers */,
 				846EC131157EB69200460DB9 /* XMPPVersion.h in Headers */,
+				84F5DE3E15958B6A009F88AB /* XMPPPass.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1363,6 +1378,7 @@
 				846EC0C1157E9A7000460DB9 /* DDXMLElement.m in Sources */,
 				846EC0C3157E9A7000460DB9 /* DDXMLNode.m in Sources */,
 				846EC132157EB69200460DB9 /* XMPPVersion.m in Sources */,
+				84F5DE3F15958B6A009F88AB /* XMPPPass.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
