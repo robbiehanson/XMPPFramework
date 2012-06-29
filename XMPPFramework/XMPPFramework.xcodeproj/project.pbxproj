@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		841B90D5159DF4CA008E4504 /* XMPPOutOfBand.h in Headers */ = {isa = PBXBuildFile; fileRef = 841B90D3159DF4CA008E4504 /* XMPPOutOfBand.h */; };
+		841B90D6159DF4CA008E4504 /* XMPPOutOfBand.m in Sources */ = {isa = PBXBuildFile; fileRef = 841B90D4159DF4CA008E4504 /* XMPPOutOfBand.m */; };
 		846EBE69157E99C500460DB9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846EBE68157E99C500460DB9 /* Foundation.framework */; };
 		846EBE82157E99F700460DB9 /* DDList.h in Headers */ = {isa = PBXBuildFile; fileRef = 846EBE76157E99F700460DB9 /* DDList.h */; };
 		846EBE83157E99F700460DB9 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = 846EBE77157E99F700460DB9 /* DDList.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -227,6 +229,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		841B90D3159DF4CA008E4504 /* XMPPOutOfBand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPOutOfBand.h; sourceTree = "<group>"; };
+		841B90D4159DF4CA008E4504 /* XMPPOutOfBand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPOutOfBand.m; sourceTree = "<group>"; };
 		846EBE65157E99C500460DB9 /* libXMPPFramework.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libXMPPFramework.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		846EBE68157E99C500460DB9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		846EBE6C157E99C500460DB9 /* XMPPFramework-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPFramework-Prefix.pch"; sourceTree = "<group>"; };
@@ -474,6 +478,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		841B90D1159DF49F008E4504 /* XEP-0066 */ = {
+			isa = PBXGroup;
+			children = (
+				841B90D3159DF4CA008E4504 /* XMPPOutOfBand.h */,
+				841B90D4159DF4CA008E4504 /* XMPPOutOfBand.m */,
+			);
+			name = "XEP-0066";
+			sourceTree = "<group>";
+		};
 		846EBE5A157E99C500460DB9 = {
 			isa = PBXGroup;
 			children = (
@@ -553,6 +566,7 @@
 		846EBE8E157E9A1300460DB9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				841B90D1159DF49F008E4504 /* XEP-0066 */,
 				84F5DE3A15958B42009F88AB /* XEP-0003 */,
 				846EC133157EB69A00460DB9 /* XEP-0092 */,
 				846EBE8F157E9A1300460DB9 /* BandwidthMonitor */,
@@ -1228,6 +1242,7 @@
 				846EC0C7157E9A7000460DB9 /* stringprep.h in Headers */,
 				846EC131157EB69200460DB9 /* XMPPVersion.h in Headers */,
 				84F5DE3E15958B6A009F88AB /* XMPPPass.h in Headers */,
+				841B90D5159DF4CA008E4504 /* XMPPOutOfBand.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1379,6 +1394,7 @@
 				846EC0C3157E9A7000460DB9 /* DDXMLNode.m in Sources */,
 				846EC132157EB69200460DB9 /* XMPPVersion.m in Sources */,
 				84F5DE3F15958B6A009F88AB /* XMPPPass.m in Sources */,
+				841B90D6159DF4CA008E4504 /* XMPPOutOfBand.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

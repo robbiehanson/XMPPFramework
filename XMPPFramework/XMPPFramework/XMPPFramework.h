@@ -27,6 +27,7 @@
 // List the modules you're using here.
 // 
 
+#import "XmppOutOfBand.h"
 #import "XMPPReconnect.h"
 #import "XMPPMUC.h"
 #import "XMPPRoomCoreDataStorage.h"
