@@ -13,6 +13,7 @@
 @class XMPPJID;
 @class XMPPStream;
 @class XMPPIQ;
+@class XMPPMessage;
 
 @interface XMPPOutOfBand : XMPPModule
 
@@ -23,7 +24,7 @@
 
 @protocol XMPPOutOfBandDelegate
 @optional
-
+- (void)xmppOutOfBand:(XMPPOutOfBand *)sender didReceiveMessageWithURL:(XMPPMessage *)message;
 - (void)xmppOutOfBand:(XMPPOutOfBand *)sender didReceiveURL:(XMPPIQ *)iq;
 - (void)xmppOutOfBand:(XMPPOutOfBand *)sender didResultInError:(XMPPIQ *)iq;
 - (void)xmppOutOfBand:(XMPPOutOfBand *)sender didResultInSuccess:(XMPPIQ *)iq;

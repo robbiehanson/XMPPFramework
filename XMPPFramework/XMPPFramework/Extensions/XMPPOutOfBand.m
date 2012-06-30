@@ -55,6 +55,23 @@
 }
 
 
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
+{
+    NSXMLElement *xtag =[message elementForName:@"x" xmlns:@"jabber:x:oob"];
+
+    if (xtag)
+    {
+        NSXMLElement *url = [xtag elementForName:@"url"];
+        
+        if (url)
+        {
+            [multicastDelegate xmppOutOfBand:self didReceiveMessageWithURL:message];
+            return YES;
+        }                     
+    }
+    return NO;
+}
+
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
     NSString *type = [[iq attributeForName:@"type"] stringValue];
