@@ -36,7 +36,7 @@
 
 #import "XMPPCapabilities.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
-
+#import "XMPPLastActivity.h"
 #import "XMPPRoster.h"
 #import "XMPPvCardTempModule.h"
 
