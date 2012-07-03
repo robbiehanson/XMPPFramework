@@ -101,6 +101,15 @@
         {
             [multicastDelegate xmppOutOfBand:self didResultInError:iq];
         }
+        
+        NSXMLElement *serviceUnavailable = [[iq elementForName:@"error"] elementForName:@"service-unavailable" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
+        if (serviceUnavailable) {
+            
+            NSURL *iqURL = [NSURL URLWithString:[[obb elementForName:@"url"] stringValue]];
+            [multicastDelegate xmppOutOfBand:self didReceiveServiceUnavailable:iqURL];
+            
+        }
+        
     }
     else if ([type isEqualToString:@"set"]) {
 
