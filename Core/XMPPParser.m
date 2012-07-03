@@ -572,7 +572,8 @@ static void	xmpp_xmlStartElement(void *ctx, const xmlChar  *nodeName,
 		
 		if (newNode->nsDef == NULL)
 		{
-			newNode->nsDef = lastAddedNs = newNs;
+			newNode->nsDef = newNs;
+			lastAddedNs = newNs;
 		}
 		else
 		{
@@ -608,12 +609,11 @@ static void	xmpp_xmlStartElement(void *ctx, const xmlChar  *nodeName,
 			
 			if (newNode->nsDef == NULL)
 			{
-				newNode->nsDef = lastAddedNs = newNs;
+				newNode->nsDef = newNs;
 			}
 			else
 			{
 				lastAddedNs->next = newNs;
-				lastAddedNs = newNs;
 			}
 			
 			newNode->ns = newNs;

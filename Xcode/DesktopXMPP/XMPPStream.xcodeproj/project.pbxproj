@@ -1288,6 +1288,7 @@
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-Wno-arc-performSelector-leaks";
 				SDKROOT = macosx;
@@ -1306,6 +1307,7 @@
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = "";
 				OTHER_CFLAGS = "-Wno-arc-performSelector-leaks";
 				SDKROOT = macosx;
 			};
