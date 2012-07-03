@@ -183,14 +183,13 @@
 	kCFCalendarUnitMinute | 
 	kCFCalendarUnitSecond;
     NSDateComponents *dateComponents = [[NSCalendar currentCalendar] components:calendarComponents fromDate:date];
-    NSString *dateString = [NSString stringWithFormat: @"%.4d%.2d%.2dT%.2d:%.2d:%.2d", 
-							[dateComponents year], 
-							[dateComponents month], 
-							[dateComponents day], 
-							[dateComponents hour], 
-							[dateComponents minute], 
-							[dateComponents second], 
-							nil];
+    NSString *dateString = [NSString stringWithFormat: @"%.4ld%.2ld%.2ldT%.2ld:%.2ld:%.2ld", 
+							(long)[dateComponents year],
+							(long)[dateComponents month],
+							(long)[dateComponents day],
+							(long)[dateComponents hour],
+							(long)[dateComponents minute],
+							(long)[dateComponents second], nil];
     
     return [self valueElementFromElementWithName:@"dateTime.iso8601" value: dateString];
 }

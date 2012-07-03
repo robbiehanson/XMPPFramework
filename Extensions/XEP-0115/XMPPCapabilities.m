@@ -434,7 +434,21 @@ static NSInteger sortForms(NSXMLElement *form1, NSXMLElement *form2, void *conte
 	
 	// The formTypeValue variable is guaranteed to be properly encoded.
 	
-	return [formTypeValue1 compare:formTypeValue2 options:NSLiteralSearch];
+	if (formTypeValue1)
+	{
+		if (formTypeValue2)
+			return [formTypeValue1 compare:formTypeValue2 options:NSLiteralSearch];
+		else
+			return NSOrderedAscending;
+	}
+	else if (formTypeValue2)
+	{
+		return NSOrderedDescending;
+	}
+	else
+	{
+		return NSOrderedSame;
+	}
 }
 
 static NSInteger sortFormFields(NSXMLElement *field1, NSXMLElement *field2, void *context)
