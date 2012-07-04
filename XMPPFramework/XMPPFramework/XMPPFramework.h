@@ -33,6 +33,9 @@
 #import "XMPPRoomCoreDataStorage.h"
 #import "XMPPRosterCoreDataStorage.h"
 #import "XMPPVersion.h"
+#import "XMPPMessage+XEP_0085.h" //chat states
+#import "XMPPMessage+XEP_0184.h" //receipts
+#import "XMPPMessage+XEP0045.h"  //Muc
 
 #import "XMPPCapabilities.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
