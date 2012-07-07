@@ -36,7 +36,7 @@
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE; // | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -1520,7 +1520,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	return YES;
 }
 
-- (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence
+- (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence
 {
 	// This method is invoked on the moduleQueue.
 	
@@ -1546,6 +1546,8 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			[presence addChild:c];
 		}
 	}
+	
+	return presence;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -42,7 +42,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		xmppRosterStorage = [[XMPPRosterMemoryStorage alloc] init];
 		xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
 		
-	//	xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] init];
+	//	xmppCapabilitiesStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
 	//	xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
 		
 	//	xmppCapabilities.autoFetchHashedCapabilities = YES;

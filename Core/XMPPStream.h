@@ -842,10 +842,16 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * These methods are called before their respective XML elements are sent over the stream.
  * These methods can be used to customize elements on the fly.
  * (E.g. add standard information for custom protocols.)
+ * 
+ * You may also filter outgoing elements by returning nil.
+ * 
+ * When implementing these methods to modify the element, you do not need to copy the given element.
+ * You can simply edit the given element, and return it.
+ * The reason these methods return an element, instead of void, is to allow filtering.
 **/
-- (void)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
-- (void)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
-- (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence;
+- (XMPPIQ *)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
+- (XMPPMessage *)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
+- (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence;
 
 /**
  * These methods are called after their respective XML elements are sent over the stream.
