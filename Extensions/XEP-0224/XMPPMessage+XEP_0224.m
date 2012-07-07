@@ -6,8 +6,6 @@
     return [[[self attributeForName:@"type"] stringValue] isEqualToString:@"headline"];
 }
 
-
-
 - (BOOL)isAttentionMessage
 {
 	return  [self isHeadLineMessage] && [self elementForName:@"attention" xmlns:XMLNS_ATTENTION];
@@ -21,7 +19,5 @@
 	}
 	return NO;
 }
-
-
 
 @end
