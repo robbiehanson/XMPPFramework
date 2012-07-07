@@ -6,6 +6,7 @@
 #import "NSData+XMPP.h"
 #import "DDList.h"
 
+#import <objc/runtime.h>
 #import <libkern/OSAtomic.h>
 
 #if TARGET_OS_IPHONE
@@ -1758,7 +1759,6 @@ enum XMPPStreamConfig
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
-	
 	// We're getting ready to send an IQ.
 	// We need to notify delegates of this action to allow them to optionally alter the IQ element.
 	
@@ -1781,27 +1781,46 @@ enum XMPPStreamConfig
 		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 		dispatch_async(concurrentQueue, ^{ @autoreleasepool {
 			
-			// Allow delegates to modify outgoing element
+			// Allow delegates to modify and/or filter outgoing element
+			
+			__block XMPPIQ *modifiedIQ = iq;
 			
 			id del;
 			dispatch_queue_t dq;
 			
-			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			while (modifiedIQ && [delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 			{
+				#if DEBUG
+				{
+					char methodReturnType[32];
+				
+					Method method = class_getInstanceMethod([del class], selector);
+					method_getReturnType(method, methodReturnType, sizeof(methodReturnType));
+				
+					if (strcmp(methodReturnType, @encode(XMPPIQ*)) != 0)
+					{
+						NSAssert(NO, @"Method xmppStream:willSendIQ: is no longer void (see XMPPStream.h). "
+						             @"Culprit = %@", NSStringFromClass([del class]));
+					}
+				}
+				#endif
+				
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-					[del xmppStream:self willSendIQ:iq];
+					modifiedIQ = [del xmppStream:self willSendIQ:modifiedIQ];
 					
 				}});
 			}
 			
-			dispatch_async(xmppQueue, ^{ @autoreleasepool {
-				
-				if (state == STATE_XMPP_CONNECTED) {
-					[self continueSendIQ:iq withTag:tag];
-				}
-			}});
-			
+			if (modifiedIQ)
+			{
+				dispatch_async(xmppQueue, ^{ @autoreleasepool {
+					
+					if (state == STATE_XMPP_CONNECTED) {
+						[self continueSendIQ:modifiedIQ withTag:tag];
+					}
+				}});
+			}
 		}});
 	}
 }
@@ -1810,7 +1829,6 @@ enum XMPPStreamConfig
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
-	
 	
 	// We're getting ready to send a message.
 	// We need to notify delegates of this action to allow them to optionally alter the message element.
@@ -1836,25 +1854,44 @@ enum XMPPStreamConfig
 			
 			// Allow delegates to modify outgoing element
 			
+			__block XMPPMessage *modifiedMessage = message;
+			
 			id del;
 			dispatch_queue_t dq;
 			
-			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			while (modifiedMessage && [delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 			{
+				#if DEBUG
+				{
+					char methodReturnType[32];
+				
+					Method method = class_getInstanceMethod([del class], selector);
+					method_getReturnType(method, methodReturnType, sizeof(methodReturnType));
+				
+					if (strcmp(methodReturnType, @encode(XMPPMessage*)) != 0)
+					{
+						NSAssert(NO, @"Method xmppStream:willSendMessage: is no longer void (see XMPPStream.h). "
+						             @"Culprit = %@", NSStringFromClass([del class]));
+					}
+				}
+				#endif
+				
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-					[del xmppStream:self willSendMessage:message];
+					modifiedMessage = [del xmppStream:self willSendMessage:modifiedMessage];
 					
 				}});
 			}
 			
-			dispatch_async(xmppQueue, ^{ @autoreleasepool {
-				
-				if (state == STATE_XMPP_CONNECTED) {
-					[self continueSendMessage:message withTag:tag];
-				}
-			}});
-			
+			if (modifiedMessage)
+			{
+				dispatch_async(xmppQueue, ^{ @autoreleasepool {
+					
+					if (state == STATE_XMPP_CONNECTED) {
+						[self continueSendMessage:modifiedMessage withTag:tag];
+					}
+				}});
+			}
 		}});
 	}
 }
@@ -1863,7 +1900,6 @@ enum XMPPStreamConfig
 {
 	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
-	
 	
 	// We're getting ready to send a presence element.
 	// We need to notify delegates of this action to allow them to optionally alter the presence element.
@@ -1889,25 +1925,44 @@ enum XMPPStreamConfig
 			
 			// Allow delegates to modify outgoing element
 			
+			__block XMPPPresence *modifiedPresence = presence;
+			
 			id del;
 			dispatch_queue_t dq;
 			
-			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			while (modifiedPresence && [delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
 			{
+				#if DEBUG
+				{
+					char methodReturnType[32];
+				
+					Method method = class_getInstanceMethod([del class], selector);
+					method_getReturnType(method, methodReturnType, sizeof(methodReturnType));
+				
+					if (strcmp(methodReturnType, @encode(XMPPPresence*)) != 0)
+					{
+						NSAssert(NO, @"Method xmppStream:willSendPresence: is no longer void (see XMPPStream.h). "
+						             @"Culprit = %@", NSStringFromClass([del class]));
+					}
+				}
+				#endif
+				
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-					[del xmppStream:self willSendPresence:presence];
+					modifiedPresence = [del xmppStream:self willSendPresence:modifiedPresence];
 					
 				}});
 			}
 			
-			dispatch_async(xmppQueue, ^{ @autoreleasepool {
-				
-				if (state == STATE_XMPP_CONNECTED) {
-					[self continueSendPresence:presence withTag:tag];
-				}
-			}});
-			
+			if (modifiedPresence)
+			{
+				dispatch_async(xmppQueue, ^{ @autoreleasepool {
+					
+					if (state == STATE_XMPP_CONNECTED) {
+						[self continueSendPresence:presence withTag:tag];
+					}
+				}});
+			}
 		}});
 	}
 }
@@ -2047,6 +2102,8 @@ enum XMPPStreamConfig
 **/
 - (void)sendElement:(NSXMLElement *)element
 {
+	if (element == nil) return;
+	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		if (state == STATE_XMPP_CONNECTED)
@@ -2070,6 +2127,8 @@ enum XMPPStreamConfig
 **/
 - (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt **)receiptPtr
 {
+	if (element == nil) return;
+	
 	if (receiptPtr == nil)
 	{
 		[self sendElement:element];

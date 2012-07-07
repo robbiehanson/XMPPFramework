@@ -1250,7 +1250,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1273,7 +1273,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
