@@ -28,5 +28,5 @@
 - (void)xmppOutOfBand:(XMPPOutOfBand *)sender didReceiveURL:(XMPPIQ *)iq;
 - (void)xmppOutOfBand:(XMPPOutOfBand *)sender didResultInError:(XMPPIQ *)iq;
 - (void)xmppOutOfBand:(XMPPOutOfBand *)sender didResultInSuccess:(XMPPIQ *)iq;
-- (void)xmppOutOfBand:(XMPPOutOfBand *)sender didReceiveServiceUnavailable:(NSURL *)iqURL;
+- (void)xmppOutOfBand:(XMPPOutOfBand *)sender didReceiveServiceUnavailable:(XMPPIQ *)iq;
 @end

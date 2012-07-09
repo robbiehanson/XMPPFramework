@@ -13,16 +13,22 @@
 #import "DDXML.h"
 #endif
 
-@class XMPPStream;
 @class XMPPJID;
+@class XMPPStream;
 @class XMPPIQ;
+@class XMPPMessage;
 
 
 @interface XMPPPass : XMPPModule
-/*
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue;
+{
+    NSArray *proxyServer; 
+    NSInteger modulestate;
+}
++ (NSArray *)proxyServer;
++ (void)setProxyServer:(NSArray *)candidates;
+
 - (void)registrationRequest:(NSString*)serviceName;
-- (void)requestToEntity:(XMPPJID*)entityJID;*/
+- (void)requestToEntity:(XMPPJID*)entityJID;
 @end
 
 @protocol XMPPPassDelegate

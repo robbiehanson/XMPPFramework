@@ -9,6 +9,9 @@
 #import "XMPPLastActivity.h"
 #import "XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 #define INTEGRATE_WITH_CAPABILITIES 1
 
 #if INTEGRATE_WITH_CAPABILITIES

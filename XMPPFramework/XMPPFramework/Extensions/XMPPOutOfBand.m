@@ -9,6 +9,9 @@
 #import "XMPPOutOfBand.h"
 #import "XMPP.h"
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
 #define INTEGRATE_WITH_CAPABILITIES 1
 
 #if INTEGRATE_WITH_CAPABILITIES
@@ -92,22 +95,18 @@
         {
             XMPPIQ *iqresult = [XMPPIQ iqWithType:@"result" to:[iq from] elementID:[iq elementID]];
             [sender sendElement:iqresult];  
+
         }
-        
+       return YES;
     } 
     else if ([type isEqualToString:@"error"]) {
-        NSXMLElement *obb = [iq elementForName:@"query" xmlns:@"jabber:iq:oob"];
-        if (obb)
-        {
-            [multicastDelegate xmppOutOfBand:self didResultInError:iq];
-        }
         
         NSXMLElement *serviceUnavailable = [[iq elementForName:@"error"] elementForName:@"service-unavailable" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
         if (serviceUnavailable) {
             
-            NSURL *iqURL = [NSURL URLWithString:[[obb elementForName:@"url"] stringValue]];
-            [multicastDelegate xmppOutOfBand:self didReceiveServiceUnavailable:iqURL];
-            
+            [multicastDelegate xmppOutOfBand:self didReceiveServiceUnavailable:iq];
+        } else {
+            [multicastDelegate xmppOutOfBand:self didResultInError:iq];
         }
         
     }
@@ -139,20 +138,21 @@
                 [error addAttributeWithName:@"type" stringValue:@"cancel"];
                 [error addAttributeWithName:@"code" stringValue:@"404"];
                 
-                NSXMLElement *item = [NSXMLElement elementWithName:@"item-notfound" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"]; 
+                NSXMLElement *item = [NSXMLElement elementWithName:@"item-not-found" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"]; 
                 [error addChild:item];
                 
                 [iqresult addChild:error];
                 [sender sendElement:iqresult];
-                return YES;
                 
             } else {
                 XMPPIQ *iqresult = [XMPPIQ iqWithType:@"result" to:[iq from] elementID:[iq elementID]];
                 [sender sendElement:iqresult];  
                 [multicastDelegate xmppOutOfBand:self didReceiveURL:iq];
-                return YES;
+                
             }
         }
+        
+       return YES;   
     }
     return NO;
 }

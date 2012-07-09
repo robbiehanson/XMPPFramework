@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		841B90D5159DF4CA008E4504 /* XMPPOutOfBand.h in Headers */ = {isa = PBXBuildFile; fileRef = 841B90D3159DF4CA008E4504 /* XMPPOutOfBand.h */; };
-		841B90D6159DF4CA008E4504 /* XMPPOutOfBand.m in Sources */ = {isa = PBXBuildFile; fileRef = 841B90D4159DF4CA008E4504 /* XMPPOutOfBand.m */; };
+		841B90D6159DF4CA008E4504 /* XMPPOutOfBand.m in Sources */ = {isa = PBXBuildFile; fileRef = 841B90D4159DF4CA008E4504 /* XMPPOutOfBand.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		8437384515A009180084260A /* XMPPLastActivity.h in Headers */ = {isa = PBXBuildFile; fileRef = 8437384315A009180084260A /* XMPPLastActivity.h */; };
-		8437384615A009180084260A /* XMPPLastActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 8437384415A009180084260A /* XMPPLastActivity.m */; };
+		8437384615A009180084260A /* XMPPLastActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 8437384415A009180084260A /* XMPPLastActivity.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		846EBE69157E99C500460DB9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846EBE68157E99C500460DB9 /* Foundation.framework */; };
 		846EBE82157E99F700460DB9 /* DDList.h in Headers */ = {isa = PBXBuildFile; fileRef = 846EBE76157E99F700460DB9 /* DDList.h */; };
 		846EBE83157E99F700460DB9 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = 846EBE77157E99F700460DB9 /* DDList.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -227,7 +227,7 @@
 		846EC131157EB69200460DB9 /* XMPPVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 846EC12F157EB69200460DB9 /* XMPPVersion.h */; };
 		846EC132157EB69200460DB9 /* XMPPVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 846EC130157EB69200460DB9 /* XMPPVersion.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		84F5DE3E15958B6A009F88AB /* XMPPPass.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F5DE3C15958B6A009F88AB /* XMPPPass.h */; };
-		84F5DE3F15958B6A009F88AB /* XMPPPass.m in Sources */ = {isa = PBXBuildFile; fileRef = 84F5DE3D15958B6A009F88AB /* XMPPPass.m */; };
+		84F5DE3F15958B6A009F88AB /* XMPPPass.m in Sources */ = {isa = PBXBuildFile; fileRef = 84F5DE3D15958B6A009F88AB /* XMPPPass.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
