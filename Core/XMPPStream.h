@@ -39,57 +39,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 
 @interface XMPPStream : NSObject <GCDAsyncSocketDelegate>
-{
-	dispatch_queue_t xmppQueue;
-	dispatch_queue_t parserQueue;
-	
-	GCDMulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
-	
-	int state;
-	
-	GCDAsyncSocket *asyncSocket;
-	NSMutableData *socketBuffer;
-	
-	UInt64 numberOfBytesSent;
-	UInt64 numberOfBytesReceived;
-	
-	XMPPParser *parser;
-	NSError *parserError;
-	
-	Byte flags;
-	Byte config;
-	
-	NSString *hostName;
-	UInt16 hostPort;
-	
-	id <XMPPSASLAuthentication> auth;
-	
-	XMPPJID *myJID_setByClient;
-	XMPPJID *myJID_setByServer;
-	XMPPJID *remoteJID;
-	
-	XMPPPresence *myPresence;
-	NSXMLElement *rootElement;
-	
-	NSTimeInterval keepAliveInterval;
-	dispatch_source_t keepAliveTimer;
-	NSTimeInterval lastSendReceiveTime;
-	NSData *keepAliveData;
-	
-	NSMutableArray *registeredModules;
-	NSMutableDictionary *autoDelegateDict;
-	
-	XMPPSRVResolver *srvResolver;
-	NSArray *srvResults;
-	NSUInteger srvResultsIndex;
-	
-	NSMutableArray *receipts;
-	
-	NSThread *xmppUtilityThread;
-	NSRunLoop *xmppUtilityRunLoop;
-	
-	id userTag;
-}
 
 /**
  * Standard XMPP initialization.

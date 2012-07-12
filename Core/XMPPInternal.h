@@ -48,8 +48,9 @@ typedef enum XMPPStreamState XMPPStreamState;
 **/
 extern NSString *const XMPPStreamDidChangeMyJIDNotification;
 
-@interface XMPPStream (Internal)
+@interface XMPPStream (/* Internal */)
 
+@property (readonly) dispatch_queue_t xmppQueue;
 @property (readonly) XMPPStreamState state;
 
 /**
