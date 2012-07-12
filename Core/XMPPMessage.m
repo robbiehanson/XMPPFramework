@@ -86,7 +86,7 @@
 
 - (BOOL)isChatMessageWithBody
 {
-	if([self isChatMessage])
+	if ([self isChatMessage])
 	{
 		return [self isMessageWithBody];
 	}

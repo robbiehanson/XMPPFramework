@@ -4,7 +4,6 @@
 #import "XMPPInternal.h"
 #import "XMPPSRVResolver.h"
 #import "NSData+XMPP.h"
-#import "DDList.h"
 
 #import <objc/runtime.h>
 #import <libkern/OSAtomic.h>
@@ -90,9 +89,63 @@ enum XMPPStreamConfig
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface XMPPStream (PrivateAPI)
+@interface XMPPStream ()
+{
+	dispatch_queue_t xmppQueue;
+	dispatch_queue_t parserQueue;
+	
+	dispatch_queue_t willSendIqQueue;
+	dispatch_queue_t willSendMessageQueue;
+	dispatch_queue_t willSendPresenceQueue;
+	
+	GCDMulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
+	
+	int state;
+	
+	GCDAsyncSocket *asyncSocket;
+	NSMutableData *socketBuffer;
+	
+	UInt64 numberOfBytesSent;
+	UInt64 numberOfBytesReceived;
+	
+	XMPPParser *parser;
+	NSError *parserError;
+	
+	Byte flags;
+	Byte config;
+	
+	NSString *hostName;
+	UInt16 hostPort;
+	
+	id <XMPPSASLAuthentication> auth;
+	
+	XMPPJID *myJID_setByClient;
+	XMPPJID *myJID_setByServer;
+	XMPPJID *remoteJID;
+	
+	XMPPPresence *myPresence;
+	NSXMLElement *rootElement;
+	
+	NSTimeInterval keepAliveInterval;
+	dispatch_source_t keepAliveTimer;
+	NSTimeInterval lastSendReceiveTime;
+	NSData *keepAliveData;
+	
+	NSMutableArray *registeredModules;
+	NSMutableDictionary *autoDelegateDict;
+	
+	XMPPSRVResolver *srvResolver;
+	NSArray *srvResults;
+	NSUInteger srvResultsIndex;
+	
+	NSMutableArray *receipts;
+	
+	NSThread *xmppUtilityThread;
+	NSRunLoop *xmppUtilityRunLoop;
+	
+	id userTag;
+}
 
-- (void)cleanup;
 - (void)setIsSecure:(BOOL)flag;
 - (void)setIsAuthenticated:(BOOL)flag;
 - (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag;
@@ -127,8 +180,12 @@ enum XMPPStreamConfig
 **/
 - (void)commonInit
 {
-	xmppQueue = dispatch_queue_create("xmppStreamQueue", NULL);
-	parserQueue = dispatch_queue_create("xmppParserQueue", NULL);
+	xmppQueue = dispatch_queue_create("xmpp", NULL);
+	parserQueue = dispatch_queue_create("xmpp.parser", NULL);
+	
+	willSendIqQueue = dispatch_queue_create("xmpp.willSendIq", NULL);
+	willSendMessageQueue = dispatch_queue_create("xmpp.willSendMessage", NULL);
+	willSendPresenceQueue = dispatch_queue_create("xmpp.willSendPresence", NULL);
 	
 	multicastDelegate = (GCDMulticastDelegate <XMPPStreamDelegate> *)[[GCDMulticastDelegate alloc] init];
 	
@@ -207,6 +264,9 @@ enum XMPPStreamConfig
 	#if NEEDS_DISPATCH_RETAIN_RELEASE
 	dispatch_release(xmppQueue);
 	dispatch_release(parserQueue);
+	dispatch_release(willSendIqQueue);
+	dispatch_release(willSendMessageQueue);
+	dispatch_release(willSendPresenceQueue);
 	#endif
 	
 	[asyncSocket setDelegate:nil delegateQueue:NULL];
@@ -233,6 +293,8 @@ enum XMPPStreamConfig
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@synthesize xmppQueue;
 
 - (XMPPStreamState)state
 {
@@ -1778,8 +1840,7 @@ enum XMPPStreamConfig
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
-		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-		dispatch_async(concurrentQueue, ^{ @autoreleasepool {
+		dispatch_async(willSendIqQueue, ^{ @autoreleasepool {
 			
 			// Allow delegates to modify and/or filter outgoing element
 			
@@ -1849,8 +1910,7 @@ enum XMPPStreamConfig
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
-		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-		dispatch_async(concurrentQueue, ^{ @autoreleasepool {
+		dispatch_async(willSendMessageQueue, ^{ @autoreleasepool {
 			
 			// Allow delegates to modify outgoing element
 			
@@ -1920,8 +1980,7 @@ enum XMPPStreamConfig
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
-		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-		dispatch_async(concurrentQueue, ^{ @autoreleasepool {
+		dispatch_async(willSendPresenceQueue, ^{ @autoreleasepool {
 			
 			// Allow delegates to modify outgoing element
 			
