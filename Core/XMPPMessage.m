@@ -112,9 +112,7 @@
 
 - (BOOL)isMessageWithBody
 {
-	NSString *body = [[self elementForName:@"body"] stringValue];
-	
-	return ([body length] > 0);
+	return ([self elementForName:@"body"] != nil);
 }
 
 @end
