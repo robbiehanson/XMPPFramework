@@ -53,4 +53,10 @@ extern NSString *const XMPPStreamDidChangeMyJIDNotification;
 **/
 - (void)sendAuthElement:(NSXMLElement *)element;
 
+/**
+ * This method allows you to inject an element into the stream as if it was received on the socket.
+ * This is an advanced technique, but makes for some interesting possibilities.
+**/
+- (void)injectElement:(NSXMLElement *)element;
+
 @end
