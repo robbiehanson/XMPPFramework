@@ -766,6 +766,31 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (NSString *)xmppStream:(XMPPStream *)sender alternativeResourceForConflictingResource:(NSString *)conflictingResource;
 
 /**
+ * These methods are called before their respective XML elements are broadcast as received to the rest of the stack.
+ * These methods can be used to modify elements on the fly.
+ * (E.g. perform custom decryption so the rest of the stack sees readable text.)
+ * 
+ * You may also filter incoming elements by returning nil.
+ * 
+ * When implementing these methods to modify the element, you do not need to copy the given element.
+ * You can simply edit the given element, and return it.
+ * The reason these methods return an element, instead of void, is to allow filtering.
+ * 
+ * Concerning thread-safety, delegates implementing the method are invoked one-at-a-time to
+ * allow thread-safe modification of the given elements.
+ *
+ * You should NOT implement these methods unless you have good reason to do so.
+ * For general processing and notification of received elements, please use xmppStream:didReceiveX: methods.
+ * 
+ * @see xmppStream:didReceiveIQ:
+ * @see xmppStream:didReceiveMessage:
+ * @see xmppStream:didReceivePresence:
+**/
+- (XMPPIQ *)xmppStream:(XMPPStream *)sender willReceiveIQ:(XMPPIQ *)iq;
+- (XMPPMessage *)xmppStream:(XMPPStream *)sender willReceiveMessage:(XMPPMessage *)message;
+- (XMPPPresence *)xmppStream:(XMPPStream *)sender willReceivePresence:(XMPPPresence *)presence;
+
+/**
  * These methods are called after their respective XML elements are received on the stream.
  * 
  * In the case of an IQ, the delegate method should return YES if it has or will respond to the given IQ.
