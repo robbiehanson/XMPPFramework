@@ -692,7 +692,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	SEL selector = @selector(xmppCapabilities:collectingMyCapabilities:);
 	
-	if ([multicastDelegate countForSelector:selector] == 0)
+	if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
