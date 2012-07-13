@@ -232,6 +232,25 @@
 	return count;
 }
 
+- (BOOL)hasDelegateThatRespondsToSelector:(SEL)aSelector
+{
+	for (GCDMulticastDelegateNode *node in delegateNodes)
+	{
+		id nodeDelegate = node.delegate;
+		#if __has_feature(objc_arc_weak) && !TARGET_OS_IPHONE
+		if (nodeDelegate == [NSNull null])
+			nodeDelegate = node.unsafeDelegate;
+		#endif
+		
+		if ([nodeDelegate respondsToSelector:aSelector])
+		{
+			return YES;
+		}
+	}
+	
+	return NO;
+}
+
 - (GCDMulticastDelegateEnumerator *)delegateEnumerator
 {
 	return [[GCDMulticastDelegateEnumerator alloc] initFromDelegateNodes:delegateNodes];

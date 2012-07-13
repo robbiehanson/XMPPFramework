@@ -1837,7 +1837,7 @@ enum XMPPStreamConfig
 	
 	SEL selector = @selector(xmppStream:willSendIQ:);
 	
-	if ([multicastDelegate countForSelector:selector] == 0)
+	if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
@@ -1907,7 +1907,7 @@ enum XMPPStreamConfig
 	
 	SEL selector = @selector(xmppStream:willSendMessage:);
 	
-	if ([multicastDelegate countForSelector:selector] == 0)
+	if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
@@ -1977,7 +1977,7 @@ enum XMPPStreamConfig
 	
 	SEL selector = @selector(xmppStream:willSendPresence:);
 	
-	if ([multicastDelegate countForSelector:selector] == 0)
+	if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
@@ -2814,7 +2814,7 @@ enum XMPPStreamConfig
 		{
 			SEL selector = @selector(xmppStream:alternativeResourceForConflictingResource:);
 			
-			if ([multicastDelegate countForSelector:selector] == 0)
+			if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
 			{
 				// None of the delegates implement the method.
 				// Use a shortcut.
