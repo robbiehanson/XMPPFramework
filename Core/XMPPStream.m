@@ -63,6 +63,17 @@
 **/
 #define return_from_block  return
 
+// Define the timeouts (in seconds) for retreiving various parts of the XML stream
+#define TIMEOUT_XMPP_WRITE         -1
+#define TIMEOUT_XMPP_READ_START    10
+#define TIMEOUT_XMPP_READ_STREAM   -1
+
+// Define the tags we'll use to differentiate what it is we're currently reading or writing
+#define TAG_XMPP_READ_START         100
+#define TAG_XMPP_READ_STREAM        101
+#define TAG_XMPP_WRITE_START        200
+#define TAG_XMPP_WRITE_STREAM       201
+#define TAG_XMPP_WRITE_RECEIPT      202
 
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
 NSString *const XMPPStreamDidChangeMyJIDNotification = @"XMPPStreamDidChangeMyJID";
@@ -1822,7 +1833,7 @@ enum XMPPStreamConfig
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to send an IQ.
-	// We need to notify delegates of this action to allow them to optionally alter the IQ element.
+	// Notify delegates to allow them to optionally alter/filter the outgoing IQ.
 	
 	SEL selector = @selector(xmppStream:willSendIQ:);
 	
@@ -1836,7 +1847,7 @@ enum XMPPStreamConfig
 	else
 	{
 		// Notify all interested delegates.
-		// This must be done serially to allow them to alter the element.
+		// This must be done serially to allow them to alter the element in a thread-safe manner.
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
@@ -1892,7 +1903,7 @@ enum XMPPStreamConfig
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to send a message.
-	// We need to notify delegates of this action to allow them to optionally alter the message element.
+	// Notify delegates to allow them to optionally alter/filter the outgoing message.
 	
 	SEL selector = @selector(xmppStream:willSendMessage:);
 	
@@ -1906,7 +1917,7 @@ enum XMPPStreamConfig
 	else
 	{
 		// Notify all interested delegates.
-		// This must be done serially to allow them to alter the element.
+		// This must be done serially to allow them to alter the element in a thread-safe manner.
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
@@ -1962,7 +1973,7 @@ enum XMPPStreamConfig
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to send a presence element.
-	// We need to notify delegates of this action to allow them to optionally alter the presence element.
+	// Notify delegates to allow them to optionally alter/filter the outgoing presence.
 	
 	SEL selector = @selector(xmppStream:willSendPresence:);
 	
@@ -2200,7 +2211,7 @@ enum XMPPStreamConfig
 			
 			if (state == STATE_XMPP_CONNECTED)
 			{
-				receipt = [[XMPPElementReceipt alloc] init]; // autoreleased below
+				receipt = [[XMPPElementReceipt alloc] init];
 				[receipts addObject:receipt];
 				
 				[self sendElement:element withTag:TAG_XMPP_WRITE_RECEIPT];
@@ -2237,7 +2248,9 @@ enum XMPPStreamConfig
 }
 
 /**
- * 
+ * This method is for use by xmpp authentication mechanism classes.
+ * They should send elements using this method instead of the public sendElement classes,
+ * as those methods don't send the elements while authentication is in progress.
 **/
 - (void)sendAuthElement:(NSXMLElement *)element
 {
