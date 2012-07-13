@@ -335,7 +335,7 @@ static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 	{
 		NSXMLElement *nsRoot = xmpp_nsxmlFromLibxml(root);
 		
-		__strong id delegate = parser->delegate;
+		__strong id theDelegate = parser->delegate;
 		
 		dispatch_async(parser->delegateQueue, ^{ @autoreleasepool {
 			
