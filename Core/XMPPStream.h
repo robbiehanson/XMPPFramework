@@ -771,6 +771,11 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * In the case of an IQ, the delegate method should return YES if it has or will respond to the given IQ.
  * If the IQ is of type 'get' or 'set', and no delegates respond to the IQ,
  * then xmpp stream will automatically send an error response.
+ * 
+ * Concerning thread-safety, delegates shouldn't modify the given elements.
+ * As documented in NSXML / KissXML, elements are read-access thread-safe, but write-access thread-unsafe.
+ * If you have need to modify an element for any reason,
+ * you should copy the element first, and then modify and use the copy.
 **/
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq;
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message;
@@ -789,7 +794,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * These methods are called before their respective XML elements are sent over the stream.
- * These methods can be used to customize elements on the fly.
+ * These methods can be used to modify outgoing elements on the fly.
  * (E.g. add standard information for custom protocols.)
  * 
  * You may also filter outgoing elements by returning nil.
@@ -797,6 +802,16 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * When implementing these methods to modify the element, you do not need to copy the given element.
  * You can simply edit the given element, and return it.
  * The reason these methods return an element, instead of void, is to allow filtering.
+ * 
+ * Concerning thread-safety, delegates implementing the method are invoked one-at-a-time to
+ * allow thread-safe modification of the given elements.
+ * 
+ * You should NOT implement these methods unless you have good reason to do so.
+ * For general processing and notification of sent elements, please use xmppStream:didSendX: methods.
+ * 
+ * @see xmppStream:didSendIQ:
+ * @see xmppStream:didSendMessage:
+ * @see xmppStream:didSendPresence:
 **/
 - (XMPPIQ *)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
 - (XMPPMessage *)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
