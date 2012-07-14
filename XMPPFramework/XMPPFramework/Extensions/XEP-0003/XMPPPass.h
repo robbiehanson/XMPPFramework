@@ -13,6 +13,20 @@
 #import "DDXML.h"
 #endif
 
+@interface ServerInfo : NSObject
+{
+    NSString *serverPort;
+    NSString *serverName;
+}
+
+- (NSString*)serverPort;
+- (void)setServerPort:(NSString*)port;
+
+- (NSString*)serverName;
+- (void)setServerName:(NSString*)name;
+
+@end
+
 @class XMPPJID;
 @class XMPPStream;
 @class XMPPIQ;
@@ -34,8 +48,8 @@
 @protocol XMPPPassDelegate
 @optional
 
-- (void)xmppPass:(XMPPPass *)sender didReceiveRegistrationSuccess:(XMPPIQ *)iq;
-- (void)xmppPass:(XMPPPass *)sender didReceiveRegistrationFailure:(XMPPIQ *)iq;
+- (void)xmppPass:(XMPPPass *)sender didReceiveRegistrationSuccess:(ServerInfo *)srv;
+- (void)xmppPass:(XMPPPass *)sender didReceiveRegistrationFailure:(NSError *)reqError;
 
 
 - (void)xmppPass:(XMPPPass *)sender didReceivePassRequest:(XMPPIQ *)iq;

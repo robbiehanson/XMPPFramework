@@ -41,7 +41,29 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #define PASS_REQUEST_TO_ENTITY     103
 #define PASS_ACCEPT_CONNECTION     104
 
+@implementation ServerInfo
 
+- (NSString*)serverName
+{
+    return serverName;
+}
+
+- (void)setServerName:(NSString *)name
+{
+    serverName = name;
+}
+
+- (NSString*)serverPort
+{
+    return serverPort;
+}
+
+- (void)setServerPort:(NSString *)port
+{
+    serverPort = port;
+}
+
+@end
 
 @implementation XMPPPass
 
@@ -125,6 +147,15 @@ static NSMutableArray *proxyServer;
 
 - (void)registrationRequest:(NSString*)serviceName
 {
+    modulestate = PASS_REGISTRATION_REQUEST;
+    NSXMLElement *regreq = [NSXMLElement elementWithName:@"query" xmlns:kModuleNameSpace];
+    NSXMLElement *reqexp = [NSXMLElement elementWithName:@"expire" stringValue:@"1200"];
+    [regreq addChild:reqexp];
+    
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:[XMPPJID jidWithString:@"pass.baseva.com"] elementID:[xmppStream generateUUID]];
+    [iq addChild:reqexp];
+    
+    [xmppStream sendElement:iq];
     
 }
 
@@ -141,26 +172,58 @@ static NSMutableArray *proxyServer;
     
     if ([type isEqualToString:@"result"])
     {
-        NSXMLElement *lastseen = [iq elementForName:@"query" xmlns:kModuleNameSpace];
-        if (lastseen)
-        {
-            
+        switch (modulestate) {
+            case PASS_REGISTRATION_REQUEST:
+            {
+                NSXMLElement *proxy = [iq elementForName:@"query" xmlns:kModuleNameSpace];
+                if (proxy)
+                {
+                    NSXMLElement *srvInfo = [proxy elementForName:@"server"];
+                    if (srvInfo) {
+                        ServerInfo *srv = [ServerInfo new];
+                        srv.serverPort = [srvInfo attributeStringValueForName:@"port"];
+                        srv.serverName = [srvInfo stringValue];
+                        
+                        [multicastDelegate xmppPass:self didReceiveRegistrationSuccess:srv];
+                        
+                    }
+                }
+            }
+                break;
+                
+            default:
+            {
+                
+            }
+                break;
         }
-        
     }
     else if ([type isEqualToString:@"get"])
     {
-        NSXMLElement *lastseen = [iq elementForName:@"query" xmlns:kModuleNameSpace];
-        if (lastseen)
+        NSXMLElement *proxy = [iq elementForName:@"query" xmlns:kModuleNameSpace];
+        if (proxy)
         {
             return YES;
         }
         
     } 
-    else if ([type isEqualToString:@"error"]) {
-        NSXMLElement *lastseen = [iq elementForName:@"query" xmlns:kModuleNameSpace];
-        if (lastseen)
+    else if ([type isEqualToString:@"set"])
+    {
+        NSXMLElement *proxy = [iq elementForName:@"query" xmlns:kModuleNameSpace];
+        if (proxy)
         {
+            return YES;
+        }
+        
+    }
+
+    else if ([type isEqualToString:@"error"]) {
+        NSXMLElement *proxy = [iq elementForName:@"error"];
+        if (proxy)
+        {
+            NSInteger code = [proxy attributeUnsignedIntegerValueForName:@"code"];
+            NSError *error = [NSError errorWithDomain:@"XEP-0003 Error" code:code userInfo:NULL];
+            [multicastDelegate xmppPass:self didReceiveRegistrationFailure:error];
         }
     }
     
