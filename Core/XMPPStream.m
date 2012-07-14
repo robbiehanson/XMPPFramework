@@ -171,7 +171,6 @@ enum XMPPStreamConfig
 - (void)continueReceiveIQ:(XMPPIQ *)iq;
 - (void)continueReceivePresence:(XMPPPresence *)presence;
 
-
 @end
 
 @interface XMPPElementReceipt (PrivateAPI)
