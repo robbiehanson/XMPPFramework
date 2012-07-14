@@ -167,6 +167,10 @@ enum XMPPStreamConfig
 - (void)setupKeepAliveTimer;
 - (void)keepAlive;
 
+- (void)continueReceiveMessage:(XMPPMessage *)message;
+- (void)continueReceiveIQ:(XMPPIQ *)iq;
+- (void)continueReceivePresence:(XMPPPresence *)presence;
+
 @end
 
 @interface XMPPElementReceipt (PrivateAPI)
