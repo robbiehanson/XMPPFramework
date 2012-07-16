@@ -58,6 +58,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 @interface XMPPPrivacy (/* Must be nameless for properties */)
 
 - (void)addQueryInfo:(XMPPPrivacyQueryInfo *)qi withKey:(NSString *)uuid;
+- (void)queryTimeout:(NSString *)uuid;
 
 @end
 
