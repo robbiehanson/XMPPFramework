@@ -289,6 +289,7 @@
 		DCA614EE1250034B00C75522 /* XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDateTimeProfiles.m; path = "../../Extensions/XEP-0082/XMPPDateTimeProfiles.m"; sourceTree = SOURCE_ROOT; };
 		DCA6151E1250069F00C75522 /* XMPPTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPTime.h; path = "../../Extensions/XEP-0202/XMPPTime.h"; sourceTree = SOURCE_ROOT; };
 		DCA6151F1250069F00C75522 /* XMPPTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPTime.m; path = "../../Extensions/XEP-0202/XMPPTime.m"; sourceTree = SOURCE_ROOT; };
+		DCB9D56915C208F30063935D /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
 		DCC220F31492E37C00736DC1 /* XMPPRoomCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPRoomCoreDataStorage.h; path = CoreDataStorage/XMPPRoomCoreDataStorage.h; sourceTree = "<group>"; };
 		DCC220F41492E37C00736DC1 /* XMPPRoomCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomCoreDataStorage.m; path = CoreDataStorage/XMPPRoomCoreDataStorage.m; sourceTree = "<group>"; };
 		DCC220F81492E58200736DC1 /* XMPPRoom.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPRoom.xcdatamodel; sourceTree = "<group>"; };
@@ -322,7 +323,6 @@
 		DCE0257B1340087A007448E1 /* XMPPvCardTempTel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPvCardTempTel.m; sourceTree = "<group>"; };
 		DCE1125E1406F52D007A2A46 /* XMPPAutoTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPAutoTime.h; path = "../../Extensions/XEP-0202/XMPPAutoTime.h"; sourceTree = "<group>"; };
 		DCE1125F1406F52D007A2A46 /* XMPPAutoTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPAutoTime.m; path = "../../Extensions/XEP-0202/XMPPAutoTime.m"; sourceTree = "<group>"; };
-		DCE11263140834D5007A2A46 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
 		DCF825930D748DC000BFABDE /* RequestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestController.h; sourceTree = "<group>"; };
 		DCF825940D748DC000BFABDE /* RequestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestController.m; sourceTree = "<group>"; };
 		DCF825F30D749A5100BFABDE /* ChatController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatController.h; sourceTree = "<group>"; };
@@ -925,7 +925,7 @@
 		DCCE55760BDC8EC8000E2798 /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
-				DCE11263140834D5007A2A46 /* XMPPFramework.h */,
+				DCB9D56915C208F30063935D /* XMPPFramework.h */,
 				DC30E699153E099A001B9E6D /* Authentication */,
 				DCB9BBF30DDCEE6B002DA335 /* Categories */,
 				DC8BA2F51141B9B40031C1F6 /* Core */,
@@ -1242,7 +1242,6 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = Info.plist;
@@ -1266,7 +1265,6 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = (
@@ -1294,7 +1292,6 @@
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "-Wno-arc-performSelector-leaks";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -1312,7 +1309,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				MACOSX_DEPLOYMENT_TARGET = "";
-				OTHER_CFLAGS = "-Wno-arc-performSelector-leaks";
 				SDKROOT = macosx;
 			};
 			name = Release;
