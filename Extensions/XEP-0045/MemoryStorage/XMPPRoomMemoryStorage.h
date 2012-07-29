@@ -10,7 +10,7 @@
 
 - (id)init;
 
-@property (unsafe_unretained, readonly) XMPPRoom *parent;
+@property (readonly) XMPPRoom *parent;
 
 /**
  * You can optionally extend the XMPPRoomMessageMemoryStorageObject and XMPPRoomOccupantMemoryStorageObject classes.

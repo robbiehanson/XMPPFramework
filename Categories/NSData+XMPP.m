@@ -40,7 +40,7 @@ static char encodingTable[64] = {
     
     for (i = 0; i < [self length]; ++i)
 	{
-        [stringBuffer appendFormat:@"%02x", (unsigned long)dataBuffer[i]];
+        [stringBuffer appendFormat:@"%02x", (unsigned int)dataBuffer[i]];
 	}
     
     return [stringBuffer copy];
@@ -106,11 +106,12 @@ static char encodingTable[64] = {
 	unsigned long ixtext = 0;
 	unsigned long lentext = [self length];
 	unsigned char ch = 0;
-	unsigned char inbuf[4], outbuf[3];
+	unsigned char inbuf[4] = {0, 0, 0, 0};
+	unsigned char outbuf[3] = {0, 0, 0};
 	short i = 0, ixinbuf = 0;
 	BOOL flignore = NO;
 	BOOL flendtext = NO;
-		
+	
 	while( YES )
 	{
 		if( ixtext >= lentext ) break;

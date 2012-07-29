@@ -1,5 +1,4 @@
 #import <Foundation/Foundation.h>
-#import <libxml2/libxml/parser.h>
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
@@ -7,23 +6,15 @@
 
 
 @interface XMPPParser : NSObject
-{
-	id delegate;
-	
-	BOOL hasReportedRoot;
-	unsigned depth;
-	
-	xmlParserCtxt *parserCtxt;
-}
 
-- (id)initWithDelegate:(id)delegate;
+- (id)initWithDelegate:(id)delegate delegateQueue:(dispatch_queue_t)dq;
+- (id)initWithDelegate:(id)delegate delegateQueue:(dispatch_queue_t)dq parserQueue:(dispatch_queue_t)pq;
 
-- (id)delegate;
-- (void)setDelegate:(id)delegate;
+- (void)setDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 
 /**
- * Synchronously parses the given data.
- * This means the delegate methods will get called before this method returns.
+ * Asynchronously parses the given data.
+ * The delegate methods will be dispatch_async'd as events occur.
 **/
 - (void)parseData:(NSData *)data;
 
@@ -43,5 +34,7 @@
 - (void)xmppParserDidEnd:(XMPPParser *)sender;
 
 - (void)xmppParser:(XMPPParser *)sender didFail:(NSError *)error;
+
+- (void)xmppParserDidParseData:(XMPPParser *)sender;
 
 @end

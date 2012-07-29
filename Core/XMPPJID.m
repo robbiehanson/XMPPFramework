@@ -129,7 +129,8 @@
 
 + (XMPPJID *)jidWithString:(NSString *)jidStr resource:(NSString *)resource
 {
-	if (![self validateResource:resource]) return nil;
+	NSString *prepResource = [LibIDN prepResource:resource];
+	if (![self validateResource:prepResource]) return nil;
 	
 	NSString *user;
 	NSString *domain;
@@ -139,7 +140,7 @@
 		XMPPJID *jid = [[XMPPJID alloc] init];
 		jid->user = [user copy];
 		jid->domain = [domain copy];
-		jid->resource = [resource copy];
+		jid->resource = [prepResource copy];
 		
 		return jid;
 	}
@@ -166,12 +167,29 @@
 	return nil;
 }
 
-+ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
++ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user
+                  prevalidatedDomain:(NSString *)domain
+                prevalidatedResource:(NSString *)resource
 {
 	XMPPJID *jid = [[XMPPJID alloc] init];
 	jid->user = [user copy];
 	jid->domain = [domain copy];
 	jid->resource = [resource copy];
+	
+	return jid;
+}
+
++ (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user
+                  prevalidatedDomain:(NSString *)domain
+                            resource:(NSString *)resource
+{
+	NSString *prepResource = [LibIDN prepResource:resource];
+	if (![self validateResource:prepResource]) return nil;
+	
+	XMPPJID *jid = [[XMPPJID alloc] init];
+	jid->user = [user copy];
+	jid->domain = [domain copy];
+	jid->resource = [prepResource copy];
 	
 	return jid;
 }
@@ -272,7 +290,7 @@
 	}
 	else
 	{
-		return [XMPPJID jidWithPrevalidatedUser:user domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:user prevalidatedDomain:domain prevalidatedResource:nil];
 	}
 }
 
@@ -284,7 +302,7 @@
 	}
 	else
 	{
-		return [XMPPJID jidWithPrevalidatedUser:nil domain:domain resource:nil];
+		return [XMPPJID jidWithPrevalidatedUser:nil prevalidatedDomain:domain prevalidatedResource:nil];
 	}
 }
 
@@ -350,20 +368,171 @@
 	return (user == nil);
 }
 
+- (XMPPJID *)jidWithNewResource:(NSString *)newResource
+{
+	return [XMPPJID jidWithPrevalidatedUser:user prevalidatedDomain:domain resource:newResource];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark NSObject Methods:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (NSUInteger)hash
 {
-	return [[self full] hash];
+	// We used to do this:
+	// return [[self full] hash];
+	//
+	// It was functional but less than optimal because it required the creation of a new NSString everytime.
+	// Now the hashing of a string itself is extremely fast,
+	// so combining 3 hashes is much faster than creating a new string.
+	// To accomplish this we use the murmur hashing algorithm.
+	// 
+	// MurmurHash2 was written by Austin Appleby, and is placed in the public domain.
+	// http://code.google.com/p/smhasher
+	
+	NSUInteger uhash = [user hash];
+	NSUInteger dhash = [domain hash];
+	NSUInteger rhash = [resource hash];
+	
+	if (NSUIntegerMax == UINT32_MAX) // Should be optimized out via compiler since these are constants
+	{
+		// MurmurHash2 (32-bit)
+		//
+		// uint32_t MurmurHash2 ( const void * key, int len, uint32_t seed )
+		// 
+		// Normally one would pass a chunk of data ('key') and associated data chunk length ('len').
+		// Instead we're going to use our 3 hashes.
+		// And we're going to randomly make up a 'seed'.
+		
+		const uint32_t seed = 0xa2f1b6f; // Some random value I made up
+		const uint32_t len = 12;         // 3 hashes, each 4 bytes = 12 bytes
+		
+		// 'm' and 'r' are mixing constants generated offline.
+		// They're not really 'magic', they just happen to work well.
+		
+		const uint32_t m = 0x5bd1e995;
+		const int r = 24;
+		
+		// Initialize the hash to a 'random' value
+		
+		uint32_t h = seed ^ len;
+		uint32_t k;
+		
+		// Mix uhash
+		
+		k = uhash;
+		
+		k *= m;
+		k ^= k >> r;
+		k *= m;
+		
+		h *= m;
+		h ^= k;
+		
+		// Mix dhash
+		
+		k = dhash;
+		
+		k *= m;
+		k ^= k >> r;
+		k *= m;
+		
+		h *= m;
+		h ^= k;
+		
+		// Mix rhash
+		
+		k = rhash;
+		
+		k *= m;
+		k ^= k >> r;
+		k *= m;
+		
+		h *= m;
+		h ^= k;
+		
+		// Do a few final mixes of the hash to ensure the last few
+		// bytes are well-incorporated.
+		
+		h ^= h >> 13;
+		h *= m;
+		h ^= h >> 15;
+		
+		return (NSUInteger)h;
+	}
+	else
+	{
+		// MurmurHash2 (64-bit)
+		// 
+		// uint64_t MurmurHash64A ( const void * key, int len, uint64_t seed )
+		// 
+		// Normally one would pass a chunk of data ('key') and associated data chunk length ('len').
+		// Instead we're going to use our 3 hashes.
+		// And we're going to randomly make up a 'seed'.
+		
+		const uint32_t seed = 0xa2f1b6f; // Some random value I made up
+		const uint32_t len = 24;         // 3 hashes, each 8 bytes = 24 bytes
+		
+		// 'm' and 'r' are mixing constants generated offline.
+		// They're not really 'magic', they just happen to work well.
+		
+		const uint64_t m = 0xc6a4a7935bd1e995LLU;
+		const int r = 47;
+		
+		// Initialize the hash to a 'random' value
+		
+		uint64_t h = seed ^ (len * m);
+		uint64_t k;
+		
+		// Mix uhash
+		
+		k = uhash;
+		
+		k *= m; 
+		k ^= k >> r; 
+		k *= m; 
+		
+		h ^= k;
+		h *= m;
+		
+		// Mix dhash
+		
+		k = dhash;
+		
+		k *= m; 
+		k ^= k >> r; 
+		k *= m; 
+		
+		h ^= k;
+		h *= m;
+		
+		// Mix rhash
+		
+		k = rhash;
+		
+		k *= m; 
+		k ^= k >> r; 
+		k *= m; 
+		
+		h ^= k;
+		h *= m;
+		
+		// Do a few final mixes of the hash to ensure the last few
+		// bytes are well-incorporated.
+		
+		h ^= h >> r;
+		h *= m;
+		h ^= h >> r;
+		
+		return (NSUInteger)h;
+	}
 }
 
 - (BOOL)isEqual:(id)anObject
 {
 	if ([anObject isMemberOfClass:[self class]])
 	{
-		return [self isEqualToJID:(XMPPJID *)anObject];
+		return [self isEqualToJID:(XMPPJID *)anObject options:XMPPJIDCompareFull];
 	}
 	return NO;
 }

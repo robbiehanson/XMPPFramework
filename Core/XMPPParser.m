@@ -1,5 +1,6 @@
 #import "XMPPParser.h"
 #import "XMPPLogging.h"
+#import <libxml/parser.h>
 #import <libxml/parserInternals.h>
 
 #if TARGET_OS_IPHONE
@@ -10,6 +11,32 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+/**
+ * Does ARC support support GCD objects?
+ * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
+**/
+#if TARGET_OS_IPHONE
+
+  // Compiling for iOS
+
+  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else                                         // iOS 5.X or earlier
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
+  #endif
+
+#else
+
+  // Compiling for Mac OS X
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
+  #endif
+
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
@@ -17,24 +44,9 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-
-// When the xmpp parser invokes a delegate method, such as xmppParser:didReadElement:,
-// it exposes itself to the possibility of exceptions mid-parse.
-// This aborts the current run loop,
-// and thus causes the parser to lose the rest of the data that was passed to it via the parseData method.
-// 
-// The end result is that our parser will likely barf the next time it tries to parse data.
-// Probably with a "EndTag: '</' not found" error.
-// After this the xmpp stream would be closed.
-// 
-// Now during development, it's probably good to be exposed to these exceptions so they can be tracked down and fixed.
-// But for release, we might not want these exceptions to break the xmpp stream.
-// So for release mode you may consider enabling the try/catch.
-#define USE_TRY_CATCH 0
-
 #define CHECK_FOR_NULL(value)                       \
     do {                                            \
-        if(value == NULL) {                         \
+        if (value == NULL) {                         \
             xmpp_xmlAbortDueToMemoryShortage(ctxt); \
             return;                                 \
         }                                           \
@@ -46,6 +58,21 @@
 
 
 @implementation XMPPParser
+{
+	#if __has_feature(objc_arc_weak)
+	__weak id delegate;
+	#else
+	__unsafe_unretained id delegate;
+	#endif
+	dispatch_queue_t delegateQueue;
+	
+	dispatch_queue_t parserQueue;
+	
+	BOOL hasReportedRoot;
+	unsigned depth;
+	
+	xmlParserCtxt *parserCtxt;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark iPhone
@@ -55,7 +82,7 @@
 
 static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 {
-	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
+	if (parser->delegateQueue && [parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
 	{
 		// We first copy the root node.
 		// We do this to allow the delegate to retain and make changes to the reported root
@@ -72,22 +99,13 @@ static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 		xmlNodePtr rootCopy = xmlCopyNode(root, 2);
 		DDXMLElement *rootCopyWrapper = [DDXMLElement nodeWithElementPrimitive:rootCopy owner:nil];
 		
-#if USE_TRY_CATCH
-		@try
-		{
-			// If the delegate throws an exception that we don't catch,
-			// this would cause our parser to abort,
-			// and ignore the rest of the data that was passed to us in parseData.
-			// 
-			// The end result is that our parser will likely barf the next time it tries to parse data.
-			// Probably with a "EndTag: '</' not found" error.
+		__strong id theDelegate = parser->delegate;
+		
+		dispatch_async(parser->delegateQueue, ^{ @autoreleasepool {
 			
-			[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
-		}
-		@catch (id exception) { /* Ignore */ }
-#else
-		[parser->delegate xmppParser:parser didReadRoot:rootCopyWrapper];
-#endif
+			[theDelegate xmppParser:parser didReadRoot:rootCopyWrapper];
+		}});
+
 		// Note: DDXMLElement will properly free the rootCopy when it's deallocated.
 	}
 }
@@ -110,24 +128,14 @@ static void xmpp_onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 	// Note: We want to detach the child from the root even if the delegate method isn't setup.
 	// This prevents the doc from growing infinitely large.
 	
-	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
+	if (parser->delegateQueue && [parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
 	{
-#if USE_TRY_CATCH
-		@try
-		{
-			// If the delegate throws an exception that we don't catch,
-			// this would cause our parser to abort,
-			// and ignore the rest of the data that was passed to us in parseData.
-			// 
-			// The end result is that our parser will likely barf the next time it tries to parse data.
-			// Probably with a "EndTag: '</' not found" error.
+		__strong id theDelegate = parser->delegate;
+		
+		dispatch_async(parser->delegateQueue, ^{ @autoreleasepool {
 			
-			[parser->delegate xmppParser:parser didReadElement:childWrapper];
-		}
-		@catch (id exception) { /* Ignore */ }
-#else
-		[parser->delegate xmppParser:parser didReadElement:childWrapper];
-#endif
+			[theDelegate xmppParser:parser didReadElement:childWrapper];
+		}});
 	}
 	
 	// Note: DDXMLElement will properly free the child when it's deallocated.
@@ -143,13 +151,13 @@ static void xmpp_setName(NSXMLElement *element, xmlNodePtr node)
 {
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
-	if(node->name == NULL)
+	if (node->name == NULL)
 	{
 		[element setName:@""];
 		return;
 	}
 	
-	if((node->ns != NULL) && (node->ns->prefix != NULL))
+	if ((node->ns != NULL) && (node->ns->prefix != NULL))
 	{
 		// E.g: <deusty:element xmlns:deusty="deusty.com"/>
 		
@@ -172,9 +180,9 @@ static void xmpp_addNamespaces(NSXMLElement *element, xmlNodePtr node)
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
 	xmlNsPtr nsNode = node->nsDef;
-	while(nsNode != NULL)
+	while (nsNode != NULL)
 	{
-		if(nsNode->href == NULL)
+		if (nsNode->href == NULL)
 		{
 			// Namespace doesn't have a value!
 		}
@@ -182,7 +190,7 @@ static void xmpp_addNamespaces(NSXMLElement *element, xmlNodePtr node)
 		{
 			NSXMLNode *ns = [[NSXMLNode alloc] initWithKind:NSXMLNamespaceKind];
 			
-			if(nsNode->prefix != NULL)
+			if (nsNode->prefix != NULL)
 			{
 				NSString *nsName = [[NSString alloc] initWithUTF8String:(const char *)nsNode->prefix];
 				[ns setName:nsName];
@@ -210,15 +218,15 @@ static void xmpp_addChildren(NSXMLElement *element, xmlNodePtr node)
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
 	xmlNodePtr childNode = node->children;
-	while(childNode != NULL)
+	while (childNode != NULL)
 	{
-		if(childNode->type == XML_ELEMENT_NODE)
+		if (childNode->type == XML_ELEMENT_NODE)
 		{
 			xmpp_recursiveAddChild(element, childNode);
 		}
-		else if(childNode->type == XML_TEXT_NODE)
+		else if (childNode->type == XML_TEXT_NODE)
 		{
-			if(childNode->content != NULL)
+			if (childNode->content != NULL)
 			{
 				NSString *value = [[NSString alloc] initWithUTF8String:(const char *)childNode->content];
 				[element setStringValue:value];
@@ -234,17 +242,17 @@ static void xmpp_addAttributes(NSXMLElement *element, xmlNodePtr node)
 	// Remember: The NSString initWithUTF8String raises an exception if passed NULL
 	
 	xmlAttrPtr attrNode = node->properties;
-	while(attrNode != NULL)
+	while (attrNode != NULL)
 	{
-		if(attrNode->name == NULL)
+		if (attrNode->name == NULL)
 		{
 			// Attribute doesn't have a name!
 		}
-		else if(attrNode->children == NULL)
+		else if (attrNode->children == NULL)
 		{
 			// Attribute doesn't have a value node!
 		}
-		else if(attrNode->children->content == NULL)
+		else if (attrNode->children->content == NULL)
 		{
 			// Attribute doesn't have a value!
 		}
@@ -252,7 +260,7 @@ static void xmpp_addAttributes(NSXMLElement *element, xmlNodePtr node)
 		{
 			NSXMLNode *attr = [[NSXMLNode alloc] initWithKind:NSXMLAttributeKind];
 			
-			if((attrNode->ns != NULL) && (attrNode->ns->prefix != NULL))
+			if ((attrNode->ns != NULL) && (attrNode->ns->prefix != NULL))
 			{
 				// E.g: <element xmlns:deusty="deusty.com" deusty:attr="value"/>
 				
@@ -323,51 +331,31 @@ static NSXMLElement* xmpp_nsxmlFromLibxml(xmlNodePtr rootNode)
 
 static void xmpp_onDidReadRoot(XMPPParser *parser, xmlNodePtr root)
 {
-	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
+	if (parser->delegateQueue && [parser->delegate respondsToSelector:@selector(xmppParser:didReadRoot:)])
 	{
 		NSXMLElement *nsRoot = xmpp_nsxmlFromLibxml(root);
 		
-#if USE_TRY_CATCH
-		@try
-		{
-			// If the delegate throws an exception that we don't catch,
-			// this would cause our parser to abort,
-			// and ignore the rest of the data that was passed to us in parseData.
-			// 
-			// The end result is that our parser will likely barf the next time it tries to parse data.
-			// Probably with a "EndTag: '</' not found" error.
+		__strong id theDelegate = parser->delegate;
+		
+		dispatch_async(parser->delegateQueue, ^{ @autoreleasepool {
 			
-			[parser->delegate xmppParser:parser didReadRoot:nsRoot];
-		}
-		@catch (id exception) { /* Ignore */ }
-#else
-		[parser->delegate xmppParser:parser didReadRoot:nsRoot];
-#endif
+			[theDelegate xmppParser:parser didReadRoot:nsRoot];
+		}});
 	}
 }
 
 static void xmpp_onDidReadElement(XMPPParser *parser, xmlNodePtr child)
 {
-	if([parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
+	if (parser->delegateQueue && [parser->delegate respondsToSelector:@selector(xmppParser:didReadElement:)])
 	{
 		NSXMLElement *nsChild = xmpp_nsxmlFromLibxml(child);
 		
-#if USE_TRY_CATCH
-		@try
-		{
-			// If the delegate throws an exception that we don't catch,
-			// this would cause our parser to abort,
-			// and ignore the rest of the data that was passed to us in parseData.
-			// 
-			// The end result is that our parser will likely barf the next time it tries to parse data.
-			// Probably with a "EndTag: '</' not found" error.
-			
-			[parser->delegate xmppParser:parser didReadElement:nsChild];
-		}
-		@catch (id exception) { /* Ignore */ }
-#else
-		[parser->delegate xmppParser:parser didReadElement:nsChild];
-#endif
+		__strong id theDelegate = parser->delegate;
+		
+		dispatch_async(parser->delegateQueue, ^{ @autoreleasepool {
+		
+			[theDelegate xmppParser:parser didReadElement:nsChild];
+		}});
 	}
 	
 	// Note: We want to detach the child from the root even if the delegate method isn't setup.
@@ -393,14 +381,14 @@ static void xmpp_postStartElement(xmlParserCtxt *ctxt)
 	XMPPParser *parser = (__bridge XMPPParser *)ctxt->_private;
 	parser->depth++;
 	
-	if(!(parser->hasReportedRoot) && (parser->depth == 1))
+	if (!(parser->hasReportedRoot) && (parser->depth == 1))
 	{
 		// We've received the full root - report it to the delegate
 		
-		if(ctxt->myDoc)
+		if (ctxt->myDoc)
 		{
 			xmlNodePtr root = xmlDocGetRootElement(ctxt->myDoc);
-			if(root)
+			if (root)
 			{
 				xmpp_onDidReadRoot(parser, root);
 				
@@ -419,7 +407,7 @@ static void xmpp_postEndElement(xmlParserCtxt *ctxt)
 	XMPPParser *parser = (__bridge XMPPParser *)ctxt->_private;
 	parser->depth--;
 	
-	if(parser->depth == 1)
+	if (parser->depth == 1)
 	{
 		// End of full xmpp element.
 		// That is, a child of the root element.
@@ -429,9 +417,9 @@ static void xmpp_postEndElement(xmlParserCtxt *ctxt)
 		xmlNodePtr root = xmlDocGetRootElement(doc);
 		
 		xmlNodePtr child = root->children;
-		while(child != NULL)
+		while (child != NULL)
 		{
-			if(child->type == XML_ELEMENT_NODE)
+			if (child->type == XML_ELEMENT_NODE)
 			{
 				xmpp_onDidReadElement(parser, child);
 				
@@ -442,13 +430,18 @@ static void xmpp_postEndElement(xmlParserCtxt *ctxt)
 			child = child->next;
 		}
 	}
-	else if(parser->depth == 0)
+	else if (parser->depth == 0)
 	{
 		// End of the root element
 		
-		if([parser->delegate respondsToSelector:@selector(xmppParserDidEnd:)])
+		if (parser->delegateQueue && [parser->delegate respondsToSelector:@selector(xmppParserDidEnd:)])
 		{
-			[parser->delegate xmppParserDidEnd:parser];
+			__strong id theDelegate = parser->delegate;
+			
+			dispatch_async(parser->delegateQueue, ^{ @autoreleasepool {
+			
+				[theDelegate xmppParserDidEnd:parser];
+			}});
 		}
 	}
 }
@@ -462,14 +455,19 @@ static void xmpp_xmlAbortDueToMemoryShortage(xmlParserCtxt *ctxt)
 	
 	xmlStopParser(ctxt);
 	
-	if([parser->delegate respondsToSelector:@selector(xmppParser:didFail:)])
+	if (parser->delegateQueue && [parser->delegate respondsToSelector:@selector(xmppParser:didFail:)])
 	{
 		NSString *errMsg = @"Unable to allocate memory in xmpp parser";
 		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 		
 		NSError *error = [NSError errorWithDomain:@"libxmlErrorDomain" code:1001 userInfo:info];
 		
-		[parser->delegate xmppParser:parser didFail:error];
+		__strong id theDelegate = parser->delegate;
+		
+		dispatch_async(parser->delegateQueue, ^{ @autoreleasepool {
+			
+			[theDelegate xmppParser:parser didFail:error];
+		}});
 	}
 }
 
@@ -544,7 +542,7 @@ static void	xmpp_xmlStartElement(void *ctx, const xmlChar  *nodeName,
 	CHECK_FOR_NULL(newNode);
 	
 	// Add the node to the tree
-	if(parent == NULL)
+	if (parent == NULL)
 	{
 		// Root node
 		xmlAddChild((xmlNodePtr)ctxt->myDoc, newNode);
@@ -572,7 +570,8 @@ static void	xmpp_xmlStartElement(void *ctx, const xmlChar  *nodeName,
 		
 		if (newNode->nsDef == NULL)
 		{
-			newNode->nsDef = lastAddedNs = newNs;
+			newNode->nsDef = newNs;
+			lastAddedNs = newNs;
 		}
 		else
 		{
@@ -608,12 +607,11 @@ static void	xmpp_xmlStartElement(void *ctx, const xmlChar  *nodeName,
 			
 			if (newNode->nsDef == NULL)
 			{
-				newNode->nsDef = lastAddedNs = newNs;
+				newNode->nsDef = newNs;
 			}
 			else
 			{
 				lastAddedNs->next = newNs;
-				lastAddedNs = newNs;
 			}
 			
 			newNode->ns = newNs;
@@ -715,11 +713,33 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 	xmpp_postEndElement(ctxt);
 }
 
-- (id)initWithDelegate:(id)aDelegate
+- (id)initWithDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)dq
+{
+	return [self initWithDelegate:aDelegate delegateQueue:dq parserQueue:NULL];
+}
+
+- (id)initWithDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)dq parserQueue:(dispatch_queue_t)pq
 {
 	if ((self = [super init]))
 	{
 		delegate = aDelegate;
+		delegateQueue = dq;
+		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		if (delegateQueue)
+			dispatch_retain(delegateQueue);
+		#endif
+		
+		if (pq) {
+			parserQueue = pq;
+			
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
+			dispatch_retain(parserQueue);
+			#endif
+		}
+		else {
+			parserQueue = dispatch_queue_create("xmpp.parser", NULL);
+		}
 		
 		hasReportedRoot = NO;
 		depth  = 0;
@@ -756,7 +776,6 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 	if (parserCtxt)
 	{
 		// The xmlFreeParserCtxt method will not free the created document in parserCtxt->myDoc.
-		
 		if (parserCtxt->myDoc)
 		{
 			// Free the created xmlDoc
@@ -766,51 +785,91 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		xmlFreeParserCtxt(parserCtxt);
 	}
 	
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	if (delegateQueue)
+		dispatch_release(delegateQueue);
+	if (parserQueue)
+		dispatch_release(parserQueue);
+	#endif
 }
 
-- (id)delegate {
-	return delegate;
-}
-- (void)setDelegate:(id)aDelegate {
-	delegate = aDelegate;
+- (void)setDelegate:(id)newDelegate delegateQueue:(dispatch_queue_t)newDelegateQueue
+{
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	if (newDelegateQueue)
+		dispatch_retain(newDelegateQueue);
+	#endif
+	
+	dispatch_block_t block = ^{
+		
+		delegate = newDelegate;
+		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		if (delegateQueue)
+			dispatch_release(delegateQueue);
+		#endif
+		
+		delegateQueue = newDelegateQueue;
+	};
+	
+	if (dispatch_get_current_queue() == parserQueue)
+		block();
+	else
+		dispatch_async(parserQueue, block);
 }
 
 - (void)parseData:(NSData *)data
 {
-	// The xmlParseChunk method below will cause the delegate methods to be invoked before this method returns.
-	// If the delegate subsequently attempts to release us in one of those methods, and our dealloc method
-	// gets invoked, then the parserCtxt will be freed in the middle of the xmlParseChunk method.
-	// This often has the effect of crashing the application.
-	// To get around this problem we simply retain/release within the method.
-	XMPPParser *selfRetain = self;
+	dispatch_block_t block = ^{ @autoreleasepool {
 	
-	int result = xmlParseChunk(parserCtxt, (const char *)[data bytes], (int)[data length], 0);
-	
-	if(result != 0)
-	{
-		if([delegate respondsToSelector:@selector(xmppParser:didFail:)])
+		int result = xmlParseChunk(parserCtxt, (const char *)[data bytes], (int)[data length], 0);
+		
+		if (result == 0)
 		{
-			NSError *error;
-			
-			xmlError *xmlErr = xmlCtxtGetLastError(parserCtxt);
-			
-			if(xmlErr->message)
+			if (delegateQueue && [delegate respondsToSelector:@selector(xmppParserDidParseData:)])
 			{
-				NSString *errMsg = [NSString stringWithFormat:@"%s", xmlErr->message];
-				NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+				__strong id theDelegate = delegate;
 				
-				error = [NSError errorWithDomain:@"libxmlErrorDomain" code:xmlErr->code userInfo:info];
+				dispatch_async(delegateQueue, ^{ @autoreleasepool {
+					
+					[theDelegate xmppParserDidParseData:self];
+				}});
 			}
-			else
-			{
-				error = [NSError errorWithDomain:@"libxmlErrorDomain" code:xmlErr->code userInfo:nil];
-			}
-			
-			[delegate xmppParser:self didFail:error];
 		}
-	}
+		else
+		{
+			if (delegateQueue && [delegate respondsToSelector:@selector(xmppParser:didFail:)])
+			{
+				NSError *error;
+				
+				xmlError *xmlErr = xmlCtxtGetLastError(parserCtxt);
+				
+				if (xmlErr->message)
+				{
+					NSString *errMsg = [NSString stringWithFormat:@"%s", xmlErr->message];
+					NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+					
+					error = [NSError errorWithDomain:@"libxmlErrorDomain" code:xmlErr->code userInfo:info];
+				}
+				else
+				{
+					error = [NSError errorWithDomain:@"libxmlErrorDomain" code:xmlErr->code userInfo:nil];
+				}
+				
+				__strong id theDelegate = delegate;
+				
+				dispatch_async(delegateQueue, ^{ @autoreleasepool {
+					
+					[theDelegate xmppParser:self didFail:error];
+				}});
+			}
+		}
+	}};
 	
-	selfRetain = nil;
+	if (dispatch_get_current_queue() == parserQueue)
+		block();
+	else
+		dispatch_async(parserQueue, block);
 }
 
 @end

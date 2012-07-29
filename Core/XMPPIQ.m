@@ -65,6 +65,21 @@
 	return [[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:childElement];
 }
 
++ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid
+{
+	return [[XMPPIQ alloc] initWithType:type to:nil elementID:eid child:nil];
+}
+
++ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement
+{
+	return [[XMPPIQ alloc] initWithType:type to:nil elementID:eid child:childElement];
+}
+
++ (XMPPIQ *)iqWithType:(NSString *)type child:(NSXMLElement *)childElement
+{
+	return [[XMPPIQ alloc] initWithType:type to:nil elementID:nil child:childElement];
+}
+
 - (id)init
 {
 	return [self initWithType:nil to:nil elementID:nil child:nil];
@@ -102,6 +117,21 @@
 			[self addChild:childElement];
 	}
 	return self;
+}
+
+- (id)initWithType:(NSString *)type elementID:(NSString *)eid
+{
+	return [self initWithType:type to:nil elementID:eid child:nil];
+}
+
+- (id)initWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement
+{
+	return [self initWithType:type to:nil elementID:eid child:childElement];
+}
+
+- (id)initWithType:(NSString *)type child:(NSXMLElement *)childElement
+{
+	return [self initWithType:type to:nil elementID:nil child:childElement];
 }
 
 - (NSString *)type

@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <libkern/OSAtomic.h>
 #import "DDLog.h"
 
 
@@ -49,6 +50,22 @@
  * you can use [[NSThread currentThread] setName:(NSString *)].
 **/
 @interface DispatchQueueLogFormatter : NSObject <DDLogFormatter>
+{
+	@protected
+	
+	NSString *dateFormatString;
+	
+	@private
+	
+	int32_t atomicLoggerCount;
+	NSDateFormatter *threadUnsafeDateFormatter; // Use [self stringFromDate]
+	
+	OSSpinLock lock;
+	
+	NSUInteger _minQueueLength;           // _prefix == Only access via atomic property
+	NSUInteger _maxQueueLength;           // _prefix == Only access via atomic property
+	NSMutableDictionary *_replacements;   // _prefix == Only access from within spinlock
+}
 
 /**
  * Standard init method.

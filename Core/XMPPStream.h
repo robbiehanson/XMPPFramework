@@ -8,7 +8,6 @@
 #endif
 
 @class XMPPSRVResolver;
-@class DDList;
 @class XMPPParser;
 @class XMPPJID;
 @class XMPPIQ;
@@ -40,56 +39,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 
 @interface XMPPStream : NSObject <GCDAsyncSocketDelegate>
-{
-	dispatch_queue_t xmppQueue;
-	dispatch_queue_t parserQueue;
-	
-	GCDMulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
-	
-	int state;
-	
-	GCDAsyncSocket *asyncSocket;
-	NSMutableData *socketBuffer;
-	
-	UInt64 numberOfBytesSent;
-	UInt64 numberOfBytesReceived;
-	
-	XMPPParser *parser;
-	NSError *parserError;
-	
-	Byte flags;
-	Byte config;
-	
-	NSString *hostName;
-	UInt16 hostPort;
-	
-	id <XMPPSASLAuthentication> auth;
-	
-	XMPPJID *myJID_setByClient;
-	XMPPJID *myJID_setByServer;
-	XMPPJID *remoteJID;
-	
-	XMPPPresence *myPresence;
-	NSXMLElement *rootElement;
-	
-	NSTimeInterval keepAliveInterval;
-	dispatch_source_t keepAliveTimer;
-	NSTimeInterval lastSendReceiveTime;
-	
-	DDList *registeredModules;
-	NSMutableDictionary *autoDelegateDict;
-	
-	XMPPSRVResolver *srvResolver;
-	NSArray *srvResults;
-	NSUInteger srvResultsIndex;
-	
-	NSMutableArray *receipts;
-	
-	NSThread *xmppUtilityThread;
-	NSRunLoop *xmppUtilityRunLoop;
-	
-	id userTag;
-}
 
 /**
  * Standard XMPP initialization.
@@ -212,6 +161,17 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 @property (readwrite, assign) NSTimeInterval keepAliveInterval;
 
 /**
+ * The keep-alive mechanism sends whitespace which is ignored by the xmpp protocol.
+ * The default whitespace character is a space (' ').
+ * 
+ * This can be changed, for whatever reason, to another whitespace character.
+ * Valid whitespace characters are space(' '), tab('\t') and newline('\n').
+ * 
+ * If you attempt to set the character to any non-whitespace character, the attempt is ignored.
+**/
+@property (readwrite, assign) char keepAliveWhitespaceCharacter;
+
+/**
  * Represents the last sent presence element concerning the presence of myJID on the server.
  * In other words, it represents the presence as others see us.
  * 
@@ -319,18 +279,23 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * Disconnects from the remote host by closing the underlying TCP socket connection.
+ * The terminating </stream:stream> element is not sent to the server.
  * 
- * The disconnect method is synchronous.
+ * This method is synchronous.
  * Meaning that the disconnect will happen immediately, even if there are pending elements yet to be sent.
- * The xmppStreamDidDisconnect:withError: method will be invoked before the disconnect method returns.
  * 
- * The disconnectAfterSending method is asynchronous.
- * The disconnect will happen after all pending elements have been sent.
- * Attempting to send elements after this method is called will not result in the elements getting sent.
- * The disconnectAfterSending method will return immediately,
- * and the xmppStreamDidDisconnect:withError: delegate method will be invoked at a later time.
+ * The xmppStreamDidDisconnect:withError: delegate method will immediately be dispatched onto the delegate queue.
 **/
 - (void)disconnect;
+
+/**
+ * Disconnects from the remote host by sending the terminating </stream:stream> element,
+ * and then closing the underlying TCP socket connection.
+ * 
+ * This method is asynchronous.
+ * The disconnect will happen after all pending elements have been sent.
+ * Attempting to send elements after this method has been called will not work (the elements won't get sent).
+**/
 - (void)disconnectAfterSending;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -793,11 +758,49 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;
 
 /**
+ * This method is called if the XMPP server doesn't allow our resource of choice
+ * because it conflicts with an existing resource.
+ * 
+ * Return an alternative resource or return nil to let the server automatically pick a resource for us.
+**/
+- (NSString *)xmppStream:(XMPPStream *)sender alternativeResourceForConflictingResource:(NSString *)conflictingResource;
+
+/**
+ * These methods are called before their respective XML elements are broadcast as received to the rest of the stack.
+ * These methods can be used to modify elements on the fly.
+ * (E.g. perform custom decryption so the rest of the stack sees readable text.)
+ * 
+ * You may also filter incoming elements by returning nil.
+ * 
+ * When implementing these methods to modify the element, you do not need to copy the given element.
+ * You can simply edit the given element, and return it.
+ * The reason these methods return an element, instead of void, is to allow filtering.
+ * 
+ * Concerning thread-safety, delegates implementing the method are invoked one-at-a-time to
+ * allow thread-safe modification of the given elements.
+ *
+ * You should NOT implement these methods unless you have good reason to do so.
+ * For general processing and notification of received elements, please use xmppStream:didReceiveX: methods.
+ * 
+ * @see xmppStream:didReceiveIQ:
+ * @see xmppStream:didReceiveMessage:
+ * @see xmppStream:didReceivePresence:
+**/
+- (XMPPIQ *)xmppStream:(XMPPStream *)sender willReceiveIQ:(XMPPIQ *)iq;
+- (XMPPMessage *)xmppStream:(XMPPStream *)sender willReceiveMessage:(XMPPMessage *)message;
+- (XMPPPresence *)xmppStream:(XMPPStream *)sender willReceivePresence:(XMPPPresence *)presence;
+
+/**
  * These methods are called after their respective XML elements are received on the stream.
  * 
  * In the case of an IQ, the delegate method should return YES if it has or will respond to the given IQ.
  * If the IQ is of type 'get' or 'set', and no delegates respond to the IQ,
  * then xmpp stream will automatically send an error response.
+ * 
+ * Concerning thread-safety, delegates shouldn't modify the given elements.
+ * As documented in NSXML / KissXML, elements are read-access thread-safe, but write-access thread-unsafe.
+ * If you have need to modify an element for any reason,
+ * you should copy the element first, and then modify and use the copy.
 **/
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq;
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message;
@@ -816,12 +819,28 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * These methods are called before their respective XML elements are sent over the stream.
- * These methods can be used to customize elements on the fly.
+ * These methods can be used to modify outgoing elements on the fly.
  * (E.g. add standard information for custom protocols.)
+ * 
+ * You may also filter outgoing elements by returning nil.
+ * 
+ * When implementing these methods to modify the element, you do not need to copy the given element.
+ * You can simply edit the given element, and return it.
+ * The reason these methods return an element, instead of void, is to allow filtering.
+ * 
+ * Concerning thread-safety, delegates implementing the method are invoked one-at-a-time to
+ * allow thread-safe modification of the given elements.
+ * 
+ * You should NOT implement these methods unless you have good reason to do so.
+ * For general processing and notification of sent elements, please use xmppStream:didSendX: methods.
+ * 
+ * @see xmppStream:didSendIQ:
+ * @see xmppStream:didSendMessage:
+ * @see xmppStream:didSendPresence:
 **/
-- (void)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
-- (void)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
-- (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence;
+- (XMPPIQ *)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
+- (XMPPMessage *)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
+- (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence;
 
 /**
  * These methods are called after their respective XML elements are sent over the stream.

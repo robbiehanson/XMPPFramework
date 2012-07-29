@@ -19,11 +19,11 @@
 
 @implementation XMPPPlainAuthentication
 {
-	#if __has_feature(objc_arc_weak)
+  #if __has_feature(objc_arc_weak)
 	__weak XMPPStream *xmppStream;
-	#else
+  #else
 	__unsafe_unretained XMPPStream *xmppStream;
-	#endif
+  #endif
 	
 	NSString *password;
 }
@@ -56,7 +56,7 @@
 	
 	NSString *username = [xmppStream.myJID user];
 	
-	NSString *payload = [NSString stringWithFormat:@"%C%@%C%@", 0, username, 0, password];
+	NSString *payload = [NSString stringWithFormat:@"\0%@\0%@", username, password];
 	NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] base64Encoded];
 	
 	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">Base-64-Info</auth>
