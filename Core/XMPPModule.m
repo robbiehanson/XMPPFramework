@@ -6,6 +6,32 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+/**
+ * Does ARC support support GCD objects?
+ * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
+**/
+#if TARGET_OS_IPHONE
+
+  // Compiling for iOS
+
+  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else                                         // iOS 5.X or earlier
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
+  #endif
+
+#else
+
+  // Compiling for Mac OS X
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
+  #endif
+
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
@@ -34,7 +60,9 @@
 		if (queue)
 		{
 			moduleQueue = queue;
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
 			dispatch_retain(moduleQueue);
+			#endif
 		}
 		else
 		{
@@ -49,42 +77,9 @@
 
 - (void)dealloc
 {
-	if (xmppStream)
-	{
-		// It is dangerous to rely on the dealloc method to deactivate a module.
-		// 
-		// Why?
-		// Because when a module is activated, it is added as a delegate to the xmpp stream.
-		// In addition to this, the module may be added as a delegate to various other xmpp components.
-		// As per usual, these delegate references do NOT retain this module.
-		// This means that modules may get invoked after they are deallocated.
-		// 
-		// Consider the following example:
-		// 
-		// 1. Thread A: Module is created (alloc/init) (retainCount = 1)
-		// 2. Thread A: Module is activated (retainCount = 1)
-		// 3. Thread A: Module is released, and dealloc is called.
-		//              First [MyCustomModule dealloc] is invoked.
-		//              Then [XMPPModule dealloc] is invoked.
-		//              Only at this point is [XMPPModule deactivate] run.
-		//              Since the deactivate method is synchronous,
-		//              it blocks until the module is removed as a delegate from the stream and all other modules.
-		// 4. Thread B: Invokes a delegate method on our module ([XMPPModule deactivate] is waiting on thread B).
-		// 5. Thread A: The [XMPPModule deactivate] method returns, but the damage is done.
-		//              Thread B has asynchronously dispatched a delegate method set to run on our module.
-		// 6. Thread A: The dealloc method completes, and our module is now deallocated.
-		// 7. Thread C: The delegate method attempts to run on our module, which is deallocated,
-		//              the application crashes, the computer blows up, and a meteor hits your favorite restaurant.
-		
-		XMPPLogWarn(@"%@: Deallocating activated module. You should deactivate modules before their final release.",
-		              NSStringFromClass([self class]));
-		
-		[self deactivate];
-	}
-	
-	
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
 	dispatch_release(moduleQueue);
-	
+	#endif
 }
 
 /**
@@ -148,20 +143,7 @@
 
 - (dispatch_queue_t)moduleQueue
 {
-	if (dispatch_get_current_queue() == moduleQueue)
-	{
-		return moduleQueue;
-	}
-	else
-	{
-		__block dispatch_queue_t result;
-		
-		dispatch_sync(moduleQueue, ^{
-			result = moduleQueue;
-		});
-		
-		return result;
-	}
+	return moduleQueue;
 }
 
 - (XMPPStream *)xmppStream

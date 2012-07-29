@@ -22,6 +22,31 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+// Does ARC support support GCD objects?
+// It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
+
+#if TARGET_OS_IPHONE
+
+  // Compiling for iOS
+
+  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else                                         // iOS 5.X or earlier
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
+  #endif
+
+#else
+
+  // Compiling for Mac OS X
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
+  #endif
+
+#endif
+
 // We probably shouldn't be using DDLog() statements within the DDLog implementation.
 // But we still want to leave our log statements for any future debugging,
 // and to allow other developers to trace the implementation (which is a great learning tool).
@@ -262,6 +287,7 @@ static unsigned int numProcessors;
        file:(const char *)file
    function:(const char *)function
        line:(int)line
+        tag:(id)tag
      format:(NSString *)format, ...
 {
 	va_list args;
@@ -276,11 +302,41 @@ static unsigned int numProcessors;
 		                                                        context:context
 		                                                           file:file
 		                                                       function:function
-		                                                           line:line];
+		                                                           line:line
+		                                                            tag:tag
+		                                                        options:0];
 		
 		[self queueLogMessage:logMessage asynchronously:asynchronous];
 		
 		va_end(args);
+	}
+}
+
++ (void)log:(BOOL)asynchronous
+      level:(int)level
+       flag:(int)flag
+    context:(int)context
+       file:(const char *)file
+   function:(const char *)function
+       line:(int)line
+        tag:(id)tag
+     format:(NSString *)format
+       args:(va_list)args
+{
+	if (format)
+	{
+		NSString *logMsg = [[NSString alloc] initWithFormat:format arguments:args];
+		DDLogMessage *logMessage = [[DDLogMessage alloc] initWithLogMsg:logMsg
+		                                                          level:level
+		                                                           flag:flag
+		                                                        context:context
+		                                                           file:file
+		                                                       function:function
+		                                                           line:line
+		                                                            tag:tag
+		                                                        options:0];
+		
+		[self queueLogMessage:logMessage asynchronously:asynchronous];
 	}
 }
 
@@ -301,15 +357,17 @@ static unsigned int numProcessors;
 	SEL getterSel = @selector(ddLogLevel);
 	SEL setterSel = @selector(ddSetLogLevel:);
 	
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
 	
-	// Issue #6 - Crashes on iOS 4.2.1 and iPhone 4
+	// Issue #6 (GoogleCode) - Crashes on iOS 4.2.1 and iPhone 4
 	// 
 	// Crash caused by class_getClassMethod(2).
 	// 
 	//     "It's a bug with UIAccessibilitySafeCategory__NSObject so it didn't pop up until
 	//      users had VoiceOver enabled [...]. I was able to work around it by searching the
 	//      result of class_copyMethodList() instead of calling class_getClassMethod()"
+	
+	BOOL result = NO;
 	
 	unsigned int methodCount, i;
 	Method *methodList = class_copyMethodList(object_getClass(class), &methodCount);
@@ -334,16 +392,22 @@ static unsigned int numProcessors;
 			
 			if (getterFound && setterFound)
 			{
-				return YES;
+				result = YES;
+				break;
 			}
 		}
 		
 		free(methodList);
 	}
 	
-	return NO;
+	return result;
 	
 #else
+	
+	// Issue #24 (GitHub) - Crashing in in ARC+Simulator
+	// 
+	// The method +[DDLog isRegisteredClass] will crash a project when using it with ARC + Simulator.
+	// For running in the Simulator, it needs to execute the non-iOS code.
 	
 	Method getter = class_getClassMethod(class, getterSel);
 	Method setter = class_getClassMethod(class, setterSel);
@@ -642,7 +706,7 @@ static unsigned int numProcessors;
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
+NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 {
 	if (filePath == NULL) return nil;
 	
@@ -730,7 +794,9 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 		
 		if (aLoggerQueue) {
 			loggerQueue = aLoggerQueue;
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
 			dispatch_retain(loggerQueue);
+			#endif
 		}
 	}
 	return self;
@@ -743,9 +809,9 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 
 - (void)dealloc
 {
-	if (loggerQueue) {
-		dispatch_release(loggerQueue);
-	}
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	if (loggerQueue) dispatch_release(loggerQueue);
+	#endif
 }
 
 @end
@@ -756,6 +822,18 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 
 @implementation DDLogMessage
 
+static char *dd_str_copy(const char *str)
+{
+	if (str == NULL) return NULL;
+	
+	size_t length = strlen(str);
+	char * result = malloc(length + 1);
+	strncpy(result, str, length);
+	result[length] = 0;
+	
+	return result;
+}
+
 - (id)initWithLogMsg:(NSString *)msg
                level:(int)level
                 flag:(int)flag
@@ -763,6 +841,8 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
                 file:(const char *)aFile
             function:(const char *)aFunction
                 line:(int)line
+                 tag:(id)aTag
+             options:(DDLogMessageOptions)optionsMask
 {
 	if ((self = [super init]))
 	{
@@ -770,22 +850,25 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 		logLevel   = level;
 		logFlag    = flag;
 		logContext = context;
-		file       = aFile;
-		function   = aFunction;
 		lineNumber = line;
+		tag        = aTag;
+		options    = optionsMask;
+		
+		if (options & DDLogMessageCopyFile)
+			file = dd_str_copy(aFile);
+		else
+			file = (char *)aFile;
+		
+		if (options & DDLogMessageCopyFunction)
+			file = dd_str_copy(aFunction);
+		else
+			function = (char *)aFunction;
 		
 		timestamp = [[NSDate alloc] init];
 		
 		machThreadID = pthread_mach_thread_np(pthread_self());
 		
-		const char *label = dispatch_queue_get_label(dispatch_get_current_queue());
-		if (label)
-		{
-			size_t labelLength = strlen(label);
-			queueLabel = malloc(labelLength+1);
-			strncpy(queueLabel, label, labelLength);
-			queueLabel[labelLength] = 0;
-		}
+		queueLabel = dd_str_copy(dispatch_queue_get_label(dispatch_get_current_queue()));
 		
 		threadName = [[NSThread currentThread] name];
 	}
@@ -794,39 +877,32 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 
 - (NSString *)threadID
 {
-	if (threadID == nil)
-	{
-		threadID = [[NSString alloc] initWithFormat:@"%x", machThreadID];
-	}
-	
-	return threadID;
+	return [[NSString alloc] initWithFormat:@"%x", machThreadID];
 }
 
 - (NSString *)fileName
 {
-	if (fileName == nil && file != NULL)
-	{
-		fileName = ExtractFileNameWithoutExtension(file, NO);
-	}
-	
-	return fileName;
+	return DDExtractFileNameWithoutExtension(file, NO);
 }
 
 - (NSString *)methodName
 {
-	if (methodName == nil && function != NULL)
-	{
-		methodName = [[NSString alloc] initWithUTF8String:function];
-	}
-	
-	return methodName;
+	if (function == NULL)
+		return nil;
+	else
+		return [[NSString alloc] initWithUTF8String:function];
 }
 
 - (void)dealloc
 {
-	if (queueLabel != NULL) {
+	if (file && (options & DDLogMessageCopyFile))
+		free(file);
+	
+	if (function && (options & DDLogMessageCopyFunction))
+		free(function);
+	
+	if (queueLabel)
 		free(queueLabel);
-	}
 }
 
 @end
@@ -854,7 +930,9 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 
 - (void)dealloc
 {
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
 	if (loggerQueue) dispatch_release(loggerQueue);
+	#endif
 }
 
 - (void)logMessage:(DDLogMessage *)logMessage
@@ -879,20 +957,20 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 	// - Must NOT require the logMessage method to acquire a lock.
 	// - Must NOT require the logMessage method to access an atomic property (also a lock of sorts).
 	// 
-	// Thread safety is ensured by executing access to the formatter variable on the logging thread/queue.
-	// This is the same thread/queue that the logMessage method operates on.
+	// Thread safety is ensured by executing access to the formatter variable on the loggerQueue.
+	// This is the same queue that the logMessage method operates on.
 	// 
 	// Note: The last time I benchmarked the performance of direct access vs atomic property access,
 	// direct access was over twice as fast on the desktop and over 6 times as fast on the iPhone.
-	
-		
+	// 
+	// 
 	// loggerQueue  : Our own private internal queue that the logMessage method runs on.
 	//                Operations are added to this queue from the global loggingQueue.
 	// 
 	// loggingQueue : The queue that all log messages go through before they arrive in our loggerQueue.
 	// 
 	// It is important to note that, while the loggerQueue is used to create thread-safety for our formatter,
-	// changes to the formatter variable are queued on the loggingQueue.
+	// changes to the formatter variable are queued through the loggingQueue.
 	// 
 	// Since this will obviously confuse the hell out of me later, here is a better description.
 	// Imagine the following code:
@@ -918,87 +996,62 @@ NSString *ExtractFileNameWithoutExtension(const char *filePath, BOOL copy)
 	// So direct access to the formatter is only available if requested from the loggerQueue.
 	// In all other circumstances we need to go through the loggingQueue to get the proper value.
 	
-	if (dispatch_get_current_queue() == loggerQueue)
+	dispatch_queue_t currentQueue = dispatch_get_current_queue();
+	if (currentQueue == loggerQueue)
 	{
 		return formatter;
 	}
-	
-	__block id <DDLogFormatter> result;
-	
-	dispatch_sync([DDLog loggingQueue], ^{
-		result = formatter;
-	});
-	
-	return result;
+	else
+	{
+		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		
+		__block id <DDLogFormatter> result;
+		
+		dispatch_sync(globalLoggingQueue, ^{
+			dispatch_sync(loggerQueue, ^{
+				result = formatter;
+			});
+		});
+		
+		return result;
+	}
 }
 
 - (void)setLogFormatter:(id <DDLogFormatter>)logFormatter
 {
-	// This method must be thread safe and intuitive.
-	// Therefore if somebody executes the following code:
-	// 
-	// [logger setLogFormatter:myFormatter];
-	// formatter = [logger logFormatter];
-	// 
-	// They would expect formatter to equal myFormatter.
-	// This functionality must be ensured by the getter and setter method.
-	// 
-	// The thread safety must not come at a cost to the performance of the logMessage method.
-	// This method is likely called sporadically, while the logMessage method is called repeatedly.
-	// This means, the implementation of this method:
-	// - Must NOT require the logMessage method to acquire a lock.
-	// - Must NOT require the logMessage method to access an atomic property (also a lock of sorts).
-	// 
-	// Thread safety is ensured by executing access to the formatter variable on the logging thread/queue.
-	// This is the same thread/queue that the logMessage method operates on.
-	// 
-	// Note: The last time I benchmarked the performance of direct access vs atomic property access,
-	// direct access was over twice as fast on the desktop and over 6 times as fast on the iPhone.
+	// The design of this method is documented extensively in the logFormatter message (above in code).
 	
+	dispatch_block_t block = ^{ @autoreleasepool {
 		
-	// loggerQueue  : Our own private internal queue that the logMessage method runs on.
-	//                Operations are added to this queue from the global loggingQueue.
-	//
-	// loggingQueue : The queue that all log messages go through before they arrive in our loggerQueue.
-	// 
-	// It is important to note that, while the loggerQueue is used to create thread-safety for our formatter,
-	// changes to the formatter variable are queued on the loggingQueue.
-	// 
-	// Since this will obviously confuse the hell out of me later, here is a better description.
-	// Imagine the following code:
-	// 
-	// DDLogVerbose(@"log msg 1");
-	// DDLogVerbose(@"log msg 2");
-	// [logger setFormatter:myFormatter];
-	// DDLogVerbose(@"log msg 3");
-	// 
-	// Our intuitive requirement means that the new formatter will only apply to the 3rd log message.
-	// But notice what happens if we have asynchronous logging enabled for verbose mode.
-	// 
-	// Log msg 1 starts executing asynchronously on the loggingQueue.
-	// The loggingQueue executes the log statement on each logger concurrently.
-	// That means it executes log msg 1 on our loggerQueue.
-	// While log msg 1 is executing, log msg 2 gets added to the loggingQueue.
-	// Then the user requests that we change our formatter.
-	// So at this exact moment, our queues look like this:
-	// 
-	// loggerQueue  : executing log msg 1, nil
-	// loggingQueue : executing log msg 1, log msg 2, nil
-	// 
-	// So direct access to the formatter is only available if requested from the loggerQueue.
-	// In all other circumstances we need to go through the loggingQueue to get the proper value.
-	
-	dispatch_block_t block = ^{
 		if (formatter != logFormatter)
 		{
+			if ([formatter respondsToSelector:@selector(willRemoveFromLogger:)]) {
+				[formatter willRemoveFromLogger:self];
+			}
+				
 			formatter = logFormatter;
+			
+			if ([formatter respondsToSelector:@selector(didAddToLogger:)]) {
+				[formatter didAddToLogger:self];
+			}
 		}
-	};
+	}};
 	
-	if (dispatch_get_current_queue() == loggerQueue)
+	dispatch_queue_t currentQueue = dispatch_get_current_queue();
+	if (currentQueue == loggerQueue)
+	{
 		block();
+	}
 	else
-		dispatch_async([DDLog loggingQueue], block);
+	{
+		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		
+		dispatch_async(globalLoggingQueue, ^{
+			dispatch_async(loggerQueue, block);
+		});
+	}
 }
 
 - (dispatch_queue_t)loggerQueue

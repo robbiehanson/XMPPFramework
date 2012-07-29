@@ -377,7 +377,8 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	
 	if (tz != nil) {
 		NSInteger offset = [tz secondsFromGMT];
-		[elem setStringValue:[NSString stringWithFormat:@"%02d:%02d", offset / 3600, (offset % 3600) / 60]];
+		[elem setStringValue:[NSString stringWithFormat:@"%02ld:%02ld",
+							  (long)(offset / 3600), (long)((offset % 3600) / 60)]];
 	} else if (elem != nil) {
 		[self removeChildAtIndex:[[self children] indexOfObject:elem]];
 	}

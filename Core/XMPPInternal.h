@@ -4,18 +4,6 @@
 
 #import "XMPPSASLAuthentication.h"
 
-// Define the various timeouts (in seconds) for retreiving various parts of the XML stream
-#define TIMEOUT_XMPP_WRITE         -1
-#define TIMEOUT_XMPP_READ_START    10
-#define TIMEOUT_XMPP_READ_STREAM   -1
-
-// Define the various tags we'll use to differentiate what it is we're currently reading or writing
-#define TAG_XMPP_READ_START         100
-#define TAG_XMPP_READ_STREAM        101
-#define TAG_XMPP_WRITE_START        200
-#define TAG_XMPP_WRITE_STREAM       201
-#define TAG_XMPP_WRITE_RECEIPT      202
-
 // Define the various states we'll use to track our progress
 enum XMPPStreamState
 {
@@ -48,8 +36,14 @@ typedef enum XMPPStreamState XMPPStreamState;
 **/
 extern NSString *const XMPPStreamDidChangeMyJIDNotification;
 
-@interface XMPPStream (Internal)
+@interface XMPPStream (/* Internal */)
 
+/**
+ * Categories on XMPPStream should maintain thread safety by dispatching through the internal xmppQueue.
+ * They may also need to ensure the stream is in the proper state for their activity.
+**/
+
+@property (readonly) dispatch_queue_t xmppQueue;
 @property (readonly) XMPPStreamState state;
 
 /**
@@ -58,5 +52,11 @@ extern NSString *const XMPPStreamDidChangeMyJIDNotification;
  * as those methods don't send the elements while authentication is in progress.
 **/
 - (void)sendAuthElement:(NSXMLElement *)element;
+
+/**
+ * This method allows you to inject an element into the stream as if it was received on the socket.
+ * This is an advanced technique, but makes for some interesting possibilities.
+**/
+- (void)injectElement:(NSXMLElement *)element;
 
 @end
