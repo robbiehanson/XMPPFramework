@@ -2766,35 +2766,47 @@ enum XMPPStreamConfig
 	// Create a mutable dictionary for security settings
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithCapacity:5];
 	
-	// Get a delegate enumerator
-	GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+	SEL selector = @selector(xmppStream:willSecureWithSettings:);
 	
-	dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-	dispatch_async(concurrentQueue, ^{ @autoreleasepool {
+	if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
+	{
+		// None of the delegates implement the method.
+		// Use a shortcut.
 		
-		// Prompt the delegate(s) to populate the security settings
+		[self continueStartTLS:settings];
+	}
+	else
+	{
+		// Query all interested delegates.
+		// This must be done serially to maintain thread safety.
 		
-		SEL selector = @selector(xmppStream:willSecureWithSettings:);
+		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
-		id delegate;
-		dispatch_queue_t delegateQueue;
-		
-		while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&delegateQueue forSelector:selector])
-		{
-			dispatch_sync(delegateQueue, ^{ @autoreleasepool {
+		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		dispatch_async(concurrentQueue, ^{ @autoreleasepool {
+			
+			// Prompt the delegate(s) to populate the security settings
+			
+			id delegate;
+			dispatch_queue_t delegateQueue;
+			
+			while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&delegateQueue forSelector:selector])
+			{
+				dispatch_sync(delegateQueue, ^{ @autoreleasepool {
+					
+					[delegate xmppStream:self willSecureWithSettings:settings];
+					
+				}});
+			}
+			
+			dispatch_async(xmppQueue, ^{ @autoreleasepool {
 				
-				[delegate xmppStream:self willSecureWithSettings:settings];
+				[self continueStartTLS:settings];
 				
 			}});
-		}
-		
-		dispatch_async(xmppQueue, ^{ @autoreleasepool {
-			
-			[self continueStartTLS:settings];
 			
 		}});
-		
-	}});
+	}
 }
 
 - (void)continueStartTLS:(NSMutableDictionary *)settings
