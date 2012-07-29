@@ -3923,7 +3923,12 @@ enum XMPPStreamConfig
 		
 		while ([autoDelegatesEnumerator getNextDelegate:&delegate delegateQueue:&delegateQueue])
 		{
-			[module removeDelegate:delegate delegateQueue:delegateQueue];
+			// The module itself has dispatch_sync'd in order to invoke its deactivate method,
+			// which has in turn invoked this method. If we call back into the module,
+			// and have it dispatch_sync again, we're going to get a deadlock.
+			// So we must remove the delegate(s) asynchronously.
+			
+			[module removeDelegate:delegate delegateQueue:delegateQueue synchronously:NO];
 		}
 		
 		// Unregister modules
