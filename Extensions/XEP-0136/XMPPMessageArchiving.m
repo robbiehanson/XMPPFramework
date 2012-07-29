@@ -297,7 +297,7 @@
 	
 	if (match == nil)
 	{
-		XMPPLogWarn(@"%@: No message archive rule found for message! Discarding...");
+		XMPPLogWarn(@"%@: No message archive rule found for message! Discarding...", THIS_FILE);
 		return NO;
 	}
 	
