@@ -101,11 +101,11 @@
     } 
     else if ([type isEqualToString:@"error"]) {
         
-        NSXMLElement *serviceUnavailable = [[iq elementForName:@"error"] elementForName:@"service-unavailable" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
+        NSXMLElement *serviceUnavailable = [[iq elementForName:@"error" xmlns:@"jabber:iq:oob"] elementForName:@"service-unavailable" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
         if (serviceUnavailable) {
             
             [multicastDelegate xmppOutOfBand:self didReceiveServiceUnavailable:iq];
-        } else {
+        } else if ([iq elementForName:@"error" xmlns:@"jabber:iq:oob"]){
             [multicastDelegate xmppOutOfBand:self didResultInError:iq];
         }
         
