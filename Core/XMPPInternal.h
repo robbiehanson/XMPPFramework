@@ -2,7 +2,8 @@
 //  This file is for XMPPStream and various internal components.
 //
 
-#import "XMPPSASLAuthentication.h"
+#import "XMPPStream.h"
+#import "XMPPModule.h"
 
 // Define the various states we'll use to track our progress
 enum XMPPStreamState
@@ -58,5 +59,16 @@ extern NSString *const XMPPStreamDidChangeMyJIDNotification;
  * This is an advanced technique, but makes for some interesting possibilities.
 **/
 - (void)injectElement:(NSXMLElement *)element;
+
+@end
+
+@interface XMPPModule (/* Internal */)
+
+/**
+ * Used internally by methods like XMPPStream's unregisterModule:.
+ * Normally removing a delegate is a synchronous operation, but due to multiple dispatch_sync operations,
+ * it must occasionally be done asynchronously to avoid deadlock.
+**/
+- (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue synchronously:(BOOL)synchronously;
 
 @end
