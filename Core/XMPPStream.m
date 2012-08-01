@@ -2685,7 +2685,7 @@ enum XMPPStreamConfig
 		XMPPLogVerbose(@"%@: Initializing parser...", THIS_FILE);
 		
 		// Need to create parser (it was destroyed when the socket was last disconnected)
-		parser = [[XMPPParser alloc] initWithDelegate:self delegateQueue:NULL];
+		parser = [[XMPPParser alloc] initWithDelegate:self delegateQueue:xmppQueue];
 	}
 	else
 	{
