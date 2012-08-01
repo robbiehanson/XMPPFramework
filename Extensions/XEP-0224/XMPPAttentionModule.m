@@ -83,7 +83,7 @@
 }
 
 
-- (BOOL)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
 	// This method is invoked on the moduleQueue.
 	
@@ -97,7 +97,6 @@
 	{
         [multicastDelegate xmppAttention:self didReceiveAttentionHeadlineMessage:message];
     }
-	return YES;
 }
 
 
