@@ -267,7 +267,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	NSXMLElement *name = [self elementForName:@"N"];
 	
 	if (name != nil) {
-		NSXMLElement *part = [name elementForName:@"SUFFIC"];
+		NSXMLElement *part = [name elementForName:@"SUFFIX"];
 		
 		if (part != nil) {
 			result = [part stringValue];
