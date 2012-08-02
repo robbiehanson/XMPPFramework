@@ -3,6 +3,9 @@
 #import "XMPPStream.h"
 #import "XMPPModule.h"
 
+@class XMPPRebindAuthentication;
+
+
 /**
  * Process One has a proprietary module they sell for ejabberd that enables several
  * features such as push notifications and fast reconnect.
@@ -17,8 +20,9 @@
  * 
  * If the session information is available, and the server supports rebind, fast reconnect may be possible.
 **/
-@property (readonly) NSString *savedSessionID;
-@property (readonly) XMPPJID *savedSessionJID;
+@property (strong, readwrite) NSString *savedSessionID;
+@property (strong, readwrite) XMPPJID *savedSessionJID;
+@property (strong, readwrite) NSDate *savedSessionDate;
 
 /**
  * Push Mode Configuration.
@@ -49,6 +53,8 @@
  * If you do, it will send the updated configuration options to the server.
  * 
  * To disable push, you can simply set the pushConfiguration to nil.
+ * 
+ * @see pushConfigurationContainer
 **/
 @property (readwrite, strong) NSXMLElement *pushConfiguration;
 
@@ -74,6 +80,16 @@
 **/
 - (XMPPElementReceipt *)goOnStandby;
 - (XMPPElementReceipt *)goOffStandby;
+
+/**
+ * Methods to help create the pushConfiguration required to enable anything on the server.
+**/
+
++ (NSXMLElement *)pushConfigurationContainer;
+
++ (NSXMLElement *)keepaliveWithMax:(NSTimeInterval)max;
++ (NSXMLElement *)sessionWithDuration:(NSTimeInterval)duration;
++ (NSXMLElement *)statusWithType:(NSString *)type message:(NSString *)message;
 
 @end
 
