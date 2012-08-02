@@ -60,11 +60,18 @@
 
 - (void)setBareJidStr:(NSString *)bareJidStr
 {
+	if ([self.bareJidStr isEqualToString:bareJidStr])
+	{
+		return; // No change
+	}
+	
 	[self willChangeValueForKey:@"bareJid"];
 	[self willChangeValueForKey:@"bareJidStr"];
 	
-	self.primitiveBareJid = [XMPPJID jidWithString:bareJidStr];
-	self.primitiveBareJidStr = bareJidStr;
+	XMPPJID *bareJid = [[XMPPJID jidWithString:bareJidStr] bareJID];
+	
+	self.primitiveBareJid = bareJid;
+	self.primitiveBareJidStr = [bareJid bare];
 	
 	[self didChangeValueForKey:@"bareJid"];
 	[self didChangeValueForKey:@"bareJidStr"];
