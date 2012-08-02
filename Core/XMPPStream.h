@@ -151,12 +151,14 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The default value is defined in DEFAULT_KEEPALIVE_INTERVAL.
  * The minimum value is defined in MIN_KEEPALIVE_INTERVAL.
  * 
- * To disable keep-alive, set the interval to zero.
+ * To disable keep-alive, set the interval to zero (or any non-positive number).
  * 
  * The keep-alive timer (if enabled) fires every (keepAliveInterval / 4) seconds.
  * Upon firing it checks when data was last sent/received,
  * and sends keep-alive data if the elapsed time has exceeded the keepAliveInterval.
  * Thus the effective resolution of the keepalive timer is based on the interval.
+ * 
+ * @see keepAliveWhitespaceCharacter
 **/
 @property (readwrite, assign) NSTimeInterval keepAliveInterval;
 
@@ -168,6 +170,8 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * Valid whitespace characters are space(' '), tab('\t') and newline('\n').
  * 
  * If you attempt to set the character to any non-whitespace character, the attempt is ignored.
+ * 
+ * @see keepAliveInterval
 **/
 @property (readwrite, assign) char keepAliveWhitespaceCharacter;
 
