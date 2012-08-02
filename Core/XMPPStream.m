@@ -215,8 +215,6 @@ enum XMPPStreamConfig
 	numberOfBytesSent = 0;
 	numberOfBytesReceived = 0;
 	
-	parser = [[XMPPParser alloc] initWithDelegate:self delegateQueue:xmppQueue];
-	
 	hostPort = 5222;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
 	keepAliveData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
@@ -1366,6 +1364,17 @@ enum XMPPStreamConfig
 		if (state != STATE_XMPP_CONNECTED)
 		{
 			NSString *errMsg = @"Please wait until the stream is connected.";
+			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+			
+			result = NO;
+			return_from_block;
+		}
+		
+		if ([self isSecure])
+		{
+			NSString *errMsg = @"The connection is already secure.";
 			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
 			
 			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
@@ -2671,25 +2680,19 @@ enum XMPPStreamConfig
 		[self setDidStartNegotiation:YES];
 	}
 	
-	if (state != STATE_XMPP_CONNECTING)
-	{
-		XMPPLogVerbose(@"%@: Resetting parser...", THIS_FILE);
-		
-		// We're restarting our negotiation, so we need to reset the parser.
-		[parser setDelegate:nil delegateQueue:NULL];
-		
-		parser = [[XMPPParser alloc] initWithDelegate:self delegateQueue:xmppQueue];
-	}
-	else if (parser == nil)
+	if (parser == nil)
 	{
 		XMPPLogVerbose(@"%@: Initializing parser...", THIS_FILE);
 		
-		// Need to create parser (it was destroyed when the socket was last disconnected)
+		// Need to create the parser.
 		parser = [[XMPPParser alloc] initWithDelegate:self delegateQueue:xmppQueue];
 	}
 	else
 	{
-		XMPPLogVerbose(@"%@: Not touching parser...", THIS_FILE);
+		XMPPLogVerbose(@"%@: Resetting parser...", THIS_FILE);
+		
+		// We're restarting our negotiation, so we need to reset the parser.
+		parser = [[XMPPParser alloc] initWithDelegate:self delegateQueue:xmppQueue];
 	}
 	
 	NSString *xmlns = @"jabber:client";
@@ -3047,6 +3050,16 @@ enum XMPPStreamConfig
 		{
 			// Now we start our negotiation over again...
 			[self sendOpeningNegotiation];
+			
+			if (![self isSecure])
+			{
+				// Normally we requeue our read operation in xmppParserDidParseData:.
+				// But we just reset the parser, so that code path isn't going to happen.
+				// So start read request here.
+				// The state is STATE_XMPP_OPENING, set via sendOpeningNegotiation method.
+				
+				[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
+			}
 		}
 		else
 		{
@@ -3447,7 +3460,7 @@ enum XMPPStreamConfig
 		{
 			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
 		}
-		else if (state != STATE_XMPP_STARTTLS_2)
+		else
 		{
 			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
 		}
@@ -3748,7 +3761,7 @@ enum XMPPStreamConfig
 		{
 			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
 		}
-		else if (state != STATE_XMPP_STARTTLS_2)
+		else if (state != STATE_XMPP_STARTTLS_2) // Don't queue read operation prior to [asyncSocket startTLS:]
 		{
 			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
 		}
