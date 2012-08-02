@@ -27,9 +27,6 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	NSString *pushIQID;
 }
 
-@property (readwrite) NSString *savedSessionID;
-@property (readwrite) XMPPJID *savedSessionJID;
-
 - (void)sendPushConfiguration;
 
 @end
@@ -79,6 +76,19 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		[[NSUserDefaults standardUserDefaults] setObject:sessionJidStr forKey:XMPPProcessOneSessionJID];
 	else
 		[[NSUserDefaults standardUserDefaults] removeObjectForKey:XMPPProcessOneSessionJID];
+}
+
+- (NSDate *)savedSessionDate
+{
+	return [[NSUserDefaults standardUserDefaults] objectForKey:XMPPProcessOneSessionDate];
+}
+
+- (void)setSavedSessionDate:(NSDate *)savedSessionDate
+{
+	if (savedSessionDate)
+		[[NSUserDefaults standardUserDefaults] setObject:savedSessionDate forKey:XMPPProcessOneSessionDate];
+	else
+		[[NSUserDefaults standardUserDefaults] removeObjectForKey:XMPPProcessOneSessionDate];
 }
 
 - (NSXMLElement *)pushConfiguration
@@ -131,8 +141,9 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	if (pushConfiguration)
 	{
 		pushIQID = [XMPPStream generateUUID];
+		NSXMLElement *push = [pushConfiguration copy];
 		
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:pushIQID child:pushConfiguration];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:pushIQID child:push];
 		
 		[xmppStream sendElement:iq];
 		pushConfigurationSent = YES;
@@ -178,12 +189,6 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-	// Successful authentication via non-rebind.
-	// Save session information.
-	
-	self.savedSessionID = [xmppStream rebindSessionID];
-	self.savedSessionJID = [xmppStream myJID];
-	
 	if (!pushConfigurationSent)
 	{
 		[self sendPushConfiguration];
@@ -192,7 +197,11 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	if (!pushConfigurationConfirmed)
+	if (pushConfigurationConfirmed)
+	{
+		self.savedSessionDate = [[NSDate alloc] init];
+	}
+	else
 	{
 		// The pushConfiguration was sent to the server, but we never received a confirmation.
 		// So either the pushConfiguration never made it to the server,
@@ -202,6 +211,64 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		
 		pushConfigurationSent = NO;
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Configuration Elements
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
++ (NSXMLElement *)pushConfigurationContainer
+{
+	return [NSXMLElement elementWithName:@"push" xmlns:@"p1:push"];
+}
+
++ (NSXMLElement *)keepaliveWithMax:(NSTimeInterval)max
+{
+	// keepalive is the max interval between keepalive events received by server
+	// before going out of reception (in seconds)
+	
+	NSString *maxStr = [NSString stringWithFormat:@"%.0f", max];
+	
+	NSXMLElement *keepalive = [NSXMLElement elementWithName:@"keepalive"];
+	[keepalive addAttributeWithName:@"max" stringValue:maxStr];
+	
+	return keepalive;
+}
+
++ (NSXMLElement *)sessionWithDuration:(NSTimeInterval)durationInSeconds
+{
+	// session is the max time the session is kept before automatically
+	// closing the session while in push mode (in minutes).
+	// 
+	// Max session is 24 hours.
+	// Server can decide to force the session close anyway, if the message queue is getting large.
+	
+	double durationInMinutes = durationInSeconds / 60.0;
+	
+	NSString *durationStr = [NSString stringWithFormat:@"%.0f", durationInMinutes];
+	
+	NSXMLElement *session = [NSXMLElement elementWithName:@"session"];
+	[session addAttributeWithName:@"duration" stringValue:durationStr];
+	
+	return session;
+}
+
++ (NSXMLElement *)statusWithType:(NSString *)type message:(NSString *)message
+{
+	// status (optional) is the XMPP status the user should appear in,
+	// and the message when the XMPP session is not linked to a TCP connection.
+	// 
+	// If omittted, the presence and status is not change when going into disconnected opened session.
+	
+	NSXMLElement *status = [NSXMLElement elementWithName:@"status"];
+	
+	if (type)
+		[status addAttributeWithName:@"type" stringValue:type];
+	
+	if (message)
+		[status setStringValue:message];
+	
+	return status;
 }
 
 @end
@@ -309,19 +376,19 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		
 		// The root element can be properly queried anytime after the
 		// stream:features are received, and TLS has been setup (if required)
-		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		if (self.state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *features = [self.rootElement elementForName:@"stream:features"];
 			NSXMLElement *push = [features elementForName:@"push" xmlns:@"p1:push"];
 			
 			result = (push != nil);
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
-		dispatch_sync(xmppQueue, block);
+		dispatch_sync(self.xmppQueue, block);
 	
 	return result;
 }
@@ -334,19 +401,19 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		
 		// The root element can be properly queried anytime after the
 		// stream:features are received, and TLS has been setup (if required)
-		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		if (self.state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *features = [self.rootElement elementForName:@"stream:features"];
 			NSXMLElement *rebind = [features elementForName:@"rebind" xmlns:@"p1:rebind"];
 			
 			result = (rebind != nil);
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
-		dispatch_sync(xmppQueue, block);
+		dispatch_sync(self.xmppQueue, block);
 	
 	return result;
 }
