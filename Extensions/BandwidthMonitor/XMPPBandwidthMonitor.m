@@ -132,7 +132,16 @@
 		smoothedAverageIncomingBandwidth = 0.0;
 		
 		dispatch_source_cancel(timer);
-		dispatch_release(timer);
+		// iOS >= 6.0 and OS X >= 10.8 apparently no longer need explicit dispatch_release calls when using ARC
+		#if TARGET_OS_IPHONE
+			#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000 // Compiling for iOS < 6.0
+				dispatch_release(timer);
+			#endif
+		#else
+			#if MAC_OS_X_VERSION_MIN_REQUIRED < 1080 // Compiling for OS X < 10.8
+				dispatch_release(timer);
+			#endif
+		#endif
 		timer = NULL;
 	}
 }
