@@ -3,7 +3,7 @@
 //  iPhoneXMPP
 //
 //  Created by Robbie Hanson on 3/18/10.
-//  Copyright __MyCompanyName__ 2010. All rights reserved.
+//  Copyright Deusty, LLC 2012. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

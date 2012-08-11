@@ -232,7 +232,7 @@ static char facebookAppIdKey;
 	if ((self = [self init])) // Note: Using [self init], NOT [super init]
 	{
 		self.facebookAppId = fbAppId;
-		myJID_setByClient = [XMPPJID jidWithString:XMPPFacebookChatHostName];
+		self.myJID = [XMPPJID jidWithString:XMPPFacebookChatHostName];
 		
 		// As of October 8, 2011, Facebook doesn't have their XMPP SRV records set.
 		// And, as per the XMPP specification, we MUST check the XMPP SRV records for an IP address,
@@ -240,7 +240,7 @@ static char facebookAppIdKey;
 		// 
 		// So we're setting the hostname as a minor optimization to avoid the SRV timeout delay.
 		
-		hostName = XMPPFacebookChatHostName;
+		self.hostName = XMPPFacebookChatHostName;
 	}
 	return self;
 }
@@ -253,10 +253,10 @@ static char facebookAppIdKey;
 		result = objc_getAssociatedObject(self, &facebookAppIdKey);
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
-		dispatch_sync(xmppQueue, block);
+		dispatch_sync(self.xmppQueue, block);
 	
 	return result;
 }
@@ -269,10 +269,10 @@ static char facebookAppIdKey;
 		objc_setAssociatedObject(self, &facebookAppIdKey, newFacebookAppId, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
-		dispatch_async(xmppQueue, block);
+		dispatch_async(self.xmppQueue, block);
 }
 
 - (BOOL)supportsXFacebookPlatformAuthentication
@@ -314,10 +314,10 @@ static char facebookAppIdKey;
 	}};
 	
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
-		dispatch_sync(xmppQueue, block);
+		dispatch_sync(self.xmppQueue, block);
 	
 	if (errPtr)
 		*errPtr = err;

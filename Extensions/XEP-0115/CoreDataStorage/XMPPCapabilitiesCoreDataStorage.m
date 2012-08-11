@@ -155,26 +155,32 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 #pragma mark Overrides
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr
-{    
-    BOOL result = [super addPersistentStoreWithPath:storePath error:errorPtr];
-    
-    if (!result &&
-        [*errorPtr code] == NSMigrationMissingSourceModelError &&
-        [[*errorPtr domain] isEqualToString:NSCocoaErrorDomain]) {
-        // If we get this error while trying to add the persistent store, it most likely means the model changed.
-        // Since we are caching capabilities, it is safe to delete the persistent store and create a new one.
-        
-        if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
-        {
-            [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
-            
-            // Try creating the store again, without creating a deletion/creation loop.
-            result = [super addPersistentStoreWithPath:storePath error:errorPtr];
-        }
-    }
-    
-    return result;
+/**
+ * Documentation from the superclass (XMPPCoreDataStorage):
+ *
+ * Override me, if needed, to provide customized behavior.
+ *
+ * For example, if you are using the database for non-persistent data and the model changes, you may want
+ * to delete the database file if it already exists on disk and a core data migration is not worthwhile.
+ *
+ * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
+ * If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
+ *
+ * The default implementation simply writes to the XMPP error log.
+**/
+- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error
+{
+	// Optional hook
+	//
+    // If we ever have problems opening the database file,
+	// it's likely because the model changed or the file became corrupt.
+	//
+	// In this case we don't have to worry about migrating the data, because it's all stored on servers.
+	// So we're just going to delete the sqlite file from disk, and create a new one.
+	
+	[[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
+	
+	[self addPersistentStoreWithPath:storePath error:NULL];
 }
 
 - (void)didCreateManagedObjectContext

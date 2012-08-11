@@ -1,6 +1,7 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "XMPPPrivacy.h"
+#import "NSNumber+XMPP.h"
 
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
@@ -40,7 +41,9 @@ typedef enum XMPPPrivacyQueryInfoType {
 @property (nonatomic, readonly) NSString *privacyListName;
 @property (nonatomic, readonly) NSArray *privacyListItems;
 
-@property (nonatomic, readwrite, retain) dispatch_source_t timer;
+@property (nonatomic, readwrite) dispatch_source_t timer;
+
+- (void)cancel;
 
 + (XMPPPrivacyQueryInfo *)queryInfoWithType:(XMPPPrivacyQueryInfoType)type;
 + (XMPPPrivacyQueryInfo *)queryInfoWithType:(XMPPPrivacyQueryInfoType)type name:(NSString *)name;
@@ -55,6 +58,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 @interface XMPPPrivacy (/* Must be nameless for properties */)
 
 - (void)addQueryInfo:(XMPPPrivacyQueryInfo *)qi withKey:(NSString *)uuid;
+- (void)queryTimeout:(NSString *)uuid;
 
 @end
 
@@ -103,15 +107,6 @@ typedef enum XMPPPrivacyQueryInfoType {
 	// Reserved for possible future use.
 	
 	[super deactivate];
-}
-
-- (void)dealloc
-{
-	[privacyDict release];
-	[activeListName release];
-	[defaultListName release];
-	[pendingQueries release];
-	[super dealloc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,13 +266,10 @@ typedef enum XMPPPrivacyQueryInfoType {
 	}
 	else
 	{
-		dispatch_async(moduleQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_async(moduleQueue, ^{ @autoreleasepool {
 			
 			[privacyDict removeAllObjects];
-			
-			[pool drain];
-		});
+		}});
 	}
 }
 
@@ -291,15 +283,12 @@ typedef enum XMPPPrivacyQueryInfoType {
 	{
 		__block NSArray *result;
 		
-		dispatch_sync(moduleQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_sync(moduleQueue, ^{ @autoreleasepool {
 			
 			result = [[privacyDict allKeys] copy];
-			
-			[pool drain];
-		});
+		}});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -318,8 +307,6 @@ typedef enum XMPPPrivacyQueryInfoType {
 	// ExecuteVoidBlock(moduleQueue, block);
 	// ExecuteNonVoidBlock(moduleQueue, block, NSArray*)
 	
-	int n = MIN(5, 6);
-	
 	if (dispatch_get_current_queue() == moduleQueue)
 	{
 		return block();
@@ -328,15 +315,12 @@ typedef enum XMPPPrivacyQueryInfoType {
 	{
 		__block NSArray *result;
 		
-		dispatch_sync(moduleQueue, ^{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		dispatch_sync(moduleQueue, ^{ @autoreleasepool {
 			
-			result = [block() retain];
-			
-			[pool drain];
-		});
+			result = block();
+		}});
 		
-		return [result autorelease];
+		return result;
 	}
 }
 
@@ -482,11 +466,19 @@ typedef enum XMPPPrivacyQueryInfoType {
 - (void)addQueryInfo:(XMPPPrivacyQueryInfo *)queryInfo withKey:(NSString *)uuid
 {
 	// Setup timer
-	NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:QUERY_TIMEOUT
-	                                                  target:self
-	                                                selector:@selector(queryTimeout:)
-	                                                userInfo:uuid
-	                                                 repeats:NO];
+	
+	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
+	
+	dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
+		
+		[self queryTimeout:uuid];
+	}});
+	
+	dispatch_time_t fireTime = dispatch_time(DISPATCH_TIME_NOW, (QUERY_TIMEOUT * NSEC_PER_SEC));
+	
+	dispatch_source_set_timer(timer, fireTime, DISPATCH_TIME_FOREVER, 1.0);
+	dispatch_resume(timer);
+	
 	queryInfo.timer = timer;
 	
 	// Add to dictionary
@@ -496,7 +488,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 - (void)removeQueryInfo:(XMPPPrivacyQueryInfo *)queryInfo withKey:(NSString *)uuid
 {
 	// Invalidate timer
-	[queryInfo.timer invalidate];
+	[queryInfo cancel];
 	
 	// Remove from dictionary
 	[pendingQueries removeObjectForKey:uuid];
@@ -528,10 +520,8 @@ typedef enum XMPPPrivacyQueryInfoType {
 	}
 }
 
-- (void)queryTimeout:(NSTimer *)timer
+- (void)queryTimeout:(NSString *)uuid
 {
-	NSString *uuid = [timer userInfo];
-	
 	XMPPPrivacyQueryInfo *queryInfo = [privacyDict objectForKey:uuid];
 	if (queryInfo)
 	{
@@ -610,9 +600,6 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 		
 		if ([[iq type] isEqualToString:@"result"])
 		{
-			[activeListName release];
-			[defaultListName release];
-			
 			NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:privacy"];
 			if (query == nil) return;
 			
@@ -742,7 +729,6 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 		
 		if ([[iq type] isEqualToString:@"result"])
 		{
-			[activeListName release];
 			activeListName = [[queryInfo privacyListName] copy];
 			
 			[multicastDelegate xmppPrivacy:self didSetActiveListName:queryInfo.privacyListName];
@@ -776,7 +762,6 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 		
 		if ([[iq type] isEqualToString:@"result"])
 		{
-			[defaultListName release];
 			defaultListName = [[queryInfo privacyListName] copy];
 			
 			[multicastDelegate xmppPrivacy:self didSetDefaultListName:queryInfo.privacyListName];
@@ -933,7 +918,6 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	[item addAttributeWithName:@"action" stringValue:action];
 	[item addAttributeWithName:@"order"  stringValue:order];
 	
-	[order release];
 	return item;
 }
 
@@ -982,13 +966,21 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	return self;
 }
 
+- (void)cancel
+{
+	if (timer)
+	{
+		dispatch_source_cancel(timer);
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		dispatch_release(timer);
+		#endif
+		timer = NULL;
+	}
+}
+
 - (void)dealloc
 {
-	[privacyListName release];
-	[privacyListItems release];
-	[timer invalidate];
-	[timer release];
-	[super dealloc];
+	[self cancel];
 }
 
 + (XMPPPrivacyQueryInfo *)queryInfoWithType:(XMPPPrivacyQueryInfoType)type
@@ -1003,7 +995,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 
 + (XMPPPrivacyQueryInfo *)queryInfoWithType:(XMPPPrivacyQueryInfoType)type name:(NSString *)name items:(NSArray *)items
 {
-	return [[[XMPPPrivacyQueryInfo alloc] initWithType:type name:name items:items] autorelease];
+	return [[XMPPPrivacyQueryInfo alloc] initWithType:type name:name items:items];
 }
 
 @end

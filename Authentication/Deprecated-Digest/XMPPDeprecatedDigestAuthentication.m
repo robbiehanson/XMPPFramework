@@ -122,7 +122,7 @@
 		
 		// The root element can be properly queried for authentication mechanisms anytime after the
 		// stream:features are received, and TLS has been setup (if required)
-		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		if (self.state >= STATE_XMPP_POST_NEGOTIATION)
 		{
 			// Search for an iq element within the rootElement.
 			// Recall that some servers might stupidly add a "jabber:client" namespace which might cause problems
@@ -130,10 +130,10 @@
 			
 			NSXMLElement *iq = nil;
 			
-			NSUInteger i, count = [rootElement childCount];
+			NSUInteger i, count = [self.rootElement childCount];
 			for (i = 0; i < count; i++)
 			{
-				NSXMLNode *childNode = [rootElement childAtIndex:i];
+				NSXMLNode *childNode = [self.rootElement childAtIndex:i];
 				
 				if ([childNode kind] == NSXMLElementKind)
 				{
@@ -151,10 +151,10 @@
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
-		dispatch_sync(xmppQueue, block);
+		dispatch_sync(self.xmppQueue, block);
 	
 	return result;
 }

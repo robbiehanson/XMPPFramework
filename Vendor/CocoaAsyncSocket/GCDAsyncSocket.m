@@ -8,15 +8,10 @@
 //  https://github.com/robbiehanson/CocoaAsyncSocket
 //
 
-#if ! __has_feature(objc_arc)
-#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
-// For more information see: https://github.com/robbiehanson/CocoaAsyncSocket/wiki/ARC
-#endif
-
 #import "GCDAsyncSocket.h"
 
 #if TARGET_OS_IPHONE
-  #import <CFNetwork/CFNetwork.h>
+#import <CFNetwork/CFNetwork.h>
 #endif
 
 #import <arpa/inet.h>
@@ -32,13 +27,44 @@
 #import <sys/uio.h>
 #import <unistd.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+// For more information see: https://github.com/robbiehanson/CocoaAsyncSocket/wiki/ARC
+#endif
+
+/**
+ * Does ARC support support GCD objects?
+ * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
+**/
+#if TARGET_OS_IPHONE
+
+  // Compiling for iOS
+
+  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else                                         // iOS 5.X or earlier
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
+  #endif
+
+#else
+
+  // Compiling for Mac OS X
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
+  #endif
+
+#endif
+
 
 #if 0
 
 // Logging Enabled - See log level below
 
 // Logging uses the CocoaLumberjack framework (which is also GCD based).
-// http://code.google.com/p/cocoalumberjack/
+// https://github.com/robbiehanson/CocoaLumberjack
 // 
 // It allows us to do a lot of logging without significantly slowing down the code.
 #import "DDLog.h"
@@ -972,12 +998,11 @@ enum GCDAsyncSocketConfig
 	if((self = [super init]))
 	{
 		delegate = aDelegate;
+		delegateQueue = dq;
 		
-		if (dq)
-		{
-			dispatch_retain(dq);
-			delegateQueue = dq;
-		}
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		if (dq) dispatch_retain(dq);
+		#endif
 		
 		socket4FD = SOCKET_NULL;
 		socket6FD = SOCKET_NULL;
@@ -992,8 +1017,10 @@ enum GCDAsyncSocketConfig
 			NSAssert(sq != dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
 			         @"The given socketQueue parameter must not be a concurrent queue.");
 			
-			dispatch_retain(sq);
 			socketQueue = sq;
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
+			dispatch_retain(sq);
+			#endif
 		}
 		else
 		{
@@ -1027,12 +1054,15 @@ enum GCDAsyncSocketConfig
 	}
 	
 	delegate = nil;
-	if (delegateQueue)
-		dispatch_release(delegateQueue);
+	
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	if (delegateQueue) dispatch_release(delegateQueue);
+	#endif
 	delegateQueue = NULL;
 	
-	if (socketQueue)
-		dispatch_release(socketQueue);
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	if (socketQueue) dispatch_release(socketQueue);
+	#endif
 	socketQueue = NULL;
 	
 	LogInfo(@"%@ - %@ (finish)", THIS_METHOD, self);
@@ -1109,11 +1139,10 @@ enum GCDAsyncSocketConfig
 {
 	dispatch_block_t block = ^{
 		
-		if (delegateQueue)
-			dispatch_release(delegateQueue);
-		
-		if (newDelegateQueue)
-			dispatch_retain(newDelegateQueue);
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		if (delegateQueue) dispatch_release(delegateQueue);
+		if (newDelegateQueue) dispatch_retain(newDelegateQueue);
+		#endif
 		
 		delegateQueue = newDelegateQueue;
 	};
@@ -1167,11 +1196,10 @@ enum GCDAsyncSocketConfig
 		
 		delegate = newDelegate;
 		
-		if (delegateQueue)
-			dispatch_release(delegateQueue);
-		
-		if (newDelegateQueue)
-			dispatch_retain(newDelegateQueue);
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		if (delegateQueue) dispatch_release(delegateQueue);
+		if (newDelegateQueue) dispatch_retain(newDelegateQueue);
+		#endif
 		
 		delegateQueue = newDelegateQueue;
 	};
@@ -1612,8 +1640,10 @@ enum GCDAsyncSocketConfig
 			
 			dispatch_source_set_cancel_handler(accept4Source, ^{
 				
+				#if NEEDS_DISPATCH_RETAIN_RELEASE
 				LogVerbose(@"dispatch_release(accept4Source)");
 				dispatch_release(acceptSource);
+				#endif
 				
 				LogVerbose(@"close(socket4FD)");
 				close(socketFD);
@@ -1644,8 +1674,10 @@ enum GCDAsyncSocketConfig
 			
 			dispatch_source_set_cancel_handler(accept6Source, ^{
 				
+				#if NEEDS_DISPATCH_RETAIN_RELEASE
 				LogVerbose(@"dispatch_release(accept6Source)");
 				dispatch_release(acceptSource);
+				#endif
 				
 				LogVerbose(@"close(socket6FD)");
 				close(socketFD);
@@ -1779,8 +1811,9 @@ enum GCDAsyncSocketConfig
 			}
 			
 			// Release the socket queue returned from the delegate (it was retained by acceptedSocket)
-			if (childSocketQueue)
-				dispatch_release(childSocketQueue);
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
+			if (childSocketQueue) dispatch_release(childSocketQueue);
+			#endif
 			
 			// The accepted socket should have been retained by the delegate.
 			// Otherwise it gets properly released when exiting the block.
@@ -2340,6 +2373,11 @@ enum GCDAsyncSocketConfig
 		}
 	}
 	
+	// Prevent SIGPIPE signals
+	
+	int nosigpipe = 1;
+	setsockopt(socketFD, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(nosigpipe));
+	
 	// Start the connection process in a background queue
 	
 	int aConnectIndex = connectIndex;
@@ -2488,11 +2526,6 @@ enum GCDAsyncSocketConfig
 		return;
 	}
 	
-	// Prevent SIGPIPE signals
-	
-	int nosigpipe = 1;
-	setsockopt(socketFD, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(nosigpipe));
-	
 	// Setup our read/write sources
 	
 	[self setupReadAndWriteSourcesForNewlyConnectedSocket:socketFD];
@@ -2533,11 +2566,13 @@ enum GCDAsyncSocketConfig
 			[self doConnectTimeout];
 		}});
 		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		dispatch_source_t theConnectTimer = connectTimer;
 		dispatch_source_set_cancel_handler(connectTimer, ^{
 			LogVerbose(@"dispatch_release(connectTimer)");
 			dispatch_release(theConnectTimer);
 		});
+		#endif
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
 		dispatch_source_set_timer(connectTimer, tt, DISPATCH_TIME_FOREVER, 0);
@@ -2638,8 +2673,9 @@ enum GCDAsyncSocketConfig
 			
 			SSLClose(sslContext);
 			
-			#if !TARGET_OS_IPHONE
-			// SSLDisposeContext doesn't exist in iOS for some odd reason.
+			#if TARGET_OS_IPHONE
+			CFRelease(sslContext);
+			#else
 			SSLDisposeContext(sslContext);
 			#endif
 			
@@ -3597,15 +3633,19 @@ enum GCDAsyncSocketConfig
 	
 	__block int socketFDRefCount = 2;
 	
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
 	dispatch_source_t theReadSource = readSource;
 	dispatch_source_t theWriteSource = writeSource;
+	#endif
 	
 	dispatch_source_set_cancel_handler(readSource, ^{
 		
 		LogVerbose(@"readCancelBlock");
 		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		LogVerbose(@"dispatch_release(readSource)");
 		dispatch_release(theReadSource);
+		#endif
 		
 		if (--socketFDRefCount == 0)
 		{
@@ -3618,8 +3658,10 @@ enum GCDAsyncSocketConfig
 		
 		LogVerbose(@"writeCancelBlock");
 		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		LogVerbose(@"dispatch_release(writeSource)");
 		dispatch_release(theWriteSource);
+		#endif
 		
 		if (--socketFDRefCount == 0)
 		{
@@ -5027,11 +5069,13 @@ enum GCDAsyncSocketConfig
 			[self doReadTimeout];
 		}});
 		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		dispatch_source_t theReadTimer = readTimer;
 		dispatch_source_set_cancel_handler(readTimer, ^{
 			LogVerbose(@"dispatch_release(readTimer)");
 			dispatch_release(theReadTimer);
 		});
+		#endif
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
 		
@@ -5333,7 +5377,7 @@ enum GCDAsyncSocketConfig
 			}
 		
 			CFIndex result = CFWriteStreamWrite(writeStream, buffer, (CFIndex)bytesToWrite);
-			LogVerbose(@"CFWriteStreamWrite(%lu) = %li", bytesToWrite, result);
+			LogVerbose(@"CFWriteStreamWrite(%lu) = %li", (unsigned long)bytesToWrite, result);
 		
 			if (result < 0)
 			{
@@ -5553,7 +5597,7 @@ enum GCDAsyncSocketConfig
 	{
 		// Update total amount read for the current write
 		currentWrite->bytesDone += bytesWritten;
-		LogVerbose(@"currentWrite->bytesDone = %lu", currentWrite->bytesDone);
+		LogVerbose(@"currentWrite->bytesDone = %lu", (unsigned long)currentWrite->bytesDone);
 		
 		// Is packet done?
 		done = (currentWrite->bytesDone == [currentWrite->buffer length]);
@@ -5655,11 +5699,13 @@ enum GCDAsyncSocketConfig
 			[self doWriteTimeout];
 		}});
 		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		dispatch_source_t theWriteTimer = writeTimer;
 		dispatch_source_set_cancel_handler(writeTimer, ^{
 			LogVerbose(@"dispatch_release(writeTimer)");
 			dispatch_release(theWriteTimer);
 		});
+		#endif
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
 		
