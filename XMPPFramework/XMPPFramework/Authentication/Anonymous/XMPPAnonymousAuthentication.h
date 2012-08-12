@@ -43,4 +43,3 @@
 - (BOOL)authenticateAnonymously:(NSError **)errPtr;
 
 @end
-

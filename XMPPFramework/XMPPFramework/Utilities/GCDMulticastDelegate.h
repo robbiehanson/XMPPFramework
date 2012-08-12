@@ -36,6 +36,8 @@
 - (NSUInteger)countOfClass:(Class)aClass;
 - (NSUInteger)countForSelector:(SEL)aSelector;
 
+- (BOOL)hasDelegateThatRespondsToSelector:(SEL)aSelector;
+
 - (GCDMulticastDelegateEnumerator *)delegateEnumerator;
 
 @end
