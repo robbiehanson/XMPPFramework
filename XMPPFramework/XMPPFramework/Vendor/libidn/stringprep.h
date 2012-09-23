@@ -44,14 +44,14 @@
 
 # include <stddef.h>		/* size_t */
 # include <sys/types.h>		/* ssize_t */
-# include "idn-int.h"		/* uint32_t */
+# include <idn-int.h>		/* uint32_t */
 
 # ifdef __cplusplus
 extern "C"
 {
 # endif
 
-# define STRINGPREP_VERSION "1.24"
+# define STRINGPREP_VERSION "1.25"
 
 /* Error codes. */
   typedef enum

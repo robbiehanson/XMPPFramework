@@ -14,8 +14,7 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 /*
  * ISO C 99 <stdint.h> for platforms that lack it.
@@ -34,6 +33,16 @@
    problems with (for example) VMS, whose <sys/bitypes.h> includes
    <inttypes.h>.  */
 #define _GL_JUST_INCLUDE_SYSTEM_INTTYPES_H
+
+/* On Android (Bionic libc), <sys/types.h> includes this file before
+   having defined 'time_t'.  Therefore in this case avoid including
+   other system header files; just include the system's <stdint.h>.
+   Ideally we should test __BIONIC__ here, but it is only defined after
+   <sys/cdefs.h> has been included; hence test __ANDROID__ instead.  */
+#if defined __ANDROID__ \
+    && defined _SYS_TYPES_H_ && !defined _SSIZE_T_DEFINED_
+# include <stdint.h>
+#else
 
 /* Get those types that are already defined in other system include
    files, so that we can "#define int8_t signed char" below without
@@ -82,7 +91,8 @@
 # include <sys/types.h>
 #endif
 
-/* Get LONG_MIN, LONG_MAX, ULONG_MAX.  */
+/* Get SCHAR_MIN, SCHAR_MAX, UCHAR_MAX, INT_MIN, INT_MAX,
+   LONG_MIN, LONG_MAX, ULONG_MAX.  */
 #include <limits.h>
 
 #if 1
@@ -238,8 +248,9 @@ typedef unsigned long long int gl_uint64_t;
 
 /* Here we assume a standard architecture where the hardware integer
    types have 8, 16, 32, optionally 64 bits. Therefore the fastN_t types
-   are taken from the same list of types.  Assume that 'long int'
-   is fast enough for all narrower integers.  */
+   are taken from the same list of types.  The following code normally
+   uses types consistent with glibc, as that lessens the chance of
+   incompatibility with older GNU hosts.  */
 
 #undef int_fast8_t
 #undef uint_fast8_t
@@ -249,12 +260,21 @@ typedef unsigned long long int gl_uint64_t;
 #undef uint_fast32_t
 #undef int_fast64_t
 #undef uint_fast64_t
-typedef long int gl_int_fast8_t;
-typedef unsigned long int gl_uint_fast8_t;
-typedef long int gl_int_fast16_t;
-typedef unsigned long int gl_uint_fast16_t;
+typedef signed char gl_int_fast8_t;
+typedef unsigned char gl_uint_fast8_t;
+
+#ifdef __sun
+/* Define types compatible with SunOS 5.10, so that code compiled under
+   earlier SunOS versions works with code compiled under SunOS 5.10.  */
+typedef int gl_int_fast32_t;
+typedef unsigned int gl_uint_fast32_t;
+#else
 typedef long int gl_int_fast32_t;
 typedef unsigned long int gl_uint_fast32_t;
+#endif
+typedef gl_int_fast32_t gl_int_fast16_t;
+typedef gl_uint_fast32_t gl_uint_fast16_t;
+
 #define int_fast8_t gl_int_fast8_t
 #define uint_fast8_t gl_uint_fast8_t
 #define int_fast16_t gl_int_fast16_t
@@ -410,23 +430,29 @@ typedef int _verify_intmax_size[sizeof (intmax_t) == sizeof (uintmax_t)
 #undef INT_FAST8_MIN
 #undef INT_FAST8_MAX
 #undef UINT_FAST8_MAX
-#define INT_FAST8_MIN  LONG_MIN
-#define INT_FAST8_MAX  LONG_MAX
-#define UINT_FAST8_MAX  ULONG_MAX
+#define INT_FAST8_MIN  SCHAR_MIN
+#define INT_FAST8_MAX  SCHAR_MAX
+#define UINT_FAST8_MAX  UCHAR_MAX
 
 #undef INT_FAST16_MIN
 #undef INT_FAST16_MAX
 #undef UINT_FAST16_MAX
-#define INT_FAST16_MIN  LONG_MIN
-#define INT_FAST16_MAX  LONG_MAX
-#define UINT_FAST16_MAX  ULONG_MAX
+#define INT_FAST16_MIN  INT_FAST32_MIN
+#define INT_FAST16_MAX  INT_FAST32_MAX
+#define UINT_FAST16_MAX  UINT_FAST32_MAX
 
 #undef INT_FAST32_MIN
 #undef INT_FAST32_MAX
 #undef UINT_FAST32_MAX
-#define INT_FAST32_MIN  LONG_MIN
-#define INT_FAST32_MAX  LONG_MAX
-#define UINT_FAST32_MAX  ULONG_MAX
+#ifdef __sun
+# define INT_FAST32_MIN  INT_MIN
+# define INT_FAST32_MAX  INT_MAX
+# define UINT_FAST32_MAX  UINT_MAX
+#else
+# define INT_FAST32_MIN  LONG_MIN
+# define INT_FAST32_MAX  LONG_MAX
+# define UINT_FAST32_MAX  ULONG_MAX
+#endif
 
 #undef INT_FAST64_MIN
 #undef INT_FAST64_MAX
@@ -608,4 +634,5 @@ typedef int _verify_intmax_size[sizeof (intmax_t) == sizeof (uintmax_t)
 #endif
 
 #endif /* _GL_LGL_STDINT_H */
+#endif /* !(defined __ANDROID__ && ...) */
 #endif /* !defined _GL_LGL_STDINT_H && !defined _GL_JUST_INCLUDE_SYSTEM_STDINT_H */
