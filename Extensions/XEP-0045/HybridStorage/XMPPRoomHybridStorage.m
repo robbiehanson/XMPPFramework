@@ -8,9 +8,35 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+/**
+ * Does ARC support support GCD objects?
+ * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
+**/
+#if TARGET_OS_IPHONE
+
+  // Compiling for iOS
+
+  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else                                         // iOS 5.X or earlier
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
+  #endif
+
+#else
+
+  // Compiling for Mac OS X
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
+  #endif
+
+#endif
+
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -80,11 +106,55 @@ static XMPPRoomHybridStorage *sharedInstance;
 	pausedMessageDeletion = [[NSMutableSet alloc] init];
 }
 
+/**
+ * Documentation from the superclass (XMPPCoreDataStorage):
+ * 
+ * Override me, if needed, to provide customized behavior.
+ * 
+ * This method is queried to get the name of the ManagedObjectModel within the app bundle.
+ * It should return the name of the appropriate file (*.xdatamodel / *.mom / *.momd) sans file extension.
+ * 
+ * The default implementation returns the name of the subclass, stripping any suffix of "CoreDataStorage".
+ * E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtension".
+ * 
+ * Note that a file extension should NOT be included.
+**/
 - (NSString *)managedObjectModelName
 {
-	// This method overrides [XMPPCoreDataStorage managedObjectModelName].
+	// Optional hook
+	// 
+	// The default implementation would return "XMPPPRoomHybridStorage".
+	// We prefer a slightly shorter version.
 	
 	return @"XMPPRoomHybrid";
+}
+
+/**
+ * Documentation from the superclass (XMPPCoreDataStorage):
+ * 
+ * Override me, if needed, to provide customized behavior.
+ *
+ * For example, if you are using the database for non-persistent data and the model changes, you may want
+ * to delete the database file if it already exists on disk and a core data migration is not worthwhile.
+ *
+ * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
+ * If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
+ *
+ * The default implementation simply writes to the XMPP error log.
+**/
+- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error
+{
+	// Optional hook
+	//
+    // If we ever have problems opening the database file,
+	// it's likely because the model changed or the file became corrupt.
+	//
+	// In this case we don't have to worry about migrating the data, because it's all stored on servers.
+	// So we're just going to delete the sqlite file from disk, and create a new one.
+	
+	[[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
+	
+	[self addPersistentStoreWithPath:storePath error:NULL];
 }
 
 - (void)dealloc
@@ -337,7 +407,9 @@ static XMPPRoomHybridStorage *sharedInstance;
 	if (deleteTimer)
 	{
 		dispatch_source_cancel(deleteTimer);
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		dispatch_release(deleteTimer);
+		#endif
 		deleteTimer = NULL;
 	}
 }

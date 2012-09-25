@@ -3,9 +3,9 @@
 //  
 //  This class is in the public domain.
 //  Originally created by Robbie Hanson in Q3 2010.
-//  Updated and maintained by Deusty LLC and the Mac development community.
+//  Updated and maintained by Deusty LLC and the Apple development community.
 //  
-//  http://code.google.com/p/cocoaasyncsocket/
+//  https://github.com/robbiehanson/CocoaAsyncSocket
 //
 
 #import <Foundation/Foundation.h>
@@ -15,6 +15,7 @@
 
 @class GCDAsyncReadPacket;
 @class GCDAsyncWritePacket;
+@class GCDAsyncSocketPreBuffer;
 
 #if TARGET_OS_IPHONE
 
@@ -128,7 +129,7 @@ typedef enum GCDAsyncSocketError GCDAsyncSocketError;
 	
 	unsigned long socketFDBytesAvailable;
 	
-	NSMutableData *partialReadBuffer;
+	GCDAsyncSocketPreBuffer *preBuffer;
 		
 #if TARGET_OS_IPHONE
 	CFStreamClientContext streamContext;
@@ -137,8 +138,9 @@ typedef enum GCDAsyncSocketError GCDAsyncSocketError;
 #endif
 #if SECURE_TRANSPORT_MAYBE_AVAILABLE
 	SSLContextRef sslContext;
-	NSMutableData *sslReadBuffer;
+	GCDAsyncSocketPreBuffer *sslPreBuffer;
 	size_t sslWriteCachedLength;
+	OSStatus sslErrCode;
 #endif
 	
 	id userData;
@@ -702,6 +704,12 @@ typedef enum GCDAsyncSocketError GCDAsyncSocketError;
              maxLength:(NSUInteger)length
                    tag:(long)tag;
 
+/**
+ * Returns progress of the current read, from 0.0 to 1.0, or NaN if no current read (use isnan() to check).
+ * The parameters "tag", "done" and "total" will be filled in if they aren't NULL.
+**/
+- (float)progressOfReadReturningTag:(long *)tagPtr bytesDone:(NSUInteger *)donePtr total:(NSUInteger *)totalPtr;
+
 #pragma mark Writing
 
 /**
@@ -722,6 +730,12 @@ typedef enum GCDAsyncSocketError GCDAsyncSocketError;
  * when the delegate method notifies you), then you should first copy the bytes, and pass the copy to this method.
 **/
 - (void)writeData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(long)tag;
+
+/**
+ * Returns progress of the current write, from 0.0 to 1.0, or NaN if no current write (use isnan() to check).
+ * The parameters "tag", "done" and "total" will be filled in if they aren't NULL.
+**/
+- (float)progressOfWriteReturningTag:(long *)tagPtr bytesDone:(NSUInteger *)donePtr total:(NSUInteger *)totalPtr;
 
 #pragma mark Security
 

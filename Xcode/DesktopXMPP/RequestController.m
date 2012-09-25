@@ -73,7 +73,7 @@
 		XMPPJID *jid = [jids objectAtIndex:jidIndex];
 		
 		[jidField setStringValue:[jid bare]];
-		[xofyField setStringValue:[NSString stringWithFormat:@"%i of %i", (jidIndex+1), [jids count]]];
+		[xofyField setStringValue:[NSString stringWithFormat:@"%i of %i", (jidIndex+1), (int)[jids count]]];
 	}
 	else
 	{
@@ -107,7 +107,7 @@
 		}
 		else
 		{
-			[xofyField setStringValue:[NSString stringWithFormat:@"%i of %i", (jidIndex+1), [jids count]]];
+			[xofyField setStringValue:[NSString stringWithFormat:@"%i of %i", (jidIndex+1), (int)[jids count]]];
 			[xofyField setHidden:NO];
 		}
 	}

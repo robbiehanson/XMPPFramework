@@ -148,7 +148,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 }
 
 
-- (void)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {
+- (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {
 	XMPPLogTrace();
     
 	NSXMLElement *currentXElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
@@ -179,6 +179,8 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	[presence addChild:xElement];
     
 	// Question: If photoElement is nil, should we be adding xElement?
+	
+	return presence;
 }
 
 

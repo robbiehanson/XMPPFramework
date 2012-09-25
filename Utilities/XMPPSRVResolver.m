@@ -15,6 +15,32 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+/**
+ * Does ARC support support GCD objects?
+ * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
+**/
+#if TARGET_OS_IPHONE
+
+  // Compiling for iOS
+
+  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else                                         // iOS 5.X or earlier
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
+  #endif
+
+#else
+
+  // Compiling for Mac OS X
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
+  #else
+    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
+  #endif
+
+#endif
+
 NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 // Log levels: off, error, warn, info, verbose
@@ -54,12 +80,17 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 		
 		delegate = aDelegate;
 		delegateQueue = dq;
+		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		dispatch_retain(delegateQueue);
+		#endif
 		
 		if (rq)
 		{
 			resolverQueue = rq;
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
 			dispatch_retain(resolverQueue);
+			#endif
 		}
 		else
 		{
@@ -77,10 +108,10 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	
     [self stop];
 	
+	#if NEEDS_DISPATCH_RETAIN_RELEASE
 	if (resolverQueue)
 		dispatch_release(resolverQueue);
-	
-    
+	#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -505,14 +536,18 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 			
 		}});
 		
+		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		dispatch_source_t theSdReadSource = sdReadSource;
+		#endif
 		DNSServiceRef theSdRef = sdRef;
 		
 		dispatch_source_set_cancel_handler(sdReadSource, ^{ @autoreleasepool {
 			
 			XMPPLogVerbose(@"%@: sdReadSource_cancelHandler", THIS_FILE);
 			
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
 			dispatch_release(theSdReadSource);
+			#endif
 			DNSServiceRefDeallocate(theSdRef);
 			
 		}});
@@ -560,7 +595,9 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		delegate = nil;
 		if (delegateQueue)
 		{
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
 			dispatch_release(delegateQueue);
+			#endif
 			delegateQueue = NULL;
 		}
 		
@@ -581,7 +618,9 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		if (timeoutTimer)
 		{
 			dispatch_source_cancel(timeoutTimer);
+			#if NEEDS_DISPATCH_RETAIN_RELEASE
 			dispatch_release(timeoutTimer);
+			#endif
 			timeoutTimer = NULL;
 		}
 		
