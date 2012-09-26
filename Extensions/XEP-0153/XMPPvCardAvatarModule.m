@@ -255,7 +255,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 }
 
 - (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule{
-		//The vCard has been updated on the server so we need to cache it
+    //The vCard has been updated on the server so we need to cache it
     [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] useCache:NO]; 
 }
 
