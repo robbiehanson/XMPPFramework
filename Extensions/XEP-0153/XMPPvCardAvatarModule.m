@@ -202,9 +202,12 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
     NSString *photoHash = [photoElement stringValue];
 
 	XMPPJID *jid = [presence from];
+    
+    NSString *savedPhotoHash = [_moduleStorage photoHashForJID:jid xmppStream:xmppStream];
 
 	// check the hash
-	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]) {
+	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]
+        && !([photoHash length] == 0 && [savedPhotoHash length] == 0)) {
 		[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:NO];
 	}
 }
