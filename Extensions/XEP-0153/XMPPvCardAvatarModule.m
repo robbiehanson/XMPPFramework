@@ -193,11 +193,13 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		return;
 	}
 
-	NSString *photoHash = [[xElement elementForName:kXMPPvCardAvatarPhotoElement] stringValue];
+	NSXMLElement *photoElement = [xElement elementForName:kXMPPvCardAvatarPhotoElement];
 
-	if (photoHash == nil || [photoHash isEqualToString:@""]) {
+	if (photoElement == nil) {
 		return;
 	}
+    
+    NSString *photoHash = [photoElement stringValue];
 
 	XMPPJID *jid = [presence from];
 
@@ -255,7 +257,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 }
 
 - (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule{
-		//The vCard has been updated on the server so we need to cache it
+    //The vCard has been updated on the server so we need to cache it
     [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] useCache:NO]; 
 }
 
