@@ -110,10 +110,13 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		#else
 			NSImage *photo = [[NSImage alloc] initWithData:photoData];
 		#endif
-			
-			[multicastDelegate xmppvCardAvatarModule:self 
-			                         didReceivePhoto:photo 
-			                                  forJID:jid];
+            
+//
+// This causes an infinte loop
+//
+//			[multicastDelegate xmppvCardAvatarModule:self 
+//			                         didReceivePhoto:photo 
+//			                                  forJID:jid];
 		}
 		
 	}};
