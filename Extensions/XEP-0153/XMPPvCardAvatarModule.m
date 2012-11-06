@@ -103,21 +103,6 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		{
 			[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
 		}
-		else
-		{
-		#if TARGET_OS_IPHONE
-			UIImage *photo = [UIImage imageWithData:photoData];
-		#else
-			NSImage *photo = [[NSImage alloc] initWithData:photoData];
-		#endif
-            
-//
-// This causes an infinte loop
-//
-//			[multicastDelegate xmppvCardAvatarModule:self 
-//			                         didReceivePhoto:photo 
-//			                                  forJID:jid];
-		}
 		
 	}};
 	
@@ -247,8 +232,6 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	 * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
 	 */
     
-    NSString *photoHash = [_moduleStorage photoHashForJID:[xmppStream myJID] xmppStream:xmppStream];
-
 	if ([[xmppStream myJID] isEqualToJID:jid options:XMPPJIDCompareBare])
 	{
 		XMPPPresence *presence = xmppStream.myPresence;
