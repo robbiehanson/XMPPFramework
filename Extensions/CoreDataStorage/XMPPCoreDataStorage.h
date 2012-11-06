@@ -123,4 +123,6 @@
 **/
 @property (strong, readonly) NSManagedObjectContext *mainThreadManagedObjectContext;
 
+- (void)resetManagedObjectContext;
+
 @end

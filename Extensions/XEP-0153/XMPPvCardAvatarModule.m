@@ -5,15 +5,6 @@
 //  Created by Eric Chamberlain on 3/9/11.
 //  Copyright 2011 RF.com. All rights reserved.
 
-
-// TODO: publish after upload vCard
-/*
- * XEP-0153 Section 4.2 rule 1
- *
- * However, a client MUST advertise an image if it has just uploaded the vCard with a new avatar 
- * image. In this case, the client MAY choose not to redownload the vCard to verify its contents.
- */
-
 #import "XMPPvCardAvatarModule.h"
 
 #import "NSData+XMPP.h"
@@ -112,18 +103,6 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		{
 			[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
 		}
-		else
-		{
-		#if TARGET_OS_IPHONE
-			UIImage *photo = [UIImage imageWithData:photoData];
-		#else
-			NSImage *photo = [[NSImage alloc] initWithData:photoData];
-		#endif
-			
-			[multicastDelegate xmppvCardAvatarModule:self 
-			                         didReceivePhoto:photo 
-			                                  forJID:jid];
-		}
 		
 	}};
 	
@@ -147,7 +126,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	 * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
 	 * Once it has done this, it MAY advertise an image. 
 	 */
-	[_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:xmppStream];
+	[_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:sender];
 }
 
 
@@ -159,22 +138,34 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {
 	XMPPLogTrace();
-
+    
+	NSXMLElement *currentXElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+	
+	//If there is already a x element then remove it
+	if(currentXElement)
+	{
+	    NSUInteger currentXElementIndex = [[presence children] indexOfObject:currentXElement];
+	    
+	    if(currentXElementIndex != NSNotFound)
+	    {
+	        [presence removeChildAtIndex:currentXElementIndex];
+	    }
+	}
 	// add our photo info to the presence stanza
 	NSXMLElement *photoElement = nil;
 	NSXMLElement *xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
 
-	NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:xmppStream];
+	NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:sender];
 
 	if (photoHash != nil) {
-		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
+	    photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
 	} else {
-		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement];
+	    photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement];
 	}
 
 	[xElement addChild:photoElement];
 	[presence addChild:xElement];
-
+    
 	// Question: If photoElement is nil, should we be adding xElement?
 	
 	return presence;
@@ -190,16 +181,21 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		return;
 	}
 
-	NSString *photoHash = [[xElement elementForName:kXMPPvCardAvatarPhotoElement] stringValue];
+	NSXMLElement *photoElement = [xElement elementForName:kXMPPvCardAvatarPhotoElement];
 
-	if (photoHash == nil || [photoHash isEqualToString:@""]) {
+	if (photoElement == nil) {
 		return;
 	}
+    
+    NSString *photoHash = [photoElement stringValue];
 
 	XMPPJID *jid = [presence from];
+    
+    NSString *savedPhotoHash = [_moduleStorage photoHashForJID:jid xmppStream:xmppStream];
 
 	// check the hash
-	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]) {
+	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]
+        && !([photoHash length] == 0 && [savedPhotoHash length] == 0)) {
 		[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:NO];
 	}
 }
@@ -235,13 +231,28 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	 * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
 	 * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
 	 */
+    
 	if ([[xmppStream myJID] isEqualToJID:jid options:XMPPJIDCompareBare])
 	{
 		XMPPPresence *presence = xmppStream.myPresence;
-		if(presence) {
-			[xmppStream sendElement:presence];
-		}
+        
+        if(presence)
+        {
+            [xmppStream sendElement:presence];
+        }
+
+
 	}
+}
+
+- (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule{
+    //The vCard has been updated on the server so we need to cache it
+    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] useCache:NO]; 
+}
+
+- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule failedToUpdateMyvCard:(NSXMLElement *)error{
+		//The vCard failed to update so we fetch the current one from the server
+    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] useCache:NO];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

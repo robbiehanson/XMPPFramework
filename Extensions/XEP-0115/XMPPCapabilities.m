@@ -1532,19 +1532,36 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 	else if ([type isEqualToString:@"available"])
 	{
-		if (myCapabilitiesQuery == nil)
-		{
-			// It appears we haven't collected our list of capabilites yet.
-			// This will need to be done before we can add the hash to the outgoing presence element.
-			
-			[self collectMyCapabilities];
-		}
-		else if (myCapabilitiesC)
-		{
-			NSXMLElement *c = [myCapabilitiesC copy];
-			
-			[presence addChild:c];
-		}
+        
+        NSXMLElement *cElement = [presence elementForName:@"c" xmlns:XMLNS_CAPS];
+        
+        //Remove the existing C Element
+        if(cElement)
+        {
+            NSUInteger currentCElementIndex = [[presence children] indexOfObject:cElement];
+            
+            if(currentCElementIndex != NSNotFound)
+            {
+                [presence removeChildAtIndex:currentCElementIndex];
+            }
+        }
+        
+        // The capabilities have already been set (maybe the existing presence is being resent?)
+        // So don't add them again
+        
+        if (myCapabilitiesQuery == nil)
+        {
+            // It appears we haven't collected our list of capabilites yet.
+            // This will need to be done before we can add the hash to the outgoing presence element.
+            
+            [self collectMyCapabilities];
+        }
+        else if (myCapabilitiesC)
+        {
+            NSXMLElement *c = [myCapabilitiesC copy];
+            
+            [presence addChild:c];
+        }
 	}
 	
 	return presence;

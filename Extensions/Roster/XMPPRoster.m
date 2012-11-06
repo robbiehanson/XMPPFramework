@@ -804,4 +804,36 @@ enum XMPPRosterFlags
 
 #endif
 
+- (void)refetchRoster
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+        [self setRequestedRoster:NO];
+        [self setHasRoster:NO];
+        
+        [earlyPresenceElements removeAllObjects];
+		
+		// <iq type="get">
+		//   <query xmlns="jabber:iq:roster"/>
+		// </iq>
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+		
+		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+		[iq addAttributeWithName:@"type" stringValue:@"get"];
+		[iq addChild:query];
+		
+		[xmppStream sendElement:iq];
+		
+		[self setRequestedRoster:YES];
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
 @end
