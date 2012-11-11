@@ -1,0 +1,40 @@
+@subheading punycode_decode
+@anchor{punycode_decode}
+@deftypefun {int} {punycode_decode} (size_t @var{input_length}, const char [] @var{input}, size_t * @var{output_length}, punycode_uint [] @var{output}, unsigned char [] @var{case_flags})
+@var{input_length}: The number of ASCII code points in the @code{input} array.
+
+@var{input}: An array of ASCII code points (0..7F).
+
+@var{output_length}: The caller passes in the maximum number of code
+points that it can receive into the @code{output} array (which is also
+the maximum number of flags that it can receive into the
+@code{case_flags} array, if @code{case_flags} is not a @code{NULL} pointer).  On
+successful return it will contain the number of code points
+actually output (which is also the number of flags actually
+output, if case_flags is not a null pointer).  The decoder will
+never need to output more code points than the number of ASCII
+code points in the input, because of the way the encoding is
+defined.  The number of code points output cannot exceed the
+maximum possible value of a punycode_uint, even if the supplied
+@code{output_length} is greater than that.
+
+@var{output}: An array of code points like the input argument of
+@code{punycode_encode()} (see above).
+
+@var{case_flags}: A @code{NULL} pointer (if the flags are not needed by the
+caller) or an array of boolean values parallel to the @code{output}
+array.  Nonzero (true, flagged) suggests that the corresponding
+Unicode character be forced to uppercase by the caller (if
+possible), and zero (false, unflagged) suggests that it be forced
+to lowercase (if possible).  ASCII code points (0..7F) are output
+already in the proper case, but their flags will be set
+appropriately so that applying the flags would be harmless.
+
+Converts Punycode to a sequence of code points (presumed to be
+Unicode code points).
+
+@strong{Return value:} The return value can be any of the @code{Punycode_status}
+values defined above.  If not @code{PUNYCODE_SUCCESS}, then
+@code{output_length}, @code{output}, and @code{case_flags} might contain garbage.
+@end deftypefun
+

@@ -1,0 +1,17 @@
+@subheading idna_to_ascii_4z
+@anchor{idna_to_ascii_4z}
+@deftypefun {int} {idna_to_ascii_4z} (const uint32_t * @var{input}, char ** @var{output}, int @var{flags})
+@var{input}: zero terminated input Unicode string.
+
+@var{output}: pointer to newly allocated output string.
+
+@var{flags}: an @code{Idna_flags} value, e.g., @code{IDNA_ALLOW_UNASSIGNED} or
+@code{IDNA_USE_STD3_ASCII_RULES}.
+
+Convert UCS-4 domain name to ASCII string.  The domain name may
+contain several labels, separated by dots.  The output buffer must
+be deallocated by the caller.
+
+@strong{Return value:} Returns @code{IDNA_SUCCESS} on success, or error code.
+@end deftypefun
+

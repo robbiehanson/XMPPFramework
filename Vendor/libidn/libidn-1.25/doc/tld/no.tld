@@ -1,0 +1,59 @@
+# Copyright (C) 2003-2012 Free Software Foundation, Inc.
+# Author: Thomas Jacob, Internet24.de.
+
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice, this notice and the source URL list below are preserved.
+
+# See http://www.norid.no/domeneregistrering/idn/idn_nyetegn.html
+# http://www.norid.no/regelverk/forslag/idn-2003/index.en.html
+# http://www.norid.no/regelverk/forslag/idn-2003/2003-02-18.en.html
+
+# --- snip ---
+#
+# From Hilde.Thunem at uninett.no Tue Mar  9 14:12:49 2004
+# Message-Id: <200403091312.i29DClR3028354 at valgrind.uninett.no>
+# Subject: Re: NI2004012700128 Copyright of IDN character set tables
+#
+# Hi.
+#
+# You may use the character list freely. The only thing we would ask of you is
+# that you give some reference as to where you have found it. This is to ensure
+# that people that want to see the latest updated list know where to go (it may
+# change if the languages changes - although I doubt that will happen). It also
+# gives the opportunity for those interested in the background for why those
+# characters have been chosen (e.g. that the language councils of Norway has
+# been involved) to read about the process.
+#
+# Kind regards,
+# Hilde Thunem
+# NORID
+#
+# --- snap ---
+
+version "1.0"
+tld no
+
+U+00E1 # a med akutt aksent / á 00E1
+U+00E0 # a med gravis-aksent / à 00E0
+U+00E4 # a med omlyd / ä 00E4
+U+010D # c med caron
+U+00E7 # c med cedille / ç 00E7
+U+0111 # d med strek
+U+00E9 # e med akutt aksent / é
+U+00E8 # e med gravis-aksent / è
+U+00EA # e med circumflex-aksent / ê
+U+014B # eng
+U+0144 # n med akutt aksent
+U+00F1 # n med tilde / ñ
+U+00F3 # o med akutt aksent / ó
+U+00F2 # o med gravis-aksent / ò
+U+00F4 # o med circumflex-aksent / ô
+U+00F6 # o med omlyd / ö
+U+0161 # s med caron
+U+0167 # t med strek
+U+00FC # u med omlyd / ü
+U+017E # z med caron
+U+00E6 # æ
+U+00F8 # ø
+U+00E5 # å

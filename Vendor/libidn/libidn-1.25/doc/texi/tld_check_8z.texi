@@ -1,0 +1,27 @@
+@subheading tld_check_8z
+@anchor{tld_check_8z}
+@deftypefun {int} {tld_check_8z} (const char * @var{in}, size_t * @var{errpos}, const Tld_table ** @var{overrides})
+@var{in}: Zero-terminated UTF8 string to process.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{overrides}: A @code{Tld_table} array of additional domain restriction
+structures that complement and supersede the built-in information.
+
+Test each of the characters in @code{in} for whether or not they are
+allowed by the information in @code{overrides} or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in @code{overrides}, the information in @code{overrides} takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If @code{overrides} is @code{NULL}, only the built-in
+information is used.  The position of the first offending character
+is returned in @code{errpos}.  Note that the error position refers to the
+decoded character offset rather than the byte position in the
+string.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all
+characters are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+

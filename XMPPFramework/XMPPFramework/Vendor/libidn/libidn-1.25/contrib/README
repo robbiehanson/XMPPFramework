@@ -1,0 +1,24 @@
+Libidn contrib/README -- Notes for the contrib/ subdirectory.
+Copyright (C) 2003-2012 Simon Josefsson
+See the end for copying conditions.
+
+The idn-python/ sub-directory contains a Python interface for Libidn,
+contributed by Stephane Bortzmeyer <bortzmeyer@nic.fr>.  It is
+licensed under the same licence as Libidn itself.  Note that as of
+version 2.3 Python has native IDN support, see
+<http://www.python.org/doc/2.3.2/lib/module-encodings.idna.html>.
+
+The web/ sub-directory contains a online libidn interface in PHP.
+
+The java/ sub-directory builds Java *.class files that implement the
+Libidn API.  Note!  It is unfinished and left as a proof of concept.
+A developer with knowledge about Java is encouraged to take over it.
+
+The doxygen/ sub-directory builds Doxygen documentation (HTML,
+LaTeX/PDF and MAN).  Simply invoke "doxygen" in that directory and it
+should build the documentation.
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

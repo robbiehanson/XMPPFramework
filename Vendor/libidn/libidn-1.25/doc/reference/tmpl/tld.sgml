@@ -1,0 +1,184 @@
+<!-- ##### SECTION Title ##### -->
+tld
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO IDNAPI ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### ENUM Tld_rc ##### -->
+<para>
+
+</para>
+
+@TLD_SUCCESS: 
+@TLD_INVALID: 
+@TLD_NODATA: 
+@TLD_MALLOC_ERROR: 
+@TLD_ICONV_ERROR: 
+@TLD_NO_TLD: 
+@TLD_NOTLD: 
+
+<!-- ##### TYPEDEF Tld_table ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF Tld_table_element ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION tld_check_4 ##### -->
+<para>
+
+</para>
+
+@in: 
+@inlen: 
+@errpos: 
+@overrides: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_check_4t ##### -->
+<para>
+
+</para>
+
+@in: 
+@inlen: 
+@errpos: 
+@tld: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_check_4tz ##### -->
+<para>
+
+</para>
+
+@in: 
+@errpos: 
+@tld: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_check_4z ##### -->
+<para>
+
+</para>
+
+@in: 
+@errpos: 
+@overrides: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_check_8z ##### -->
+<para>
+
+</para>
+
+@in: 
+@errpos: 
+@overrides: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_check_lz ##### -->
+<para>
+
+</para>
+
+@in: 
+@errpos: 
+@overrides: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_default_table ##### -->
+<para>
+
+</para>
+
+@tld: 
+@overrides: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_get_4 ##### -->
+<para>
+
+</para>
+
+@in: 
+@inlen: 
+@out: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_get_4z ##### -->
+<para>
+
+</para>
+
+@in: 
+@out: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_get_table ##### -->
+<para>
+
+</para>
+
+@tld: 
+@tables: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_get_z ##### -->
+<para>
+
+</para>
+
+@in: 
+@out: 
+@Returns: 
+
+
+<!-- ##### FUNCTION tld_strerror ##### -->
+<para>
+
+</para>
+
+@rc: 
+@Returns: 
+
+

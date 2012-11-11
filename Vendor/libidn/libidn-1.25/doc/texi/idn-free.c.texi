@@ -1,0 +1,15 @@
+@subheading idn_free
+@anchor{idn_free}
+@deftypefun {void} {idn_free} (void * @var{ptr})
+@var{ptr}: memory region to deallocate, or @code{NULL}.
+
+Deallocates memory region by calling @code{free()}.  If @code{ptr} is @code{NULL} no
+operation is performed.
+
+Normally applications de-allocate strings allocated by libidn by
+calling @code{free()} directly.  Under Windows, different parts of the
+same application may use different heap memory, and then it is
+important to deallocate memory allocated within the same module
+that allocated it.  This function makes that possible.
+@end deftypefun
+

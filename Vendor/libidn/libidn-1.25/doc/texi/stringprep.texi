@@ -1,0 +1,32 @@
+@subheading stringprep
+@anchor{stringprep}
+@deftypefun {int} {stringprep} (char * @var{in}, size_t @var{maxlen}, Stringprep_profile_flags @var{flags}, const Stringprep_profile * @var{profile})
+@var{in}: input/ouput array with string to prepare.
+
+@var{maxlen}: maximum length of input/output array.
+
+@var{flags}: a @code{Stringprep_profile_flags} value, or 0.
+
+@var{profile}: pointer to @code{Stringprep_profile} to use.
+
+Prepare the input zero terminated UTF-8 string according to the
+stringprep profile, and write back the result to the input string.
+
+Note that you must convert strings entered in the systems locale
+into UTF-8 before using this function, see
+@code{stringprep_locale_to_utf8()}.
+
+Since the stringprep operation can expand the string, @code{maxlen}
+indicate how large the buffer holding the string is.  This function
+will not read or write to characters outside that size.
+
+The @code{flags} are one of @code{Stringprep_profile_flags} values, or 0.
+
+The @code{profile} contain the @code{Stringprep_profile} instructions to
+perform.  Your application can define new profiles, possibly
+re-using the generic stringprep tables that always will be part of
+the library, or use one of the currently supported profiles.
+
+@strong{Return value:} Returns @code{STRINGPREP_OK} iff successful, or an error code.
+@end deftypefun
+

@@ -1,0 +1,26 @@
+@subheading tld_strerror
+@anchor{tld_strerror}
+@deftypefun {const char *} {tld_strerror} (Tld_rc @var{rc})
+@var{rc}: tld return code
+
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+
+@strong{TLD_SUCCESS:} Successful operation.  This value is guaranteed to
+always be zero, the remaining ones are only guaranteed to hold
+non-zero values, for logical comparison purposes.
+
+@strong{TLD_INVALID:} Invalid character found.
+
+@strong{TLD_NODATA:} No input data was provided.
+
+@strong{TLD_MALLOC_ERROR:} Error during memory allocation.
+
+@strong{TLD_ICONV_ERROR:} Error during iconv string conversion.
+
+@strong{TLD_NO_TLD:} No top-level domain found in domain string.
+
+@strong{Return value:} Returns a pointer to a statically allocated string
+containing a description of the error with the return code @code{rc}.
+@end deftypefun
+

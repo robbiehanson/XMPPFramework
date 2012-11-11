@@ -1,0 +1,21 @@
+@subheading tld_check_4tz
+@anchor{tld_check_4tz}
+@deftypefun {int} {tld_check_4tz} (const uint32_t * @var{in}, size_t * @var{errpos}, const Tld_table * @var{tld})
+@var{in}: Zero terminated array of unicode code points to process.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{tld}: A @code{Tld_table} data structure representing the restrictions for
+which the input should be tested.
+
+Test each of the code points in @code{in} for whether or not
+they are allowed by the data structure in @code{tld}, return
+the position of the first character for which this is not
+the case in @code{errpos}.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all code
+points are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+

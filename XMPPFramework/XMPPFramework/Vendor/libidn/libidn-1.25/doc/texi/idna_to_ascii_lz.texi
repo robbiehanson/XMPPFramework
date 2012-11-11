@@ -1,0 +1,18 @@
+@subheading idna_to_ascii_lz
+@anchor{idna_to_ascii_lz}
+@deftypefun {int} {idna_to_ascii_lz} (const char * @var{input}, char ** @var{output}, int @var{flags})
+@var{input}: zero terminated input string encoded in the current locale's
+character set.
+
+@var{output}: pointer to newly allocated output string.
+
+@var{flags}: an @code{Idna_flags} value, e.g., @code{IDNA_ALLOW_UNASSIGNED} or
+@code{IDNA_USE_STD3_ASCII_RULES}.
+
+Convert domain name in the locale's encoding to ASCII string.  The
+domain name may contain several labels, separated by dots.  The
+output buffer must be deallocated by the caller.
+
+@strong{Return value:} Returns @code{IDNA_SUCCESS} on success, or error code.
+@end deftypefun
+

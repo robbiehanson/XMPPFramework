@@ -1,0 +1,75 @@
+Libidn HACKING -- Information for contributors.                 -*- outline -*-
+Copyright (C) 2009-2012 Simon Josefsson
+See the end for copying conditions.
+
+This file contains instructions for developers and advanced users that
+wants to build from version controlled sources.
+
+We require several tools to build the software, including:
+
+- Make <http://www.gnu.org/software/make/>
+- Automake <http://www.gnu.org/software/automake/>
+- Autoconf <http://www.gnu.org/software/autoconf/>
+- Libtool <http://www.gnu.org/software/libtool/>
+- Gettext <http://www.gnu.org/software/gettext/>
+- Texinfo <http://www.gnu.org/software/texinfo/>
+- Gperf <http://www.gnu.org/software/gperf/>
+- help2man <http://www.gnu.org/software/help2man/>
+- Gengetopt <http://www.gnu.org/software/gengetopt/>
+- Tar <http://www.gnu.org/software/tar/>
+- Gzip <http://www.gnu.org/software/gzip/>
+- Texlive & epsf <http://www.tug.org/texlive/> (for PDF manual)
+- CVS <http://www.gnu.org/software/cvs/> (for gettext autopoint)
+- GTK-DOC <http://www.gtk.org/gtk-doc/> (for API manual)
+- Git <http://git.or.cz/>
+- Perl <http://www.cpan.org/>
+- Valgrind <http://valgrind.org/> (optional)
+- Gcj <http://www.gnu.org/software/gcc/java/> (for java port)
+- gjdoc <http://www.gnu.org/software/classpath/cp-tools/> (for java port)
+- Mono mcs <http://www.mono.org/> (for C# port)
+- fig2dev <http://www-epb.lbl.gov/xfig/>
+
+The required software is typically distributed with your operating
+system, and the instructions for installing them differ.  Here are
+some hints:
+
+gNewSense/Debian/Ubuntu:
+apt-get install make git-core autoconf automake libtool gettext cvs
+apt-get install texinfo texlive texlive-generic-recommended texlive-extra-utils
+apt-get install help2man gtk-doc-tools valgrind gengetopt
+apt-get install gcj-jdk gjdoc transfig mono-mcs binfmt-support gperf
+
+To download the version controlled sources:
+
+$ git clone git://git.savannah.gnu.org/libidn.git
+$ cd libidn
+
+The next step is to run autoreconf, ./configure, etc:
+
+$ make bootstrap
+
+Then build the project normally:
+
+$ make
+$ make check
+
+When building from version controlled sources, some developer specific
+flags are automatically enabled.  For example, the self-checks are run
+under valgrind if available.  For various reasons, you may run into
+valgrind false positives that will cause self-checks to fail.  We ship
+a Valgrind suppression file to address common issues.  You can use it
+by putting the following in your ~/.valgrindrc:
+
+--suppressions=/path/to/libidn/tests/libidn.supp
+
+To prepare releases (see rules in cfg.mk) you need some additional
+tools:
+
+apt-get install pmccabe mingw-w64 wine clang lcov
+
+Happy hacking!
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

@@ -1,0 +1,619 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>tld</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="index.html" title="GNU Libidn API Reference Manual">
+<link rel="up" href="intro.html" title="GNU Libidn API Reference Manual">
+<link rel="prev" href="libidn-pr29.html" title="pr29">
+<link rel="next" href="libidn-idn-free.html" title="idn-free">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libidn-pr29.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="intro.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GNU Libidn API Reference Manual</th>
+<td><a accesskey="n" href="libidn-idn-free.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#libidn-tld.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libidn-tld.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="libidn-tld"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libidn-tld.top_of_page"></a>tld</span></h2>
+<p>tld</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libidn-tld.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">#define             <a class="link" href="libidn-idna.html#IDNAPI:CAPS" title="IDNAPI">IDNAPI</a>
+enum                <a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc">Tld_rc</a>;
+typedef             <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table">Tld_table</a>;
+typedef             <a class="link" href="libidn-tld.html#Tld-table-element" title="Tld_table_element">Tld_table_element</a>;
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-check-4" title="tld_check_4 ()">tld_check_4</a>                         (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-check-4t" title="tld_check_4t ()">tld_check_4t</a>                        (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> *tld</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-check-4tz" title="tld_check_4tz ()">tld_check_4tz</a>                       (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> *tld</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-check-4z" title="tld_check_4z ()">tld_check_4z</a>                        (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-check-8z" title="tld_check_8z ()">tld_check_8z</a>                        (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-check-lz" title="tld_check_lz ()">tld_check_lz</a>                        (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);
+const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="returnvalue">Tld_table</span></a> *   <a class="link" href="libidn-tld.html#tld-default-table" title="tld_default_table ()">tld_default_table</a>                   (<em class="parameter"><code>const <span class="type">char</span> *tld</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-get-4" title="tld_get_4 ()">tld_get_4</a>                           (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-get-4z" title="tld_get_4z ()">tld_get_4z</a>                          (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>);
+const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="returnvalue">Tld_table</span></a> *   <a class="link" href="libidn-tld.html#tld-get-table" title="tld_get_table ()">tld_get_table</a>                       (<em class="parameter"><code>const <span class="type">char</span> *tld</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **tables</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-tld.html#tld-get-z" title="tld_get_z ()">tld_get_z</a>                           (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>);
+const <span class="returnvalue">char</span> *        <a class="link" href="libidn-tld.html#tld-strerror" title="tld_strerror ()">tld_strerror</a>                        (<em class="parameter"><code><a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> rc</code></em>);
+</pre>
+</div>
+<div class="refsect1">
+<a name="libidn-tld.description"></a><h2>Description</h2>
+<p>
+</p>
+</div>
+<div class="refsect1">
+<a name="libidn-tld.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="IDNAPI:CAPS"></a><h3>IDNAPI</h3>
+<pre class="programlisting">#define             IDNAPI</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Tld-rc"></a><h3>enum Tld_rc</h3>
+<pre class="programlisting">typedef enum {
+    TLD_SUCCESS = 0,
+    TLD_INVALID = 1,		/* Invalid character found. */
+    TLD_NODATA = 2,		/* Char, domain or inlen = 0. */
+    TLD_MALLOC_ERROR = 3,
+    TLD_ICONV_ERROR = 4,
+    TLD_NO_TLD = 5,
+    /* Workaround typo in earlier versions. */
+    TLD_NOTLD = TLD_NO_TLD
+} Tld_rc;
+</pre>
+<p>
+Enumerated return codes of the TLD checking functions.
+The value 0 is guaranteed to always correspond to success.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="TLD-SUCCESS:CAPS"></a><span class="term"><code class="literal">TLD_SUCCESS</code></span></p></td>
+<td>Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+</td>
+</tr>
+<tr>
+<td><p><a name="TLD-INVALID:CAPS"></a><span class="term"><code class="literal">TLD_INVALID</code></span></p></td>
+<td>Invalid character found.
+</td>
+</tr>
+<tr>
+<td><p><a name="TLD-NODATA:CAPS"></a><span class="term"><code class="literal">TLD_NODATA</code></span></p></td>
+<td>No input data was provided.
+</td>
+</tr>
+<tr>
+<td><p><a name="TLD-MALLOC-ERROR:CAPS"></a><span class="term"><code class="literal">TLD_MALLOC_ERROR</code></span></p></td>
+<td>Error during memory allocation.
+</td>
+</tr>
+<tr>
+<td><p><a name="TLD-ICONV-ERROR:CAPS"></a><span class="term"><code class="literal">TLD_ICONV_ERROR</code></span></p></td>
+<td>Error during iconv string conversion.
+</td>
+</tr>
+<tr>
+<td><p><a name="TLD-NO-TLD:CAPS"></a><span class="term"><code class="literal">TLD_NO_TLD</code></span></p></td>
+<td>No top-level domain found in domain string.
+</td>
+</tr>
+<tr>
+<td><p><a name="TLD-NOTLD:CAPS"></a><span class="term"><code class="literal">TLD_NOTLD</code></span></p></td>
+<td>Same as <em class="parameter"><code>TLD_NO_TLD</code></em>, for compatibility
+  with typo in earlier versions.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Tld-table"></a><h3>Tld_table</h3>
+<pre class="programlisting">  typedef struct Tld_table Tld_table;
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Tld-table-element"></a><h3>Tld_table_element</h3>
+<pre class="programlisting">  typedef struct Tld_table_element Tld_table_element;
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-check-4"></a><h3>tld_check_4 ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_check_4                         (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);</pre>
+<p>
+Test each of the code points in <em class="parameter"><code>in</code></em> for whether or not they are
+allowed by the information in <em class="parameter"><code>overrides</code></em> or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in <em class="parameter"><code>overrides</code></em>, the information in <em class="parameter"><code>overrides</code></em> takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If <em class="parameter"><code>overrides</code></em> is <code class="literal">NULL</code>, only the built-in
+information is used.  The position of the first offending character
+is returned in <em class="parameter"><code>errpos</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Array of unicode code points to process. Does not need to be
+zero terminated.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>inlen</code></em> :</span></p></td>
+<td>Number of unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>errpos</code></em> :</span></p></td>
+<td>Position of offending character is returned here.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>overrides</code></em> :</span></p></td>
+<td>A <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> array of additional domain restriction
+structures that complement and supersede the built-in information.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> value <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> if all code
+points are valid or when <em class="parameter"><code>tld</code></em> is null, <a class="link" href="libidn-tld.html#TLD-INVALID:CAPS"><code class="literal">TLD_INVALID</code></a> if a
+character is not allowed, or additional error codes on general
+failure conditions.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-check-4t"></a><h3>tld_check_4t ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_check_4t                        (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> *tld</code></em>);</pre>
+<p>
+Test each of the code points in <em class="parameter"><code>in</code></em> for whether or not
+they are allowed by the data structure in <em class="parameter"><code>tld</code></em>, return
+the position of the first character for which this is not
+the case in <em class="parameter"><code>errpos</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Array of unicode code points to process. Does not need to be
+zero terminated.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>inlen</code></em> :</span></p></td>
+<td>Number of unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>errpos</code></em> :</span></p></td>
+<td>Position of offending character is returned here.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>tld</code></em> :</span></p></td>
+<td>A <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> data structure representing the restrictions for
+which the input should be tested.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> value <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> if all code
+points are valid or when <em class="parameter"><code>tld</code></em> is null, <a class="link" href="libidn-tld.html#TLD-INVALID:CAPS"><code class="literal">TLD_INVALID</code></a> if a
+character is not allowed, or additional error codes on general
+failure conditions.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-check-4tz"></a><h3>tld_check_4tz ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_check_4tz                       (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> *tld</code></em>);</pre>
+<p>
+Test each of the code points in <em class="parameter"><code>in</code></em> for whether or not
+they are allowed by the data structure in <em class="parameter"><code>tld</code></em>, return
+the position of the first character for which this is not
+the case in <em class="parameter"><code>errpos</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Zero terminated array of unicode code points to process.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>errpos</code></em> :</span></p></td>
+<td>Position of offending character is returned here.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>tld</code></em> :</span></p></td>
+<td>A <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> data structure representing the restrictions for
+which the input should be tested.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> value <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> if all code
+points are valid or when <em class="parameter"><code>tld</code></em> is null, <a class="link" href="libidn-tld.html#TLD-INVALID:CAPS"><code class="literal">TLD_INVALID</code></a> if a
+character is not allowed, or additional error codes on general
+failure conditions.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-check-4z"></a><h3>tld_check_4z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_check_4z                        (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);</pre>
+<p>
+Test each of the code points in <em class="parameter"><code>in</code></em> for whether or not they are
+allowed by the information in <em class="parameter"><code>overrides</code></em> or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in <em class="parameter"><code>overrides</code></em>, the information in <em class="parameter"><code>overrides</code></em> takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If <em class="parameter"><code>overrides</code></em> is <code class="literal">NULL</code>, only the built-in
+information is used.  The position of the first offending character
+is returned in <em class="parameter"><code>errpos</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Zero-terminated array of unicode code points to process.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>errpos</code></em> :</span></p></td>
+<td>Position of offending character is returned here.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>overrides</code></em> :</span></p></td>
+<td>A <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> array of additional domain restriction
+structures that complement and supersede the built-in information.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> value <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> if all code
+points are valid or when <em class="parameter"><code>tld</code></em> is null, <a class="link" href="libidn-tld.html#TLD-INVALID:CAPS"><code class="literal">TLD_INVALID</code></a> if a
+character is not allowed, or additional error codes on general
+failure conditions.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-check-8z"></a><h3>tld_check_8z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_check_8z                        (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);</pre>
+<p>
+Test each of the characters in <em class="parameter"><code>in</code></em> for whether or not they are
+allowed by the information in <em class="parameter"><code>overrides</code></em> or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in <em class="parameter"><code>overrides</code></em>, the information in <em class="parameter"><code>overrides</code></em> takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If <em class="parameter"><code>overrides</code></em> is <code class="literal">NULL</code>, only the built-in
+information is used.  The position of the first offending character
+is returned in <em class="parameter"><code>errpos</code></em>.  Note that the error position refers to the
+decoded character offset rather than the byte position in the
+string.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Zero-terminated UTF8 string to process.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>errpos</code></em> :</span></p></td>
+<td>Position of offending character is returned here.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>overrides</code></em> :</span></p></td>
+<td>A <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> array of additional domain restriction
+structures that complement and supersede the built-in information.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> value <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> if all
+characters are valid or when <em class="parameter"><code>tld</code></em> is null, <a class="link" href="libidn-tld.html#TLD-INVALID:CAPS"><code class="literal">TLD_INVALID</code></a> if a
+character is not allowed, or additional error codes on general
+failure conditions.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-check-lz"></a><h3>tld_check_lz ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_check_lz                        (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *errpos</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);</pre>
+<p>
+Test each of the characters in <em class="parameter"><code>in</code></em> for whether or not they are
+allowed by the information in <em class="parameter"><code>overrides</code></em> or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in <em class="parameter"><code>overrides</code></em>, the information in <em class="parameter"><code>overrides</code></em> takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If <em class="parameter"><code>overrides</code></em> is <code class="literal">NULL</code>, only the built-in
+information is used.  The position of the first offending character
+is returned in <em class="parameter"><code>errpos</code></em>.  Note that the error position refers to the
+decoded character offset rather than the byte position in the
+string.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Zero-terminated string in the current locales encoding to process.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>errpos</code></em> :</span></p></td>
+<td>Position of offending character is returned here.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>overrides</code></em> :</span></p></td>
+<td>A <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> array of additional domain restriction
+structures that complement and supersede the built-in information.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> value <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> if all
+characters are valid or when <em class="parameter"><code>tld</code></em> is null, <a class="link" href="libidn-tld.html#TLD-INVALID:CAPS"><code class="literal">TLD_INVALID</code></a> if a
+character is not allowed, or additional error codes on general
+failure conditions.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-default-table"></a><h3>tld_default_table ()</h3>
+<pre class="programlisting">const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="returnvalue">Tld_table</span></a> *   tld_default_table                   (<em class="parameter"><code>const <span class="type">char</span> *tld</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **overrides</code></em>);</pre>
+<p>
+Get the TLD table for a named TLD, using the internal defaults,
+possibly overrided by the (optional) supplied tables.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>tld</code></em> :</span></p></td>
+<td>TLD name (e.g. "com") as zero terminated ASCII byte string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>overrides</code></em> :</span></p></td>
+<td>Additional zero terminated array of <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a>
+info-structures for TLDs, or <code class="literal">NULL</code> to only use library deault
+tables.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Return structure corresponding to TLD <em class="parameter"><code>tld_str</code></em>, first
+looking through <em class="parameter"><code>overrides</code></em> then thru built-in list, or <code class="literal">NULL</code> if
+no such structure found.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-get-4"></a><h3>tld_get_4 ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_get_4                           (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>);</pre>
+<p>
+Isolate the top-level domain of <em class="parameter"><code>in</code></em> and return it as an ASCII
+string in <em class="parameter"><code>out</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Array of unicode code points to process. Does not need to be
+zero terminated.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>inlen</code></em> :</span></p></td>
+<td>Number of unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out</code></em> :</span></p></td>
+<td>Zero terminated ascii result string pointer.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Return <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> on success, or the corresponding
+<a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> error code otherwise.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-get-4z"></a><h3>tld_get_4z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_get_4z                          (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>);</pre>
+<p>
+Isolate the top-level domain of <em class="parameter"><code>in</code></em> and return it as an ASCII
+string in <em class="parameter"><code>out</code></em>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Zero terminated array of unicode code points to process.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out</code></em> :</span></p></td>
+<td>Zero terminated ascii result string pointer.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Return <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> on success, or the corresponding
+<a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> error code otherwise.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-get-table"></a><h3>tld_get_table ()</h3>
+<pre class="programlisting">const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="returnvalue">Tld_table</span></a> *   tld_get_table                       (<em class="parameter"><code>const <span class="type">char</span> *tld</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> **tables</code></em>);</pre>
+<p>
+Get the TLD table for a named TLD by searching through the given
+TLD table array.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>tld</code></em> :</span></p></td>
+<td>TLD name (e.g. "com") as zero terminated ASCII byte string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>tables</code></em> :</span></p></td>
+<td>Zero terminated array of <a class="link" href="libidn-tld.html#Tld-table" title="Tld_table"><span class="type">Tld_table</span></a> info-structures for
+TLDs.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Return structure corresponding to TLD <em class="parameter"><code>tld</code></em> by going
+thru <em class="parameter"><code>tables</code></em>, or return <code class="literal">NULL</code> if no such structure is found.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-get-z"></a><h3>tld_get_z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 tld_get_z                           (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>);</pre>
+<p>
+Isolate the top-level domain of <em class="parameter"><code>in</code></em> and return it as an ASCII
+string in <em class="parameter"><code>out</code></em>.  The input string <em class="parameter"><code>in</code></em> may be UTF-8, ISO-8859-1 or
+any ASCII compatible character encoding.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>Zero terminated character array to process.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out</code></em> :</span></p></td>
+<td>Zero terminated ascii result string pointer.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Return <a class="link" href="libidn-tld.html#TLD-SUCCESS:CAPS"><code class="literal">TLD_SUCCESS</code></a> on success, or the corresponding
+<a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> error code otherwise.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="tld-strerror"></a><h3>tld_strerror ()</h3>
+<pre class="programlisting">const <span class="returnvalue">char</span> *        tld_strerror                        (<em class="parameter"><code><a class="link" href="libidn-tld.html#Tld-rc" title="enum Tld_rc"><span class="type">Tld_rc</span></a> rc</code></em>);</pre>
+<p>
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+</p>
+<p>
+TLD_SUCCESS: Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+TLD_INVALID: Invalid character found.
+TLD_NODATA: No input data was provided.
+TLD_MALLOC_ERROR: Error during memory allocation.
+TLD_ICONV_ERROR: Error during iconv string conversion.
+TLD_NO_TLD: No top-level domain found in domain string.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rc</code></em> :</span></p></td>
+<td>tld return code</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns a pointer to a statically allocated string
+containing a description of the error with the return code <em class="parameter"><code>rc</code></em>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.18</div>
+</body>
+</html>

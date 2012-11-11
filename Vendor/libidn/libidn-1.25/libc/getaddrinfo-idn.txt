@@ -1,0 +1,117 @@
+Libidn getaddrinfo-idn.txt -- Proposal for IDN support in POSIX getaddrinfo.
+Copyright (C) 2003-2012 Simon Josefsson
+See the end for copying conditions.
+
+Background
+----------
+
+Libidn is a package for internationalized string handling based on the
+Stringprep, Punycode and Internationalized Domain Names in
+Applications (IDNA) specifications.  It can be used by applications
+directly by linking to it, as is done by, e.g., Gnus, KDE, and Mutt.
+
+Having each and every application link with and perform its own IDN
+handling is not a good idea.  It bloats the code and makes things
+unnecessarily complex.  Only few applications, such as web browsers
+and mail clients, will need to do this in the future, to provide good
+user interfaces for internationalization.
+
+See http://josefsson.org/libidn/ for more information.
+
+Alternative Approaches
+----------------------
+
+There are implementation that modify gethostbyname() to accept UTF-8
+strings and perform the IDNA ToASCII operation within gethostbyname().
+
+There are even implementations that assume gethostbyname (on the
+client host) perform no validation of the string and will send UTF-8
+strings out to the DNS server, and perform the IDN-conversion on the
+DNS server.
+
+Some doubts can be raised whether this is an approach that is likely
+to be standardized.  It also lack in functionality: it only provide
+black-box ToASCII functionality.  The application cannot extract the
+output from the ToASCII operation.  More important, there is no way to
+perform a ToUnicode operation that applications may want to use for
+display purposes.  Furthermore, while the first can support locale
+specific character sets (e.g., ISO-8859-1), the second approach is
+bound to either guess the character set, or always use UTF-8.
+
+See also the thread rooted in <iluel7n6bmu.fsf@latte.josefsson.org>
+posted to libc-alpha@sources.redhat.com on 08 Jan 2003.
+
+What I propose
+--------------
+
+The getaddrinfo() API should have two new flags, AI_IDN and
+AI_CANONIDN.  Roughly they correspond to IDNA ToASCII and IDNA
+ToUnicode, but there are several details.  Note that strings are still
+'char*', i.e. it does not use the "wide" character type, and that the
+encoding of non-ASCII strings are the current locale's character set
+(i.e., nl_langinfo(CODESET)).
+
+An application that uses AI_IDN signal to the getaddrinfo()
+implementation that the input host name may be non-ASCII and that the
+appropriate IDNA ToASCII steps should be carried out on the input, and
+the output from the ToASCII operation (if any) should be used in the
+lookup using the current resolver processing.
+
+An application that uses AI_CANONIDN signal to the getaddrinfo()
+implementation that the input host name should be put through the IDNA
+ToUnicode steps, and the output of that placed in the 'ai_canonname'
+field of the resulting structure.  Normal resolver processing applies
+to the input string, of course.
+
+Consequently, an application that uses AI_IDN|AI_CANONIDN signal to
+the getaddrinfo() implementation that the input host name may be
+non-ASCII and should be put through the IDNA ToASCII steps before run
+through the resolver, and that the input string should also be run
+through the IDNA ToUnicode steps and the output of that placed in the
+'ai_canonname' field.
+
+The semantics of AI_CANONNAME|AI_CANONIDN is that instead of running
+the ToUnicode IDNA steps on the input string, the canonical host name
+as returned by the resolver for the input string should be used in the
+ToUnicode IDNA step.
+
+Details
+-------
+
+Four new flags has been proposed; AI_IDN_ALLOW_UNASSIGNED,
+AI_IDN_USE_STD3_ASCII_RULES for getaddrinfo, and
+NI_IDN_ALLOW_UNASSIGNED, NI_IDN_USE_STD3_ASCII_RULES for getnameinfo.
+The implementation is simple, if specified those flag will set the
+appropriate flag in the call to the IDNA functions.  See the RFC for
+the meaning of those flags.
+
+Status
+------
+
+The AI_IDN flag has been implemented and shipped as a proof-of-concept
+patch for GNU Libc with GNU Libidn since January 2003.  Binary libc
+packages with the patch exists for (at least) two GNU/Linux
+distributions.  The AI_CANONIDN flag is not yet implemented.
+
+As of March 2004, Libidn has been integrated as an add-on in the GNU
+Libc CVS repository.  The AI_CANONIDN flag has been implemented.  The
+AllowUnassigned and UseSTD3ASCIIRules flags were added.
+
+Future
+------
+
+Allow non-ASCII in gethostname (and similar functions), if
+administrator has supplied, e.g., 'option idn' in /etc/resolv.conf?
+
+Feedback
+--------
+
+This document is a work-in-progress and the details may change.
+Contact me at simon@josefsson.org to discuss changes.
+
+----------------------------------------------------------------------
+Permission is granted to anyone to make or distribute verbatim copies
+of this document, in any medium, provided that the copyright notice
+and permission notice are preserved, and that the distributor grants
+the recipient permission for further redistribution as permitted by
+this notice.  Modified versions may not be made.

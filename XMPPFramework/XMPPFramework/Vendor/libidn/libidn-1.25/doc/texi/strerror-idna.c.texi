@@ -1,0 +1,46 @@
+@subheading idna_strerror
+@anchor{idna_strerror}
+@deftypefun {const char *} {idna_strerror} (Idna_rc @var{rc})
+@var{rc}: an @code{Idna_rc} return code.
+
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+
+@strong{IDNA_SUCCESS:} Successful operation.  This value is guaranteed to
+always be zero, the remaining ones are only guaranteed to hold
+non-zero values, for logical comparison purposes.
+
+@strong{IDNA_STRINGPREP_ERROR:} Error during string preparation.
+
+@strong{IDNA_PUNYCODE_ERROR:} Error during punycode operation.
+
+@strong{IDNA_CONTAINS_NON_LDH:} For IDNA_USE_STD3_ASCII_RULES, indicate that
+the string contains non-LDH ASCII characters.
+
+@strong{IDNA_CONTAINS_MINUS:} For IDNA_USE_STD3_ASCII_RULES, indicate that
+the string contains a leading or trailing hyphen-minus (U+002D).
+
+@strong{IDNA_INVALID_LENGTH:} The final output string is not within the
+(inclusive) range 1 to 63 characters.
+
+@strong{IDNA_NO_ACE_PREFIX:} The string does not contain the ACE prefix
+(for ToUnicode).
+
+@strong{IDNA_ROUNDTRIP_VERIFY_ERROR:} The ToASCII operation on output
+string does not equal the input.
+
+@strong{IDNA_CONTAINS_ACE_PREFIX:} The input contains the ACE prefix (for
+ToASCII).
+
+@strong{IDNA_ICONV_ERROR:} Could not convert string in locale encoding.
+
+@strong{IDNA_MALLOC_ERROR:} Could not allocate buffer (this is typically a
+fatal error).
+
+@strong{IDNA_DLOPEN_ERROR:} Could not dlopen the libcidn DSO (only used
+internally in libc).
+
+@strong{Return value:} Returns a pointer to a statically allocated string
+containing a description of the error with the return code @code{rc}.
+@end deftypefun
+

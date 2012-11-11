@@ -1,0 +1,86 @@
+# Copyright (C) 2004-2012 Simon Josefsson
+# Copyright (C) 2003 Stephane Bortzmeyer <bortzmeyer@nic.fr> / AFNIC
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.
+
+version "1.0"
+tld fr
+ 
+# Variant table for the French language
+# See Internet-Draft draft-hoffman-idn-reg-00
+#
+# Designed at AFNIC
+
+# This table is built by starting from the characters that are
+# actually used in French.
+
+# a-z
+# a and its variants : à â
+# á (a acute) does not seem to exist in French: for further study (town names?)
+# a with ring above <U+00E5> does not exist in french but in picard
+# <URL:http://www.picard.free.fr/lgpic/a-e.htm>
+U+0061|U+00E0:U+00E2
+U+0062
+# c and ç
+U+0063|U+00E7
+U+0064
+# e and its variants : è é ê ë
+U+0065|U+00E8:U+00E9:U+00EA:U+00EB
+U+0066
+U+0067
+U+0068
+# i and its variants : î ï
+U+0069|U+00EE:U+00EF
+U+006A
+U+006B
+U+006C
+U+006D
+# n
+# ñ <U+00F1> does not exist in french but in breton
+# <URL:http://www.ouest-france.fr/dossiershtm/cours-de-breton/lecture.htm>
+# or in basque.
+U+006E
+# o and its variants : ô. ö <U+00F6> exists in French? No word uses 
+# it.
+# ò <U+00F2> does not exist in french but in occitan
+# <URL:http://occitanet.free.fr/fr/index.html>
+U+006F|U+00F4
+U+0070
+U+0071
+U+0072
+U+0073
+U+0074
+# u and its variants : ù û ü
+# ú (u acute) does not seem to exist in French: for further study
+U+0075|U+00F9:U+00FB:U+00FC
+U+0076
+U+0077
+U+0078
+# y. ÿ only in names? (L'Haÿ-les-Roses)
+U+0079|U+00FF
+U+007A
+# 0-9
+U+0030
+U+0031
+U+0032
+U+0033
+U+0034
+U+0035
+U+0036
+U+0037
+U+0038
+U+0039
+# - (hyphen)
+U+002D
+# Ligature ae (æ). Only in names like Lætitia?
+U+00E6|U+0061U+0065
+# Ligature oe (not in Latin-1)
+U+0153|U+006FU+0065
+
+# Some references:
+# http://www.sdv.fr/orthonet/pages/informations_p6.html
+# regional languages
+# http://www.ouest-france.fr/dossiershtm/cours-de-breton/lecture.htm
+# http://occitanet.free.fr/fr/index.html
+# http://www.picard.free.fr/lgpic/a-e.htm

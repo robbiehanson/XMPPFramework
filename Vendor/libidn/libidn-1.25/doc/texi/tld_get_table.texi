@@ -1,0 +1,15 @@
+@subheading tld_get_table
+@anchor{tld_get_table}
+@deftypefun {const Tld_table *} {tld_get_table} (const char * @var{tld}, const Tld_table ** @var{tables})
+@var{tld}: TLD name (e.g. "com") as zero terminated ASCII byte string.
+
+@var{tables}: Zero terminated array of @code{Tld_table} info-structures for
+TLDs.
+
+Get the TLD table for a named TLD by searching through the given
+TLD table array.
+
+@strong{Return value:} Return structure corresponding to TLD @code{tld} by going
+thru @code{tables}, or return @code{NULL} if no such structure is found.
+@end deftypefun
+

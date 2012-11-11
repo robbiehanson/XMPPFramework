@@ -1,0 +1,23 @@
+# Process this file with autoconf to produce a pkg-config metadata file.
+# Copyright 2002-2012 Simon Josefsson
+#
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This file is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: Libidn
+Description: IETF stringprep, nameprep, punycode, IDNA text processing.
+URL: http://www.gnu.org/software/libidn/
+Version: @VERSION@
+Libs: -L${libdir} -lidn
+Libs.private: @LTLIBICONV@
+Cflags: -I${includedir}

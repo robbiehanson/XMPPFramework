@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>pr29</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="index.html" title="GNU Libidn API Reference Manual">
+<link rel="up" href="intro.html" title="GNU Libidn API Reference Manual">
+<link rel="prev" href="libidn-punycode.html" title="punycode">
+<link rel="next" href="libidn-tld.html" title="tld">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libidn-punycode.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="intro.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GNU Libidn API Reference Manual</th>
+<td><a accesskey="n" href="libidn-tld.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#libidn-pr29.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libidn-pr29.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="libidn-pr29"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libidn-pr29.top_of_page"></a>pr29</span></h2>
+<p>pr29</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libidn-pr29.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">#define             <a class="link" href="libidn-idna.html#IDNAPI:CAPS" title="IDNAPI">IDNAPI</a>
+enum                <a class="link" href="libidn-pr29.html#Pr29-rc" title="enum Pr29_rc">Pr29_rc</a>;
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-pr29.html#pr29-4" title="pr29_4 ()">pr29_4</a>                              (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> len</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-pr29.html#pr29-4z" title="pr29_4z ()">pr29_4z</a>                             (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-pr29.html#pr29-8z" title="pr29_8z ()">pr29_8z</a>                             (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>);
+const <span class="returnvalue">char</span> *        <a class="link" href="libidn-pr29.html#pr29-strerror" title="pr29_strerror ()">pr29_strerror</a>                       (<em class="parameter"><code><a class="link" href="libidn-pr29.html#Pr29-rc" title="enum Pr29_rc"><span class="type">Pr29_rc</span></a> rc</code></em>);
+</pre>
+</div>
+<div class="refsect1">
+<a name="libidn-pr29.description"></a><h2>Description</h2>
+<p>
+</p>
+</div>
+<div class="refsect1">
+<a name="libidn-pr29.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="IDNAPI:CAPS"></a><h3>IDNAPI</h3>
+<pre class="programlisting">#define             IDNAPI</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Pr29-rc"></a><h3>enum Pr29_rc</h3>
+<pre class="programlisting">typedef enum {
+    PR29_SUCCESS = 0,
+    PR29_PROBLEM = 1,		/* String is a problem sequence. */
+    PR29_STRINGPREP_ERROR = 2 /* Charset conversion failed (p29_8*). */
+} Pr29_rc;
+</pre>
+<p>
+Enumerated return codes for <a class="link" href="libidn-pr29.html#pr29-4" title="pr29_4 ()"><code class="function">pr29_4()</code></a>, <a class="link" href="libidn-pr29.html#pr29-4z" title="pr29_4z ()"><code class="function">pr29_4z()</code></a>, <a class="link" href="libidn-pr29.html#pr29-8z" title="pr29_8z ()"><code class="function">pr29_8z()</code></a>.  The
+value 0 is guaranteed to always correspond to success.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="PR29-SUCCESS:CAPS"></a><span class="term"><code class="literal">PR29_SUCCESS</code></span></p></td>
+<td>Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+</td>
+</tr>
+<tr>
+<td><p><a name="PR29-PROBLEM:CAPS"></a><span class="term"><code class="literal">PR29_PROBLEM</code></span></p></td>
+<td>A problem sequence was encountered.
+</td>
+</tr>
+<tr>
+<td><p><a name="PR29-STRINGPREP-ERROR:CAPS"></a><span class="term"><code class="literal">PR29_STRINGPREP_ERROR</code></span></p></td>
+<td>The character set conversion failed (only
+  for <a class="link" href="libidn-pr29.html#pr29-8z" title="pr29_8z ()"><code class="function">pr29_8z()</code></a>).
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="pr29-4"></a><h3>pr29_4 ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 pr29_4                              (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> len</code></em>);</pre>
+<p>
+Check the input to see if it may be normalized into different
+strings by different NFKC implementations, due to an anomaly in the
+NFKC specifications.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td>length of input array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-pr29.html#Pr29-rc" title="enum Pr29_rc"><span class="type">Pr29_rc</span></a> value <a class="link" href="libidn-pr29.html#PR29-SUCCESS:CAPS"><code class="literal">PR29_SUCCESS</code></a> on success,
+and <a class="link" href="libidn-pr29.html#PR29-PROBLEM:CAPS"><code class="literal">PR29_PROBLEM</code></a> if the input sequence is a "problem sequence"
+(i.e., may be normalized into different strings by different
+implementations).</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="pr29-4z"></a><h3>pr29_4z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 pr29_4z                             (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>);</pre>
+<p>
+Check the input to see if it may be normalized into different
+strings by different NFKC implementations, due to an anomaly in the
+NFKC specifications.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>zero terminated array of Unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-pr29.html#Pr29-rc" title="enum Pr29_rc"><span class="type">Pr29_rc</span></a> value <a class="link" href="libidn-pr29.html#PR29-SUCCESS:CAPS"><code class="literal">PR29_SUCCESS</code></a> on success,
+and <a class="link" href="libidn-pr29.html#PR29-PROBLEM:CAPS"><code class="literal">PR29_PROBLEM</code></a> if the input sequence is a "problem sequence"
+(i.e., may be normalized into different strings by different
+implementations).</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="pr29-8z"></a><h3>pr29_8z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 pr29_8z                             (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>);</pre>
+<p>
+Check the input to see if it may be normalized into different
+strings by different NFKC implementations, due to an anomaly in the
+NFKC specifications.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>zero terminated input UTF-8 string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns the <a class="link" href="libidn-pr29.html#Pr29-rc" title="enum Pr29_rc"><span class="type">Pr29_rc</span></a> value <a class="link" href="libidn-pr29.html#PR29-SUCCESS:CAPS"><code class="literal">PR29_SUCCESS</code></a> on success,
+and <a class="link" href="libidn-pr29.html#PR29-PROBLEM:CAPS"><code class="literal">PR29_PROBLEM</code></a> if the input sequence is a "problem sequence"
+(i.e., may be normalized into different strings by different
+implementations), or <a class="link" href="libidn-pr29.html#PR29-STRINGPREP-ERROR:CAPS"><code class="literal">PR29_STRINGPREP_ERROR</code></a> if there was a
+problem converting the string from UTF-8 to UCS-4.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="pr29-strerror"></a><h3>pr29_strerror ()</h3>
+<pre class="programlisting">const <span class="returnvalue">char</span> *        pr29_strerror                       (<em class="parameter"><code><a class="link" href="libidn-pr29.html#Pr29-rc" title="enum Pr29_rc"><span class="type">Pr29_rc</span></a> rc</code></em>);</pre>
+<p>
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+</p>
+<p>
+PR29_SUCCESS: Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+PR29_PROBLEM: A problem sequence was encountered.
+PR29_STRINGPREP_ERROR: The character set conversion failed (only
+  for <a class="link" href="libidn-pr29.html#pr29-8z" title="pr29_8z ()"><code class="function">pr29_8z()</code></a>).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rc</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-pr29.html#Pr29-rc" title="enum Pr29_rc"><span class="type">Pr29_rc</span></a> return code.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns a pointer to a statically allocated string
+containing a description of the error with the return code <em class="parameter"><code>rc</code></em>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.18</div>
+</body>
+</html>

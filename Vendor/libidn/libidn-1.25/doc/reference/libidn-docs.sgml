@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+  <!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+  <!ENTITY version SYSTEM "version.xml">
+]>
+<book id="index">
+  <bookinfo>
+    <title>GNU Libidn API Reference Manual</title>
+    <releaseinfo>
+      for GNU Libidn &version;.
+      The latest version of this documentation can be found on-line at
+      <ulink role="online-location" url="https://www.gnu.org/software/libidn/reference/">https://www.gnu.org/software/libidn/reference/</ulink>.
+    </releaseinfo>
+  </bookinfo>
+
+  <chapter id="intro">
+    <title>GNU Libidn API Reference Manual</title>
+
+    <para>
+GNU Libidn is a fully documented implementation of the Stringprep,
+Punycode and IDNA specifications.  Libidn's purpose is to encode and
+decode internationalized domain name strings.  There are native C, C#
+and Java libraries.
+    </para>
+
+    <para>
+The C library contains a generic Stringprep implementation.  Profiles
+for Nameprep, iSCSI, SASL, XMPP and Kerberos V5 are included.
+Punycode and ASCII Compatible Encoding (ACE) via IDNA are supported.
+A mechanism to define Top-Level Domain (TLD) specific validation
+tables, and to compare strings against those tables, is included.
+Default tables for some TLDs are also included.
+    </para>
+
+    <para>
+The Stringprep API consists of two main functions, one for converting
+data from the system's native representation into UTF-8, and one
+function to perform the Stringprep processing.  Adding a new
+Stringprep profile for your application within the API is
+straightforward.  The Punycode API consists of one encoding function
+and one decoding function.  The IDNA API consists of the ToASCII and
+ToUnicode functions, as well as an high-level interface for converting
+entire domain names to and from the ACE encoded form.  The TLD API
+consists of one set of functions to extract the TLD name from a domain
+string, one set of functions to locate the proper TLD table to use
+based on the TLD name, and core functions to validate a string against
+a TLD table, and some utility wrappers to perform all the steps in one
+call.
+    </para>
+
+    <para>
+The library is used by, e.g., GNU SASL and Shishi to process user
+names and passwords.  Libidn can be built into GNU Libc to enable a
+new system-wide getaddrinfo flag for IDN processing.
+    </para>
+
+    <para>
+Libidn is developed for the GNU/Linux system, but runs on over 20 Unix
+platforms (including Solaris, IRIX, AIX, and Tru64) and Windows.  The
+library is written in C and (parts of) the API is also accessible from
+C++, Emacs Lisp, Python and Java.  A native Java and C# port is
+included.
+    </para>
+
+    <para>
+Also included is a command line tool, several self tests, code
+examples, and more.
+    </para>
+
+    <para>
+      The internal layout of the library, and how your application
+      interact with the various parts of the library, are shown in
+      <xref linkend="components"/>.
+    </para>
+
+    <figure id="components">
+      <title>Components of Libidn</title>
+      <graphic fileref="libidn-components.png" format="PNG"></graphic>
+    </figure>
+
+    <xi:include href="xml/idna.xml"/>
+    <xi:include href="xml/stringprep.xml"/>
+    <xi:include href="xml/punycode.xml"/>
+    <xi:include href="xml/pr29.xml"/>
+    <xi:include href="xml/tld.xml"/>
+    <xi:include href="xml/idn-free.xml"/>
+
+  </chapter>
+  <index id="api-index-full">
+    <title>API Index</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+</book>

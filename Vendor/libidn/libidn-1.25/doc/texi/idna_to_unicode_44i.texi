@@ -1,0 +1,41 @@
+@subheading idna_to_unicode_44i
+@anchor{idna_to_unicode_44i}
+@deftypefun {int} {idna_to_unicode_44i} (const uint32_t * @var{in}, size_t @var{inlen}, uint32_t * @var{out}, size_t * @var{outlen}, int @var{flags})
+@var{in}: input array with unicode code points.
+
+@var{inlen}: length of input array with unicode code points.
+
+@var{out}: output array with unicode code points.
+
+@var{outlen}: on input, maximum size of output array with unicode code points,
+on exit, actual size of output array with unicode code points.
+
+@var{flags}: an @code{Idna_flags} value, e.g., @code{IDNA_ALLOW_UNASSIGNED} or
+@code{IDNA_USE_STD3_ASCII_RULES}.
+
+The ToUnicode operation takes a sequence of Unicode code points
+that make up one domain label and returns a sequence of Unicode
+code points. If the input sequence is a label in ACE form, then the
+result is an equivalent internationalized label that is not in ACE
+form, otherwise the original sequence is returned unaltered.
+
+ToUnicode never fails. If any step fails, then the original input
+sequence is returned immediately in that step.
+
+The Punycode decoder can never output more code points than it
+inputs, but Nameprep can, and therefore ToUnicode can.  Note that
+the number of octets needed to represent a sequence of code points
+depends on the particular character encoding used.
+
+The inputs to ToUnicode are a sequence of code points, the
+AllowUnassigned flag, and the UseSTD3ASCIIRules flag. The output of
+ToUnicode is always a sequence of Unicode code points.
+
+@strong{Return value:} Returns @code{Idna_rc} error condition, but it must only be
+used for debugging purposes.  The output buffer is always
+guaranteed to contain the correct data according to the
+specification (sans malloc induced errors).  NB!  This means that
+you normally ignore the return code from this function, as
+checking it means breaking the standard.
+@end deftypefun
+

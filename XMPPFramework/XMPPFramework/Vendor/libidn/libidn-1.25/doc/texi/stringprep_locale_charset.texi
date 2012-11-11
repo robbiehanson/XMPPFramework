@@ -1,0 +1,22 @@
+@subheading stringprep_locale_charset
+@anchor{stringprep_locale_charset}
+@deftypefun {const char *} {stringprep_locale_charset} ( @var{void})
+
+Find out current locale charset.  The function respect the CHARSET
+environment variable, but typically uses nl_langinfo(CODESET) when
+it is supported.  It fall back on "ASCII" if CHARSET isn't set and
+nl_langinfo isn't supported or return anything.
+
+Note that this function return the application's locale's preferred
+charset (or thread's locale's preffered charset, if your system
+support thread-specific locales).  It does not return what the
+system may be using.  Thus, if you receive data from external
+sources you cannot in general use this function to guess what
+charset it is encoded in.  Use stringprep_convert from the external
+representation into the charset returned by this function, to have
+data in the locale encoding.
+
+@strong{Return value:} Return the character set used by the current locale.
+It will never return NULL, but use "ASCII" as a fallback.
+@end deftypefun
+

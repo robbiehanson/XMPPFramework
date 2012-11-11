@@ -1,0 +1,45 @@
+Libidn doc/tld/README -- Notes and definition of the TLD tables.
+Copyright (C) 2004-2012 Simon Josefsson
+Copyright (C) 2004  Free Software Foundation, Inc
+See the end for copying conditions.
+
+This directory contain tables that specify which characters are valid
+for each TLD.  Each table is stored in a file XX.tld where XX doesn't
+really matter, but is recommended to be the TLD name.  For example,
+the TLD table for .FR is stored in the file "fr.tld".
+
+The library finds all files matching *.tld automatically, so if you
+install a file you only need to remove lib/tlds.c and type 'make' and
+it will be incorporated in the library.
+
+Experimental tables for various TLDs can be found at
+<https://github.com/gnuthor/tldchk>.
+
+The format for the files are as follows.  Empty lines or those
+starting with '#' are ignored.  It is highly recommended to discuss
+matters in a comment; to give the URL to the source of the table,
+mention the copyright and copying conditions of the tables, etc.
+Normal lines consist of valid Unicode code points for the TLD,
+expressed as single numbers (like 123, 0xff, 0100) or inclusive
+intervals (112-344 0xff-0100) using the usual C decimal, octal or hex
+notations.
+
+Each TLD file must contain one line on the format 'tld XX'.  The XX
+should be the TLD name that the file defines.  This is the string that
+is used in the generated C source code.
+
+If definitions are shared among several TLDs or are constructed from
+standard Unicode blocks, put the building blocks in a file of its own
+and include it using 'include FILENAME' on a line by itself.
+
+All files, even included files, MUST contain a line 'version FOO'
+where FOO is a human readable string that should be possible to use in
+a string comparison to detect when the table has changed.  The version
+number must be changed whenever a backwards incompatible change is
+made to the file.  Don't change the version number just because the
+comments are changed, or there is a new release of the library.
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

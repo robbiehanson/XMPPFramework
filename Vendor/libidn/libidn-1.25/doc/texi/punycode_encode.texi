@@ -1,0 +1,43 @@
+@subheading punycode_encode
+@anchor{punycode_encode}
+@deftypefun {int} {punycode_encode} (size_t @var{input_length}, const punycode_uint [] @var{input}, const unsigned char [] @var{case_flags}, size_t * @var{output_length}, char [] @var{output})
+@var{input_length}: The number of code points in the @code{input} array and
+the number of flags in the @code{case_flags} array.
+
+@var{input}: An array of code points.  They are presumed to be Unicode
+code points, but that is not strictly REQUIRED.  The array
+contains code points, not code units.  UTF-16 uses code units
+D800 through DFFF to refer to code points 10000..10FFFF.  The
+code points D800..DFFF do not occur in any valid Unicode string.
+The code points that can occur in Unicode strings (0..D7FF and
+E000..10FFFF) are also called Unicode scalar values.
+
+@var{case_flags}: A @code{NULL} pointer or an array of boolean values parallel
+to the @code{input} array.  Nonzero (true, flagged) suggests that the
+corresponding Unicode character be forced to uppercase after
+being decoded (if possible), and zero (false, unflagged) suggests
+that it be forced to lowercase (if possible).  ASCII code points
+(0..7F) are encoded literally, except that ASCII letters are
+forced to uppercase or lowercase according to the corresponding
+case flags.  If @code{case_flags} is a @code{NULL} pointer then ASCII letters
+are left as they are, and other code points are treated as
+unflagged.
+
+@var{output_length}: The caller passes in the maximum number of ASCII
+code points that it can receive.  On successful return it will
+contain the number of ASCII code points actually output.
+
+@var{output}: An array of ASCII code points.  It is *not*
+null-terminated; it will contain zeros if and only if the @code{input}
+contains zeros.  (Of course the caller can leave room for a
+terminator and add one if needed.)
+
+Converts a sequence of code points (presumed to be Unicode code
+points) to Punycode.
+
+@strong{Return value:} The return value can be any of the @code{Punycode_status}
+values defined above except @code{PUNYCODE_BAD_INPUT}.  If not
+@code{PUNYCODE_SUCCESS}, then @code{output_size} and @code{output} might contain
+garbage.
+@end deftypefun
+

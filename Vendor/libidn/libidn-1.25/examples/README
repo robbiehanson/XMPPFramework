@@ -1,0 +1,28 @@
+Libidn examples/README -- Information about files in examples/ directory.
+Copyright (C) 2003-2012 Simon Josefsson
+See the end for copying conditions.
+
+This directory contains examples on how to use Libidn.
+
+* Example 1::		Example using stringprep.
+This example demonstrates how the stringprep functions are used.
+
+* Example 2::		Example using punycode.
+This example demonstrates how the punycode functions are used.
+
+* Example 3::		Example using IDNA ToASCII.
+This example demonstrates how the library is used to convert
+internationalized domain names into ASCII compatible names.
+
+* Example 4::		Example using IDNA ToUnicode.
+This example demonstrates how the library is used to convert ASCII
+compatible names to internationalized domain names.
+
+* Example 5::		Example using TLD checking.
+This example demonstrates how the library is used to check a string
+for invalid characters within a specific TLD.
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

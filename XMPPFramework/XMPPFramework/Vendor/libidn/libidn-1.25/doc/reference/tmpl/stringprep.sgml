@@ -1,0 +1,334 @@
+<!-- ##### SECTION Title ##### -->
+stringprep
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO IDNAPI ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO STRINGPREP_MAX_MAP_CHARS ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO STRINGPREP_VERSION ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### TYPEDEF Stringprep_profile ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM Stringprep_profile_flags ##### -->
+<para>
+
+</para>
+
+@STRINGPREP_NO_NFKC: 
+@STRINGPREP_NO_BIDI: 
+@STRINGPREP_NO_UNASSIGNED: 
+
+<!-- ##### ENUM Stringprep_profile_steps ##### -->
+<para>
+
+</para>
+
+@STRINGPREP_NFKC: 
+@STRINGPREP_BIDI: 
+@STRINGPREP_MAP_TABLE: 
+@STRINGPREP_UNASSIGNED_TABLE: 
+@STRINGPREP_PROHIBIT_TABLE: 
+@STRINGPREP_BIDI_PROHIBIT_TABLE: 
+@STRINGPREP_BIDI_RAL_TABLE: 
+@STRINGPREP_BIDI_L_TABLE: 
+
+<!-- ##### TYPEDEF Stringprep_profiles ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM Stringprep_rc ##### -->
+<para>
+
+</para>
+
+@STRINGPREP_OK: 
+@STRINGPREP_CONTAINS_UNASSIGNED: 
+@STRINGPREP_CONTAINS_PROHIBITED: 
+@STRINGPREP_BIDI_BOTH_L_AND_RAL: 
+@STRINGPREP_BIDI_LEADTRAIL_NOT_RAL: 
+@STRINGPREP_BIDI_CONTAINS_PROHIBITED: 
+@STRINGPREP_TOO_SMALL_BUFFER: 
+@STRINGPREP_PROFILE_ERROR: 
+@STRINGPREP_FLAG_ERROR: 
+@STRINGPREP_UNKNOWN_PROFILE: 
+@STRINGPREP_NFKC_FAILED: 
+@STRINGPREP_MALLOC_ERROR: 
+
+<!-- ##### TYPEDEF Stringprep_table_element ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION stringprep ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+@flags: 
+@profile: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_4i ##### -->
+<para>
+
+</para>
+
+@ucs4: 
+@len: 
+@maxucs4len: 
+@flags: 
+@profile: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_4zi ##### -->
+<para>
+
+</para>
+
+@ucs4: 
+@maxucs4len: 
+@flags: 
+@profile: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_check_version ##### -->
+<para>
+
+</para>
+
+@req_version: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_convert ##### -->
+<para>
+
+</para>
+
+@str: 
+@to_codeset: 
+@from_codeset: 
+@Returns: 
+
+
+<!-- ##### MACRO stringprep_iscsi ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+
+
+<!-- ##### MACRO stringprep_kerberos5 ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+
+
+<!-- ##### FUNCTION stringprep_locale_charset ##### -->
+<para>
+
+</para>
+
+@void: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_locale_to_utf8 ##### -->
+<para>
+
+</para>
+
+@str: 
+@Returns: 
+
+
+<!-- ##### MACRO stringprep_nameprep ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+
+
+<!-- ##### MACRO stringprep_nameprep_no_unassigned ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+
+
+<!-- ##### MACRO stringprep_plain ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+
+
+<!-- ##### FUNCTION stringprep_profile ##### -->
+<para>
+
+</para>
+
+@in: 
+@out: 
+@profile: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_strerror ##### -->
+<para>
+
+</para>
+
+@rc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_ucs4_nfkc_normalize ##### -->
+<para>
+
+</para>
+
+@str: 
+@len: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_ucs4_to_utf8 ##### -->
+<para>
+
+</para>
+
+@str: 
+@len: 
+@items_read: 
+@items_written: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_unichar_to_utf8 ##### -->
+<para>
+
+</para>
+
+@c: 
+@outbuf: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_utf8_nfkc_normalize ##### -->
+<para>
+
+</para>
+
+@str: 
+@len: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_utf8_to_locale ##### -->
+<para>
+
+</para>
+
+@str: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_utf8_to_ucs4 ##### -->
+<para>
+
+</para>
+
+@str: 
+@len: 
+@items_written: 
+@Returns: 
+
+
+<!-- ##### FUNCTION stringprep_utf8_to_unichar ##### -->
+<para>
+
+</para>
+
+@p: 
+@Returns: 
+
+
+<!-- ##### MACRO stringprep_xmpp_nodeprep ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+
+
+<!-- ##### MACRO stringprep_xmpp_resourceprep ##### -->
+<para>
+
+</para>
+
+@in: 
+@maxlen: 
+
+

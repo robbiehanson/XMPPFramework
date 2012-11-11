@@ -1,0 +1,14 @@
+@subheading stringprep_unichar_to_utf8
+@anchor{stringprep_unichar_to_utf8}
+@deftypefun {int} {stringprep_unichar_to_utf8} (uint32_t @var{c}, char * @var{outbuf})
+@var{c}: a ISO10646 character code
+
+@var{outbuf}: output buffer, must have at least 6 bytes of space.
+If @code{NULL}, the length will be computed and returned
+and nothing will be written to @code{outbuf}.
+
+Converts a single character to UTF-8.
+
+@strong{Return value:} number of bytes written.
+@end deftypefun
+
