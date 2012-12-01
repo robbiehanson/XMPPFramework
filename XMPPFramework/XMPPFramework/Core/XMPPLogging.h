@@ -107,7 +107,7 @@
 // but we reserve a special macro to easily disable asynchronous logging for debugging purposes.
 
 #if DEBUG
-#define XMPP_LOG_ASYNC_ENABLED  YES
+#define XMPP_LOG_ASYNC_ENABLED  NO
 #else
 #define XMPP_LOG_ASYNC_ENABLED  YES
 #endif
