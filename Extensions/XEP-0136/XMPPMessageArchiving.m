@@ -1,5 +1,4 @@
 #import "XMPPMessageArchiving.h"
-#import "XMPPFramework.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
 
