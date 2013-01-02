@@ -1,5 +1,4 @@
 #import "XMPPMUC.h"
-#import "XMPPFramework.h"
 
 
 @implementation XMPPMUC
