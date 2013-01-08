@@ -7,6 +7,7 @@
 
 #import "XMPPMessage.h"
 #import "NSXMLElement+XMPP.h"
+#import <Cocoa/Cocoa.h>
 
 /* Simple implementatio of the XEP-0071 extension to implement support
  for lightweight text attributes. This implementation generates HTML
