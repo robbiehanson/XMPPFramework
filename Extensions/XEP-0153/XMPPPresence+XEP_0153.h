@@ -12,5 +12,5 @@
 // SHA1 hash of the photo data for the handle that sent this presence
 // This can be used to selectively fetch vCards only if the photo
 // hash has been updated
-@property (nonatomic, strong) NSString *photoHash;
+@property (nonatomic, retain) NSString *photoHash;
 @end
