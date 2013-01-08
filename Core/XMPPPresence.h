@@ -38,6 +38,9 @@ typedef NSUInteger XMPPPresenceShowType;
 @property (nonatomic, assign) XMPPPresenceShowType showType;
 @property (nonatomic, retain) NSString *status;
 @property (nonatomic, assign) NSInteger priority;
+@property (nonatomic, assign) BOOL available;
+@property (nonatomic, strong) XMPPJID *from;
+@property (nonatomic, strong) XMPPJID *to;
 
 - (BOOL)isErrorPresence;
 

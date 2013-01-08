@@ -82,10 +82,7 @@
 - (NSString *)type
 {
 	NSString *type = [self attributeStringValueForName:@"type"];
-	if (type)
-		return [type lowercaseString];
-	else
-		return @"available";
+	return [type lowercaseString];
 }
 
 - (void)setType:(NSString *)type
@@ -174,6 +171,46 @@
 			break;
 	}
 	self.show = show;
+}
+
+- (BOOL)available
+{
+	if (self.type)
+		return ![self.type isEqualToString:@"unavailable"];
+	return YES;
+}
+
+- (void)setAvailable:(BOOL)available
+{
+	self.type = available ? nil : @"unavailable";
+}
+
+- (XMPPJID *)from
+{
+	NSString *from = [self attributeStringValueForName:@"from"];
+	if ([from length])
+		return [XMPPJID jidWithString:from];
+	return nil;
+}
+
+- (void)setFrom:(XMPPJID *)from
+{
+	[self removeAttributeForName:@"from"];
+	[self addAttributeWithName:@"from" stringValue:[from description]];
+}
+
+- (XMPPJID *)to
+{
+	NSString *to = [self attributeStringValueForName:@"to"];
+	if ([to length])
+		return [XMPPJID jidWithString:to];
+	return nil;
+}
+
+- (void)setTo:(XMPPJID *)to
+{
+	[self removeAttributeForName:@"to"];
+	[self addAttributeWithName:@"to" stringValue:[to description]];
 }
 
 - (int)intShow
