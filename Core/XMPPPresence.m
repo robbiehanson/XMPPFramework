@@ -82,10 +82,17 @@
 - (NSString *)type
 {
 	NSString *type = [self attributeStringValueForName:@"type"];
-	if(type)
+	if (type)
 		return [type lowercaseString];
 	else
 		return @"available";
+}
+
+- (void)setType:(NSString *)type
+{
+	[self removeAttributeForName:@"type"];
+	if ([type length])
+		[self addAttributeWithName:@"type" stringValue:type];
 }
 
 - (NSString *)show
@@ -93,27 +100,93 @@
 	return [[self elementForName:@"show"] stringValue];
 }
 
+- (void)setShow:(NSString *)show
+{
+	NSXMLElement *showElement = [self elementForName:@"show"];
+	if (!showElement) {
+		showElement = [NSXMLElement elementWithName:@"show"];
+		[self addChild:showElement];
+	}
+	[showElement setStringValue:show];
+}
+
 - (NSString *)status
 {
 	return [[self elementForName:@"status"] stringValue];
 }
 
-- (int)priority
+- (void)setStatus:(NSString *)status
 {
-	return [[[self elementForName:@"priority"] stringValue] intValue];
+	NSXMLElement *statusElement = [self elementForName:@"status"];
+	if (!statusElement) {
+		statusElement = [NSXMLElement elementWithName:@"status"];
+		[self addChild:statusElement];
+	}
+	[statusElement setStringValue:status];
+}
+
+- (NSInteger)priority
+{
+	return [[[self elementForName:@"priority"] stringValue] integerValue];
+}
+
+- (void)setPriority:(NSInteger)priority
+{
+	NSXMLElement *priorityElement = [self elementForName:@"priority"];
+	if (!priorityElement) {
+		priorityElement = [NSXMLElement elementWithName:@"priority"];
+		[self addChild:priorityElement];
+	}
+	[priorityElement setStringValue:[[NSNumber numberWithInteger:priority] stringValue]];
+}
+
+- (XMPPPresenceShowType)showType
+{
+	NSString *show = [self show];
+	if ([show isEqualToString:@"dnd"])
+		return XMPPPresenceShowBusy;
+	if ([show isEqualToString:@"xa"])
+		return XMPPPresenceShowExtendedAway;
+	if ([show isEqualToString:@"away"])
+		return XMPPPresenceShowAway;
+	if ([show isEqualToString:@"chat"])
+		return XMPPPresenceShowChat;
+	return XMPPPresenceShowNone;
+}
+
+- (void)setShowType:(XMPPPresenceShowType)showType
+{
+	NSString *show = nil;
+	switch (showType) {
+		case XMPPPresenceShowBusy:
+			show = @"dnd";
+			break;
+		case XMPPPresenceShowExtendedAway:
+			show = @"xa";
+			break;
+		case XMPPPresenceShowAway:
+			show = @"away";
+			break;
+		case XMPPPresenceShowChat:
+			show = @"chat";
+			break;
+		default:
+			break;
+	}
+	self.show = show;
 }
 
 - (int)intShow
 {
 	NSString *show = [self show];
 	
-	if([show isEqualToString:@"dnd"])
+	if ([show isEqualToString:@"dnd"])
 		return 0;
-	if([show isEqualToString:@"xa"])
+	if ([show isEqualToString:@"xa"])
 		return 1;
-	if([show isEqualToString:@"away"])
+	if ([show isEqualToString:@"away"])
 		return 2;
-	if([show isEqualToString:@"chat"])
+	if ([show isEqualToString:@"chat"])
 		return 4;
 	
 	return 3;
@@ -123,6 +196,4 @@
 {
 	return [[self type] isEqualToString:@"error"];
 }
-
-
 @end

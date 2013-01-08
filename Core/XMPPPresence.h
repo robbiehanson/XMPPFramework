@@ -11,6 +11,15 @@
  * Simply add your own category to XMPPPresence to extend it with your own custom methods.
 **/
 
+enum {
+	XMPPPresenceShowNone = 0,
+	XMPPPresenceShowBusy = 1,
+	XMPPPresenceShowExtendedAway = 2,
+	XMPPPresenceShowAway = 3,
+	XMPPPresenceShowChat = 4
+};
+typedef NSUInteger XMPPPresenceShowType;
+
 @interface XMPPPresence : XMPPElement
 
 // Converts an NSXMLElement to an XMPPPresence element in place (no memory allocations or copying)
@@ -24,15 +33,15 @@
 - (id)initWithType:(NSString *)type;
 - (id)initWithType:(NSString *)type to:(XMPPJID *)to;
 
-- (NSString *)type;
-
-- (NSString *)show;
-- (NSString *)status;
-
-- (int)priority;
-
-- (int)intShow;
+@property (nonatomic, retain) NSString *type;
+@property (nonatomic, retain) NSString *show;
+@property (nonatomic, assign) XMPPPresenceShowType showType;
+@property (nonatomic, retain) NSString *status;
+@property (nonatomic, assign) NSInteger priority;
 
 - (BOOL)isErrorPresence;
 
+// This is for backward compatibility.
+// New implementations should use showType instead
+- (int)intShow;
 @end
