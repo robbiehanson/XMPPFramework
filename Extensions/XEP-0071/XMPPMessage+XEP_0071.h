@@ -1,12 +1,12 @@
 //
 //  XMPPMessage+XEP_0071.h
-//  FlamingoXMPP
 //
 //  Created by Indragie Karunaratne on 2013-01-08.
 //  Copyright (c) 2013 Indragie Karunaratne. All rights reserved.
 //
 
-#import <FlamingoXMPP/FlamingoXMPP.h>
+#import "XMPPMessage.h"
+#import "NSXMLElement+XMPP.h"
 
 /* Simple implementatio of the XEP-0071 extension to implement support
  for lightweight text attributes. This implementation generates HTML

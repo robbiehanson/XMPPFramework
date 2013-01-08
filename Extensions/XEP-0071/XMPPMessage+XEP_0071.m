@@ -1,6 +1,5 @@
 //
 //  XMPPMessage+XEP_0071.m
-//  FlamingoXMPP
 //
 //  Created by Indragie Karunaratne on 2013-01-08.
 //  Copyright (c) 2013 Indragie Karunaratne. All rights reserved.
@@ -12,6 +11,11 @@ static NSString* const XMPPMessageElementBody = @"body";
 static NSString* const XMPPMessageElementNSBody = @"http://www.w3.org/1999/xhtml";
 static NSString* const XMPPMessageElementHTML = @"html";
 static NSString* const XMPPMessageElementNSHTML = @"http://jabber.org/protocol/xhtml-im";
+
+@interface NSColor (HexColors)
+// Code rom this Apple technote <http://developer.apple.com/library/mac/#qa/qa1576/_index.html>
+- (NSString *)xmpp_hexadecimalValue;
+@end
 
 @implementation XMPPMessage (XEP_0071)
 - (NSAttributedString *)attributedBody
@@ -70,14 +74,14 @@ static NSString* const XMPPMessageElementNSHTML = @"http://jabber.org/protocol/x
 	}
 	NSColor *foregroundColor = [attr objectForKey:NSForegroundColorAttributeName];
 	if (foregroundColor) {
-		NSString *colorString = [foregroundColor fgo_hexadecimalValue];
+		NSString *colorString = [foregroundColor xmpp_hexadecimalValue];
 		if (colorString) {
 			[style appendFormat:@"color: %@;", colorString];
 		}
 	}
 	NSColor *backgroundColor = [attr objectForKey:NSBackgroundColorAttributeName];
 	if (backgroundColor) {
-		NSString *colorString = [backgroundColor fgo_hexadecimalValue];
+		NSString *colorString = [backgroundColor xmpp_hexadecimalValue];
 		if (colorString) {
 			[style appendFormat:@"background-color: %@;", colorString];
 		}
@@ -112,5 +116,35 @@ static NSString* const XMPPMessageElementNSHTML = @"http://jabber.org/protocol/x
 		[style appendString:@"text-decoration: line-through;"];
 	}
 	return style;
+}
+@end
+
+@implementation NSColor (HexColors)
+- (NSString *)xmpp_hexadecimalValue
+{
+	CGFloat redFloatValue, greenFloatValue, blueFloatValue;
+    int redIntValue, greenIntValue, blueIntValue;
+    NSString *redHexValue, *greenHexValue, *blueHexValue;
+	
+	// Convert the NSColor to the RGB color space before we can access its components
+    NSColor *convertedColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+	
+    if(convertedColor) {
+        // Get the red, green, and blue components of the color
+        [convertedColor getRed:&redFloatValue green:&greenFloatValue blue:&blueFloatValue alpha:NULL];
+        // Convert the components to numbers (unsigned decimal integer) between 0 and 255
+        redIntValue = redFloatValue * 255.99999f;
+        greenIntValue = greenFloatValue * 255.99999f;
+        blueIntValue = blueFloatValue * 255.99999f;
+		
+        // Convert the numbers to hex strings
+        redHexValue = [NSString stringWithFormat:@"%02x", redIntValue];
+        greenHexValue = [NSString stringWithFormat:@"%02x", greenIntValue];
+        blueHexValue = [NSString stringWithFormat:@"%02x", blueIntValue];
+		
+        // Concatenate the red, green, and blue components' hex strings together with a "#"
+        return [NSString stringWithFormat:@"#%@%@%@", redHexValue, greenHexValue, blueHexValue];
+    }
+    return nil;
 }
 @end
