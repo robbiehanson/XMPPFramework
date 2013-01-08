@@ -25,5 +25,5 @@
 */
 
 @interface XMPPMessage (XEP_0071)
-@property (nonatomic, strong) NSAttributedString *attributedBody;
+@property (nonatomic, retain) NSAttributedString *attributedBody;
 @end
