@@ -55,6 +55,7 @@ static NSString* const XMPPMessageElementNSHTML = @"http://jabber.org/protocol/x
 			[span addAttributeWithName:@"style" stringValue:style];
 		[body addChild:span];
 	}];
+	self.body = [attributedBody string];
 }
 
 + (NSString *)styleForAttributes:(NSDictionary *)attr
