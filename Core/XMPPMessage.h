@@ -31,4 +31,7 @@
 
 - (NSError *)errorMessage;
 
+@property (nonatomic, copy) NSString *body;
+@property (nonatomic, strong) XMPPJID *from;
+@property (nonatomic, strong) XMPPJID *to;
 @end
