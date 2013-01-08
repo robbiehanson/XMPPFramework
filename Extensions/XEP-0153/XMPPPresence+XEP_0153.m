@@ -1,12 +1,12 @@
 //
 //  XMPPPresence+XEP_0153.m
-//  FlamingoXMPP
 //
 //  Created by Indragie Karunaratne on 2013-01-08.
 //  Copyright (c) 2013 Indragie Karunaratne. All rights reserved.
 //
 
 #import "XMPPPresence+XEP_0153.h"
+#import "NSXMLElement+XMPP.h"
 
 static NSString* const XMPPPresenceElementX = @"x";
 static NSString* const XMPPPresenceElementNSX = @"vcard-temp:x:update";

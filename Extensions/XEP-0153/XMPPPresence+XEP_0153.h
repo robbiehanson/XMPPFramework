@@ -1,12 +1,11 @@
 //
 //  XMPPPresence+XEP_0153.h
-//  FlamingoXMPP
 //
 //  Created by Indragie Karunaratne on 2013-01-08.
 //  Copyright (c) 2013 Indragie Karunaratne. All rights reserved.
 //
 
-#import <FlamingoXMPP/FlamingoXMPP.h>
+#import "XMPPPresence.h"
 
 @interface XMPPPresence (XEP_0153)
 // SHA1 hash of the photo data for the handle that sent this presence
