@@ -9,7 +9,7 @@
 #import "NSXMLElement+XMPP.h"
 #import <Cocoa/Cocoa.h>
 
-/* Simple implementatio of the XEP-0071 extension to implement support
+/* Simple implementation of the XEP-0071 extension to implement support
  for lightweight text attributes. This implementation generates HTML
  that uses a style attribute to style the text. Not all elements supported
  by XEP-0071 are supported. The following style properties are supported:
