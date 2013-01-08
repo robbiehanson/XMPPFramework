@@ -4,6 +4,7 @@
 #import "XMPPInternal.h"
 #import "XMPPSRVResolver.h"
 #import "NSData+XMPP.h"
+#import "NSXMLElement+XMPP.h"
 
 #import <objc/runtime.h>
 #import <libkern/OSAtomic.h>
