@@ -64,6 +64,7 @@
 	DDListNode *node = listHead;
 	while (node != NULL)
 	{
+		DDListNode *nextNode = node->next;
 		if (element == node->element)
 		{
 			// Remove the node from the list.
@@ -90,10 +91,7 @@
 			
 			if (!allInstances) break;
 		}
-		else
-		{
-			node = node->next;
-		}
+		node = nextNode;
 	}
 }
 
