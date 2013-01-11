@@ -13,6 +13,7 @@
     NSXMLElement *myDiscoInfoQuery; // Full list of discovery info <query/>
 
     BOOL collectingMyDiscoInfo;
+    NSTimeInterval capabilitiesRequestTimeout;
 }
 
 @end
@@ -22,7 +23,7 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol XMPPCapabilitiesDelegate
+@protocol XMPPDiscoDelegate
 @optional
 
 /**
