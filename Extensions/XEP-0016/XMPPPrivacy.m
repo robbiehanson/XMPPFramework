@@ -971,7 +971,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	if (timer)
 	{
 		dispatch_source_cancel(timer);
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_release(timer);
 		#endif
 		timer = NULL;
