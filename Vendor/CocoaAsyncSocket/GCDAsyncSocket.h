@@ -112,6 +112,7 @@ typedef enum GCDAsyncSocketError GCDAsyncSocketError;
 	NSData * connectInterface6;
 	
 	dispatch_queue_t socketQueue;
+	const char *socketQueueTag;
 	
 	dispatch_source_t accept4Source;
 	dispatch_source_t accept6Source;

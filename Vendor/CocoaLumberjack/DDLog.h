@@ -271,8 +271,16 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
  * Provides access to the underlying logging queue.
  * This may be helpful to Logger classes for things like thread synchronization.
 **/
-
 + (dispatch_queue_t)loggingQueue;
+
+/**
+ * Provides access to the queue specific that identifies the loggingQueue.
+ *
+ * Use it as the following:
+ *     const char *tag = [DDLog loggingQueueTag];
+ *     NSAssert(dispatch_get_specific(tag) == tag, @"Ouch");
+**/
++ (const char *)loggingQueueTag;
 
 /**
  * Logging Primitive.
@@ -589,6 +597,7 @@ typedef int DDLogMessageOptions;
 	id <DDLogFormatter> formatter;
 	
 	dispatch_queue_t loggerQueue;
+	const char *loggerQueueTag;
 }
 
 - (id <DDLogFormatter>)logFormatter;

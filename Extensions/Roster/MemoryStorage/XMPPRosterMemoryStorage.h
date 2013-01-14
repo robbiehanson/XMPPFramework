@@ -19,6 +19,7 @@
 	__unsafe_unretained XMPPRoster *parent;
   #endif	
 	dispatch_queue_t parentQueue;
+	const char *parentQueueTag;
 	
 	Class userClass;
 	Class resourceClass;

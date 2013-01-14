@@ -93,7 +93,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 
 - (NSXMLElement *)pushConfiguration
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return pushConfiguration;
 	}
@@ -130,7 +130,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -384,8 +384,9 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 			result = (push != nil);
 		}
 	}};
-	
-	if (dispatch_get_current_queue() == self.xmppQueue)
+
+	const char *xmppQueueTag = self.xmppQueueTag;
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);
@@ -410,7 +411,8 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == self.xmppQueue)
+	const char *xmppQueueTag = self.xmppQueueTag;
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);

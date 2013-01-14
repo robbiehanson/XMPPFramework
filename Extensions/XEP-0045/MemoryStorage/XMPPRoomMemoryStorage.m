@@ -42,10 +42,10 @@
 #endif
 
 #define AssertPrivateQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag) == parentQueueTag, @"Private method: MUST run on parentQueue");
 
 #define AssertParentQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private protocol method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag) == parentQueueTag, @"Private protocol method: MUST run on parentQueue");
 
 @interface XMPPRoomMemoryStorage ()
 {
@@ -55,6 +55,7 @@
 	__unsafe_unretained XMPPRoom *parent;
   #endif
 	dispatch_queue_t parentQueue;
+	const char *parentQueueTag;
 	
 	NSMutableArray * messages;
 	NSMutableArray * occupantsArray;
@@ -100,7 +101,9 @@
 		if ((parent == nil) && (parentQueue == NULL))
 		{
 			parent = aParent;
+			parentQueueTag = "parentQueueTag";
 			parentQueue = queue;
+			dispatch_queue_set_specific(parentQueue, parentQueueTag, (void *)parentQueueTag, NULL);
 			
 			#if NEEDS_DISPATCH_RETAIN_RELEASE
 			dispatch_retain(parentQueue);
@@ -468,7 +471,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
 	{
 		return [occupantsDict objectForKey:jid];
 	}
@@ -495,7 +498,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
 	{
 		return messages;
 	}
@@ -522,7 +525,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
 	{
 		return occupantsArray;
 	}
@@ -549,7 +552,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
 	{
 		[messages sortUsingSelector:@selector(compare:)];
 		return messages;
@@ -578,7 +581,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
 	{
 		[occupantsArray sortUsingSelector:@selector(compare:)];
 		return occupantsArray;
