@@ -41,7 +41,7 @@
 #endif
 
 #define AssertPrivateQueue() \
-            NSAssert(dispatch_get_current_queue() == storageQueue, @"Private method: MUST run on storageQueue");
+            NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Private method: MUST run on storageQueue");
 
 @interface XMPPRoomCoreDataStorage ()
 {
@@ -130,7 +130,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		result = messageEntityName;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -144,7 +144,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		messageEntityName = newMessageEntityName;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -158,7 +158,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		result = occupantEntityName;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -172,7 +172,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		occupantEntityName = newOccupantEntityName;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -186,7 +186,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		result = maxMessageAge;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -254,7 +254,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -268,7 +268,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		result = deleteInterval;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -325,7 +325,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -338,7 +338,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		[pausedMessageDeletion addObject:[roomJID bareJID]];
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -352,7 +352,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		[self performDelete];
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);

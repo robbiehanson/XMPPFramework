@@ -44,7 +44,7 @@
 
 - (BOOL)respondsToQueries
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return respondsToQueries;
 	}
@@ -76,7 +76,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);

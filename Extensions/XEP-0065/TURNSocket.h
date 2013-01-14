@@ -17,6 +17,7 @@
 	BOOL isClient;
 	
 	dispatch_queue_t turnQueue;
+	const char *turnQueueTag;
 	
 	XMPPStream *xmppStream;
 	XMPPJID *jid;

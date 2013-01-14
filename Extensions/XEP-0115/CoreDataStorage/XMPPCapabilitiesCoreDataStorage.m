@@ -46,7 +46,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 
 - (XMPPCapsResourceCoreDataStorageObject *)resourceForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
 	
@@ -77,7 +77,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 
 - (XMPPCapsCoreDataStorageObject *)capsForHash:(NSString *)hash algorithm:(NSString *)hashAlg
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace2(@"%@: capsForHash:%@ algorithm:%@", THIS_FILE, hash, hashAlg);
 	
@@ -105,7 +105,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 
 - (void)_clearAllNonPersistentCapabilitiesForXMPPStream:(XMPPStream *)stream
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCapsResourceCoreDataStorageObject"
 	                                          inManagedObjectContext:[self managedObjectContext]];
@@ -220,7 +220,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 - (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr xmppStream:(XMPPStream *)stream
 {
 	// By design this method should not be invoked from the storageQueue.
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -331,7 +331,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
                  xmppStream:(XMPPStream *)stream
 {
 	// By design this method should not be invoked from the storageQueue.
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -411,7 +411,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
                   xmppStream:(XMPPStream *)stream
 {
 	// By design this method should not be invoked from the storageQueue.
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -519,7 +519,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 - (void)setCapabilities:(NSXMLElement *)capabilities forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// By design this method should not be invoked from the storageQueue.
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	

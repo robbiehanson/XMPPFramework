@@ -16,8 +16,9 @@
 @interface XMPPModule : NSObject
 {
 	XMPPStream *xmppStream;
-	
+
 	dispatch_queue_t moduleQueue;
+	const char* moduleQueueTag;
 	id multicastDelegate;
 }
 

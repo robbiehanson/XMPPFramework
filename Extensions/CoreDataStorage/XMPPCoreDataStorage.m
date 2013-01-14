@@ -250,7 +250,9 @@ static NSMutableSet *databaseFileNames;
 - (void)commonInit
 {
 	saveThreshold = 500;
+	storageQueueTag = "storageQueueTag";
 	storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
+	dispatch_queue_set_specific(storageQueue, storageQueueTag, (void *)storageQueueTag, NULL);
 	
 	myJidCache = [[NSMutableDictionary alloc] init];
 	
@@ -319,7 +321,7 @@ static NSMutableSet *databaseFileNames;
 
 - (NSUInteger)saveThreshold
 {
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 	{
 		return saveThreshold;
 	}
@@ -341,7 +343,7 @@ static NSMutableSet *databaseFileNames;
 		saveThreshold = newSaveThreshold;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -382,7 +384,7 @@ static NSMutableSet *databaseFileNames;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -429,7 +431,7 @@ static NSMutableSet *databaseFileNames;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -509,7 +511,7 @@ static NSMutableSet *databaseFileNames;
 		result = managedObjectModel;
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -583,7 +585,7 @@ static NSMutableSet *databaseFileNames;
 		
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -609,7 +611,7 @@ static NSMutableSet *databaseFileNames;
 	// then you need to go read the documentation for core data,
 	// specifically the section entitled "Concurrency with Core Data".
 	// 
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	// 
 	// Do NOT remove the assert statment above!
 	// Read the comments above!
@@ -654,7 +656,7 @@ static NSMutableSet *databaseFileNames;
 	// then you need to go read the documentation for core data,
 	// specifically the section entitled "Concurrency with Core Data".
 	// 
-	NSAssert(dispatch_get_current_queue() == dispatch_get_main_queue(), @"Context reserved for main thread only");
+	NSAssert([NSThread isMainThread], @"Context reserved for main thread only");
 	// 
 	// Do NOT remove the assert statment above!
 	// Read the comments above!
@@ -749,7 +751,7 @@ static NSMutableSet *databaseFileNames;
 
 - (void)maybeSave:(int32_t)currentPendingRequests
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	
 	
 	if ([[self managedObjectContext] hasChanges])
@@ -787,7 +789,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	//
@@ -817,7 +819,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	// 

@@ -30,11 +30,18 @@
 
 #endif
 
-#define AssertProperQueue() NSAssert(dispatch_get_current_queue() == queue, @"Invoked on incorrect queue")
+#define AssertProperQueue() NSAssert(dispatch_get_specific(queueTag) == queueTag, @"Invoked on incorrect queue")
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface XMPPIDTracker ()
+{
+	const char *queueTag;
+}
+
+@end
 
 @implementation XMPPIDTracker
 
@@ -51,7 +58,9 @@
 	
 	if ((self = [super init]))
 	{
+		queueTag = "queueTag";
 		queue = aQueue;
+		dispatch_queue_set_specific(queue, queueTag, (void *)queueTag, NULL);
 		#if NEEDS_DISPATCH_RETAIN_RELEASE
 		dispatch_retain(queue);
 		#endif
