@@ -106,6 +106,9 @@ static NSMutableArray *loggers;
 // All logging statements are added to the same queue to ensure FIFO operation.
 static dispatch_queue_t loggingQueue;
 
+// The queue specific key and context to identify the loggingQueue;
+static const char *loggingQueueTag;
+
 // Individual loggers are executed concurrently per log statement.
 // Each logger has it's own associated queue, and a dispatch group is used for synchrnoization.
 static dispatch_group_t loggingGroup;
@@ -135,8 +138,10 @@ static unsigned int numProcessors;
 		loggers = [[NSMutableArray alloc] initWithCapacity:4];
 		
 		NSLogDebug(@"DDLog: Using grand central dispatch");
-		
+
+		loggingQueueTag = "loggingQueueTag";
 		loggingQueue = dispatch_queue_create("cocoa.lumberjack", NULL);
+		dispatch_queue_set_specific(loggingQueue, loggingQueueTag, (void *)loggingQueueTag, NULL);
 		loggingGroup = dispatch_group_create();
 		
 		queueSemaphore = dispatch_semaphore_create(LOG_MAX_QUEUE_SIZE);
@@ -177,6 +182,11 @@ static unsigned int numProcessors;
 + (dispatch_queue_t)loggingQueue
 {
 	return loggingQueue;
+}
+
++ (const char *)loggingQueueTag
+{
+	return loggingQueueTag;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -867,8 +877,11 @@ static char *dd_str_copy(const char *str)
 		timestamp = [[NSDate alloc] init];
 		
 		machThreadID = pthread_mach_thread_np(pthread_self());
-		
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 		queueLabel = dd_str_copy(dispatch_queue_get_label(dispatch_get_current_queue()));
+#pragma clang diagnostic pop
 		
 		threadName = [[NSThread currentThread] name];
 	}
@@ -917,6 +930,7 @@ static char *dd_str_copy(const char *str)
 {
 	if ((self = [super init]))
 	{
+		loggerQueueTag = "loggerQueueTag";
 		const char *loggerQueueName = NULL;
 		if ([self respondsToSelector:@selector(loggerName)])
 		{
@@ -924,6 +938,7 @@ static char *dd_str_copy(const char *str)
 		}
 		
 		loggerQueue = dispatch_queue_create(loggerQueueName, NULL);
+		dispatch_queue_set_specific(loggerQueue, loggerQueueTag, (void *)loggerQueueTag, NULL);
 	}
 	return self;
 }
@@ -996,15 +1011,15 @@ static char *dd_str_copy(const char *str)
 	// So direct access to the formatter is only available if requested from the loggerQueue.
 	// In all other circumstances we need to go through the loggingQueue to get the proper value.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if (dispatch_get_specific(loggerQueueTag) == loggerQueueTag)
 	{
 		return formatter;
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		const char *globalLoggingQueueTag = [DDLog loggingQueueTag];
+		NSAssert(dispatch_get_specific(globalLoggingQueueTag) != globalLoggingQueueTag, @"Core architecture requirement failure");
 		
 		__block id <DDLogFormatter> result;
 		
@@ -1038,15 +1053,15 @@ static char *dd_str_copy(const char *str)
 		}
 	}};
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if (dispatch_get_specific(loggerQueueTag) == loggerQueueTag)
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		const char *globalLoggingQueueTag = [DDLog loggingQueueTag];
+		NSAssert(dispatch_get_specific(globalLoggingQueueTag) != globalLoggingQueueTag, @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);

@@ -97,6 +97,7 @@ enum XMPPStreamConfig
 @interface XMPPStream ()
 {
 	dispatch_queue_t xmppQueue;
+	const char *xmppQueueTag;
 	
 	dispatch_queue_t willSendIqQueue;
 	dispatch_queue_t willSendMessageQueue;
@@ -193,7 +194,9 @@ enum XMPPStreamConfig
 **/
 - (void)commonInit
 {
+	xmppQueueTag = "xmppQueueTag";
 	xmppQueue = dispatch_queue_create("xmpp", NULL);
+	dispatch_queue_set_specific(xmppQueue, xmppQueueTag, (void *)xmppQueueTag, NULL);
 	
 	willSendIqQueue = dispatch_queue_create("xmpp.willSendIq", NULL);
 	willSendMessageQueue = dispatch_queue_create("xmpp.willSendMessage", NULL);
@@ -314,6 +317,7 @@ enum XMPPStreamConfig
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @synthesize xmppQueue;
+@synthesize xmppQueueTag;
 
 - (XMPPStreamState)state
 {
@@ -323,7 +327,7 @@ enum XMPPStreamConfig
 		result = (XMPPStreamState)state;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -333,7 +337,7 @@ enum XMPPStreamConfig
 
 - (NSString *)hostName
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return hostName;
 	}
@@ -351,7 +355,7 @@ enum XMPPStreamConfig
 
 - (void)setHostName:(NSString *)newHostName
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		if (hostName != newHostName)
 		{
@@ -371,7 +375,7 @@ enum XMPPStreamConfig
 
 - (UInt16)hostPort
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return hostPort;
 	}
@@ -393,7 +397,7 @@ enum XMPPStreamConfig
 		hostPort = newHostPort;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -411,7 +415,7 @@ enum XMPPStreamConfig
 			result = myJID_setByClient;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -437,7 +441,7 @@ enum XMPPStreamConfig
 		}
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -467,7 +471,7 @@ enum XMPPStreamConfig
 		}
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -480,7 +484,7 @@ enum XMPPStreamConfig
 
 - (XMPPJID *)remoteJID
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return remoteJID;
 	}
@@ -498,7 +502,7 @@ enum XMPPStreamConfig
 
 - (XMPPPresence *)myPresence
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return myPresence;
 	}
@@ -522,7 +526,7 @@ enum XMPPStreamConfig
 		result = keepAliveInterval;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -545,7 +549,7 @@ enum XMPPStreamConfig
 		}
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -564,7 +568,7 @@ enum XMPPStreamConfig
 		}
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -582,7 +586,7 @@ enum XMPPStreamConfig
 		}
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -590,7 +594,7 @@ enum XMPPStreamConfig
 
 - (UInt64)numberOfBytesSent
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return numberOfBytesSent;
 	}
@@ -608,7 +612,7 @@ enum XMPPStreamConfig
 
 - (UInt64)numberOfBytesReceived
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return numberOfBytesReceived;
 	}
@@ -632,7 +636,7 @@ enum XMPPStreamConfig
 		result = (config & kResetByteCountPerConnection) ? YES : NO;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -649,7 +653,7 @@ enum XMPPStreamConfig
 			config &= ~kResetByteCountPerConnection;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -665,7 +669,7 @@ enum XMPPStreamConfig
 		result = (config & kEnableBackgroundingOnSocket) ? YES : NO;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -682,7 +686,7 @@ enum XMPPStreamConfig
 			config &= ~kEnableBackgroundingOnSocket;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -702,7 +706,7 @@ enum XMPPStreamConfig
 		[multicastDelegate addDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -716,7 +720,7 @@ enum XMPPStreamConfig
 		[multicastDelegate removeDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -730,7 +734,7 @@ enum XMPPStreamConfig
 		[multicastDelegate removeDelegate:delegate];
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -742,7 +746,7 @@ enum XMPPStreamConfig
 **/
 - (BOOL)isP2P
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return (config & kP2PMode) ? YES : NO;
 	}
@@ -760,7 +764,7 @@ enum XMPPStreamConfig
 
 - (BOOL)isP2PInitiator
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return ((config & kP2PMode) && (flags & kP2PInitiator));
 	}
@@ -778,7 +782,7 @@ enum XMPPStreamConfig
 
 - (BOOL)isP2PRecipient
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return ((config & kP2PMode) && !(flags & kP2PInitiator));
 	}
@@ -796,14 +800,14 @@ enum XMPPStreamConfig
 
 - (BOOL)didStartNegotiation
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	return (flags & kDidStartNegotiation) ? YES : NO;
 }
 
 - (void)setDidStartNegotiation:(BOOL)flag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	if (flag)
 		flags |= kDidStartNegotiation;
@@ -827,7 +831,7 @@ enum XMPPStreamConfig
 		result = (state == STATE_XMPP_DISCONNECTED);
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -847,7 +851,7 @@ enum XMPPStreamConfig
 		result = (state == STATE_XMPP_CONNECTED);
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -861,7 +865,7 @@ enum XMPPStreamConfig
 
 - (BOOL)connectToHost:(NSString *)host onPort:(UInt16)port error:(NSError **)errPtr
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -969,7 +973,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1006,7 +1010,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1091,7 +1095,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1176,7 +1180,7 @@ enum XMPPStreamConfig
 		[self startNegotiation];
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1222,7 +1226,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1263,7 +1267,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -1278,7 +1282,7 @@ enum XMPPStreamConfig
 **/
 - (BOOL)isSecure
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return (flags & kIsSecure) ? YES : NO;
 	}
@@ -1303,7 +1307,7 @@ enum XMPPStreamConfig
 			flags &= ~kIsSecure;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -1326,7 +1330,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1336,7 +1340,7 @@ enum XMPPStreamConfig
 
 - (void)sendStartTLSRequest
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1406,7 +1410,7 @@ enum XMPPStreamConfig
 		
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1442,7 +1446,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1523,7 +1527,7 @@ enum XMPPStreamConfig
 		
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1561,7 +1565,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1602,7 +1606,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1659,7 +1663,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1751,7 +1755,7 @@ enum XMPPStreamConfig
 	}};
 	
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1770,7 +1774,7 @@ enum XMPPStreamConfig
 		result = (flags & kIsAuthenticated) ? YES : NO;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -1787,7 +1791,7 @@ enum XMPPStreamConfig
 			flags &= ~kIsAuthenticated;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -1807,7 +1811,7 @@ enum XMPPStreamConfig
 **/
 - (NSXMLElement *)rootElement
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return rootElement;
 	}
@@ -1830,7 +1834,7 @@ enum XMPPStreamConfig
 **/
 - (float)serverXmppStreamVersionNumber
 {
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 	{
 		return [rootElement attributeFloatValueForName:@"version" withDefaultValue:0.0F];
 	}
@@ -1848,7 +1852,7 @@ enum XMPPStreamConfig
 
 - (void)sendIQ:(XMPPIQ *)iq withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to send an IQ.
@@ -1918,7 +1922,7 @@ enum XMPPStreamConfig
 
 - (void)sendMessage:(XMPPMessage *)message withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to send a message.
@@ -1988,7 +1992,7 @@ enum XMPPStreamConfig
 
 - (void)sendPresence:(XMPPPresence *)presence withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to send a presence element.
@@ -2058,7 +2062,7 @@ enum XMPPStreamConfig
 
 - (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	NSString *outgoingStr = [iq compactXMLString];
@@ -2076,7 +2080,7 @@ enum XMPPStreamConfig
 
 - (void)continueSendMessage:(XMPPMessage *)message withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	NSString *outgoingStr = [message compactXMLString];
@@ -2094,7 +2098,7 @@ enum XMPPStreamConfig
 
 - (void)continueSendPresence:(XMPPPresence *)presence withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	NSString *outgoingStr = [presence compactXMLString];
@@ -2127,7 +2131,7 @@ enum XMPPStreamConfig
 
 - (void)continueSendElement:(NSXMLElement *)element withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	NSString *outgoingStr = [element compactXMLString];
@@ -2147,7 +2151,7 @@ enum XMPPStreamConfig
 **/
 - (void)sendElement:(NSXMLElement *)element withTag:(long)tag
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	
 	if ([element isKindOfClass:[XMPPIQ class]])
@@ -2201,7 +2205,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -2237,7 +2241,7 @@ enum XMPPStreamConfig
 			}
 		}};
 		
-		if (dispatch_get_current_queue() == xmppQueue)
+		if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 			block();
 		else
 			dispatch_sync(xmppQueue, block);
@@ -2260,7 +2264,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -2293,7 +2297,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -2301,7 +2305,7 @@ enum XMPPStreamConfig
 
 - (void)receiveIQ:(XMPPIQ *)iq
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to receive an IQ.
@@ -2356,7 +2360,7 @@ enum XMPPStreamConfig
 
 - (void)receiveMessage:(XMPPMessage *)message
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to receive a message.
@@ -2411,7 +2415,7 @@ enum XMPPStreamConfig
 
 - (void)receivePresence:(XMPPPresence *)presence
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
 	// We're getting ready to receive a presence element.
@@ -2624,7 +2628,7 @@ enum XMPPStreamConfig
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -2639,7 +2643,7 @@ enum XMPPStreamConfig
 **/
 - (void)startNegotiation
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	NSAssert(![self didStartNegotiation], @"Invoked after initial negotiation has started");
 	
 	XMPPLogTrace();
@@ -2659,7 +2663,7 @@ enum XMPPStreamConfig
 **/
 - (void)sendOpeningNegotiation
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -2759,7 +2763,7 @@ enum XMPPStreamConfig
 **/
 - (void)startTLS
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -2814,7 +2818,7 @@ enum XMPPStreamConfig
 
 - (void)continueStartTLS:(NSMutableDictionary *)settings
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, settings);
 	
@@ -2866,7 +2870,7 @@ enum XMPPStreamConfig
 **/
 - (void)handleStreamFeatures
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -2972,7 +2976,7 @@ enum XMPPStreamConfig
 
 - (void)handleStartTLSResponse:(NSXMLElement *)response
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -2997,7 +3001,7 @@ enum XMPPStreamConfig
 **/
 - (void)handleRegistration:(NSXMLElement *)response
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -3029,7 +3033,7 @@ enum XMPPStreamConfig
 **/
 - (void)handleAuth:(NSXMLElement *)authResponse
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -3102,7 +3106,7 @@ enum XMPPStreamConfig
 
 - (void)handleBinding:(NSXMLElement *)response
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -3276,7 +3280,7 @@ enum XMPPStreamConfig
 
 - (void)handleStartSessionResponse:(NSXMLElement *)response
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -3302,7 +3306,7 @@ enum XMPPStreamConfig
 
 - (void)tryNextSrvResult
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -3350,7 +3354,7 @@ enum XMPPStreamConfig
 
 - (void)srvResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	if (sender != srvResolver) return;
 	
@@ -3366,7 +3370,7 @@ enum XMPPStreamConfig
 
 - (void)srvResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	if (sender != srvResolver) return;
 	
@@ -3797,7 +3801,7 @@ enum XMPPStreamConfig
 
 - (void)setupKeepAliveTimer
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -3844,7 +3848,7 @@ enum XMPPStreamConfig
 
 - (void)keepAlive
 {
-	NSAssert(dispatch_get_current_queue() == xmppQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(xmppQueueTag) == xmppQueueTag, @"Invoked on incorrect queue");
 	
 	if (state == STATE_XMPP_CONNECTED)
 	{
@@ -3907,7 +3911,7 @@ enum XMPPStreamConfig
 	
 	// Asynchronous operation
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -3952,7 +3956,7 @@ enum XMPPStreamConfig
 	
 	// Synchronous operation
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -3996,7 +4000,7 @@ enum XMPPStreamConfig
 	
 	// Asynchronous operation
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_async(xmppQueue, block);
@@ -4059,7 +4063,7 @@ enum XMPPStreamConfig
 	
 	// Synchronous operation
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -4087,7 +4091,7 @@ enum XMPPStreamConfig
 	
 	// Synchronous operation
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);
@@ -4132,7 +4136,7 @@ enum XMPPStreamConfig
 		result = xmppUtilityRunLoop;
 	};
 	
-	if (dispatch_get_current_queue() == xmppQueue)
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(xmppQueue, block);

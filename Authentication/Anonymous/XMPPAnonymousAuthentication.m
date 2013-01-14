@@ -116,8 +116,9 @@
 			result = NO;
 		}
 	}};
-	
-	if (dispatch_get_current_queue() == self.xmppQueue)
+
+	const char *xmppQueueTag = self.xmppQueueTag;
+	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);

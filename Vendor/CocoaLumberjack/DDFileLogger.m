@@ -528,15 +528,15 @@
 	// Note: The internal implementation should access the maximumFileSize variable directly,
 	// but if we forget to do this, then this method should at least work properly.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if (dispatch_get_specific(loggerQueueTag) == loggerQueueTag)
 	{
 		return maximumFileSize;
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		const char *globalLoggingQueueTag = [DDLog loggingQueueTag];
+		NSAssert(dispatch_get_specific(globalLoggingQueueTag) != globalLoggingQueueTag, @"Core architecture requirement failure");
 		
 		__block unsigned long long result;
 		
@@ -562,16 +562,16 @@
 		
 	}};
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if (dispatch_get_specific(loggerQueueTag) == loggerQueueTag)
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
-		
+		const char *globalLoggingQueueTag = [DDLog loggingQueueTag];
+		NSAssert(dispatch_get_specific(globalLoggingQueueTag) != globalLoggingQueueTag, @"Core architecture requirement failure");
+
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
 		});
@@ -586,16 +586,16 @@
 	// Note: The internal implementation should access the rollingFrequency variable directly,
 	// but if we forget to do this, then this method should at least work properly.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if (dispatch_get_specific(loggerQueueTag) == loggerQueueTag)
 	{
 		return rollingFrequency;
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
-		
+		const char *globalLoggingQueueTag = [DDLog loggingQueueTag];
+		NSAssert(dispatch_get_specific(globalLoggingQueueTag) != globalLoggingQueueTag, @"Core architecture requirement failure");
+
 		__block NSTimeInterval result;
 		
 		dispatch_sync(globalLoggingQueue, ^{
@@ -620,16 +620,16 @@
 		
 	}};
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if (dispatch_get_specific(loggerQueueTag) == loggerQueueTag)
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
-		
+		const char *globalLoggingQueueTag = [DDLog loggingQueueTag];
+		NSAssert(dispatch_get_specific(globalLoggingQueueTag) != globalLoggingQueueTag, @"Core architecture requirement failure");
+
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
 		});
@@ -700,15 +700,15 @@
 		[self rollLogFileNow];
 	}};
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if (dispatch_get_specific(loggerQueueTag) == loggerQueueTag)
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		const char *globalLoggingQueueTag = [DDLog loggingQueueTag];
+		NSAssert(dispatch_get_specific(globalLoggingQueueTag) != globalLoggingQueueTag, @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
