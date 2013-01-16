@@ -73,7 +73,7 @@ static NSDateFormatter *df;
 	NSString *t6s = @"16:00:00.123-06:00";
 	NSString *t7s = @"16:00:00.123456";
 	NSString *t8s = @"16:00:00.123456Z";
-	NSString *t9s = @"16:00:00.123456-06:00";
+	NSString *t9s = @"16:00:00.999511-06:00";
 	
 	NSLog(@"S parseTime(%@) = %@", t1s, [df stringFromDate:[XMPPDateTimeProfiles parseTime:t1s]]);
 	NSLog(@"S parseTime(%@) = %@", t2s, [df stringFromDate:[XMPPDateTimeProfiles parseTime:t2s]]);
@@ -115,7 +115,7 @@ static NSDateFormatter *df;
 	NSString *dt03s = @"1776-07-04T02:56:15.123Z";
 	NSString *dt04s = @"1776-07-04T21:56:15.123-05:00";
   NSString *dt05s = @"1776-07-04T02:56:15.123456Z";
-  NSString *dt06s = @"1776-07-04T21:56:15.123456-05:00";
+  NSString *dt06s = @"1776-07-04T21:56:15.999511-05:00";
 
 	NSLog(@"S parseDateTime(%@) = %@", dt01s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt01s]]);
 	NSLog(@"S parseDateTime(%@) = %@", dt02s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt02s]]);
@@ -131,7 +131,7 @@ static NSDateFormatter *df;
 	NSString *dt09s = @"1969-01-21T02:56:15.123Z";
 	NSString *dt10s = @"1969-01-21T21:56:15.123-05:00";
 	NSString *dt11s = @"1969-01-21T02:56:15.123456Z";
-	NSString *dt12s = @"1969-01-21T21:56:15.123456-05:00";
+	NSString *dt12s = @"1969-01-21T21:56:15.999511-05:00";
 
 	NSLog(@"S parseDateTime(%@) = %@", dt07s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt07s]]);
 	NSLog(@"S parseDateTime(%@) = %@", dt08s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt08s]]);
@@ -147,7 +147,7 @@ static NSDateFormatter *df;
 	NSString *dt15s = @"1969-07-21T02:56:15.123Z";
 	NSString *dt16s = @"1969-07-21T21:56:15.123-05:00";
 	NSString *dt17s = @"1969-07-21T02:56:15.123456Z";
-	NSString *dt18s = @"1969-07-21T21:56:15.123456-05:00";
+	NSString *dt18s = @"1969-07-21T21:56:15.999511-05:00";
 
 	NSLog(@"S parseDateTime(%@) = %@", dt13s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt13s]]);
 	NSLog(@"S parseDateTime(%@) = %@", dt14s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt14s]]);
@@ -163,7 +163,7 @@ static NSDateFormatter *df;
 	NSString *dt21s = @"2010-04-04T02:56:15.123Z";
 	NSString *dt22s = @"2010-04-04T21:56:15.123-05:00";
 	NSString *dt23s = @"2010-04-04T02:56:15.123456Z";
-	NSString *dt24s = @"2010-04-04T21:56:15.123456-05:00";
+	NSString *dt24s = @"2010-04-04T21:56:15.999511-05:00";
 
 	NSLog(@"S parseDateTime(%@) = %@", dt19s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt19s]]);
 	NSLog(@"S parseDateTime(%@) = %@", dt20s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt20s]]);
@@ -179,7 +179,7 @@ static NSDateFormatter *df;
 	NSString *dt27s = @"2010-12-25T02:56:15.123Z";
 	NSString *dt28s = @"2010-12-25T21:56:15.123-05:00";
 	NSString *dt29s = @"2010-12-25T02:56:15.123456Z";
-	NSString *dt30s = @"2010-12-25T21:56:15.123456-05:00";
+	NSString *dt30s = @"2010-12-25T21:56:15.999511-05:00";
 
 	NSLog(@"S parseDateTime(%@) = %@", dt25s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt25s]]);
 	NSLog(@"S parseDateTime(%@) = %@", dt26s, [df stringFromDate:[XMPPDateTimeProfiles parseDateTime:dt26s]]);

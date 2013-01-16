@@ -187,53 +187,51 @@
 	
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
+	[df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
 
-	NSMutableString *format = [NSMutableString stringWithString:@"yyyy-MM-dd'T'HH:mm:ss"];
-	if (fractionalDigits > 0)
-	{
-		[format appendString:[@"." stringByPaddingToLength:fractionalDigits + 1 withString:@"S" startingAtIndex:0]];
-	}
+	NSDate *result = nil;
+	NSString *dateAndTime = [dateTimeStr substringToIndex:19];
+	NSString *fraction = fractionalDigits != 0 ? [NSString stringWithFormat:@"0%@", [dateTimeStr substringWithRange:NSMakeRange(19, fractionalDigits + 1)]] : nil;
 
-	if (hasTimeZoneInfo && !hasTimeZoneOffset)
-	{
-		[format appendString:@"'Z'"];
-	}
-	// else: offset calculated separately
-
-	[df setDateFormat:format];
-	
-	NSDate *result;
-	
 	if (hasTimeZoneInfo && !hasTimeZoneOffset)
 	{
 		[df setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-		
-		result = [df dateFromString:dateTimeStr];
+		result = [df dateFromString:dateAndTime];
 	}
 	else if (hasTimeZoneInfo && hasTimeZoneOffset)
 	{
-		NSString *dto;
-		NSString *tzo;
-		NSInteger splitIndex = [dateTimeStr length] - 6;
-		dto = [dateTimeStr substringToIndex:splitIndex];
-		tzo = [dateTimeStr substringFromIndex:splitIndex];
-
-		NSTimeZone *timeZone = [self parseTimeZoneOffset:tzo];
-		if (timeZone == nil)
+		NSString *timeZone = [dateTimeStr substringFromIndex:[dateTimeStr length] - 6];
+		NSTimeZone *tz = [self parseTimeZoneOffset:timeZone];
+		if (tz == nil)
 		{
 			result = nil;
 		}
 		else
 		{
-			[df setTimeZone:timeZone];
-			result = [df dateFromString:dto];
+			[df setTimeZone:tz];
+			result = [df dateFromString:dateAndTime];
 		}
 	}
 	else
 	{
-		result = [df dateFromString:dateTimeStr];
+		result = [df dateFromString:dateAndTime];
 	}
-	
+
+	if (result && fraction)
+	{
+		static NSNumberFormatter *numberFormatter = nil;
+		static dispatch_once_t onceToken;
+		dispatch_once(&onceToken, ^{
+			numberFormatter = [[NSNumberFormatter alloc] init];
+			[numberFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
+			[numberFormatter setDecimalSeparator:@"."];
+		});
+
+		NSTimeInterval fractionInterval = [[numberFormatter numberFromString:fraction] doubleValue];
+		NSTimeInterval current = [result timeIntervalSinceReferenceDate];
+		result = [NSDate dateWithTimeIntervalSinceReferenceDate:floor(current) + fractionInterval];
+	}
+
 	return result;
 }
 
