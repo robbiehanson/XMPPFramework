@@ -16,6 +16,8 @@
     NSTimeInterval capabilitiesRequestTimeout;
 }
 
+- (void)sendDiscoInfoQueryTo:(XMPPJID *)jid withNode:(NSString *)node ver:(NSString *)ver;
+
 @end
 
 
@@ -42,5 +44,12 @@
  * The discoInfo element is the <query/> element response to a disco#info request.
  **/
 - (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryInfo:(NSXMLElement *)discoInfo forJID:(XMPPJID *)jid;
+
+/**
+ * Invoked when identity/feature disco failed and we recieved an error response.
+ *
+ * The errorInfo element is the <error/> element response to a disco#info request.
+ **/
+- (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryError:(NSXMLElement *)errorInfo forJID:(XMPPJID *)jid;
 
 @end

@@ -10,24 +10,6 @@
 #import "XMPPLogging.h"
 
 /**
- * Defines the timeout for a capabilities request.
- *
- * There are two reasons to have a timeout:
- * - To prevent the discoRequest variables from growing indefinitely if responses are not received.
- * - If a request is sent to a jid broadcasting a capabilities hash, and it does not respond within the timeout,
- *   we can then send a request to a different jid broadcasting the same capabilities hash.
- *
- * Remember, if multiple jids all broadcast the same capabilities hash,
- * we only (initially) send a disco request to the first jid.
- * This is an obvious optimization to remove unnecessary traffic and cpu load.
- *
- * However, if that jid doesn't respond within a sensible time period,
- * we should move on to the next jid in the list.
- **/
-#define DISCO_REQUEST_TIMEOUT 30.0 // seconds
-
-
-/**
  * Define various xmlns values.
  **/
 #define XMLNS_DISCO_INFO  @"http://jabber.org/protocol/disco#info"
@@ -223,173 +205,27 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	XMPPLogTrace();
 	
 	// Remember XML hiearchy memory management rules.
-	// The passed parameter is a subnode of the IQ, and we need to pass it asynchronously to storge / delegate(s).
+	// The passed parameter is a subnode of the IQ, and we need to pass it asynchronously to delegate(s).
 	NSXMLElement *query = [querySubElement copy];
-	
-    // Cancel the request timeout
-    //[self cancelTimeoutForDiscoRequestFromJID:jid];
     
     // Notify the delegate(s)
     [multicastDelegate xmppDisco:self didReceiveDiscoveryInfo:query forJID:jid];
 }
 
-- (void)handleDiscoErrorResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
+- (void)handleDiscoErrorResponse:(NSXMLElement *)errorSubElement fromJID:(XMPPJID *)jid
 {
-//	// This method must be invoked on the moduleQueue
-//	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-//	
-//	XMPPLogTrace();
-//	
-//	NSString *hash = nil;
-//	NSString *hashAlg = nil;
-//	
-//	BOOL hashResponse = [xmppCapabilitiesStorage getCapabilitiesHash:&hash
-//	                                                       algorithm:&hashAlg
-//	                                                          forJID:jid
-//	                                                      xmppStream:xmppStream];
-//	if (hashResponse)
-//	{
-//		NSString *key = [self keyFromHash:hash algorithm:hashAlg];
-//		
-//		// We'd still like to know what the capabilities are for this hash.
-//		// Move onto the next one in the list (if there are more, otherwise stop).
-//		[self maybeQueryNextJidWithHashKey:key dueToHashMismatch:NO];
-//	}
-//	else
-//	{
-//		// Make a note of the failure
-//		[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
-//		
-//		// Remove the jid from the discoRequest variable
-//		[discoRequestJidSet removeObject:jid];
-//		
-//		// Cancel the request timeout
-//		[self cancelTimeoutForDiscoRequestFromJID:jid];
-//	}
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
+	// Remember XML hiearchy memory management rules.
+	// The passed parameter is a subnode of the IQ, and we need to pass it asynchronously to delegate(s).
+	NSXMLElement *error = [errorSubElement copy];
+    
+    // Notify the delegates(s)
+    [multicastDelegate xmppDisco:self didReceiveDiscoveryError:error forJID:jid];
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Timers
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
-{
-//	// This method must be invoked on the moduleQueue
-//	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-//	
-//	XMPPLogTrace();
-//	
-//	// If the timeout occurs, we will remove the jid from the discoRequestJidSet.
-//	// If we eventually get a response (after the timeout) we will still be able to process it.
-//	// The timeout simply prevents the set from growing infinitely.
-//	
-//	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
-//	
-//	dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
-//		
-//		[self processTimeoutWithJID:jid];
-//		
-//		dispatch_source_cancel(timer);
-//#if NEEDS_DISPATCH_RETAIN_RELEASE
-//		dispatch_release(timer);
-//#endif
-//	}});
-//	
-//	dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (DISCO_REQUEST_TIMEOUT * NSEC_PER_SEC));
-//	
-//	dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
-//	dispatch_resume(timer);
-//	
-//	// We also keep a reference to the timer in the discoTimerJidDict.
-//	// This allows us to cancel the timer when we get a response to the disco request.
-//	
-//	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
-//	
-//	[discoTimerJidDict setObject:timerWrapper forKey:jid];
-}
-
-- (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid withHashKey:(NSString *)key
-{
-//	// This method must be invoked on the moduleQueue
-//	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-//	
-//	XMPPLogTrace();
-//	
-//	// If the timeout occurs, we want to send a request to the next jid with the same capabilities hash.
-//	// This list of jids is stored in the discoRequestHashDict.
-//	// The key will allow us to fetch the jid list.
-//    
-//	dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, moduleQueue);
-//	
-//	dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
-//		
-//		[self processTimeoutWithHashKey:key];
-//		
-//		dispatch_source_cancel(timer);
-//#if NEEDS_DISPATCH_RETAIN_RELEASE
-//		dispatch_release(timer);
-//#endif
-//	}});
-//	
-//	dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (DISCO_REQUEST_TIMEOUT * NSEC_PER_SEC));
-//	
-//	dispatch_source_set_timer(timer, tt, DISPATCH_TIME_FOREVER, 0);
-//	dispatch_resume(timer);
-//	
-//	// We also keep a reference to the timer in the discoTimerJidDict.
-//	// This allows us to cancel the timer when we get a response to the disco request.
-//	
-//	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
-//	
-//	[discoTimerJidDict setObject:timerWrapper forKey:jid];
-}
-
-- (void)cancelTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
-{
-//	// This method must be invoked on the moduleQueue
-//	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-//	
-//	XMPPLogTrace();
-//	
-//	GCDTimerWrapper *timerWrapper = [discoTimerJidDict objectForKey:jid];
-//	if (timerWrapper)
-//	{
-//		[timerWrapper cancel];
-//		[discoTimerJidDict removeObjectForKey:jid];
-//	}
-}
-
-- (void)processTimeoutWithHashKey:(NSString *)key
-{
-//	// This method must be invoked on the moduleQueue
-//	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-//	
-//	XMPPLogTrace();
-//	
-//	[self maybeQueryNextJidWithHashKey:key dueToHashMismatch:NO];
-}
-
-- (void)processTimeoutWithJID:(XMPPJID *)jid
-{
-//	// This method must be invoked on the moduleQueue
-//	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-//	
-//	XMPPLogTrace();
-//	
-//	// We queried the jid for its capabilities, but it didn't answer us.
-//	// Nothing left to do now but wait.
-//	//
-//	// If it happens to eventually respond,
-//	// then we'll still be able to process the capabilities properly.
-//	//
-//	// But at this point we're going to consider the query to be done.
-//	// This prevents our discoRequestJidSet from growing infinitely,
-//	// and also opens up the possibility of sending it another query in the future.
-//	
-//	[discoRequestJidSet removeObject:jid];
-//	[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
@@ -424,6 +260,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	//     <feature var="feature2"/>
 	//   </query>
 	// </iq>
+    
+    NSXMLElement *error = [iq elementForName:@"error"];
 	
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNS_DISCO_INFO];
 	if (query == nil)
@@ -451,7 +289,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	}
 	else if ([type isEqualToString:@"error"])
 	{
-		[self handleDiscoErrorResponse:query fromJID:[iq from]];
+		[self handleDiscoErrorResponse:error fromJID:[iq from]];
 	}
 	else
 	{
