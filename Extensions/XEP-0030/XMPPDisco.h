@@ -11,7 +11,8 @@
 @interface XMPPDisco : XMPPModule
 {
     NSXMLElement *myDiscoInfoQuery; // Full list of discovery info <query/>
-
+    NSXMLElement *myDiscoItemsQuery;
+    
     BOOL collectingMyDiscoInfo;
     NSTimeInterval capabilitiesRequestTimeout;
 }
@@ -36,7 +37,7 @@
  * The design of XEP-115 is such that capabilites are expected to remain rather static.
  * However, if the capabilities change, the recollectMyCapabilities method may be used to perform a manual update.
  **/
-- (void)xmppDisco:(XMPPDisco *)sender collectingMyDiscoInfo:(NSXMLElement *)query;
+- (void)xmppDisco:(XMPPDisco *)sender collectingMyDiscoInfo:(NSXMLElement *)infoQuery  andDiscoItems:(NSXMLElement *)itemsQuery;
 
 /**
  * Invoked when identity/feature info have been discovered for an available JID.
