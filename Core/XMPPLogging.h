@@ -64,7 +64,7 @@
 // Global flag to enable/disable logging throughout the entire xmpp framework.
 
 #ifndef XMPP_LOGGING_ENABLED
-#define XMPP_LOGGING_ENABLED 1
+#define XMPP_LOGGING_ENABLED 0
 #endif
 
 // Define logging context for every log message coming from the XMPP framework.
