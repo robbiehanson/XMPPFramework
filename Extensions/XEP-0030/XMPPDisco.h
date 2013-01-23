@@ -6,7 +6,7 @@
 //
 //
 
-#import <XMPP/XMPP.h>
+#import "XMPP.h"
 
 @interface XMPPDisco : XMPPModule
 {

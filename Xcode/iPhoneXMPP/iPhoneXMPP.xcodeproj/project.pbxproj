@@ -49,6 +49,7 @@
 		0704FFC9134794020092A737 /* SettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0704FFC7134794020092A737 /* SettingsViewController.xib */; };
 		07AF16B9134812E20084D82A /* XMPPvCardAvatarModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF16B8134812E20084D82A /* XMPPvCardAvatarModule.m */; };
 		07AF189D134BC3370084D82A /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF189C134BC3370084D82A /* XMPPSRVResolver.m */; };
+		1AC620FC16B06851009C18A9 /* XMPPJID.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBCD12440A8E0055A459 /* XMPPJID.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D3623260D0F684500981E51 /* iPhoneXMPPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -155,7 +156,6 @@
 		31B5B693169B97D4007D1030 /* XMPPLogging.h in Headers */ = {isa = PBXBuildFile; fileRef = DCC0BEF31301CE9100EC45D2 /* XMPPLogging.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		31B5B694169B97D4007D1030 /* XMPPParser.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBD312440A8E0055A459 /* XMPPParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		31B5B695169B97D4007D1030 /* XMPPStream.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBD912440A8E0055A459 /* XMPPStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		31B5B696169B97D4007D1030 /* XMPPJID.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBCD12440A8E0055A459 /* XMPPJID.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		31B5B697169B97D4007D1030 /* XMPPElement.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBC912440A8E0055A459 /* XMPPElement.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		31B5B698169B97D4007D1030 /* XMPPIQ.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBCB12440A8E0055A459 /* XMPPIQ.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		31B5B699169B97D4007D1030 /* XMPPMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBCF12440A8E0055A459 /* XMPPMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -362,11 +362,11 @@
 		07AF16F7134A4E740084D82A /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPInternal.h; path = ../../Core/XMPPInternal.h; sourceTree = "<group>"; };
 		07AF189B134BC3370084D82A /* XMPPSRVResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSRVResolver.h; path = ../../Utilities/XMPPSRVResolver.h; sourceTree = "<group>"; };
 		07AF189C134BC3370084D82A /* XMPPSRVResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSRVResolver.m; path = ../../Utilities/XMPPSRVResolver.m; sourceTree = "<group>"; };
+		1AC6213316B09155009C18A9 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPFramework.h; path = ../../Core/XMPPFramework.h; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* iPhoneXMPPAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iPhoneXMPPAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iPhoneXMPPAppDelegate.m; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* iPhoneXMPP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iPhoneXMPP.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1DC726E2169F91A900A53F9F /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPFramework.h; path = ../../../ClientIOS/CommunicationsManager/CommunicationsManager/XMPPFramework.h; sourceTree = "<group>"; };
 		1DD53987169E2355009FADB2 /* XMPPDisco.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDisco.h; sourceTree = "<group>"; };
 		1DD53988169E2355009FADB2 /* XMPPDisco.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDisco.m; sourceTree = "<group>"; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -377,7 +377,6 @@
 		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = RootViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		315C72C316AF94D30057A843 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
 		31B5B615169B90D8007D1030 /* libXMPP.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libXMPP.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		31B5B619169B90D8007D1030 /* XMPP-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPP-Prefix.pch"; sourceTree = "<group>"; };
 		31B5B6E2169B9A72007D1030 /* XMPPExternalAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPExternalAuthentication.h; sourceTree = "<group>"; };
@@ -810,7 +809,7 @@
 		DC1F98001152CAF300138A8F /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
-				315C72C316AF94D30057A843 /* XMPPFramework.h */,
+				1AC6213316B09155009C18A9 /* XMPPFramework.h */,
 				DC30E6B8153E09D2001B9E6D /* Authentication */,
 				DC1F98011152CAFD00138A8F /* Categories */,
 				DC1F98031152CB0C00138A8F /* Core */,
@@ -1116,7 +1115,6 @@
 				31B5B693169B97D4007D1030 /* XMPPLogging.h in Headers */,
 				31B5B694169B97D4007D1030 /* XMPPParser.h in Headers */,
 				31B5B695169B97D4007D1030 /* XMPPStream.h in Headers */,
-				31B5B696169B97D4007D1030 /* XMPPJID.h in Headers */,
 				31B5B697169B97D4007D1030 /* XMPPElement.h in Headers */,
 				31B5B698169B97D4007D1030 /* XMPPIQ.h in Headers */,
 				31B5B699169B97D4007D1030 /* XMPPMessage.h in Headers */,
@@ -1185,11 +1183,12 @@
 				31B5B6D8169B97D4007D1030 /* iPhoneXMPPAppDelegate.h in Headers */,
 				31B5B6D9169B97D4007D1030 /* RootViewController.h in Headers */,
 				31B5B6DA169B97D4007D1030 /* SettingsViewController.h in Headers */,
-				31B5B6DD169B984D007D1030 /* XMPPSASLAuthentication.h in Headers */,
 				31B5B6DE169B9875007D1030 /* XMPPRoomOccupant.h in Headers */,
 				31B5B686169B9698007D1030 /* XMPPReconnect.h in Headers */,
 				31B5B6E4169B9A72007D1030 /* XMPPExternalAuthentication.h in Headers */,
 				1DD53989169E2355009FADB2 /* XMPPDisco.h in Headers */,
+				1AC620FC16B06851009C18A9 /* XMPPJID.h in Headers */,
+				31B5B6DD169B984D007D1030 /* XMPPSASLAuthentication.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1547,6 +1546,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1578,6 +1578,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
