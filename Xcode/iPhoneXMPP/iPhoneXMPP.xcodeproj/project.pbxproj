@@ -377,6 +377,7 @@
 		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = RootViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		315C72C316AF94D30057A843 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
 		31B5B615169B90D8007D1030 /* libXMPP.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libXMPP.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		31B5B619169B90D8007D1030 /* XMPP-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPP-Prefix.pch"; sourceTree = "<group>"; };
 		31B5B6E2169B9A72007D1030 /* XMPPExternalAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPExternalAuthentication.h; sourceTree = "<group>"; };
@@ -809,7 +810,7 @@
 		DC1F98001152CAF300138A8F /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
-				1DC726E2169F91A900A53F9F /* XMPPFramework.h */,
+				315C72C316AF94D30057A843 /* XMPPFramework.h */,
 				DC30E6B8153E09D2001B9E6D /* Authentication */,
 				DC1F98011152CAFD00138A8F /* Categories */,
 				DC1F98031152CB0C00138A8F /* Core */,

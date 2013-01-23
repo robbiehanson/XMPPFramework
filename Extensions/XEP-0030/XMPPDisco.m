@@ -13,6 +13,7 @@
  * Define various xmlns values.
  **/
 #define XMLNS_DISCO_INFO  @"http://jabber.org/protocol/disco#info"
+#define XMLNS_DISCO_ITEMS  @"http://jabber.org/protocol/disco#items"
 
 /**
  * Application identifier.
@@ -78,23 +79,26 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	//   <feature var='http://jabber.org/protocol/disco#info'/>
 	// </query>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
+	NSXMLElement *infoQuery = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
+    NSXMLElement *itemsQuery = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_ITEMS];
 	
+    // TODO: I know this is required but do I want to automatically include it or leave it to the caller?
 	NSXMLElement *feature1 = [NSXMLElement elementWithName:@"feature"];
 	[feature1 addAttributeWithName:@"var" stringValue:XMLNS_DISCO_INFO];
 	
-	[query addChild:feature1];
+	[infoQuery addChild:feature1];
 	
 	// Now prompt the delegates to add any additional features.
 	
-	SEL selector = @selector(xmppDisco:collectingMyDiscoInfo:);
+	SEL selector = @selector(xmppDisco:collectingMyDiscoInfo:andDiscoItems:);
 	
 	if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
         collectingMyDiscoInfo = NO;
-        myDiscoInfoQuery = query;
+        myDiscoInfoQuery = infoQuery;
+        myDiscoItemsQuery = itemsQuery;
 	}
 	else
 	{
@@ -115,12 +119,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 			{
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-                    [del xmppDisco:self collectingMyDiscoInfo:query];
+                    [del xmppDisco:self collectingMyDiscoInfo:infoQuery andDiscoItems:itemsQuery];
 				}});
 			}
             
             collectingMyDiscoInfo = NO;
-            myDiscoInfoQuery = query;
+            myDiscoInfoQuery = infoQuery;
+            myDiscoItemsQuery = itemsQuery;
 		}});
 	}
 }
@@ -155,14 +160,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
  * Invoked when we receive a disco request (request for our capabilities).
  * We should response with the proper disco response.
  **/
-- (void)handleDiscoRequest:(XMPPIQ *)iqRequest
+- (void)handleDiscoRequest:(XMPPIQ *)iqRequest forXMLNS:(NSString*)xmlNS
 {
 	// This method must be invoked on the moduleQueue
 	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
 	
-	//XMPPLogTrace();
+    XMPPIQ *iqResponse = nil;
 	
-	if (myDiscoInfoQuery == nil)
+	if (myDiscoInfoQuery == nil || myDiscoItemsQuery == nil)
 	{
 		// It appears we haven't collected our list of capabilites yet.
 		// This will need to be done before we can add the hash to the outgoing presence element.
@@ -170,9 +175,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		[self collectMyDiscoInfo];
 	}
 
-    NSXMLElement *queryRequest = [iqRequest childElement];
-    NSString *node = [queryRequest attributeStringValueForName:@"node"];
-    
     // <iq to="jid" id="id" type="result">
     //   <query xmlns="http://jabber.org/protocol/disco#info">
     //     <feature var="feature1"/>
@@ -180,16 +182,28 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     //   </query>
     // </iq>
     
-    NSXMLElement *query = [myDiscoInfoQuery copy];
-    if (node)
+    NSXMLElement *query = nil;
+    
+    if ([xmlNS isEqualToString:XMLNS_DISCO_INFO])
     {
-        [query addAttributeWithName:@"node" stringValue:node];
+        query = [myDiscoInfoQuery copy];
+        
+        NSString *node = [[iqRequest childElement] attributeStringValueForName:@"node"];
+    
+        if (node)
+        {
+            [query addAttributeWithName:@"node" stringValue:node];
+        }
+    }
+    else if ([xmlNS isEqualToString:XMLNS_DISCO_ITEMS])
+    {
+        query = [myDiscoItemsQuery copy];
     }
     
-    XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"result"
-                                         to:[iqRequest from]
-                                  elementID:[iqRequest elementID]
-                                      child:query];
+    iqResponse = [XMPPIQ iqWithType:@"result"
+                                 to:[iqRequest from]
+                          elementID:[iqRequest elementID]
+                              child:query];
     
     [xmppStream sendElement:iqResponse];
 }
@@ -244,6 +258,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+    NSLog(@"Got an IQ");
+    
 	// This method is invoked on the moduleQueue.
 	
 	// Disco Request:
@@ -262,41 +278,70 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	// </iq>
     
     NSXMLElement *error = [iq elementForName:@"error"];
-	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNS_DISCO_INFO];
-	if (query == nil)
+	NSXMLElement *query;
+    
+    query = [iq elementForName:@"query" xmlns:XMLNS_DISCO_INFO];
+    
+	if (query != nil) // disco#info query
 	{
-		return NO;
+        NSString *type = [[iq attributeStringValueForName:@"type"] lowercaseString];
+        if ([type isEqualToString:@"get"])
+        {
+            NSString *node = [query attributeStringValueForName:@"node"];
+            
+            if (node == nil || [node hasPrefix:DISCO_NODE])
+            {
+                [self handleDiscoRequest:iq forXMLNS:XMLNS_DISCO_INFO];
+            }
+            else
+            {
+                return NO;
+            }
+        }
+        else if ([type isEqualToString:@"result"])
+        {
+            [self handleDiscoResponse:query fromJID:[iq from]];
+        }
+        else if ([type isEqualToString:@"error"])
+        {
+            [self handleDiscoErrorResponse:error fromJID:[iq from]];
+        }
+        else
+        {
+            return NO;
+        }
+        
+        return YES;
 	}
-	
-	NSString *type = [[iq attributeStringValueForName:@"type"] lowercaseString];
-	if ([type isEqualToString:@"get"])
-	{
-		NSString *node = [query attributeStringValueForName:@"node"];
-		
-		if (node == nil || [node hasPrefix:DISCO_NODE])
-		{
-			[self handleDiscoRequest:iq];
-		}
-		else
-		{
-			return NO;
-		}
-	}
-	else if ([type isEqualToString:@"result"])
-	{
-		[self handleDiscoResponse:query fromJID:[iq from]];
-	}
-	else if ([type isEqualToString:@"error"])
-	{
-		[self handleDiscoErrorResponse:error fromJID:[iq from]];
-	}
-	else
-	{
-		return NO;
-	}
-	
-	return YES;
+    else
+    {
+        query = [iq elementForName:@"query" xmlns:XMLNS_DISCO_ITEMS];
+        
+        if (query != nil)
+        {
+            NSString *type = [[iq attributeStringValueForName:@"type"] lowercaseString];
+            if ([type isEqualToString:@"get"])
+            {
+                [self handleDiscoRequest:iq forXMLNS:XMLNS_DISCO_ITEMS];
+            }
+            else if ([type isEqualToString:@"result"])
+            {
+                [self handleDiscoResponse:query fromJID:[iq from]];
+            }
+            else if ([type isEqualToString:@"error"])
+            {
+                [self handleDiscoErrorResponse:error fromJID:[iq from]];
+            }
+            else
+            {
+                return NO;
+            }
+            
+            return YES;
+        }
+    }
+    
+    return NO;
 }
 
 @end

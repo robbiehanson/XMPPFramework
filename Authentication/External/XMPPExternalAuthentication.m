@@ -46,7 +46,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
 	XMPPLogTrace();
 	
-	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="EXTENAL">=</auth>
+	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="EXTERNAL">=</auth>
 	
     NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
     [auth addAttributeWithName:@"mechanism" stringValue:@"EXTERNAL"];
