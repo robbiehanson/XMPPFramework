@@ -699,12 +699,11 @@ static NSMutableSet *databaseFileNames;
 	    (sender.persistentStoreCoordinator == mainThreadManagedObjectContext.persistentStoreCoordinator))
 	{
 		XMPPLogVerbose(@"%@: %@ - Merging changes into mainThreadManagedObjectContext", THIS_FILE, THIS_METHOD);
-		
-		dispatch_async(dispatch_get_main_queue(), ^{
-			
-			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
-			[self mainThreadManagedObjectContextDidMergeChanges];
-		});
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+            [self mainThreadManagedObjectContextDidMergeChanges];
+        });
+        
     }
 }
 
