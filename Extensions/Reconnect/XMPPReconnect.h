@@ -111,6 +111,16 @@
 @property (nonatomic, assign) NSTimeInterval reconnectTimerInterval;
 
 /**
+ * Whether you want to reconnect using the legacy method -[XMPPStream oldSchoolSecureConnect:]
+ * instead of the standard -[XMPPStream connect:].
+ *
+ * If you initially connect using -oldSchoolSecureConnect:, set this to YES to reconnect the same way.
+ *
+ * The default value is NO (disabled).
+ */
+@property (nonatomic, assign) BOOL usesOldSchoolSecureConnect;
+
+/**
  * As opposed to using autoReconnect, this method may be used to manually start the reconnect process.
  * This may be useful, for example, if one needs network monitoring in order to setup the inital xmpp connection.
  * Or if one wants autoReconnect but only in very limited situations which they prefer to control manually.
