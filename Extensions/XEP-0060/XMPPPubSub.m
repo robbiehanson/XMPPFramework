@@ -107,7 +107,7 @@
             NSString *elementID = [iq attributeStringValueForName:@"id"];
             if (elementID) {
                 NSArray * elementIDComp = [elementID componentsSeparatedByString:@":"];
-                if (elementIDComp > 0) {
+                if ([elementIDComp count] > 0) {
                     NSString * opType = [elementIDComp objectAtIndex:1];
                     
                     if ([opType isEqualToString:@"publish_node"]) {
