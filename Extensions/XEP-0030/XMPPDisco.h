@@ -18,6 +18,7 @@
 }
 
 - (void)sendDiscoInfoQueryTo:(XMPPJID *)jid withNode:(NSString *)node ver:(NSString *)ver;
+- (void)sendDiscoItemsQueryTo:(XMPPJID *)jid;
 
 @end
 
@@ -45,6 +46,13 @@
  * The discoInfo element is the <query/> element response to a disco#info request.
  **/
 - (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryInfo:(NSXMLElement *)discoInfo forJID:(XMPPJID *)jid;
+
+/**
+ * Invoked when items have been returned in response to an items disco query.
+ *
+ * The discoItems element is the <query/> element response to a disco#items request.
+ **/
+- (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryItems:(NSXMLElement *)discoItems forJID:(XMPPJID *)jid;
 
 /**
  * Invoked when identity/feature disco failed and we recieved an error response.

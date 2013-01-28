@@ -155,6 +155,23 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	[xmppStream sendElement:iq];
 }
 
+- (void)sendDiscoItemsQueryTo:(XMPPJID *)jid
+{
+	// <iq to="romeo@montague.lit" id="uuid" type="get">
+	//   <query xmlns="http://jabber.org/protocol/disco#items"/>
+	// </iq>
+	//
+	// Note:
+	// Some xmpp clients will return an error if we don't specify the proper query node.
+	// Some xmpp clients will return an error if we don't include an id attribute in the iq.
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_ITEMS];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
+	
+	[xmppStream sendElement:iq];
+}
+
 
 /**
  * Invoked when we receive a disco request (request for our capabilities).
@@ -211,7 +228,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 /**
  * Invoked when we receive a response to one of our previously sent disco requests.
  **/
-- (void)handleDiscoResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
+- (void)handleDiscoInfoResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
 	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
@@ -224,6 +241,21 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     // Notify the delegate(s)
     [multicastDelegate xmppDisco:self didReceiveDiscoveryInfo:query forJID:jid];
+}
+
+- (void)handleDiscoItemsResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
+{
+	// This method must be invoked on the moduleQueue
+	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	
+	XMPPLogTrace();
+	
+	// Remember XML hiearchy memory management rules.
+	// The passed parameter is a subnode of the IQ, and we need to pass it asynchronously to delegate(s).
+	NSXMLElement *query = [querySubElement copy];
+    
+    // Notify the delegate(s)
+    [multicastDelegate xmppDisco:self didReceiveDiscoveryItems:query forJID:jid];
 }
 
 - (void)handleDiscoErrorResponse:(NSXMLElement *)errorSubElement fromJID:(XMPPJID *)jid
@@ -300,7 +332,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         }
         else if ([type isEqualToString:@"result"])
         {
-            [self handleDiscoResponse:query fromJID:[iq from]];
+            [self handleDiscoInfoResponse:query fromJID:[iq from]];
         }
         else if ([type isEqualToString:@"error"])
         {
@@ -326,7 +358,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             }
             else if ([type isEqualToString:@"result"])
             {
-                [self handleDiscoResponse:query fromJID:[iq from]];
+                [self handleDiscoItemsResponse:query fromJID:[iq from]];
             }
             else if ([type isEqualToString:@"error"])
             {
