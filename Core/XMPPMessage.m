@@ -124,7 +124,7 @@
 {
 	NSXMLElement *bodyElement = [self elementForName:@"body"];
 	if (!bodyElement) {
-		bodyElement = [self elementForName:@"body"];
+		bodyElement = [NSXMLElement elementForName:@"body"];
 		[self addChild:bodyElement];
 	}
 	[bodyElement setStringValue:body];
