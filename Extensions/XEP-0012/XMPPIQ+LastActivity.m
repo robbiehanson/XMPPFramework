@@ -49,4 +49,43 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 	return [[self alloc] initWithType:@"error" to:request.from elementID:request.elementID child:error];
 }
 
+- (BOOL)isLastActivityQuery
+{
+	return nil != [self lastActivityQueryElement];
+}
+
+- (NSUInteger)lastActivitySeconds
+{
+	NSUInteger seconds = NSNotFound;
+	NSXMLElement *query = [self lastActivityQueryElement];
+	if (query)
+	{
+		NSXMLNode *attribute = [query attributeForName:@"seconds"];
+		if (attribute)
+		{
+			seconds = (NSUInteger) [query attributeIntegerValueForName:@"seconds"];
+		}
+	}
+
+	return seconds;
+}
+
+- (NSString *)lastActivityUnavailableStatus
+{
+	NSXMLElement *query = [self lastActivityQueryElement];
+	if (query)
+	{
+		return [query stringValue];
+	}
+	else
+	{
+		return nil;
+	}
+}
+
+- (NSXMLElement *)lastActivityQueryElement
+{
+	return [self elementForName:@"query" xmlns:XMPPLastActivityNamespace];
+}
+
 @end

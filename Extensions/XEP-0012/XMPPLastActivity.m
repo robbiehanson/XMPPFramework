@@ -156,11 +156,10 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 	{
 		return [_queryTracker invokeForID:iq.elementID withObject:iq];
 	}
-	else if (_respondsToQueries && [type isEqualToString:@"get"])
+	else if (_respondsToQueries && [type isEqualToString:@"get"] && [iq isLastActivityQuery])
 	{
-		// TODO: the delegate will need to be extended to answer if we want the
-		// real response or the forbidden one, and how many seconds to answer.
-		XMPPIQ *response = [XMPPIQ lastActivityResponseTo:iq withSeconds:1];
+		NSUInteger seconds = [self delegateNumberOfIdleTimeSecondsWithIQ:iq];
+		XMPPIQ *response = [XMPPIQ lastActivityResponseTo:iq withSeconds:seconds];
 		[sender sendElement:response];
 
 		return YES;
@@ -196,6 +195,26 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 - (void)delegateDidNotReceiveResponse:(NSString *)queryID dueToTimeout:(NSTimeInterval)timeout
 {
 	[multicastDelegate xmppLastActivity:self didNotReceiveResponse:queryID dueToTimeout:timeout];
+}
+
+- (NSUInteger)delegateNumberOfIdleTimeSecondsWithIQ:(XMPPIQ *)iq
+{
+	__block NSUInteger idleSeconds = NSNotFound;
+
+	GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+
+	id delegate;
+	dispatch_queue_t delegateQueue;
+	SEL selector = @selector(numberOfIdleTimeSecondsForXMPPLastActivity:queryIQ:currentIdleTimeSeconds:);
+
+	while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&delegateQueue forSelector:selector])
+	{
+		dispatch_sync(delegateQueue, ^{ @autoreleasepool {
+			idleSeconds = [delegate numberOfIdleTimeSecondsForXMPPLastActivity:self queryIQ:iq currentIdleTimeSeconds:idleSeconds];
+		}});
+	}
+
+	return idleSeconds == NSNotFound ? 0 : idleSeconds;
 }
 
 @end

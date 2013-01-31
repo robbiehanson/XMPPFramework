@@ -22,4 +22,10 @@ extern NSString *const XMPPLastActivityNamespace;
 
 + (instancetype)lastActivityResponseForbiddenTo:(XMPPIQ *)request;
 
+- (BOOL)isLastActivityQuery;
+
+- (NSUInteger)lastActivitySeconds;
+
+- (NSString *)lastActivityUnavailableStatus;
+
 @end
