@@ -76,6 +76,8 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
+
+    [super deactivate];
 }
 
 - (BOOL)respondsToQueries

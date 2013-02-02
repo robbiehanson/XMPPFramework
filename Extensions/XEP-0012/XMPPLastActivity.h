@@ -7,6 +7,7 @@
 //
 
 #import "XMPP.h"
+#import "XMPPIQ+LastActivity.h"
 
 /**
  * Provides support to both sending last activity queries and answering those

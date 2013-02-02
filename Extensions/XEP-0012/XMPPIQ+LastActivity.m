@@ -31,6 +31,7 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 + (instancetype)lastActivityResponseTo:(XMPPIQ *)request withSeconds:(NSUInteger)seconds status:(NSString *)status
 {
 	NSXMLElement *query = [[NSXMLElement alloc] initWithName:@"query" xmlns:XMPPLastActivityNamespace];
+    [query addAttributeWithName:@"seconds" stringValue:[NSString stringWithFormat:@"%lu", (unsigned long)seconds]];
 	if (status && [status length] > 0)
 	{
 		[query setStringValue:status];
