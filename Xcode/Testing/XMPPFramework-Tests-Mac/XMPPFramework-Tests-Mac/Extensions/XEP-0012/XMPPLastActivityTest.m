@@ -107,11 +107,11 @@
 
     // We need to activate the module to create the id tracker, so we need a
     // mock stream.
-    [[stream expect] addDelegate:module delegateQueue:moduleQueue];
-    [[stream expect] registerModule:module];
+    [[stream stub] addDelegate:module delegateQueue:moduleQueue];
+    [[stream stub] registerModule:module];
 
 #ifdef _XMPP_CAPABILITIES_H
-    [[stream expect] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+    [[stream stub] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 #endif
 
     [module activate:stream];
@@ -163,17 +163,17 @@
 
     // We need to activate the module to create the id tracker, so we need a
     // mock stream.
-    [[stream expect] addDelegate:module delegateQueue:moduleQueue];
-    [[stream expect] registerModule:module];
+    [[stream stub] addDelegate:module delegateQueue:moduleQueue];
+    [[stream stub] registerModule:module];
 
 #ifdef _XMPP_CAPABILITIES_H
-    [[stream expect] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+    [[stream stub] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 #endif
 
     [module activate:stream];
 
     // sendLastActivityQueryTo:withTimeout uses the stream to send the query
-    [[stream expect] sendElement:[OCMArg any]];
+    [[stream stub] sendElement:[OCMArg any]];
 
     NSTimeInterval expectedTimeout = 1.0;
     NSString *expectedQueryID = [module sendLastActivityQueryTo:romeo withTimeout:expectedTimeout];
@@ -210,11 +210,11 @@
 
     // We need to activate the module to create the id tracker, so we need a
     // mock stream.
-    [[stream expect] addDelegate:module delegateQueue:moduleQueue];
-    [[stream expect] registerModule:module];
+    [[stream stub] addDelegate:module delegateQueue:moduleQueue];
+    [[stream stub] registerModule:module];
 
 #ifdef _XMPP_CAPABILITIES_H
-    [[stream expect] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+    [[stream stub] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
 #endif
 
     [module activate:stream];
@@ -260,7 +260,9 @@
     XMPPIQ *query = [XMPPIQ lastActivityQueryTo:romeo];
 
     // the stream is not used
-    GHAssertFalse([lastActivity xmppStream:nil didReceiveIQ:query], nil);
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        GHAssertFalse([lastActivity xmppStream:nil didReceiveIQ:query], nil);
+    });
 }
 
 - (void)testXMPPStreamDidReceiveIQWithTypeSetReturnsNo
@@ -274,7 +276,9 @@
     [query addAttributeWithName:@"type" stringValue:@"set"];
 
     // the stream is not used
-    GHAssertFalse([lastActivity xmppStream:nil didReceiveIQ:query], nil);
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        GHAssertFalse([lastActivity xmppStream:nil didReceiveIQ:query], nil);
+    });
 }
 
 - (void)testXMPPStreamDidReceiveIQWithOtherNamespaceReturnsNo
@@ -284,7 +288,9 @@
     XMPPIQ *nonQuery = [XMPPIQ iqWithType:@"get" to:romeo];
 
     // the stream is not used
-    GHAssertFalse([lastActivity xmppStream:nil didReceiveIQ:nonQuery], nil);
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        GHAssertFalse([lastActivity xmppStream:nil didReceiveIQ:nonQuery], nil);
+    });
 }
 
 - (void)testXMPPStreamDidReceiveIQWithLastActivityQuery
@@ -322,7 +328,9 @@
         return valid;
     }]];
 
-    GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    });
 
     if (dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC)) != 0)
     {
@@ -379,7 +387,9 @@
         return valid;
     }]];
 
-    GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    });
 
     if (dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC)) != 0)
     {
@@ -424,7 +434,9 @@
         return valid;
     }]];
 
-    GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    });
 
     if (dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC)) != 0)
     {
@@ -456,7 +468,9 @@
         return valid;
     }]];
 
-    GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        GHAssertTrue([lastActivity xmppStream:stream didReceiveIQ:query], nil);
+    });
 
     if (dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC)) != 0)
     {
@@ -466,21 +480,146 @@
     [stream verify];
 }
 
-- (void)xtestDeactivateShouldNotCallPendingQueriesTimeouts
+- (void)testDeactivateShouldNotCallPendingQueriesTimeouts
 {
+    XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
+    XMPPLastActivityDelegateMock *delegate = [[XMPPLastActivityDelegateMock alloc] init];
+    XMPPLastActivity *module = [[XMPPLastActivity alloc] init];
+    dispatch_queue_t moduleQueue = module.moduleQueue;
+    id stream = [OCMockObject mockForClass:[XMPPStream class]];
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+
+    dispatch_queue_t queue = dispatch_queue_create("test", 0);
+    [module addDelegate:delegate delegateQueue:queue];
+
+    // We need to activate the module to create the id tracker, so we need a
+    // mock stream.
+    [[stream stub] addDelegate:module delegateQueue:moduleQueue];
+    [[stream stub] registerModule:module];
+
+#ifdef _XMPP_CAPABILITIES_H
+    [[stream stub] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+#endif
+
+    [module activate:stream];
+
+    // We now send a last activity query, that will not be answered because we
+    // deactivate the module just after sending, but should not generate the
+    // timeout either.
+    delegate.xmppLastActivityDidReceiveResponseHandler = ^(XMPPLastActivity *sender, XMPPIQ *response) {
+        dispatch_semaphore_signal(semaphore);
+        GHFail(@"The response should not be invoked");
+    };
+
+    delegate.xmppLastActivityDidNotReceiveResponseDueToTimeoutHandler = ^(XMPPLastActivity *sender, NSString *queryID, NSTimeInterval timeout) {
+        dispatch_semaphore_signal(semaphore);
+        GHFail(@"The timeout should not be invoked");
+    };
+
+    [[stream stub] sendElement:[OCMArg any]];
+
+    [module sendLastActivityQueryTo:romeo withTimeout:1.0];
+
+    // Now we need to deactivate the module. Set up the expectations.
+#ifdef _XMPP_CAPABILITIES_H
+    [[stream stub] removeAutoDelegate:module delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+#endif
+
+    [[stream stub] removeDelegate:module delegateQueue:moduleQueue];
+    [[stream stub] unregisterModule:module];
+
+    [module deactivate];
+
+    // Wait for 2 seconds, if timeout occurs, the test is good.
+    dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, 1100 * NSEC_PER_MSEC));
+    [stream verify];
 }
 
-- (void)xtestXMPPDidDisconnectWithErrorShouldNotCallPendingQueriesTimeouts
+- (void)testXMPPDidDisconnectWithErrorShouldNotCallPendingQueriesTimeouts
 {
+    XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
+    XMPPLastActivityDelegateMock *delegate = [[XMPPLastActivityDelegateMock alloc] init];
+    XMPPLastActivity<XMPPStreamDelegate> *module = (XMPPLastActivity<XMPPStreamDelegate> *)[[XMPPLastActivity alloc] init];
+    dispatch_queue_t moduleQueue = module.moduleQueue;
+    id stream = [OCMockObject mockForClass:[XMPPStream class]];
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+
+    dispatch_queue_t queue = dispatch_queue_create("test", 0);
+    [module addDelegate:delegate delegateQueue:queue];
+
+    // We need to activate the module to create the id tracker, so we need a
+    // mock stream.
+    [[stream stub] addDelegate:module delegateQueue:moduleQueue];
+    [[stream stub] registerModule:module];
+
+#ifdef _XMPP_CAPABILITIES_H
+    [[stream stub] autoAddDelegate:module delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+#endif
+
+    [module activate:stream];
+
+    // We now send a last activity query, that will not be answered because we
+    // deactivate the module just after sending, but should not generate the
+    // timeout either.
+    delegate.xmppLastActivityDidReceiveResponseHandler = ^(XMPPLastActivity *sender, XMPPIQ *response) {
+        dispatch_semaphore_signal(semaphore);
+        GHFail(@"The response should not be invoked");
+    };
+
+    delegate.xmppLastActivityDidNotReceiveResponseDueToTimeoutHandler = ^(XMPPLastActivity *sender, NSString *queryID, NSTimeInterval timeout) {
+        dispatch_semaphore_signal(semaphore);
+        GHFail(@"The timeout should not be invoked");
+    };
+
+    [[stream stub] sendElement:[OCMArg any]];
+
+    [module sendLastActivityQueryTo:romeo withTimeout:1.0];
+
+    dispatch_sync(moduleQueue, ^{
+        [module xmppStreamDidDisconnect:stream withError:nil];
+    });
+
+    // Wait for 2 seconds, if timeout occurs, the test is good.
+    dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, 1100 * NSEC_PER_MSEC));
+    [stream verify];
 }
 
 #ifdef _XMPP_CAPABILITIES_H
-- (void)xtestXMPPCapabilitiesColletingMyCapabilitiesShouldAddLastActivityFeature
+- (void)testXMPPCapabilitiesColletingMyCapabilitiesShouldAddLastActivityFeature
 {
+    NSXMLElement *query = [NSXMLElement elementWithName:@"query" URI:@"http://jabber.org/protocol/disco#info"];
+    XMPPLastActivity<XMPPCapabilitiesDelegate> *lastActivity = (XMPPLastActivity<XMPPCapabilitiesDelegate> *) [[XMPPLastActivity alloc] init];
+
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        [lastActivity xmppCapabilities:nil collectingMyCapabilities:query];
+    });
+
+    __block BOOL found = NO;
+    [[query elementsForName:@"feature"] enumerateObjectsUsingBlock:^(NSXMLElement *feature, NSUInteger idx, BOOL *stop) {
+        found = [[feature attributeStringValueForName:@"var"] isEqualToString:XMPPLastActivityNamespace];
+        *stop = found;
+    }];
+
+    if (!found) GHFail(@"feature subelement with jabber:iq:last var not found");
 }
 
-- (void)xtestXMPPCapabilitiesColletingMyCapabilitiesShouldNotModifyCapabilitiesWhenNoRespondsToQueries
+- (void)testXMPPCapabilitiesColletingMyCapabilitiesShouldNotModifyCapabilitiesWhenNoRespondsToQueries
 {
+    NSXMLElement *query = [NSXMLElement elementWithName:@"query" URI:@"http://jabber.org/protocol/disco#info"];
+    XMPPLastActivity<XMPPCapabilitiesDelegate> *lastActivity = (XMPPLastActivity<XMPPCapabilitiesDelegate> *) [[XMPPLastActivity alloc] init];
+    lastActivity.respondsToQueries = NO;
+
+    dispatch_sync(lastActivity.moduleQueue, ^{
+        [lastActivity xmppCapabilities:nil collectingMyCapabilities:query];
+    });
+
+    __block BOOL found = NO;
+    [[query elementsForName:@"feature"] enumerateObjectsUsingBlock:^(NSXMLElement *feature, NSUInteger idx, BOOL *stop) {
+        found = [[feature attributeStringValueForName:@"var"] isEqualToString:XMPPLastActivityNamespace];
+        *stop = found;
+    }];
+
+    if (found) GHFail(@"feature subelement with jabber:iq:last var found");
 }
 
 #endif

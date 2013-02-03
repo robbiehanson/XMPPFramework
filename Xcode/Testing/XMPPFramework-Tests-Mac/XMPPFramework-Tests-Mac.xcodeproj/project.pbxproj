@@ -9,10 +9,8 @@
 /* Begin PBXBuildFile section */
 		650895E916BD5996003DF20B /* XMPPLastActivityTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 650895E816BD5996003DF20B /* XMPPLastActivityTest.m */; };
 		653D0BAC16BC8AAB000906D4 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 653D0BAB16BC8AAB000906D4 /* Cocoa.framework */; };
-		653D0BC916BC8D90000906D4 /* GHUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 653D0BC816BC8D90000906D4 /* GHUnit.framework */; };
 		653D0BCB16BC8DE3000906D4 /* GHUnit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 653D0BC816BC8D90000906D4 /* GHUnit.framework */; };
 		653D0BCD16BC8E54000906D4 /* GHUnitTestMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 653D0BCC16BC8E54000906D4 /* GHUnitTestMain.m */; };
-		653D0BD016BC917F000906D4 /* OCMock.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 653D0BCF16BC917F000906D4 /* OCMock.framework */; };
 		653D0BD116BC91C2000906D4 /* OCMock.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 653D0BCF16BC917F000906D4 /* OCMock.framework */; };
 		653D0D4416BC9258000906D4 /* NSData+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = 653D0BE916BC9257000906D4 /* NSData+XMPP.m */; };
 		653D0D4516BC9258000906D4 /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = 653D0BEB16BC9257000906D4 /* NSNumber+XMPP.m */; };
@@ -44,6 +42,8 @@
 		653D0E0C16BC97C1000906D4 /* XMPPCapabilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 653D0E0716BC97C1000906D4 /* XMPPCapabilities.m */; };
 		653D0E0E16BC9851000906D4 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 653D0E0D16BC9851000906D4 /* Security.framework */; };
 		653D0E1316BC98EE000906D4 /* XMPPIQ+LastActivityTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 653D0E1216BC98EE000906D4 /* XMPPIQ+LastActivityTest.m */; };
+		65E5363316BEC05E00810BFD /* OCMock.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 653D0BCF16BC917F000906D4 /* OCMock.framework */; };
+		65E5363416BEC06100810BFD /* GHUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 653D0BC816BC8D90000906D4 /* GHUnit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -69,9 +69,9 @@
 		653D0BB016BC8AAB000906D4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		653D0BB316BC8AAB000906D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		653D0BB916BC8AAB000906D4 /* Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = "<group>"; };
-		653D0BC816BC8D90000906D4 /* GHUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GHUnit.framework; path = "XMPPFramework-Tests/GHUnit.framework"; sourceTree = "<group>"; };
+		653D0BC816BC8D90000906D4 /* GHUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GHUnit.framework; path = "XMPPFramework-Tests-Mac/GHUnit.framework"; sourceTree = "<group>"; };
 		653D0BCC16BC8E54000906D4 /* GHUnitTestMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GHUnitTestMain.m; sourceTree = "<group>"; };
-		653D0BCF16BC917F000906D4 /* OCMock.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OCMock.framework; path = "XMPPFramework-Tests/OCMock.framework"; sourceTree = "<group>"; };
+		653D0BCF16BC917F000906D4 /* OCMock.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OCMock.framework; path = "XMPPFramework-Tests-Mac/OCMock.framework"; sourceTree = "<group>"; };
 		653D0BE816BC9257000906D4 /* NSData+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+XMPP.h"; sourceTree = "<group>"; };
 		653D0BE916BC9257000906D4 /* NSData+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+XMPP.m"; sourceTree = "<group>"; };
 		653D0BEA16BC9257000906D4 /* NSNumber+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNumber+XMPP.h"; sourceTree = "<group>"; };
@@ -95,7 +95,7 @@
 		653D0BFD16BC9257000906D4 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		653D0BFE16BC9257000906D4 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		653D0BFF16BC9257000906D4 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		653D0C0016BC9257000906D4 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		653D0C0016BC9257000906D4 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
 		653D0C0116BC9257000906D4 /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		653D0C3016BC9257000906D4 /* XMPPIQ+LastActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPIQ+LastActivity.h"; sourceTree = "<group>"; };
 		653D0C3116BC9257000906D4 /* XMPPIQ+LastActivity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XMPPIQ+LastActivity.m"; sourceTree = "<group>"; };
@@ -116,7 +116,7 @@
 		653D0CCF16BC9258000906D4 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
 		653D0CD016BC9258000906D4 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		653D0D3A16BC9258000906D4 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "idn-int.h"; sourceTree = "<group>"; };
-		653D0D3B16BC9258000906D4 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = x86_64/libidn.a; sourceTree = "<group>"; };
+		653D0D3B16BC9258000906D4 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libidn.a; sourceTree = "<group>"; };
 		653D0D3D16BC9258000906D4 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringprep.h; sourceTree = "<group>"; };
 		653D0DDB16BC947C000906D4 /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
 		653D0DE516BC9694000906D4 /* XMPPDigestMD5Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDigestMD5Authentication.h; sourceTree = "<group>"; };
@@ -145,9 +145,9 @@
 			files = (
 				653D0E0E16BC9851000906D4 /* Security.framework in Frameworks */,
 				653D0BAC16BC8AAB000906D4 /* Cocoa.framework in Frameworks */,
-				653D0BC916BC8D90000906D4 /* GHUnit.framework in Frameworks */,
-				653D0BD016BC917F000906D4 /* OCMock.framework in Frameworks */,
 				653D0DD016BC9258000906D4 /* libidn.a in Frameworks */,
+				65E5363316BEC05E00810BFD /* OCMock.framework in Frameworks */,
+				65E5363416BEC06100810BFD /* GHUnit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,8 +200,7 @@
 				653D0BCE16BC90B4000906D4 /* Test Cases */,
 				653D0BB216BC8AAB000906D4 /* Supporting Files */,
 			);
-			name = "XMPPFramework-Tests-Mac";
-			path = "XMPPFramework-Tests";
+			path = "XMPPFramework-Tests-Mac";
 			sourceTree = "<group>";
 		};
 		653D0BB216BC8AAB000906D4 /* Supporting Files */ = {
@@ -614,16 +613,16 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/XMPPFramework-Tests\"",
+					"\"$(SRCROOT)/XMPPFramework-Tests-Mac\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "XMPPFramework-Tests/Prefix.pch";
+				GCC_PREFIX_HEADER = "XMPPFramework-Tests-Mac/Prefix.pch";
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				INFOPLIST_FILE = "XMPPFramework-Tests/Info.plist";
+				INFOPLIST_FILE = "XMPPFramework-Tests-Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../../Vendor/libidn\"",
+					"$(SRCROOT)/../../../Vendor/libidn",
 				);
 				OTHER_LDFLAGS = (
 					"-lxml2",
@@ -640,16 +639,16 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/XMPPFramework-Tests\"",
+					"\"$(SRCROOT)/XMPPFramework-Tests-Mac\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "XMPPFramework-Tests/Prefix.pch";
+				GCC_PREFIX_HEADER = "XMPPFramework-Tests-Mac/Prefix.pch";
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				INFOPLIST_FILE = "XMPPFramework-Tests/Info.plist";
+				INFOPLIST_FILE = "XMPPFramework-Tests-Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../../Vendor/libidn\"",
+					"$(SRCROOT)/../../../Vendor/libidn",
 				);
 				OTHER_LDFLAGS = (
 					"-lxml2",
