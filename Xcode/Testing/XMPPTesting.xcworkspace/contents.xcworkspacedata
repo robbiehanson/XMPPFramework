@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:XMPPFramework-Tests-iOS/XMPPFramework-Tests-iOS.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:XMPPFramework-Tests-Mac/XMPPFramework-Tests-Mac.xcodeproj">
    </FileRef>
    <FileRef

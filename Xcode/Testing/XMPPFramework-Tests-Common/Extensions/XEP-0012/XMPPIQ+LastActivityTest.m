@@ -6,7 +6,12 @@
 //  Copyright (c) 2013 XMPPFramework. All rights reserved.
 //
 
+#if TARGET_OS_IPHONE
+#import <GHUnitIOS/GHUnit.h>
+#else
 #import <GHUnit/GHUnit.h>
+#endif
+
 #import <OCMock/OCMock.h>
 
 #import "XMPPFramework.h"
@@ -35,7 +40,7 @@
     XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
     XMPPJID *juliet = [XMPPJID jidWithString:@"juliet@capulet.com/balcony"];
     XMPPIQ *request = [XMPPIQ lastActivityQueryTo:romeo];
-    [request setAttributesAsDictionary:@{@"from": [juliet full]}];
+    [request addAttributeWithName:@"from" stringValue:[juliet full]];
 
     XMPPIQ *response = [XMPPIQ lastActivityResponseTo:request withSeconds:23U];
 
@@ -54,7 +59,7 @@
     XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
     XMPPJID *juliet = [XMPPJID jidWithString:@"juliet@capulet.com/balcony"];
     XMPPIQ *request = [XMPPIQ lastActivityQueryTo:romeo];
-    [request setAttributesAsDictionary:@{@"from": [juliet full]}];
+    [request addAttributeWithName:@"from" stringValue:[juliet full]];
 
     XMPPIQ *response = [XMPPIQ lastActivityResponseTo:request withSeconds:37U status:@"Heading Home"];
 
@@ -73,7 +78,7 @@
     XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
     XMPPJID *juliet = [XMPPJID jidWithString:@"juliet@capulet.com/balcony"];
     XMPPIQ *request = [XMPPIQ lastActivityQueryTo:romeo];
-    [request setAttributesAsDictionary:@{@"from": [juliet full]}];
+    [request addAttributeWithName:@"from" stringValue:[juliet full]];
 
     XMPPIQ *response = [XMPPIQ lastActivityResponseForbiddenTo:request];
 
@@ -94,7 +99,7 @@
     XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
     XMPPJID *juliet = [XMPPJID jidWithString:@"juliet@capulet.com/balcony"];
     XMPPIQ *request = [XMPPIQ lastActivityQueryTo:romeo];
-    [request setAttributesAsDictionary:@{@"from": [juliet full]}];
+    [request addAttributeWithName:@"from" stringValue:[juliet full]];
     XMPPIQ *response = [XMPPIQ lastActivityResponseTo:request withSeconds:43U];
 
     GHAssertTrue([request isLastActivityQuery], nil);
@@ -106,7 +111,7 @@
     XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
     XMPPJID *juliet = [XMPPJID jidWithString:@"juliet@capulet.com/balcony"];
     XMPPIQ *request = [XMPPIQ lastActivityQueryTo:romeo];
-    [request setAttributesAsDictionary:@{@"from": [juliet full]}];
+    [request addAttributeWithName:@"from" stringValue:[juliet full]];
     XMPPIQ *response = [XMPPIQ lastActivityResponseTo:request withSeconds:57U];
 
     GHAssertEquals([response lastActivitySeconds], (NSUInteger) 57, nil);
@@ -117,7 +122,7 @@
     XMPPJID *romeo = [XMPPJID jidWithString:@"romeo@montague.net/orchard"];
     XMPPJID *juliet = [XMPPJID jidWithString:@"juliet@capulet.com/balcony"];
     XMPPIQ *request = [XMPPIQ lastActivityQueryTo:romeo];
-    [request setAttributesAsDictionary:@{@"from": [juliet full]}];
+    [request addAttributeWithName:@"from" stringValue:[juliet full]];
     XMPPIQ *response = [XMPPIQ lastActivityResponseTo:request withSeconds:57U status:@"Heading Home"];
 
     GHAssertEqualStrings([response lastActivityUnavailableStatus], @"Heading Home", nil);

@@ -220,6 +220,7 @@
 				653D0DFC16BC96FA000906D4 /* XMPPFramework.h */,
 			);
 			name = "Test Cases";
+			path = "../../XMPPFramework-Tests-Common";
 			sourceTree = "<group>";
 		};
 		653D0BD216BC91EE000906D4 /* XMPPFramework */ = {

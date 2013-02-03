@@ -6,7 +6,12 @@
 //  Copyright (c) 2013 XMPPFramework. All rights reserved.
 //
 
+#if TARGET_OS_IPHONE
+#import <GHUnitIOS/GHUnit.h>
+#else
 #import <GHUnit/GHUnit.h>
+#endif
+
 #import <OCMock/OCMock.h>
 
 #import "XMPPFramework.h"
@@ -312,7 +317,7 @@
     delegate.numberOfIdleTimeSecondsForXMPPLastActivityQueryIQCurrentIdleTimeSeconds = ^NSUInteger (XMPPLastActivity *sender, XMPPIQ *iq, NSUInteger idleSeconds) {
         GHAssertEquals(sender, lastActivity, nil);
         GHAssertEquals(iq, query, nil);
-        GHAssertEquals(idleSeconds, NSNotFound, nil);
+        GHAssertEquals(idleSeconds, (NSUInteger) NSNotFound, nil);
         dispatch_group_leave(group);
         return 123U;
     };
@@ -418,7 +423,7 @@
     delegate.numberOfIdleTimeSecondsForXMPPLastActivityQueryIQCurrentIdleTimeSeconds = ^NSUInteger (XMPPLastActivity *sender, XMPPIQ *iq, NSUInteger idleSeconds) {
         GHAssertEquals(sender, lastActivity, nil);
         GHAssertEquals(iq, query, nil);
-        GHAssertEquals(idleSeconds, NSNotFound, nil);
+        GHAssertEquals(idleSeconds, (NSUInteger) NSNotFound, nil);
         dispatch_group_leave(group);
         return idleSeconds;
     };
