@@ -170,7 +170,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 	return NO;
 }
 
-- (void)xmppDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	[_queryTracker removeAllIDs];
 }
