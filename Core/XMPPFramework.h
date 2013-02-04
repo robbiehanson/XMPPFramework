@@ -64,6 +64,7 @@
 //#import "XMPPTransports.h"
 //
 #import "XMPPDisco.h"
+#import "XMPPCommands.h"
 //
 //#import "XMPPCapabilities.h"
 //#import "XMPPCapabilitiesCoreDataStorage.h"

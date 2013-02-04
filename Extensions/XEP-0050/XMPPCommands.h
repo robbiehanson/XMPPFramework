@@ -1,33 +1,34 @@
 //
-//  XMPPDisco.h
+//  XMPPCommands.h
 //  iPhoneXMPP
 //
-//  Created by Rick Mellor on 1/9/13.
+//  Created by Rick Mellor on 1/29/13.
 //
 //
 
 #import "XMPP.h"
+#import "XMPPDisco.h"
 
-@interface XMPPDisco : XMPPModule
+#define XMPP_FEATURE_CMDS  @"http://jabber.org/protocol/commands"
+
+@interface XMPPCommands : XMPPModule
 {
-    NSXMLElement *myDiscoInfoQuery; // Full list of discovery info <query/>
-    NSXMLElement *myDiscoItemsQuery;
+    NSXMLElement *myDiscoCommandsQuery;
+    XMPPDisco *xmppDisco;
     
-    BOOL collectingMyDiscoInfo;
-    NSTimeInterval capabilitiesRequestTimeout;
+    BOOL collectingMyDiscoCommands;
 }
 
-- (void)sendDiscoInfoQueryTo:(XMPPJID *)jid withNode:(NSString *)node ver:(NSString *)ver;
-- (void)sendDiscoItemsQueryTo:(XMPPJID *)jid withNode:(NSString *)node ver:(NSString *)ver;
+- (BOOL)activate:(XMPPStream *)aXmppStream withXMPPDisco:(XMPPDisco*)aXmppDisco;
+- (void)getEndpointCommandsList:(XMPPJID *)jid;
 
 @end
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol XMPPDiscoDelegate
+@protocol XMPPCommandsDelegate
 @optional
 
 /**
@@ -38,27 +39,27 @@
  * The design of XEP-115 is such that capabilites are expected to remain rather static.
  * However, if the capabilities change, the recollectMyCapabilities method may be used to perform a manual update.
  **/
-- (void)xmppDisco:(XMPPDisco *)sender collectingMyDiscoInfo:(NSXMLElement *)infoQuery  andDiscoItems:(NSXMLElement *)itemsQuery;
+- (void)xmppCommands:(XMPPCommands *)sender collectingMyDiscoCommands:(NSXMLElement *)commandsQuery;
 
 /**
  * Invoked when identity/feature info have been discovered for an available JID.
  *
  * The discoInfo element is the <query/> element response to a disco#info request.
  **/
-- (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryInfo:(NSXMLElement *)discoInfo forJID:(XMPPJID *)jid;
+- (void)xmppCommands:(XMPPCommands *)sender didReceiveCommandsList:(NSXMLElement *)commandsList forJID:(XMPPJID *)forJID;
 
 /**
  * Invoked when items have been returned in response to an items disco query.
  *
  * The discoItems element is the <query/> element response to a disco#items request.
  **/
-- (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryItems:(NSXMLElement *)discoItems forJID:(XMPPJID *)jid;
+- (void)xmppCommands:(XMPPCommands *)sender executeCommand:(NSString *)command fromJID:(XMPPJID *)fromJID withXData:(NSXMLElement *)xData;
 
 /**
  * Invoked when identity/feature disco failed and we recieved an error response.
  *
  * The errorInfo element is the <error/> element response to a disco#info request.
  **/
-- (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryError:(NSXMLElement *)errorInfo forJID:(XMPPJID *)jid;
+//- (void)xmppDisco:(XMPPDisco *)sender didReceiveDiscoveryError:(NSXMLElement *)errorInfo forJID:(XMPPJID *)jid;
 
 @end

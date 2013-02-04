@@ -143,10 +143,19 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
 	
-	if (node && ver)
+	if (node)
 	{
-		NSString *nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
-		
+        NSString *nodeValue;
+        
+        if (ver)
+        {
+            nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
+		}
+        else
+        {
+            nodeValue = [NSString stringWithString:node];
+        }
+        
 		[query addAttributeWithName:@"node" stringValue:nodeValue];
 	}
 	
@@ -155,7 +164,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	[xmppStream sendElement:iq];
 }
 
-- (void)sendDiscoItemsQueryTo:(XMPPJID *)jid
+- (void)sendDiscoItemsQueryTo:(XMPPJID *)jid withNode:(NSString *)node ver:(NSString *)ver
 {
 	// <iq to="romeo@montague.lit" id="uuid" type="get">
 	//   <query xmlns="http://jabber.org/protocol/disco#items"/>
@@ -167,6 +176,22 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_ITEMS];
 	
+	if (node)
+	{
+        NSString *nodeValue;
+        
+        if (ver)
+        {
+            nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
+		}
+        else
+        {
+            nodeValue = [NSString stringWithString:node];
+        }
+        
+		[query addAttributeWithName:@"node" stringValue:nodeValue];
+	}
+    
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
 	
 	[xmppStream sendElement:iq];

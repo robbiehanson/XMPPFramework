@@ -51,9 +51,10 @@
 		07AF189D134BC3370084D82A /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 07AF189C134BC3370084D82A /* XMPPSRVResolver.m */; };
 		1AC620FC16B06851009C18A9 /* XMPPJID.h in Headers */ = {isa = PBXBuildFile; fileRef = DC84BBCD12440A8E0055A459 /* XMPPJID.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D3623260D0F684500981E51 /* iPhoneXMPPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */; };
+		1D39A22516B8309800956709 /* XMPPCommands.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D39A22316B8309800956709 /* XMPPCommands.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1D39A22616B8309800956709 /* XMPPCommands.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D39A22416B8309800956709 /* XMPPCommands.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
-		1DC726E1169F632B00A53F9F /* XMPPDisco.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD53988169E2355009FADB2 /* XMPPDisco.m */; };
 		1DD53989169E2355009FADB2 /* XMPPDisco.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DD53987169E2355009FADB2 /* XMPPDisco.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DD5398A169E2355009FADB2 /* XMPPDisco.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD53988169E2355009FADB2 /* XMPPDisco.m */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
@@ -366,6 +367,8 @@
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* iPhoneXMPPAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iPhoneXMPPAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* iPhoneXMPPAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iPhoneXMPPAppDelegate.m; sourceTree = "<group>"; };
+		1D39A22316B8309800956709 /* XMPPCommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCommands.h; sourceTree = "<group>"; };
+		1D39A22416B8309800956709 /* XMPPCommands.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCommands.m; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* iPhoneXMPP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iPhoneXMPP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DD53987169E2355009FADB2 /* XMPPDisco.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDisco.h; sourceTree = "<group>"; };
 		1DD53988169E2355009FADB2 /* XMPPDisco.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDisco.m; sourceTree = "<group>"; };
@@ -550,6 +553,7 @@
 				DC37309F139E9FDA00A8407D /* Roster */,
 				1DD53986169E22EA009FADB2 /* XEP-0030 */,
 				DCC2211F149A61F000736DC1 /* XEP-0045 */,
+				1D39A22116B8305200956709 /* XEP-0050 */,
 				070400591347CB510092A737 /* XEP-0054 */,
 				0704007B1347CB520092A737 /* XEP-0082 */,
 				070400831347CB520092A737 /* XEP-0115 */,
@@ -674,6 +678,15 @@
 				31B5B615169B90D8007D1030 /* libXMPP.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		1D39A22116B8305200956709 /* XEP-0050 */ = {
+			isa = PBXGroup;
+			children = (
+				1D39A22316B8309800956709 /* XMPPCommands.h */,
+				1D39A22416B8309800956709 /* XMPPCommands.m */,
+			);
+			path = "XEP-0050";
 			sourceTree = "<group>";
 		};
 		1DD53986169E22EA009FADB2 /* XEP-0030 */ = {
@@ -1189,6 +1202,7 @@
 				1DD53989169E2355009FADB2 /* XMPPDisco.h in Headers */,
 				1AC620FC16B06851009C18A9 /* XMPPJID.h in Headers */,
 				31B5B6DD169B984D007D1030 /* XMPPSASLAuthentication.h in Headers */,
+				1D39A22516B8309800956709 /* XMPPCommands.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1387,7 +1401,6 @@
 				DC30E6CF153E09D2001B9E6D /* XMPPDigestMD5Authentication.m in Sources */,
 				DC30E6D0153E09D2001B9E6D /* XMPPPlainAuthentication.m in Sources */,
 				DC30E6D1153E09D2001B9E6D /* XMPPXFacebookPlatformAuthentication.m in Sources */,
-				1DC726E1169F632B00A53F9F /* XMPPDisco.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1468,6 +1481,7 @@
 				31B5B71F169BA9D3007D1030 /* XMPPIDTracker.m in Sources */,
 				31B5B720169BA9E7007D1030 /* XMPPResourceCoreDataStorageObject.m in Sources */,
 				1DD5398A169E2355009FADB2 /* XMPPDisco.m in Sources */,
+				1D39A22616B8309800956709 /* XMPPCommands.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
