@@ -115,6 +115,52 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	}
 }
 
+- (void)executeCommand:(NSString*)command withType:(NSString*)type onEndpoint:(XMPPJID*)jid withXData:(NSXMLElement*)xData
+{
+    //<iq type='set' to='responder@domain' id='exec3'>
+    //    <command xmlns='http://jabber.org/protocol/commands' sessionid='config:20020923T213616Z-700' node='config'>
+    //        <x xmlns='jabber:x:data' type='submit'>
+    //            <field var='mode'>
+    //                <value>3</value>
+    //            </field>
+    //            <field var='state'>
+    //                <value>on</value>
+    //            </field>
+    //        </x>
+    //    </command>
+    //</iq>
+    
+	NSXMLElement *commandElement = [NSXMLElement elementWithName:@"command" xmlns:XMPP_FEATURE_CMDS];
+    [commandElement addAttributeWithName:@"node" stringValue:command];
+    [commandElement addAttributeWithName:@"action" stringValue:@"execute"];
+        
+    if (xData)
+    {
+        [commandElement addChild:xData];
+    }
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:type to:jid elementID:[xmppStream generateUUID] child:commandElement];
+	
+	[xmppStream sendElement:iq];
+}
+
+- (void)returnExecutionResult:(NSXMLElement *)data toEndpoint:(XMPPJID*)endpoint forCommand:(NSString*)command withStatus:(NSString*)status
+{
+    NSXMLElement *commandElement = [NSXMLElement elementWithName:@"command" xmlns:XMPP_FEATURE_CMDS];
+    [commandElement addAttributeWithName:@"node" stringValue:command];
+    [commandElement addAttributeWithName:@"status" stringValue:status];
+    [commandElement addAttributeWithName:@"sessionid" stringValue:[xmppStream generateUUID]];
+    
+    if (data)
+    {
+        [commandElement addChild:data];
+    }
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:endpoint elementID:[xmppStream generateUUID] child:commandElement];
+	
+	[xmppStream sendElement:iq];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,28 +178,24 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     NSLog(@"Got an IQ");
     
 /* Without arguments */
-//    <iq type='set' to='responder@domain' id='exec1'>
-//        <command xmlns='http://jabber.org/protocol/commands' node='list' action='execute'/>
-//    </iq>
+    //<iq type='set' to='responder@domain' id='exec1'>
+    //    <command xmlns='http://jabber.org/protocol/commands' node='list' action='execute'/>
+    //</iq>
 
 
 /* With arguments */
-//    <iq type='set' to='responder@domain' id='exec3'>
-//        <command xmlns='http://jabber.org/protocol/commands' sessionid='config:20020923T213616Z-700' node='config'>
-//            <x xmlns='jabber:x:data' type='submit'>
-//                <field var='mode'>
-//                    <value>3</value>
-//                </field>
-//                <field var='state'>
-//                    <value>on</value>
-//                </field>
-//            </x>
-//        </command>
-//    </iq>
-    
-    // TODO: Need to make sure my interface is being consistent here.  Should I be tossing up the xml element or the dict?
-    //       Seems like maybe I want to pass up the XML and let the parsing to NS objects occur in the outer layers
-    //       (comm mgr).  
+    //<iq type='set' to='responder@domain' id='exec3'>
+    //    <command xmlns='http://jabber.org/protocol/commands' sessionid='config:20020923T213616Z-700' node='config'>
+    //        <x xmlns='jabber:x:data' type='submit'>
+    //            <field var='mode'>
+    //                <value>3</value>
+    //            </field>
+    //            <field var='state'>
+    //                <value>on</value>
+    //            </field>
+    //        </x>
+    //    </command>
+    //</iq>
     
     NSString *node = [iq attributeStringValueForName:@"type"];
     
@@ -176,6 +218,26 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             }
         }
     }
+    else if (node != nil && [node isEqualToString:@"result"])
+    {
+        NSXMLElement *command = [iq elementForName:@"command" xmlns:XMPP_FEATURE_CMDS];
+        
+        if (command != nil)
+        {
+            NSString *node = [command attributeStringValueForName:@"node"];
+            NSString *status = [command attributeStringValueForName:@"status"];
+            NSString *sessionid = [command attributeStringValueForName:@"sessionid"];
+            
+            NSXMLElement *morse = [command elementForName:@"m" xmlns:@"morse"];
+            
+            if (morse != nil)
+            {
+                [multicastDelegate xmppCommands:self receivedCommandResult:status fromEndpoint:[iq from] forCommand:node withSessionId:sessionid andPayload:morse];
+                return NO;
+            }
+            
+        }
+    }
     
     return NO;
 }
@@ -190,16 +252,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     if (node != nil && [node isEqualToString:XMPP_FEATURE_CMDS])
     {
-//        <iq type='result' to='requester@domain' from='responder@domain'>
-//            <query xmlns='http://jabber.org/protocol/disco#items' node='http://jabber.org/protocol/commands'>
-//                <item jid='responder@domain' node='list' name='List Service Configurations'/>
-//                <item jid='responder@domain' node='config' name='Configure Service'/>
-//                <item jid='responder@domain' node='reset' name='Reset Service Configuration'/>
-//                <item jid='responder@domain' node='start' name='Start Service'/>
-//                <item jid='responder@domain' node='stop' name='Stop Service'/>
-//                <item jid='responder@domain' node='restart' name='Restart Service'/>
-//            </query>
-//        </iq>
+        //<iq type='result' to='requester@domain' from='responder@domain'>
+        //    <query xmlns='http://jabber.org/protocol/disco#items' node='http://jabber.org/protocol/commands'>
+        //        <item jid='responder@domain' node='list' name='List Service Configurations'/>
+        //        <item jid='responder@domain' node='config' name='Configure Service'/>
+        //        <item jid='responder@domain' node='reset' name='Reset Service Configuration'/>
+        //        <item jid='responder@domain' node='start' name='Start Service'/>
+        //        <item jid='responder@domain' node='stop' name='Stop Service'/>
+        //        <item jid='responder@domain' node='restart' name='Restart Service'/>
+        //    </query>
+        //</iq>
         
         NSLog(@"XMPPCommands: In didReceiveDiscoveryInfo");
         

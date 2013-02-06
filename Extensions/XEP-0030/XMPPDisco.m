@@ -177,7 +177,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_ITEMS];
 	
 	if (node)
-	{
+	{	
         NSString *nodeValue;
         
         if (ver)
