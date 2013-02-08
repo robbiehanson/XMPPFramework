@@ -144,7 +144,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	[xmppStream sendElement:iq];
 }
 
-- (void)returnExecutionResult:(NSXMLElement *)data toEndpoint:(XMPPJID*)endpoint forCommand:(NSString*)command withStatus:(NSString*)status
+- (void)returnExecutionResult:(NSXMLElement *)data toEndpoint:(XMPPJID*)endpoint forCommand:(NSString*)command withStatus:(NSString*)status andIQID:iqID
 {
     NSXMLElement *commandElement = [NSXMLElement elementWithName:@"command" xmlns:XMPP_FEATURE_CMDS];
     [commandElement addAttributeWithName:@"node" stringValue:command];
@@ -156,7 +156,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         [commandElement addChild:data];
     }
 	
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:endpoint elementID:[xmppStream generateUUID] child:commandElement];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:endpoint elementID:iqID child:commandElement];
 	
 	[xmppStream sendElement:iq];
 }
@@ -212,8 +212,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             if (action == nil || (action != nil && [action isEqualToString:@"execute"]))
             {
                 NSXMLElement *xData = [command elementForName:@"x" xmlns:@"jabber:x:data"];
+                NSXMLElement *morseElement = [command elementForName:@"m" xmlns:@"morse"];
                 
-                [multicastDelegate xmppCommands:self executeCommand:node fromJID:[iq from] withXData:xData];
+                [multicastDelegate xmppCommands:self executeCommand:node fromJID:[iq from] withXData:xData andMorseNode:morseElement andIQID:[iq attributeStringValueForName:@"id"]];
                 return YES;
             }
         }

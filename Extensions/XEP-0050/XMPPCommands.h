@@ -22,7 +22,7 @@
 - (BOOL)activate:(XMPPStream *)aXmppStream withXMPPDisco:(XMPPDisco*)aXmppDisco;
 - (void)getEndpointCommandsList:(XMPPJID *)jid;
 - (void)executeCommand:(NSString*)command withType:(NSString*)type onEndpoint:(XMPPJID*)jid withXData:(NSXMLElement*)xData;
-- (void)returnExecutionResult:(NSXMLElement *)data toEndpoint:(XMPPJID*)endpoint forCommand:(NSString*)command withStatus:(NSString*)status;
+- (void)returnExecutionResult:(NSXMLElement *)data toEndpoint:(XMPPJID*)endpoint forCommand:(NSString*)command withStatus:(NSString*)status andIQID:(NSString*)iqID;
 
 @end
 
@@ -55,7 +55,7 @@
  *
  * The discoItems element is the <query/> element response to a disco#items request.
  **/
-- (void)xmppCommands:(XMPPCommands *)sender executeCommand:(NSString *)command fromJID:(XMPPJID *)fromJID withXData:(NSXMLElement *)xData;
+- (void)xmppCommands:(XMPPCommands *)sender executeCommand:(NSString *)command fromJID:(XMPPJID *)fromJID withXData:(NSXMLElement *)xData andMorseNode:(NSXMLElement*)morseElement andIQID:(NSString*)iqID;
 
 /**
  * Invoked when identity/feature disco failed and we recieved an error response.
