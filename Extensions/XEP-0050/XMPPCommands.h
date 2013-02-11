@@ -21,7 +21,7 @@
 
 - (BOOL)activate:(XMPPStream *)aXmppStream withXMPPDisco:(XMPPDisco*)aXmppDisco;
 - (void)getEndpointCommandsList:(XMPPJID *)jid;
-- (void)executeCommand:(NSString*)command withType:(NSString*)type onEndpoint:(XMPPJID*)jid withXData:(NSXMLElement*)xData;
+- (NSString*)executeCommand:(NSString*)command onEndpoint:(XMPPJID*)jid withXData:(NSXMLElement*)xData andPayload:(NSXMLElement*)payload;
 - (void)returnExecutionResult:(NSXMLElement *)data toEndpoint:(XMPPJID*)endpoint forCommand:(NSString*)command withStatus:(NSString*)status andIQID:(NSString*)iqID;
 
 @end
@@ -63,6 +63,6 @@
  * The errorInfo element is the <error/> element response to a disco#info request.
  **/
 - (void)xmppCommands:(XMPPCommands *)sender receivedCommandResult:(NSString*)status fromEndpoint:(XMPPJID*)fromJID forCommand:(NSString*)node
-       withSessionId:(NSString*)sessionid andPayload:(NSXMLElement*)xmlPayload;
+       withSessionId:(NSString*)sessionid andPayload:(NSXMLElement*)xmlPayload andIQID:(NSString*)iqID;
 
 @end

@@ -115,7 +115,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	}
 }
 
-- (void)executeCommand:(NSString*)command withType:(NSString*)type onEndpoint:(XMPPJID*)jid withXData:(NSXMLElement*)xData
+- (NSString*)executeCommand:(NSString*)command onEndpoint:(XMPPJID*)jid withXData:(NSXMLElement*)xData andPayload:(NSXMLElement *)payload
 {
     //<iq type='set' to='responder@domain' id='exec3'>
     //    <command xmlns='http://jabber.org/protocol/commands' sessionid='config:20020923T213616Z-700' node='config'>
@@ -130,6 +130,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     //    </command>
     //</iq>
     
+    NSString *iqID = [xmppStream generateUUID];
+    
 	NSXMLElement *commandElement = [NSXMLElement elementWithName:@"command" xmlns:XMPP_FEATURE_CMDS];
     [commandElement addAttributeWithName:@"node" stringValue:command];
     [commandElement addAttributeWithName:@"action" stringValue:@"execute"];
@@ -138,10 +140,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     {
         [commandElement addChild:xData];
     }
+    
+    if (payload)
+    {
+        [commandElement addChild:payload];
+    }
 	
-	XMPPIQ *iq = [XMPPIQ iqWithType:type to:jid elementID:[xmppStream generateUUID] child:commandElement];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:jid elementID:iqID child:commandElement];
 	
 	[xmppStream sendElement:iq];
+    
+    return iqID;
 }
 
 - (void)returnExecutionResult:(NSXMLElement *)data toEndpoint:(XMPPJID*)endpoint forCommand:(NSString*)command withStatus:(NSString*)status andIQID:iqID
@@ -222,6 +231,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else if (node != nil && [node isEqualToString:@"result"])
     {
         NSXMLElement *command = [iq elementForName:@"command" xmlns:XMPP_FEATURE_CMDS];
+        NSString *iqID = [iq attributeStringValueForName:@"id"];
         
         if (command != nil)
         {
@@ -233,7 +243,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             
             if (morse != nil)
             {
-                [multicastDelegate xmppCommands:self receivedCommandResult:status fromEndpoint:[iq from] forCommand:node withSessionId:sessionid andPayload:morse];
+                [multicastDelegate xmppCommands:self receivedCommandResult:status fromEndpoint:[iq from] forCommand:node withSessionId:sessionid andPayload:morse andIQID:iqID];
                 return NO;
             }
             
