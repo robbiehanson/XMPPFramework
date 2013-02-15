@@ -239,13 +239,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             NSString *status = [command attributeStringValueForName:@"status"];
             NSString *sessionid = [command attributeStringValueForName:@"sessionid"];
             
-            NSXMLElement *morse = [command elementForName:@"m" xmlns:@"morse"];
-            
-            if (morse != nil)
-            {
-                [multicastDelegate xmppCommands:self receivedCommandResult:status fromEndpoint:[iq from] forCommand:node withSessionId:sessionid andPayload:morse andIQID:iqID];
+//            NSXMLElement *morse = [command elementForName:@"m" xmlns:@"morse"];
+//            
+//            if (morse != nil)
+//            {
+                [multicastDelegate xmppCommands:self receivedCommandResult:status fromEndpoint:[iq from] forCommand:node withSessionId:sessionid andPayload:command andIQID:iqID];
                 return NO;
-            }
+//            }
             
         }
     }
