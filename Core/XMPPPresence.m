@@ -107,20 +107,16 @@
 {
 	NSString *show = [self show];
     
-    if (show) {
-        if ([show isEqualToString:@"chat"])
-            return 0;
-        else if ([show isEqualToString:@"dnd"])
-            return 1;
-        else if ([show isEqualToString:@"away"])
-            return 2;
-        else if ([show isEqualToString:@"xa"])
-            return 3;
-        else
-            return 4;
-    }
-    else
+    if ([show isEqualToString:@"chat"])
         return 0;
+    if ([show isEqualToString:@"dnd"])
+        return 1;
+    if ([show isEqualToString:@"away"])
+        return 2;
+    if ([show isEqualToString:@"xa"])
+        return 3;
+    
+    return 0;
 }
 
 - (BOOL)isErrorPresence
