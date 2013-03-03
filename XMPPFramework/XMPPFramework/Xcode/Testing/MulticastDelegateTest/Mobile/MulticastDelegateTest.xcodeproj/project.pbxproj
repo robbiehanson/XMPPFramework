@@ -1,0 +1,308 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DCD1912C154B3F8900659E75 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD1912B154B3F8900659E75 /* UIKit.framework */; };
+		DCD1912E154B3F8900659E75 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD1912D154B3F8900659E75 /* Foundation.framework */; };
+		DCD19130154B3F8900659E75 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD1912F154B3F8900659E75 /* CoreGraphics.framework */; };
+		DCD19136154B3F8900659E75 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DCD19134154B3F8900659E75 /* InfoPlist.strings */; };
+		DCD19138154B3F8900659E75 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD19137154B3F8900659E75 /* main.m */; };
+		DCD1913C154B3F8900659E75 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD1913B154B3F8900659E75 /* AppDelegate.m */; };
+		DCD191AF154B4ACB00659E75 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD191AE154B4ACB00659E75 /* GCDMulticastDelegate.m */; };
+		DCD191B6154B4AE000659E75 /* DelegateTesters.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD191B2154B4AE000659E75 /* DelegateTesters.m */; };
+		DCD191B7154B4AE000659E75 /* MulticastDelegateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD191B4154B4AE000659E75 /* MulticastDelegateTest.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DCD19127154B3F8900659E75 /* MulticastDelegateTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MulticastDelegateTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCD1912B154B3F8900659E75 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		DCD1912D154B3F8900659E75 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DCD1912F154B3F8900659E75 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		DCD19133154B3F8900659E75 /* MulticastDelegateTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MulticastDelegateTest-Info.plist"; sourceTree = "<group>"; };
+		DCD19135154B3F8900659E75 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DCD19137154B3F8900659E75 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DCD19139154B3F8900659E75 /* MulticastDelegateTest-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MulticastDelegateTest-Prefix.pch"; sourceTree = "<group>"; };
+		DCD1913A154B3F8900659E75 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		DCD1913B154B3F8900659E75 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		DCD191AD154B4ACB00659E75 /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDMulticastDelegate.h; path = ../../../../Utilities/GCDMulticastDelegate.h; sourceTree = "<group>"; };
+		DCD191AE154B4ACB00659E75 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDMulticastDelegate.m; path = ../../../../Utilities/GCDMulticastDelegate.m; sourceTree = "<group>"; };
+		DCD191B1154B4AE000659E75 /* DelegateTesters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DelegateTesters.h; path = ../Shared/DelegateTesters.h; sourceTree = "<group>"; };
+		DCD191B2154B4AE000659E75 /* DelegateTesters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DelegateTesters.m; path = ../Shared/DelegateTesters.m; sourceTree = "<group>"; };
+		DCD191B3154B4AE000659E75 /* MulticastDelegateTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MulticastDelegateTest.h; path = ../Shared/MulticastDelegateTest.h; sourceTree = "<group>"; };
+		DCD191B4154B4AE000659E75 /* MulticastDelegateTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MulticastDelegateTest.m; path = ../Shared/MulticastDelegateTest.m; sourceTree = "<group>"; };
+		DCD191B5154B4AE000659E75 /* MyProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyProtocol.h; path = ../Shared/MyProtocol.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DCD19124154B3F8900659E75 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCD1912C154B3F8900659E75 /* UIKit.framework in Frameworks */,
+				DCD1912E154B3F8900659E75 /* Foundation.framework in Frameworks */,
+				DCD19130154B3F8900659E75 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DCD1911C154B3F8900659E75 = {
+			isa = PBXGroup;
+			children = (
+				DCD191AA154B4AB500659E75 /* XMPP */,
+				DCD191B0154B4ACF00659E75 /* Testing */,
+				DCD19131154B3F8900659E75 /* MulticastDelegateTest */,
+				DCD1912A154B3F8900659E75 /* Frameworks */,
+				DCD19128154B3F8900659E75 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DCD19128154B3F8900659E75 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DCD19127154B3F8900659E75 /* MulticastDelegateTest.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DCD1912A154B3F8900659E75 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCD1912B154B3F8900659E75 /* UIKit.framework */,
+				DCD1912D154B3F8900659E75 /* Foundation.framework */,
+				DCD1912F154B3F8900659E75 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DCD19131154B3F8900659E75 /* MulticastDelegateTest */ = {
+			isa = PBXGroup;
+			children = (
+				DCD1913A154B3F8900659E75 /* AppDelegate.h */,
+				DCD1913B154B3F8900659E75 /* AppDelegate.m */,
+				DCD19132154B3F8900659E75 /* Supporting Files */,
+			);
+			path = MulticastDelegateTest;
+			sourceTree = "<group>";
+		};
+		DCD19132154B3F8900659E75 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DCD19133154B3F8900659E75 /* MulticastDelegateTest-Info.plist */,
+				DCD19134154B3F8900659E75 /* InfoPlist.strings */,
+				DCD19137154B3F8900659E75 /* main.m */,
+				DCD19139154B3F8900659E75 /* MulticastDelegateTest-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DCD191AA154B4AB500659E75 /* XMPP */ = {
+			isa = PBXGroup;
+			children = (
+				DCD191AC154B4ABA00659E75 /* Utilities */,
+			);
+			name = XMPP;
+			sourceTree = "<group>";
+		};
+		DCD191AC154B4ABA00659E75 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				DCD191AD154B4ACB00659E75 /* GCDMulticastDelegate.h */,
+				DCD191AE154B4ACB00659E75 /* GCDMulticastDelegate.m */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
+		};
+		DCD191B0154B4ACF00659E75 /* Testing */ = {
+			isa = PBXGroup;
+			children = (
+				DCD191B5154B4AE000659E75 /* MyProtocol.h */,
+				DCD191B3154B4AE000659E75 /* MulticastDelegateTest.h */,
+				DCD191B4154B4AE000659E75 /* MulticastDelegateTest.m */,
+				DCD191B1154B4AE000659E75 /* DelegateTesters.h */,
+				DCD191B2154B4AE000659E75 /* DelegateTesters.m */,
+			);
+			name = Testing;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DCD19126154B3F8900659E75 /* MulticastDelegateTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DCD1913F154B3F8900659E75 /* Build configuration list for PBXNativeTarget "MulticastDelegateTest" */;
+			buildPhases = (
+				DCD19123154B3F8900659E75 /* Sources */,
+				DCD19124154B3F8900659E75 /* Frameworks */,
+				DCD19125154B3F8900659E75 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MulticastDelegateTest;
+			productName = MulticastDelegateTest;
+			productReference = DCD19127154B3F8900659E75 /* MulticastDelegateTest.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DCD1911E154B3F8900659E75 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = DCD19121154B3F8900659E75 /* Build configuration list for PBXProject "MulticastDelegateTest" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = DCD1911C154B3F8900659E75;
+			productRefGroup = DCD19128154B3F8900659E75 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DCD19126154B3F8900659E75 /* MulticastDelegateTest */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DCD19125154B3F8900659E75 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCD19136154B3F8900659E75 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DCD19123154B3F8900659E75 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCD19138154B3F8900659E75 /* main.m in Sources */,
+				DCD1913C154B3F8900659E75 /* AppDelegate.m in Sources */,
+				DCD191AF154B4ACB00659E75 /* GCDMulticastDelegate.m in Sources */,
+				DCD191B6154B4AE000659E75 /* DelegateTesters.m in Sources */,
+				DCD191B7154B4AE000659E75 /* MulticastDelegateTest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DCD19134154B3F8900659E75 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCD19135154B3F8900659E75 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DCD1913D154B3F8900659E75 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		DCD1913E154B3F8900659E75 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DCD19140154B3F8900659E75 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MulticastDelegateTest/MulticastDelegateTest-Prefix.pch";
+				INFOPLIST_FILE = "MulticastDelegateTest/MulticastDelegateTest-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		DCD19141154B3F8900659E75 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MulticastDelegateTest/MulticastDelegateTest-Prefix.pch";
+				INFOPLIST_FILE = "MulticastDelegateTest/MulticastDelegateTest-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DCD19121154B3F8900659E75 /* Build configuration list for PBXProject "MulticastDelegateTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCD1913D154B3F8900659E75 /* Debug */,
+				DCD1913E154B3F8900659E75 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DCD1913F154B3F8900659E75 /* Build configuration list for PBXNativeTarget "MulticastDelegateTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCD19140154B3F8900659E75 /* Debug */,
+				DCD19141154B3F8900659E75 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DCD1911E154B3F8900659E75 /* Project object */;
+}

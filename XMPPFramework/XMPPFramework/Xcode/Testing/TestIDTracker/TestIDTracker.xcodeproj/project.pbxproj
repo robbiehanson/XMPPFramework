@@ -1,0 +1,341 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DCC88A7B13E7770D00CDAB56 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC88A7A13E7770D00CDAB56 /* Cocoa.framework */; };
+		DCC88A8513E7770D00CDAB56 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DCC88A8313E7770D00CDAB56 /* InfoPlist.strings */; };
+		DCC88A8713E7770D00CDAB56 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88A8613E7770D00CDAB56 /* main.m */; };
+		DCC88A8B13E7770D00CDAB56 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DCC88A8913E7770D00CDAB56 /* Credits.rtf */; };
+		DCC88A8E13E7770E00CDAB56 /* TestIDTrackerAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88A8D13E7770E00CDAB56 /* TestIDTrackerAppDelegate.m */; };
+		DCC88A9113E7770E00CDAB56 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCC88A8F13E7770E00CDAB56 /* MainMenu.xib */; };
+		DCC88A9913E7772900CDAB56 /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88A9813E7772900CDAB56 /* XMPPIDTracker.m */; };
+		DCC88AA513E7817700CDAB56 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88A9C13E7817700CDAB56 /* DDAbstractDatabaseLogger.m */; };
+		DCC88AA613E7817700CDAB56 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88A9E13E7817700CDAB56 /* DDASLLogger.m */; };
+		DCC88AA713E7817700CDAB56 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88AA013E7817700CDAB56 /* DDFileLogger.m */; };
+		DCC88AA813E7817700CDAB56 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88AA213E7817700CDAB56 /* DDLog.m */; };
+		DCC88AA913E7817700CDAB56 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC88AA413E7817700CDAB56 /* DDTTYLogger.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DCC88A7613E7770D00CDAB56 /* TestIDTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestIDTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCC88A7A13E7770D00CDAB56 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		DCC88A7D13E7770D00CDAB56 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		DCC88A7E13E7770D00CDAB56 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		DCC88A7F13E7770D00CDAB56 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DCC88A8213E7770D00CDAB56 /* TestIDTracker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TestIDTracker-Info.plist"; sourceTree = "<group>"; };
+		DCC88A8413E7770D00CDAB56 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DCC88A8613E7770D00CDAB56 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DCC88A8813E7770D00CDAB56 /* TestIDTracker-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TestIDTracker-Prefix.pch"; sourceTree = "<group>"; };
+		DCC88A8A13E7770D00CDAB56 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		DCC88A8C13E7770E00CDAB56 /* TestIDTrackerAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestIDTrackerAppDelegate.h; sourceTree = "<group>"; };
+		DCC88A8D13E7770E00CDAB56 /* TestIDTrackerAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestIDTrackerAppDelegate.m; sourceTree = "<group>"; };
+		DCC88A9013E7770E00CDAB56 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		DCC88A9713E7772900CDAB56 /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPIDTracker.h; path = ../../../../Utilities/XMPPIDTracker.h; sourceTree = "<group>"; };
+		DCC88A9813E7772900CDAB56 /* XMPPIDTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPIDTracker.m; path = ../../../../Utilities/XMPPIDTracker.m; sourceTree = "<group>"; };
+		DCC88A9B13E7817700CDAB56 /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
+		DCC88A9C13E7817700CDAB56 /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
+		DCC88A9D13E7817700CDAB56 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
+		DCC88A9E13E7817700CDAB56 /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogger.m; sourceTree = "<group>"; };
+		DCC88A9F13E7817700CDAB56 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
+		DCC88AA013E7817700CDAB56 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
+		DCC88AA113E7817700CDAB56 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		DCC88AA213E7817700CDAB56 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		DCC88AA313E7817700CDAB56 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
+		DCC88AA413E7817700CDAB56 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DCC88A7313E7770D00CDAB56 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCC88A7B13E7770D00CDAB56 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DCC88A6B13E7770D00CDAB56 = {
+			isa = PBXGroup;
+			children = (
+				DCC88A9A13E7817700CDAB56 /* Logging */,
+				DCC88A8013E7770D00CDAB56 /* TestIDTracker */,
+				DCC88A7913E7770D00CDAB56 /* Frameworks */,
+				DCC88A7713E7770D00CDAB56 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DCC88A7713E7770D00CDAB56 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DCC88A7613E7770D00CDAB56 /* TestIDTracker.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DCC88A7913E7770D00CDAB56 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCC88A7A13E7770D00CDAB56 /* Cocoa.framework */,
+				DCC88A7C13E7770D00CDAB56 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DCC88A7C13E7770D00CDAB56 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCC88A7D13E7770D00CDAB56 /* AppKit.framework */,
+				DCC88A7E13E7770D00CDAB56 /* CoreData.framework */,
+				DCC88A7F13E7770D00CDAB56 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		DCC88A8013E7770D00CDAB56 /* TestIDTracker */ = {
+			isa = PBXGroup;
+			children = (
+				DCC88A9713E7772900CDAB56 /* XMPPIDTracker.h */,
+				DCC88A9813E7772900CDAB56 /* XMPPIDTracker.m */,
+				DCC88A8C13E7770E00CDAB56 /* TestIDTrackerAppDelegate.h */,
+				DCC88A8D13E7770E00CDAB56 /* TestIDTrackerAppDelegate.m */,
+				DCC88A8F13E7770E00CDAB56 /* MainMenu.xib */,
+				DCC88A8113E7770D00CDAB56 /* Supporting Files */,
+			);
+			path = TestIDTracker;
+			sourceTree = "<group>";
+		};
+		DCC88A8113E7770D00CDAB56 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DCC88A8213E7770D00CDAB56 /* TestIDTracker-Info.plist */,
+				DCC88A8313E7770D00CDAB56 /* InfoPlist.strings */,
+				DCC88A8613E7770D00CDAB56 /* main.m */,
+				DCC88A8813E7770D00CDAB56 /* TestIDTracker-Prefix.pch */,
+				DCC88A8913E7770D00CDAB56 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DCC88A9A13E7817700CDAB56 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				DCC88A9B13E7817700CDAB56 /* DDAbstractDatabaseLogger.h */,
+				DCC88A9C13E7817700CDAB56 /* DDAbstractDatabaseLogger.m */,
+				DCC88A9D13E7817700CDAB56 /* DDASLLogger.h */,
+				DCC88A9E13E7817700CDAB56 /* DDASLLogger.m */,
+				DCC88A9F13E7817700CDAB56 /* DDFileLogger.h */,
+				DCC88AA013E7817700CDAB56 /* DDFileLogger.m */,
+				DCC88AA113E7817700CDAB56 /* DDLog.h */,
+				DCC88AA213E7817700CDAB56 /* DDLog.m */,
+				DCC88AA313E7817700CDAB56 /* DDTTYLogger.h */,
+				DCC88AA413E7817700CDAB56 /* DDTTYLogger.m */,
+			);
+			name = Logging;
+			path = ../../../Vendor/CocoaLumberjack;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DCC88A7513E7770D00CDAB56 /* TestIDTracker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DCC88A9413E7770E00CDAB56 /* Build configuration list for PBXNativeTarget "TestIDTracker" */;
+			buildPhases = (
+				DCC88A7213E7770D00CDAB56 /* Sources */,
+				DCC88A7313E7770D00CDAB56 /* Frameworks */,
+				DCC88A7413E7770D00CDAB56 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TestIDTracker;
+			productName = TestIDTracker;
+			productReference = DCC88A7613E7770D00CDAB56 /* TestIDTracker.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DCC88A6D13E7770D00CDAB56 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = DCC88A7013E7770D00CDAB56 /* Build configuration list for PBXProject "TestIDTracker" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = DCC88A6B13E7770D00CDAB56;
+			productRefGroup = DCC88A7713E7770D00CDAB56 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DCC88A7513E7770D00CDAB56 /* TestIDTracker */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DCC88A7413E7770D00CDAB56 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCC88A8513E7770D00CDAB56 /* InfoPlist.strings in Resources */,
+				DCC88A8B13E7770D00CDAB56 /* Credits.rtf in Resources */,
+				DCC88A9113E7770E00CDAB56 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DCC88A7213E7770D00CDAB56 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCC88A8713E7770D00CDAB56 /* main.m in Sources */,
+				DCC88A8E13E7770E00CDAB56 /* TestIDTrackerAppDelegate.m in Sources */,
+				DCC88A9913E7772900CDAB56 /* XMPPIDTracker.m in Sources */,
+				DCC88AA513E7817700CDAB56 /* DDAbstractDatabaseLogger.m in Sources */,
+				DCC88AA613E7817700CDAB56 /* DDASLLogger.m in Sources */,
+				DCC88AA713E7817700CDAB56 /* DDFileLogger.m in Sources */,
+				DCC88AA813E7817700CDAB56 /* DDLog.m in Sources */,
+				DCC88AA913E7817700CDAB56 /* DDTTYLogger.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DCC88A8313E7770D00CDAB56 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCC88A8413E7770D00CDAB56 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		DCC88A8913E7770D00CDAB56 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCC88A8A13E7770D00CDAB56 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		DCC88A8F13E7770E00CDAB56 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCC88A9013E7770E00CDAB56 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DCC88A9213E7770E00CDAB56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		DCC88A9313E7770E00CDAB56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DCC88A9513E7770E00CDAB56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "TestIDTracker/TestIDTracker-Prefix.pch";
+				INFOPLIST_FILE = "TestIDTracker/TestIDTracker-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		DCC88A9613E7770E00CDAB56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "TestIDTracker/TestIDTracker-Prefix.pch";
+				INFOPLIST_FILE = "TestIDTracker/TestIDTracker-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DCC88A7013E7770D00CDAB56 /* Build configuration list for PBXProject "TestIDTracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCC88A9213E7770E00CDAB56 /* Debug */,
+				DCC88A9313E7770E00CDAB56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DCC88A9413E7770E00CDAB56 /* Build configuration list for PBXNativeTarget "TestIDTracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCC88A9513E7770E00CDAB56 /* Debug */,
+				DCC88A9613E7770E00CDAB56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DCC88A6D13E7770D00CDAB56 /* Project object */;
+}

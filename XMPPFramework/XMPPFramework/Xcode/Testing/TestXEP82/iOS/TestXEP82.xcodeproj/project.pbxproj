@@ -1,0 +1,316 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DC373217139F0A3400A8407D /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC373216139F0A3400A8407D /* NSNumber+XMPP.m */; };
+		DCDA2A171355494F00B98971 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2A161355494F00B98971 /* UIKit.framework */; };
+		DCDA2A191355494F00B98971 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2A181355494F00B98971 /* Foundation.framework */; };
+		DCDA2A1B1355494F00B98971 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCDA2A1A1355494F00B98971 /* CoreGraphics.framework */; };
+		DCDA2A211355494F00B98971 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2A1F1355494F00B98971 /* InfoPlist.strings */; };
+		DCDA2A241355494F00B98971 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A231355494F00B98971 /* main.m */; };
+		DCDA2A271355494F00B98971 /* TestXEP82AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A261355494F00B98971 /* TestXEP82AppDelegate.m */; };
+		DCDA2A2A1355494F00B98971 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2A281355494F00B98971 /* MainWindow.xib */; };
+		DCDA2A2D1355494F00B98971 /* TestXEP82ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A2C1355494F00B98971 /* TestXEP82ViewController.m */; };
+		DCDA2A301355494F00B98971 /* TestXEP82ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCDA2A2E1355494F00B98971 /* TestXEP82ViewController.xib */; };
+		DCDA2A461355497700B98971 /* NSDate+XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A431355497700B98971 /* NSDate+XMPPDateTimeProfiles.m */; };
+		DCDA2A471355497700B98971 /* XMPPDateTimeProfiles.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A451355497700B98971 /* XMPPDateTimeProfiles.m */; };
+		DCDA2A4A135549DF00B98971 /* TestXEP82.m in Sources */ = {isa = PBXBuildFile; fileRef = DCDA2A49135549DF00B98971 /* TestXEP82.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DC373215139F0A3400A8407D /* NSNumber+XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSNumber+XMPP.h"; path = "../../../../Categories/NSNumber+XMPP.h"; sourceTree = "<group>"; };
+		DC373216139F0A3400A8407D /* NSNumber+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSNumber+XMPP.m"; path = "../../../../Categories/NSNumber+XMPP.m"; sourceTree = "<group>"; };
+		DCDA2A121355494F00B98971 /* TestXEP82.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestXEP82.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCDA2A161355494F00B98971 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		DCDA2A181355494F00B98971 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DCDA2A1A1355494F00B98971 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		DCDA2A1E1355494F00B98971 /* TestXEP82-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TestXEP82-Info.plist"; sourceTree = "<group>"; };
+		DCDA2A201355494F00B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DCDA2A221355494F00B98971 /* TestXEP82-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TestXEP82-Prefix.pch"; sourceTree = "<group>"; };
+		DCDA2A231355494F00B98971 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DCDA2A251355494F00B98971 /* TestXEP82AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestXEP82AppDelegate.h; sourceTree = "<group>"; };
+		DCDA2A261355494F00B98971 /* TestXEP82AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestXEP82AppDelegate.m; sourceTree = "<group>"; };
+		DCDA2A291355494F00B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
+		DCDA2A2B1355494F00B98971 /* TestXEP82ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestXEP82ViewController.h; sourceTree = "<group>"; };
+		DCDA2A2C1355494F00B98971 /* TestXEP82ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestXEP82ViewController.m; sourceTree = "<group>"; };
+		DCDA2A2F1355494F00B98971 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TestXEP82ViewController.xib; sourceTree = "<group>"; };
+		DCDA2A421355497700B98971 /* NSDate+XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSDate+XMPPDateTimeProfiles.h"; path = "../../../../Extensions/XEP-0082/NSDate+XMPPDateTimeProfiles.h"; sourceTree = "<group>"; };
+		DCDA2A431355497700B98971 /* NSDate+XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSDate+XMPPDateTimeProfiles.m"; path = "../../../../Extensions/XEP-0082/NSDate+XMPPDateTimeProfiles.m"; sourceTree = "<group>"; };
+		DCDA2A441355497700B98971 /* XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPDateTimeProfiles.h; path = "../../../../Extensions/XEP-0082/XMPPDateTimeProfiles.h"; sourceTree = "<group>"; };
+		DCDA2A451355497700B98971 /* XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDateTimeProfiles.m; path = "../../../../Extensions/XEP-0082/XMPPDateTimeProfiles.m"; sourceTree = "<group>"; };
+		DCDA2A48135549DF00B98971 /* TestXEP82.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestXEP82.h; path = ../../TestXEP82.h; sourceTree = "<group>"; };
+		DCDA2A49135549DF00B98971 /* TestXEP82.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestXEP82.m; path = ../../TestXEP82.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DCDA2A0F1355494F00B98971 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2A171355494F00B98971 /* UIKit.framework in Frameworks */,
+				DCDA2A191355494F00B98971 /* Foundation.framework in Frameworks */,
+				DCDA2A1B1355494F00B98971 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DCDA2A071355494E00B98971 = {
+			isa = PBXGroup;
+			children = (
+				DC373215139F0A3400A8407D /* NSNumber+XMPP.h */,
+				DC373216139F0A3400A8407D /* NSNumber+XMPP.m */,
+				DCDA2A441355497700B98971 /* XMPPDateTimeProfiles.h */,
+				DCDA2A451355497700B98971 /* XMPPDateTimeProfiles.m */,
+				DCDA2A421355497700B98971 /* NSDate+XMPPDateTimeProfiles.h */,
+				DCDA2A431355497700B98971 /* NSDate+XMPPDateTimeProfiles.m */,
+				DCDA2A1C1355494F00B98971 /* TestXEP82 */,
+				DCDA2A151355494F00B98971 /* Frameworks */,
+				DCDA2A131355494F00B98971 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DCDA2A131355494F00B98971 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A121355494F00B98971 /* TestXEP82.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DCDA2A151355494F00B98971 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A161355494F00B98971 /* UIKit.framework */,
+				DCDA2A181355494F00B98971 /* Foundation.framework */,
+				DCDA2A1A1355494F00B98971 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DCDA2A1C1355494F00B98971 /* TestXEP82 */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A48135549DF00B98971 /* TestXEP82.h */,
+				DCDA2A49135549DF00B98971 /* TestXEP82.m */,
+				DCDA2A251355494F00B98971 /* TestXEP82AppDelegate.h */,
+				DCDA2A261355494F00B98971 /* TestXEP82AppDelegate.m */,
+				DCDA2A281355494F00B98971 /* MainWindow.xib */,
+				DCDA2A2B1355494F00B98971 /* TestXEP82ViewController.h */,
+				DCDA2A2C1355494F00B98971 /* TestXEP82ViewController.m */,
+				DCDA2A2E1355494F00B98971 /* TestXEP82ViewController.xib */,
+				DCDA2A1D1355494F00B98971 /* Supporting Files */,
+			);
+			path = TestXEP82;
+			sourceTree = "<group>";
+		};
+		DCDA2A1D1355494F00B98971 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DCDA2A1E1355494F00B98971 /* TestXEP82-Info.plist */,
+				DCDA2A1F1355494F00B98971 /* InfoPlist.strings */,
+				DCDA2A221355494F00B98971 /* TestXEP82-Prefix.pch */,
+				DCDA2A231355494F00B98971 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DCDA2A111355494F00B98971 /* TestXEP82 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DCDA2A331355494F00B98971 /* Build configuration list for PBXNativeTarget "TestXEP82" */;
+			buildPhases = (
+				DCDA2A0E1355494F00B98971 /* Sources */,
+				DCDA2A0F1355494F00B98971 /* Frameworks */,
+				DCDA2A101355494F00B98971 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TestXEP82;
+			productName = TestXEP82;
+			productReference = DCDA2A121355494F00B98971 /* TestXEP82.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DCDA2A091355494E00B98971 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = Voalte;
+			};
+			buildConfigurationList = DCDA2A0C1355494E00B98971 /* Build configuration list for PBXProject "TestXEP82" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = DCDA2A071355494E00B98971;
+			productRefGroup = DCDA2A131355494F00B98971 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DCDA2A111355494F00B98971 /* TestXEP82 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DCDA2A101355494F00B98971 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2A211355494F00B98971 /* InfoPlist.strings in Resources */,
+				DCDA2A2A1355494F00B98971 /* MainWindow.xib in Resources */,
+				DCDA2A301355494F00B98971 /* TestXEP82ViewController.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DCDA2A0E1355494F00B98971 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCDA2A241355494F00B98971 /* main.m in Sources */,
+				DCDA2A271355494F00B98971 /* TestXEP82AppDelegate.m in Sources */,
+				DCDA2A2D1355494F00B98971 /* TestXEP82ViewController.m in Sources */,
+				DCDA2A461355497700B98971 /* NSDate+XMPPDateTimeProfiles.m in Sources */,
+				DCDA2A471355497700B98971 /* XMPPDateTimeProfiles.m in Sources */,
+				DCDA2A4A135549DF00B98971 /* TestXEP82.m in Sources */,
+				DC373217139F0A3400A8407D /* NSNumber+XMPP.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DCDA2A1F1355494F00B98971 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2A201355494F00B98971 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		DCDA2A281355494F00B98971 /* MainWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2A291355494F00B98971 /* en */,
+			);
+			name = MainWindow.xib;
+			sourceTree = "<group>";
+		};
+		DCDA2A2E1355494F00B98971 /* TestXEP82ViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DCDA2A2F1355494F00B98971 /* en */,
+			);
+			name = TestXEP82ViewController.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DCDA2A311355494F00B98971 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		DCDA2A321355494F00B98971 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		DCDA2A341355494F00B98971 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "TestXEP82/TestXEP82-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				INFOPLIST_FILE = "TestXEP82/TestXEP82-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		DCDA2A351355494F00B98971 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "TestXEP82/TestXEP82-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				INFOPLIST_FILE = "TestXEP82/TestXEP82-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DCDA2A0C1355494E00B98971 /* Build configuration list for PBXProject "TestXEP82" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCDA2A311355494F00B98971 /* Debug */,
+				DCDA2A321355494F00B98971 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DCDA2A331355494F00B98971 /* Build configuration list for PBXNativeTarget "TestXEP82" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCDA2A341355494F00B98971 /* Debug */,
+				DCDA2A351355494F00B98971 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DCDA2A091355494E00B98971 /* Project object */;
+}
