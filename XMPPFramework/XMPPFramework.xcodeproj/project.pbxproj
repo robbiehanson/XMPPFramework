@@ -258,8 +258,8 @@
 		846EBE93157E9A1300460DB9 /* XMPPCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCoreDataStorage.h; sourceTree = "<group>"; };
 		846EBE94157E9A1300460DB9 /* XMPPCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCoreDataStorage.m; sourceTree = "<group>"; };
 		846EBE95157E9A1300460DB9 /* XMPPCoreDataStorageProtected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCoreDataStorageProtected.h; sourceTree = "<group>"; };
-		846EBE97157E9A1300460DB9 /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPReconnect.h; path = ../Reconnect/XMPPReconnect.h; sourceTree = "<group>"; };
-		846EBE98157E9A1300460DB9 /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPReconnect.m; path = ../Reconnect/XMPPReconnect.m; sourceTree = "<group>"; };
+		846EBE97157E9A1300460DB9 /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
+		846EBE98157E9A1300460DB9 /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
 		846EBE9B157E9A1300460DB9 /* XMPPGroupCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPGroupCoreDataStorageObject.h; sourceTree = "<group>"; };
 		846EBE9C157E9A1300460DB9 /* XMPPGroupCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPGroupCoreDataStorageObject.m; sourceTree = "<group>"; };
 		846EBE9D157E9A1300460DB9 /* XMPPResourceCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPResourceCoreDataStorageObject.h; sourceTree = "<group>"; };
@@ -494,20 +494,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		841B90D1159DF49F008E4504 /* XEP-0066 */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "XEP-0066";
-			sourceTree = "<group>";
-		};
-		8437384115A008ED0084260A /* XEP-0012 */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "XEP-0012";
-			sourceTree = "<group>";
-		};
 		846EBE5A157E99C500460DB9 = {
 			isa = PBXGroup;
 			children = (
@@ -591,8 +577,6 @@
 				84AABDFE15D7293300E09A17 /* XEP-0066 */,
 				84AABDEC15D728C600E09A17 /* ProcessOne */,
 				84AABDEF15D728C600E09A17 /* XEP-0224 */,
-				8437384115A008ED0084260A /* XEP-0012 */,
-				841B90D1159DF49F008E4504 /* XEP-0066 */,
 				84F5DE3A15958B42009F88AB /* XEP-0003 */,
 				846EC133157EB69A00460DB9 /* XEP-0092 */,
 				846EBE8F157E9A1300460DB9 /* BandwidthMonitor */,
@@ -640,6 +624,8 @@
 		846EBE96157E9A1300460DB9 /* Reconnect */ = {
 			isa = PBXGroup;
 			children = (
+				846EBE97157E9A1300460DB9 /* XMPPReconnect.h */,
+				846EBE98157E9A1300460DB9 /* XMPPReconnect.m */,
 			);
 			path = Reconnect;
 			sourceTree = "<group>";
@@ -647,8 +633,6 @@
 		846EBE99157E9A1300460DB9 /* Roster */ = {
 			isa = PBXGroup;
 			children = (
-				846EBE97157E9A1300460DB9 /* XMPPReconnect.h */,
-				846EBE98157E9A1300460DB9 /* XMPPReconnect.m */,
 				846EBE9A157E9A1300460DB9 /* CoreDataStorage */,
 				846EBEA4157E9A1300460DB9 /* MemoryStorage */,
 				846EBEAC157E9A1300460DB9 /* XMPPResource.h */,
