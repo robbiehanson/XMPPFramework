@@ -1,0 +1,36 @@
+Libidn README -- Notes for the JAVA API proof of concept.
+Copyright (C) 2003-2012 Simon Josefsson
+See the end for copying conditions.
+
+This directory builds Java *.class files that implement the Libidn
+API.  Note!  It is unfinished and left as a proof of concept.  A
+developer with knowledge about Java is encouraged to take over it.
+
+The current Makefile.am require GCJ.  It was tested with Sun JDK 1.1
+and IBM JDK 1.1.8 too, after replacing "gcj" with "javac" and "gcjh"
+with "javah" in Makefile.am.  Some combinations of compilation with
+one package and executing using another package (e.g., compile with
+GCJ, run with Sun's JRE) also seemed to work.
+
+$ ./autogen.sh
+$ ./configure
+$ make
+$ su
+# make install
+# exit
+$ make ExampleIDNA
+$ gij ExampleIDNA räksmörgås
+xn--rksmrgs-5wao1o
+$ 
+
+Please let me know if you want to finish and maintain the Java API
+glue.  It may involve some tedious work initially, but could be useful
+for Java developers.
+
+Eventually I think the Java API Glue functions should be merged into
+libidn, instead of having a separate libidn-java library.
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

@@ -1,0 +1,110 @@
+Libidn THANKS -- Acknowledgements.
+Copyright (C) 2002-2012 Simon Josefsson
+See the end for copying conditions.
+
+The punycode code was taken from the IETF IDN Punycode specification,
+by Adam M. Costello.  The TLD code was contributed by Thomas Jacob.
+The Java implementation was contributed by Oliver Hitz.  The C#
+implementation was contributed by Alexander Gnauck.  The Unicode
+tables were provided by Unicode, Inc.  Functions for dealing with
+Unicode (see lib/nfkc.c) are borrowed from GLib downloaded from
+www.gtk.org.  Gnulib is used to simplify portability and to improve
+readability of the code.
+
+Suggestions, bug reports, patches, translations, test vectors or other
+contributions were also received from or written by the people
+mentioned below.  If you have contributed and aren't mentioned here,
+please let us know!
+
+Stephane Bortzmeyer
+Seungho Lee
+Waldo Bastian
+Travis Shirk
+Hugo Salgado H.
+Leonard Stiles
+Ryan M. Golbeck
+Joe Hildebrand
+Thiago Macieira
+Ienup Sung
+Wim Lewis
+Robert Norris
+Patrik Wallstrom
+Marcos Sanz
+Gerrit P. Haase
+Adam M. Costello
+Trond Haugen
+Marco d'Itri
+Arkadiusz Miskiewicz
+Noah Levitt
+Paul Hoffman / JDNA
+Oden Eriksson
+Kai Schaetzl
+Graydon Hoare
+Jan-Hendrik Heuing
+Chris Moore
+Niels Möller
+Thomas Jacob
+Ulrich Drepper
+Jakub Bogusz
+Aleksandar Jelenak
+Michel Robitaille
+Morten Bo Johansen
+Oliver Hitz
+Jørgen Thomsen
+Roland Illig
+Elros Cyriatan
+Martin Waitz
+Laurentiu Buzdugan
+Joe Orton
+Daniel Stenberg
+Gisle Vanem
+Robert Scheck
+Benjamin Reed
+Edmund GRIMLEY EVANS
+Stephan Kulow
+Andreas Schwab
+Eric S. Raymond
+Matt Tucker
+Marco Colombo
+Linus Nordberg
+Simon Walter
+Clytie Siddall
+Meng Jie
+Carsten Lohrke
+Wim Lewis
+Yaakov S
+Alexander Gnauck
+Bernard Leak
+Kirill Ponomarew
+Paul Howarth
+Stephane Mikaty
+Petteri Räty
+Petr Pisar
+Christian Ehrlicher
+Remko van der Vossen
+Erik van der Poel
+Mike Frysinger
+Adam Strzelecki
+Benno Schulenberg
+John McGowan
+Sisyphus
+Jens Rehsack <jens.rehsack@bayerbbs.com>
+Dagobert Michelsen <dam@opencsw.org>
+Guus der Kinderen <guus.der.kinderen@gmail.com>
+Guenter Knauf <gk@gknw.de>
+Stepan Golosunov <stepan@golosunov.pp.ru>
+"Andrew O. Shadoura" <bugzilla@tut.by>
+Roman Mamedov <rm@romanrm.ru>
+Waqas Hussain <waqas20@gmail.com>
+Guido Trentalancia <guido@trentalancia.com>
+Volker Grabsch <vog@notjusthosting.com>
+Olga Limburg <olimburg@gmail.com>
+Bittner Ede <bittner.ede@euronetrt.hu>
+René Berber <r.berber@computer.org>
+Jon Nelson <jnelson@jamponi.net>
+Bartosz Brachaczek <b.brachaczek@gmail.com>
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

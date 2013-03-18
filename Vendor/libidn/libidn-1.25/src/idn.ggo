@@ -1,0 +1,31 @@
+# Copyright (C) 2003-2012 Simon Josefsson.
+#
+# This file is part of GNU Libidn.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+option "stringprep" s "Prepare string according to nameprep profile" no
+option "punycode-decode" d "Decode Punycode" no
+option "punycode-encode" e "Encode Punycode" no
+option "idna-to-ascii"   a "Convert to ACE according to IDNA (default)" no
+option "idna-to-unicode" u "Convert from ACE according to IDNA" no
+option "allow-unassigned" - "Toggle IDNA AllowUnassigned flag" flag off
+option "usestd3asciirules" - "Toggle IDNA UseSTD3ASCIIRules flag" flag off
+option "tld" t "Check string for TLD specific rules\nOnly for --idna-to-ascii and --idna-to-unicode" flag on
+option "no-tld" - "Don't check string for TLD specific rules\nOnly for --idna-to-ascii and --idna-to-unicode" flag off
+option "nfkc" n "Normalize string according to Unicode v3.2 NFKC" no
+option "hidden-nfkc" k "Hidden parameter for backwards compatibility" no hidden
+option "profile" p "Use specified stringprep profile instead\nValid stringprep profiles are `Nameprep', `iSCSI', `Nodeprep', `Resourceprep', `trace', and `SASLprep'." string no
+option "debug" - "Print debugging information" flag off
+option "quiet" - "Silent operation" flag off

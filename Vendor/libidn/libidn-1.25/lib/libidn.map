@@ -1,0 +1,103 @@
+# Copyright (C) 2009-2012 Simon Josefsson.
+#
+# This file is part of GNU Libidn.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+LIBIDN_1.0
+{
+  global:
+    idn_free;
+    idna_strerror;
+    idna_to_ascii_4i;
+    idna_to_ascii_4z;
+    idna_to_ascii_8z;
+    idna_to_ascii_lz;
+    idna_to_unicode_44i;
+    idna_to_unicode_4z4z;
+    idna_to_unicode_8z4z;
+    idna_to_unicode_8z8z;
+    idna_to_unicode_8zlz;
+    idna_to_unicode_lzlz;
+    pr29_4;
+    pr29_4z;
+    pr29_8z;
+    pr29_strerror;
+    punycode_decode;
+    punycode_encode;
+    punycode_strerror;
+    stringprep;
+    stringprep_4i;
+    stringprep_4zi;
+    stringprep_check_version;
+    stringprep_convert;
+    stringprep_iscsi;
+    stringprep_kerberos5;
+    stringprep_locale_charset;
+    stringprep_locale_to_utf8;
+    stringprep_nameprep;
+    stringprep_plain;
+    stringprep_profile;
+    stringprep_profiles;
+    stringprep_saslprep;
+    stringprep_strerror;
+    stringprep_trace;
+    stringprep_ucs4_nfkc_normalize;
+    stringprep_ucs4_to_utf8;
+    stringprep_unichar_to_utf8;
+    stringprep_utf8_nfkc_normalize;
+    stringprep_utf8_to_locale;
+    stringprep_utf8_to_ucs4;
+    stringprep_utf8_to_unichar;
+    stringprep_xmpp_nodeprep;
+    stringprep_xmpp_nodeprep_prohibit;
+    stringprep_xmpp_resourceprep;
+    tld_check_4;
+    tld_check_4t;
+    tld_check_4tz;
+    tld_check_4z;
+    tld_check_8z;
+    tld_check_lz;
+    tld_default_table;
+    tld_get_4;
+    tld_get_4z;
+    tld_get_table;
+    tld_get_z;
+    tld_strerror;
+
+  # These symbols were intended to be exported from the beginning, but
+  # by accident they never were.  Version 1.17 exported them properly.
+    stringprep_iscsi_prohibit;
+    stringprep_rfc3454_A_1;
+    stringprep_rfc3454_B_1;
+    stringprep_rfc3454_B_2;
+    stringprep_rfc3454_B_3;
+    stringprep_rfc3454_C_1_1;
+    stringprep_rfc3454_C_1_2;
+    stringprep_rfc3454_C_2_1;
+    stringprep_rfc3454_C_2_2;
+    stringprep_rfc3454_C_3;
+    stringprep_rfc3454_C_4;
+    stringprep_rfc3454_C_5;
+    stringprep_rfc3454_C_6;
+    stringprep_rfc3454_C_7;
+    stringprep_rfc3454_C_8;
+    stringprep_rfc3454_C_9;
+    stringprep_rfc3454_D_1;
+    stringprep_rfc3454_D_2;
+    stringprep_saslprep_space_map;
+
+  local:
+    *;
+};

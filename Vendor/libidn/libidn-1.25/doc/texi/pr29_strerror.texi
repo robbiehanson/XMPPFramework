@@ -1,0 +1,21 @@
+@subheading pr29_strerror
+@anchor{pr29_strerror}
+@deftypefun {const char *} {pr29_strerror} (Pr29_rc @var{rc})
+@var{rc}: an @code{Pr29_rc} return code.
+
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+
+@strong{PR29_SUCCESS:} Successful operation.  This value is guaranteed to
+always be zero, the remaining ones are only guaranteed to hold
+non-zero values, for logical comparison purposes.
+
+@strong{PR29_PROBLEM:} A problem sequence was encountered.
+
+@strong{PR29_STRINGPREP_ERROR:} The character set conversion failed (only
+for @code{pr29_8z()}).
+
+@strong{Return value:} Returns a pointer to a statically allocated string
+containing a description of the error with the return code @code{rc}.
+@end deftypefun
+

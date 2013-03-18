@@ -1,0 +1,31 @@
+Libidn libc/README -- Instructions for building as a GNU Libc add-on.
+Copyright (C) 2003-2012 Simon Josefsson
+See the end for copying conditions.
+
+GNU Libidn is now part of GNU Libc, so the stand-alone patch and
+instructions that were distributed here before has been removed.
+
+See getaddrinfo-idn.txt for the write-up of the API that is used in
+Libc.
+
+Simply build Libc as you would normally, but specify "libidn" as an
+add-on, as in --enable-add-ons=libidn to configure.
+
+Once installed, you may build and run the sample still distributed in
+this directory, perhaps as follows:
+
+$ gcc -o example example.c -L/usr/local/glibc/lib -Wl,-rpath,/usr/local/glibc/lib -nostdinc -I/usr/local/glibc/include -I/usr/include -I/usr/lib/gcc-lib/i386-linux/2.95.4/include
+$ CHARSET=iso-8859-1 ./example
+locale charset `iso-8859-1'
+gettaddrinfo(räksmörgås.josefsson.org):
+address `217.13.230.178'
+canonical name `178.230.13.217.in-addr.dgcsystems.net'
+$
+
+Internally the domain name xn--rksmrgs-5wao1o.josefsson.org is looked
+up in DNS.
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

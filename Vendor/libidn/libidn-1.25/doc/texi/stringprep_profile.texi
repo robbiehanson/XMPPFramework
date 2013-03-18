@@ -1,0 +1,29 @@
+@subheading stringprep_profile
+@anchor{stringprep_profile}
+@deftypefun {int} {stringprep_profile} (const char * @var{in}, char ** @var{out}, const char * @var{profile}, Stringprep_profile_flags @var{flags})
+@var{in}: input array with UTF-8 string to prepare.
+
+@var{out}: output variable with pointer to newly allocate string.
+
+@var{profile}: name of stringprep profile to use.
+
+@var{flags}: a @code{Stringprep_profile_flags} value, or 0.
+
+Prepare the input zero terminated UTF-8 string according to the
+stringprep profile, and return the result in a newly allocated
+variable.
+
+Note that you must convert strings entered in the systems locale
+into UTF-8 before using this function, see
+@code{stringprep_locale_to_utf8()}.
+
+The output @code{out} variable must be deallocated by the caller.
+
+The @code{flags} are one of @code{Stringprep_profile_flags} values, or 0.
+
+The @code{profile} specifies the name of the stringprep profile to use.
+It must be one of the internally supported stringprep profiles.
+
+@strong{Return value:} Returns @code{STRINGPREP_OK} iff successful, or an error code.
+@end deftypefun
+

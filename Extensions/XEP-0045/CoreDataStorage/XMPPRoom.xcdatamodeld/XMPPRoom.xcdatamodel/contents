@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="878" systemVersion="11C74" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="XMPPRoomMessageCoreDataStorageObject" representedClassName="XMPPRoomMessageCoreDataStorageObject" syncable="YES">
+        <attribute name="body" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="fromMe" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="jid" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="jidStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="localTimestamp" attributeType="Date" indexed="YES" syncable="YES"/>
+        <attribute name="message" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="messageStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="nickname" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="remoteTimestamp" optional="YES" attributeType="Date" indexed="YES" syncable="YES"/>
+        <attribute name="roomJID" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="roomJIDStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="type" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+    </entity>
+    <entity name="XMPPRoomOccupantCoreDataStorageObject" representedClassName="XMPPRoomOccupantCoreDataStorageObject" syncable="YES">
+        <attribute name="affiliation" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="createdAt" attributeType="Date" defaultDateTimeInterval="0" defaultValueString="0" indexed="YES" syncable="YES"/>
+        <attribute name="jid" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="jidStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="nickname" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="presence" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="presenceStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="realJID" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="realJIDStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="role" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="roomJID" optional="YES" transient="YES" syncable="YES"/>
+        <attribute name="roomJIDStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="XMPPRoomMessageCoreDataStorageObject" positionX="160" positionY="192" width="128" height="240"/>
+        <element name="XMPPRoomOccupantCoreDataStorageObject" positionX="160" positionY="192" width="128" height="240"/>
+    </elements>
+</model>

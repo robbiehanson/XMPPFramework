@@ -1,0 +1,18 @@
+@subheading idna_to_unicode_8z8z
+@anchor{idna_to_unicode_8z8z}
+@deftypefun {int} {idna_to_unicode_8z8z} (const char * @var{input}, char ** @var{output}, int @var{flags})
+@var{input}: zero-terminated UTF-8 string.
+
+@var{output}: pointer to newly allocated output UTF-8 string.
+
+@var{flags}: an @code{Idna_flags} value, e.g., @code{IDNA_ALLOW_UNASSIGNED} or
+@code{IDNA_USE_STD3_ASCII_RULES}.
+
+Convert possibly ACE encoded domain name in UTF-8 format into a
+UTF-8 string.  The domain name may contain several labels,
+separated by dots.  The output buffer must be deallocated by the
+caller.
+
+@strong{Return value:} Returns @code{IDNA_SUCCESS} on success, or error code.
+@end deftypefun
+

@@ -1,0 +1,25 @@
+@subheading stringprep_utf8_nfkc_normalize
+@anchor{stringprep_utf8_nfkc_normalize}
+@deftypefun {char *} {stringprep_utf8_nfkc_normalize} (const char * @var{str}, ssize_t @var{len})
+@var{str}: a UTF-8 encoded string.
+
+@var{len}: length of @code{str}, in bytes, or -1 if @code{str} is nul-terminated.
+
+Converts a string into canonical form, standardizing
+such issues as whether a character with an accent
+is represented as a base character and combining
+accent or as a single precomposed character.
+
+The normalization mode is NFKC (ALL COMPOSE).  It standardizes
+differences that do not affect the text content, such as the
+above-mentioned accent representation. It standardizes the
+"compatibility" characters in Unicode, such as SUPERSCRIPT THREE to
+the standard forms (in this case DIGIT THREE). Formatting
+information may be lost but for most text operations such
+characters should be considered the same. It returns a result with
+composed forms rather than a maximally decomposed form.
+
+@strong{Return value:} a newly allocated string, that is the
+NFKC normalized form of @code{str}.
+@end deftypefun
+

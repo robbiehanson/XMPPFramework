@@ -1,0 +1,17 @@
+@subheading tld_default_table
+@anchor{tld_default_table}
+@deftypefun {const Tld_table *} {tld_default_table} (const char * @var{tld}, const Tld_table ** @var{overrides})
+@var{tld}: TLD name (e.g. "com") as zero terminated ASCII byte string.
+
+@var{overrides}: Additional zero terminated array of @code{Tld_table}
+info-structures for TLDs, or @code{NULL} to only use library deault
+tables.
+
+Get the TLD table for a named TLD, using the internal defaults,
+possibly overrided by the (optional) supplied tables.
+
+@strong{Return value:} Return structure corresponding to TLD @code{tld_str}, first
+looking through @code{overrides} then thru built-in list, or @code{NULL} if
+no such structure found.
+@end deftypefun
+

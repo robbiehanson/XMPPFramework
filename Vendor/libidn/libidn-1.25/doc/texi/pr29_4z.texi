@@ -1,0 +1,15 @@
+@subheading pr29_4z
+@anchor{pr29_4z}
+@deftypefun {int} {pr29_4z} (const uint32_t * @var{in})
+@var{in}: zero terminated array of Unicode code points.
+
+Check the input to see if it may be normalized into different
+strings by different NFKC implementations, due to an anomaly in the
+NFKC specifications.
+
+@strong{Return value:} Returns the @code{Pr29_rc} value @code{PR29_SUCCESS} on success,
+and @code{PR29_PROBLEM} if the input sequence is a "problem sequence"
+(i.e., may be normalized into different strings by different
+implementations).
+@end deftypefun
+

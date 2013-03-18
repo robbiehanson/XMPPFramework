@@ -1,0 +1,48 @@
+@subheading pr29_4
+@anchor{pr29_4}
+@deftypefun {int} {pr29_4} (const uint32_t * @var{in}, size_t @var{len})
+@var{in}: input array with unicode code points.
+
+@var{len}: length of input array with unicode code points.
+
+Check the input to see if it may be normalized into different
+strings by different NFKC implementations, due to an anomaly in the
+NFKC specifications.
+
+@strong{Return value:} Returns the @code{Pr29_rc} value @code{PR29_SUCCESS} on success,
+and @code{PR29_PROBLEM} if the input sequence is a "problem sequence"
+(i.e., may be normalized into different strings by different
+implementations).
+@end deftypefun
+
+@subheading pr29_4z
+@anchor{pr29_4z}
+@deftypefun {int} {pr29_4z} (const uint32_t * @var{in})
+@var{in}: zero terminated array of Unicode code points.
+
+Check the input to see if it may be normalized into different
+strings by different NFKC implementations, due to an anomaly in the
+NFKC specifications.
+
+@strong{Return value:} Returns the @code{Pr29_rc} value @code{PR29_SUCCESS} on success,
+and @code{PR29_PROBLEM} if the input sequence is a "problem sequence"
+(i.e., may be normalized into different strings by different
+implementations).
+@end deftypefun
+
+@subheading pr29_8z
+@anchor{pr29_8z}
+@deftypefun {int} {pr29_8z} (const char * @var{in})
+@var{in}: zero terminated input UTF-8 string.
+
+Check the input to see if it may be normalized into different
+strings by different NFKC implementations, due to an anomaly in the
+NFKC specifications.
+
+@strong{Return value:} Returns the @code{Pr29_rc} value @code{PR29_SUCCESS} on success,
+and @code{PR29_PROBLEM} if the input sequence is a "problem sequence"
+(i.e., may be normalized into different strings by different
+implementations), or @code{PR29_STRINGPREP_ERROR} if there was a
+problem converting the string from UTF-8 to UCS-4.
+@end deftypefun
+
