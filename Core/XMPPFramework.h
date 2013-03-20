@@ -52,7 +52,7 @@
 //#import "XMPPvCardTempModule.h"
 //#import "XMPPvCardCoreDataStorage.h"
 //
-//#import "XMPPPubSub.h"
+#import "XMPPPubSub.h"
 //
 //#import "TURNSocket.h"
 //
