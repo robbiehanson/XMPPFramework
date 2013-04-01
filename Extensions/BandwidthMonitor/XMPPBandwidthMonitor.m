@@ -132,7 +132,7 @@
 		smoothedAverageIncomingBandwidth = 0.0;
 		
 		dispatch_source_cancel(timer);
-		dispatch_release(timer);
+		//dispatch_release(timer);
 		timer = NULL;
 	}
 }
