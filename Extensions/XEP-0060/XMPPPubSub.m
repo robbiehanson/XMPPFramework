@@ -305,6 +305,7 @@
 	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
 	NSXMLElement *create = [NSXMLElement elementWithName:@"create"];
 	[create addAttributeWithName:@"node" stringValue:node];
+    [ps addChild:create];
 
 	if (options != nil && [options count] > 0)
 	{
@@ -327,9 +328,9 @@
 		{
 			f = [NSXMLElement elementWithName:@"field"];
 			[f addAttributeWithName:@"var"
-			            stringValue:[NSString stringWithFormat:@"pubsub#%@", [options valueForKey:item]]];
+			            stringValue:[NSString stringWithFormat:@"pubsub#%@", item]];
 			v = [NSXMLElement elementWithName:@"value"];
-			[v setStringValue:item];
+			[v setStringValue:[options valueForKey:item]];
 			[f addChild:v];
 			[x addChild:f];
 		}
@@ -339,7 +340,6 @@
 
 	}
 
-	[ps addChild:create];
 	[iq addChild:ps];
 
 	[xmppStream sendElement:iq];
