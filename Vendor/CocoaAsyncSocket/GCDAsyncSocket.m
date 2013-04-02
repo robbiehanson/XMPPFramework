@@ -32,33 +32,6 @@
 // For more information see: https://github.com/robbiehanson/CocoaAsyncSocket/wiki/ARC
 #endif
 
-/**
- * Does ARC support support GCD objects?
- * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
-**/
-#if TARGET_OS_IPHONE
-
-  // Compiling for iOS
-
-  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else                                         // iOS 5.X or earlier
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
-  #endif
-
-#else
-
-  // Compiling for Mac OS X
-
-  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
-  #endif
-
-#endif
-
-
 #if 0
 
 // Logging Enabled - See log level below
@@ -1000,7 +973,7 @@ enum GCDAsyncSocketConfig
 		delegate = aDelegate;
 		delegateQueue = dq;
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		if (dq) dispatch_retain(dq);
 		#endif
 		
@@ -1018,7 +991,7 @@ enum GCDAsyncSocketConfig
 			         @"The given socketQueue parameter must not be a concurrent queue.");
 			
 			socketQueue = sq;
-			#if NEEDS_DISPATCH_RETAIN_RELEASE
+			#if !OS_OBJECT_USE_OBJC
 			dispatch_retain(sq);
 			#endif
 		}
@@ -1055,12 +1028,12 @@ enum GCDAsyncSocketConfig
 	
 	delegate = nil;
 	
-	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	#if !OS_OBJECT_USE_OBJC
 	if (delegateQueue) dispatch_release(delegateQueue);
 	#endif
 	delegateQueue = NULL;
 	
-	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	#if !OS_OBJECT_USE_OBJC
 	if (socketQueue) dispatch_release(socketQueue);
 	#endif
 	socketQueue = NULL;
@@ -1139,7 +1112,7 @@ enum GCDAsyncSocketConfig
 {
 	dispatch_block_t block = ^{
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		if (delegateQueue) dispatch_release(delegateQueue);
 		if (newDelegateQueue) dispatch_retain(newDelegateQueue);
 		#endif
@@ -1196,7 +1169,7 @@ enum GCDAsyncSocketConfig
 		
 		delegate = newDelegate;
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		if (delegateQueue) dispatch_release(delegateQueue);
 		if (newDelegateQueue) dispatch_retain(newDelegateQueue);
 		#endif
@@ -1640,7 +1613,7 @@ enum GCDAsyncSocketConfig
 			
 			dispatch_source_set_cancel_handler(accept4Source, ^{
 				
-				#if NEEDS_DISPATCH_RETAIN_RELEASE
+				#if !OS_OBJECT_USE_OBJC
 				LogVerbose(@"dispatch_release(accept4Source)");
 				dispatch_release(acceptSource);
 				#endif
@@ -1674,7 +1647,7 @@ enum GCDAsyncSocketConfig
 			
 			dispatch_source_set_cancel_handler(accept6Source, ^{
 				
-				#if NEEDS_DISPATCH_RETAIN_RELEASE
+				#if !OS_OBJECT_USE_OBJC
 				LogVerbose(@"dispatch_release(accept6Source)");
 				dispatch_release(acceptSource);
 				#endif
@@ -1811,7 +1784,7 @@ enum GCDAsyncSocketConfig
 			}
 			
 			// Release the socket queue returned from the delegate (it was retained by acceptedSocket)
-			#if NEEDS_DISPATCH_RETAIN_RELEASE
+			#if !OS_OBJECT_USE_OBJC
 			if (childSocketQueue) dispatch_release(childSocketQueue);
 			#endif
 			
@@ -2566,7 +2539,7 @@ enum GCDAsyncSocketConfig
 			[self doConnectTimeout];
 		}});
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_source_t theConnectTimer = connectTimer;
 		dispatch_source_set_cancel_handler(connectTimer, ^{
 			LogVerbose(@"dispatch_release(connectTimer)");
@@ -3633,7 +3606,7 @@ enum GCDAsyncSocketConfig
 	
 	__block int socketFDRefCount = 2;
 	
-	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	#if !OS_OBJECT_USE_OBJC
 	dispatch_source_t theReadSource = readSource;
 	dispatch_source_t theWriteSource = writeSource;
 	#endif
@@ -3642,7 +3615,7 @@ enum GCDAsyncSocketConfig
 		
 		LogVerbose(@"readCancelBlock");
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		LogVerbose(@"dispatch_release(readSource)");
 		dispatch_release(theReadSource);
 		#endif
@@ -3658,7 +3631,7 @@ enum GCDAsyncSocketConfig
 		
 		LogVerbose(@"writeCancelBlock");
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		LogVerbose(@"dispatch_release(writeSource)");
 		dispatch_release(theWriteSource);
 		#endif
@@ -5069,7 +5042,7 @@ enum GCDAsyncSocketConfig
 			[self doReadTimeout];
 		}});
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_source_t theReadTimer = readTimer;
 		dispatch_source_set_cancel_handler(readTimer, ^{
 			LogVerbose(@"dispatch_release(readTimer)");
@@ -5699,7 +5672,7 @@ enum GCDAsyncSocketConfig
 			[self doWriteTimeout];
 		}});
 		
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_source_t theWriteTimer = writeTimer;
 		dispatch_source_set_cancel_handler(writeTimer, ^{
 			LogVerbose(@"dispatch_release(writeTimer)");
