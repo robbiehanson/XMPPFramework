@@ -125,7 +125,6 @@
 
 @implementation DDTTYLogger
 
-static BOOL isaTTY;
 static BOOL isaColorTTY;
 static BOOL isaColor256TTY;
 static BOOL isaXcodeColorTTY;
@@ -770,8 +769,6 @@ static DDTTYLogger *sharedInstance;
 	{
 		initialized = YES;
 		
-		isaTTY = isatty(STDERR_FILENO);
-		
 		char *term = getenv("TERM");
 		if (term)
 		{
@@ -822,42 +819,39 @@ static DDTTYLogger *sharedInstance;
 	
 	if ((self = [super init]))
 	{
-		if (isaTTY)
-		{
-			calendar = [NSCalendar autoupdatingCurrentCalendar];
-			
-			calendarUnitFlags = 0;
-			calendarUnitFlags |= NSYearCalendarUnit;
-			calendarUnitFlags |= NSMonthCalendarUnit;
-			calendarUnitFlags |= NSDayCalendarUnit;
-			calendarUnitFlags |= NSHourCalendarUnit;
-			calendarUnitFlags |= NSMinuteCalendarUnit;
-			calendarUnitFlags |= NSSecondCalendarUnit;
-			
-			// Initialze 'app' variable (char *)
-			
-			appName = [[NSProcessInfo processInfo] processName];
-			
-			appLen = [appName lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-			app = (char *)malloc(appLen + 1);
-			
-			[appName getCString:app maxLength:(appLen+1) encoding:NSUTF8StringEncoding];
-			
-			// Initialize 'pid' variable (char *)
-			
-			processID = [NSString stringWithFormat:@"%i", (int)getpid()];
-			
-			pidLen = [processID lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-			pid = (char *)malloc(pidLen + 1);
-			
-			[processID getCString:pid maxLength:(pidLen+1) encoding:NSUTF8StringEncoding];
-			
-			// Initialize color stuff
-			
-			colorsEnabled = NO;
-			colorProfilesArray = [[NSMutableArray alloc] initWithCapacity:8];
-			colorProfilesDict = [[NSMutableDictionary alloc] initWithCapacity:8];
-		}
+		calendar = [NSCalendar autoupdatingCurrentCalendar];
+		
+		calendarUnitFlags = 0;
+		calendarUnitFlags |= NSYearCalendarUnit;
+		calendarUnitFlags |= NSMonthCalendarUnit;
+		calendarUnitFlags |= NSDayCalendarUnit;
+		calendarUnitFlags |= NSHourCalendarUnit;
+		calendarUnitFlags |= NSMinuteCalendarUnit;
+		calendarUnitFlags |= NSSecondCalendarUnit;
+		
+		// Initialze 'app' variable (char *)
+		
+		appName = [[NSProcessInfo processInfo] processName];
+		
+		appLen = [appName lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+		app = (char *)malloc(appLen + 1);
+		
+		[appName getCString:app maxLength:(appLen+1) encoding:NSUTF8StringEncoding];
+		
+		// Initialize 'pid' variable (char *)
+		
+		processID = [NSString stringWithFormat:@"%i", (int)getpid()];
+		
+		pidLen = [processID lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+		pid = (char *)malloc(pidLen + 1);
+		
+		[processID getCString:pid maxLength:(pidLen+1) encoding:NSUTF8StringEncoding];
+		
+		// Initialize color stuff
+		
+		colorsEnabled = NO;
+		colorProfilesArray = [[NSMutableArray alloc] initWithCapacity:8];
+		colorProfilesDict = [[NSMutableDictionary alloc] initWithCapacity:8];
 	}
 	return self;
 }
@@ -871,28 +865,29 @@ static DDTTYLogger *sharedInstance;
 - (BOOL)colorsEnabled
 {
 	// The design of this method is taken from the DDAbstractLogger implementation.
-	// For documentation please refer to the DDAbstractLogger implementation.
+	// For extensive documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
-	{
-		return colorsEnabled;
-	}
-	else
-	{
-		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
-		
-		__block BOOL result;
-		
-		dispatch_sync(globalLoggingQueue, ^{
-			dispatch_sync(loggerQueue, ^{
-				result = colorsEnabled;
-			});
+	// Note: The internal implementation MUST access the colorsEnabled variable directly,
+	// This method is designed explicitly for external access.
+	//
+	// Using "self." syntax to go through this method will cause immediate deadlock.
+	// This is the intended result. Fix it by accessing the ivar directly.
+	// Great strides have been take to ensure this is safe to do. Plus it's MUCH faster.
+	
+	NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
+	NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
+	
+	dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+	
+	__block BOOL result;
+	
+	dispatch_sync(globalLoggingQueue, ^{
+		dispatch_sync(loggerQueue, ^{
+			result = colorsEnabled;
 		});
-		
-		return result;
-	}
+	});
+	
+	return result;
 }
 
 - (void)setColorsEnabled:(BOOL)newColorsEnabled
@@ -906,23 +901,24 @@ static DDTTYLogger *sharedInstance;
 		}
 	}};
 	
-	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
-	// For documentation please refer to the DDAbstractLogger implementation.
+	// The design of this method is taken from the DDAbstractLogger implementation.
+	// For extensive documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
-	{
-		block();
-	}
-	else
-	{
-		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
-		
-		dispatch_async(globalLoggingQueue, ^{
-			dispatch_async(loggerQueue, block);
-		});
-	}
+	// Note: The internal implementation MUST access the colorsEnabled variable directly,
+	// This method is designed explicitly for external access.
+	//
+	// Using "self." syntax to go through this method will cause immediate deadlock.
+	// This is the intended result. Fix it by accessing the ivar directly.
+	// Great strides have been take to ensure this is safe to do. Plus it's MUCH faster.
+	
+	NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
+	NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
+	
+	dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+	
+	dispatch_async(globalLoggingQueue, ^{
+		dispatch_async(loggerQueue, block);
+	});
 }
 
 - (void)setForegroundColor:(OSColor *)txtColor backgroundColor:(OSColor *)bgColor forFlag:(int)mask
@@ -962,15 +958,14 @@ static DDTTYLogger *sharedInstance;
 	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
 	// For documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if ([self isOnInternalLoggerQueue])
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
@@ -998,15 +993,14 @@ static DDTTYLogger *sharedInstance;
 	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
 	// For documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if ([self isOnInternalLoggerQueue])
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
@@ -1043,15 +1037,14 @@ static DDTTYLogger *sharedInstance;
 	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
 	// For documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if ([self isOnInternalLoggerQueue])
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
@@ -1071,15 +1064,14 @@ static DDTTYLogger *sharedInstance;
 	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
 	// For documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if ([self isOnInternalLoggerQueue])
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
@@ -1097,15 +1089,14 @@ static DDTTYLogger *sharedInstance;
 	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
 	// For documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if ([self isOnInternalLoggerQueue])
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
@@ -1123,15 +1114,14 @@ static DDTTYLogger *sharedInstance;
 	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
 	// For documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if ([self isOnInternalLoggerQueue])
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
@@ -1150,15 +1140,14 @@ static DDTTYLogger *sharedInstance;
 	// The design of the setter logic below is taken from the DDAbstractLogger implementation.
 	// For documentation please refer to the DDAbstractLogger implementation.
 	
-	dispatch_queue_t currentQueue = dispatch_get_current_queue();
-	if (currentQueue == loggerQueue)
+	if ([self isOnInternalLoggerQueue])
 	{
 		block();
 	}
 	else
 	{
 		dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
-		NSAssert(currentQueue != globalLoggingQueue, @"Core architecture requirement failure");
+		NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 		
 		dispatch_async(globalLoggingQueue, ^{
 			dispatch_async(loggerQueue, block);
@@ -1168,8 +1157,6 @@ static DDTTYLogger *sharedInstance;
 
 - (void)logMessage:(DDLogMessage *)logMessage
 {
-	if (!isaTTY) return;
-	
 	NSString *logMsg = logMessage->logMsg;
 	BOOL isFormatted = NO;
 	
@@ -1223,32 +1210,38 @@ static DDTTYLogger *sharedInstance;
 		{
 			// The log message has already been formatted.
 			
-			struct iovec v[4];
+			struct iovec v[5];
 			
 			if (colorProfile)
 			{
 				v[0].iov_base = colorProfile->fgCode;
 				v[0].iov_len = colorProfile->fgCodeLen;
-				
-				v[3].iov_base = colorProfile->resetCode;
-				v[3].iov_len = colorProfile->resetCodeLen;
+
+				v[1].iov_base = colorProfile->bgCode;
+				v[1].iov_len = colorProfile->bgCodeLen;
+
+				v[4].iov_base = colorProfile->resetCode;
+				v[4].iov_len = colorProfile->resetCodeLen;
 			}
 			else
 			{
 				v[0].iov_base = "";
 				v[0].iov_len = 0;
 				
-				v[3].iov_base = "";
-				v[3].iov_len = 0;
+				v[1].iov_base = "";
+				v[1].iov_len = 0;
+				
+				v[4].iov_base = "";
+				v[4].iov_len = 0;
 			}
 			
-			v[1].iov_base = (char *)msg;
-			v[1].iov_len = msgLen;
+			v[2].iov_base = (char *)msg;
+			v[2].iov_len = msgLen;
 			
-			v[2].iov_base = "\n";
-			v[2].iov_len = (msg[msgLen] == '\n') ? 0 : 1;
+			v[3].iov_base = "\n";
+			v[3].iov_len = (msg[msgLen] == '\n') ? 0 : 1;
 			
-			writev(STDERR_FILENO, v, 4);
+			writev(STDERR_FILENO, v, 5);
 		}
 		else
 		{
@@ -1290,56 +1283,62 @@ static DDTTYLogger *sharedInstance;
 			
 			// Here is our format: "%s %s[%i:%s] %s", timestamp, appName, processID, threadID, logMsg
 			
-			struct iovec v[12];
+			struct iovec v[13];
 			
 			if (colorProfile)
 			{
 				v[0].iov_base = colorProfile->fgCode;
 				v[0].iov_len = colorProfile->fgCodeLen;
-				
-				v[11].iov_base = colorProfile->resetCode;
-				v[11].iov_len = colorProfile->resetCodeLen;
+
+				v[1].iov_base = colorProfile->bgCode;
+				v[1].iov_len = colorProfile->bgCodeLen;
+
+				v[12].iov_base = colorProfile->resetCode;
+				v[12].iov_len = colorProfile->resetCodeLen;
 			}
 			else
 			{
 				v[0].iov_base = "";
 				v[0].iov_len = 0;
-				
-				v[11].iov_base = "";
-				v[11].iov_len = 0;
+
+				v[1].iov_base = "";
+				v[1].iov_len = 0;
+
+				v[12].iov_base = "";
+				v[12].iov_len = 0;
 			}
 			
-			v[1].iov_base = ts;
-			v[1].iov_len = tsLen;
+			v[2].iov_base = ts;
+			v[2].iov_len = tsLen;
 			
-			v[2].iov_base = " ";
-			v[2].iov_len = 1;
+			v[3].iov_base = " ";
+			v[3].iov_len = 1;
 			
-			v[3].iov_base = app;
-			v[3].iov_len = appLen;
+			v[4].iov_base = app;
+			v[4].iov_len = appLen;
 			
-			v[4].iov_base = "[";
-			v[4].iov_len = 1;
+			v[5].iov_base = "[";
+			v[5].iov_len = 1;
 			
-			v[5].iov_base = pid;
-			v[5].iov_len = pidLen;
+			v[6].iov_base = pid;
+			v[6].iov_len = pidLen;
 			
-			v[6].iov_base = ":";
-			v[6].iov_len = 1;
+			v[7].iov_base = ":";
+			v[7].iov_len = 1;
 			
-			v[7].iov_base = tid;
-			v[7].iov_len = MIN((size_t)8, tidLen); // snprintf doesn't return what you might think
+			v[8].iov_base = tid;
+			v[8].iov_len = MIN((size_t)8, tidLen); // snprintf doesn't return what you might think
 			
-			v[8].iov_base = "] ";
-			v[8].iov_len = 2;
+			v[9].iov_base = "] ";
+			v[9].iov_len = 2;
 			
-			v[9].iov_base = (char *)msg;
-			v[9].iov_len = msgLen;
+			v[10].iov_base = (char *)msg;
+			v[10].iov_len = msgLen;
 			
-			v[10].iov_base = "\n";
-			v[10].iov_len = (msg[msgLen] == '\n') ? 0 : 1;
+			v[11].iov_base = "\n";
+			v[11].iov_len = (msg[msgLen] == '\n') ? 0 : 1;
 			
-			writev(STDERR_FILENO, v, 12);
+			writev(STDERR_FILENO, v, 13);
 		}
 		
 		if (!useStack) {
