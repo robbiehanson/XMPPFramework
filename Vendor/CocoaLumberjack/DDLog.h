@@ -252,7 +252,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 /**
  * The THIS_METHOD macro gives you the name of the current objective-c method.
  * 
- * For example: DDLogWarn(@"%@ - Requires non-nil strings") -> @"setMake:model: requires non-nil strings"
+ * For example: DDLogWarn(@"%@ - Requires non-nil strings", THIS_METHOD) -> @"setMake:model: requires non-nil strings"
  * 
  * Note: This does NOT work in straight C functions (non objective-c).
  * Instead you should use the predefined __FUNCTION__ macro.
@@ -489,7 +489,7 @@ NSString *DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 
 enum {
 	DDLogMessageCopyFile     = 1 << 0,
-	DDLogMessageCopyFunction = 1 << 1,
+	DDLogMessageCopyFunction = 1 << 1
 };
 typedef int DDLogMessageOptions;
 
@@ -593,5 +593,9 @@ typedef int DDLogMessageOptions;
 
 - (id <DDLogFormatter>)logFormatter;
 - (void)setLogFormatter:(id <DDLogFormatter>)formatter;
+
+// For thread-safety assertions
+- (BOOL)isOnGlobalLoggingQueue;
+- (BOOL)isOnInternalLoggerQueue;
 
 @end
