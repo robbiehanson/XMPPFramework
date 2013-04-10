@@ -672,9 +672,10 @@
 	XMPPLogTrace();
 	AssertParentQueue();
 	
-	XMPPJID *msgJID = [message from];
+	XMPPJID *myRoomJID = room.myRoomJID;
+	XMPPJID *messageJID = [message from];
 	
-	if ([room.myRoomJID isEqualToJID:msgJID])
+	if ([myRoomJID isEqualToJID:messageJID])
 	{
 		if (![message wasDelayed])
 		{
