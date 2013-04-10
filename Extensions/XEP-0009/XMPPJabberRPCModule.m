@@ -110,7 +110,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 		result = defaultTimeout;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -125,7 +125,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 		defaultTimeout = newDefaultTimeout;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);

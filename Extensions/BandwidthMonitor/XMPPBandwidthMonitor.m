@@ -33,7 +33,7 @@
 		result = smoothedAverageOutgoingBandwidth;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -49,7 +49,7 @@
 		result = smoothedAverageIncomingBandwidth;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -161,7 +161,7 @@
 		[super deactivate];
 	}};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);

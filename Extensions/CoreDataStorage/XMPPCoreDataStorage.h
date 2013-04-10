@@ -56,7 +56,7 @@
 	NSUInteger saveCount;
 	
 	dispatch_queue_t storageQueue;
-	const char *storageQueueTag;
+	void *storageQueueTag;
 }
 
 /**

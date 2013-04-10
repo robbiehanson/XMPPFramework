@@ -20,7 +20,7 @@
 #endif
 
 #define AssertPrivateQueue() \
-        NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Private method: MUST run on storageQueue");
+        NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on storageQueue");
 
 
 @implementation XMPPRosterCoreDataStorage

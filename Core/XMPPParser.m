@@ -40,7 +40,7 @@
 	dispatch_queue_t delegateQueue;
 	
 	dispatch_queue_t parserQueue;
-	const char *xmppParserQueueTag;
+	void *xmppParserQueueTag;
 	
 	BOOL hasReportedRoot;
 	unsigned depth;
@@ -704,7 +704,6 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 			dispatch_retain(delegateQueue);
 		#endif
 
-		xmppParserQueueTag = "xmppParserQueueTag";
 		if (pq) {
 			parserQueue = pq;
 			
@@ -715,7 +714,9 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		else {
 			parserQueue = dispatch_queue_create("xmpp.parser", NULL);
 		}
-		dispatch_queue_set_specific(parserQueue, xmppParserQueueTag, (void *)xmppParserQueueTag, NULL);
+		
+		xmppParserQueueTag = &xmppParserQueueTag;
+		dispatch_queue_set_specific(parserQueue, xmppParserQueueTag, xmppParserQueueTag, NULL);
 		
 		hasReportedRoot = NO;
 		depth  = 0;
@@ -788,7 +789,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		delegateQueue = newDelegateQueue;
 	};
 	
-	if (dispatch_get_specific(xmppParserQueueTag) == xmppParserQueueTag)
+	if (dispatch_get_specific(xmppParserQueueTag))
 		block();
 	else
 		dispatch_async(parserQueue, block);
@@ -842,7 +843,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		}
 	}};
 	
-	if (dispatch_get_specific(xmppParserQueueTag) == xmppParserQueueTag)
+	if (dispatch_get_specific(xmppParserQueueTag))
 		block();
 	else
 		dispatch_async(parserQueue, block);

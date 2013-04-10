@@ -55,7 +55,7 @@
 		
 	}};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);

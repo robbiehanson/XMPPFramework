@@ -117,8 +117,7 @@
 		}
 	}};
 
-	const char *xmppQueueTag = self.xmppQueueTag;
-	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
+	if (dispatch_get_specific(self.xmppQueueTag))
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);

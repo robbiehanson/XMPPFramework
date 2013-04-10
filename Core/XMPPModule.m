@@ -30,7 +30,6 @@
 {
 	if ((self = [super init]))
 	{
-		moduleQueueTag = "moduleQueueTag";
 		if (queue)
 		{
 			moduleQueue = queue;
@@ -43,7 +42,9 @@
 			const char *moduleQueueName = [[self moduleName] UTF8String];
 			moduleQueue = dispatch_queue_create(moduleQueueName, NULL);
 		}
-		dispatch_queue_set_specific(moduleQueue, moduleQueueTag, (void *)moduleQueueTag, NULL);
+		
+		moduleQueueTag = &moduleQueueTag;
+		dispatch_queue_set_specific(moduleQueue, moduleQueueTag, moduleQueueTag, NULL);
 		
 		multicastDelegate = [[GCDMulticastDelegate alloc] init];
 	}
@@ -81,7 +82,7 @@
 		}
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -110,7 +111,7 @@
 		}
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -121,9 +122,14 @@
 	return moduleQueue;
 }
 
+- (void *)moduleQueueTag
+{
+	return moduleQueueTag;
+}
+
 - (XMPPStream *)xmppStream
 {
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return xmppStream;
 	}
@@ -147,7 +153,7 @@
 		[multicastDelegate addDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -159,7 +165,7 @@
 		[multicastDelegate removeDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else if (synchronously)
 		dispatch_sync(moduleQueue, block);
