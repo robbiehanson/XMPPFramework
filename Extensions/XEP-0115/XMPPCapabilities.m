@@ -1516,8 +1516,15 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		else if (myCapabilitiesC)
 		{
 			NSXMLElement *c = [myCapabilitiesC copy];
-			
-			[presence addChild:c];
+			NSXMLElement *oldC = [presence elementForName:c.name xmlns:c.xmlns];
+			if (oldC)
+			{
+				[presence replaceChildAtIndex:[presence.children indexOfObject:oldC] withNode:c];
+			}
+			else
+			{
+				[presence addChild:c];
+			}
 		}
 	}
 	
