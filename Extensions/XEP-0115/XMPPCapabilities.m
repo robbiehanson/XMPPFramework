@@ -1519,11 +1519,12 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			NSXMLElement *oldC = [presence elementForName:c.name xmlns:c.xmlns];
 			if (oldC)
 			{
-				[presence replaceChildAtIndex:[presence.children indexOfObject:oldC] withNode:c];
+                [presence removeChildAtIndex:[presence.children indexOfObject:oldC]];
+                [presence addChild:c];
 			}
 			else
 			{
-				[presence addChild:c];
+                [presence addChild:c];
 			}
 		}
 	}
