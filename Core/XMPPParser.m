@@ -20,7 +20,7 @@
 
 #define CHECK_FOR_NULL(value)                       \
     do {                                            \
-        if (value == NULL) {                         \
+        if (value == NULL) {                        \
             xmpp_xmlAbortDueToMemoryShortage(ctxt); \
             return;                                 \
         }                                           \
@@ -29,7 +29,6 @@
 #if !TARGET_OS_IPHONE
   static void xmpp_recursiveAddChild(NSXMLElement *parent, xmlNodePtr childNode);
 #endif
-
 
 @implementation XMPPParser
 {
@@ -41,6 +40,7 @@
 	dispatch_queue_t delegateQueue;
 	
 	dispatch_queue_t parserQueue;
+	const char *xmppParserQueueTag;
 	
 	BOOL hasReportedRoot;
 	unsigned depth;
@@ -703,7 +703,8 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		if (delegateQueue)
 			dispatch_retain(delegateQueue);
 		#endif
-		
+
+		xmppParserQueueTag = "xmppParserQueueTag";
 		if (pq) {
 			parserQueue = pq;
 			
@@ -714,6 +715,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		else {
 			parserQueue = dispatch_queue_create("xmpp.parser", NULL);
 		}
+		dispatch_queue_set_specific(parserQueue, xmppParserQueueTag, (void *)xmppParserQueueTag, NULL);
 		
 		hasReportedRoot = NO;
 		depth  = 0;
@@ -786,7 +788,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		delegateQueue = newDelegateQueue;
 	};
 	
-	if (dispatch_get_current_queue() == parserQueue)
+	if (dispatch_get_specific(xmppParserQueueTag) == xmppParserQueueTag)
 		block();
 	else
 		dispatch_async(parserQueue, block);
@@ -840,7 +842,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == parserQueue)
+	if (dispatch_get_specific(xmppParserQueueTag) == xmppParserQueueTag)
 		block();
 	else
 		dispatch_async(parserQueue, block);

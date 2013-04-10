@@ -73,7 +73,7 @@
 		
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -94,7 +94,7 @@
 
 - (NSTimeInterval)pingInterval
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return pingInterval;
 	}
@@ -135,7 +135,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -143,7 +143,7 @@
 
 - (NSTimeInterval)pingTimeout
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return pingTimeout;
 	}
@@ -168,7 +168,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -176,7 +176,7 @@
 
 - (XMPPJID *)targetJID
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return targetJID;
 	}
@@ -203,7 +203,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -211,7 +211,7 @@
 
 - (NSTimeInterval)lastReceiveTime
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return lastReceiveTime;
 	}

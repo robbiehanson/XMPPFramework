@@ -78,7 +78,7 @@
 		[super deactivate];
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -101,7 +101,7 @@
 
 - (NSTimeInterval)recalibrationInterval
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return recalibrationInterval;
 	}
@@ -142,7 +142,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -150,7 +150,7 @@
 
 - (XMPPJID *)targetJID
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return targetJID;
 	}
@@ -175,7 +175,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -183,7 +183,7 @@
 
 - (NSTimeInterval)timeDifference
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return timeDifference;
 	}
@@ -201,7 +201,7 @@
 
 - (dispatch_time_t)lastCalibrationTime
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return lastCalibrationTime;
 	}

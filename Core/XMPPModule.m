@@ -13,7 +13,6 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-
 @implementation XMPPModule
 
 /**
@@ -31,6 +30,7 @@
 {
 	if ((self = [super init]))
 	{
+		moduleQueueTag = "moduleQueueTag";
 		if (queue)
 		{
 			moduleQueue = queue;
@@ -43,6 +43,7 @@
 			const char *moduleQueueName = [[self moduleName] UTF8String];
 			moduleQueue = dispatch_queue_create(moduleQueueName, NULL);
 		}
+		dispatch_queue_set_specific(moduleQueue, moduleQueueTag, (void *)moduleQueueTag, NULL);
 		
 		multicastDelegate = [[GCDMulticastDelegate alloc] init];
 	}
@@ -80,7 +81,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -109,7 +110,7 @@
 		}
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -122,7 +123,7 @@
 
 - (XMPPStream *)xmppStream
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 	{
 		return xmppStream;
 	}
@@ -146,7 +147,7 @@
 		[multicastDelegate addDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -158,7 +159,7 @@
 		[multicastDelegate removeDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else if (synchronously)
 		dispatch_sync(moduleQueue, block);
