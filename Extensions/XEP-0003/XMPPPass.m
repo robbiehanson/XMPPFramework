@@ -135,7 +135,7 @@ static NSMutableArray *proxyServer;
         
     };
     
-    if (dispatch_get_current_queue() == moduleQueue)
+    if (dispatch_get_specific(moduleQueueTag))
         block();
     else
         dispatch_sync(moduleQueue, block);
