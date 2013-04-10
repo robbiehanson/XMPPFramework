@@ -954,10 +954,10 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 {
 	XMPPLogTrace();
 	
-	XMPPJID *roomJID = room.roomJID;
+	XMPPJID *myRoomJID = room.myRoomJID;
 	XMPPJID *messageJID = [message from];
 	
-	if ([roomJID isEqualToJID:messageJID])
+	if ([myRoomJID isEqualToJID:messageJID])
 	{
 		if (![message wasDelayed])
 		{
