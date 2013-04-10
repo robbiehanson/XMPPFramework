@@ -33,7 +33,7 @@
 		result = smoothedAverageOutgoingBandwidth;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -49,7 +49,7 @@
 		result = smoothedAverageIncomingBandwidth;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -132,7 +132,9 @@
 		smoothedAverageIncomingBandwidth = 0.0;
 		
 		dispatch_source_cancel(timer);
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_release(timer);
+		#endif
 		timer = NULL;
 	}
 }
@@ -159,7 +161,7 @@
 		[super deactivate];
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);

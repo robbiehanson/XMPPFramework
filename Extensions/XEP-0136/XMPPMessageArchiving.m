@@ -105,7 +105,7 @@
 		result = clientSideMessageArchivingOnly;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -119,7 +119,7 @@
 		clientSideMessageArchivingOnly = flag;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -134,7 +134,7 @@
 		result = [preferences copy];
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -164,7 +164,7 @@
 		//  - Send new pref to server (if changed)
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);

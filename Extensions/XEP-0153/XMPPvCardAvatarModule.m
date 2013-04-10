@@ -127,7 +127,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -162,18 +162,23 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 	// add our photo info to the presence stanza
 	NSXMLElement *photoElement = nil;
-	NSXMLElement *xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+	NSXMLElement *xElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+
+	if (xElement) {
+		photoElement = [xElement elementForName:kXMPPvCardAvatarPhotoElement];
+	} else {
+		xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+		[presence addChild:xElement];
+	}
 
 	NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:xmppStream];
 
-	if (photoHash != nil) {
-		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
+	if (photoElement) {
+		photoElement.stringValue = photoHash;
 	} else {
-		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement];
+		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
+		[xElement addChild:photoElement];
 	}
-
-	[xElement addChild:photoElement];
-	[presence addChild:xElement];
 
 	// Question: If photoElement is nil, should we be adding xElement?
 	

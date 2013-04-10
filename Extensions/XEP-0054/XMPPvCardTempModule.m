@@ -132,7 +132,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_LEVEL_INFO; //
 		result = vCardTemp;
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -179,7 +179,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_LEVEL_INFO; //
 		                                                                  forJID:jid];
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);

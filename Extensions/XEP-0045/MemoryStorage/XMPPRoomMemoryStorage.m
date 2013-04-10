@@ -8,32 +8,6 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-/**
- * Does ARC support support GCD objects?
- * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
-**/
-#if TARGET_OS_IPHONE
-
-  // Compiling for iOS
-
-  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else                                         // iOS 5.X or earlier
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
-  #endif
-
-#else
-
-  // Compiling for Mac OS X
-
-  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
-  #endif
-
-#endif
-
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
@@ -42,10 +16,10 @@
 #endif
 
 #define AssertPrivateQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private method: MUST run on parentQueue");
 
 #define AssertParentQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private protocol method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private protocol method: MUST run on parentQueue");
 
 @interface XMPPRoomMemoryStorage ()
 {
@@ -55,6 +29,7 @@
 	__unsafe_unretained XMPPRoom *parent;
   #endif
 	dispatch_queue_t parentQueue;
+	void *parentQueueTag;
 	
 	NSMutableArray * messages;
 	NSMutableArray * occupantsArray;
@@ -101,8 +76,10 @@
 		{
 			parent = aParent;
 			parentQueue = queue;
+			parentQueueTag = &parentQueueTag;
+			dispatch_queue_set_specific(parentQueue, parentQueueTag, parentQueueTag, NULL);
 			
-			#if NEEDS_DISPATCH_RETAIN_RELEASE
+			#if !OS_OBJECT_USE_OBJC
 			dispatch_retain(parentQueue);
 			#endif
 			
@@ -120,7 +97,7 @@
 
 - (void)dealloc
 {
-	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	#if !OS_OBJECT_USE_OBJC
 	if (parentQueue)
 		dispatch_release(parentQueue);
 	#endif
@@ -468,7 +445,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [occupantsDict objectForKey:jid];
 	}
@@ -495,7 +472,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return messages;
 	}
@@ -522,7 +499,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return occupantsArray;
 	}
@@ -549,7 +526,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		[messages sortUsingSelector:@selector(compare:)];
 		return messages;
@@ -578,7 +555,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		[occupantsArray sortUsingSelector:@selector(compare:)];
 		return occupantsArray;
@@ -695,9 +672,10 @@
 	XMPPLogTrace();
 	AssertParentQueue();
 	
-	XMPPJID *msgJID = [message from];
+	XMPPJID *myRoomJID = room.myRoomJID;
+	XMPPJID *messageJID = [message from];
 	
-	if ([room.myRoomJID isEqualToJID:msgJID])
+	if ([myRoomJID isEqualToJID:messageJID])
 	{
 		if (![message wasDelayed])
 		{

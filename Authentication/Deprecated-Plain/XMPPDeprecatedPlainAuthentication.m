@@ -144,8 +144,8 @@
 			result = (plain != nil);
 		}
 	}};
-	
-	if (dispatch_get_current_queue() == self.xmppQueue)
+
+	if (dispatch_get_specific(self.xmppQueueTag))
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);

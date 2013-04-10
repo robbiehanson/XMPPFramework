@@ -115,7 +115,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 
 - (BOOL)autoRetrievePrivacyListNames
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return autoRetrievePrivacyListNames;
 	}
@@ -138,7 +138,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 		autoRetrievePrivacyListNames = flag;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -146,7 +146,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 
 - (BOOL)autoRetrievePrivacyListItems
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return autoRetrievePrivacyListItems;
 	}
@@ -169,7 +169,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 		autoRetrievePrivacyListItems = flag;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -177,7 +177,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 
 - (BOOL)autoClearPrivacyListInfo
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return autoClearPrivacyListInfo;
 	}
@@ -200,7 +200,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 		autoClearPrivacyListInfo = flag;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -260,7 +260,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 {
 	XMPPLogTrace();
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		[privacyDict removeAllObjects];
 	}
@@ -275,7 +275,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 
 - (NSArray *)listNames
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return [privacyDict allKeys];
 	}
@@ -307,7 +307,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 	// ExecuteVoidBlock(moduleQueue, block);
 	// ExecuteNonVoidBlock(moduleQueue, block, NSArray*)
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return block();
 	}
@@ -971,7 +971,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	if (timer)
 	{
 		dispatch_source_cancel(timer);
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_release(timer);
 		#endif
 		timer = NULL;

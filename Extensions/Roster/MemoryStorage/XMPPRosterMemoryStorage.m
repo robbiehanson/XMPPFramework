@@ -8,32 +8,6 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-/**
- * Does ARC support support GCD objects?
- * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
-**/
-#if TARGET_OS_IPHONE
-
-  // Compiling for iOS
-
-  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else                                         // iOS 5.X or earlier
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
-  #endif
-
-#else
-
-  // Compiling for Mac OS X
-
-  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
-  #endif
-
-#endif
-
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
@@ -42,10 +16,10 @@
 #endif
 
 #define AssertPrivateQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private method: MUST run on parentQueue");
 
 #define AssertParentQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private protocol method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private protocol method: MUST run on parentQueue");
 
 @interface XMPPRosterMemoryStorage ()
 
@@ -82,8 +56,10 @@
 		{
 			parent = aParent;
 			parentQueue = queue;
+			parentQueueTag = &parentQueueTag;
+			dispatch_queue_set_specific(parentQueue, parentQueueTag, parentQueueTag, NULL);
 			
-			#if NEEDS_DISPATCH_RETAIN_RELEASE
+			#if !OS_OBJECT_USE_OBJC
 			dispatch_retain(parentQueue);
 			#endif
 			
@@ -96,7 +72,7 @@
 
 - (void)dealloc
 {
-	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	#if !OS_OBJECT_USE_OBJC
 	if (parentQueue)
 		dispatch_release(parentQueue);
 	#endif
@@ -294,7 +270,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return myUser;
 	}
@@ -320,7 +296,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return (XMPPResourceMemoryStorageObject *)[myUser resourceForJID:myJID];
 	}
@@ -348,7 +324,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _userForJID:jid];
 	}
@@ -377,7 +353,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _resourceForJID:jid];
 	}
@@ -406,7 +382,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUsersByName];
 	}
@@ -436,7 +412,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUsersByAvailabilityName];
 	}
@@ -466,7 +442,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedAvailableUsersByName];
 	}
@@ -495,7 +471,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUnavailableUsersByName];
 	}
@@ -524,7 +500,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedUsers];
 	}
@@ -553,7 +529,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedAvailableUsers];
 	}
@@ -582,7 +558,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedUnavailableUsers];
 	}
@@ -611,7 +587,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedResources:includeResourcesForMyUserExcludingMyself];
 	}

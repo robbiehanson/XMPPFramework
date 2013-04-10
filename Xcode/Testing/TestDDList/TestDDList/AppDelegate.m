@@ -72,11 +72,26 @@
 	NSLog(@"%@: Done", NSStringFromSelector(_cmd));
 }
 
+- (void)testRemoveAllWithOneElement
+{
+	NSLog(@"%@: Start", NSStringFromSelector(_cmd));
+
+	NSString *theElement = @"theElement";
+	DDList *list = [[DDList alloc] init];
+
+	[list add:(__bridge void *)theElement];
+
+	[list removeAll:(__bridge void *)theElement];
+
+	NSLog(@"%@: Done", NSStringFromSelector(_cmd));
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
 	[self testZeroElements];
 	[self testOneElement];
 	[self testMultipleElements];
+	[self testRemoveAllWithOneElement];
 }
 
 @end

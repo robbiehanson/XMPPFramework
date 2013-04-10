@@ -12,32 +12,6 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-/**
- * Does ARC support support GCD objects?
- * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
-**/
-#if TARGET_OS_IPHONE
-
-  // Compiling for iOS
-
-  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else                                         // iOS 5.X or earlier
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
-  #endif
-
-#else
-
-  // Compiling for Mac OS X
-
-  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
-  #endif
-
-#endif
-
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
@@ -250,7 +224,11 @@ static NSMutableSet *databaseFileNames;
 - (void)commonInit
 {
 	saveThreshold = 500;
+	
 	storageQueue = dispatch_queue_create(class_getName([self class]), NULL);
+	
+	storageQueueTag = &storageQueueTag;
+	dispatch_queue_set_specific(storageQueue, storageQueueTag, storageQueueTag, NULL);
 	
 	myJidCache = [[NSMutableDictionary alloc] init];
 	
@@ -319,7 +297,7 @@ static NSMutableSet *databaseFileNames;
 
 - (NSUInteger)saveThreshold
 {
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 	{
 		return saveThreshold;
 	}
@@ -341,7 +319,7 @@ static NSMutableSet *databaseFileNames;
 		saveThreshold = newSaveThreshold;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -382,7 +360,7 @@ static NSMutableSet *databaseFileNames;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -429,7 +407,7 @@ static NSMutableSet *databaseFileNames;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -509,7 +487,7 @@ static NSMutableSet *databaseFileNames;
 		result = managedObjectModel;
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -583,7 +561,7 @@ static NSMutableSet *databaseFileNames;
 		
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -609,7 +587,7 @@ static NSMutableSet *databaseFileNames;
 	// then you need to go read the documentation for core data,
 	// specifically the section entitled "Concurrency with Core Data".
 	// 
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	// 
 	// Do NOT remove the assert statment above!
 	// Read the comments above!
@@ -654,7 +632,7 @@ static NSMutableSet *databaseFileNames;
 	// then you need to go read the documentation for core data,
 	// specifically the section entitled "Concurrency with Core Data".
 	// 
-	NSAssert(dispatch_get_current_queue() == dispatch_get_main_queue(), @"Context reserved for main thread only");
+	NSAssert([NSThread isMainThread], @"Context reserved for main thread only");
 	// 
 	// Do NOT remove the assert statment above!
 	// Read the comments above!
@@ -748,7 +726,7 @@ static NSMutableSet *databaseFileNames;
 
 - (void)maybeSave:(int32_t)currentPendingRequests
 {
-	NSAssert(dispatch_get_current_queue() == storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	
 	
 	if ([[self managedObjectContext] hasChanges])
@@ -786,7 +764,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	//
@@ -816,7 +794,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_current_queue() != storageQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	// 
@@ -844,7 +822,7 @@ static NSMutableSet *databaseFileNames;
 		[[self class] unregisterDatabaseFileName:databaseFileName];
 	}
 	
-	#if NEEDS_DISPATCH_RETAIN_RELEASE
+	#if !OS_OBJECT_USE_OBJC
 	if (storageQueue)
 		dispatch_release(storageQueue);
 	#endif

@@ -8,32 +8,6 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-/**
- * Does ARC support support GCD objects?
- * It does if the minimum deployment target is iOS 6+ or Mac OS X 10.8+
-**/
-#if TARGET_OS_IPHONE
-
-  // Compiling for iOS
-
-  #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000 // iOS 6.0 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else                                         // iOS 5.X or earlier
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1
-  #endif
-
-#else
-
-  // Compiling for Mac OS X
-
-  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080     // Mac OS X 10.8 or later
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 0
-  #else
-    #define NEEDS_DISPATCH_RETAIN_RELEASE 1     // Mac OS X 10.7 or earlier
-  #endif
-
-#endif
-
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
@@ -42,7 +16,7 @@
 #endif
 
 #define AssertPrivateQueue() \
-            NSAssert(dispatch_get_current_queue() == storageQueue, @"Private method: MUST run on storageQueue");
+            NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on storageQueue");
 
 
 @interface XMPPRoomHybridStorage ()
@@ -177,7 +151,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		result = maxMessageAge;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -245,7 +219,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -259,7 +233,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		result = deleteInterval;
 	};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -316,7 +290,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -329,7 +303,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		[pausedMessageDeletion addObject:[roomJID bareJID]];
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -343,7 +317,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		[self performDelete];
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -407,7 +381,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 	if (deleteTimer)
 	{
 		dispatch_source_cancel(deleteTimer);
-		#if NEEDS_DISPATCH_RETAIN_RELEASE
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_release(deleteTimer);
 		#endif
 		deleteTimer = NULL;
@@ -833,7 +807,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block(NO);
 	else
 		dispatch_sync(storageQueue, ^{ block(YES); });
@@ -880,7 +854,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == storageQueue)
+	if (dispatch_get_specific(storageQueueTag))
 		block(NO);
 	else
 		dispatch_sync(storageQueue, ^{ block(YES); });
