@@ -1,6 +1,12 @@
 #import "DelegateTesters.h"
 
-#define dispatch_current_queue_label() dispatch_queue_get_label(dispatch_get_current_queue())
+#define dispatch_current_queue_label() ({                                     \
+	_Pragma("clang diagnostic push");                                           \
+	_Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"");          \
+	const char *label = dispatch_queue_get_label(dispatch_get_current_queue()); \
+	_Pragma("clang diagnostic pop");                                            \
+	label;                                                                      \
+})
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -

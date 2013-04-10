@@ -124,10 +124,12 @@ static MulticastDelegateTest *sharedInstance;
 		
 		// If the semaphore has been signaled, then dispatch_semaphore_wait will return zero.
 		result = (dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW) == 0);
-		
+
+		#if !OS_OBJECT_USE_OBJC
 		dispatch_release(delGroup);
 		dispatch_release(semaphore);
-		
+		#endif
+
 		NSLog(@"%@ (Any YES -> YES, otherwise NO) = %@", NSStringFromSelector(selector), (result ? @"YES" : @"NO"));
 	}
 }

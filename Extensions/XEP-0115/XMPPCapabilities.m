@@ -195,7 +195,7 @@
 		result = autoFetchHashedCapabilities;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -209,7 +209,7 @@
 		autoFetchHashedCapabilities = flag;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -223,7 +223,7 @@
 		result = autoFetchNonHashedCapabilities;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -237,7 +237,7 @@
 		autoFetchNonHashedCapabilities = flag;
 	};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -629,7 +629,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)collectMyCapabilities
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -708,7 +708,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)continueCollectMyCapabilities:(NSXMLElement *)query
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -764,7 +764,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		[self collectMyCapabilities];
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -898,7 +898,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		
 	}};
 	
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -911,7 +911,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)handlePresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
 	
@@ -1043,7 +1043,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)handleLegacyPresenceCapabilities:(NSXMLElement *)c fromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
 	
@@ -1114,7 +1114,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)handleDiscoRequest:(XMPPIQ *)iqRequest
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1158,7 +1158,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)handleDiscoResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1248,7 +1248,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)handleDiscoErrorResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1283,7 +1283,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)maybeQueryNextJidWithHashKey:(NSString *)key dueToHashMismatch:(BOOL)hashMismatch
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1531,7 +1531,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1567,7 +1567,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid withHashKey:(NSString *)key
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1603,7 +1603,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)cancelTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1618,7 +1618,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)processTimeoutWithHashKey:(NSString *)key
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1628,7 +1628,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 - (void)processTimeoutWithJID:(XMPPJID *)jid
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
