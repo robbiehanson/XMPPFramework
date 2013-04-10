@@ -163,7 +163,7 @@ enum XMPPRosterFlags
 		result = (config & kAutoFetchRoster) ? YES : NO;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -181,7 +181,7 @@ enum XMPPRosterFlags
 			config &= ~kAutoFetchRoster;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -195,7 +195,7 @@ enum XMPPRosterFlags
 		result = (config & kAutoAcceptKnownPresenceSubscriptionRequests) ? YES : NO;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -213,7 +213,7 @@ enum XMPPRosterFlags
 			config &= ~kAutoAcceptKnownPresenceSubscriptionRequests;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -227,7 +227,7 @@ enum XMPPRosterFlags
 		result = (config & kRosterlessOperation) ? YES : NO;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -245,7 +245,7 @@ enum XMPPRosterFlags
 			config &= ~kRosterlessOperation;
 	};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -257,14 +257,14 @@ enum XMPPRosterFlags
 
 - (BOOL)requestedRoster
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
 	
 	return (flags & kRequestedRoster) ? YES : NO;
 }
 
 - (void)setRequestedRoster:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
 	
 	if (flag)
 		flags |= kRequestedRoster;
@@ -274,14 +274,14 @@ enum XMPPRosterFlags
 
 - (BOOL)hasRoster
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
 	
 	return (flags & kHasRoster) ? YES : NO;
 }
 
 - (void)setHasRoster:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag) == moduleQueueTag, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
 	
 	if (flag)
 		flags |= kHasRoster;
@@ -565,7 +565,7 @@ enum XMPPRosterFlags
 		[self setRequestedRoster:YES];
 	}};
 	
-	if (dispatch_get_specific(moduleQueueTag) == moduleQueueTag)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);

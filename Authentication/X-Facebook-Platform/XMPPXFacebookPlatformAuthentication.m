@@ -253,8 +253,7 @@ static char facebookAppIdKey;
 		result = objc_getAssociatedObject(self, &facebookAppIdKey);
 	};
 
-	const char *xmppQueueTag = self.xmppQueueTag;
-	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
+	if (dispatch_get_specific(self.xmppQueueTag))
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);
@@ -270,8 +269,7 @@ static char facebookAppIdKey;
 		objc_setAssociatedObject(self, &facebookAppIdKey, newFacebookAppId, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	};
 	
-	const char *xmppQueueTag = self.xmppQueueTag;
-	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
+	if (dispatch_get_specific(self.xmppQueueTag))
 		block();
 	else
 		dispatch_async(self.xmppQueue, block);
@@ -315,8 +313,7 @@ static char facebookAppIdKey;
 		}
 	}};
 	
-	const char *xmppQueueTag = self.xmppQueueTag;
-	if (dispatch_get_specific(xmppQueueTag) == xmppQueueTag)
+	if (dispatch_get_specific(self.xmppQueueTag))
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);

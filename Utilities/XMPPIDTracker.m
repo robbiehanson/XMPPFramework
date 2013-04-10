@@ -4,7 +4,7 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-#define AssertProperQueue() NSAssert(dispatch_get_specific(queueTag) == queueTag, @"Invoked on incorrect queue")
+#define AssertProperQueue() NSAssert(dispatch_get_specific(queueTag), @"Invoked on incorrect queue")
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -12,7 +12,7 @@
 
 @interface XMPPIDTracker ()
 {
-	const char *queueTag;
+	void *queueTag;
 }
 
 @end
@@ -32,9 +32,10 @@
 	
 	if ((self = [super init]))
 	{
-		queueTag = "queueTag";
 		queue = aQueue;
-		dispatch_queue_set_specific(queue, queueTag, (void *)queueTag, NULL);
+		
+		queueTag = &queueTag;
+		dispatch_queue_set_specific(queue, queueTag, queueTag, NULL);
 		
 		#if !OS_OBJECT_USE_OBJC
 		dispatch_retain(queue);

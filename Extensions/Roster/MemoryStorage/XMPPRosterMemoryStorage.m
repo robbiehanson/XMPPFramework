@@ -16,10 +16,10 @@
 #endif
 
 #define AssertPrivateQueue() \
-        NSAssert(dispatch_get_specific(parentQueueTag) == parentQueueTag, @"Private method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private method: MUST run on parentQueue");
 
 #define AssertParentQueue() \
-        NSAssert(dispatch_get_specific(parentQueueTag) == parentQueueTag, @"Private protocol method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private protocol method: MUST run on parentQueue");
 
 @interface XMPPRosterMemoryStorage ()
 
@@ -55,9 +55,9 @@
 		if ((parent == nil) && (parentQueue == NULL))
 		{
 			parent = aParent;
-			parentQueueTag = "parentQueueTag";
 			parentQueue = queue;
-			dispatch_queue_set_specific(parentQueue, parentQueueTag, (void *)parentQueueTag, NULL);
+			parentQueueTag = &parentQueueTag;
+			dispatch_queue_set_specific(parentQueue, parentQueueTag, parentQueueTag, NULL);
 			
 			#if !OS_OBJECT_USE_OBJC
 			dispatch_retain(parentQueue);
@@ -270,7 +270,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return myUser;
 	}
@@ -296,7 +296,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return (XMPPResourceMemoryStorageObject *)[myUser resourceForJID:myJID];
 	}
@@ -324,7 +324,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _userForJID:jid];
 	}
@@ -353,7 +353,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _resourceForJID:jid];
 	}
@@ -382,7 +382,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUsersByName];
 	}
@@ -412,7 +412,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUsersByAvailabilityName];
 	}
@@ -442,7 +442,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedAvailableUsersByName];
 	}
@@ -471,7 +471,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUnavailableUsersByName];
 	}
@@ -500,7 +500,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedUsers];
 	}
@@ -529,7 +529,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedAvailableUsers];
 	}
@@ -558,7 +558,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedUnavailableUsers];
 	}
@@ -587,7 +587,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_specific(parentQueueTag) == parentQueueTag)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedResources:includeResourcesForMyUserExcludingMyself];
 	}

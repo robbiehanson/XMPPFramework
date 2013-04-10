@@ -16,7 +16,7 @@
 #endif
 
 #define AssertPrivateQueue() \
-            NSAssert(dispatch_get_specific(storageQueueTag) == storageQueueTag, @"Private method: MUST run on storageQueue");
+            NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on storageQueue");
 
 
 @interface XMPPRoomHybridStorage ()
@@ -151,7 +151,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		result = maxMessageAge;
 	};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -219,7 +219,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -233,7 +233,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		result = deleteInterval;
 	};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_sync(storageQueue, block);
@@ -290,7 +290,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -303,7 +303,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		[pausedMessageDeletion addObject:[roomJID bareJID]];
 	}};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -317,7 +317,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		[self performDelete];
 	}};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block();
 	else
 		dispatch_async(storageQueue, block);
@@ -807,7 +807,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block(NO);
 	else
 		dispatch_sync(storageQueue, ^{ block(YES); });
@@ -854,7 +854,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 	}};
 	
-	if (dispatch_get_specific(storageQueueTag) == storageQueueTag)
+	if (dispatch_get_specific(storageQueueTag))
 		block(NO);
 	else
 		dispatch_sync(storageQueue, ^{ block(YES); });
