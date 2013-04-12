@@ -131,70 +131,131 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (BOOL)shouldReconnect
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+        result = (flags & kShouldReconnect) ? YES : NO;
+	};
 	
-	return (flags & kShouldReconnect) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
 }
 
 - (void)setShouldReconnect:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+	dispatch_block_t block = ^{
+        if (flag)
+            flags |= kShouldReconnect;
+        else
+            flags &= ~kShouldReconnect;
+	};
 	
-	if (flag)
-		flags |= kShouldReconnect;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kShouldReconnect;
+		dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)multipleReachabilityChanges
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+		result = (flags & kMultipleChanges) ? YES : NO;
+	};
 	
-	return (flags & kMultipleChanges) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
 }
 
 - (void)setMultipleReachabilityChanges:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+	dispatch_block_t block = ^{
+        if (flag)
+            flags |= kMultipleChanges;
+        else
+            flags &= ~kMultipleChanges;
+	};
 	
-	if (flag)
-		flags |= kMultipleChanges;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kMultipleChanges;
+		dispatch_async(moduleQueue, block);
+
+	
 }
 
 - (BOOL)manuallyStarted
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+		result = (flags & kManuallyStarted) ? YES : NO;
+	};
 	
-	return (flags & kManuallyStarted) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
+
+    
 }
 
 - (void)setManuallyStarted:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    dispatch_block_t block = ^{
+        if (flag)
+            flags |= kManuallyStarted;
+        else
+            flags &= ~kManuallyStarted;
+	};
 	
-	if (flag)
-		flags |= kManuallyStarted;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kManuallyStarted;
+		dispatch_async(moduleQueue, block);
+
 }
 
 - (BOOL)queryingDelegates
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+		result = (flags & kQueryingDelegates) ? YES : NO;
+	};
 	
-	return (flags & kQueryingDelegates) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
+    
 }
 
 - (void)setQueryingDelegates:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    dispatch_block_t block = ^{
+        if (flag)
+            flags |= kQueryingDelegates;
+        else
+            flags &= ~kQueryingDelegates;
+	};
 	
-	if (flag)
-		flags |= kQueryingDelegates;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kQueryingDelegates;
+		dispatch_async(moduleQueue, block);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
