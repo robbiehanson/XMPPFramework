@@ -17,7 +17,7 @@
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -66,6 +66,8 @@
 		if ([storage configureWithParent:self queue:moduleQueue])
 		{
 			_moduleStorage = storage;
+            
+            
 		}
 		else
 		{
@@ -150,7 +152,6 @@
 	NSString *elemId = [xmppStream generateUUID];
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:elemId child:newvCardTemp];
 	[xmppStream sendElement:iq];
-
 	[self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
 
 }
@@ -161,6 +162,8 @@
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
 {
+    XMPPLogVerbose(@"%@: %s %@ %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare], _moduleStorage);
+
 	// this method could be called from anywhere
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
@@ -168,6 +171,9 @@
 		
 		[_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
 		
+		XMPPLogVerbose(@"%@: %s %@ %@ vc=%@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare], _moduleStorage,vCardTemp);
+        
+        
 		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
 		                                                     didReceivevCardTemp:vCardTemp
 		                                                                  forJID:jid];

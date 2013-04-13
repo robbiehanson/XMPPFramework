@@ -1,0 +1,16 @@
+@subheading stringprep_convert
+@anchor{stringprep_convert}
+@deftypefun {char *} {stringprep_convert} (const char * @var{str}, const char * @var{to_codeset}, const char * @var{from_codeset})
+@var{str}: input zero-terminated string.
+
+@var{to_codeset}: name of destination character set.
+
+@var{from_codeset}: name of origin character set, as used by @code{str}.
+
+Convert the string from one character set to another using the
+system's @code{iconv()} function.
+
+@strong{Return value:} Returns newly allocated zero-terminated string which
+is @code{str} transcoded into to_codeset.
+@end deftypefun
+

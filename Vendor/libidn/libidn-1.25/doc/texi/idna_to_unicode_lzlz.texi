@@ -1,0 +1,20 @@
+@subheading idna_to_unicode_lzlz
+@anchor{idna_to_unicode_lzlz}
+@deftypefun {int} {idna_to_unicode_lzlz} (const char * @var{input}, char ** @var{output}, int @var{flags})
+@var{input}: zero-terminated string encoded in the current locale's
+character set.
+
+@var{output}: pointer to newly allocated output string encoded in the
+current locale's character set.
+
+@var{flags}: an @code{Idna_flags} value, e.g., @code{IDNA_ALLOW_UNASSIGNED} or
+@code{IDNA_USE_STD3_ASCII_RULES}.
+
+Convert possibly ACE encoded domain name in the locale's character
+set into a string encoded in the current locale's character set.
+The domain name may contain several labels, separated by dots.  The
+output buffer must be deallocated by the caller.
+
+@strong{Return value:} Returns @code{IDNA_SUCCESS} on success, or error code.
+@end deftypefun
+

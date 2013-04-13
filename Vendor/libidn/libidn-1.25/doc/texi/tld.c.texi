@@ -1,0 +1,230 @@
+@subheading tld_get_table
+@anchor{tld_get_table}
+@deftypefun {const Tld_table *} {tld_get_table} (const char * @var{tld}, const Tld_table ** @var{tables})
+@var{tld}: TLD name (e.g. "com") as zero terminated ASCII byte string.
+
+@var{tables}: Zero terminated array of @code{Tld_table} info-structures for
+TLDs.
+
+Get the TLD table for a named TLD by searching through the given
+TLD table array.
+
+@strong{Return value:} Return structure corresponding to TLD @code{tld} by going
+thru @code{tables}, or return @code{NULL} if no such structure is found.
+@end deftypefun
+
+@subheading tld_default_table
+@anchor{tld_default_table}
+@deftypefun {const Tld_table *} {tld_default_table} (const char * @var{tld}, const Tld_table ** @var{overrides})
+@var{tld}: TLD name (e.g. "com") as zero terminated ASCII byte string.
+
+@var{overrides}: Additional zero terminated array of @code{Tld_table}
+info-structures for TLDs, or @code{NULL} to only use library deault
+tables.
+
+Get the TLD table for a named TLD, using the internal defaults,
+possibly overrided by the (optional) supplied tables.
+
+@strong{Return value:} Return structure corresponding to TLD @code{tld_str}, first
+looking through @code{overrides} then thru built-in list, or @code{NULL} if
+no such structure found.
+@end deftypefun
+
+@subheading tld_get_4
+@anchor{tld_get_4}
+@deftypefun {int} {tld_get_4} (const uint32_t * @var{in}, size_t @var{inlen}, char ** @var{out})
+@var{in}: Array of unicode code points to process. Does not need to be
+zero terminated.
+
+@var{inlen}: Number of unicode code points.
+
+@var{out}: Zero terminated ascii result string pointer.
+
+Isolate the top-level domain of @code{in} and return it as an ASCII
+string in @code{out}.
+
+@strong{Return value:} Return @code{TLD_SUCCESS} on success, or the corresponding
+@code{Tld_rc} error code otherwise.
+@end deftypefun
+
+@subheading tld_get_4z
+@anchor{tld_get_4z}
+@deftypefun {int} {tld_get_4z} (const uint32_t * @var{in}, char ** @var{out})
+@var{in}: Zero terminated array of unicode code points to process.
+
+@var{out}: Zero terminated ascii result string pointer.
+
+Isolate the top-level domain of @code{in} and return it as an ASCII
+string in @code{out}.
+
+@strong{Return value:} Return @code{TLD_SUCCESS} on success, or the corresponding
+@code{Tld_rc} error code otherwise.
+@end deftypefun
+
+@subheading tld_get_z
+@anchor{tld_get_z}
+@deftypefun {int} {tld_get_z} (const char * @var{in}, char ** @var{out})
+@var{in}: Zero terminated character array to process.
+
+@var{out}: Zero terminated ascii result string pointer.
+
+Isolate the top-level domain of @code{in} and return it as an ASCII
+string in @code{out}.  The input string @code{in} may be UTF-8, ISO-8859-1 or
+any ASCII compatible character encoding.
+
+@strong{Return value:} Return @code{TLD_SUCCESS} on success, or the corresponding
+@code{Tld_rc} error code otherwise.
+@end deftypefun
+
+@subheading tld_check_4t
+@anchor{tld_check_4t}
+@deftypefun {int} {tld_check_4t} (const uint32_t * @var{in}, size_t @var{inlen}, size_t * @var{errpos}, const Tld_table * @var{tld})
+@var{in}: Array of unicode code points to process. Does not need to be
+zero terminated.
+
+@var{inlen}: Number of unicode code points.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{tld}: A @code{Tld_table} data structure representing the restrictions for
+which the input should be tested.
+
+Test each of the code points in @code{in} for whether or not
+they are allowed by the data structure in @code{tld}, return
+the position of the first character for which this is not
+the case in @code{errpos}.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all code
+points are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+
+@subheading tld_check_4tz
+@anchor{tld_check_4tz}
+@deftypefun {int} {tld_check_4tz} (const uint32_t * @var{in}, size_t * @var{errpos}, const Tld_table * @var{tld})
+@var{in}: Zero terminated array of unicode code points to process.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{tld}: A @code{Tld_table} data structure representing the restrictions for
+which the input should be tested.
+
+Test each of the code points in @code{in} for whether or not
+they are allowed by the data structure in @code{tld}, return
+the position of the first character for which this is not
+the case in @code{errpos}.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all code
+points are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+
+@subheading tld_check_4
+@anchor{tld_check_4}
+@deftypefun {int} {tld_check_4} (const uint32_t * @var{in}, size_t @var{inlen}, size_t * @var{errpos}, const Tld_table ** @var{overrides})
+@var{in}: Array of unicode code points to process. Does not need to be
+zero terminated.
+
+@var{inlen}: Number of unicode code points.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{overrides}: A @code{Tld_table} array of additional domain restriction
+structures that complement and supersede the built-in information.
+
+Test each of the code points in @code{in} for whether or not they are
+allowed by the information in @code{overrides} or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in @code{overrides}, the information in @code{overrides} takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If @code{overrides} is @code{NULL}, only the built-in
+information is used.  The position of the first offending character
+is returned in @code{errpos}.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all code
+points are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+
+@subheading tld_check_4z
+@anchor{tld_check_4z}
+@deftypefun {int} {tld_check_4z} (const uint32_t * @var{in}, size_t * @var{errpos}, const Tld_table ** @var{overrides})
+@var{in}: Zero-terminated array of unicode code points to process.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{overrides}: A @code{Tld_table} array of additional domain restriction
+structures that complement and supersede the built-in information.
+
+Test each of the code points in @code{in} for whether or not they are
+allowed by the information in @code{overrides} or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in @code{overrides}, the information in @code{overrides} takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If @code{overrides} is @code{NULL}, only the built-in
+information is used.  The position of the first offending character
+is returned in @code{errpos}.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all code
+points are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+
+@subheading tld_check_8z
+@anchor{tld_check_8z}
+@deftypefun {int} {tld_check_8z} (const char * @var{in}, size_t * @var{errpos}, const Tld_table ** @var{overrides})
+@var{in}: Zero-terminated UTF8 string to process.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{overrides}: A @code{Tld_table} array of additional domain restriction
+structures that complement and supersede the built-in information.
+
+Test each of the characters in @code{in} for whether or not they are
+allowed by the information in @code{overrides} or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in @code{overrides}, the information in @code{overrides} takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If @code{overrides} is @code{NULL}, only the built-in
+information is used.  The position of the first offending character
+is returned in @code{errpos}.  Note that the error position refers to the
+decoded character offset rather than the byte position in the
+string.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all
+characters are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+
+@subheading tld_check_lz
+@anchor{tld_check_lz}
+@deftypefun {int} {tld_check_lz} (const char * @var{in}, size_t * @var{errpos}, const Tld_table ** @var{overrides})
+@var{in}: Zero-terminated string in the current locales encoding to process.
+
+@var{errpos}: Position of offending character is returned here.
+
+@var{overrides}: A @code{Tld_table} array of additional domain restriction
+structures that complement and supersede the built-in information.
+
+Test each of the characters in @code{in} for whether or not they are
+allowed by the information in @code{overrides} or by the built-in TLD
+restriction data. When data for the same TLD is available both
+internally and in @code{overrides}, the information in @code{overrides} takes
+precedence. If several entries for a specific TLD are found, the
+first one is used.  If @code{overrides} is @code{NULL}, only the built-in
+information is used.  The position of the first offending character
+is returned in @code{errpos}.  Note that the error position refers to the
+decoded character offset rather than the byte position in the
+string.
+
+@strong{Return value:} Returns the @code{Tld_rc} value @code{TLD_SUCCESS} if all
+characters are valid or when @code{tld} is null, @code{TLD_INVALID} if a
+character is not allowed, or additional error codes on general
+failure conditions.
+@end deftypefun
+

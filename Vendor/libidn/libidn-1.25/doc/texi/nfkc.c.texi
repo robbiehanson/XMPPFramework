@@ -1,0 +1,106 @@
+@subheading stringprep_utf8_to_unichar
+@anchor{stringprep_utf8_to_unichar}
+@deftypefun {uint32_t} {stringprep_utf8_to_unichar} (const char * @var{p})
+@var{p}: a pointer to Unicode character encoded as UTF-8
+
+Converts a sequence of bytes encoded as UTF-8 to a Unicode character.
+If @code{p} does not point to a valid UTF-8 encoded character, results are
+undefined.
+
+@strong{Return value:} the resulting character.
+@end deftypefun
+
+@subheading stringprep_unichar_to_utf8
+@anchor{stringprep_unichar_to_utf8}
+@deftypefun {int} {stringprep_unichar_to_utf8} (uint32_t @var{c}, char * @var{outbuf})
+@var{c}: a ISO10646 character code
+
+@var{outbuf}: output buffer, must have at least 6 bytes of space.
+If @code{NULL}, the length will be computed and returned
+and nothing will be written to @code{outbuf}.
+
+Converts a single character to UTF-8.
+
+@strong{Return value:} number of bytes written.
+@end deftypefun
+
+@subheading stringprep_utf8_to_ucs4
+@anchor{stringprep_utf8_to_ucs4}
+@deftypefun {uint32_t *} {stringprep_utf8_to_ucs4} (const char * @var{str}, ssize_t @var{len}, size_t * @var{items_written})
+@var{str}: a UTF-8 encoded string
+
+@var{len}: the maximum length of @code{str} to use. If @code{len} < 0, then
+the string is nul-terminated.
+
+@var{items_written}: location to store the number of characters in the
+result, or @code{NULL}.
+
+Convert a string from UTF-8 to a 32-bit fixed width
+representation as UCS-4, assuming valid UTF-8 input.
+This function does no error checking on the input.
+
+@strong{Return value:} a pointer to a newly allocated UCS-4 string.
+This value must be deallocated by the caller.
+@end deftypefun
+
+@subheading stringprep_ucs4_to_utf8
+@anchor{stringprep_ucs4_to_utf8}
+@deftypefun {char *} {stringprep_ucs4_to_utf8} (const uint32_t * @var{str}, ssize_t @var{len}, size_t * @var{items_read}, size_t * @var{items_written})
+@var{str}: a UCS-4 encoded string
+
+@var{len}: the maximum length of @code{str} to use. If @code{len} < 0, then
+the string is terminated with a 0 character.
+
+@var{items_read}: location to store number of characters read read, or @code{NULL}.
+
+@var{items_written}: location to store number of bytes written or @code{NULL}.
+The value here stored does not include the trailing 0
+byte.
+
+Convert a string from a 32-bit fixed width representation as UCS-4.
+to UTF-8. The result will be terminated with a 0 byte.
+
+@strong{Return value:} a pointer to a newly allocated UTF-8 string.
+This value must be deallocated by the caller.
+If an error occurs, @code{NULL} will be returned.
+@end deftypefun
+
+@subheading stringprep_utf8_nfkc_normalize
+@anchor{stringprep_utf8_nfkc_normalize}
+@deftypefun {char *} {stringprep_utf8_nfkc_normalize} (const char * @var{str}, ssize_t @var{len})
+@var{str}: a UTF-8 encoded string.
+
+@var{len}: length of @code{str}, in bytes, or -1 if @code{str} is nul-terminated.
+
+Converts a string into canonical form, standardizing
+such issues as whether a character with an accent
+is represented as a base character and combining
+accent or as a single precomposed character.
+
+The normalization mode is NFKC (ALL COMPOSE).  It standardizes
+differences that do not affect the text content, such as the
+above-mentioned accent representation. It standardizes the
+"compatibility" characters in Unicode, such as SUPERSCRIPT THREE to
+the standard forms (in this case DIGIT THREE). Formatting
+information may be lost but for most text operations such
+characters should be considered the same. It returns a result with
+composed forms rather than a maximally decomposed form.
+
+@strong{Return value:} a newly allocated string, that is the
+NFKC normalized form of @code{str}.
+@end deftypefun
+
+@subheading stringprep_ucs4_nfkc_normalize
+@anchor{stringprep_ucs4_nfkc_normalize}
+@deftypefun {uint32_t *} {stringprep_ucs4_nfkc_normalize} (const uint32_t * @var{str}, ssize_t @var{len})
+@var{str}: a Unicode string.
+
+@var{len}: length of @code{str} array, or -1 if @code{str} is nul-terminated.
+
+Converts a UCS4 string into canonical form, see
+@code{stringprep_utf8_nfkc_normalize()} for more information.
+
+@strong{Return value:} a newly allocated Unicode string, that is the NFKC
+normalized form of @code{str}.
+@end deftypefun
+

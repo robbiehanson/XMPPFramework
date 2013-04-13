@@ -1,0 +1,21 @@
+Libidn TODO -- Future directions.
+Copyright (C) 2002-2012 Simon Josefsson
+See the end for copying conditions.
+
+If you like to start working on anything, please let me know so work
+duplication can be avoided.
+
+  - Optimize stringprep for speed, the table searching is slow (but
+    does it matter?).
+  - Optimize for size?  The stringprep tables can be compressed _alot_
+    (most map entries are simply zeroes).
+  - Port applications to use libidn.
+  - Include more stringprep profiles.
+  - Improve IDN tool.
+  - Reimplement punycode without string length restrictions.
+  - Reject invalid Unicode data.
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

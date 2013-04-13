@@ -1,0 +1,15 @@
+@subheading tld_get_z
+@anchor{tld_get_z}
+@deftypefun {int} {tld_get_z} (const char * @var{in}, char ** @var{out})
+@var{in}: Zero terminated character array to process.
+
+@var{out}: Zero terminated ascii result string pointer.
+
+Isolate the top-level domain of @code{in} and return it as an ASCII
+string in @code{out}.  The input string @code{in} may be UTF-8, ISO-8859-1 or
+any ASCII compatible character encoding.
+
+@strong{Return value:} Return @code{TLD_SUCCESS} on success, or the corresponding
+@code{Tld_rc} error code otherwise.
+@end deftypefun
+

@@ -1,0 +1,351 @@
+# Ukrainian translation of libidn.
+# Copyright (C) 2011 Free Software Foundation, Inc.
+# This file is distributed under the same license as the libidn package.
+#
+# Yuri Chornoivan <yurchor@ukr.net>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: libidn 1.21\n"
+"Report-Msgid-Bugs-To: bug-libidn@gnu.org\n"
+"POT-Creation-Date: 2012-05-23 10:37+0200\n"
+"PO-Revision-Date: 2011-04-30 13:44+0300\n"
+"Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
+"Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 1.2\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: lib/strerror-idna.c:82 lib/strerror-pr29.c:66 lib/strerror-punycode.c:66
+#: lib/strerror-stringprep.c:86 lib/strerror-tld.c:68
+msgid "Success"
+msgstr "Виконано"
+
+#: lib/strerror-idna.c:86 lib/strerror-pr29.c:74
+msgid "String preparation failed"
+msgstr "Помилка під час спроби приготування рядка"
+
+#: lib/strerror-idna.c:90
+msgid "Punycode failed"
+msgstr "Помилка punycode"
+
+#: lib/strerror-idna.c:94
+msgid "Non-digit/letter/hyphen in input"
+msgstr "Символ, відмінний від цифри, літери або дефіса у вхідних даних"
+
+#: lib/strerror-idna.c:98
+msgid "Forbidden leading or trailing minus sign (`-')"
+msgstr "Некоректний початковий або кінцевий дефіс («-»)"
+
+#: lib/strerror-idna.c:102
+msgid "Output would be too large or too small"
+msgstr "Виведені дані будуть занадто об’ємними або занадто малими"
+
+#: lib/strerror-idna.c:106
+msgid "Input does not start with ACE prefix (`xn--')"
+msgstr "Вхідні дані не починаються з префікса ACE («xn--»)"
+
+#: lib/strerror-idna.c:110
+msgid "String not idempotent under ToASCII"
+msgstr "Рядок не є ідемпотентним у ToASCII"
+
+#: lib/strerror-idna.c:114
+msgid "Input already contain ACE prefix (`xn--')"
+msgstr "Вхідні дані вже містять префікс ACE («xn--»)"
+
+#: lib/strerror-idna.c:118 lib/strerror-tld.c:84
+msgid "System iconv failed"
+msgstr "Помилка системного iconv"
+
+#: lib/strerror-idna.c:122 lib/strerror-stringprep.c:130 lib/strerror-tld.c:80
+msgid "Cannot allocate memory"
+msgstr "Не вдалося виділити пам’ять"
+
+#: lib/strerror-idna.c:126
+msgid "System dlopen failed"
+msgstr "Помилка системного dlopen"
+
+#: lib/strerror-idna.c:130 lib/strerror-pr29.c:78 lib/strerror-punycode.c:82
+#: lib/strerror-stringprep.c:134 lib/strerror-tld.c:92
+msgid "Unknown error"
+msgstr "Невідома помилка"
+
+#: lib/strerror-pr29.c:70
+msgid "String not idempotent under Unicode NFKC normalization"
+msgstr "Рядок не є ідемпотентним після NFKC-нормалізації Unicode"
+
+#: lib/strerror-punycode.c:70
+msgid "Invalid input"
+msgstr "Некоректні вхідні дані"
+
+#: lib/strerror-punycode.c:74 lib/strerror-stringprep.c:110
+msgid "Output would exceed the buffer space provided"
+msgstr "Об’єм виведених даних перевищує наданий об’єм буфера"
+
+#: lib/strerror-punycode.c:78
+msgid "String size limit exceeded"
+msgstr "Перевищено обмеження на довжину рядка"
+
+#: lib/strerror-stringprep.c:90
+msgid "Forbidden unassigned code points in input"
+msgstr "Некоректні непов’язані символи коду у вхідних даних"
+
+#: lib/strerror-stringprep.c:94
+msgid "Prohibited code points in input"
+msgstr "Некоректні символи коду у вхідних даних"
+
+#: lib/strerror-stringprep.c:98
+msgid "Conflicting bidirectional properties in input"
+msgstr "Суперечливі двонапрямні властивості у вхідних даних"
+
+#: lib/strerror-stringprep.c:102
+msgid "Malformed bidirectional string"
+msgstr "Помилка у форматуванні двонаправленого рядка"
+
+#: lib/strerror-stringprep.c:106
+msgid "Prohibited bidirectional code points in input"
+msgstr "Некоректні двонапрямні символи коду у вхідних даних"
+
+#: lib/strerror-stringprep.c:114
+msgid "Error in stringprep profile definition"
+msgstr "Помилка у визначені профілю stringprep"
+
+#: lib/strerror-stringprep.c:118
+msgid "Flag conflict with profile"
+msgstr "Прапорець конфліктує з профілем"
+
+#: lib/strerror-stringprep.c:122
+msgid "Unknown profile"
+msgstr "Невідомий профіль"
+
+#: lib/strerror-stringprep.c:126
+msgid "Unicode normalization failed (internal error)"
+msgstr "Помилка під час спроби нормалізації Unicode (внутрішня помилка)"
+
+#: lib/strerror-tld.c:72
+msgid "Code points prohibited by top-level domain"
+msgstr "Символи коду, заборонені доменом вищого рівня"
+
+#: lib/strerror-tld.c:76
+msgid "Missing input"
+msgstr "Не вказано вхідних даних"
+
+#: lib/strerror-tld.c:88
+msgid "No top-level domain found in input"
+msgstr "У вхідних даних не знайдено домену вищого рівня"
+
+#: src/idn.c:65
+#, c-format
+msgid "Try `%s --help' for more information.\n"
+msgstr "Виконайте команду «%s --help», щоб дізнатися більше.\n"
+
+#: src/idn.c:69
+#, c-format
+msgid "Usage: %s [OPTION]... [STRINGS]...\n"
+msgstr "Використання: %s [ПАРАМЕТР]... [РЯДКИ]...\n"
+
+#: src/idn.c:72
+msgid ""
+"Internationalized Domain Name (IDN) convert STRINGS, or standard input.\n"
+"\n"
+msgstr ""
+"Перетворення Internationalized Domain Name (IDN) РЯДКІВ або даних зі "
+"стандартного джерела вхідних даних.\n"
+"\n"
+
+#: src/idn.c:76
+msgid ""
+"Command line interface to the internationalized domain name library.\n"
+"\n"
+"All strings are expected to be encoded in the preferred charset used\n"
+"by your locale.  Use `--debug' to find out what this charset is.  You\n"
+"can override the charset used by setting environment variable CHARSET.\n"
+"\n"
+"To process a string that starts with `-', for example `-foo', use `--'\n"
+"to signal the end of parameters, as in `idn --quiet -a -- -foo'.\n"
+"\n"
+"Mandatory arguments to long options are mandatory for short options too.\n"
+msgstr ""
+"Інтерфейс командного рядка до бібліотеки інтернаціоналізованих назв "
+"доменів.\n"
+"\n"
+"Програма вважає, що кодуванням всіх рядків є основне кодування вашої\n"
+"локалі. Скористайтеся параметром «--debug», щоб переглянути дані щодо "
+"кодування.\n"
+"Змінити набір символів можна за допомогою змінної середовища CHARSET.\n"
+"\n"
+"Для обробки рядка, що починається з «-», наприклад, «-foo» додайте у команду "
+"«--»\n"
+"для позначення завершення параметрів. Приклад: «idn --quiet -a -- -foo».\n"
+"\n"
+"Обов’язкові аргументи для параметрів у розгорнутому записів є обов’язковими "
+"і для\n"
+"скорочених форм запису.\n"
+
+#: src/idn.c:88
+msgid ""
+"  -h, --help               Print help and exit\n"
+"  -V, --version            Print version and exit\n"
+msgstr ""
+"  -h, --help               вивести довідкові дані і завершити роботу\n"
+"  -V, --version            вивести дані щодо версії і завершити роботу\n"
+
+#: src/idn.c:92
+msgid ""
+"  -s, --stringprep         Prepare string according to nameprep profile\n"
+"  -d, --punycode-decode    Decode Punycode\n"
+"  -e, --punycode-encode    Encode Punycode\n"
+"  -a, --idna-to-ascii      Convert to ACE according to IDNA (default mode)\n"
+"  -u, --idna-to-unicode    Convert from ACE according to IDNA\n"
+msgstr ""
+"  -s, --stringprep         обробити рядок відповідно до профілю nameprep\n"
+"  -d, --punycode-decode    декодувати Punycode\n"
+"  -e, --punycode-encode    закодувати у Punycode\n"
+"  -a, --idna-to-ascii      перетворити на ACE відповідно до IDNA (типовий "
+"режим)\n"
+"  -u, --idna-to-unicode    перетворити з ACE відповідно до IDNA\n"
+
+#: src/idn.c:99
+msgid ""
+"      --allow-unassigned   Toggle IDNA AllowUnassigned flag (default off)\n"
+"      --usestd3asciirules  Toggle IDNA UseSTD3ASCIIRules flag (default off)\n"
+msgstr ""
+"      --allow-unassigned   увімкнути або вимкнути прапорець AllowUnassigned "
+"IDNA (типово вимкнено)\n"
+"      --usestd3asciirules  увімкнути або вимкнути прапорець "
+"UseSTD3ASCIIRules IDNA (типово вимкнено)\n"
+
+#: src/idn.c:103
+msgid ""
+"      --no-tld             Don't check string for TLD specific rules\n"
+"                             Only for --idna-to-ascii and --idna-to-unicode\n"
+msgstr ""
+"      --no-tld             не перевіряти рядок на використання специфічних "
+"правил TLD\n"
+"                             Лише для параметрів --idna-to-ascii і --idna-to-"
+"unicode\n"
+
+#: src/idn.c:107
+msgid ""
+"  -n, --nfkc               Normalize string according to Unicode v3.2 NFKC\n"
+msgstr ""
+"  -n, --nfkc               нормалізувати рядок відповідно до NFKC Unicode "
+"версії 3.2\n"
+
+#: src/idn.c:110
+msgid ""
+"  -p, --profile=STRING     Use specified stringprep profile instead\n"
+"                             Valid stringprep profiles: `Nameprep',\n"
+"                             `iSCSI', `Nodeprep', `Resourceprep', \n"
+"                             `trace', `SASLprep'\n"
+msgstr ""
+"  -p, --profile=РЯДОК      використовувати вказаний профіль stringprep "
+"profile instead\n"
+"                             Можливі значення профілів stringprep: "
+"«Nameprep»,\n"
+"                             «iSCSI», «Nodeprep», «Resourceprep», \n"
+"                             «trace», «SASLprep»\n"
+
+#: src/idn.c:116
+msgid ""
+"      --debug              Print debugging information\n"
+"      --quiet              Silent operation\n"
+msgstr ""
+"      --debug              вивести діагностичні дані\n"
+"      --quiet              обробка без додаткових повідомлень\n"
+
+#: src/idn.c:172
+#, c-format
+msgid "only one of -s, -e, -d, -a, -u or -n can be specified"
+msgstr "можна використовувати лише один з параметрів -s, -e, -d, -a, -u або -n"
+
+#: src/idn.c:182
+#, c-format
+msgid "Charset `%s'.\n"
+msgstr "Набір символів «%s».\n"
+
+#: src/idn.c:187
+#, c-format
+msgid ""
+"Type each input string on a line by itself, terminated by a newline "
+"character.\n"
+msgstr ""
+"Виводити кожен рядок у окремому рядку, розділяти рядки символом нового "
+"рядка.\n"
+
+#: src/idn.c:202
+#, c-format
+msgid "input error"
+msgstr "помилка у вхідних даних"
+
+#: src/idn.c:212 src/idn.c:274 src/idn.c:357 src/idn.c:434 src/idn.c:515
+#, c-format
+msgid "could not convert from %s to UTF-8"
+msgstr "не вдалося перетворити дані з формату %s на UTF-8"
+
+#: src/idn.c:220 src/idn.c:245 src/idn.c:281 src/idn.c:498 src/idn.c:527
+#: src/idn.c:551
+#, c-format
+msgid "could not convert from UTF-8 to UCS-4"
+msgstr "не вдалося перетворити дані з формату UTF-8 на UCS-4"
+
+#: src/idn.c:237
+#, c-format
+msgid "stringprep_profile: %s"
+msgstr "stringprep_profile: %s"
+
+#: src/idn.c:260 src/idn.c:302 src/idn.c:345 src/idn.c:503 src/idn.c:564
+#, c-format
+msgid "could not convert from UTF-8 to %s"
+msgstr "не вдалося перетворити дані з формату UTF-8 на %s"
+
+#: src/idn.c:295
+#, c-format
+msgid "punycode_encode: %s"
+msgstr "punycode_encode: %s"
+
+#: src/idn.c:317
+msgid "malloc"
+msgstr "malloc"
+
+#: src/idn.c:323
+#, c-format
+msgid "punycode_decode: %s"
+msgstr "punycode_decode: %s"
+
+#: src/idn.c:340 src/idn.c:364 src/idn.c:442
+#, c-format
+msgid "could not convert from UCS-4 to UTF-8"
+msgstr "не вдалося перетворити дані з формату UCS-4 на UTF-8"
+
+#: src/idn.c:381
+#, c-format
+msgid "idna_to_ascii_4z: %s"
+msgstr "idna_to_ascii_4z: %s"
+
+#: src/idn.c:395
+#, c-format
+msgid "idna_to_unicode_8z4z (TLD): %s"
+msgstr "idna_to_unicode_8z4z (TLD): %s"
+
+#: src/idn.c:409 src/idn.c:482
+#, c-format
+msgid "tld_check_4z (position %lu): %s"
+msgstr "tld_check_4z (позиція %lu): %s"
+
+#: src/idn.c:412 src/idn.c:488
+#, c-format
+msgid "tld_check_4z: %s"
+msgstr "tld_check_4z: %s"
+
+#: src/idn.c:461
+#, c-format
+msgid "idna_to_unicode_8z4z: %s"
+msgstr "idna_to_unicode_8z4z: %s"
+
+#: src/idn.c:540
+#, c-format
+msgid "could not do NFKC normalization"
+msgstr "не вдалося виконати NFKC-нормалізацію"

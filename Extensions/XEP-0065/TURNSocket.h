@@ -76,4 +76,8 @@
 
 - (void)turnSocketDidFail:(TURNSocket *)sender;
 
+- (NSString *)turnSocketNeedsUsername:(TURNSocket *)sender;
+
+- (NSString *)turnSocketNeedsPassword:(TURNSocket *)sender;
+
 @end

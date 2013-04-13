@@ -1,0 +1,17 @@
+@subheading tld_get_4
+@anchor{tld_get_4}
+@deftypefun {int} {tld_get_4} (const uint32_t * @var{in}, size_t @var{inlen}, char ** @var{out})
+@var{in}: Array of unicode code points to process. Does not need to be
+zero terminated.
+
+@var{inlen}: Number of unicode code points.
+
+@var{out}: Zero terminated ascii result string pointer.
+
+Isolate the top-level domain of @code{in} and return it as an ASCII
+string in @code{out}.
+
+@strong{Return value:} Return @code{TLD_SUCCESS} on success, or the corresponding
+@code{Tld_rc} error code otherwise.
+@end deftypefun
+

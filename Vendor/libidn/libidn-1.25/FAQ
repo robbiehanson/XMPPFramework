@@ -1,0 +1,46 @@
+Libidn FAQ -- Anticipated Frequently Asked Questions.
+Copyright (C) 2002-2012 Simon Josefsson
+See the end for copying conditions.
+
+Q#1: Why doesn't Libidn use a separate library for the Unicode
+     operations?
+
+A#1: Separate libraries (Glib, QT, libiconv) seldom mark the
+     Unicode tables with the corresponding Unicode version they
+     implement, nor do they provide a interface where a specific
+     version can be requested.  This violates the stringprep
+     specification which requires that a specific version must be
+     used.  Also, some of these third party libraries depend on
+     non-portable behavior (e.g. threads).
+
+Q#2: Why do Libidn include several stringprep profiles?  They waste
+     space!
+
+A#2: The stringprep profiles included are usually derived from the
+     generic stringprep tables, and doesn't waste more than say a few
+     hundred bytes (see profiles.c).  The Unicode normalization tables
+     and the generic stringprep tables are roughly equivalent in size,
+     although the latter tables can surely be compressed much further.
+     They occupy about 100 kilobytes on typical platforms.  However,
+     if in the future several large Stringprep profiles are added,
+     configure options will be added to help reduce size.
+
+Q#3: I thought GNU was encouraging libraries to be licensed under the GPL?
+
+A#3: The reasoning for this was for libraries that provide unique
+     functionality to encourage more free programs.  Since there are
+     several IDN libraries out there, using the GPL for Libidn would
+     only encourage people not to use Libidn which would not help the
+     spread of free software.
+
+Q#4: How do I add a new stringprep profile?
+
+A#4: Add the profile definition to profiles.c, export the symbol and
+     optionally add a CPP macro in stringprep.h (and document it in
+     stringprep.c).  If you want to add self tests, do it through
+     tst_stringprep.c.  Mention it in NEWS.
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

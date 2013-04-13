@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.gnu.inet</groupId>
+  <artifactId>libidn</artifactId>
+  <name>GNU IDN Library</name>
+  <version>@VERSION@</version>
+  <description>
+    GNU Libidn is a fully documented implementation of the Stringprep,
+    Punycode and IDNA specifications. Libidn's purpose is to encode
+    and decode internationalized domain names.
+  </description>
+  <url>http://www.gnu.org/software/libidn/</url>
+  <inceptionYear>2002</inceptionYear>
+  <licenses>
+    <license>
+      <name>GNU Lesser General Public License version 3.0 or later</name>
+      <url>http://www.gnu.org/licenses/licenses.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git://git.savannah.gnu.org/libidn.git</connection>
+    <url>http://git.savannah.gnu.org/gitweb/?p=libidn.git</url>
+  </scm>
+  <organization>
+    <name>GNU</name>
+    <url>http://www.gnu.org/</url>
+  </organization>
+  <build>
+    <sourceDirectory>${project.basedir}/java</sourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>misc/**</exclude>
+          </excludes>
+          <!-- put your configurations here -->
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

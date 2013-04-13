@@ -1,0 +1,12 @@
+@subheading stringprep_locale_to_utf8
+@anchor{stringprep_locale_to_utf8}
+@deftypefun {char *} {stringprep_locale_to_utf8} (const char * @var{str})
+@var{str}: input zero terminated string.
+
+Convert string encoded in the locale's character set into UTF-8 by
+using @code{stringprep_convert()}.
+
+@strong{Return value:} Returns newly allocated zero-terminated string which
+is @code{str} transcoded into UTF-8.
+@end deftypefun
+

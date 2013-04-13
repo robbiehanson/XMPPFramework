@@ -1,0 +1,82 @@
+<!-- ##### SECTION Title ##### -->
+punycode
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO IDNAPI ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### ENUM Punycode_status ##### -->
+<para>
+
+</para>
+
+@PUNYCODE_SUCCESS: 
+@PUNYCODE_BAD_INPUT: 
+@PUNYCODE_BIG_OUTPUT: 
+@PUNYCODE_OVERFLOW: 
+
+<!-- ##### FUNCTION punycode_decode ##### -->
+<para>
+
+</para>
+
+@input_length: 
+@input: 
+@output_length: 
+@output: 
+@case_flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION punycode_encode ##### -->
+<para>
+
+</para>
+
+@input_length: 
+@input: 
+@case_flags: 
+@output_length: 
+@output: 
+@Returns: 
+
+
+<!-- ##### FUNCTION punycode_strerror ##### -->
+<para>
+
+</para>
+
+@rc: 
+@Returns: 
+
+
+<!-- ##### TYPEDEF punycode_uint ##### -->
+<para>
+
+</para>
+
+

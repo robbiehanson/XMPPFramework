@@ -1,0 +1,36 @@
+@subheading idna_to_ascii_4i
+@anchor{idna_to_ascii_4i}
+@deftypefun {int} {idna_to_ascii_4i} (const uint32_t * @var{in}, size_t @var{inlen}, char * @var{out}, int @var{flags})
+@var{in}: input array with unicode code points.
+
+@var{inlen}: length of input array with unicode code points.
+
+@var{out}: output zero terminated string that must have room for at
+least 63 characters plus the terminating zero.
+
+@var{flags}: an @code{Idna_flags} value, e.g., @code{IDNA_ALLOW_UNASSIGNED} or
+@code{IDNA_USE_STD3_ASCII_RULES}.
+
+The ToASCII operation takes a sequence of Unicode code points that
+make up one domain label and transforms it into a sequence of code
+points in the ASCII range (0..7F). If ToASCII succeeds, the
+original sequence and the resulting sequence are equivalent labels.
+
+It is important to note that the ToASCII operation can fail. ToASCII
+fails if any step of it fails. If any step of the ToASCII operation
+fails on any label in a domain name, that domain name MUST NOT be used
+as an internationalized domain name. The method for deadling with this
+failure is application-specific.
+
+The inputs to ToASCII are a sequence of code points, the AllowUnassigned
+flag, and the UseSTD3ASCIIRules flag. The output of ToASCII is either a
+sequence of ASCII code points or a failure condition.
+
+ToASCII never alters a sequence of code points that are all in the ASCII
+range to begin with (although it could fail). Applying the ToASCII
+operation multiple times has exactly the same effect as applying it just
+once.
+
+@strong{Return value:} Returns 0 on success, or an @code{Idna_rc} error code.
+@end deftypefun
+

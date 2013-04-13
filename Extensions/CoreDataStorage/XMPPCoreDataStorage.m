@@ -677,12 +677,11 @@ static NSMutableSet *databaseFileNames;
 	    (sender.persistentStoreCoordinator == mainThreadManagedObjectContext.persistentStoreCoordinator))
 	{
 		XMPPLogVerbose(@"%@: %@ - Merging changes into mainThreadManagedObjectContext", THIS_FILE, THIS_METHOD);
-		
-		dispatch_async(dispatch_get_main_queue(), ^{
-			
-			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
-			[self mainThreadManagedObjectContextDidMergeChanges];
-		});
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+            [self mainThreadManagedObjectContextDidMergeChanges];
+        });
+        
     }
 }
 
@@ -765,7 +764,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
+	NSAssert(!dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	//
@@ -795,7 +794,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
+	NSAssert(!dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	// 

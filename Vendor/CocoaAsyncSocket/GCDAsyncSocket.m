@@ -6744,7 +6744,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 		CFWriteStreamUnscheduleFromRunLoop(asyncSocket->writeStream, runLoop, kCFRunLoopDefaultMode);
 }
 
-static void CFReadStreamCallback (CFReadStreamRef stream, CFStreamEventType type, void *pInfo)
+void CFReadStreamCallback (CFReadStreamRef stream, CFStreamEventType type, void *pInfo)
 {
 	GCDAsyncSocket *asyncSocket = (__bridge GCDAsyncSocket *)pInfo;
 	
@@ -6811,7 +6811,7 @@ static void CFReadStreamCallback (CFReadStreamRef stream, CFStreamEventType type
 	
 }
 
-static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType type, void *pInfo)
+void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType type, void *pInfo)
 {
 	GCDAsyncSocket *asyncSocket = (__bridge GCDAsyncSocket *)pInfo;
 	
@@ -6957,7 +6957,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	if (includeReadWrite)
 		readStreamEvents |= kCFStreamEventHasBytesAvailable;
 	
-	if (!CFReadStreamSetClient(readStream, readStreamEvents, &CFReadStreamCallback, &streamContext))
+	if (!CFReadStreamSetClient(readStream, readStreamEvents, CFReadStreamCallback, &streamContext))
 	{
 		return NO;
 	}
@@ -6966,7 +6966,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	if (includeReadWrite)
 		writeStreamEvents |= kCFStreamEventCanAcceptBytes;
 	
-	if (!CFWriteStreamSetClient(writeStream, writeStreamEvents, &CFWriteStreamCallback, &streamContext))
+	if (!CFWriteStreamSetClient(writeStream, writeStreamEvents, CFWriteStreamCallback, &streamContext))
 	{
 		return NO;
 	}

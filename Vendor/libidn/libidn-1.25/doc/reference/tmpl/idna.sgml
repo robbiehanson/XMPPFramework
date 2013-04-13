@@ -1,0 +1,187 @@
+<!-- ##### SECTION Title ##### -->
+idna
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO IDNAPI ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO IDNA_ACE_PREFIX ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### ENUM Idna_flags ##### -->
+<para>
+
+</para>
+
+@IDNA_ALLOW_UNASSIGNED: 
+@IDNA_USE_STD3_ASCII_RULES: 
+
+<!-- ##### ENUM Idna_rc ##### -->
+<para>
+
+</para>
+
+@IDNA_SUCCESS: 
+@IDNA_STRINGPREP_ERROR: 
+@IDNA_PUNYCODE_ERROR: 
+@IDNA_CONTAINS_NON_LDH: 
+@IDNA_CONTAINS_LDH: 
+@IDNA_CONTAINS_MINUS: 
+@IDNA_INVALID_LENGTH: 
+@IDNA_NO_ACE_PREFIX: 
+@IDNA_ROUNDTRIP_VERIFY_ERROR: 
+@IDNA_CONTAINS_ACE_PREFIX: 
+@IDNA_ICONV_ERROR: 
+@IDNA_MALLOC_ERROR: 
+@IDNA_DLOPEN_ERROR: 
+
+<!-- ##### FUNCTION idna_strerror ##### -->
+<para>
+
+</para>
+
+@rc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_ascii_4i ##### -->
+<para>
+
+</para>
+
+@in: 
+@inlen: 
+@out: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_ascii_4z ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_ascii_8z ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_ascii_lz ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_unicode_44i ##### -->
+<para>
+
+</para>
+
+@in: 
+@inlen: 
+@out: 
+@outlen: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_unicode_4z4z ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_unicode_8z4z ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_unicode_8z8z ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_unicode_8zlz ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+
+<!-- ##### FUNCTION idna_to_unicode_lzlz ##### -->
+<para>
+
+</para>
+
+@input: 
+@output: 
+@flags: 
+@Returns: 
+
+

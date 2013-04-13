@@ -1,0 +1,29 @@
+@subheading stringprep_4zi
+@anchor{stringprep_4zi}
+@deftypefun {int} {stringprep_4zi} (uint32_t * @var{ucs4}, size_t @var{maxucs4len}, Stringprep_profile_flags @var{flags}, const Stringprep_profile * @var{profile})
+@var{ucs4}: input/output array with zero terminated string to prepare.
+
+@var{maxucs4len}: maximum length of input/output array.
+
+@var{flags}: a @code{Stringprep_profile_flags} value, or 0.
+
+@var{profile}: pointer to @code{Stringprep_profile} to use.
+
+Prepare the input zero terminated UCS-4 string according to the
+stringprep profile, and write back the result to the input string.
+
+Since the stringprep operation can expand the string, @code{maxucs4len}
+indicate how large the buffer holding the string is.  This function
+will not read or write to code points outside that size.
+
+The @code{flags} are one of @code{Stringprep_profile_flags} values, or 0.
+
+The @code{profile} contain the @code{Stringprep_profile} instructions to
+perform.  Your application can define new profiles, possibly
+re-using the generic stringprep tables that always will be part of
+the library, or use one of the currently supported profiles.
+
+@strong{Return value:} Returns @code{STRINGPREP_OK} iff successful, or an
+@code{Stringprep_rc} error code.
+@end deftypefun
+

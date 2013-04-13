@@ -6,6 +6,10 @@
   #import <Cocoa/Cocoa.h>
 #endif
 
+#if TARGET_OS_IPHONE 
+#import <UIKit/UIKit.h>
+#endif
+
 @class XMPPResourceMemoryStorageObject;
 
 
@@ -17,7 +21,7 @@
 	NSMutableDictionary *resources;
 	XMPPResourceMemoryStorageObject *primaryResource;
 	
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE 
 	UIImage *photo;
 #else
 	NSImage *photo;

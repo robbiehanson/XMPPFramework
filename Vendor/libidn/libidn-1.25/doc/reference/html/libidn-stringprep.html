@@ -1,0 +1,1129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>stringprep</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="index.html" title="GNU Libidn API Reference Manual">
+<link rel="up" href="intro.html" title="GNU Libidn API Reference Manual">
+<link rel="prev" href="libidn-idna.html" title="idna">
+<link rel="next" href="libidn-punycode.html" title="punycode">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="libidn-idna.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="intro.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GNU Libidn API Reference Manual</th>
+<td><a accesskey="n" href="libidn-punycode.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#libidn-stringprep.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libidn-stringprep.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="libidn-stringprep"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libidn-stringprep.top_of_page"></a>stringprep</span></h2>
+<p>stringprep</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libidn-stringprep.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">#define             <a class="link" href="libidn-idna.html#IDNAPI:CAPS" title="IDNAPI">IDNAPI</a>
+#define             <a class="link" href="libidn-stringprep.html#STRINGPREP-MAX-MAP-CHARS:CAPS" title="STRINGPREP_MAX_MAP_CHARS">STRINGPREP_MAX_MAP_CHARS</a>
+#define             <a class="link" href="libidn-stringprep.html#STRINGPREP-VERSION:CAPS" title="STRINGPREP_VERSION">STRINGPREP_VERSION</a>
+typedef             <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile">Stringprep_profile</a>;
+enum                <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags">Stringprep_profile_flags</a>;
+enum                <a class="link" href="libidn-stringprep.html#Stringprep-profile-steps" title="enum Stringprep_profile_steps">Stringprep_profile_steps</a>;
+typedef             <a class="link" href="libidn-stringprep.html#Stringprep-profiles" title="Stringprep_profiles">Stringprep_profiles</a>;
+enum                <a class="link" href="libidn-stringprep.html#Stringprep-rc" title="enum Stringprep_rc">Stringprep_rc</a>;
+typedef             <a class="link" href="libidn-stringprep.html#Stringprep-table-element" title="Stringprep_table_element">Stringprep_table_element</a>;
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-stringprep.html#stringprep" title="stringprep ()">stringprep</a>                          (<em class="parameter"><code><span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> maxlen</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> *profile</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-stringprep.html#stringprep-4i" title="stringprep_4i ()">stringprep_4i</a>                       (<em class="parameter"><code><span class="type">uint32_t</span> *ucs4</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *len</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> maxucs4len</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> *profile</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-stringprep.html#stringprep-4zi" title="stringprep_4zi ()">stringprep_4zi</a>                      (<em class="parameter"><code><span class="type">uint32_t</span> *ucs4</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> maxucs4len</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> *profile</code></em>);
+const <span class="returnvalue">char</span> *        <a class="link" href="libidn-stringprep.html#stringprep-check-version" title="stringprep_check_version ()">stringprep_check_version</a>            (<em class="parameter"><code>const <span class="type">char</span> *req_version</code></em>);
+<span class="returnvalue">char</span> *              <a class="link" href="libidn-stringprep.html#stringprep-convert" title="stringprep_convert ()">stringprep_convert</a>                  (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *to_codeset</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *from_codeset</code></em>);
+#define             <a class="link" href="libidn-stringprep.html#stringprep-iscsi" title="stringprep_iscsi()">stringprep_iscsi</a>                    (in,
+                                                         maxlen)
+#define             <a class="link" href="libidn-stringprep.html#stringprep-kerberos5" title="stringprep_kerberos5()">stringprep_kerberos5</a>                (in,
+                                                         maxlen)
+const <span class="returnvalue">char</span> *        <a class="link" href="libidn-stringprep.html#stringprep-locale-charset" title="stringprep_locale_charset ()">stringprep_locale_charset</a>           (<em class="parameter"><code><span class="type">void</span></code></em>);
+<span class="returnvalue">char</span> *              <a class="link" href="libidn-stringprep.html#stringprep-locale-to-utf8" title="stringprep_locale_to_utf8 ()">stringprep_locale_to_utf8</a>           (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>);
+#define             <a class="link" href="libidn-stringprep.html#stringprep-nameprep" title="stringprep_nameprep()">stringprep_nameprep</a>                 (in,
+                                                         maxlen)
+#define             <a class="link" href="libidn-stringprep.html#stringprep-nameprep-no-unassigned" title="stringprep_nameprep_no_unassigned()">stringprep_nameprep_no_unassigned</a>   (in,
+                                                         maxlen)
+#define             <a class="link" href="libidn-stringprep.html#stringprep-plain" title="stringprep_plain()">stringprep_plain</a>                    (in,
+                                                         maxlen)
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-stringprep.html#stringprep-profile" title="stringprep_profile ()">stringprep_profile</a>                  (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *profile</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>);
+const <span class="returnvalue">char</span> *        <a class="link" href="libidn-stringprep.html#stringprep-strerror" title="stringprep_strerror ()">stringprep_strerror</a>                 (<em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-rc" title="enum Stringprep_rc"><span class="type">Stringprep_rc</span></a> rc</code></em>);
+<span class="returnvalue">uint32_t</span> *          <a class="link" href="libidn-stringprep.html#stringprep-ucs4-nfkc-normalize" title="stringprep_ucs4_nfkc_normalize ()">stringprep_ucs4_nfkc_normalize</a>      (<em class="parameter"><code>const <span class="type">uint32_t</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>);
+<span class="returnvalue">char</span> *              <a class="link" href="libidn-stringprep.html#stringprep-ucs4-to-utf8" title="stringprep_ucs4_to_utf8 ()">stringprep_ucs4_to_utf8</a>             (<em class="parameter"><code>const <span class="type">uint32_t</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *items_read</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *items_written</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-stringprep.html#stringprep-unichar-to-utf8" title="stringprep_unichar_to_utf8 ()">stringprep_unichar_to_utf8</a>          (<em class="parameter"><code><span class="type">uint32_t</span> c</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> *outbuf</code></em>);
+<span class="returnvalue">char</span> *              <a class="link" href="libidn-stringprep.html#stringprep-utf8-nfkc-normalize" title="stringprep_utf8_nfkc_normalize ()">stringprep_utf8_nfkc_normalize</a>      (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>);
+<span class="returnvalue">char</span> *              <a class="link" href="libidn-stringprep.html#stringprep-utf8-to-locale" title="stringprep_utf8_to_locale ()">stringprep_utf8_to_locale</a>           (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>);
+<span class="returnvalue">uint32_t</span> *          <a class="link" href="libidn-stringprep.html#stringprep-utf8-to-ucs4" title="stringprep_utf8_to_ucs4 ()">stringprep_utf8_to_ucs4</a>             (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *items_written</code></em>);
+<span class="returnvalue">uint32_t</span>            <a class="link" href="libidn-stringprep.html#stringprep-utf8-to-unichar" title="stringprep_utf8_to_unichar ()">stringprep_utf8_to_unichar</a>          (<em class="parameter"><code>const <span class="type">char</span> *p</code></em>);
+#define             <a class="link" href="libidn-stringprep.html#stringprep-xmpp-nodeprep" title="stringprep_xmpp_nodeprep()">stringprep_xmpp_nodeprep</a>            (in,
+                                                         maxlen)
+#define             <a class="link" href="libidn-stringprep.html#stringprep-xmpp-resourceprep" title="stringprep_xmpp_resourceprep()">stringprep_xmpp_resourceprep</a>        (in,
+                                                         maxlen)
+</pre>
+</div>
+<div class="refsect1">
+<a name="libidn-stringprep.description"></a><h2>Description</h2>
+<p>
+</p>
+</div>
+<div class="refsect1">
+<a name="libidn-stringprep.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="IDNAPI:CAPS"></a><h3>IDNAPI</h3>
+<pre class="programlisting">#define             IDNAPI</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="STRINGPREP-MAX-MAP-CHARS:CAPS"></a><h3>STRINGPREP_MAX_MAP_CHARS</h3>
+<pre class="programlisting"># define STRINGPREP_MAX_MAP_CHARS 4
+</pre>
+<p>
+Maximum number of code points that can replace a single code point,
+during stringprep mapping.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="STRINGPREP-VERSION:CAPS"></a><h3>STRINGPREP_VERSION</h3>
+<pre class="programlisting"># define STRINGPREP_VERSION "1.25"
+</pre>
+<p>
+String defined via CPP denoting the header file version number.
+Used together with <a class="link" href="libidn-stringprep.html#stringprep-check-version" title="stringprep_check_version ()"><code class="function">stringprep_check_version()</code></a> to verify header file
+and run-time library consistency.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Stringprep-profile"></a><h3>Stringprep_profile</h3>
+<pre class="programlisting">  typedef struct Stringprep_table Stringprep_profile;
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Stringprep-profile-flags"></a><h3>enum Stringprep_profile_flags</h3>
+<pre class="programlisting">typedef enum {
+    STRINGPREP_NO_NFKC = 1,
+    STRINGPREP_NO_BIDI = 2,
+    STRINGPREP_NO_UNASSIGNED = 4
+} Stringprep_profile_flags;
+</pre>
+<p>
+Stringprep profile flags.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="STRINGPREP-NO-NFKC:CAPS"></a><span class="term"><code class="literal">STRINGPREP_NO_NFKC</code></span></p></td>
+<td>Disable the NFKC normalization, as well as
+  selecting the non-NFKC case folding tables.  Usually the profile
+  specifies BIDI and NFKC settings, and applications should not
+  override it unless in special situations.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-NO-BIDI:CAPS"></a><span class="term"><code class="literal">STRINGPREP_NO_BIDI</code></span></p></td>
+<td>Disable the BIDI step.  Usually the profile
+  specifies BIDI and NFKC settings, and applications should not
+  override it unless in special situations.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-NO-UNASSIGNED:CAPS"></a><span class="term"><code class="literal">STRINGPREP_NO_UNASSIGNED</code></span></p></td>
+<td>Make the library return with an error if
+  string contains unassigned characters according to profile.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Stringprep-profile-steps"></a><h3>enum Stringprep_profile_steps</h3>
+<pre class="programlisting">typedef enum {
+    STRINGPREP_NFKC = 1,
+    STRINGPREP_BIDI = 2,
+    STRINGPREP_MAP_TABLE = 3,
+    STRINGPREP_UNASSIGNED_TABLE = 4,
+    STRINGPREP_PROHIBIT_TABLE = 5,
+    STRINGPREP_BIDI_PROHIBIT_TABLE = 6,
+    STRINGPREP_BIDI_RAL_TABLE = 7,
+    STRINGPREP_BIDI_L_TABLE = 8
+} Stringprep_profile_steps;
+</pre>
+<p>
+Various steps in the stringprep algorithm.  You really want to
+study the source code to understand this one.  Only useful if you
+want to add another profile.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="STRINGPREP-NFKC:CAPS"></a><span class="term"><code class="literal">STRINGPREP_NFKC</code></span></p></td>
+<td>The NFKC step.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-BIDI:CAPS"></a><span class="term"><code class="literal">STRINGPREP_BIDI</code></span></p></td>
+<td>The BIDI step.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-MAP-TABLE:CAPS"></a><span class="term"><code class="literal">STRINGPREP_MAP_TABLE</code></span></p></td>
+<td>The MAP step.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-UNASSIGNED-TABLE:CAPS"></a><span class="term"><code class="literal">STRINGPREP_UNASSIGNED_TABLE</code></span></p></td>
+<td>The Unassigned step.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-PROHIBIT-TABLE:CAPS"></a><span class="term"><code class="literal">STRINGPREP_PROHIBIT_TABLE</code></span></p></td>
+<td>The Prohibited step.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-BIDI-PROHIBIT-TABLE:CAPS"></a><span class="term"><code class="literal">STRINGPREP_BIDI_PROHIBIT_TABLE</code></span></p></td>
+<td>The BIDI-Prohibited step.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-BIDI-RAL-TABLE:CAPS"></a><span class="term"><code class="literal">STRINGPREP_BIDI_RAL_TABLE</code></span></p></td>
+<td>The BIDI-RAL step.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-BIDI-L-TABLE:CAPS"></a><span class="term"><code class="literal">STRINGPREP_BIDI_L_TABLE</code></span></p></td>
+<td>The BIDI-L step.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Stringprep-profiles"></a><h3>Stringprep_profiles</h3>
+<pre class="programlisting">  typedef struct Stringprep_profiles Stringprep_profiles;
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Stringprep-rc"></a><h3>enum Stringprep_rc</h3>
+<pre class="programlisting">typedef enum {
+    STRINGPREP_OK = 0,
+    /* Stringprep errors. */
+    STRINGPREP_CONTAINS_UNASSIGNED = 1,
+    STRINGPREP_CONTAINS_PROHIBITED = 2,
+    STRINGPREP_BIDI_BOTH_L_AND_RAL = 3,
+    STRINGPREP_BIDI_LEADTRAIL_NOT_RAL = 4,
+    STRINGPREP_BIDI_CONTAINS_PROHIBITED = 5,
+    /* Error in calling application. */
+    STRINGPREP_TOO_SMALL_BUFFER = 100,
+    STRINGPREP_PROFILE_ERROR = 101,
+    STRINGPREP_FLAG_ERROR = 102,
+    STRINGPREP_UNKNOWN_PROFILE = 103,
+    /* Internal errors. */
+    STRINGPREP_NFKC_FAILED = 200,
+    STRINGPREP_MALLOC_ERROR = 201
+} Stringprep_rc;
+</pre>
+<p>
+Enumerated return codes of <a class="link" href="libidn-stringprep.html#stringprep" title="stringprep ()"><code class="function">stringprep()</code></a>, <a class="link" href="libidn-stringprep.html#stringprep-profile" title="stringprep_profile ()"><code class="function">stringprep_profile()</code></a>
+functions (and macros using those functions).  The value 0 is
+guaranteed to always correspond to success.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="STRINGPREP-OK:CAPS"></a><span class="term"><code class="literal">STRINGPREP_OK</code></span></p></td>
+<td>Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-CONTAINS-UNASSIGNED:CAPS"></a><span class="term"><code class="literal">STRINGPREP_CONTAINS_UNASSIGNED</code></span></p></td>
+<td>String contain unassigned Unicode
+  code points, which is forbidden by the profile.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-CONTAINS-PROHIBITED:CAPS"></a><span class="term"><code class="literal">STRINGPREP_CONTAINS_PROHIBITED</code></span></p></td>
+<td>String contain code points
+  prohibited by the profile.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-BIDI-BOTH-L-AND-RAL:CAPS"></a><span class="term"><code class="literal">STRINGPREP_BIDI_BOTH_L_AND_RAL</code></span></p></td>
+<td>String contain code points with
+  conflicting bidirection category.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-BIDI-LEADTRAIL-NOT-RAL:CAPS"></a><span class="term"><code class="literal">STRINGPREP_BIDI_LEADTRAIL_NOT_RAL</code></span></p></td>
+<td>Leading and trailing character
+  in string not of proper bidirectional category.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-BIDI-CONTAINS-PROHIBITED:CAPS"></a><span class="term"><code class="literal">STRINGPREP_BIDI_CONTAINS_PROHIBITED</code></span></p></td>
+<td>Contains prohibited code
+  points detected by bidirectional code.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-TOO-SMALL-BUFFER:CAPS"></a><span class="term"><code class="literal">STRINGPREP_TOO_SMALL_BUFFER</code></span></p></td>
+<td>Buffer handed to function was too
+  small.  This usually indicate a problem in the calling
+  application.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-PROFILE-ERROR:CAPS"></a><span class="term"><code class="literal">STRINGPREP_PROFILE_ERROR</code></span></p></td>
+<td>The stringprep profile was inconsistent.
+  This usually indicate an internal error in the library.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-FLAG-ERROR:CAPS"></a><span class="term"><code class="literal">STRINGPREP_FLAG_ERROR</code></span></p></td>
+<td>The supplied flag conflicted with profile.
+  This usually indicate a problem in the calling application.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-UNKNOWN-PROFILE:CAPS"></a><span class="term"><code class="literal">STRINGPREP_UNKNOWN_PROFILE</code></span></p></td>
+<td>The supplied profile name was not
+  known to the library.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-NFKC-FAILED:CAPS"></a><span class="term"><code class="literal">STRINGPREP_NFKC_FAILED</code></span></p></td>
+<td>The Unicode NFKC operation failed.  This
+  usually indicate an internal error in the library.
+</td>
+</tr>
+<tr>
+<td><p><a name="STRINGPREP-MALLOC-ERROR:CAPS"></a><span class="term"><code class="literal">STRINGPREP_MALLOC_ERROR</code></span></p></td>
+<td>The <code class="function">malloc()</code> was out of memory.  This is
+  usually a fatal error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Stringprep-table-element"></a><h3>Stringprep_table_element</h3>
+<pre class="programlisting">  typedef struct Stringprep_table_element Stringprep_table_element;
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep"></a><h3>stringprep ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 stringprep                          (<em class="parameter"><code><span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> maxlen</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> *profile</code></em>);</pre>
+<p>
+Prepare the input zero terminated UTF-8 string according to the
+stringprep profile, and write back the result to the input string.
+</p>
+<p>
+Note that you must convert strings entered in the systems locale
+into UTF-8 before using this function, see
+<a class="link" href="libidn-stringprep.html#stringprep-locale-to-utf8" title="stringprep_locale_to_utf8 ()"><code class="function">stringprep_locale_to_utf8()</code></a>.
+</p>
+<p>
+Since the stringprep operation can expand the string, <em class="parameter"><code>maxlen</code></em>
+indicate how large the buffer holding the string is.  This function
+will not read or write to characters outside that size.
+</p>
+<p>
+The <em class="parameter"><code>flags</code></em> are one of <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> values, or 0.
+</p>
+<p>
+The <em class="parameter"><code>profile</code></em> contain the <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> instructions to
+perform.  Your application can define new profiles, possibly
+re-using the generic stringprep tables that always will be part of
+the library, or use one of the currently supported profiles.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input/ouput array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxlen</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>a <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> value, or 0.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>profile</code></em> :</span></p></td>
+<td>pointer to <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> to use.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-stringprep.html#STRINGPREP-OK:CAPS"><code class="literal">STRINGPREP_OK</code></a> iff successful, or an error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-4i"></a><h3>stringprep_4i ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 stringprep_4i                       (<em class="parameter"><code><span class="type">uint32_t</span> *ucs4</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *len</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> maxucs4len</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> *profile</code></em>);</pre>
+<p>
+Prepare the input UCS-4 string according to the stringprep profile,
+and write back the result to the input string.
+</p>
+<p>
+The input is not required to be zero terminated (<em class="parameter"><code>ucs4</code></em>[<em class="parameter"><code>len</code></em>] = 0).
+The output will not be zero terminated unless <em class="parameter"><code>ucs4</code></em>[<em class="parameter"><code>len</code></em>] = 0.
+Instead, see <a class="link" href="libidn-stringprep.html#stringprep-4zi" title="stringprep_4zi ()"><code class="function">stringprep_4zi()</code></a> if your input is zero terminated or
+if you want the output to be.
+</p>
+<p>
+Since the stringprep operation can expand the string, <em class="parameter"><code>maxucs4len</code></em>
+indicate how large the buffer holding the string is.  This function
+will not read or write to code points outside that size.
+</p>
+<p>
+The <em class="parameter"><code>flags</code></em> are one of <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> values, or 0.
+</p>
+<p>
+The <em class="parameter"><code>profile</code></em> contain the <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> instructions to
+perform.  Your application can define new profiles, possibly
+re-using the generic stringprep tables that always will be part of
+the library, or use one of the currently supported profiles.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ucs4</code></em> :</span></p></td>
+<td>input/output array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td>on input, length of input array with Unicode code points,
+on exit, length of output array with Unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxucs4len</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>a <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> value, or 0.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>profile</code></em> :</span></p></td>
+<td>pointer to <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> to use.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-stringprep.html#STRINGPREP-OK:CAPS"><code class="literal">STRINGPREP_OK</code></a> iff successful, or an
+<a class="link" href="libidn-stringprep.html#Stringprep-rc" title="enum Stringprep_rc"><span class="type">Stringprep_rc</span></a> error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-4zi"></a><h3>stringprep_4zi ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 stringprep_4zi                      (<em class="parameter"><code><span class="type">uint32_t</span> *ucs4</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> maxucs4len</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>,
+                                                         <em class="parameter"><code>const <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> *profile</code></em>);</pre>
+<p>
+Prepare the input zero terminated UCS-4 string according to the
+stringprep profile, and write back the result to the input string.
+</p>
+<p>
+Since the stringprep operation can expand the string, <em class="parameter"><code>maxucs4len</code></em>
+indicate how large the buffer holding the string is.  This function
+will not read or write to code points outside that size.
+</p>
+<p>
+The <em class="parameter"><code>flags</code></em> are one of <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> values, or 0.
+</p>
+<p>
+The <em class="parameter"><code>profile</code></em> contain the <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> instructions to
+perform.  Your application can define new profiles, possibly
+re-using the generic stringprep tables that always will be part of
+the library, or use one of the currently supported profiles.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ucs4</code></em> :</span></p></td>
+<td>input/output array with zero terminated string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxucs4len</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>a <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> value, or 0.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>profile</code></em> :</span></p></td>
+<td>pointer to <a class="link" href="libidn-stringprep.html#Stringprep-profile" title="Stringprep_profile"><span class="type">Stringprep_profile</span></a> to use.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-stringprep.html#STRINGPREP-OK:CAPS"><code class="literal">STRINGPREP_OK</code></a> iff successful, or an
+<a class="link" href="libidn-stringprep.html#Stringprep-rc" title="enum Stringprep_rc"><span class="type">Stringprep_rc</span></a> error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-check-version"></a><h3>stringprep_check_version ()</h3>
+<pre class="programlisting">const <span class="returnvalue">char</span> *        stringprep_check_version            (<em class="parameter"><code>const <span class="type">char</span> *req_version</code></em>);</pre>
+<p>
+Check that the version of the library is at minimum the requested one
+and return the version string; return NULL if the condition is not
+satisfied.  If a NULL is passed to this function, no check is done,
+but the version string is simply returned.
+</p>
+<p>
+See <a class="link" href="libidn-stringprep.html#STRINGPREP-VERSION:CAPS" title="STRINGPREP_VERSION"><code class="literal">STRINGPREP_VERSION</code></a> for a suitable <em class="parameter"><code>req_version</code></em> string.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>req_version</code></em> :</span></p></td>
+<td>Required version number, or NULL.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Version string of run-time library, or NULL if the
+run-time library does not meet the required version number.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-convert"></a><h3>stringprep_convert ()</h3>
+<pre class="programlisting"><span class="returnvalue">char</span> *              stringprep_convert                  (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *to_codeset</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *from_codeset</code></em>);</pre>
+<p>
+Convert the string from one character set to another using the
+system's <code class="function">iconv()</code> function.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>str</code></em> :</span></p></td>
+<td>input zero-terminated string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>to_codeset</code></em> :</span></p></td>
+<td>name of destination character set.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>from_codeset</code></em> :</span></p></td>
+<td>name of origin character set, as used by <em class="parameter"><code>str</code></em>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns newly allocated zero-terminated string which
+is <em class="parameter"><code>str</code></em> transcoded into to_codeset.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-iscsi"></a><h3>stringprep_iscsi()</h3>
+<pre class="programlisting">#define             stringprep_iscsi(in, maxlen)</pre>
+<p>
+Prepare the input UTF-8 string according to the draft iSCSI
+stringprep profile.  Returns 0 iff successful, or an error code.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input/ouput array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxlen</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-kerberos5"></a><h3>stringprep_kerberos5()</h3>
+<pre class="programlisting">#define             stringprep_kerberos5(in, maxlen)</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-locale-charset"></a><h3>stringprep_locale_charset ()</h3>
+<pre class="programlisting">const <span class="returnvalue">char</span> *        stringprep_locale_charset           (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>
+Find out current locale charset.  The function respect the CHARSET
+environment variable, but typically uses nl_langinfo(CODESET) when
+it is supported.  It fall back on "ASCII" if CHARSET isn't set and
+nl_langinfo isn't supported or return anything.
+</p>
+<p>
+Note that this function return the application's locale's preferred
+charset (or thread's locale's preffered charset, if your system
+support thread-specific locales).  It does not return what the
+system may be using.  Thus, if you receive data from external
+sources you cannot in general use this function to guess what
+charset it is encoded in.  Use stringprep_convert from the external
+representation into the charset returned by this function, to have
+data in the locale encoding.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Return the character set used by the current locale.
+It will never return NULL, but use "ASCII" as a fallback.</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-locale-to-utf8"></a><h3>stringprep_locale_to_utf8 ()</h3>
+<pre class="programlisting"><span class="returnvalue">char</span> *              stringprep_locale_to_utf8           (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>);</pre>
+<p>
+Convert string encoded in the locale's character set into UTF-8 by
+using <a class="link" href="libidn-stringprep.html#stringprep-convert" title="stringprep_convert ()"><code class="function">stringprep_convert()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>str</code></em> :</span></p></td>
+<td>input zero terminated string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns newly allocated zero-terminated string which
+is <em class="parameter"><code>str</code></em> transcoded into UTF-8.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-nameprep"></a><h3>stringprep_nameprep()</h3>
+<pre class="programlisting">#define             stringprep_nameprep(in, maxlen)</pre>
+<p>
+Prepare the input UTF-8 string according to the nameprep profile.
+The AllowUnassigned flag is true, use
+<a class="link" href="libidn-stringprep.html#stringprep-nameprep-no-unassigned" title="stringprep_nameprep_no_unassigned()"><code class="function">stringprep_nameprep_no_unassigned()</code></a> if you want a false
+AllowUnassigned.  Returns 0 iff successful, or an error code.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input/ouput array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxlen</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-nameprep-no-unassigned"></a><h3>stringprep_nameprep_no_unassigned()</h3>
+<pre class="programlisting">#define             stringprep_nameprep_no_unassigned(in, maxlen)</pre>
+<p>
+Prepare the input UTF-8 string according to the nameprep profile.
+The AllowUnassigned flag is false, use <a class="link" href="libidn-stringprep.html#stringprep-nameprep" title="stringprep_nameprep()"><code class="function">stringprep_nameprep()</code></a> for
+true AllowUnassigned.  Returns 0 iff successful, or an error code.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input/ouput array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxlen</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-plain"></a><h3>stringprep_plain()</h3>
+<pre class="programlisting">#define             stringprep_plain(in, maxlen)</pre>
+<p>
+Prepare the input UTF-8 string according to the draft SASL
+ANONYMOUS profile.  Returns 0 iff successful, or an error code.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input/ouput array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxlen</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-profile"></a><h3>stringprep_profile ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 stringprep_profile                  (<em class="parameter"><code>const <span class="type">char</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **out</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *profile</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> flags</code></em>);</pre>
+<p>
+Prepare the input zero terminated UTF-8 string according to the
+stringprep profile, and return the result in a newly allocated
+variable.
+</p>
+<p>
+Note that you must convert strings entered in the systems locale
+into UTF-8 before using this function, see
+<a class="link" href="libidn-stringprep.html#stringprep-locale-to-utf8" title="stringprep_locale_to_utf8 ()"><code class="function">stringprep_locale_to_utf8()</code></a>.
+</p>
+<p>
+The output <em class="parameter"><code>out</code></em> variable must be deallocated by the caller.
+</p>
+<p>
+The <em class="parameter"><code>flags</code></em> are one of <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> values, or 0.
+</p>
+<p>
+The <em class="parameter"><code>profile</code></em> specifies the name of the stringprep profile to use.
+It must be one of the internally supported stringprep profiles.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input array with UTF-8 string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out</code></em> :</span></p></td>
+<td>output variable with pointer to newly allocate string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>profile</code></em> :</span></p></td>
+<td>name of stringprep profile to use.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>a <a class="link" href="libidn-stringprep.html#Stringprep-profile-flags" title="enum Stringprep_profile_flags"><span class="type">Stringprep_profile_flags</span></a> value, or 0.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-stringprep.html#STRINGPREP-OK:CAPS"><code class="literal">STRINGPREP_OK</code></a> iff successful, or an error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-strerror"></a><h3>stringprep_strerror ()</h3>
+<pre class="programlisting">const <span class="returnvalue">char</span> *        stringprep_strerror                 (<em class="parameter"><code><a class="link" href="libidn-stringprep.html#Stringprep-rc" title="enum Stringprep_rc"><span class="type">Stringprep_rc</span></a> rc</code></em>);</pre>
+<p>
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+</p>
+<p>
+STRINGPREP_OK: Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+STRINGPREP_CONTAINS_UNASSIGNED: String contain unassigned Unicode
+  code points, which is forbidden by the profile.
+STRINGPREP_CONTAINS_PROHIBITED: String contain code points
+  prohibited by the profile.
+STRINGPREP_BIDI_BOTH_L_AND_RAL: String contain code points with
+  conflicting bidirection category.
+STRINGPREP_BIDI_LEADTRAIL_NOT_RAL: Leading and trailing character
+  in string not of proper bidirectional category.
+STRINGPREP_BIDI_CONTAINS_PROHIBITED: Contains prohibited code
+  points detected by bidirectional code.
+STRINGPREP_TOO_SMALL_BUFFER: Buffer handed to function was too
+  small.  This usually indicate a problem in the calling
+  application.
+STRINGPREP_PROFILE_ERROR: The stringprep profile was inconsistent.
+  This usually indicate an internal error in the library.
+STRINGPREP_FLAG_ERROR: The supplied flag conflicted with profile.
+  This usually indicate a problem in the calling application.
+STRINGPREP_UNKNOWN_PROFILE: The supplied profile name was not
+  known to the library.
+STRINGPREP_NFKC_FAILED: The Unicode NFKC operation failed.  This
+  usually indicate an internal error in the library.
+STRINGPREP_MALLOC_ERROR: The <code class="function">malloc()</code> was out of memory.  This is
+  usually a fatal error.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rc</code></em> :</span></p></td>
+<td>a <a class="link" href="libidn-stringprep.html#Stringprep-rc" title="enum Stringprep_rc"><span class="type">Stringprep_rc</span></a> return code.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns a pointer to a statically allocated string
+containing a description of the error with the return code <em class="parameter"><code>rc</code></em>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-ucs4-nfkc-normalize"></a><h3>stringprep_ucs4_nfkc_normalize ()</h3>
+<pre class="programlisting"><span class="returnvalue">uint32_t</span> *          stringprep_ucs4_nfkc_normalize      (<em class="parameter"><code>const <span class="type">uint32_t</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>);</pre>
+<p>
+Converts a UCS4 string into canonical form, see
+<a class="link" href="libidn-stringprep.html#stringprep-utf8-nfkc-normalize" title="stringprep_utf8_nfkc_normalize ()"><code class="function">stringprep_utf8_nfkc_normalize()</code></a> for more information.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>str</code></em> :</span></p></td>
+<td>a Unicode string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td>length of <em class="parameter"><code>str</code></em> array, or -1 if <em class="parameter"><code>str</code></em> is nul-terminated.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a newly allocated Unicode string, that is the NFKC
+normalized form of <em class="parameter"><code>str</code></em>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-ucs4-to-utf8"></a><h3>stringprep_ucs4_to_utf8 ()</h3>
+<pre class="programlisting"><span class="returnvalue">char</span> *              stringprep_ucs4_to_utf8             (<em class="parameter"><code>const <span class="type">uint32_t</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *items_read</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *items_written</code></em>);</pre>
+<p>
+Convert a string from a 32-bit fixed width representation as UCS-4.
+to UTF-8. The result will be terminated with a 0 byte.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>str</code></em> :</span></p></td>
+<td>a UCS-4 encoded string</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td>the maximum length of <em class="parameter"><code>str</code></em> to use. If <em class="parameter"><code>len</code></em> &lt; 0, then
+the string is terminated with a 0 character.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>items_read</code></em> :</span></p></td>
+<td>location to store number of characters read read, or <code class="literal">NULL</code>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>items_written</code></em> :</span></p></td>
+<td>location to store number of bytes written or <code class="literal">NULL</code>.
+The value here stored does not include the trailing 0
+byte.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a pointer to a newly allocated UTF-8 string.
+This value must be deallocated by the caller.
+If an error occurs, <code class="literal">NULL</code> will be returned.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-unichar-to-utf8"></a><h3>stringprep_unichar_to_utf8 ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 stringprep_unichar_to_utf8          (<em class="parameter"><code><span class="type">uint32_t</span> c</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> *outbuf</code></em>);</pre>
+<p>
+Converts a single character to UTF-8.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>c</code></em> :</span></p></td>
+<td>a ISO10646 character code</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>outbuf</code></em> :</span></p></td>
+<td>output buffer, must have at least 6 bytes of space.
+If <code class="literal">NULL</code>, the length will be computed and returned
+and nothing will be written to <em class="parameter"><code>outbuf</code></em>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>number of bytes written.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-utf8-nfkc-normalize"></a><h3>stringprep_utf8_nfkc_normalize ()</h3>
+<pre class="programlisting"><span class="returnvalue">char</span> *              stringprep_utf8_nfkc_normalize      (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>);</pre>
+<p>
+Converts a string into canonical form, standardizing
+such issues as whether a character with an accent
+is represented as a base character and combining
+accent or as a single precomposed character.
+</p>
+<p>
+The normalization mode is NFKC (ALL COMPOSE).  It standardizes
+differences that do not affect the text content, such as the
+above-mentioned accent representation. It standardizes the
+"compatibility" characters in Unicode, such as SUPERSCRIPT THREE to
+the standard forms (in this case DIGIT THREE). Formatting
+information may be lost but for most text operations such
+characters should be considered the same. It returns a result with
+composed forms rather than a maximally decomposed form.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>str</code></em> :</span></p></td>
+<td>a UTF-8 encoded string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td>length of <em class="parameter"><code>str</code></em>, in bytes, or -1 if <em class="parameter"><code>str</code></em> is nul-terminated.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a newly allocated string, that is the
+NFKC normalized form of <em class="parameter"><code>str</code></em>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-utf8-to-locale"></a><h3>stringprep_utf8_to_locale ()</h3>
+<pre class="programlisting"><span class="returnvalue">char</span> *              stringprep_utf8_to_locale           (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>);</pre>
+<p>
+Convert string encoded in UTF-8 into the locale's character set by
+using <a class="link" href="libidn-stringprep.html#stringprep-convert" title="stringprep_convert ()"><code class="function">stringprep_convert()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>str</code></em> :</span></p></td>
+<td>input zero terminated string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns newly allocated zero-terminated string which
+is <em class="parameter"><code>str</code></em> transcoded into the locale's character set.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-utf8-to-ucs4"></a><h3>stringprep_utf8_to_ucs4 ()</h3>
+<pre class="programlisting"><span class="returnvalue">uint32_t</span> *          stringprep_utf8_to_ucs4             (<em class="parameter"><code>const <span class="type">char</span> *str</code></em>,
+                                                         <em class="parameter"><code><span class="type">ssize_t</span> len</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *items_written</code></em>);</pre>
+<p>
+Convert a string from UTF-8 to a 32-bit fixed width
+representation as UCS-4, assuming valid UTF-8 input.
+This function does no error checking on the input.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>str</code></em> :</span></p></td>
+<td>a UTF-8 encoded string</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>len</code></em> :</span></p></td>
+<td>the maximum length of <em class="parameter"><code>str</code></em> to use. If <em class="parameter"><code>len</code></em> &lt; 0, then
+the string is nul-terminated.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>items_written</code></em> :</span></p></td>
+<td>location to store the number of characters in the
+result, or <code class="literal">NULL</code>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a pointer to a newly allocated UCS-4 string.
+This value must be deallocated by the caller.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-utf8-to-unichar"></a><h3>stringprep_utf8_to_unichar ()</h3>
+<pre class="programlisting"><span class="returnvalue">uint32_t</span>            stringprep_utf8_to_unichar          (<em class="parameter"><code>const <span class="type">char</span> *p</code></em>);</pre>
+<p>
+Converts a sequence of bytes encoded as UTF-8 to a Unicode character.
+If <em class="parameter"><code>p</code></em> does not point to a valid UTF-8 encoded character, results are
+undefined.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>p</code></em> :</span></p></td>
+<td>a pointer to Unicode character encoded as UTF-8</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>the resulting character.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-xmpp-nodeprep"></a><h3>stringprep_xmpp_nodeprep()</h3>
+<pre class="programlisting">#define             stringprep_xmpp_nodeprep(in, maxlen)</pre>
+<p>
+Prepare the input UTF-8 string according to the draft XMPP node
+identifier profile.  Returns 0 iff successful, or an error code.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input/ouput array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxlen</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="stringprep-xmpp-resourceprep"></a><h3>stringprep_xmpp_resourceprep()</h3>
+<pre class="programlisting">#define             stringprep_xmpp_resourceprep(in, maxlen)</pre>
+<p>
+Prepare the input UTF-8 string according to the draft XMPP resource
+identifier profile.  Returns 0 iff successful, or an error code.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input/ouput array with string to prepare.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>maxlen</code></em> :</span></p></td>
+<td>maximum length of input/output array.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.18</div>
+</body>
+</html>

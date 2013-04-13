@@ -1,0 +1,1434 @@
+Libidn NEWS -- History of user-visible changes.                 -*- outline -*-
+Copyright (C) 2002-2012 Simon Josefsson
+See the end for copying conditions.
+
+* Version 1.25 (released 2012-05-23) [stable]
+
+** MSVC: Build fixes related to _GL_ATTRIBUTE_CONST and _GL_ATTRIBUTE_PURE.
+Reported by Bartosz Brachaczek <b.brachaczek@gmail.com>.
+
+** examples: Fix compiler warning about ignoring return value from fgets.
+
+** tests: Ship with a valgrind suppressions file for the strlen issue.
+See tests/libidn.supp and  bottom of HACKING for discussion.
+
+** Update gnulib files and translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.24 (released 2012-01-10) [stable]
+
+** Libraries are re-licensed from LGPLv2+ to dual-GPLv2+|LGPLv3+.
+
+** build: Fix parallel Windows builds.
+Reported by René Berber <r.berber@computer.org>.
+
+** libidn: Fix potential infloop in pr29 code.
+Reported by Jon Nelson <jnelson@jamponi.net> in
+<http://lists.gnu.org/archive/html/help-libidn/2012-01/msg00008.html>.
+
+** libidn: Add 'const' keyword to 'stringprep_ucs4_nfkc_normalize' function.
+
+** Sync glib NFKC code and improve copyright/license statements.
+
+** Update gnulib files and translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.23 (released 2011-11-25) [stable]
+
+** stringprep.h: Now #include's sys/types.h instead of unistd.h for ssize_t.
+Some systems (e.g., Mingw with MSVC 9) does not have unistd.h.
+
+** idn-free.h: Protect prototypes with 'extern "C"' marker.
+Reported by Bittner Ede <bittner.ede@euronetrt.hu>.
+
+** doc: Update link to experimental TLD tables.
+The new link is <https://github.com/gnuthor/tldchk>.
+
+** Update gnulib files and translations.
+
+** QA: Improved cyclo output.  Update GTK-DOC files.  Various bugfixes.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.22 (released 2011-05-04) [stable]
+
+** libidn: Add -liconv as static library requirement in libidn.pc, for MinGW.
+Reported by Volker Grabsch <vog@notjusthosting.com>.
+
+** libidn: Fix memory leak in idna_to_ascii_4z when idna_to_ascii_4i fails.
+Reported by and tiny patch from Olga Limburg <olimburg@gmail.com>.
+
+** libidn: Ran clang-analyze on the code.
+Fixed some dead assignments/initializations.
+
+** build: Really distribute win32/libidn4win.mk.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.21 (released 2011-04-24) [stable]
+
+** build/gettext: Demand gettext >= 0.18.1 in order to get newer M4 files.
+The old M4 files associated with 0.17 caused problems on Solaris,
+hopefully now fixed.  Reported by Dagobert Michelsen <dam@opencsw.org>
+in <http://thread.gmane.org/gmane.comp.lib.gnulib.bugs/25522>.
+
+** build: Improve MinGW cross-compile makefile, see win32/libidn4win.mk.
+
+** build: Visual Studio files fixed to define LIBIDN_BUILDING.
+Tiny patch from Waqas Hussain <waqas20@gmail.com>.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.20 (released 2011-03-01) [stable]
+
+** libidn: Fix bug in ToUnicode to compare 'xn--' case-insensitively.
+The problem is typically noticed when an upper ACE case string is
+converted to Unicode.  Before, this would return the input rather than
+converting the ACE form to Unicode.  Reported by Stepan Golosunov
+<stepan@golosunov.pp.ru> in <http://bugs.debian.org/610617>.
+
+** tests: Added self-test tst_idna3 to catch any regression of problem above.
+
+** idn: Only print copyright and license blurb when used interactively.
+Reported by "Andrew O. Shadoura" <bugzilla@tut.by> and Roman Mamedov
+<rm@romanrm.ru> in <http://bugs.debian.org/615947> and
+<http://bugs.debian.org/615949> respectively.
+
+** Update gnulib files and translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.19 (released 2010-05-22) [stable]
+
+** doc: Typo fixes.  Added PDF version of API reference manual.
+See doc/reference/libidn.pdf.
+
+** build: Update gnulib files.
+
+** build: Use valgrind -q to reduce verbosity.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.18 (released 2010-02-15) [stable]
+
+** libidn: Put forgotten symbols under old namespace.
+Reverts one unnecessary change introduced in 1.17.  Suggested by Marco
+d'Itri <md@linux.it>.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.17 (released 2010-02-05) [alpha]
+
+** libidn: Fix symbol export problem for a few variables.
+Applications (that use these rarely used variables) built against
+versions before 1.13 did not work with libidn versions 1.13 to 1.16.
+
+Symbol versioning was introduced in version 1.13 but by accident some
+symbols that were visible before that release were not exported, and
+the consequence was that those symbols were not available in version
+1.13 to 1.16.  This release fixes the problem, so the symbols are
+visible again, making this release backwards compatible with all
+earlier releases.
+
+The affected symbols are the following variables:
+stringprep_iscsi_prohibit, stringprep_rfc3454_A_1,
+stringprep_rfc3454_B_1, stringprep_rfc3454_B_2,
+stringprep_rfc3454_B_3, stringprep_rfc3454_C_1_1,
+stringprep_rfc3454_C_1_2, stringprep_rfc3454_C_2_1,
+stringprep_rfc3454_C_2_2, stringprep_rfc3454_C_3,
+stringprep_rfc3454_C_4, stringprep_rfc3454_C_5,
+stringprep_rfc3454_C_6, stringprep_rfc3454_C_7,
+stringprep_rfc3454_C_8, stringprep_rfc3454_C_9,
+stringprep_rfc3454_D_1, stringprep_rfc3454_D_2,
+stringprep_saslprep_space_map.
+
+Thanks to Marco d'Itri <md@linux.it> for reporting
+<http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=561291> that led to
+discovering this problem.
+
+** Really fix the link error of self-tests on MinGW.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.16 (released 2010-01-12)
+
+** java: Add a Maven pom.xml project file.
+Contributed by Guus der Kinderen <guus.der.kinderen@gmail.com>.
+
+** Fix a link error on MinGW.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.15 (released 2009-06-08)
+
+** libidn: Use c_strcasecmp instead of strcasecmp.
+For portability to NetWare CLIB.  The specification requires a ASCII
+comparison, so it is also more appropriate to use c_strcasecmp.
+Reported by Guenter Knauf <gk@gknw.de>.
+
+** java: Fix some Java compiler warnings.
+
+** doc: Improved sections for the info manual.
+We now follow the advice given by the texinfo manual on which
+directory categories to use.  In particular, libidn moved from the
+'GNU Libraries' section to the 'Software libraries' and 'Invoking idn'
+moved from 'GNU utilities' to 'Localization'.
+
+** New configure parameters to set packaging specific information.
+The parameters are --with-packager, --with-packager-version, and
+--with-packager-bug-reports.  See
+<http://article.gmane.org/gmane.comp.lib.gnulib.bugs/17791> for more
+details.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.14 (released 2009-04-03)
+
+** libidn: Install a libidn-*.def file when building under MinGW.
+The file is useful if you develop programs in Visual Studio that links
+to libidn.
+
+** tests/tst_toutf8: Don't crash if stringprep_utf8_to_locale returns NULL.
+Reported by Dagobert Michelsen <dam@opencsw.org> in
+<http://thread.gmane.org/gmane.comp.gnu.libidn.general/192>.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.13 (released 2009-03-06)
+
+** libidn: Use a LD version script on platforms where it is supported.
+Currently only GNU LD and the Solaris linker supports it.  This helps
+Debian package tools to produce better dependencies.  Before we used
+Libtool -export-symbols-regex that created an anonymous version tag.
+Libidn uses -export-symbols-regex if the system does not support LD
+version scripts, but that only affect symbol visibility.
+
+** libidn: Compiled with -fvisibility=hidden by default if supported.
+Currently only GCC supports it for ELF targets.  This hides internal
+symbols and has other advantages, see
+<http://gcc.gnu.org/wiki/Visibility>.
+
+** libidn: Compiled with warning flags only when GCC is used.
+This avoids the problem that some flags confuse non-GCC compilers, for
+example -fdiagnostics-show-option.  Reported by
+jens.rehsack@bayerbbs.com.
+
+** doc: The idn_free function is now documented.
+Suggested by "Sisyphus" <sisyphus1@optusnet.com.au>.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.12 (released 2009-01-23)
+
+** idn: New parameter --no-tld to deprecate the old parameter --tld.
+The new parameter --no-tld disable TLD checking of the input string.
+The --tld parameter was broken; it behaved opposite to its documented
+behaviour.  To avoid confusion over what --tld means, we decided to
+deprecate it.  Now --tld is not printed in the idn --help output, but
+will continue to work as before.
+
+** doc: Modernize doxygen configuration.
+
+** doc: Change license on the manual to GFDLv1.3+.
+
+** doc: Improve JavaDoc output.
+
+** Update gnulib files and translations.
+
+** Build with more warnings.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.11 (released 2008-10-28)
+
+** libidn: New WARN_CFLAGS configure variable.
+It is used internally to add -Werror and other warnings flags, to
+catch coding mistakes before releases.
+
+** Win32: Perl is no longer required to build Libidn in Visual Studio.
+
+** Win32: Functions in idna.h are also exported.
+Reported by Adam Strzelecki <adam.strzelecki@java.pl>.
+
+** doc: Included cyclomatic code complexity charts of the library code.
+See doc/cyclo/.
+
+** tests: Add more self-tests to get more self-test code coverage.
+
+** tests: New 'make coverage' command to generate code coverage reports.
+The output is created in doc/coverage/.  Requires the LCOV tools.  See
+http://www.gnu.org/software/libidn/coverage/ for a pre-generated copy.
+
+** Clarify copyright and license for gdoc, man pages, and C# port.
+
+** Update gnulib files and translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.10 (released 2008-08-27)
+
+** idn: accept -n as short form for --nfkc.
+Before '-k' was used as the short form, but all documentation has said
+'-n'.  We now accept both short forms, and -n remains the documented
+short form.  Reported by John McGowan <jmcgowan@inch.com> in
+<http://lists.gnu.org/archive/html/help-libidn/2008-08/msg00000.html>.
+
+** Fix compiler warnings.
+
+** Update gnulib files.
+
+** Update translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.9 (released 2008-07-01)
+
+** idn: fix error message when NFKC fails, and some other translation fixes.
+Reported by Benno Schulenberg <coordinator@translationproject.org>.
+
+** C# Libidn.dll: Work around bug that cause a failure during C# compilation.
+See <https://bugzilla.novell.com/show_bug.cgi?id=372483>.
+
+** Remove more non-free text from doc/specifications/rfc3454.txt.
+The remaining data tables are not copyrightable.
+
+** Update gnulib files, and include gnulib self-tests.
+
+** Update translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.8 (released 2008-04-23)
+
+** Translations files not stored directly in git to avoid merge conflicts.
+This allows us to avoid use of --no-location which makes the
+translation teams happier.
+
+** Update gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.7 (released 2008-04-10)
+
+** idn: new parameter --nfkc to process string with Unicode v3.2 NFKC.
+
+** Minor build fix for native Win32 builds.
+
+** Update gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.6 (released 2008-03-19)
+
+** Add native Windows Visual Studio project files.
+Contributed by Adam Strzelecki <ono@java.pl>.
+
+** Remove non-free portions of RFC 3454 in doc/specifications/rfc3454.txt.
+
+** Update gnulib files.
+
+** Doc fixes in IDNA to clarify that some functions operate on
+** just one domain labels and some operate on domain name (which
+** can contain several domain labels).
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.5 (released 2008-02-19)
+
+** Don't include wchar.h in idn-int.h.
+Fixes problems on uClibc systems which lack a wchar.h.  Reported by
+Mike Frysinger <vapier@gentoo.org>, see
+<http://thread.gmane.org/gmane.comp.gnu.libidn.general/118>.
+
+** Added appendix 'On Label Separators' to the manual.
+Thanks to Erik van der Poel <erikv@google.com> for bringing the issue
+to our attention and for discussing the matter.  See
+<http://thread.gmane.org/gmane.comp.gnu.libidn.general/96>.
+
+** Improved rendering of non-ASCII in the info manual.
+Done by adding a @documentencoding UTF-8.  This affect how the
+examples are encoded, the files examples/*.c are now encoded using
+UTF-8 instead of a mix of ISO-8859-1 and ISO-8859-15.
+
+** Fix non-portable use of brace expansion in makefiles.
+
+** Update translations.
+
+** Update gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.4 (released 2008-01-09)
+
+** Fixes to make the C# port compile under Mono.
+
+** Update gnulib files.
+
+** Improve idn --version and --help output to conform to GNU standards.
+This also enables translations of --help output.
+
+** Update translations.
+Added Finish translation, thanks to Jorma Karvonen.  Updated Dutch and
+Vietnamese.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.3 (released 2007-12-11)
+
+** Some hints on Windows installation in the manual.
+
+** Update translations.
+Added Czech translation, thanks to Petr Pisar.
+
+** Use gettext 0.17.
+
+** Update gnulib files.
+Top-level gnulib files are now distributed under GPLv3+.  (The gnulib
+files used by the core library are still under LGPLv2.1+.)
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.2 (released 2007-10-01)
+
+** Development git tree moved to savannah.
+See <https://savannah.gnu.org/projects/libidn/>.
+
+** Update gnulib files.
+Including mono detection fixes.
+
+** Update translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.1 (released 2007-09-01)
+
+** Fix compilation error in idn-int.h.
+The error would typically be 'error: no include path in which to
+search for stdint.h'.  Reported by Remko van der Vossen
+<wich@stack.nl>, see
+<http://thread.gmane.org/gmane.comp.gnu.libidn.general/65> and
+<http://bugs.sourcemage.org/show_bug.cgi?id=13857>.
+
+** Declare external variables with __declspec(import) for Windows.
+Apparently this is required for variables in DLL's on Windows.  This
+is enabled if __DECLSPEC_SUPPORTED is defined (MinGW), or if _MSC_VER
+and_DLL is defined (MSVC).
+
+** Update gnulib files.
+
+** Update translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 1.0 (released 2007-07-31)
+
+** Command-line tools, examples, etc are now licensed under GPL version 3.
+The library is still licensed under LGPL v2.1 for compatibility
+reasons (it is included in glibc).
+
+** Updated documentation as per license change.
+
+** Update gnulib files.
+
+** Update translations.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.14 (released 2007-05-31)
+
+** Libidn is now developed using Git instead of CVS.
+A public git mirror is available from
+<http://repo.or.cz/w/libidn.git>.  If you have pulled from this
+repository before this release, you need to erase your clone because
+it has been re-generated from scratch.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.13 (released 2007-05-31)
+
+** Documentation fixes.
+Clarify that the C# and Java libraries are licensed under the LGPL.
+Earlier, some places incorrectly said that these were licensed under
+the GPL.  If you encounter other places that still suggest that GPL
+applies to the C# and Java library, please let me know.
+
+** Updated Polish and Vietnamese translations.
+Thanks to Jakub Bogusz <qboosh@pld-linux.org> and Clytie Siddall
+<clytie@riverland.net.au>.
+
+** Install images for the manual in $infodir.
+This fixes the broken image in the info manual.  Image files will be
+called libidn-*.png to avoid namespace collisions with images from
+other info manuals.
+
+** Update gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.12 (released 2007-04-25)
+
+** Use AM_JAVACFLAGS instead of JAVACFLAGS in java/misc/Makefile.am.
+Reported by Petteri Räty <betelgeuse@gentoo.org>.
+
+** Update gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.11 (released 2007-03-13)
+
+** Update of the C# Libidn port, by Alexander Gnauck.
+The code has been refactored and the namespace has been modified to
+comply with .NET naming conventions.  An IDNA bug was fixed.
+
+** Update gnulib files.
+We now use the "striconv" module instead of the "iconvme", which
+causes a slight increase of code size (from 303kb to 319kb with
+debugging symbols on i386).  The reason is the use of a new locale
+independent strcasecmp, which may cause faster operation in some
+locales where, e.g., "ASCII" and "ascii" are not treated as the same.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.10 (released 2007-01-04)
+
+** Corrected year in copyright notices.
+
+** Update gnulib files.
+Including the code to convert strings between different encodings
+(noted in case this introduces problems).
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.9 (released 2006-11-30)
+
+** The Java code is fixed to properly translate any non-ASCII dot into '.'.
+Reported and fixed by "Stephane Mikaty" <mikaty@ecircle-ag.com>.
+
+** Update gnulib files.
+
+** Bump tool versions to autoconf 2.61, automake 1.10, and gettext 0.16.
+
+** Old versions of iconv.m4, codeset.m4 and lib-link.m4 removed from m4/.
+Modern versions are part of gnulib.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.8 (released 2006-10-18)
+
+** The gnulib directory is separated into two directories.
+One gnulib directory (lib/gl/) for the LGPL library in lib/, and one
+gnulib directory (gl/) for the GPL tools in src/.  This allows the
+GPL'd tools to use more gnulib modules than before, since earlier all
+gnulib files had to be LGPL.
+
+** Update gnulib files.
+
+** Some minor cleanups, like assuming locale.h and setlocale().
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.7 (released 2006-09-13)
+
+** Fix build failure of idn-int.h on C99 platforms.
+Reported by Paul Howarth <paul@city-fan.org>.
+
+** The manual includes the GPL license, for the command-line tools.
+
+** The function, variable and concept index is moved to the end of the manual.
+
+** Update gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.6 (released 2006-08-23)
+
+** Instead of AX_CREATE_STDINT_H, use the stdint gnulib module, for idn-int.h.
+This solves building on some HPPA systems.  Note that the generated
+idn-int.h is specific to the build environment that libidn was built
+under, and is not generally usable by any other compiler (if any) on
+the host.  This was true before too.
+
+** Update gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.5 (released 2006-06-07)
+
+** Link the library with external libintl, for gettext.
+This fixes building on FreeBSD, reported by Kirill Ponomarew
+<krion@voodoo.bawue.com>.
+
+** Update doxygen config file to version 1.4.7.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.4 (released 2006-06-07)
+
+** Fix translation of error messages.
+Thanks to Joe Orton <jorton@redhat.com>.
+
+** Fix warnings on 64-bit platforms.
+Thanks to Joe Orton <jorton@redhat.com>.
+
+** The tests are run under valgrind, if it is installed.
+Use --disable-valgrind-tests to unconditionally disable this.  It is
+disabled by default for cross compiles.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.3 (released 2006-03-08)
+
+** Fixes for the build environment.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.2 (released 2006-02-07)
+
+** Fix objdir != srcdir builds for the Java documentation.
+Thanks to Bernard Leak <bernard@brenda-arkle.demon.co.uk>.
+
+** Update of gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.1 (released 2006-01-20)
+
+** Make it possible to cross-compile to mingw32.
+You can build Libidn for Windows by invoking `./configure
+--host=i586-mingw32msvc' (or similar).
+
+** Minor changes in how the C# code is built.
+
+** Update of gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.6.0 (released 2005-12-03)
+
+** A C# port of Libidn has been contributed by Alexander Gnauck.
+The port resides in the csharp/ directory.  Configure will build it if
+a working C# compiler can be found.  Mono's "mcs" compiler is known to
+work (available in Debian in the "mono-mcs" package), but PNET's
+"cscc" compiler should also work (available in Debian in the "pnet"
+package).  The port is licensed under the GPL.  Some Microsoft Visual
+Studio project files are also present in the csharp/ directory, which
+may be useful when building the port under Windows.  The C# API is
+currently not documented, improvements are gratefully accepted.
+
+** Support shared libraries on Cygwin and Mingw32, thanks to Yaakov S.
+
+** Fix memory leak.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.20 (released 2005-10-23)
+
+** The header file pr29.h is now installed by 'make install'.
+
+** Translation updates.
+
+** Update of gnulib files.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.19 (released 2005-09-19)
+
+** The test for setlocale and nl_langinfo has now been separated.
+The autoconf script now test for locale.h, setlocale and
+nl_langinfo(CODESET) independently.
+
+** Gnulib updates, fixes for getopt.
+
+** Java manuals in doc/java/ are now generated by Gjdoc from GNU Classpath.
+
+** Kaffe is used to link the pre-built libidn-*.jar file.
+
+** Translation updates.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.18 (released 2005-07-16)
+
+** The macro AX_CREATE_STDINT_H that is used to create idn-int.h
+** has been updated.
+
+** Fix use of 'head -1' in configure script (should be 'head -n -1'),
+** thanks to Carsten Lohrke.
+
+** Announce the help-libidn mailing list in documentation and README.
+
+** Translation updates.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.17 (released 2005-05-26)
+
+** The gnulib portability files were updated.
+
+** The license template in files were updated with the new address.
+
+** Translation updated.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.16 (released 2005-05-06)
+
+** Mark static PR29 data tables as 'const', thanks to Joe Orton.
+
+** Kinyarwanda translations added, thanks to Steve Murphy.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.15 (released 2005-03-19)
+
+** Improvements to code to convert data between character sets.
+The license template was changed to the LGPL, from the GPL template
+that was mistakenly used in the previous two releases.  Document here
+that cleaning up this code has solved memory allocation and arithmetic
+overflow problems.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.14 (released 2005-03-19)
+
+** Building for srcdir != objdir from CVS now work, thanks to Linus Nordberg.
+
+** Simplified Chinese translations added, thanks to Meng Jie.
+
+** Vietnamese translation added, thanks to Clytie Siddall.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.13 (released 2005-01-29)
+
+** The code to convert data between character encodings have been cleaned up.
+The stringprep_convert function has been added to gnulib, under the
+name iconv_string, and is now used by libidn.  This should not have
+any user-visible consequences, though.
+
+** It is now possible to bootstrap with unmodified Automake installations.
+
+** Italian translation added, thanks to Marco Colombo.
+
+** Swedish translation updated.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.12 (released 2004-12-04)
+
+** Java code now support the XMPP NodePrep and ResourcePrep profiles.
+
+** Bug fixes and improvements to Java code.
+The allowUnassigned flag is now respected properly.  The prohibited
+code points check now works.  Arguments are now checked.  Convenience
+method with allowUnassigned set to false was added.
+
+** Update getopt from gnulib.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.11 (released 2004-11-21)
+
+** Fix formatting of man pages, based on warnings from Doclifter.
+
+** Update of gnulib files to fix potential getopt problem on ELF systems.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.10 (released 2004-11-08)
+
+** Libtool's -export-symbols-regex is now used to only export official APIs.
+Before, applications might accidentally access internal functions.
+Note that this is not supported on all platforms, so you must still
+make sure you are not using undocumented symbols in Libidn.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.9 (released 2004-11-07)
+
+** Align GTK-DOC build infrastructure with GTK-DOC official recommendations.
+This mean that you can now browse the Libidn API manual using Devhelp.
+
+** Update of gnulib files to fix potential problem in getopt on BSD.
+
+** Documentation improvements.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.8 (released 2004-10-12)
+
+** BidiMirroring-3.2.0.txt is now included, not only the generated source code.
+This allow builds to succeed after 'make realclean'.
+
+** Generated files now have consistent 'DO NOT EDIT!' comments.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.7 (released 2004-10-12)
+
+** Shared library version incremented, because new APIs were added.
+This was forgotten in the last release.
+
+** French translation updated.
+
+** Minor bug fixes.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.6 (released 2004-10-02)
+
+** Added functions to convert return codes to human readable text.
+
+** Now using GNULib in command line front end (src/) for portability code.
+See <http://www.gnu.org/software/gnulib/> for more information on
+GNULib.  This should make the code easier to read and maintain.
+
+** API and ABI is backwards compatible with the previous version.
+idna_strerror: ADD.
+pr29_strerror: ADD.
+punycode_strerror: ADD.
+stringprep_strerror: ADD.
+tld_strerror: ADD.
+TLD_NO_TLD: ADD.  Replaces TLD_NOTLD.
+TLD_NOTLD: DEPRECATED.  Use TLD_NO_TLD instead.
+
+* Version 0.5.5 (released 2004-09-13)
+
+** Hide accidentally exported variable g_utf8_skip, by marking it as static.
+
+** Various fixes.
+
+** API and ABI is backwards compatible with the previous version.
+g_utf8_skip: REMOVED.  (But never meant to be used.)
+
+* Version 0.5.4 (released 2004-08-08)
+
+** Translation updates.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.3 (released 2004-08-05)
+
+** Fix crash in `idn --tld' command line tool.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.2 (released 2004-07-14)
+
+** Java "make install" rules are now DESTDIR compatible.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.1 (released 2004-07-09)
+
+** Cross compile builds should work.
+It should work for any sane cross compile target, but the only tested
+platform is uClibc/uClinux on Motorola Coldfire.
+
+** The example programs now correctly invoke `setlocale (LC_ALL, "")'.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.5.0 (released 2004-06-26)
+
+** Functions to detect "normalization problem sequences" as per PR-29 added.
+See the new chapter "PR29 Functions" in the manual
+(doc/libidn.{ps,pdf,html}) for more information and the background
+story.  An external link that discuss the problem is
+<http://www.unicode.org/review/pr-29.html>.
+
+** More translations.
+Added Esperanto (by Edmund GRIMLEY EVANS).
+
+** API and ABI is backwards compatible with the previous version.
+pr29.h: ADD.  Prototypes for PR29 types and functions.
+pr29_4, pr29_4z, pr29_8z: ADD.  New API entry points for PR29 functions.
+Pr29_rc: ADD.  New error code enum type for PR29 functions.
+
+* Version 0.4.9 (released 2004-06-11)
+
+** The Java library (java/libidn-*.jar) is included in the distribution.
+
+** JavaDoc manuals (doc/javadoc/) are included.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.4.8 (released 2004-06-01)
+
+** The Java source code is actually included in the distribution.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.4.7 (released 2004-05-31)
+
+** The Java port should now be functional, contributed by Oliver Hitz.
+See the new section "Java API" in the manual for more information.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.4.6 (released 2004-05-24)
+
+** The header file idn-free.h is actually installed by 'make install'.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.4.5 (released 2004-05-21)
+
+** In IDNA ToUnicode, a `free' on a stale pointer fixed by Ulrich Drepper.
+
+** Several memory leaks fixed by Ulrich Drepper.
+
+** Added more SASLPrep and NFKC test vectors.
+
+** Automake 1.8.4 is used.
+
+** API and ABI is backwards compatible with the previous version.
+idn_free: ADD.  Wrapper around system `free'.
+idn-free.h: ADD.  Prototype for `idn_free'.
+                See idn-free.h for discussion.  The interface is
+                currently not documented.  Comments and feedback is
+                appreciated.
+
+* Version 0.4.4 (released 2004-04-29)
+
+** Fixed two bugs in iSCSI definition, syncing with newly published RFC 3722.
+The first bug was an omission of prohibiting the characters in C.1.1,
+C.1.2 and C.7 (space characters and characters that are inappropriate
+for canonical representation).  The second was a bug in the definition
+of the table, causing the entire table to be skipped, of the special
+prohibited output character table defined in RFC 3722 (see section 6,
+the characters in the table are various ASCII characters and U+3002).
+
+** A few test vectors for iSCSI were added.
+
+** The self tests are linked with libtool -no-install to avoid wrapper script.
+
+** Separated self test utilities into a separate library, shared by all tests.
+
+** More translations.
+Added Romanian (by Laurentiu Buzdugan).
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.4.3 (released 2004-04-22)
+
+** Fixed a bug in table processing code to prohibit control characters.
+The problem was that the code used a code point of 0 to indicate end
+of table, but if (as for table C.2.1) a range starts with 0, this
+logic would fail.  The end-of-table test is now that both the start
+and end code points of the range is 0.  Table C.2.1 is responsible for
+prohibiting non-ASCII control characters, i.e. ASCII 0-31 and 127.
+Before, libidn silently accepted such strings without complaining.
+
+** A few test vectors for SASLprep were added.
+
+** The pkg-config script no longer include a -R parameter.
+
+** More translations.
+Added Dutch (by Elros Cyriatan), and German (by Roland Illig).
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.4.2 (released 2004-03-20)
+
+** A Punycode implementation in Java was added, by Oliver Hitz.
+Eventually hopefully a StringPrep, Nameprep and IDNA implementation
+will be added as well.  Currently you need to specify --enable-java to
+enable the Java interface.  The Java sources (below java/) are
+compiled into byte-code (not native code) into a JAR library.
+
+** More translations.
+Added Danish (by Morten Bo Johansen), French (by Michel Robitaille),
+Polish (by Jakub Bogusz), and Serbian (by Aleksandar Jelenak).
+
+** Norwegian TLD table added, by Thomas Jacob.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.4.1 (released 2004-03-08)
+
+** The user messages from the command line utility are now translated.
+Currently English and Swedish is supported.
+
+** Logic of stringprep_locale_charset modified.
+Future versions will use, in order, $CHARSET iff defined, nl_langinfo
+(CODESET) iff working, or fall back to returning "ASCII".  Earlier it
+attempted to guess the system locale, in contrast with the current
+application's locale, via some setlocale save/set/reset magic.  This
+change may require you to invoke setlocale() in your application,
+which is (should be) required for non-ASCII to work anyway.  Based on
+discussion with Ulrich Drepper.
+
+** The command-line utility now invoke setlocale (LC_ALL, "") at startup.
+
+** Fixed SASLprep tables to prohibit non-ASCII space in output.
+Non-ASCII space has always been mapped to ASCII space, so it is not
+clear this really have any effect, but the specification require it.
+
+** Building Libidn as part of GLIBC has been updated.
+Refer to libc/README for more information.  Incidentally, GLIBC in CVS
+now include a copy of Libidn.
+
+** API and ABI is backwards compatible with the previous version.
+IDNA_DLOPEN_ERROR: ADD.  Only used internally by Libidn in libc.
+
+* Version 0.4.0 (released 2004-02-28)
+
+** Support for TLD restrictions on IDN strings, contributed by Thomas Jacob.
+Many TLDs restrict the set of characters that can be used, from the
+full Unicode 3.2 range that is normally available.  This contribution
+make it possible for you to test strings for TLD conformance locally.
+The code can be disabled by --disable-tld.  If enabled (the default),
+the new API "tld.h" is installed which can be used to check a string
+for conformance to TLD specific rules.  This add a new self test, and
+a new chapter in the manual.  People responsible for maintaining TLD
+tables are hereby encouraged to contribute them (under reasonable
+licensing terms) for inclusion in future versions of Libidn.  Be
+warned that the API for TLD checking may change throughout the 0.4.x
+series as we get feedback on it.
+
+** Kerberos 5 stringprep profile macro is no longer documented.
+The macro itself will probably be removed in the future, if the
+specification is dropped from the Kerberos WG agenda.
+
+** API and ABI is backwards compatible with the previous version.
+stringprep_kerberos5: DEPRECATED.
+Tld_table_element:
+Tld_table:
+Tld_rc: ADD.  New data types.
+tld_get_4:
+tld_get_4z:
+tld_get_z: ADD.  New functions to extract TLD from string.
+tld_get_table:
+tld_default_table: ADD.  New functions to get TLD table from TLD name.
+tld_check_4t:
+tld_check_4tz: ADD.  New function to provide core TLD operations.
+tld_check_4:
+tld_check_4z:
+tld_check_8z:
+tld_check_lz: ADD.  New functions that combine all TLD operations in one call.
+
+* Version 0.3.7 (released 2004-01-22)
+
+** The command line parameter '--' idiom is documented.
+
+** The iSCSI stringprep profile now recognized as "iSCSI".
+The earlier name "ISCSIprep" is still recognized, for backwards
+compatibility.
+
+** DocBook manuals no longer included (the tools are too unstable).
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.3.6 (released 2004-01-06)
+
+** The manual now contain a troubleshooting section for the command line tool.
+
+** The PHP interface pass the string directly on the command line.
+
+** The macro that create 'idn-int.h' has been updated to latest version.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.3.5 (released 2003-12-15)
+
+** The program 'idn' accepts input strings directly on the command line.
+
+** The program 'idn' defaults to --idna-to-ascii if no parameter is given.
+
+** The program 'idn' now print user instructions before waiting for input.
+
+** DocBook HTML output not included any longer.
+The reason is that the filenames generated by docbook2html appear to
+be rather random, so it is difficult to maintain the Makefile.am rules
+for them.
+
+** Autoconf 2.59, automake 1.8 and libtool from CVS is used.
+
+** API and ABI is backwards compatible with the previous version.
+IDNA_CONTAINS_NON_LDH: ADD.  Same integer value as IDNA_CONTAINS_LDH.
+IDNA_CONTAINS_LDH: DEPRECATED.  LDH (letter-digits-hyphens) characters
+                are not an error, but non-LDH characters are, when
+                IDNA_USE_STD3_ASCII_RULES is used.  The logic of the
+                mnemonic name of this error constant was reversed.
+
+* Version 0.3.4 (released 2003-11-09)
+
+** DocBook manuals in XML, PDF, PostScript, ASCII and HTML formats included.
+
+* Version 0.3.3 (released 2003-10-18)
+
+** Fixed list of Stringprep profiles in 'idn --help' and 'idn.php'.
+
+** Fixed debug information in 'idn'.
+
+** Internal improvements.
+Leads to reduced heap memory usage.  Simplified inter-dependency among
+files in lib/* to make it easier to copy them into your project.
+
+** Debugging stringprep profile 'generic' removed.
+
+** Punycode implementation updated to rfc3492bis-00.
+
+** API and ABI is backwards compatible with the previous version.
+stringprep_4i: NEW.
+stringprep_4zi: NEW.
+stringprep: CHANGED. 'profile' is marked as 'const'.
+stringprep_profile: CHANGED. 'profile' is marked as 'const'.
+stringprep_generic: REMOVED. Never meant for public use.
+
+* Version 0.3.2 (released 2003-10-07)
+
+** SASL ANONYMOUS stringprep profile "trace" added.
+It is equivalent to the already supported "plain" SASL ANONYMOUS
+stringprep profile, except for the name.
+
+** API and ABI is backwards compatible with the previous version.
+The 'in' parameter to stringprep_profile was changed from 'char*' to
+'const char*'.
+
+* Version 0.3.1 (released 2003-10-02)
+
+** Fixed handling of implicit and explicit zero-length root labels in ToASCII.
+
+** Fixed support for Hangul Syllables during Unicode NFKC normalization.
+
+** Fixed Unicode NFKC normalization of (some) BMP code points.
+This was done by syncing the NFKC code with latest GLIB, and may have
+fixed other bugs in the earlier versions of the updated functions.
+
+** Added more IDNA test vectors.
+
+** Emacs Lisp IDNA implementation now set the UseSTD3ASCIIRules flag.
+This is the appropriate setting for mail-related uses of IDNA.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.3.0 (released 2003-09-23)
+
+** Ported to Mac OS X.
+
+** Gnulib code removed, we now assume a C89 compatible environment.
+
+** Building libidn as a libc add-on now works again.
+
+** Man pages for all public API functions are included.
+
+** Fixed bug in SASLprep profile.
+
+** API and ABI is NOT backwards compatible with the previous version.
+All previously labeled (since 0.1.x) obsolete functions have been dropped.
+The use of 'enum' types instead of 'int' added in 0.2.3 reverted, it
+confused documentation generators and wasn't all that common practice.
+
+* Version 0.2.3 (released 2003-08-26)
+
+** Example 4 was the same as example 3, now changed to demo ToUnicode.
+
+** Documentation improvements.
+
+** Prototype cleanups.
+The proper enum types (Stringprep_rc, Idna_rc, etc) are now used in
+several places where plain int where used before.  String lengths are
+handled by (s)size_t instead of int.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.2.2 (released 2003-08-13)
+
+** Fixed problem with strings longer than 4GB in punycode functions.
+The punycode code cannot handle strings longer than 4GB.  The code now
+return PUNYCODE_BAD_INPUT on too long input, instead of failing in an
+unknown way.
+
+** The "idn --idna-to-unicode" command now output locale encoded strings.
+
+** Build fixes, bug fixes.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.2.1 (released 2003-07-04)
+
+** Don't reject zero-length trailing labels as in, e.g., "www.example.org.".
+The IDNA RFC is not clear on this topic, zero-length labels in general
+are forbidden by the ToASCII algorithm in section 4.1 step 8, but the
+terminology section define, inside a parenthesis, that the zero-length
+root label is in fact not considered a label at all in IDNA.
+
+** Bug fixes.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.2.0 (released 2003-06-19)
+
+** Unicode code point data is now uint32_t, defined in "idn-int.h".
+A header file "idn-int.h" is generated and installed to make sure the
+"uint32_t" data type is available on all platforms.  The reason for
+this change is that on 64-bit platforms, the application was required
+to convert 32 bit integers (which is how Unicode code points are
+typically represented) into 64 bit integers before calling libidn
+functions.
+
+** New idna_*() functions have improved flags handling.
+The allowunassigned and usestd3asciirules parameters were collapsed
+into a flags parameter, that can take on the IDNA_ALLOW_UNASSIGNED and
+IDNA_USE_STD3_ASCII_RULES values.  This allows for easier extensions
+to support, e.g., Unicode 4.0 or RFC 952 ASCII rules checking.  Note
+that the old entry points are unmodified (in this regard), and new
+entry points with this modification were added.
+
+** The manual was moved into a separate directory doc/.
+
+** Bugfixes.
+
+** API and ABI is not backwards compatible.
+In punycode.h and stringprep.h the "unsigned long" data type was
+changed into "uint32_t", which cause a API and ABI missmatch.  For
+idna.h, the old entry points that used "unsigned long" still exist,
+and new entry points that uses "uint32_t" was added.  To update your
+application, you probably only need to change "unsigned long" to
+"uint32_t".  As a result of these changes, the shared object version
+has been increased.
+
+* Version 0.1.15 (released 2003-06-07)
+
+** Bugfixes.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.1.14 (released 2003-05-10)
+
+** Experimental documentation generation in contrib/doxygen/.
+Simply invoke "doxygen" in that directory and it should build the
+documentation.
+
+** Lisp API bug fixes.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.1.13 (released 2003-03-13)
+
+** Unfinished Java *.class files implementing the libidn API.
+See the contrib/java/ directory.  It is implemented using the Java
+Native Interface, and light initial testing indicate interoperability
+between GCJ, IBM's JDK and Sun's JDK.
+
+** Building is now silent when gengetopt is not present.
+
+** Bug fixes.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.1.12 (released 2003-03-06)
+
+** Building libidn doesn't require gengetopt.
+Warnings are still printed though.  Gengetopt will be replaced by argp
+eventually.
+
+** Command line tool "idn" supports stringprep too.
+
+** New stringprep API entry point: stringprep_profile().
+It takes a name of the stringprep profile as an argument instead of
+the stringprep table structure.
+
+** stringprep_*.h are deprecated and will be removed in the future.
+All symbols have been moved to stringprep.h.  The reasons are that (1)
+the files typically only defined one CPP macro and exported one symbol
+definition, which is wasteful as it generates too much work in the
+manual, and (2) using one header file for all profiles allows easier
+access to all stringprep profiles during runtime.  Note that the files
+are still installed, but they only #include stringprep.h now, for
+backwards compatibility.
+
+** GNU Libc add-on build instructions updated to GNU Libc 2.3.2.
+
+** SASLprep stringprep profile added.
+
+** An online interface to libidn written in PHP added to contrib/web/.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.1.11 (released 2003-02-26)
+
+** Command line application "idn" is included.
+A simple wrapper around the library that allows you to invoke punycode
+encoding/decoding and IDNA ToASCII/ToUnicode on the command line.
+
+** Emacs Lisp interface for punycode and IDNA included.
+See punycode.el and idna.el.
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.1.10 (released 2003-02-21)
+
+** idna_*_to_ace() and idna_*ace_to_*() are deprecated in favor of
+** idna_to_ascii_from_*() and idna_to_unicode_*_from_*() respectively.
+The reason was that the old interfaces did not accept the
+AllowUnassigned and UseSTD3ASCIIRules flags.  Note that the old
+functions are not removed, but will be in the future.
+
+** IPS iSCSI stringprep profile added.
+
+** A new contrib/ directory added.
+Currently it contains a Python interface to Libidn, contributed by
+Stephane Bortzmeyer.
+
+** idna.h and punycode.h are now installed by "make install".
+
+** API and ABI is backwards compatible with the previous version.
+
+* Version 0.1.9 (released 2003-02-20)
+
+** SASL ANONYMOUS "plain" stringprep profile added.
+
+** XMPP nodeprep profile fixed.
+
+** API and ABI is backwards compatible with the previous version.
+For future releases, the NEWS entry will specifically mention whether
+the C header API or library ABI backwards compatibility is affected.
+
+* Version 0.1.8 (released 2003-02-14)
+
+** Portability fixes.
+This includes not building the API Reference Manual with GTK-DOC by
+default, if you want it use configure parameter --enable-gtk-doc after
+making sure your gtkdoc-mkdb accept the --tmpl-dir parameter.
+
+** The type for string length variables is now (s)size_t.
+Unfortunately this means binary shared library binary backwards
+compatible is lost.
+
+** New nameprep test vectors.
+
+* Version 0.1.7 (released 2003-02-12)
+
+** Uses official IDNA ACE prefix.
+
+* Version 0.1.6 (released 2003-02-11)
+
+** Uses tentative IDNA ACE prefix.
+
+** Added XMPP Node/Resource Identifiers stringprep profiles.
+
+** Fixed prohibited character checks for bidi.
+
+* Version 0.1.5 (released 2003-01-28)
+
+** The library can now be built as part of GNU Libc.
+This is experimental and only tested against GNU Libc version 2.3.1.
+See the libc/ directory, and libc/README in particular.
+
+** Bug fixes.
+
+* Version 0.1.4 (released 2003-01-15)
+
+** Documentation fixes.
+
+** Portability fixes.
+
+** Bug fixes.
+
+* Version 0.1.3 (released 2003-01-15)
+
+** Added texinfo manual.
+
+* Version 0.1.2 (released 2003-01-08)
+
+** Added high-level IDNA API.
+
+** Added example3.c and example4.c demonstrating the high-level IDNA API.
+
+* Version 0.1.1 (released 2003-01-08)
+
+** Added documentation using GTK-DOC.
+
+** The obsolete stringprep_utf8_to_ucs4_fast API entry point was removed.
+By accident it was never removed in 0.1.0.
+
+* Version 0.1.0 (released 2003-01-05)
+
+** Official GNU project.
+
+** Renamed from libstringprep to libidn.
+
+** Supports punycode and IDNA.  Caveat emptor: I don't use it myself.
+
+** Uses "unsigned long" for Unicode code points instead of "long".
+Long is guaranteed to be at least 32 bits by C standards so it is
+always sufficiently large, no need to use uint32_t and the like.
+
+** The obsolete stringprep_utf8_to_ucs4_fast API entry point was removed.
+
+* Version 0.0.8 (released 2002-12-13)
+
+** Portability fixes (now works under Cygwin on Windows 2000).
+
+** Bug fixes.
+
+* Version 0.0.7 (released 2002-12-09)
+
+** Apply all tables to entire strings, not just first hit.
+
+** Fix bidi infloop.
+
+* Version 0.0.5 (released 2002-12-07)
+
+** Fix prohibited characters handling.
+
+** Fix bidi.
+
+** Renamed type (struct) stringprep_table_element to Stringprep_table_element.
+
+** Renamed type stringprep_profile to Stringprep_profile.
+
+** Renamed type (struct) stringprep_table to Stringprep_table.
+
+** Added more self-tests.
+
+* Version 0.0.4 (released 2002-12-06)
+
+** Add unassigned code point handling, including self test cases.
+
+** Portability fixes.
+
+* Version 0.0.3 (released 2002-11-30)
+
+** Exported utility function `stringprep_utf8_to_unichar', complementary
+to existing `stringprep_unichar_to_utf8'.
+
+** Renamed `stringprep_utf8_to_ucs4_fast' to `stringprep_utf8_to_ucs4' to
+clean up API. The old entry point is maintained for binary backwards
+compatibility though.
+
+** The distribution is from now on signed using GnuPG.
+
+** Bug fixes.
+
+* Version 0.0.2 (released 2002-11-07)
+
+** NFKC self test.
+
+** Bug fixes.
+
+* Version 0.0.1 (released 2002-11-06)
+
+** Add utility functions stringprep_locale_charset(), stringprep_convert() 
+and stringprep_locale_to_utf8 () that can be used to convert text from
+system's locale into UTF-8, which should be done before invoking
+stringprep().  The functions requires iconv() in the operating system.
+
+** An example program (example.c) that illustrates how libstringprep can be
+used is included.
+
+** The pkg-config --libs output should now include necessary -R options.
+
+* Version 0.0.0 (released 2002-11-05)
+
+** Initial release
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

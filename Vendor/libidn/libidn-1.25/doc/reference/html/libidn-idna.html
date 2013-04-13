@@ -1,0 +1,700 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>idna</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="index.html" title="GNU Libidn API Reference Manual">
+<link rel="up" href="intro.html" title="GNU Libidn API Reference Manual">
+<link rel="prev" href="intro.html" title="GNU Libidn API Reference Manual">
+<link rel="next" href="libidn-stringprep.html" title="stringprep">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="intro.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="intro.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">GNU Libidn API Reference Manual</th>
+<td><a accesskey="n" href="libidn-stringprep.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#libidn-idna.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#libidn-idna.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="libidn-idna"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libidn-idna.top_of_page"></a>idna</span></h2>
+<p>idna</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="libidn-idna.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">#define             <a class="link" href="libidn-idna.html#IDNAPI:CAPS" title="IDNAPI">IDNAPI</a>
+#define             <a class="link" href="libidn-idna.html#IDNA-ACE-PREFIX:CAPS" title="IDNA_ACE_PREFIX">IDNA_ACE_PREFIX</a>
+enum                <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags">Idna_flags</a>;
+enum                <a class="link" href="libidn-idna.html#Idna-rc" title="enum Idna_rc">Idna_rc</a>;
+const <span class="returnvalue">char</span> *        <a class="link" href="libidn-idna.html#idna-strerror" title="idna_strerror ()">idna_strerror</a>                       (<em class="parameter"><code><a class="link" href="libidn-idna.html#Idna-rc" title="enum Idna_rc"><span class="type">Idna_rc</span></a> rc</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-ascii-4i" title="idna_to_ascii_4i ()">idna_to_ascii_4i</a>                    (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> *out</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-ascii-4z" title="idna_to_ascii_4z ()">idna_to_ascii_4z</a>                    (<em class="parameter"><code>const <span class="type">uint32_t</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-ascii-8z" title="idna_to_ascii_8z ()">idna_to_ascii_8z</a>                    (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-ascii-lz" title="idna_to_ascii_lz ()">idna_to_ascii_lz</a>                    (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-unicode-44i" title="idna_to_unicode_44i ()">idna_to_unicode_44i</a>                 (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">uint32_t</span> *out</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *outlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-unicode-4z4z" title="idna_to_unicode_4z4z ()">idna_to_unicode_4z4z</a>                (<em class="parameter"><code>const <span class="type">uint32_t</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">uint32_t</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-unicode-8z4z" title="idna_to_unicode_8z4z ()">idna_to_unicode_8z4z</a>                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">uint32_t</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-unicode-8z8z" title="idna_to_unicode_8z8z ()">idna_to_unicode_8z8z</a>                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-unicode-8zlz" title="idna_to_unicode_8zlz ()">idna_to_unicode_8zlz</a>                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+<span class="returnvalue">int</span>                 <a class="link" href="libidn-idna.html#idna-to-unicode-lzlz" title="idna_to_unicode_lzlz ()">idna_to_unicode_lzlz</a>                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);
+</pre>
+</div>
+<div class="refsect1">
+<a name="libidn-idna.description"></a><h2>Description</h2>
+<p>
+</p>
+</div>
+<div class="refsect1">
+<a name="libidn-idna.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="IDNAPI:CAPS"></a><h3>IDNAPI</h3>
+<pre class="programlisting">#define             IDNAPI</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="IDNA-ACE-PREFIX:CAPS"></a><h3>IDNA_ACE_PREFIX</h3>
+<pre class="programlisting">#  define IDNA_ACE_PREFIX "xn--"
+</pre>
+<p>
+The IANA allocated prefix to use for IDNA. "xn--"
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Idna-flags"></a><h3>enum Idna_flags</h3>
+<pre class="programlisting">typedef enum {
+    IDNA_ALLOW_UNASSIGNED = 0x0001,
+    IDNA_USE_STD3_ASCII_RULES = 0x0002
+} Idna_flags;
+</pre>
+<p>
+Flags to pass to <a class="link" href="libidn-idna.html#idna-to-ascii-4i" title="idna_to_ascii_4i ()"><code class="function">idna_to_ascii_4i()</code></a>, <a class="link" href="libidn-idna.html#idna-to-unicode-44i" title="idna_to_unicode_44i ()"><code class="function">idna_to_unicode_44i()</code></a> etc.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="IDNA-ALLOW-UNASSIGNED:CAPS"></a><span class="term"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></span></p></td>
+<td>Don't reject strings containing unassigned
+  Unicode code points.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-USE-STD3-ASCII-RULES:CAPS"></a><span class="term"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></span></p></td>
+<td>Validate strings according to STD3
+  rules (i.e., normal host name rules).
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="Idna-rc"></a><h3>enum Idna_rc</h3>
+<pre class="programlisting">typedef enum {
+    IDNA_SUCCESS = 0,
+    IDNA_STRINGPREP_ERROR = 1,
+    IDNA_PUNYCODE_ERROR = 2,
+    IDNA_CONTAINS_NON_LDH = 3,
+    /* Workaround typo in earlier versions. */
+    IDNA_CONTAINS_LDH = IDNA_CONTAINS_NON_LDH,
+    IDNA_CONTAINS_MINUS = 4,
+    IDNA_INVALID_LENGTH = 5,
+    IDNA_NO_ACE_PREFIX = 6,
+    IDNA_ROUNDTRIP_VERIFY_ERROR = 7,
+    IDNA_CONTAINS_ACE_PREFIX = 8,
+    IDNA_ICONV_ERROR = 9,
+    /* Internal errors. */
+    IDNA_MALLOC_ERROR = 201,
+    IDNA_DLOPEN_ERROR = 202
+} Idna_rc;
+</pre>
+<p>
+Enumerated return codes of <a class="link" href="libidn-idna.html#idna-to-ascii-4i" title="idna_to_ascii_4i ()"><code class="function">idna_to_ascii_4i()</code></a>,
+<a class="link" href="libidn-idna.html#idna-to-unicode-44i" title="idna_to_unicode_44i ()"><code class="function">idna_to_unicode_44i()</code></a> functions (and functions derived from those
+functions).  The value 0 is guaranteed to always correspond to
+success.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><a name="IDNA-SUCCESS:CAPS"></a><span class="term"><code class="literal">IDNA_SUCCESS</code></span></p></td>
+<td>Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-STRINGPREP-ERROR:CAPS"></a><span class="term"><code class="literal">IDNA_STRINGPREP_ERROR</code></span></p></td>
+<td>Error during string preparation.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-PUNYCODE-ERROR:CAPS"></a><span class="term"><code class="literal">IDNA_PUNYCODE_ERROR</code></span></p></td>
+<td>Error during punycode operation.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-CONTAINS-NON-LDH:CAPS"></a><span class="term"><code class="literal">IDNA_CONTAINS_NON_LDH</code></span></p></td>
+<td>For IDNA_USE_STD3_ASCII_RULES, indicate that
+  the string contains non-LDH ASCII characters.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-CONTAINS-LDH:CAPS"></a><span class="term"><code class="literal">IDNA_CONTAINS_LDH</code></span></p></td>
+<td>Same as <em class="parameter"><code>IDNA_CONTAINS_NON_LDH</code></em>, for compatibility
+  with typo in earlier versions.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-CONTAINS-MINUS:CAPS"></a><span class="term"><code class="literal">IDNA_CONTAINS_MINUS</code></span></p></td>
+<td>For IDNA_USE_STD3_ASCII_RULES, indicate that
+  the string contains a leading or trailing hyphen-minus (U+002D).
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-INVALID-LENGTH:CAPS"></a><span class="term"><code class="literal">IDNA_INVALID_LENGTH</code></span></p></td>
+<td>The final output string is not within the
+  (inclusive) range 1 to 63 characters.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-NO-ACE-PREFIX:CAPS"></a><span class="term"><code class="literal">IDNA_NO_ACE_PREFIX</code></span></p></td>
+<td>The string does not contain the ACE prefix
+  (for ToUnicode).
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-ROUNDTRIP-VERIFY-ERROR:CAPS"></a><span class="term"><code class="literal">IDNA_ROUNDTRIP_VERIFY_ERROR</code></span></p></td>
+<td>The ToASCII operation on output
+  string does not equal the input.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-CONTAINS-ACE-PREFIX:CAPS"></a><span class="term"><code class="literal">IDNA_CONTAINS_ACE_PREFIX</code></span></p></td>
+<td>The input contains the ACE prefix (for
+  ToASCII).
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-ICONV-ERROR:CAPS"></a><span class="term"><code class="literal">IDNA_ICONV_ERROR</code></span></p></td>
+<td>Could not convert string in locale encoding.
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-MALLOC-ERROR:CAPS"></a><span class="term"><code class="literal">IDNA_MALLOC_ERROR</code></span></p></td>
+<td>Could not allocate buffer (this is typically a
+  fatal error).
+</td>
+</tr>
+<tr>
+<td><p><a name="IDNA-DLOPEN-ERROR:CAPS"></a><span class="term"><code class="literal">IDNA_DLOPEN_ERROR</code></span></p></td>
+<td>Could not dlopen the libcidn DSO (only used
+  internally in libc).
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-strerror"></a><h3>idna_strerror ()</h3>
+<pre class="programlisting">const <span class="returnvalue">char</span> *        idna_strerror                       (<em class="parameter"><code><a class="link" href="libidn-idna.html#Idna-rc" title="enum Idna_rc"><span class="type">Idna_rc</span></a> rc</code></em>);</pre>
+<p>
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+</p>
+<p>
+IDNA_SUCCESS: Successful operation.  This value is guaranteed to
+  always be zero, the remaining ones are only guaranteed to hold
+  non-zero values, for logical comparison purposes.
+IDNA_STRINGPREP_ERROR:  Error during string preparation.
+IDNA_PUNYCODE_ERROR: Error during punycode operation.
+IDNA_CONTAINS_NON_LDH: For IDNA_USE_STD3_ASCII_RULES, indicate that
+  the string contains non-LDH ASCII characters.
+IDNA_CONTAINS_MINUS: For IDNA_USE_STD3_ASCII_RULES, indicate that
+  the string contains a leading or trailing hyphen-minus (U+002D).
+IDNA_INVALID_LENGTH: The final output string is not within the
+  (inclusive) range 1 to 63 characters.
+IDNA_NO_ACE_PREFIX: The string does not contain the ACE prefix
+  (for ToUnicode).
+IDNA_ROUNDTRIP_VERIFY_ERROR: The ToASCII operation on output
+  string does not equal the input.
+IDNA_CONTAINS_ACE_PREFIX: The input contains the ACE prefix (for
+  ToASCII).
+IDNA_ICONV_ERROR: Could not convert string in locale encoding.
+IDNA_MALLOC_ERROR: Could not allocate buffer (this is typically a
+  fatal error).
+IDNA_DLOPEN_ERROR: Could not dlopen the libcidn DSO (only used
+  internally in libc).
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>rc</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-rc" title="enum Idna_rc"><span class="type">Idna_rc</span></a> return code.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns a pointer to a statically allocated string
+containing a description of the error with the return code <em class="parameter"><code>rc</code></em>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-ascii-4i"></a><h3>idna_to_ascii_4i ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_ascii_4i                    (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> *out</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+The ToASCII operation takes a sequence of Unicode code points that
+make up one domain label and transforms it into a sequence of code
+points in the ASCII range (0..7F). If ToASCII succeeds, the
+original sequence and the resulting sequence are equivalent labels.
+</p>
+<p>
+It is important to note that the ToASCII operation can fail. ToASCII
+fails if any step of it fails. If any step of the ToASCII operation
+fails on any label in a domain name, that domain name MUST NOT be used
+as an internationalized domain name. The method for deadling with this
+failure is application-specific.
+</p>
+<p>
+The inputs to ToASCII are a sequence of code points, the AllowUnassigned
+flag, and the UseSTD3ASCIIRules flag. The output of ToASCII is either a
+sequence of ASCII code points or a failure condition.
+</p>
+<p>
+ToASCII never alters a sequence of code points that are all in the ASCII
+range to begin with (although it could fail). Applying the ToASCII
+operation multiple times has exactly the same effect as applying it just
+once.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>inlen</code></em> :</span></p></td>
+<td>length of input array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out</code></em> :</span></p></td>
+<td>output zero terminated string that must have room for at
+least 63 characters plus the terminating zero.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns 0 on success, or an <a class="link" href="libidn-idna.html#Idna-rc" title="enum Idna_rc"><span class="type">Idna_rc</span></a> error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-ascii-4z"></a><h3>idna_to_ascii_4z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_ascii_4z                    (<em class="parameter"><code>const <span class="type">uint32_t</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert UCS-4 domain name to ASCII string.  The domain name may
+contain several labels, separated by dots.  The output buffer must
+be deallocated by the caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero terminated input Unicode string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-ascii-8z"></a><h3>idna_to_ascii_8z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_ascii_8z                    (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert UTF-8 domain name to ASCII string.  The domain name may
+contain several labels, separated by dots.  The output buffer must
+be deallocated by the caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero terminated input UTF-8 string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-ascii-lz"></a><h3>idna_to_ascii_lz ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_ascii_lz                    (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert domain name in the locale's encoding to ASCII string.  The
+domain name may contain several labels, separated by dots.  The
+output buffer must be deallocated by the caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero terminated input string encoded in the current locale's
+character set.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-unicode-44i"></a><h3>idna_to_unicode_44i ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_unicode_44i                 (<em class="parameter"><code>const <span class="type">uint32_t</span> *in</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> inlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">uint32_t</span> *out</code></em>,
+                                                         <em class="parameter"><code><span class="type">size_t</span> *outlen</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+The ToUnicode operation takes a sequence of Unicode code points
+that make up one domain label and returns a sequence of Unicode
+code points. If the input sequence is a label in ACE form, then the
+result is an equivalent internationalized label that is not in ACE
+form, otherwise the original sequence is returned unaltered.
+</p>
+<p>
+ToUnicode never fails. If any step fails, then the original input
+sequence is returned immediately in that step.
+</p>
+<p>
+The Punycode decoder can never output more code points than it
+inputs, but Nameprep can, and therefore ToUnicode can.  Note that
+the number of octets needed to represent a sequence of code points
+depends on the particular character encoding used.
+</p>
+<p>
+The inputs to ToUnicode are a sequence of code points, the
+AllowUnassigned flag, and the UseSTD3ASCIIRules flag. The output of
+ToUnicode is always a sequence of Unicode code points.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>in</code></em> :</span></p></td>
+<td>input array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>inlen</code></em> :</span></p></td>
+<td>length of input array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>out</code></em> :</span></p></td>
+<td>output array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>outlen</code></em> :</span></p></td>
+<td>on input, maximum size of output array with unicode code points,
+on exit, actual size of output array with unicode code points.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#Idna-rc" title="enum Idna_rc"><span class="type">Idna_rc</span></a> error condition, but it must only be
+used for debugging purposes.  The output buffer is always
+guaranteed to contain the correct data according to the
+specification (sans malloc induced errors).  NB!  This means that
+you normally ignore the return code from this function, as
+checking it means breaking the standard.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-unicode-4z4z"></a><h3>idna_to_unicode_4z4z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_unicode_4z4z                (<em class="parameter"><code>const <span class="type">uint32_t</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">uint32_t</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert possibly ACE encoded domain name in UCS-4 format into a
+UCS-4 string.  The domain name may contain several labels,
+separated by dots.  The output buffer must be deallocated by the
+caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero-terminated Unicode string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output Unicode string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-unicode-8z4z"></a><h3>idna_to_unicode_8z4z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_unicode_8z4z                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">uint32_t</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert possibly ACE encoded domain name in UTF-8 format into a
+UCS-4 string.  The domain name may contain several labels,
+separated by dots.  The output buffer must be deallocated by the
+caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero-terminated UTF-8 string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output Unicode string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-unicode-8z8z"></a><h3>idna_to_unicode_8z8z ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_unicode_8z8z                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert possibly ACE encoded domain name in UTF-8 format into a
+UTF-8 string.  The domain name may contain several labels,
+separated by dots.  The output buffer must be deallocated by the
+caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero-terminated UTF-8 string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output UTF-8 string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-unicode-8zlz"></a><h3>idna_to_unicode_8zlz ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_unicode_8zlz                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert possibly ACE encoded domain name in UTF-8 format into a
+string encoded in the current locale's character set.  The domain
+name may contain several labels, separated by dots.  The output
+buffer must be deallocated by the caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero-terminated UTF-8 string.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output string encoded in the
+current locale's character set.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="idna-to-unicode-lzlz"></a><h3>idna_to_unicode_lzlz ()</h3>
+<pre class="programlisting"><span class="returnvalue">int</span>                 idna_to_unicode_lzlz                (<em class="parameter"><code>const <span class="type">char</span> *input</code></em>,
+                                                         <em class="parameter"><code><span class="type">char</span> **output</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> flags</code></em>);</pre>
+<p>
+Convert possibly ACE encoded domain name in the locale's character
+set into a string encoded in the current locale's character set.
+The domain name may contain several labels, separated by dots.  The
+output buffer must be deallocated by the caller.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>input</code></em> :</span></p></td>
+<td>zero-terminated string encoded in the current locale's
+character set.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>output</code></em> :</span></p></td>
+<td>pointer to newly allocated output string encoded in the
+current locale's character set.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>flags</code></em> :</span></p></td>
+<td>an <a class="link" href="libidn-idna.html#Idna-flags" title="enum Idna_flags"><span class="type">Idna_flags</span></a> value, e.g., <a class="link" href="libidn-idna.html#IDNA-ALLOW-UNASSIGNED:CAPS"><code class="literal">IDNA_ALLOW_UNASSIGNED</code></a> or
+<a class="link" href="libidn-idna.html#IDNA-USE-STD3-ASCII-RULES:CAPS"><code class="literal">IDNA_USE_STD3_ASCII_RULES</code></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Returns <a class="link" href="libidn-idna.html#IDNA-SUCCESS:CAPS"><code class="literal">IDNA_SUCCESS</code></a> on success, or error code.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.18</div>
+</body>
+</html>

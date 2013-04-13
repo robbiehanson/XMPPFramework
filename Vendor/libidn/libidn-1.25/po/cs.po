@@ -1,0 +1,362 @@
+# Czech translation for libidn.
+# Copyright (C) 2007 Free Software Foundation, Inc.
+# This file is distributed under the same license as the libidn package.
+# Petr Pisar <petr.pisar@atlas.cz>, 2007, 2008, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: libidn 1.21\n"
+"Report-Msgid-Bugs-To: bug-libidn@gnu.org\n"
+"POT-Creation-Date: 2012-05-23 10:37+0200\n"
+"PO-Revision-Date: 2011-04-28 20:24+0200\n"
+"Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
+"Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: lib/strerror-idna.c:82 lib/strerror-pr29.c:66 lib/strerror-punycode.c:66
+#: lib/strerror-stringprep.c:86 lib/strerror-tld.c:68
+msgid "Success"
+msgstr "Úspěch"
+
+#: lib/strerror-idna.c:86 lib/strerror-pr29.c:74
+msgid "String preparation failed"
+msgstr "Příprava řetězce selhala"
+
+#: lib/strerror-idna.c:90
+msgid "Punycode failed"
+msgstr "Punycode selhal"
+
+#: lib/strerror-idna.c:94
+msgid "Non-digit/letter/hyphen in input"
+msgstr "Znak jiný než číslice/písmeno/spojovník na vstupu"
+
+#: lib/strerror-idna.c:98
+msgid "Forbidden leading or trailing minus sign (`-')"
+msgstr "Zakázaný úvodní nebo závěrečný spojovník („-“)"
+
+#: lib/strerror-idna.c:102
+msgid "Output would be too large or too small"
+msgstr "Výstup by byl příliš dlouhý nebo příliš krátký"
+
+#: lib/strerror-idna.c:106
+msgid "Input does not start with ACE prefix (`xn--')"
+msgstr "Vstup nezačíná předponou ACE („xn--“)"
+
+#: lib/strerror-idna.c:110
+msgid "String not idempotent under ToASCII"
+msgstr "Řetězec není po ToASCII idempotentní"
+
+#: lib/strerror-idna.c:114
+msgid "Input already contain ACE prefix (`xn--')"
+msgstr "Vstup již obsahuje předponu ACE („xn--“)"
+
+#: lib/strerror-idna.c:118 lib/strerror-tld.c:84
+msgid "System iconv failed"
+msgstr "Selhal systémový iconv"
+
+#: lib/strerror-idna.c:122 lib/strerror-stringprep.c:130 lib/strerror-tld.c:80
+msgid "Cannot allocate memory"
+msgstr "Nelze vyhradit paměť"
+
+#: lib/strerror-idna.c:126
+msgid "System dlopen failed"
+msgstr "Selhalo volání systému dlopen"
+
+#: lib/strerror-idna.c:130 lib/strerror-pr29.c:78 lib/strerror-punycode.c:82
+#: lib/strerror-stringprep.c:134 lib/strerror-tld.c:92
+msgid "Unknown error"
+msgstr "Neznámá chyba"
+
+#: lib/strerror-pr29.c:70
+msgid "String not idempotent under Unicode NFKC normalization"
+msgstr "Řetězec není po unicodové NFKC normalizaci idempotentní"
+
+#: lib/strerror-punycode.c:70
+msgid "Invalid input"
+msgstr "Neplatný vstup"
+
+#: lib/strerror-punycode.c:74 lib/strerror-stringprep.c:110
+msgid "Output would exceed the buffer space provided"
+msgstr "Výstup by se nevešel do poskytnuté vyrovnávací paměti"
+
+#: lib/strerror-punycode.c:78
+msgid "String size limit exceeded"
+msgstr "Omezení délky řetězce bylo překonáno"
+
+#: lib/strerror-stringprep.c:90
+msgid "Forbidden unassigned code points in input"
+msgstr "Na vstupu zakázaná nepřiřazená ordinární čísla"
+
+#: lib/strerror-stringprep.c:94
+msgid "Prohibited code points in input"
+msgstr "Na vstupu zakázaná ordinární čísla"
+
+#: lib/strerror-stringprep.c:98
+msgid "Conflicting bidirectional properties in input"
+msgstr "Na vstupu rozporné příkazy pro směr textu"
+
+#: lib/strerror-stringprep.c:102
+msgid "Malformed bidirectional string"
+msgstr "Chybně utvořený obousměrný řetězec"
+
+#: lib/strerror-stringprep.c:106
+msgid "Prohibited bidirectional code points in input"
+msgstr "Na vstupu zakázaná ordinární čísla pro obousměrný text"
+
+#: lib/strerror-stringprep.c:114
+msgid "Error in stringprep profile definition"
+msgstr "Chyba v definici profilu pro stringprep"
+
+#: lib/strerror-stringprep.c:118
+msgid "Flag conflict with profile"
+msgstr "Příznak neslučitelný s profilem"
+
+#: lib/strerror-stringprep.c:122
+msgid "Unknown profile"
+msgstr "Neznámý profil"
+
+#: lib/strerror-stringprep.c:126
+msgid "Unicode normalization failed (internal error)"
+msgstr "Unicodová normalizace selhala (vnitřní chyba)"
+
+#: lib/strerror-tld.c:72
+msgid "Code points prohibited by top-level domain"
+msgstr "Ordinární čísla zakázaná vrcholovou doménou"
+
+#: lib/strerror-tld.c:76
+msgid "Missing input"
+msgstr "Postrádám vstup"
+
+#: lib/strerror-tld.c:88
+msgid "No top-level domain found in input"
+msgstr "Ve vstupu chybí vrcholová doména"
+
+#: src/idn.c:65
+#, c-format
+msgid "Try `%s --help' for more information.\n"
+msgstr "Další informace získáte příkazem „%s --help“.\n"
+
+#: src/idn.c:69
+#, c-format
+msgid "Usage: %s [OPTION]... [STRINGS]...\n"
+msgstr "Použití: %s [PŘEPÍNAČ]… [ŘETĚZEC]…\n"
+
+#: src/idn.c:72
+msgid ""
+"Internationalized Domain Name (IDN) convert STRINGS, or standard input.\n"
+"\n"
+msgstr ""
+"IDN (internacionalizovaná doménová jména) převádí ŘETĚZCE nebo standardní "
+"vstup.\n"
+"\n"
+
+#: src/idn.c:76
+msgid ""
+"Command line interface to the internationalized domain name library.\n"
+"\n"
+"All strings are expected to be encoded in the preferred charset used\n"
+"by your locale.  Use `--debug' to find out what this charset is.  You\n"
+"can override the charset used by setting environment variable CHARSET.\n"
+"\n"
+"To process a string that starts with `-', for example `-foo', use `--'\n"
+"to signal the end of parameters, as in `idn --quiet -a -- -foo'.\n"
+"\n"
+"Mandatory arguments to long options are mandatory for short options too.\n"
+msgstr ""
+"Rozhraní ke knihovně internacionalizovaných (s národními znaky) doménových\n"
+"jmen pro prostředí příkazového řádku.\n"
+"\n"
+"Všechny řetězce jsou očekávány ve znakové sadě upřednostňované vaším\n"
+"národním prostředím. Která sada to je, zjistíte přepínačem „--debug“. Jinou\n"
+"znakovou sadu můžete vnutit nastavením proměnné prostředí CHARSET.\n"
+"\n"
+"Je-li třeba pracovat s řetězcem začínající znakem „-“ (např. „-foo“), "
+"použijte\n"
+"„--“ pro označení konce všech parametrů (např. „idn --quiet -a -- -foo“).\n"
+"\n"
+"Povinné argumenty dlouhých přepínačů jsou rovněž povinné u odpovídajících\n"
+"krátkých přepínačů.\n"
+
+#: src/idn.c:88
+msgid ""
+"  -h, --help               Print help and exit\n"
+"  -V, --version            Print version and exit\n"
+msgstr ""
+"  -h, --help               Vypíše nápovědu a skončí\n"
+"  -V, --version            Vypíše verzi a skončí\n"
+
+#: src/idn.c:92
+msgid ""
+"  -s, --stringprep         Prepare string according to nameprep profile\n"
+"  -d, --punycode-decode    Decode Punycode\n"
+"  -e, --punycode-encode    Encode Punycode\n"
+"  -a, --idna-to-ascii      Convert to ACE according to IDNA (default mode)\n"
+"  -u, --idna-to-unicode    Convert from ACE according to IDNA\n"
+msgstr ""
+"  -s, --stringprep         Připraví řetězec podle nameprep profilu\n"
+"  -d, --punycode-decode    Dekóduje Punycode\n"
+"  -e, --punycode-encode    Kóduje do Punycode\n"
+"  -a, --idna-to-ascii      Převede do ACE podle IDNA (implicitní režim)\n"
+"  -u, --idna-to-unicode    Převede z ACE podle IDNA\n"
+
+#: src/idn.c:99
+msgid ""
+"      --allow-unassigned   Toggle IDNA AllowUnassigned flag (default off)\n"
+"      --usestd3asciirules  Toggle IDNA UseSTD3ASCIIRules flag (default off)\n"
+msgstr ""
+"      --allow-unassigned   Přepne příznak IDNA AllowUnassigned (implicitně\n"
+"                           vypnut)\n"
+"      --usestd3asciirules  Přepne příznak IDNA UseSTD3ASCIIRules "
+"(implicitně\n"
+"                           vypnut)\n"
+
+#: src/idn.c:103
+msgid ""
+"      --no-tld             Don't check string for TLD specific rules\n"
+"                             Only for --idna-to-ascii and --idna-to-unicode\n"
+msgstr ""
+"      --no-tld             Nekontroluje řetězec podle pravidel dané TLD.\n"
+"                           Jen u --idna-to-ascii a --idna-to-unicode\n"
+
+#: src/idn.c:107
+msgid ""
+"  -n, --nfkc               Normalize string according to Unicode v3.2 NFKC\n"
+msgstr ""
+"  -n, --nfkc               Normalizuje řetězec podle Unicode v3.2 NFKC\n"
+
+#: src/idn.c:110
+msgid ""
+"  -p, --profile=STRING     Use specified stringprep profile instead\n"
+"                             Valid stringprep profiles: `Nameprep',\n"
+"                             `iSCSI', `Nodeprep', `Resourceprep', \n"
+"                             `trace', `SASLprep'\n"
+msgstr ""
+"  -p, --profile=ŘETĚZEC    Použije zadaný stringprep profil.\n"
+"                           Platné stringprep profily jsou: „Nameprep“,\n"
+"                           „iSCSI“, „Nodeprep“, „Resourceprep“, „trace“ a \n"
+"                           „SASLprep“\n"
+
+#: src/idn.c:116
+msgid ""
+"      --debug              Print debugging information\n"
+"      --quiet              Silent operation\n"
+msgstr ""
+"      --debug              Vypíše ladicí informace\n"
+"      --quiet              Pracuje potichu\n"
+
+#: src/idn.c:172
+#, c-format
+msgid "only one of -s, -e, -d, -a, -u or -n can be specified"
+msgstr "Pouze jeden přepínač z -s, -e, -d, -a, -u nebo -n smí být zadán."
+
+#: src/idn.c:182
+#, c-format
+msgid "Charset `%s'.\n"
+msgstr "Znaková sada „%s“.\n"
+
+#: src/idn.c:187
+#, c-format
+msgid ""
+"Type each input string on a line by itself, terminated by a newline "
+"character.\n"
+msgstr ""
+"Pište po jednom vstupním řetězci na jednom řádku zakončeným znakem nového "
+"řádku.\n"
+
+#: src/idn.c:202
+#, c-format
+msgid "input error"
+msgstr "chyba na vstupu"
+
+#: src/idn.c:212 src/idn.c:274 src/idn.c:357 src/idn.c:434 src/idn.c:515
+#, c-format
+msgid "could not convert from %s to UTF-8"
+msgstr "nelze převést z %s do UTF-8"
+
+#: src/idn.c:220 src/idn.c:245 src/idn.c:281 src/idn.c:498 src/idn.c:527
+#: src/idn.c:551
+#, c-format
+msgid "could not convert from UTF-8 to UCS-4"
+msgstr "nelze převést z UTF-8 do UCS-4"
+
+#: src/idn.c:237
+#, c-format
+msgid "stringprep_profile: %s"
+msgstr "stringprep_profile (profil pro přípravu řetězce): %s"
+
+#: src/idn.c:260 src/idn.c:302 src/idn.c:345 src/idn.c:503 src/idn.c:564
+#, c-format
+msgid "could not convert from UTF-8 to %s"
+msgstr "nelze převést z UTF-8 do %s"
+
+#: src/idn.c:295
+#, c-format
+msgid "punycode_encode: %s"
+msgstr "punycode_encode (zakódování do Punycodu): %s"
+
+#: src/idn.c:317
+msgid "malloc"
+msgstr "malloc"
+
+#: src/idn.c:323
+#, c-format
+msgid "punycode_decode: %s"
+msgstr "punycode_decode (dekódování Punycodu): %s"
+
+#: src/idn.c:340 src/idn.c:364 src/idn.c:442
+#, c-format
+msgid "could not convert from UCS-4 to UTF-8"
+msgstr "nelze převést z UCS-4 do UTF-8"
+
+#: src/idn.c:381
+#, c-format
+msgid "idna_to_ascii_4z: %s"
+msgstr "idna_to_ascii_4z: %s"
+
+#: src/idn.c:395
+#, c-format
+msgid "idna_to_unicode_8z4z (TLD): %s"
+msgstr "idna_to_unicode_8z4z (TLD): %s"
+
+#: src/idn.c:409 src/idn.c:482
+#, c-format
+msgid "tld_check_4z (position %lu): %s"
+msgstr "tld_check_4z (pozice %lu): %s"
+
+#: src/idn.c:412 src/idn.c:488
+#, c-format
+msgid "tld_check_4z: %s"
+msgstr "tld_check_4z: %s"
+
+#: src/idn.c:461
+#, c-format
+msgid "idna_to_unicode_8z4z: %s"
+msgstr "idna_to_unicode_8z4z: %s"
+
+#: src/idn.c:540
+#, c-format
+msgid "could not do NFKC normalization"
+msgstr "nebylo možné znormalizovat do NFKC"
+
+#~ msgid ""
+#~ "\n"
+#~ "Report bugs to <%s>.\n"
+#~ msgstr ""
+#~ "\n"
+#~ "Chyby programu hlaste na <%s> (pouze anglicky),\n"
+#~ "chyby překladu na <translation-team-cs@lists.sourceforge.net> (česky).\n"
+
+#~ msgid "input[%lu] = U+%04x\n"
+#~ msgstr "vstup[%lu] = U+%04x\n"
+
+#~ msgid "output[%lu] = U+%04x\n"
+#~ msgstr "výstup[%lu] = U+%04x\n"
+
+#~ msgid "tld[%lu] = U+%04x\n"
+#~ msgstr "vrcholová_doména[%lu] = U+%04x\n"
+
+#~ msgid "nfkc: %s"
+#~ msgstr "nfkc: %s"

@@ -1,3 +1,5 @@
+#import "XMPPMessage.h"
+#import "NSXMLElement+XMPP.h"
 #import "XMPPMessage+XEP_0224.h"
 #import "NSXMLElement+XMPP.h"
 

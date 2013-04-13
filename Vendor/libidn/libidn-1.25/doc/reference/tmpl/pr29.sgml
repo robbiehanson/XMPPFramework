@@ -1,0 +1,77 @@
+<!-- ##### SECTION Title ##### -->
+pr29
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO IDNAPI ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### ENUM Pr29_rc ##### -->
+<para>
+
+</para>
+
+@PR29_SUCCESS: 
+@PR29_PROBLEM: 
+@PR29_STRINGPREP_ERROR: 
+
+<!-- ##### FUNCTION pr29_4 ##### -->
+<para>
+
+</para>
+
+@in: 
+@len: 
+@Returns: 
+
+
+<!-- ##### FUNCTION pr29_4z ##### -->
+<para>
+
+</para>
+
+@in: 
+@Returns: 
+
+
+<!-- ##### FUNCTION pr29_8z ##### -->
+<para>
+
+</para>
+
+@in: 
+@Returns: 
+
+
+<!-- ##### FUNCTION pr29_strerror ##### -->
+<para>
+
+</para>
+
+@rc: 
+@Returns: 
+
+

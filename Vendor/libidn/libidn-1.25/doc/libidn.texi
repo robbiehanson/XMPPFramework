@@ -1,0 +1,2173 @@
+\input texinfo   @c -*- mode: texinfo; coding: us-ascii; -*-
+@c This file is part of GNU Libidn.
+@c See below for copyright and license.
+
+@setfilename libidn.info
+@documentencoding UTF-8
+@include version.texi
+@settitle GNU Libidn @value{VERSION}
+@finalout
+
+@syncodeindex pg cp
+
+@copying
+This manual is last updated @value{UPDATED} for version
+@value{VERSION} of GNU Libidn.
+
+Copyright @copyright{} 2002-2012 Simon Josefsson.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled ``GNU Free
+Documentation License''.
+@end quotation
+@end copying
+
+@dircategory Software libraries
+@direntry
+* libidn: (libidn).	Internationalized string processing library.
+@end direntry
+
+@dircategory Localization
+@direntry
+* idn: (libidn)Invoking idn.	Internationalized Domain Name (IDN) string conversion.
+@end direntry
+
+@dircategory Emacs
+@direntry
+* IDN Library: (libidn)Emacs API.	Emacs API for IDN functions.
+@end direntry
+
+@titlepage
+@title GNU Libidn
+@subtitle Internationalized string processing for the GNU system
+@subtitle for version @value{VERSION}, @value{UPDATED}
+@author Simon Josefsson
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top GNU Libidn
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::		How to use this manual.
+* Preparation::			What you should do before using the library.
+* Utility Functions::		Unicode transformation utility functions.
+* Stringprep Functions::	Stringprep functions.
+* Punycode Functions::		Punycode functions.
+* IDNA Functions::		IDNA functions.
+* TLD Functions::		TLD functions.
+* PR29 Functions::		Detect strings non-idempotent under NFKC.
+* Examples::                    Demonstrate how to use the library.
+* Invoking idn::		Command line interface to the library.
+* Emacs API::                   Emacs Lisp API for Libidn.
+* Java API::                    Notes on the Java port of Libidn.
+* C# API::                      Notes on the C# port of Libidn.
+* Acknowledgements::            Whom to blame.
+* History::                     Rough outline of development history.
+
+Appendices
+
+* PR29 discussion::             Implementation aspects of the PR29 flaw.
+* On Label Separators::         Discussions of a flaw in the IDNA spec.
+* Copying Information::		License texts.
+
+Indices
+
+* Function and Variable Index::
+* Concept Index::
+
+@end menu
+
+
+@node Introduction
+@chapter Introduction
+
+GNU Libidn is a fully documented implementation of the Stringprep,
+Punycode and IDNA specifications.  Libidn's purpose is to encode and
+decode internationalized domain name strings.  There are native C, C#
+and Java libraries.
+
+The C library contains a generic Stringprep implementation.  Profiles
+for Nameprep, iSCSI, SASL, XMPP and Kerberos V5 are included.
+Punycode and ASCII Compatible Encoding (ACE) via IDNA are supported.
+A mechanism to define Top-Level Domain (TLD) specific validation
+tables, and to compare strings against those tables, is included.
+Default tables for some TLDs are also included.
+
+The Stringprep API consists of two main functions, one for converting
+data from the system's native representation into UTF-8, and one
+function to perform the Stringprep processing.  Adding a new
+Stringprep profile for your application within the API is
+straightforward.  The Punycode API consists of one encoding function
+and one decoding function.  The IDNA API consists of the ToASCII and
+ToUnicode functions, as well as an high-level interface for converting
+entire domain names to and from the ACE encoded form.  The TLD API
+consists of one set of functions to extract the TLD name from a domain
+string, one set of functions to locate the proper TLD table to use
+based on the TLD name, and core functions to validate a string against
+a TLD table, and some utility wrappers to perform all the steps in one
+call.
+
+The library is used by, e.g., GNU SASL and Shishi to process user
+names and passwords.  Libidn can be built into GNU Libc to enable a
+new system-wide getaddrinfo flag for IDN processing.
+
+Libidn is developed for the GNU/Linux system, but runs on over 20 Unix
+platforms (including Solaris, IRIX, AIX, and Tru64) and Windows.  The
+library is written in C and (parts of) the API is also accessible from
+C++, Emacs Lisp, Python and Java.  A native Java and C# port is
+included.
+
+Also included is a command line tool, several self tests, code
+examples, and more.
+
+@menu
+* Getting Started::
+* Features::
+* Library Overview::
+* Supported Platforms::
+* Getting help::
+* Commercial Support::
+* Downloading and Installing::
+* Bug Reports::
+* Contributing::
+@end menu
+
+@node Getting Started
+@section Getting Started
+
+This manual documents the library programming interface.  All
+functions and data types provided by the library are explained.
+Included are also examples, and documentation for the command line
+tool @file{idn} that provide a quick interface to the library.  The
+Emacs Lisp bindings for the library is also discussed.
+
+The reader is assumed to possess basic familiarity with
+internationalization concepts and network programming in C or C++.
+
+This manual can be used in several ways.  If read from the beginning
+to the end, it gives a good introduction into the library and how it
+can be used in an application.  Forward references are included where
+necessary.  Later on, the manual can be used as a reference manual to
+get just the information needed about any particular interface of the
+library.  Experienced programmers might want to start looking at the
+examples at the end of the manual (@pxref{Examples}), and then only
+read up those parts of the interface which are unclear.
+
+@node Features
+@section Features
+
+This library might have a couple of advantages over other libraries
+doing a similar job.
+
+@table @asis
+@item It's Free Software
+Anybody can use, modify, and redistribute it under the terms of a free
+software license.
+
+@item It's thread-safe
+No global state is kept in the library.  All functions are re-entrant.
+
+@item It's portable
+The code is intended to be written in pure ANSI C89.  It has been
+tested on many Unix like operating systems, and Windows.
+
+@item It's modularized
+The library is composed of several modules, and the only interaction
+between modules is through each modules' public API.  If you only need
+one piece of functionality, it is possible to take the files you need
+and incorporate them into your own project.
+
+@item It's not bloated
+The design of the library is based on the smallest API necessary to
+implement the basic functionality.  It has been carefully extended
+with a small number of high-level wrappers to make it comfortable to
+use the library.  However, it does not implement additional
+functionality just for the sake of completeness.
+
+@item It's documented
+Sadly, not all software comes with documentation these days.  This one
+does.
+
+@end table
+
+@node Library Overview
+@section Library Overview
+
+The following illustration show the components that make up Libidn,
+and how your application relates to the library.  In the illustration,
+various components are shown as boxes.  You see the generic StringPrep
+component, the various StringPrep profiles including Nameprep, the
+Punycode component, the IDNA component, and the TLD component.  The
+arrows indicate aggregation, e.g., IDNA uses Punycode and Nameprep,
+and in turn Nameprep uses the generic StringPrep interface.  The
+interfaces to all components are available for applications, no
+component within the library is hidden from the application.
+
+@image{libidn-components}
+
+@node Supported Platforms
+@section Supported Platforms
+
+Libidn has at some point in time been tested on the following
+platforms.  Build reports for each platforms and Libidn version is
+available at @url{http://autobuild.josefsson.org/libidn/}.
+
+@enumerate
+
+@item Debian GNU/Linux 3.0 (Woody)
+@cindex Debian
+
+GCC 2.95.4 and GNU Make. This is the main development platform.
+@code{alphaev67-unknown-linux-gnu}, @code{alphaev6-unknown-linux-gnu},
+@code{arm-unknown-linux-gnu}, @code{armv4l-unknown-linux-gnu},
+@code{hppa-unknown-linux-gnu}, @code{hppa64-unknown-linux-gnu},
+@code{i686-pc-linux-gnu}, @code{ia64-unknown-linux-gnu},
+@code{m68k-unknown-linux-gnu}, @code{mips-unknown-linux-gnu},
+@code{mipsel-unknown-linux-gnu}, @code{powerpc-unknown-linux-gnu},
+@code{s390-ibm-linux-gnu}, @code{sparc-unknown-linux-gnu},
+@code{sparc64-unknown-linux-gnu}.
+
+@item Debian GNU/Linux 2.1
+@cindex Debian
+
+GCC 2.95.1 and GNU Make. @code{armv4l-unknown-linux-gnu}.
+
+@item Tru64 UNIX
+@cindex Tru64
+
+Tru64 UNIX C compiler and Tru64 Make. @code{alphaev67-dec-osf5.1},
+@code{alphaev68-dec-osf5.1}.
+
+@item SuSE Linux 7.1
+@cindex SuSE
+
+GCC 2.96 and GNU Make. @code{alphaev6-unknown-linux-gnu},
+@code{alphaev67-unknown-linux-gnu}.
+
+@item SuSE Linux 7.2a
+@cindex SuSE Linux
+
+GCC 3.0 and GNU Make. @code{ia64-unknown-linux-gnu}.
+
+@item SuSE Linux
+@cindex SuSE Linux
+
+GCC 3.2.2 and GNU Make.  @code{x86_64-unknown-linux-gnu} (AMD64
+Opteron ``Melody'').
+
+@item SuSE Enterprise Server 9 on IBM OpenPower 720 
+@cindex SuSE Linux
+@cindex OpenPower 720
+
+GCC 3.3.3 and GNU Make.  @code{powerpc64-unknown-linux-gnu}.
+
+@item RedHat Linux 7.2
+@cindex RedHat
+
+GCC 2.96 and GNU Make. @code{alphaev6-unknown-linux-gnu},
+@code{alphaev67-unknown-linux-gnu}, @code{ia64-unknown-linux-gnu}.
+
+@item RedHat Linux 8.0
+@cindex RedHat
+
+GCC 3.2 and GNU Make. @code{i686-pc-linux-gnu}.
+
+@item RedHat Advanced Server 2.1
+@cindex RedHat Advanced Server
+
+GCC 2.96 and GNU Make. @code{i686-pc-linux-gnu}.
+
+@item Slackware Linux 8.0.01
+@cindex RedHat
+
+GCC 2.95.3 and GNU Make. @code{i686-pc-linux-gnu}.
+
+@item Mandrake Linux 9.0
+@cindex Mandrake
+
+GCC 3.2 and GNU Make. @code{i686-pc-linux-gnu}.
+
+@item IRIX 6.5
+@cindex IRIX
+
+MIPS C compiler, IRIX Make. @code{mips-sgi-irix6.5}.
+
+@item AIX 4.3.2
+@cindex AIX
+
+IBM C for AIX compiler, AIX Make.  @code{rs6000-ibm-aix4.3.2.0}.
+
+@item Microsoft Windows 2000 (Cygwin)
+@cindex Windows
+
+GCC 3.2, GNU make. @code{i686-pc-cygwin}.
+
+@item HP-UX 11
+@cindex HP-UX
+
+HP-UX C compiler and HP Make. @code{ia64-hp-hpux11.22},
+@code{hppa2.0w-hp-hpux11.11}.
+
+@item SUN Solaris 2.7
+@cindex Solaris
+
+GCC 3.0.4 and GNU Make. @code{sparc-sun-solaris2.7}.
+
+@item SUN Solaris 2.8
+@cindex Solaris
+
+Sun WorkShop Compiler C 6.0 and SUN Make. @code{sparc-sun-solaris2.8}.
+
+@item SUN Solaris 2.9
+@cindex Solaris
+
+Sun Forte Developer 7 C compiler and GNU
+Make. @code{sparc-sun-solaris2.9}.
+
+@item NetBSD 1.6
+@cindex NetBSD
+
+GCC 2.95.3 and GNU Make. @code{alpha-unknown-netbsd1.6},
+@code{i386-unknown-netbsdelf1.6}.
+
+@item OpenBSD 3.1 and 3.2
+@cindex OpenBSD
+
+GCC 2.95.3 and GNU Make. @code{alpha-unknown-openbsd3.1},
+@code{i386-unknown-openbsd3.1}.
+
+@item FreeBSD 4.7 and 4.8
+@cindex FreeBSD
+
+GCC 2.95.4 and GNU Make. @code{alpha-unknown-freebsd4.7},
+@code{alpha-unknown-freebsd4.8}, @code{i386-unknown-freebsd4.7},
+@code{i386-unknown-freebsd4.8}.
+
+@item MacOS X 10.2 Server Edition
+@cindex MacOS X
+
+GCC 3.1 and GNU Make. @code{powerpc-apple-darwin6.5}.
+
+@item MacOS X 10.4 ``Tiger'' with Xcode 2.0
+@cindex MacOS X
+
+GCC 4.0 and GNU Make. @code{powerpc-apple-darwin8.0}.
+
+@item Cross compiled to uClinux/uClibc on Motorola Coldfire
+@cindex Motorola Coldfire
+@cindex uClinux
+@cindex uClibc
+
+GCC 3.4 and GNU Make @code{m68k-uclinux-elf}.
+
+@item Cross compiled to ARM using Glibc
+@cindex ARM
+
+GCC 2.95 and GNU Make @code{arm-linux}.
+
+@item Cross compiled to Mingw32.
+@cindex Windows
+@cindex Microsoft
+@cindex mingw32
+
+GCC 3.4.4 and GNU Make @code{i586-mingw32msvc}.
+
+@item OS/2
+@cindex OS/2
+@cindex IBM
+
+GCC.
+
+@end enumerate
+
+If you use Libidn on, or port Libidn to, a new platform please report
+it to the author.
+
+@node Getting help
+@section Getting help
+
+A mailing list where users of Libidn may help each other exists, and
+you can reach it by sending e-mail to @email{help-libidn@@gnu.org}.
+Archives of the mailing list discussions, and an interface to manage
+subscriptions, is available through the World Wide Web at
+@url{http://lists.gnu.org/mailman/listinfo/help-libidn}.
+
+@node Commercial Support
+@section Commercial Support
+
+Commercial support is available for users of GNU Libidn.  The kind of
+support that can be purchased may include:
+
+@itemize
+
+@item Implement new features.
+Such as country code specific profiling to support a restricted subset
+of Unicode.
+
+@item Port Libidn to new platforms.
+This could include porting Libidn to an embedded platforms that may
+need memory or size optimization.
+
+@item Integrating IDN support in your existing project.
+
+@item System design of components related to IDN.
+
+@end itemize
+
+If you are interested, please write to:
+
+@verbatim
+Simon Josefsson Datakonsult AB
+Hagagatan 24
+113 47 Stockholm
+Sweden
+
+E-mail: simon@josefsson.org
+@end verbatim
+
+If your company provides support related to GNU Libidn and would like
+to be mentioned here, contact the author (@pxref{Bug Reports}).
+
+@node Downloading and Installing
+@section Downloading and Installing
+@cindex Installation
+@cindex Download
+
+The package can be downloaded from several places, including:
+
+@url{ftp://alpha.gnu.org/pub/gnu/libidn/}
+
+The latest version is stored in a file, e.g.,
+@samp{libidn-@value{VERSION}.tar.gz} where the @samp{@value{VERSION}}
+value is the highest version number in the directory.
+
+The package is then extracted, configured and built like many other
+packages that use Autoconf.  For detailed information on configuring
+and building it, refer to the @file{INSTALL} file that is part of the
+distribution archive.
+
+Here is an example terminal session that download, configure, build
+and install the package.  You will need a few basic tools, such as
+@samp{sh}, @samp{make} and @samp{cc}.
+
+@example
+$ wget -q ftp://alpha.gnu.org/pub/gnu/libidn/libidn-@value{VERSION}.tar.gz
+$ tar xfz libidn-@value{VERSION}.tar.gz
+$ cd libidn-@value{VERSION}/
+$ ./configure
+...
+$ make
+...
+$ make install
+...
+@end example
+
+After that Libidn should be properly installed and ready for use.
+
+A few @code{configure} options may be relevant, summarized in the
+table.
+
+@table @code
+
+@item --enable-java
+Build the Java port into a *.JAR file.  @xref{Java API}, for more
+information.
+
+@item --disable-tld
+Disable the TLD module.  This would typically only be useful if you
+are building on a memory restricted platforms.  @xref{TLD Functions},
+for more information.
+
+@item --enable-csharp[=IMPL]
+Build the @code{C#} port into a @code{*.DLL} file.  @xref{C# API}, for
+more information.  Here, @code{IMPL} is @code{pnet} or @code{mono},
+indicating whether the PNET @command{cscc} compiler or the Mono
+@command{mcs} compiler should be used, respectively.
+
+@item --disable-valgrind-tests
+Disable running the self-checks under Valgrind
+(@url{http://valgrind.org/}).  Normally Valgrind does not cause
+problems and can detect some severe memory errors.  If you are getting
+errors from Valgrind that are caused by the compiler or libc (possibly
+as a result of special optimization flags), you may use this option to
+disable the use of Valgrind.
+
+@end table
+
+For the complete list, refer to the output from @code{configure
+--help}.
+
+@menu
+* Installing under Windows::    Windows specific build instructions.
+@end menu
+
+@node Installing under Windows
+@subsection Installing under Windows
+
+There are two ways to build Libidn on Windows: via MinGW or via Visual
+Studio.
+
+With MinGW, you can build a Libidn DLL and use it from other
+applications.  After installing MinGW (@url{http://mingw.org/}) follow
+the generic installation instructions (@pxref{Downloading and
+Installing}).  The DLL is installed by default.
+
+For information on how to use the DLL in other applications, see:
+@url{http://www.mingw.org/mingwfaq.shtml#faq-msvcdll}.
+
+You can build Libidn as a native Visual Studio C++ project.  This
+allows you to build the code for other platforms that VS supports,
+such as Windows Mobile.  You need Visual Studio 2005 or later.
+
+First download and unpack the archive as described in the generic
+installation instructions (@pxref{Downloading and Installing}).  Don't
+run @code{./configure}.  Instead, start Visual Studio and open the
+project file @file{win32/libidn.sln} inside the Libidn directory.  You
+should be able to build the project using Build Project.
+
+Output libraries will be written into the @code{win32/lib} (or
+@code{win32/lib/debug} for Debug versions) folder.
+
+When working with Windows you may want to look into the special memory
+handling functions that may be needed (@pxref{Memory handling under
+Windows}).
+
+@node Bug Reports
+@section Bug Reports
+@cindex Reporting Bugs
+
+If you think you have found a bug in Libidn, please investigate it and
+report it.
+
+@itemize @bullet
+
+@item Please make sure that the bug is really in Libidn, and
+preferably also check that it hasn't already been fixed in the latest
+version.
+
+@item You have to send us a test case that makes it possible for us to
+reproduce the bug.
+
+@item You also have to explain what is wrong; if you get a crash, or
+if the results printed are not good and in that case, in what way.
+Make sure that the bug report includes all information you would need
+to fix this kind of bug for someone else.
+
+@end itemize
+
+Please make an effort to produce a self-contained report, with
+something definite that can be tested or debugged.  Vague queries or
+piecemeal messages are difficult to act on and don't help the
+development effort.
+
+If your bug report is good, we will do our best to help you to get a
+corrected version of the software; if the bug report is poor, we won't
+do anything about it (apart from asking you to send better bug
+reports).
+
+If you think something in this manual is unclear, or downright
+incorrect, or if the language needs to be improved, please also send a
+note.
+
+Send your bug report to:
+
+@center @samp{bug-libidn@@gnu.org}
+
+
+@node Contributing
+@section Contributing
+@cindex Contributing
+@cindex Hacking
+
+If you want to submit a patch for inclusion -- from solve a typo you
+discovered, up to adding support for a new feature -- you should
+submit it as a bug report (@pxref{Bug Reports}).  There are some
+things that you can do to increase the chances for it to be included
+in the official package.
+
+Unless your patch is very small (say, under 10 lines) we require that
+you assign the copyright of your work to the Free Software Foundation.
+This is to protect the freedom of the project.  If you have not
+already signed papers, we will send you the necessary information when
+you submit your contribution.
+
+For contributions that doesn't consist of actual programming code, the
+only guidelines are common sense.  Use it.
+
+For code contributions, a number of style guides will help you:
+
+@itemize @bullet
+
+@item Coding Style.
+Follow the GNU Standards document (@pxref{top, GNU Coding Standards,,
+standards}).
+
+If you normally code using another coding standard, there is no
+problem, but you should use @samp{indent} to reformat the code
+(@pxref{top, GNU Indent,, indent}) before submitting your work.
+
+@item Use the unified diff format @samp{diff -u}.
+
+@item Return errors.
+No reason whatsoever should abort the execution of the library.  Even
+memory allocation errors, e.g. when malloc return NULL, should work
+although result in an error code.
+
+@item Design with thread safety in mind.
+Don't use global variables and the like.
+
+@item Avoid using the C math library.
+It causes problems for embedded implementations, and in most
+situations it is very easy to avoid using it.
+
+@item Document your functions.
+Use comments before each function headers, that, if properly
+formatted, are extracted into GTK-DOC web pages.  Don't forget to
+update the Texinfo manual as well.
+
+@item Supply a ChangeLog and NEWS entries, where appropriate.
+
+@end itemize
+
+@c **********************************************************
+@c *******************  Preparation  ************************
+@c **********************************************************
+@node Preparation
+@chapter Preparation
+
+To use `Libidn', you have to perform some changes to your sources and
+the build system.  The necessary changes are small and explained in
+the following sections.  At the end of this chapter, it is described
+how the library is initialized, and how the requirements of the
+library are verified.
+
+A faster way to find out how to adapt your application for use with
+`Libidn' may be to look at the examples at the end of this manual
+(@pxref{Examples}).
+
+@menu
+* Header::
+* Initialization::
+* Version Check::
+* Building the source::
+* Autoconf tests::
+* Memory handling under Windows::
+@end menu
+
+@node Header
+@section Header
+
+The library contains a few independent parts, and each part export the
+interfaces (data types and functions) in a header file.  You must
+include the appropriate header files in all programs using the
+library, either directly or through some other header file, like this:
+
+@example
+#include <stringprep.h>
+@end example
+
+The header files and the functions they define are categorized as
+follows:
+
+@table @asis
+@item stringprep.h
+
+The low-level stringprep API entry point.  For IDN applications, this
+is usually invoked via IDNA. Some applications, specifically non-IDN
+ones, may want to prepare strings directly though, and should include
+this header file.
+
+The name space of the stringprep part of Libidn is @code{stringprep*}
+for function names, @code{Stringprep*} for data types and
+@code{STRINGPREP_*} for other symbols.  In addition,
+@code{_stringprep*} is reserved for internal use and should never be
+used by applications.
+
+@item punycode.h
+
+The entry point to Punycode encoding and decoding functions.  Normally
+punycode is used via the idna.h interface, but some application may
+want to perform raw punycode operations.
+
+The name space of the punycode part of Libidn is @code{punycode_*} for
+function names, @code{Punycode*} for data types and @code{PUNYCODE_*}
+for other symbols.  In addition, @code{_punycode*} is reserved for
+internal use and should never be used by applications.
+@item idna.h
+
+The entry point to the IDNA functions.  This is the normal entry point
+for applications that need IDN functionality.
+
+The name space of the IDNA part of Libidn is @code{idna_*} for
+function names, @code{Idna*} for data types and @code{IDNA_*} for
+other symbols.  In addition, @code{_idna*} is reserved for internal
+use and should never be used by applications.
+
+@item tld.h
+
+The entry point to the TLD functions.  Normal applications are not
+expected to need this functionality, but it is present for
+applications that are used by TLDs to validate customer input.
+
+The name space of the TLD part of Libidn is @code{tld_*} for function
+names, @code{Tld_*} for data types and @code{TLD_*} for other symbols.
+In addition, @code{_tld*} is reserved for internal use and should
+never be used by applications.
+
+@item pr29.h
+
+The entry point to the PR29 functions.  These functions are used to
+detect ``problem sequences'' (@pxref{PR29 Functions}), mostly for use
+in security critical applications.
+
+The name space of the PR29 part of Libidn is @code{pr29_*} for
+function names, @code{Pr29_*} for data types and @code{PR29_*} for
+other symbols.  In addition, @code{_pr29*} is reserved for internal
+use and should never be used by applications.
+
+@item idn-free.h
+
+The entry point to the Windows memory de-allocation function
+(@pxref{Memory handling under Windows}).  It contains only one
+function @code{idn_free}.
+
+@end table
+
+All header files defined and use the symbol @code{IDNAPI} to decorate
+the API functions.
+
+@node Initialization
+@section Initialization
+
+Libidn is stateless and does not need any initialization.
+
+@node Version Check
+@section Version Check
+
+It is often desirable to check that the version of `Libidn' used is
+indeed one which fits all requirements.  Even with binary
+compatibility new features may have been introduced but due to problem
+with the dynamic linker an old version is actually used.  So you may
+want to check that the version is okay right after program startup.
+
+@include texi/stringprep_check_version.texi
+
+The normal way to use the function is to put something similar to the
+following first in your @code{main}:
+
+@example
+  if (!stringprep_check_version (STRINGPREP_VERSION))
+    @{
+      printf ("stringprep_check_version() failed:\n"
+              "Header file incompatible with shared library.\n");
+      exit(EXIT_FAILURE);
+    @}
+@end example
+
+@node Building the source
+@section Building the source
+@cindex Compiling your application
+
+If you want to compile a source file including e.g. the `idna.h' header
+file, you must make sure that the compiler can find it in the
+directory hierarchy.  This is accomplished by adding the path to the
+directory in which the header file is located to the compilers include
+file search path (via the @option{-I} option).
+
+However, the path to the include file is determined at the time the
+source is configured.  To solve this problem, `Libidn' uses the
+external package @command{pkg-config} that knows the path to the
+include file and other configuration options.  The options that need
+to be added to the compiler invocation at compile time are output by
+the @option{--cflags} option to @command{pkg-config libidn}.  The
+following example shows how it can be used at the command line:
+
+@example
+gcc -c foo.c `pkg-config libidn --cflags`
+@end example
+
+Adding the output of @samp{pkg-config libidn --cflags} to the
+compilers command line will ensure that the compiler can find e.g. the
+idna.h header file.
+
+A similar problem occurs when linking the program with the library.
+Again, the compiler has to find the library files.  For this to work,
+the path to the library files has to be added to the library search
+path (via the @option{-L} option).  For this, the option
+@option{--libs} to @command{pkg-config libidn} can be used.  For
+convenience, this option also outputs all other options that are
+required to link the program with the `libidn' library.  The example
+shows how to link @file{foo.o} with the `libidn' library to a program
+@command{foo}.
+
+@example
+gcc -o foo foo.o `pkg-config libidn --libs`
+@end example
+
+Of course you can also combine both examples to a single command by
+specifying both options to @command{pkg-config}:
+
+@example
+gcc -o foo foo.c `pkg-config libidn --cflags --libs`
+@end example
+
+@node Autoconf tests
+@section Autoconf tests
+@cindex Autoconf tests
+@cindex Configure tests
+
+If your project uses Autoconf (@pxref{top, GNU Autoconf,, autoconf})
+to check for installed libraries, you might find the following snippet
+illustrative.  It add a new @file{configure} parameter
+@code{--with-libidn}, and check for @file{idna.h} and @samp{-lidn}
+(possibly below the directory specified as the optional argument to
+@code{--with-libidn}), and define the CPP symbol @code{LIBIDN} if the
+library is found.  The default behaviour is to search for the library
+and enable the functionality (that is, define the symbol) when the
+library is found, but if you wish to make the default behaviour of
+your package be that Libidn is not used (even if it is installed on
+the system), change @samp{libidn=yes} to @samp{libidn=no} on the third
+line.
+
+@example
+AC_ARG_WITH(libidn, AC_HELP_STRING([--with-libidn=[DIR]],
+                                [Support IDN (needs GNU Libidn)]),
+  libidn=$withval, libidn=yes)
+if test "$libidn" != "no"; then
+  if test "$libidn" != "yes"; then
+    LDFLAGS="$@{LDFLAGS@} -L$libidn/lib"
+    CPPFLAGS="$@{CPPFLAGS@} -I$libidn/include"
+  fi
+  AC_CHECK_HEADER(idna.h,
+    AC_CHECK_LIB(idn, stringprep_check_version,
+      [libidn=yes LIBS="$@{LIBS@} -lidn"], libidn=no),
+    libidn=no)
+fi
+if test "$libidn" != "no" ; then
+  AC_DEFINE(LIBIDN, 1, [Define to 1 if you want IDN support.])
+else
+  AC_MSG_WARN([Libidn not found])
+fi
+AC_MSG_CHECKING([if Libidn should be used])
+AC_MSG_RESULT($libidn)
+@end example
+
+If you require that your users have installed @code{pkg-config} (which
+I cannot recommend generally), the above can be done more easily as
+follows.
+
+@example
+AC_ARG_WITH(libidn, AC_HELP_STRING([--with-libidn=[DIR]],
+                                [Support IDN (needs GNU Libidn)]),
+  libidn=$withval, libidn=yes)
+if test "$libidn" != "no" ; then
+  PKG_CHECK_MODULES(LIBIDN, libidn >= 0.0.0, [libidn=yes], [libidn=no])
+  if test "$libidn" != "yes" ; then
+    libidn=no
+    AC_MSG_WARN([Libidn not found])
+  else
+    libidn=yes
+    AC_DEFINE(LIBIDN, 1, [Define to 1 if you want Libidn.])
+  fi
+fi
+AC_MSG_CHECKING([if Libidn should be used])
+AC_MSG_RESULT($libidn)
+@end example
+
+@node Memory handling under Windows
+@section Memory handling under Windows
+@cindex free
+@cindex Memory handling
+@cindex de-allocation
+@cindex heap memory
+
+Several functions in the library allocates memory.  The memory is
+expected to be de-allocated using the @code{free} function.  Under
+Windows, it is sometimes necessary to de-allocate memory in the same
+module that allocated a memory region.  The reason is that different
+modules use separate heap memory regions.  To solve this problem we
+provide a function to de-allocate memory inside the library.
+
+Note that we do not recommend using this interface generally if you do
+not care about Windows portability.
+
+@section Header file @code{idn-free.h}
+
+To use the function explained in this chapter, you need to include the
+file @file{idn-free.h} using:
+
+@example
+#include <idn-free.h>
+@end example
+
+@section Memory de-allocation function
+
+@include texi/idn_free.texi
+
+@c **********************************************************
+@c ********************  Utility Functions ******************
+@c **********************************************************
+@node Utility Functions
+@chapter Utility Functions
+@cindex Utility Functions
+
+The rest of this library makes extensive use of Unicode characters.
+In order to interface this library with the outside world, your
+application may need to make various Unicode transformations.
+
+@section Header file @code{stringprep.h}
+
+To use the functions explained in this chapter, you need to include
+the file @file{stringprep.h} using:
+
+@example
+#include <stringprep.h>
+@end example
+
+@section Unicode Encoding Transformation
+
+@include texi/stringprep_unichar_to_utf8.texi
+@include texi/stringprep_utf8_to_unichar.texi
+@include texi/stringprep_ucs4_to_utf8.texi
+@include texi/stringprep_utf8_to_ucs4.texi
+
+@section Unicode Normalization
+
+@include texi/stringprep_ucs4_nfkc_normalize.texi
+@include texi/stringprep_utf8_nfkc_normalize.texi
+
+@section Character Set Conversion
+
+@include texi/stringprep_locale_charset.texi
+@include texi/stringprep_convert.texi
+@include texi/stringprep_locale_to_utf8.texi
+@include texi/stringprep_utf8_to_locale.texi
+
+
+@c **********************************************************
+@c ******************  Stringprep Functions *****************
+@c **********************************************************
+@node Stringprep Functions
+@chapter Stringprep Functions
+@cindex Stringprep Functions
+
+Stringprep describes a framework for preparing Unicode text strings in
+order to increase the likelihood that string input and string
+comparison work in ways that make sense for typical users throughout
+the world. The stringprep protocol is useful for protocol identifier
+values, company and personal names, internationalized domain names,
+and other text strings.
+
+@section Header file @code{stringprep.h}
+
+To use the functions explained in this chapter, you need to include
+the file @file{stringprep.h} using:
+
+@example
+#include <stringprep.h>
+@end example
+
+@section Defining A Stringprep Profile
+
+Further types and structures are defined for applications that want to
+specify their own stringprep profile.  As these are fairly obscure,
+and by necessity tied to the implementation, we do not document them
+here.  Look into the @file{stringprep.h} header file, and the
+@file{profiles.c} source code for the details.
+
+@section Control Flags
+
+@deftypevr {Stringprep flags} {Stringprep_profile_flags} {STRINGPREP_NO_NFKC}
+Disable the NFKC normalization, as well as selecting the non-NFKC case
+folding tables.  Usually the profile specifies BIDI and NFKC settings,
+and applications should not override it unless in special situations.
+@end deftypevr
+
+@deftypevr {Stringprep flags} {Stringprep_profile_flags} {STRINGPREP_NO_BIDI}
+Disable the BIDI step.  Usually the profile specifies BIDI and NFKC
+settings, and applications should not override it unless in special
+situations.
+@end deftypevr
+
+@deftypevr {Stringprep flags} {Stringprep_profile_flags} {STRINGPREP_NO_UNASSIGNED}
+Make the library return with an error if string contains unassigned
+characters according to profile.
+@end deftypevr
+
+@section Core Functions
+
+@include texi/stringprep_4i.texi
+@include texi/stringprep_4zi.texi
+@include texi/stringprep.texi
+@include texi/stringprep_profile.texi
+
+@section Error Handling
+
+@include texi/stringprep_strerror.texi
+
+@section Stringprep Profile Macros
+
+@deftypefun {int} stringprep_nameprep_no_unassigned (char * @var{in}, int @var{maxlen})
+
+@var{in}: input/ouput array with string to prepare.
+
+@var{maxlen}: maximum length of input/output array.
+
+Prepare the input UTF-8 string according to the nameprep profile.  The
+AllowUnassigned flag is false, use @code{stringprep_nameprep} for
+true AllowUnassigned.  Returns 0 iff successful, or an error code.
+@end deftypefun
+
+@deftypefun {int} stringprep_iscsi (char * @var{in}, int @var{maxlen})
+
+@var{in}: input/ouput array with string to prepare.
+
+@var{maxlen}: maximum length of input/output array.
+
+Prepare the input UTF-8 string according to the draft iSCSI stringprep
+profile.  Returns 0 iff successful, or an error code.
+@end deftypefun
+
+@deftypefun {int} stringprep_plain (char * @var{in}, int @var{maxlen})
+
+@var{in}: input/ouput array with string to prepare.
+
+@var{maxlen}: maximum length of input/output array.
+
+Prepare the input UTF-8 string according to the draft SASL ANONYMOUS
+profile.  Returns 0 iff successful, or an error code.
+@end deftypefun
+
+@deftypefun {int} stringprep_xmpp_nodeprep (char * @var{in}, int @var{maxlen})
+
+@var{in}: input/ouput array with string to prepare.
+
+@var{maxlen}: maximum length of input/output array.
+
+Prepare the input UTF-8 string according to the draft XMPP node
+identifier profile.  Returns 0 iff successful, or an error code.
+@end deftypefun
+
+@deftypefun {int} stringprep_xmpp_resourceprep (char * @var{in}, int @var{maxlen})
+
+@var{in}: input/ouput array with string to prepare.
+
+@var{maxlen}: maximum length of input/output array.
+
+Prepare the input UTF-8 string according to the draft XMPP resource
+identifier profile.  Returns 0 iff successful, or an error code.
+@end deftypefun
+
+@c **********************************************************
+@c *******************  Punycode Functions ******************
+@c **********************************************************
+@node Punycode Functions
+@chapter Punycode Functions
+@cindex Punycode Functions
+
+Punycode is a simple and efficient transfer encoding syntax designed
+for use with Internationalized Domain Names in Applications. It
+uniquely and reversibly transforms a Unicode string into an ASCII
+string. ASCII characters in the Unicode string are represented
+literally, and non-ASCII characters are represented by ASCII
+characters that are allowed in host name labels (letters, digits, and
+hyphens). A general algorithm called Bootstring allows a string of
+basic code points to uniquely represent any string of code points
+drawn from a larger set. Punycode is an instance of Bootstring that
+uses particular parameter values, appropriate for IDNA.
+
+@section Header file @code{punycode.h}
+
+To use the functions explained in this chapter, you need to include
+the file @file{punycode.h} using:
+
+@example
+#include <punycode.h>
+@end example
+
+@section Unicode Code Point Data Type
+
+The punycode function uses a special type to denote Unicode code
+points.  It is guaranteed to always be a 32 bit unsigned integer.
+
+@deftypevr {Punycode Unicode code point} uint32_t punycode_uint
+A unsigned integer that hold Unicode code points.
+@end deftypevr
+
+@section Core Functions
+
+Note that the current implementation will fail if the
+@code{input_length} exceed 4294967295 (the size of
+@code{punycode_uint}).  This restriction may be removed in the future.
+Meanwhile applications are encouraged to not depend on this problem,
+and use @code{sizeof} to initialize @code{input_length} and
+@code{output_length}.
+
+The functions provided are the following two entry points:
+
+@include texi/punycode_encode.texi
+@include texi/punycode_decode.texi
+
+@section Error Handling
+
+@include texi/punycode_strerror.texi
+
+@c **********************************************************
+@c ********************* IDNA Functions *********************
+@c **********************************************************
+@node IDNA Functions
+@chapter IDNA Functions
+@cindex IDNA Functions
+
+Until now, there has been no standard method for domain names to use
+characters outside the ASCII repertoire. The IDNA document defines
+internationalized domain names (IDNs) and a mechanism called IDNA for
+handling them in a standard fashion. IDNs use characters drawn from a
+large repertoire (Unicode), but IDNA allows the non-ASCII characters
+to be represented using only the ASCII characters already allowed in
+so-called host names today. This backward-compatible representation is
+required in existing protocols like DNS, so that IDNs can be
+introduced with no changes to the existing infrastructure. IDNA is
+only meant for processing domain names, not free text.
+
+@section Header file @code{idna.h}
+
+To use the functions explained in this chapter, you need to include
+the file @file{idna.h} using:
+
+@example
+#include <idna.h>
+@end example
+
+@section Control Flags
+
+The IDNA @code{flags} parameter can take on the following values, or a
+bit-wise inclusive or of any subset of the parameters:
+
+@deftypevr {Return code} {Idna_flags} IDNA_ALLOW_UNASSIGNED
+Allow unassigned Unicode code points.
+@end deftypevr
+
+@deftypevr {Return code} {Idna_flags} IDNA_USE_STD3_ASCII_RULES
+Check output to make sure it is a STD3 conforming host name.
+@end deftypevr
+
+@section Prefix String
+
+@deftypevr {Macro} {#define} IDNA_ACE_PREFIX
+String with the official IDNA prefix, @code{xn--}.
+@end deftypevr
+
+@section Core Functions
+
+The idea behind the IDNA function names are as follows: the
+@code{idna_to_ascii_4i} and @code{idna_to_unicode_44i} functions are
+the core IDNA primitives.  The @code{4} indicate that the function
+takes UCS-4 strings (i.e., Unicode code points encoded in a 32-bit
+unsigned integer type) of the specified length.  The @code{i} indicate
+that the data is written ``inline'' into the buffer.  This means the
+caller is responsible for allocating (and de-allocating) the string,
+and providing the library with the allocated length of the string.
+The output length is written in the output length variable.  The
+remaining functions all contain the @code{z} indicator, which means
+the strings are zero terminated.  All output strings are allocated by
+the library, and must be de-allocated by the caller.  The @code{4}
+indicator again means that the string is UCS-4, the @code{8} means the
+strings are UTF-8 and the @code{l} indicator means the strings are
+encoded in the encoding used by the current locale.
+
+The functions provided are the following entry points:
+
+@include texi/idna_to_ascii_4i.texi
+@include texi/idna_to_unicode_44i.texi
+
+@section Simplified ToASCII Interface
+
+@include texi/idna_to_ascii_4z.texi
+@include texi/idna_to_ascii_8z.texi
+@include texi/idna_to_ascii_lz.texi
+
+@section Simplified ToUnicode Interface
+
+@include texi/idna_to_unicode_4z4z.texi
+@include texi/idna_to_unicode_8z4z.texi
+@include texi/idna_to_unicode_8z8z.texi
+@include texi/idna_to_unicode_8zlz.texi
+@include texi/idna_to_unicode_lzlz.texi
+
+@section Error Handling
+
+@include texi/idna_strerror.texi
+
+@c **********************************************************
+@c ********************** TLD Functions *********************
+@c **********************************************************
+@node TLD Functions
+@chapter TLD Functions
+@cindex TLD Functions
+
+Organizations that manage some Top Level Domains (TLDs) have published
+tables with characters they accept within the domain.  The reason may
+be to reduce complexity that come from using the full Unicode range,
+and to protect themselves from future (backwards incompatible) changes
+in the IDN or Unicode specifications.  Libidn implement an
+infrastructure for defining and checking strings against such tables.
+Libidn also ship some tables from TLDs that we have managed to get
+permission to use them from.  Because these tables are even less
+static than Unicode or StringPrep tables, it is likely that they will
+be updated from time to time (even in backwards incompatible ways).
+The Libidn interface provide a ``version'' field for each TLD table,
+which can be compared for equality to guarantee the same operation
+over time.
+
+From a design point of view, you can regard the TLD tables for IDN as
+the ``localization'' step that come after the ``internationalization''
+step provided by the IETF standards.
+
+The TLD functionality rely on up-to-date tables.  The latest version
+of Libidn aim to provide these, but tables with unclear copying
+conditions, or generally experimental tables, are not included.  Some
+such tables can be found at @url{https://github.com/gnuthor/tldchk}.
+
+@section Header file @code{tld.h}
+
+To use the functions explained in this chapter, you need to include
+the file @file{tld.h} using:
+
+@example
+#include <tld.h>
+@end example
+
+@c @section Data Types
+@c
+@c @deftp {Data type} {Tld_table_element} @var{start} @var{end}
+@c @example
+@c /* Interval of valid code points in the TLD. */
+@c struct Tld_table_element
+@c @{
+@c   uint32_t start;		/* Start of range. */
+@c   uint32_t end;		/* End of range, end == start if single. */
+@c @};
+@c typedef struct Tld_table_element Tld_table_element;
+@c @end example
+@c This @code{struct} contain the @var{start} and @var{end} positions
+@c (inclusive) of a range.  If the range is a single (i.e., starts and
+@c ends in the same character), then set @var{end} to the same as
+@c @var{start}.  This structure is normally used as an array.
+@c @end deftp
+@c 
+@c @deftp {Data type} {Tld_table} @var{name} @var{version} @var{nvalid} @var{valid}
+@c @example
+@c /* List valid code points in a TLD. */
+@c struct Tld_table
+@c @{
+@c   char *name;			/* TLD name, e.g., "no". */
+@c   char *version;		/* Version string from TLD file. */
+@c   size_t nvalid;		/* Number of entries in data. */
+@c   Tld_table_element *valid[];	/* Sorted array of valid code points. */
+@c @};
+@c typedef struct Tld_table Tld_table;
+@c @end example
+@c In this @code{struct}, the @var{name} field is a string (@samp{char*})
+@c indicating the TLD name (e.g., ``no'').  The @var{version} field is a
+@c string (@samp{char*}) containing a free form humanly readable string
+@c that can be used for equality comparison to compare different versions
+@c of the table.  The @var{nvalid} field indicate how many entries there
+@c are in @var{valid}, which brings us finally to @var{valid} that
+@c contain the actual code points that are valid for this TLD (see
+@c @code{Tld_table_element} above).
+@c @end deftp
+
+@section Core Functions
+
+@include texi/tld_check_4t.texi
+@include texi/tld_check_4tz.texi
+
+@section Utility Functions
+
+@include texi/tld_get_4.texi
+@include texi/tld_get_4z.texi
+@include texi/tld_get_z.texi
+@include texi/tld_get_table.texi
+@include texi/tld_default_table.texi
+
+@section High-Level Wrapper Functions
+
+@include texi/tld_check_4.texi
+@include texi/tld_check_4z.texi
+@include texi/tld_check_8z.texi
+@include texi/tld_check_lz.texi
+
+@section Error Handling
+
+@include texi/tld_strerror.texi
+
+@c **********************************************************
+@c ********************** PR29 Functions ********************
+@c **********************************************************
+@node PR29 Functions
+@chapter PR29 Functions
+@cindex PR29 Functions
+
+A deficiency in the specification of Unicode Normalization Forms has
+been found.  The consequence is that some strings can be normalized
+into different strings by different implementations.  In other words,
+two different implementations may return different output for the same
+input (because the interpretation of the specification is
+ambiguous). Further, an implementation invoked again on the one of the
+output strings may return a different string (because one of the
+interpretation of the ambiguous specification make normalization
+non-idempotent).  Fortunately, only a select few character sequence
+exhibit this problem, and none of them are expected to occur in
+natural languages (due to different linguistic uses of the involved
+characters).
+
+A full discussion of the problem may be found at:
+
+@url{http://www.unicode.org/review/pr-29.html}
+
+The PR29 functions below allow you to detect the problem sequence.  So
+when would you want to use these functions?  For most applications,
+such as those using Nameprep for IDN, this is likely only to be an
+interoperability problem.  Thus, you may not want to care about it, as
+the character sequences will rarely occur naturally.  However, if you
+are using a profile, such as SASLPrep, to process authentication
+tokens; authorization tokens; or passwords, there is a real danger
+that attackers may try to use the peculiarities in these strings to
+attack parts of your system.  As only a small number of strings, and
+no naturally occurring strings, exhibit this problem, the conservative
+approach of rejecting the strings is recommended.  If this approach is
+not used, you should instead verify that all parts of your system,
+that process the tokens and passwords, use a NFKC implementation that
+produce the same output for the same input.
+
+Technically inclined readers may be interested in knowing more about
+the implementation aspects of the PR29 flaw. @xref{PR29 discussion}.
+
+@section Header file @code{pr29.h}
+
+To use the functions explained in this chapter, you need to include
+the file @file{pr29.h} using:
+
+@example
+#include <pr29.h>
+@end example
+
+@section Core Functions
+
+@include texi/pr29_4.texi
+
+@section Utility Functions
+
+@include texi/pr29_4z.texi
+@include texi/pr29_8z.texi
+
+@section Error Handling
+
+@include texi/pr29_strerror.texi
+
+@c **********************************************************
+@c ***********************  Examples  ***********************
+@c **********************************************************
+@node Examples
+@chapter Examples
+@cindex Examples
+
+This chapter contains example code which illustrate how `Libidn' can
+be used when writing your own application.
+
+@menu
+* Example 1::		Example using stringprep.
+* Example 2::		Example using punycode.
+* Example 3::		Example using IDNA ToASCII.
+* Example 4::		Example using IDNA ToUnicode.
+* Example 5::		Example using TLD checking.
+@end menu
+
+@node Example 1
+@section Example 1
+
+This example demonstrates how the stringprep functions are used.
+
+@verbatiminclude example.c
+
+@node Example 2
+@section Example 2
+
+This example demonstrates how the punycode functions are used.
+
+@verbatiminclude example2.c
+
+@node Example 3
+@section Example 3
+
+This example demonstrates how the library is used to convert
+internationalized domain names into ASCII compatible names.
+
+@verbatiminclude example3.c
+
+@node Example 4
+@section Example 4
+
+This example demonstrates how the library is used to convert ASCII
+compatible names to internationalized domain names.
+
+@verbatiminclude example4.c
+
+@node Example 5
+@section Example 5
+
+This example demonstrates how the library is used to check a string
+for invalid characters within a specific TLD.
+
+@verbatiminclude example5.c
+
+@c **********************************************************
+@c *********************  Invoking idn  *********************
+@c **********************************************************
+@node Invoking idn
+@chapter Invoking idn
+
+@pindex idn
+@cindex invoking @command{idn}
+@cindex command line
+
+@section Name
+
+GNU Libidn (idn) -- Internationalized Domain Names command line tool
+
+@section Description
+@code{idn} allows internationalized string preparation
+(@samp{stringprep}), encoding and decoding of punycode data, and IDNA
+ToASCII/ToUnicode operations to be performed on the command line.
+
+If strings are specified on the command line, they are used as input
+and the computed output is printed to standard output @code{stdout}.
+If no strings are specified on the command line, the program read
+data, line by line, from the standard input @code{stdin}, and print
+the computed output to standard output.  What processing is performed
+(e.g., ToASCII, or Punycode encode) is indicated by options.  If any
+errors are encountered, the execution of the applications is aborted.
+
+All strings are expected to be encoded in the preferred charset used
+by your locale.  Use @code{--debug} to find out what this charset is.
+You can override the charset used by setting environment variable
+@code{CHARSET}.
+
+To process a string that starts with @code{-}, for example
+@code{-foo}, use @code{--} to signal the end of parameters, as in
+@code{idn --quiet -a -- -foo}.
+
+@section Options
+@code{idn} recognizes these commands:
+
+@verbatim
+  -h, --help               Print help and exit
+
+  -V, --version            Print version and exit
+
+  -s, --stringprep         Prepare string according to nameprep profile
+
+  -d, --punycode-decode    Decode Punycode
+
+  -e, --punycode-encode    Encode Punycode
+
+  -a, --idna-to-ascii      Convert to ACE according to IDNA (default mode)
+
+  -u, --idna-to-unicode    Convert from ACE according to IDNA
+
+      --allow-unassigned   Toggle IDNA AllowUnassigned flag (default off)
+
+      --usestd3asciirules  Toggle IDNA UseSTD3ASCIIRules flag (default off)
+
+      --no-tld             Don't check string for TLD specific rules
+                             Only for --idna-to-ascii and --idna-to-unicode
+
+  -n, --nfkc               Normalize string according to Unicode v3.2 NFKC
+
+  -p, --profile=STRING     Use specified stringprep profile instead
+                             Valid stringprep profiles: `Nameprep',
+                             `iSCSI', `Nodeprep', `Resourceprep',
+                             `trace', `SASLprep'
+
+      --debug              Print debugging information
+
+      --quiet              Silent operation
+@end verbatim
+
+@section Environment Variables
+
+The @var{CHARSET} environment variable can be used to override what
+character set to be used for decoding incoming data (i.e., on the
+command line or on the standard input stream), and to encode data to
+the standard output.  If your system is set up correctly, however, the
+application will guess which character set is used automatically.
+Example usage:
+
+@example
+$ CHARSET=ISO-8859-1 idn --punycode-encode
+...
+@end example
+
+@section Examples
+
+Standard usage, reading input from standard input:
+
+@example
+jas@@latte:~$ idn
+libidn 0.3.5
+Copyright 2002, 2003 Simon Josefsson.
+GNU Libidn comes with NO WARRANTY, to the extent permitted by law.
+You may redistribute copies of GNU Libidn under the terms of
+the GNU Lesser General Public License.  For more information
+about these matters, see the file named COPYING.LIB.
+Type each input string on a line by itself, terminated by a newline character.
+r@"aksm@"org@aa{}s.se
+xn--rksmrgs-5wao1o.se
+jas@@latte:~$
+@end example
+
+Reading input from command line, and disable printing copyright and
+license information:
+
+@example
+jas@@latte:~$ idn --quiet r@"aksm@"org@aa{}s.se bl@aa{}b@ae{}rgr@o{}d.no
+xn--rksmrgs-5wao1o.se
+xn--blbrgrd-fxak7p.no
+jas@@latte:~$
+@end example
+
+Accessing a specific StringPrep profile directly:
+
+@example
+jas@@latte:~$ idn --quiet --profile=SASLprep --stringprep te@ss{}t@ordf{}
+te@ss{}ta
+jas@@latte:~$
+@end example
+
+@section Troubleshooting
+
+Getting character data encoded right, and making sure Libidn use the
+same encoding, can be difficult.  The reason for this is that most
+systems encode character data in more than one character encoding,
+i.e., using @code{UTF-8} together with @code{ISO-8859-1} or
+@code{ISO-2022-JP}.  This problem is likely to continue to exist until
+only one character encoding come out as the evolutionary winner, or
+(more likely, at least to some extents) forever.
+
+The first step to troubleshooting character encoding problems with
+Libidn is to use the @samp{--debug} parameter to find out which
+character set encoding @samp{idn} believe your locale uses.
+
+@example
+jas@@latte:~$ idn --debug --quiet ""
+system locale uses charset `UTF-8'.
+
+jas@@latte:~$
+@end example
+
+If it prints @code{ANSI_X3.4-1968} (i.e., @code{US-ASCII}), this
+indicate you have not configured your locale properly.  To configure
+the locale, you can, for example, use @samp{LANG=sv_SE.UTF-8; export
+LANG} at a @code{/bin/sh} prompt, to set up your locale for a Swedish
+environment using @code{UTF-8} as the encoding.
+
+Sometimes @samp{idn} appear to be unable to translate from your system
+locale into @code{UTF-8} (which is used internally), and you get an
+error like the following:
+
+@example
+jas@@latte:~$ idn --quiet foo
+idn: could not convert from ISO-8859-1 to UTF-8.
+jas@@latte:~$
+@end example
+
+The simplest explanation is that you haven't installed the
+@samp{iconv} conversion tools.  You can find it as a standalone
+library in GNU Libiconv
+(@uref{http://www.gnu.org/software/libiconv/}).  On many GNU/Linux
+systems, this library is part of the system, but you may have to
+install additional packages (e.g., @samp{glibc-locale} for Debian) to
+be able to use it.
+
+Another explanation is that the error is correct and you are feeding
+@samp{idn} invalid data.  This can happen inadvertently if you are not
+careful with the character set encoding you use.  For example, if your
+shell run in a @code{ISO-8859-1} environment, and you invoke
+@samp{idn} with the @samp{CHARSET} environment variable as follows,
+you will feed it @code{ISO-8859-1} characters but force it to believe
+they are @code{UTF-8}.  Naturally this will lead to an error, unless
+the byte sequences happen to be valid @code{UTF-8}.  Note that even if
+you don't get an error, the output may be incorrect in this situation,
+because @code{ISO-8859-1} and @code{UTF-8} does not in general encode
+the same characters as the same byte sequences.
+
+@example
+jas@@latte:~$ idn --quiet --debug ""
+system locale uses charset `ISO-8859-1'.
+ 
+jas@@latte:~$ CHARSET=UTF-8 idn --quiet --debug r@"aksm@"org@aa{}s
+system locale uses charset `UTF-8'.
+input[0] = U+0072
+input[1] = U+4af3
+input[2] = U+006d
+input[3] = U+1b29e5
+input[4] = U+0073
+output[0] = U+0078
+output[1] = U+006e
+output[2] = U+002d
+output[3] = U+002d
+output[4] = U+0072
+output[5] = U+006d
+output[6] = U+0073
+output[7] = U+002d
+output[8] = U+0068
+output[9] = U+0069
+output[10] = U+0036
+output[11] = U+0064
+output[12] = U+0035
+output[13] = U+0039
+output[14] = U+0037
+output[15] = U+0035
+output[16] = U+0035
+output[17] = U+0032
+output[18] = U+0061
+xn--rms-hi6d597552a
+jas@@latte:~$
+@end example
+
+The sense moral here is to forget about @samp{CHARSET} (configure your
+locales properly instead) unless you know what you are doing, and if
+you want to use it, do it carefully, after verifying with
+@samp{--debug} that you get the desired results.
+
+@node Emacs API
+@chapter Emacs API
+
+Included in Libidn are @file{punycode.el} and @file{idna.el} that
+provides an Emacs Lisp API to (a limited set of) the Libidn API.  This
+section describes the API.  Currently the IDNA API always set the
+@code{UseSTD3ASCIIRules} flag and clear the @code{AllowUnassigned}
+flag, in the future there may be functionality to specify these flags
+via the API.
+
+@section Punycode Emacs API
+
+@defvar punycode-program
+Name of the GNU Libidn @file{idn} application.  The default is
+@samp{idn}.  This variable can be customized.
+@end defvar
+
+@defvar punycode-environment
+List of environment variable definitions prepended to
+@samp{process-environment}.  The default is @samp{("CHARSET=UTF-8")}.
+This variable can be customized.
+@end defvar
+
+@defvar punycode-encode-parameters
+List of parameters passed to @var{punycode-program} to invoke punycode
+encoding mode.  The default is @samp{("--quiet" "--punycode-encode")}.
+This variable can be customized.
+@end defvar
+
+@defvar punycode-decode-parameters
+Parameters passed to @var{punycode-program} to invoke punycode
+decoding mode.  The default is @samp{("--quiet" "--punycode-decode")}.
+This variable can be customized.
+@end defvar
+
+@defun punycode-encode string
+Returns a Punycode encoding of the @var{string}, after converting the
+input into UTF-8.
+@end defun
+
+@defun punycode-decode string
+Returns a possibly multibyte string which is the decoding of the
+@var{string} which is a punycode encoded string.
+@end defun
+
+@section IDNA Emacs API
+
+@defvar idna-program
+Name of the GNU Libidn @file{idn} application.  The default is
+@samp{idn}.  This variable can be customized.
+@end defvar
+
+@defvar idna-environment
+List of environment variable definitions prepended to
+@samp{process-environment}.  The default is @samp{("CHARSET=UTF-8")}.
+This variable can be customized.
+@end defvar
+
+@defvar idna-to-ascii-parameters
+List of parameters passed to @var{idna-program} to invoke IDNA ToASCII
+mode.  The default is @samp{("--quiet" "--idna-to-ascii"
+"--usestd3asciirules")}.  This variable can be customized.
+@end defvar
+
+@defvar idna-to-unicode-parameters
+Parameters passed @var{idna-program} to invoke IDNA ToUnicode mode.
+The default is @samp{("--quiet" "--idna-to-unicode"
+"--usestd3asciirules")}.  This variable can be customized.
+@end defvar
+
+@defun idna-to-ascii string
+Returns an ASCII Compatible Encoding (ACE) of the string computed by
+the IDNA ToASCII operation on the input @var{string}, after converting
+the input to UTF-8.
+@end defun
+
+@defun idna-to-unicode string
+Returns a possibly multibyte string which is the output of the IDNA
+ToUnicode operation computed on the input @var{string}.
+@end defun
+
+@node Java API
+@chapter Java API
+
+Libidn has been ported to the Java programming language, and as a
+consequence most of the API is available to native Java applications.
+This section contain notes on this support, complete documentation is
+pending.
+
+The Java library, if Libidn has been built with Java support
+(@pxref{Downloading and Installing}), will be placed in
+@file{java/libidn-@value{VERSION}.jar}.  The source code is located in
+@file{java/gnu/inet/encoding/}.
+
+@section Overview
+
+This package provides a Java implementation of the Internationalized
+Domain Names in Applications (IDNA) standard. It is written entirely
+in Java and does not require any additional libraries to be set up.
+
+The gnu.inet.encoding.IDNA class offers two public functions, toASCII
+and toUnicode which can be used as follows:
+
+@example
+gnu.inet.encoding.IDNA.toASCII("bl@"ods.z@"ug");
+gnu.inet.encoding.IDNA.toUnicode("xn--blds-6qa.xn--zg-xka");
+@end example
+
+@section Miscellaneous Programs
+
+The @file{misc/} directory contains several programs that are related
+to the Java part of GNU Libidn, but that don't need to be included in
+the main source tree.
+
+@subsection GenerateRFC3454
+
+This program parses RFC3454 and creates the RFC3454.java program that
+is required during the StringPrep phase.
+
+The RFC can be found at various locations, for example at
+@url{http://www.ietf.org/rfc/rfc3454.txt}.
+
+Invoke the program as follows:
+
+@example
+$ java GenerateRFC3454
+Creating RFC3454.java... Ok.
+@end example
+
+@subsection GenerateNFKC
+
+The GenerateNFKC program parses the Unicode character database file
+and generates all the tables required for NFKC. This program requires
+the two files UnicodeData.txt and CompositionExclusions.txt of version
+3.2 of the Unicode files. Note that RFC3454 (Stringprep) defines that
+Unicode version 3.2 is to be used, not the latest version.
+
+The Unicode data files can be found at
+@url{http://www.unicode.org/Public/}.
+
+Invoke the program as follows:
+
+@example
+$ java GenerateNFKC
+Creating CombiningClass.java... Ok.
+Creating DecompositionKeys.java... Ok.
+Creating DecompositionMappings.java... Ok.
+Creating Composition.java... Ok.
+@end example
+
+@subsection TestIDNA
+
+The TestIDNA program allows to test the IDNA implementation manually
+or against Simon Josefsson's test vectors.
+
+The test vectors can be found at the Libidn homepage,
+@url{http://www.gnu.org/software/libidn/}.
+
+To test the transformation manually, use:
+
+@example
+$ java -cp .:../libidn.jar TestIDNA -a <string to test>
+Input: <string to test>
+Output: <toASCII(string to test)>
+$ java -cp .:../libidn.jar TestIDNA -u <string to test>
+Input: <string to test>
+Output: <toUnicode(string to test)>
+@end example
+
+To test against draft-josefsson-idn-test-vectors.html, use:
+
+@example
+$ java -cp .:../libidn.jar TestIDNA -t
+No errors detected!
+@end example
+
+@subsection TestNFKC
+
+The TestNFKC program allows to test the NFKC implementation manually
+or against the NormalizationTest.txt file from the Unicode data files.
+
+To test the normalization manually, use:
+
+@example
+$ java -cp .:../libidn.jar TestNFKC <string to test>
+Input: <string to test>
+Output: <nfkc version of the string to test>
+@end example
+
+To test against NormalizationTest.txt:
+
+@example
+$ java -cp .:../libidn.jar TestNFKC
+No errors detected!
+@end example
+
+@section Possible Problems
+
+Beware of Bugs: This Java API needs a lot more testing, especially
+with "exotic" character sets. While it works for me, it may not work
+for you.
+
+Encoding of your Java sources: If you are using non-ASCII characters
+in your Java source code, make sure javac compiles your programs with
+the correct encoding. If necessary specify the encoding using the
+-encoding parameter.
+
+Java Unicode handling: Java 1.4 only handles 16-bit Unicode code
+points (i.e. characters in the Basic Multilingual Plane), this
+implementation therefore ignores all references to so-called
+Supplementary Characters (U+10000 to U+10FFFF). Starting from Java
+1.5, these characters will also be supported by Java, but this will
+require changes to this library.  See also the next section.
+
+@section A Note on Java and Unicode
+
+This library uses Java's built-in 'char' datatype. Up to Java 1.4, this
+datatype only supports 16-bit Unicode code points, also called the
+Basic Multilingual Plane. For this reason, this library doesn't work
+for Supplementary Characters (i.e. characters from U+10000 to
+U+10FFFF). All references to such characters are silently ignored.
+
+Starting from Java 1.5, also Supplementary Characters will be
+supported. However, this will require changes in the present version
+of the library. Java 1.5 is currently in beta status.
+
+For more information refer to the documentation of java.lang.Character
+in the JDK API.
+
+@node C# API
+@chapter C# API
+
+The Libidn library has been ported to the C# language.  The port
+reside in the top-level @file{csharp/} directory.  Currently, no
+further documentation about the implementation or the API is
+available.  However, the C# port was based on the Java port, and the
+API is exactly the same as in the Java version.  The help files for
+the Java API may thus be useful.
+
+@c **********************************************************
+@c *******************  Acknowledgements  *******************
+@c **********************************************************
+@node Acknowledgements
+@chapter Acknowledgements
+
+The punycode implementation was taken from the IETF IDN Punycode
+specification, by Adam M. Costello.  The TLD code was contributed by
+Thomas Jacob.  The Java implementation was contributed by Oliver Hitz.
+The C# implementation was contributed by Alexander Gnauck.  The
+Unicode tables were provided by Unicode, Inc.  Some functions for
+dealing with Unicode (see nfkc.c and toutf8.c) were borrowed from
+GLib, downloaded from @url{http://www.gtk.org/}.  The manual borrowed
+text from Libgcrypt by Werner Koch.
+
+Inspiration for many things that, consciously or not, have gone into
+this package is due to a number of free software package that the
+author has been exposed to.  The author wishes to acknowledge the free
+software community in general, for giving an example on what role
+software development can play in the modern society.
+
+Several people reported bugs, sent patches or suggested improvements,
+see the file THANKS in the top-level directory of the source code.
+
+@c **********************************************************
+@c ************************  History  ***********************
+@c **********************************************************
+@node History
+@chapter History
+
+The complete history of user visible changes is stored in the file
+@file{NEWS} in the top-level directory of the source code tree.  The
+complete history of modifications to each file is stored in the file
+@file{ChangeLog} in the same directory.  This section contain a
+condensed version of that information, in the form of ``milestones''
+for the project.
+
+@table @asis
+@item Stringprep implementation.
+Version 0.0.0 released on 2002-11-05.
+
+@item IDNA and Punycode implementations, part of the GNU project.
+Version 0.1.0 released on 2003-01-05.
+
+@item Uses official IDNA ACE prefix @code{xn--}.
+Version 0.1.7 released on 2003-02-12.
+
+@item Command line interface.
+Version 0.1.11 released on 2003-02-26.
+
+@item GNU Libc add-on proposed.
+Version 0.1.12 released on 2003-03-06.
+
+@item Interoperability testing during IDNConnect.
+Version 0.3.1 released on 2003-10-02.
+
+@item TLD restriction testing.
+Version 0.4.0 released on 2004-02-28.
+
+@item GNU Libc add-on integrated.
+Version 0.4.1 released on 2004-03-08.
+
+@item Native Java implementation.
+Version 0.4.2-0.4.9 released between 2004-03-20 and 2004-06-11.
+
+@item PR-29 functions for ``problem sequences''.
+Version 0.5.0 released on 2004-06-26.
+
+@item Many small portability fixes and wider use.
+Version 0.5.1 through 0.5.20, released between 2004-07-09 and
+2005-10-23.
+
+@item Native C# implementation.
+Version 0.6.0 released on 2005-12-03.
+
+@item Windows support through cross-compilation.
+Version 0.6.1 released on 2006-01-20.
+
+@item Library declared stable by releasing v1.0.
+Version 1.0 released on 2007-07-31.
+
+@end table
+
+@node PR29 discussion
+@appendix PR29 discussion
+
+If you wish to experiment with a modified Unicode NFKC implementation
+according to the PR29 proposal, you may find the following bug report
+useful.  However, I have not verified that the suggested modifications
+are correct.  For reference, I'm including my response to the report
+as well.
+
+@verbatim
+From: Rick McGowan <rick@unicode.org>
+Subject: Possible bug and status of PR 29 change(s)
+To: bug-libidn@gnu.org
+Date: Wed, 27 Oct 2004 14:49:17 -0700
+
+Hello. On behalf of the Unicode Consortium editorial committee, I would
+like to find out more information about the PR 29 fixes, if any, and
+functions in Libidn. Your implementation was listed in the text of PR29 as
+needing investigation, so I am following up on several implementations.
+
+The UTC has accepted the proposed fix to D2 as outlined in PR29, and a new
+draft of UAX #15 has been issued.
+
+I have looked at Libidn 0.5.8 (today), and there may still be a possible
+bug in NFKC.java and nfkc.c.
+
+------------------------------------------------------
+
+1. In NFKC.java, this line in canonicalOrdering():
+
+      if (i > 0 && (last_cc == 0 || last_cc != cc)) {
+
+should perhaps be changed to:
+
+      if (i > 0 && (last_cc == 0 || last_cc < cc)) {
+
+but I'm not sure of the sense of this comparison.
+
+------------------------------------------------------
+
+2. In nfkc.c, function _g_utf8_normalize_wc() has this code:
+
+	  if (i > 0 &&
+	      (last_cc == 0 || last_cc != cc) &&
+	      combine (wc_buffer[last_start], wc_buffer[i],
+		       &wc_buffer[last_start]))
+	    {
+
+This appears to have the same bug as the current Python implementation (in
+Python 2.3.4). The code should be checking, as per new rule D2 UAX #15
+update, that the next combining character is the same or HIGHER than the
+current one. It now checks to see if it's non-zero and not equal.
+
+The above line(s) should perhaps be changed to:
+
+	  if (i > 0 &&
+	      (last_cc == 0 || last_cc < cc) &&
+	      combine (wc_buffer[last_start], wc_buffer[i],
+		       &wc_buffer[last_start]))
+	    {
+
+but I'm not sure of the sense of the comparison (< or > or <=?) here.
+
+In the text of PR29, I will be marking Libidn as "needs change" and adding
+the version number that I checked. If any further change is made, please
+let me know the release version, and I'll update again.
+
+Regards,
+	Rick McGowan
+@end verbatim
+
+@verbatim
+From: Simon Josefsson <jas@extundo.com>
+Subject: Re: Possible bug and status of PR 29 change(s)
+To: Rick McGowan <rick@unicode.org>
+Cc: bug-libidn@gnu.org
+Date: Thu, 28 Oct 2004 09:47:47 +0200
+
+Rick McGowan <rick@unicode.org> writes:
+
+> Hello. On behalf of the Unicode Consortium editorial committee, I would
+> like to find out more information about the PR 29 fixes, if any, and
+> functions in Libidn. Your implementation was listed in the text of PR29 as
+> needing investigation, so I am following up on several implementations.
+>
+> The UTC has accepted the proposed fix to D2 as outlined in PR29, and a new
+> draft of UAX #15 has been issued.
+>
+> I have looked at Libidn 0.5.8 (today), and there may still be a possible
+> bug in NFKC.java and nfkc.c.
+
+Hello Rick.
+
+I believe the current behavior is intentional.  Libidn do not aim to
+implement latest-and-greatest NFKC, it aim to implement the NFKC
+functionality required for StringPrep and IDN.  As you may know,
+StringPrep/IDN reference Unicode 3.2.0, and explicitly says any later
+changes (which I consider PR29 as) do not apply.
+
+In fact, I believe that would I incorporate the changes suggested in
+PR29, I would in fact be violating the IDN specifications.
+
+Thanks for looking into the code and finding the place where the
+change could be made.  I'll see if I can mention this in the manual
+somewhere, for technically interested readers.
+
+Regards,
+Simon
+@end verbatim
+
+@node On Label Separators
+@appendix On Label Separators
+
+Some strings contains characters whose NFKC normalized form contain
+the ASCII dot (0x2E, ``.'').  Examples of these characters are U+2024
+(ONE DOT LEADER) and U+248C (DIGIT FIVE FULL STOP).  The strings have
+the interesting property that their IDNA ToASCII output will contain
+embedded dots.  For example:
+
+@example
+ToASCII (hi U+248C com) = hi5.com
+ToASCII (r@"aksm@"org@aa{}s U+2024 com) = xn--rksmrgs.com-l8as9u
+@end example
+
+This demonstrate the two general cases: The first where the ASCII dot
+is part of an output that do not begin with the IDN prefix
+@code{xn--}.  The second example illustrate when the dot is part of
+IDN prefixed with @code{xn--}.
+
+The input strings are, from the DNS point of view, a single label.
+The IDNA algorithm translate one label at a time.  Thus, the output is
+expected to be only one label.  What is important here is to make sure
+the DNS resolver receives the correct query.  The DNS protocol does
+not use the dot to delimit labels on the wire, rather it uses
+length-value pairs.  Thus the correct query would be for
+@code{@{7@}hi5.com} and @code{@{22@}xn--rksmrgs.com-l8as9u}
+respectively.
+
+Some implementations @footnote{Notably Microsoft's Internet Explorer
+and Mozilla's Firefox, but not Apple's Safari.} have decided that
+these inputs strings are potentially confusing for the user.  The
+string @code{hi U+248C com} looks like @code{hi5.com} on systems that
+support Unicode properly.  These implementations do not follow RFC
+3490.  They yield:
+
+@example
+ToASCII (hi U+248C com) = hi5.com
+ToASCII (r@"aksm@"org@aa{}s U+2024 com) = xn--rksmrgs-5wao1o.com
+@end example
+
+The DNS query they perform are @code{@{3@}hi5@{3@}com} and
+@code{@{18@}xn--rksmrgs-5wao1o@{3@}com} respectively.  Arguably, this
+leads to a better user experience, and suggests that the IDNA
+specification is sub-optimal in this area.
+
+@section Recommended Workaround
+
+It has been suggested to normalize the entire input string using NFKC
+before passing it to IDNA ToASCII.  You may use
+@code{stringprep_utf8_nfkc_normalize} or
+@code{stringprep_ucs4_nfkc_normalize}.  This appears to lead to
+similar behaviour as IE/Firefox, which would avoid the problem, but
+this needs to be confirmed.  Feel free to discuss the issue with us.
+
+Alternative workarounds are being considered.  Eventually Libidn may
+implement a new flag to the @code{idna_*} functions that implements a
+recommended way to work around this problem.
+
+@node Copying Information
+@appendix Copying Information
+
+@menu
+* GNU Free Documentation License::   License for copying this manual.
+@end menu
+
+@node GNU Free Documentation License
+@appendixsec GNU Free Documentation License
+
+@cindex FDL, GNU Free Documentation License
+
+@include fdl-1.3.texi
+
+@node Function and Variable Index
+@unnumbered Function and Variable Index
+
+@printindex fn
+
+@node Concept Index
+@unnumbered Concept Index
+
+@printindex cp
+
+@bye
+
+@c  LocalWords:  Kerberos Shishi getaddrinfo Slackware Cygwin WorkShop

@@ -8,6 +8,10 @@
 #import "XMPPUser.h"
 #import "XMPPResource.h"
 
+#if TARGET_OS_IPHONE  
+  #import <UIKit/UIKit.h>
+#endif
+
 @protocol XMPPRosterStorage;
 @class DDList;
 

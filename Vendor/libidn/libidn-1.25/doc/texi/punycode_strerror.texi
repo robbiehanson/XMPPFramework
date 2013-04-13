@@ -1,0 +1,22 @@
+@subheading punycode_strerror
+@anchor{punycode_strerror}
+@deftypefun {const char *} {punycode_strerror} (Punycode_status @var{rc})
+@var{rc}: an @code{Punycode_status} return code.
+
+Convert a return code integer to a text string.  This string can be
+used to output a diagnostic message to the user.
+
+@strong{PUNYCODE_SUCCESS:} Successful operation.  This value is guaranteed
+to always be zero, the remaining ones are only guaranteed to hold
+non-zero values, for logical comparison purposes.
+
+@strong{PUNYCODE_BAD_INPUT:} Input is invalid.
+
+@strong{PUNYCODE_BIG_OUTPUT:} Output would exceed the space provided.
+
+@strong{PUNYCODE_OVERFLOW:} Input needs wider integers to process.
+
+@strong{Return value:} Returns a pointer to a statically allocated string
+containing a description of the error with the return code @code{rc}.
+@end deftypefun
+

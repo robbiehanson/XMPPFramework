@@ -4,6 +4,9 @@
 #if !TARGET_OS_IPHONE
   #import <Cocoa/Cocoa.h>
 #endif
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#endif
 
 #import "XMPPUser.h"
 #import "XMPP.h"

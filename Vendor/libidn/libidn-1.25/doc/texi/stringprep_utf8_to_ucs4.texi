@@ -1,0 +1,19 @@
+@subheading stringprep_utf8_to_ucs4
+@anchor{stringprep_utf8_to_ucs4}
+@deftypefun {uint32_t *} {stringprep_utf8_to_ucs4} (const char * @var{str}, ssize_t @var{len}, size_t * @var{items_written})
+@var{str}: a UTF-8 encoded string
+
+@var{len}: the maximum length of @code{str} to use. If @code{len} < 0, then
+the string is nul-terminated.
+
+@var{items_written}: location to store the number of characters in the
+result, or @code{NULL}.
+
+Convert a string from UTF-8 to a 32-bit fixed width
+representation as UCS-4, assuming valid UTF-8 input.
+This function does no error checking on the input.
+
+@strong{Return value:} a pointer to a newly allocated UCS-4 string.
+This value must be deallocated by the caller.
+@end deftypefun
+
