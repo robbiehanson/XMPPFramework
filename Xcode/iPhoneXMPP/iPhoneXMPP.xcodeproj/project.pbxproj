@@ -58,6 +58,8 @@
 		DC30E6CF153E09D2001B9E6D /* XMPPDigestMD5Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E6C4153E09D2001B9E6D /* XMPPDigestMD5Authentication.m */; };
 		DC30E6D0153E09D2001B9E6D /* XMPPPlainAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E6C7153E09D2001B9E6D /* XMPPPlainAuthentication.m */; };
 		DC30E6D1153E09D2001B9E6D /* XMPPXFacebookPlatformAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E6CA153E09D2001B9E6D /* XMPPXFacebookPlatformAuthentication.m */; };
+		DC319A2217289FDA00AD8EF8 /* XEP_0223.m in Sources */ = {isa = PBXBuildFile; fileRef = DC319A2117289FDA00AD8EF8 /* XEP_0223.m */; };
+		DC319A2517289FF900AD8EF8 /* XMPPIQ+XEP_0060.m in Sources */ = {isa = PBXBuildFile; fileRef = DC319A2417289FF900AD8EF8 /* XMPPIQ+XEP_0060.m */; };
 		DC37309E139E9FD100A8407D /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = DC37309D139E9FD100A8407D /* XMPPReconnect.m */; };
 		DC3730B7139E9FDA00A8407D /* XMPPGroupCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3730A2139E9FDA00A8407D /* XMPPGroupCoreDataStorageObject.m */; };
 		DC3730B8139E9FDA00A8407D /* XMPPResourceCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3730A4139E9FDA00A8407D /* XMPPResourceCoreDataStorageObject.m */; };
@@ -226,6 +228,10 @@
 		DC30E6C9153E09D2001B9E6D /* XMPPXFacebookPlatformAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPXFacebookPlatformAuthentication.h; sourceTree = "<group>"; };
 		DC30E6CA153E09D2001B9E6D /* XMPPXFacebookPlatformAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPXFacebookPlatformAuthentication.m; sourceTree = "<group>"; };
 		DC30E6CB153E09D2001B9E6D /* XMPPSASLAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSASLAuthentication.h; sourceTree = "<group>"; };
+		DC319A2017289FDA00AD8EF8 /* XEP_0223.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XEP_0223.h; sourceTree = "<group>"; };
+		DC319A2117289FDA00AD8EF8 /* XEP_0223.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XEP_0223.m; sourceTree = "<group>"; };
+		DC319A2317289FF900AD8EF8 /* XMPPIQ+XEP_0060.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPIQ+XEP_0060.h"; sourceTree = "<group>"; };
+		DC319A2417289FF900AD8EF8 /* XMPPIQ+XEP_0060.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XMPPIQ+XEP_0060.m"; sourceTree = "<group>"; };
 		DC37309C139E9FD100A8407D /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
 		DC37309D139E9FD100A8407D /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
 		DC3730A1139E9FDA00A8407D /* XMPPGroupCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPGroupCoreDataStorageObject.h; sourceTree = "<group>"; };
@@ -426,6 +432,7 @@
 				DCB215D01715EDC500719845 /* XEP-0199 */,
 				DCB215D71715EDD600719845 /* XEP-0202 */,
 				070400941347CB520092A737 /* XEP-0203 */,
+				DC319A1F17289FDA00AD8EF8 /* XEP-0223 */,
 				DCB215DE1715EDF100719845 /* XEP-0224 */,
 			);
 			name = Extensions;
@@ -783,6 +790,15 @@
 			path = "X-Facebook-Platform";
 			sourceTree = "<group>";
 		};
+		DC319A1F17289FDA00AD8EF8 /* XEP-0223 */ = {
+			isa = PBXGroup;
+			children = (
+				DC319A2017289FDA00AD8EF8 /* XEP_0223.h */,
+				DC319A2117289FDA00AD8EF8 /* XEP_0223.m */,
+			);
+			path = "XEP-0223";
+			sourceTree = "<group>";
+		};
 		DC37309B139E9FD100A8407D /* Reconnect */ = {
 			isa = PBXGroup;
 			children = (
@@ -941,6 +957,8 @@
 		DCB215AB1715ECF900719845 /* XEP-0060 */ = {
 			isa = PBXGroup;
 			children = (
+				DC319A2317289FF900AD8EF8 /* XMPPIQ+XEP_0060.h */,
+				DC319A2417289FF900AD8EF8 /* XMPPIQ+XEP_0060.m */,
 				DCB215AC1715ECF900719845 /* XMPPPubSub.h */,
 				DCB215AD1715ECF900719845 /* XMPPPubSub.m */,
 			);
@@ -1283,6 +1301,8 @@
 				DCB215DD1715EDD600719845 /* XMPPTime.m in Sources */,
 				DCB215E31715EDF100719845 /* XMPPAttentionModule.m in Sources */,
 				DCB215E41715EDF100719845 /* XMPPMessage+XEP_0224.m in Sources */,
+				DC319A2217289FDA00AD8EF8 /* XEP_0223.m in Sources */,
+				DC319A2517289FF900AD8EF8 /* XMPPIQ+XEP_0060.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,34 +1,55 @@
-//
-//  XMPPPubSub.m
-//
-//  Created by Duncan Robertson [duncan@whomwah.com]
-//
-
 #import "XMPPPubSub.h"
-#import "XMPPFramework.h"
+#import "XMPPIQ+XEP_0060.h"
+#import "XMPPInternal.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-#define NS_PUBSUB          @"http://jabber.org/protocol/pubsub"
-#define NS_PUBSUB_EVENT    @"http://jabber.org/protocol/pubsub#event"
-#define NS_PUBSUB_CONFIG   @"http://jabber.org/protocol/pubsub#node_config"
-#define NS_PUBSUB_OWNER    @"http://jabber.org/protocol/pubsub#owner"
-#define NS_DISCO_ITEMS     @"http://jabber.org/protocol/disco#items"
+// Defined in XMPPIQ+XEP_0060.h
+//
+// #define XMLNS_PUBSUB             @"http://jabber.org/protocol/pubsub"
+// #define XMLNS_PUBSUB_OWNER       @"http://jabber.org/protocol/pubsub#owner"
+// #define XMLNS_PUBSUB_EVENT       @"http://jabber.org/protocol/pubsub#event"
+// #define XMLNS_PUBSUB_NODE_CONFIG @"http://jabber.org/protocol/pubsub#node_config"
 
 
 @implementation XMPPPubSub
+{
+	XMPPJID *serviceJID;
+	XMPPJID *myJID;
+	
+	NSMutableDictionary *subscribeDict;
+	NSMutableDictionary *unsubscribeDict;
+	NSMutableDictionary *retrieveDict;
+	NSMutableDictionary *configSubDict;
+	NSMutableDictionary *createDict;
+	NSMutableDictionary *deleteDict;
+	NSMutableDictionary *configNodeDict;
+	NSMutableDictionary *publishDict;
+}
+
++ (BOOL)isPubSubMessage:(XMPPMessage *)message
+{
+	NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
+	return (event != nil);
+}
 
 @synthesize serviceJID;
 
 - (id)init
 {
+	// This will cause a crash - it's designed to.
+	// Only the init methods listed in XMPPPubSub.h are supported.
+	
 	return [self initWithServiceJID:nil dispatchQueue:NULL];
 }
 
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue
 {
+	// This will cause a crash - it's designed to.
+	// Only the init methods listed in XMPPPubSub.h are supported.
+	
 	return [self initWithServiceJID:nil dispatchQueue:NULL];
 }
 
@@ -39,11 +60,21 @@
 
 - (id)initWithServiceJID:(XMPPJID *)aServiceJID dispatchQueue:(dispatch_queue_t)queue
 {
-	NSParameterAssert(aServiceJID != nil);
+	// If aServiceJID is nil, we won't include a 'to' attribute in the <iq/> element(s) we send.
+	// This is the proper configuration for PEP, as it uses the bare JID as the pubsub node.
 	
 	if ((self = [super initWithDispatchQueue:queue]))
 	{
 		serviceJID = [aServiceJID copy];
+		
+		subscribeDict   = [[NSMutableDictionary alloc] init];
+		unsubscribeDict = [[NSMutableDictionary alloc] init];
+		retrieveDict    = [[NSMutableDictionary alloc] init];
+		configSubDict   = [[NSMutableDictionary alloc] init];
+		createDict      = [[NSMutableDictionary alloc] init];
+		deleteDict      = [[NSMutableDictionary alloc] init];
+		configNodeDict  = [[NSMutableDictionary alloc] init];
+		publishDict     = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
@@ -52,9 +83,14 @@
 {
 	if ([super activate:aXmppStream])
 	{
-	#ifdef _XMPP_CAPABILITIES_H
-		[xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
-	#endif
+		if (serviceJID == nil)
+		{
+			myJID = xmppStream.myJID;
+			[[NSNotificationCenter defaultCenter] addObserver:self
+			                                         selector:@selector(myJIDDidChange:)
+			                                             name:XMPPStreamDidChangeMyJIDNotification
+			                                           object:nil];
+		}
 		
 		return YES;
 	}
@@ -64,13 +100,41 @@
 
 - (void)deactivate
 {
-#ifdef _XMPP_CAPABILITIES_H
-	[xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
-#endif
+	[subscribeDict   removeAllObjects];
+	[unsubscribeDict removeAllObjects];
+	[retrieveDict    removeAllObjects];
+	[configSubDict   removeAllObjects];
+	[createDict      removeAllObjects];
+	[deleteDict      removeAllObjects];
+	[configNodeDict  removeAllObjects];
+	[publishDict     removeAllObjects];
 	
+	if (serviceJID == nil) {
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:XMPPStreamDidChangeMyJIDNotification object:nil];
+	}
 	[super deactivate];
 }
 
+- (void)myJIDDidChange:(NSNotification *)notification
+{
+	// Notifications are delivered on the thread/queue that posted them.
+	// In this case, they are delivered on xmppStream's internal processing queue.
+	
+	XMPPStream *stream = (XMPPStream *)[notification object];
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		if (xmppStream == stream)
+		{
+			myJID = xmppStream.myJID;
+		}
+	}};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
@@ -81,53 +145,250 @@
 **/
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	if ([iq isResultIQ])
+	// Check to see if IQ is from our PubSub/PEP service
+	if (serviceJID) {
+		if (![serviceJID isEqualToJID:[iq from]]) return NO;
+	}
+	else {
+		if (![myJID isEqualToJID:[iq from] options:XMPPJIDCompareBare]) return NO;
+	}
+	
+	NSString *elementID = [iq elementID];
+	NSString *node = nil;
+	
+	if ((node = [subscribeDict objectForKey:elementID]))
 	{
-		NSXMLElement *pubsub = [iq elementForName:@"pubsub" xmlns:NS_PUBSUB];
-		if (pubsub)
-		{
-			// <iq from="pubsub.host.com" to="user@host.com/rsrc" id="ABC123:subscribenode" type="result">
-			//   <pubsub xmlns="http://jabber.org/protocol/pubsub">
-			//     <subscription jid="tv@xmpp.local" subscription="subscribed" subid="DEF456"/>
-			//   </pubsub>
-			// </iq>
-			
-			NSXMLElement *subscription = [pubsub elementForName:@"subscription"];
-			if (subscription)
-			{
-				NSString *value = [subscription attributeStringValueForName:@"subscription"];
-				if (value && ([value caseInsensitiveCompare:@"subscribed"] == NSOrderedSame))
-				{
-					[multicastDelegate xmppPubSub:self didSubscribe:iq];
-					return YES;
-				}
-			}
-		} else {
-            //Check if it was a publish
-            NSString *elementID = [iq attributeStringValueForName:@"id"];
-            if (elementID) {
-                NSArray * elementIDComp = [elementID componentsSeparatedByString:@":"];
-                if ([elementIDComp count] > 1) {
-                    NSString * opType = [elementIDComp objectAtIndex:1];
-                    
-                    if ([opType isEqualToString:@"publish_node"]) {
-                        [multicastDelegate xmppPubSub:self didPublish:iq];
-                        return YES;
-                        
-                    } else if([opType isEqualToString:@"unsubscribe_node"]) {
-                        [multicastDelegate xmppPubSub:self didUnsubscribe:iq];
-                        return YES;
-                    }
-                }
-            }
-        }
+		// Example subscription success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='sub1'>
+		//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+		//     <subscription
+		//         node='princely_musings'
+		//         jid='francisco@denmark.lit'
+		//         subid='ba49252aaa4f5d320c24d3766f0bdcade78c78d3'
+		//         subscription='subscribed'/>
+		//   </pubsub>
+		// </iq>
+		//
+		// Example subscription error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='sub1'>
+		//   <error type='modify'>
+		//     <bad-request xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//     <invalid-jid xmlns='http://jabber.org/protocol/pubsub#errors'/>
+		//   </error>
+		// </iq>
+		// 
+		// XEP-0060 provides many other example responses, but
+		// not all of them fit perfectly into the subscribed/not-subscribed categories.
+		// For example, the subscription could be:
+		// 
+		// - pending, approval required
+		// - unconfigured, configuration required
+		// - unconfigured, configuration supported
+		//
+		// However, in the general sense, the subscription request was accepted.
+		// So these special cases will still be broadcast as "subscibed",
+		// and it is the delegates responsibility to handle these special cases if the server is configured as such.
 		
-		[multicastDelegate xmppPubSub:self didReceiveResult:iq];
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppPubSub:self didSubscribeToNode:node withResult:iq];
+		else
+			[multicastDelegate xmppPubSub:self didNotSubscribeToNode:node withError:iq];
+		
+		[subscribeDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ([iq isErrorIQ])
+	else if ((node = [unsubscribeDict objectForKey:elementID]))
 	{
-		[multicastDelegate xmppPubSub:self didReceiveError:iq];
+		// Example unsubscribe success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='unsub1'/>
+		//
+		// Example unsubscribe error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='unsub1'>
+		//   <error type='modify'>
+		//     <bad-request xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//     <subid-required xmlns='http://jabber.org/protocol/pubsub#errors'/>
+		//   </error>
+		// </iq>
+		//
+		// XEP-0060 provides many other example responses, but
+		// not all of them fit perfectly into the unsubscribed/not-unsubscribed categories.
+		//
+		// For example, there's an error that gets returned if the client wasn't subscribed.
+		// Depending on the client, this could possibly get treated as a successful unsubscribe action.
+		//
+		// It is the delegates responsibility to handle these special cases.
+		
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppPubSub:self didUnsubscribeFromNode:node withResult:iq];
+		else
+			[multicastDelegate xmppPubSub:self didNotUnsubscribeFromNode:node withError:iq];
+		
+		[unsubscribeDict removeObjectForKey:elementID];
+		return YES;
+	}
+	else if ((node = [retrieveDict objectForKey:elementID]))
+	{
+		// Example retrieve success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' to='francisco@denmark.lit' id='subscriptions1'>
+		//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+		//     <subscriptions>
+		//       <subscription node='node1' jid='francisco@denmark.lit' subscription='subscribed'/>
+		//       <subscription node='node2' jid='francisco@denmark.lit' subscription='subscribed'/>
+		//       <subscription node='node5' jid='francisco@denmark.lit' subscription='unconfigured'/>
+		//       <subscription node='node6' jid='francisco@denmark.lit' subscription='subscribed' subid='123-abc'/>
+		//       <subscription node='node6' jid='francisco@denmark.lit' subscription='subscribed' subid='004-yyy'/>
+		//     </subscriptions>
+		//   </pubsub>
+		// </iq>
+		//
+		// Example retrieve error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='subscriptions1'>
+		//   <error type='cancel'>
+		//     <feature-not-implemented xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//     <unsupported xmlns='http://jabber.org/protocol/pubsub#errors' feature='retrieve-subscriptions'/>
+		//   </error>
+		// </iq>
+		
+		if ([[iq type] isEqualToString:@"result"])
+		{
+			if ([node isKindOfClass:[NSNull class]])
+				[multicastDelegate xmppPubSub:self didRetrieveSubscriptions:iq];
+			else
+				[multicastDelegate xmppPubSub:self didRetrieveSubscriptions:iq forNode:node];
+		}
+		else
+		{
+			if ([node isKindOfClass:[NSNull class]])
+				[multicastDelegate xmppPubSub:self didNotRetrieveSubscriptions:iq];
+			else
+				[multicastDelegate xmppPubSub:self didNotRetrieveSubscriptions:iq forNode:node];
+		}
+		
+		[retrieveDict removeObjectForKey:elementID];
+		return YES;
+	}
+	else if ((node = [configSubDict objectForKey:elementID]))
+	{
+		// Example configure subscription success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='options2'/>
+		//
+		// Example configure subscription error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='options2'>
+		//   <error type='modify'>
+		//     <bad-request xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//     <invalid-options xmlns='http://jabber.org/protocol/pubsub#errors'/>
+		//   </error>
+		// </iq>
+		
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppPubSub:self didConfigureSubscriptionToNode:node withResult:iq];
+		else
+			[multicastDelegate xmppPubSub:self didNotConfigureSubscriptionToNode:node withError:iq];
+		
+		[configSubDict removeObjectForKey:elementID];
+		return YES;
+	}
+	else if ((node = [publishDict objectForKey:elementID]))
+	{
+		// Example publish success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' to='hamlet@denmark.lit/blogbot' id='publish1'>
+		//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+		//     <publish node='princely_musings'>
+		//       <item id='ae890ac52d0df67ed7cfdf51b644e901'/>
+		//     </publish>
+		//   </pubsub>
+		// </iq>
+		//
+		// Example publish error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' id='publish1'>
+		//   <error type='auth'>
+		//     <forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//   </error>
+		// </iq>
+		
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppPubSub:self didPublishToNode:node withResult:iq];
+		else
+			[multicastDelegate xmppPubSub:self didNotPublishToNode:node withError:iq];
+		
+		[publishDict removeObjectForKey:elementID];
+		return YES;
+	}
+	else if ((node = [createDict objectForKey:elementID]))
+	{
+		// Example create success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='options2'/>
+		//
+		// Example create error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='options2'>
+		//   <error type='modify'>
+		//     <bad-request xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//     <invalid-options xmlns='http://jabber.org/protocol/pubsub#errors'/>
+		//   </error>
+		// </iq>
+		
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppPubSub:self didCreateNode:node withResult:iq];
+		else
+			[multicastDelegate xmppPubSub:self didNotCreateNode:node withError:iq];
+		
+		[createDict removeObjectForKey:elementID];
+		return YES;
+	}
+	else if ((node = [deleteDict objectForKey:elementID]))
+	{
+		// Example delete success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' id='delete1'/>
+		//
+		// Example delete error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' to='hamlet@denmark.lit/elsinore' id='delete1'>
+		//   <error type='auth'>
+		//     <forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//   </error>
+		// </iq>
+		
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppPubSub:self didDeleteNode:node withResult:iq];
+		else
+			[multicastDelegate xmppPubSub:self didNotDeleteNode:node withError:iq];
+		
+		[deleteDict removeObjectForKey:elementID];
+		return YES;
+	}
+	else if ((node = [configNodeDict objectForKey:elementID]))
+	{
+		// Example configure node success response:
+		//
+		// <iq type='result' from='pubsub.shakespeare.lit' to='hamlet@denmark.lit/elsinore' id='config2'/>
+		//
+		// Example configure node error response:
+		//
+		// <iq type='error' from='pubsub.shakespeare.lit' to='hamlet@denmark.lit/elsinore' id='config2'>
+		//   <error type='modify'>
+		//     <not-acceptable xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		//   </error>
+		// </iq>
+		
+		if ([[iq type] isEqualToString:@"result"])
+			[multicastDelegate xmppPubSub:self didConfigureNode:node withResult:iq];
+		else
+			[multicastDelegate xmppPubSub:self didNotConfigureNode:node withError:iq];
+		
+		[configNodeDict removeObjectForKey:elementID];
 		return YES;
 	}
 	
@@ -139,147 +400,371 @@
 **/
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
+	// Check to see if message is from our PubSub/PEP service
+	if (serviceJID) {
+		if (![serviceJID isEqualToJID:[message from]]) return;
+	}
+	else {
+		if (![myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+	}
+	
 	// <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
 	//   <event xmlns='http://jabber.org/protocol/pubsub#event'>
 	//     <items node='/pubsub.foo'>
 	//       <item id='5036AA52A152B'>
-	//         <text id='724427814855'>
-	//           Huw Stephens sits in for Greg James and David Garrido takes a look at the sporting week
-	//         </text>
+	//         [... entry ...]
 	//       </item>
 	//     </items>
 	//   </event>
 	// </message>
 	
-	NSXMLElement *event = [message elementForName:@"event" xmlns:NS_PUBSUB_EVENT];
+	NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
 	if (event)
 	{
 		[multicastDelegate xmppPubSub:self didReceiveMessage:message];
 	}
 }
 
-#ifdef _XMPP_CAPABILITIES_H
-/**
- * If an XMPPCapabilites instance is used we want to advertise our support for pubsub support.
-**/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	// <query xmlns="http://jabber.org/protocol/disco#info">
-	//   ...
-	//   <identity category='pubsub' type='service'/>
-	//   <feature var='http://jabber.org/protocol/pubsub' />
-	//   ...
-	// </query>
-	
-	NSXMLElement *identity = [NSXMLElement elementWithName:@"identity"];
-	[identity addAttributeWithName:@"category" stringValue:@"pubsub"];
-	[identity addAttributeWithName:@"type" stringValue:@"service"];
-	[query addChild:identity];
-	
-	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-	[feature addAttributeWithName:@"var" stringValue:NS_PUBSUB];
-	[query addChild:feature];
+	[subscribeDict   removeAllObjects];
+	[unsubscribeDict removeAllObjects];
+	[retrieveDict    removeAllObjects];
+	[configSubDict   removeAllObjects];
+	[createDict      removeAllObjects];
+	[deleteDict      removeAllObjects];
+	[configNodeDict  removeAllObjects];
+	[publishDict     removeAllObjects];
 }
-#endif
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Utility Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSXMLElement *)formForOptions:(NSDictionary *)options withFromType:(NSString *)formTypeValue
+{
+	// <x xmlns='jabber:x:data' type='submit'>
+	//   <field var='FORM_TYPE' type='hidden'>
+	//     <value>http://jabber.org/protocol/pubsub#subscribe_options</value>
+	//   </field>
+	//   <field var='pubsub#deliver'><value>1</value></field>
+	//   <field var='pubsub#digest'><value>0</value></field>
+	//   <field var='pubsub#include_body'><value>false</value></field>
+	//   <field var='pubsub#show-values'>
+	//     <value>chat</value>
+	//     <value>online</value>
+	//     <value>away</value>
+	//   </field>
+	// </x>
+	
+	NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
+	[x addAttributeWithName:@"type" stringValue:@"submit"];
+	
+	NSXMLElement *formTypeField = [NSXMLElement elementWithName:@"field"];
+	[formTypeField addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
+	[formTypeField addAttributeWithName:@"type" stringValue:@"hidden"];
+	[formTypeField addChild:[NSXMLElement elementWithName:@"value" stringValue:formTypeValue]];
+	
+	[x addChild:formTypeField];
+	
+	[options enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop){
+		
+		NSAssert([key isKindOfClass:[NSString class]], @"The keys within an options dictionary must be strings");
+		
+		NSXMLElement *field = [NSXMLElement elementWithName:@"field"];
+		
+		NSString *var = (NSString *)key;
+		[field addAttributeWithName:@"var" stringValue:var];
+		
+		if ([obj isKindOfClass:[NSArray class]])
+		{
+			NSArray *values = (NSArray *)obj;
+			for (id value in values)
+			{
+				[field addChild:[NSXMLElement elementWithName:@"value" stringValue:[value description]]];
+			}
+		}
+		else
+		{
+			[field addChild:[NSXMLElement elementWithName:@"value" stringValue:[obj description]]];
+		}
+		
+		[x addChild:field];
+	}];
+	
+	NSXMLElement *optionsStanza = [NSXMLElement elementWithName:@"options"];
+	[optionsStanza addChild:x];
+	
+	return optionsStanza;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Subscription Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)subscribeToNode:(NSString *)node withOptions:(NSDictionary *)options
+- (NSString *)subscribeToNode:(NSString *)node
 {
+	return [self subscribeToNode:node withJID:nil options:nil];
+}
+
+- (NSString *)subscribeToNode:(NSString *)node withJID:(XMPPJID *)myBareOrFullJid
+{
+	return [self subscribeToNode:node withJID:myBareOrFullJid options:nil];
+}
+
+- (NSString *)subscribeToNode:(NSString *)aNode withJID:(XMPPJID *)myBareOrFullJid options:(NSDictionary *)options
+{
+	if (aNode == nil) return nil;
+	
+	// In-case aNode is mutable
+	NSString *node = [aNode copy];
+	
+	// We default to using the full JID
+	NSString *jidStr = myBareOrFullJid ? [myBareOrFullJid full] : [xmppStream.myJID full];
+	
+	// Generate uuid and add to dict
+	NSString *uuid = [xmppStream generateUUID];
+	dispatch_async(moduleQueue, ^{
+		[subscribeDict setObject:node forKey:uuid];
+	});
+	
+	// Example from XEP-0060 section 6.1.1:
+	// 
 	// <iq type='set' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='sub1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
 	//     <subscribe node='princely_musings' jid='francisco@denmark.lit'/>
 	//   </pubsub>
 	// </iq>
-
-	NSString *sid = [NSString stringWithFormat:@"%@:subscribe_node", xmppStream.generateUUID];
-
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
-	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+	
 	NSXMLElement *subscribe = [NSXMLElement elementWithName:@"subscribe"];
 	[subscribe addAttributeWithName:@"node" stringValue:node];
-	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID full]];
-
-	[ps addChild:subscribe];
-	[iq addChild:ps];
-
+	[subscribe addAttributeWithName:@"jid" stringValue:jidStr];
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	[pubsub addChild:subscribe];
+	
+	if (options)
+	{
+		// Example from XEP-0060 section 6.3.7:
+		// 
+		// <options>
+		//   <x xmlns='jabber:x:data' type='submit'>
+		//     <field var='FORM_TYPE' type='hidden'>
+		//       <value>http://jabber.org/protocol/pubsub#subscribe_options</value>
+		//     </field>
+		//     <field var='pubsub#deliver'><value>1</value></field>
+		//     <field var='pubsub#digest'><value>0</value></field>
+		//     <field var='pubsub#include_body'><value>false</value></field>
+		//     <field var='pubsub#show-values'>
+		//       <value>chat</value>
+		//       <value>online</value>
+		//       <value>away</value>
+		//     </field>
+		//   </x>
+		// </options>
+		
+		NSXMLElement *x = [self formForOptions:options withFromType:XMLNS_PUBSUB_SUBSCRIBE_OPTIONS];
+		
+		NSXMLElement *optionsStanza = [NSXMLElement elementWithName:@"options"];
+		[optionsStanza addChild:x];
+		
+		[pubsub addChild:optionsStanza];
+	}
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
+	
 	[xmppStream sendElement:iq];
-
-	return sid;
+	return uuid;
 }
 
-- (NSString *)unsubscribeFromNode:(NSString*)node {
-    return [self unsubscribeFromNode:node withSubid:nil];
-}
-
-- (NSString *)unsubscribeFromNode:(NSString *)node withSubid:(NSString *)subid 
+- (NSString *)unsubscribeFromNode:(NSString *)node
 {
+	return [self unsubscribeFromNode:node withJID:nil subid:nil];
+}
+
+- (NSString *)unsubscribeFromNode:(NSString *)node withJID:(XMPPJID *)myBareOrFullJid
+{
+	return [self unsubscribeFromNode:node withJID:myBareOrFullJid subid:nil];
+}
+
+- (NSString *)unsubscribeFromNode:(NSString *)aNode withJID:(XMPPJID *)myBareOrFullJid subid:(NSString *)subid
+{
+	if (aNode == nil) return nil;
+	
+	// In-case aNode is mutable
+	NSString *node = [aNode copy];
+	
+	// We default to using the full JID
+	NSString *jidStr = myBareOrFullJid ? [myBareOrFullJid full] : [xmppStream.myJID full];
+	
+	// Generate uuid and add to dict
+	NSString *uuid = [xmppStream generateUUID];
+	dispatch_async(moduleQueue, ^{
+		[unsubscribeDict setObject:node forKey:uuid];
+	});
+	
+	// Example from XEP-0060 section 6.2.1:
+	// 
 	// <iq type='set' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='unsub1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
 	//     <unsubscribe node='princely_musings' jid='francisco@denmark.lit'/>
 	//   </pubsub>
 	// </iq>
-
-	NSString *sid = [NSString stringWithFormat:@"%@:unsubscribe_node", xmppStream.generateUUID]; 
-
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
-	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
-	NSXMLElement *subscribe = [NSXMLElement elementWithName:@"unsubscribe"];
-	[subscribe addAttributeWithName:@"node" stringValue:node];
-	[subscribe addAttributeWithName:@"jid" stringValue:[xmppStream.myJID bare]];
-    
-    if (subid) {
-        [subscribe addAttributeWithName:@"subid" stringValue:subid];
-    }
-
-	// join them all together
-	[ps addChild:subscribe];
-	[iq addChild:ps];
+	
+	NSXMLElement *unsubscribe = [NSXMLElement elementWithName:@"unsubscribe"];
+	[unsubscribe addAttributeWithName:@"node" stringValue:node];
+	[unsubscribe addAttributeWithName:@"jid" stringValue:jidStr];
+    if (subid)
+        [unsubscribe addAttributeWithName:@"subid" stringValue:subid];
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	[pubsub addChild:unsubscribe];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
 
 	[xmppStream sendElement:iq];
-
-	return sid;
+	return uuid;
 }
 
-- (NSString *)getSubscriptions {
-    return [self getSubscriptionsForNode:nil];
+- (NSString *)retrieveSubscriptions
+{
+	return [self retrieveSubscriptionsForNode:nil];
 }
 
-- (NSString *)getSubscriptionsForNode:(NSString *)node {
-    //<iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='subscriptions1'>
-    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-    //      <subscriptions/>
-    //  </pubsub>
-    //</iq>
-    
-	NSString *sid = [NSString stringWithFormat:@"%@:subscriptions_for_node", xmppStream.generateUUID]; 
-    
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
-	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+- (NSString *)retrieveSubscriptionsForNode:(NSString *)aNode
+{
+	// Parameter aNode is optional
+	
+	// In-case aNode is mutable
+	NSString *node = [aNode copy];
+	
+	// Generate uuid and add to dict
+	NSString *uuid = [xmppStream generateUUID];
+	dispatch_async(moduleQueue, ^{
+		if (node)
+			[retrieveDict setObject:node forKey:uuid];
+		else
+			[retrieveDict setObject:[NSNull null] forKey:uuid];
+	});
+	
+	// Get subscriptions for all nodes:
+	//
+	// <iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='subscriptions1'>
+	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+	//     <subscriptions/>
+	//   </pubsub>
+	// </iq>
+	//
+	//
+	// Get subscriptions for a specific node:
+	//
+	// <iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='subscriptions1'>
+	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+	//     <subscriptions node='princely_musings'/>
+	//   </pubsub>
+	// </iq>
+	
 	NSXMLElement *subscriptions = [NSXMLElement elementWithName:@"subscriptions"];
-    
-    if (node) {
-        [subscriptions addAttributeWithName:@"node" stringValue:node];
-    }
-    
-	// join them all together
-	[ps addChild:subscriptions];
-	[iq addChild:ps];
-    
+	if (node) {
+		[subscriptions addAttributeWithName:@"node" stringValue:node];
+	}
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	[pubsub addChild:subscriptions];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
+
 	[xmppStream sendElement:iq];
-    
-	return sid;
-    
+	return uuid;
+}
+
+- (NSString *)configureSubscriptionToNode:(NSString *)aNode
+                                  withJID:(XMPPJID *)myBareOrFullJid
+                                    subid:(NSString *)subid
+                                  options:(NSDictionary *)options
+{
+	if (aNode == nil) return nil;
+	
+	// In-case aNode is mutable
+	NSString *node = [aNode copy];
+	
+	// We default to using the full JID
+	NSString *jidStr = myBareOrFullJid ? [myBareOrFullJid full] : [xmppStream.myJID full];
+	
+	// Generate uuid and add to dict
+	NSString *uuid = [xmppStream generateUUID];
+	dispatch_async(moduleQueue, ^{
+		[configSubDict setObject:node forKey:uuid];
+	});
+	
+	// Example from XEP-0060 section 6.3.5:
+	//
+	// <iq type='set' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='options2'>
+	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+	//     <options node='princely_musings' jid='francisco@denmark.lit'>
+	//       <x xmlns='jabber:x:data' type='submit'>
+	//         <field var='FORM_TYPE' type='hidden'>
+	//           <value>http://jabber.org/protocol/pubsub#subscribe_options</value>
+	//         </field>
+	//         <field var='pubsub#deliver'><value>1</value></field>
+	//         <field var='pubsub#digest'><value>0</value></field>
+	//         <field var='pubsub#include_body'><value>false</value></field>
+	//         <field var='pubsub#show-values'>
+	//           <value>chat</value>
+	//           <value>online</value>
+	//           <value>away</value>
+	//         </field>
+	//       </x>
+	//     </options>
+	//   </pubsub>
+	// </iq>
+	
+	NSXMLElement *optionsStanza = [NSXMLElement elementWithName:@"options"];
+	[optionsStanza addAttributeWithName:@"node" stringValue:node];
+	[optionsStanza addAttributeWithName:@"jid" stringValue:jidStr];
+	if (subid) {
+		[optionsStanza addAttributeWithName:@"subid" stringValue:subid];
+	}
+	if (options) {
+		NSXMLElement *x = [self formForOptions:options withFromType:XMLNS_PUBSUB_NODE_CONFIG];
+		[optionsStanza addChild:x];
+	}
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
+	[pubsub addChild:optionsStanza];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
+	
+	[xmppStream sendElement:iq];
+	return uuid;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Node Admin
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)createNode:(NSString *)node withOptions:(NSDictionary *)options
+- (NSString *)createNode:(NSString *)node
 {
+	return [self createNode:node withOptions:nil];
+}
+
+- (NSString *)createNode:(NSString *)aNode withOptions:(NSDictionary *)options
+{
+	if (aNode == nil) return nil;
+	
+	// In-case aNode is mutable
+	NSString *node = [aNode copy];
+	
+	// Generate uuid and add to dict
+	NSString *uuid = [xmppStream generateUUID];
+	dispatch_async(moduleQueue, ^{
+		[createDict setObject:node forKey:uuid];
+	});
+	
 	// <iq type='set' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='create1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
 	//     <create node='princely_musings'/>
@@ -298,190 +783,192 @@
 	//     </configure>
 	//   </pubsub>
 	// </iq>
-
-	NSString *sid = [NSString stringWithFormat:@"%@:create_node", xmppStream.generateUUID];
-
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
-	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
+	
 	NSXMLElement *create = [NSXMLElement elementWithName:@"create"];
 	[create addAttributeWithName:@"node" stringValue:node];
-    [ps addChild:create];
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	[pubsub addChild:create];
 
-	if (options != nil && [options count] > 0)
+	if (options)
 	{
-
-		NSXMLElement *config = [NSXMLElement elementWithName:@"configure"];
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
-		[x addAttributeWithName:@"type" stringValue:@"submit"];
-
-		NSXMLElement *field = [NSXMLElement elementWithName:@"field"];
-		[field addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
-		[field addAttributeWithName:@"type" stringValue:@"hidden"];
-		NSXMLElement *value = [NSXMLElement elementWithName:@"value"];
-		[value setStringValue:NS_PUBSUB_CONFIG];
-		[field addChild:value];
-		[x addChild:field];
-
-		NSXMLElement *f;
-		NSXMLElement *v;
-		for (NSString *item in options)
-		{
-			f = [NSXMLElement elementWithName:@"field"];
-			[f addAttributeWithName:@"var"
-			            stringValue:[NSString stringWithFormat:@"pubsub#%@", item]];
-			v = [NSXMLElement elementWithName:@"value"];
-			[v setStringValue:[options valueForKey:item]];
-			[f addChild:v];
-			[x addChild:f];
-		}
-
-		[config addChild:x];
-		[ps addChild:config];
-
+		// Example from XEP-0060 section 8.1.3 show above
+		
+		NSXMLElement *x = [self formForOptions:options withFromType:XMLNS_PUBSUB_NODE_CONFIG];
+		
+		NSXMLElement *configure = [NSXMLElement elementWithName:@"configure"];
+		[configure addChild:x];
+		
+		[pubsub addChild:configure];
 	}
 
-	[iq addChild:ps];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
 
 	[xmppStream sendElement:iq];
-
-	return sid;
+	return uuid;
 }
 
 /**
  * This method currently does not support redirection
 **/
-- (NSString*)deleteNode:(NSString*)node
+- (NSString *)deleteNode:(NSString *)aNode
 {
+	if (aNode == nil) return nil;
+	
+	// In-case aNode is mutable
+	NSString *node = [aNode copy];
+	
+	// Generate uuid and add to dict
+	NSString *uuid = [xmppStream generateUUID];
+	dispatch_async(moduleQueue, ^{
+		[deleteDict setObject:node forKey:uuid];
+	});
+	
+	// Example XEP-0060 section 8.4.1:
+	// 
 	// <iq type='set' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='delete1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub#owner'>
-	//     <delete node='princely_musings'>
-	//       <redirect uri='xmpp:hamlet@denmark.lit?;node=blog'/>
-	//     </delete>
+	//     <delete node='princely_musings'/>
 	//   </pubsub>
 	// </iq>
 
-	NSString *sid = [NSString stringWithFormat:@"%@:delete_node", xmppStream.generateUUID];
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
-	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB_OWNER];
-
 	NSXMLElement *delete = [NSXMLElement elementWithName:@"delete"];
 	[delete addAttributeWithName:@"node" stringValue:node];
-
-	[ps addChild:delete];
-	[iq addChild:ps];
-
-	[xmppStream sendElement:iq];
-
-	return sid;
-}
-
-
-- (NSString*)discoverItemsForNode:(NSString*)node
-{
-	// <iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='nodes2'>
-	//   <query xmlns='http://jabber.org/protocol/disco#items' node='blogs'/>
-	// </iq>
-
-	NSString *sid = [NSString stringWithFormat:@"%@:items_for_node", xmppStream.generateUUID];
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:NS_DISCO_ITEMS];
-
-	if (node != nil) {
-		[query addAttributeWithName:@"node" stringValue:node];  
-	}
-
-	[iq addChild:query];
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
+	[pubsub addChild:delete];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
 
 	[xmppStream sendElement:iq];
-
-	return sid;
+	return uuid;
 }
 
-- (NSString*)allItemsForNode:(NSString*)node
+- (NSString *)configureNode:(NSString *)node
 {
-	//<iq type='get' from='francisco@denmark.lit/barracks' to='pubsub.shakespeare.lit' id='items1'>
-    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-    //      <items node='princely_musings'/>
-    //  </pubsub>
-    //</iq>
-    
-	NSString *sid = [NSString stringWithFormat:@"%@:allitems_for_node", xmppStream.generateUUID];
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
-    NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
-    NSXMLElement *items = [NSXMLElement elementWithName:@"items"];
-    
-    if (node != nil) {
-        [items addAttributeWithName:@"node" stringValue:node];
-    }
-
-    [pubsub addChild:items];
-    [iq addChild:pubsub];
-    
-	[xmppStream sendElement:iq];
-    
-	return sid;
+	return [self configureNode:node withOptions:nil];
 }
 
-- (NSString*)configureNode:(NSString*)node
+- (NSString *)configureNode:(NSString *)aNode withOptions:(NSDictionary *)options
 {
+	if (aNode == nil) return nil;
+	
+	// In-case aNode is mutable
+	NSString *node = [aNode copy];
+	
+	// Generate uuid and add to dict
+	NSString *uuid = [xmppStream generateUUID];
+	dispatch_async(moduleQueue, ^{
+		[configNodeDict setObject:node forKey:uuid];
+	});
+	
 	// <iq type='get' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='config1'>
 	//   <pubsub xmlns='http://jabber.org/protocol/pubsub#owner'>
 	//     <configure node='princely_musings'/>
 	//   </pubsub>
 	// </iq>
-
-	NSString *sid = [NSString stringWithFormat:@"%@:configure_node", xmppStream.generateUUID];
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:sid];
-	NSXMLElement *ps = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB_OWNER];
-
-	NSXMLElement *conf  = [NSXMLElement elementWithName:@"configure"];
-	[conf addAttributeWithName:@"node" stringValue:node];
-
-	[ps addChild:conf];
-	[iq addChild:ps];
+	
+	NSXMLElement *configure  = [NSXMLElement elementWithName:@"configure"];
+	[configure addAttributeWithName:@"node" stringValue:node];
+	if (options)
+	{
+		NSXMLElement *x = [self formForOptions:options withFromType:XMLNS_PUBSUB_NODE_CONFIG];
+		[configure addChild:x];
+	}
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
+	[pubsub addChild:configure];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
 
 	[xmppStream sendElement:iq];
-
-	return sid;
+	return uuid;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark - publication methods
+#pragma mark Publication methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry {
-    //<iq type='set' from='hamlet@denmark.lit/blogbot' to='pubsub.shakespeare.lit' id='publish1'>
-    //  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-    //      <publish node='princely_musings'>
-    //          <item id='bnd81g37d61f49fgn581'>
-    //              Some content
-    //          </item>
-    //      </publish>
-    //  </pubsub>
-    //</iq>
-    
-	NSString *sid = [NSString stringWithFormat:@"%@:publish_node", xmppStream.generateUUID];
-    
-    //create iq message
-    XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:sid];
-    
-    //create child nodes
-    NSXMLElement * pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:NS_PUBSUB];
-    
-    NSXMLElement * publish = [NSXMLElement elementWithName:@"publish"];
-    [publish addAttributeWithName:@"node" stringValue:node];
-    
-    NSXMLElement * item = [NSXMLElement elementWithName:@"item"];
-    
-    //create node hierarchy
-    [item addChild:entry];
-    [publish addChild:item];
-    [pubsub addChild:publish];
-    [iq addChild:pubsub];
+- (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry
+{
+	return [self publishToNode:node entry:entry withItemID:nil options:nil];
+}
 
-	[xmppStream sendElement:iq];
+- (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry withItemID:(NSString *)itemId
+{
+	return [self publishToNode:node entry:entry withItemID:itemId options:nil];
+}
+
+- (NSString *)publishToNode:(NSString *)node
+                      entry:(NSXMLElement *)entry
+                 withItemID:(NSString *)itemId
+                    options:(NSDictionary *)options
+{
+	if (node == nil) return nil;
+	if (entry == nil) return nil;
+	
+	// <iq type='set' from='hamlet@denmark.lit/blogbot' to='pubsub.shakespeare.lit' id='publish1'>
+	//   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+	//     <publish node='princely_musings'>
+	//       <item id='bnd81g37d61f49fgn581'>
+	//         Some content
+	//       </item>
+	//     </publish>
+	//     <publish-options>
+	//       [... FORM ... ]
+	//     </publish-options>
+	//   </pubsub>
+	// </iq>
     
-	return sid;
+	NSString *uuid = [xmppStream generateUUID];
+
+	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+	if (itemId)
+		[item addAttributeWithName:@"id" stringValue:itemId];
+	[item addChild:entry];
+	
+	NSXMLElement *publish = [NSXMLElement elementWithName:@"publish"];
+	[publish addAttributeWithName:@"node" stringValue:node];
+	[publish addChild:item];
+	
+	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	[pubsub addChild:publish];
+	
+	if (options)
+	{
+		// Example from XEP-0060 section 7.1.5:
+		//
+		// <publish-options>
+		//   <x xmlns='jabber:x:data' type='submit'>
+		//     <field var='FORM_TYPE' type='hidden'>
+		//       <value>http://jabber.org/protocol/pubsub#publish-options</value>
+		//     </field>
+		//     <field var='pubsub#access_model'>
+		//       <value>presence</value>
+		//     </field>
+		//   </x>
+		// </publish-options>
+		
+		NSXMLElement *x = [self formForOptions:options withFromType:XMLNS_PUBSUB_PUBLISH_OPTIONS];
+		
+		NSXMLElement *publishOptions = [NSXMLElement elementWithName:@"publish-options"];
+		[publishOptions addChild:x];
+		
+		[pubsub addChild:publishOptions];
+	}
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
+	[iq addChild:pubsub];
+	
+	[xmppStream sendElement:iq];
+	
+	dispatch_async(moduleQueue, ^{
+		[publishDict setObject:node forKey:uuid];
+	});
+	return uuid;
 }
 
 @end
