@@ -28,6 +28,7 @@
 @property (nonatomic, readonly) XMPPJID *serviceJID;
 
 - (NSString *)subscribeToNode:(NSString *)node withOptions:(NSDictionary *)options;
+- (NSString *)unsubscribeFromNode:(NSString *)node withJid:(NSString *)jid andSubid:(NSString *)subid;
 - (NSString *)unsubscribeFromNode:(NSString *)node withSubid:(NSString *)subid;
 - (NSString *)unsubscribeFromNode:(NSString *)node;
 - (NSString *)createNode:(NSString *)node withOptions:(NSDictionary *)options;
