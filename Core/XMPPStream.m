@@ -2996,14 +2996,9 @@ enum XMPPStreamConfig
 }
 
 /**
- * After the authenticateWithPassword:error: or authenticateWithFacebookAccessToken:error: methods are invoked, an 
+ * After the authenticate:error: or authenticateWithPassword:error: methods are invoked, some kind of
  * authentication message is sent to the server.
- * If the server supports digest-md5 sasl authentication, it is used.  Otherwise plain sasl authentication is used,
- * assuming the server supports it.
- * 
- * Now if digest-md5 or X-FACEBOOK-PLATFORM was used, we sent a challenge request, and we're waiting for a 
- * challenge response.  If plain sasl was used, we sent our authentication information, and we're waiting for a 
- * success response.
+ * This method forwards the response to the authentication module, and handles the resulting authentication state.
 **/
 - (void)handleAuth:(NSXMLElement *)authResponse
 {
