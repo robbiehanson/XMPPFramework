@@ -525,7 +525,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 
 - (void)maybeAttemptReconnectWithReachabilityFlags:(SCNetworkReachabilityFlags)reachabilityFlags
 {
-	if (dispatch_get_specific(moduleQueueTag))
+	if (!dispatch_get_specific(moduleQueueTag))
 	{
 		dispatch_async(moduleQueue, ^{ @autoreleasepool {
 			
