@@ -333,55 +333,69 @@ enum XMPPRosterFlags
 #pragma mark Roster Management
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName
-{
-	// This is a public method, so it may be invoked on any thread/queue.
+- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName{
+	[self addUser:jid withNickname:optionalName groups:nil subscribeToPresence:YES];
+}
+
+- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups{
+	[self addUser:jid withNickname:optionalName groups:groups subscribeToPresence:YES];
+}
+
+- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups subscribeToPresence:(BOOL)subscribe{
 	
 	if (jid == nil) return;
-	
+
 	XMPPJID *myJID = xmppStream.myJID;
-	
+
 	if ([myJID isEqualToJID:jid options:XMPPJIDCompareBare])
 	{
 		// You don't need to add yourself to the roster.
 		// XMPP will automatically send you presence from all resources signed in under your username.
-		// 
+		//
 		// E.g. If you sign in with robbiehanson@deusty.com/home you'll automatically
 		//    receive presence from robbiehanson@deusty.com/work
 		
 		XMPPLogInfo(@"%@: %@ - Ignoring request to add myself to my own roster", [self class], THIS_METHOD);
 		return;
 	}
-	
-	// Add the user to our roster.
-	// 
+
+	// Add the buddy to our roster
+	//
 	// <iq type="set">
 	//   <query xmlns="jabber:iq:roster">
-	//     <item jid="bareJID" name="optionalName"/>
+	//     <item jid="bareJID" name="optionalName">
+	//      <group>family</group>
+	//     </item>
 	//   </query>
 	// </iq>
-	
+
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
-	
-	if (optionalName)
+
+	if(optionalName)
 	{
 		[item addAttributeWithName:@"name" stringValue:optionalName];
 	}
-	
+
+	for (NSString *group in groups) {
+		NSXMLElement *groupElement = [NSXMLElement elementWithName:@"group"];
+		[groupElement setStringValue:group];
+		[item addChild:groupElement];
+	}
+
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
-	
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+
+	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
+	[iq addAttributeWithName:@"type" stringValue:@"set"];
 	[iq addChild:query];
-	
+
 	[xmppStream sendElement:iq];
-	
-	// Subscribe to the user's presence.
-	// 
-	// <presence to="bareJID" type="subscribe"/>
-	
-	[xmppStream sendElement:[XMPPPresence presenceWithType:@"subscribe" to:[jid bareJID]]];
+
+	if(subscribe)
+	{
+		[self subscribePresenceToUser:jid];
+	}
 }
 
 - (void)setNickname:(NSString *)nickname forUser:(XMPPJID *)jid
