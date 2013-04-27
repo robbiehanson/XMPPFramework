@@ -599,7 +599,14 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 						[self setMultipleReachabilityChanges:NO];
 						previousReachabilityFlags = reachabilityFlags;
 						
-						[xmppStream connect:nil];
+                        if (self.usesOldSchoolSecureConnect)
+                        {
+                            [xmppStream oldSchoolSecureConnect:nil];
+                        }
+                        else
+                        {
+                            [xmppStream connect:nil];
+                        }
 					}
 					else if ([self multipleReachabilityChanges])
 					{
