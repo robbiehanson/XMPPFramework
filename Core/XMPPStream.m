@@ -2963,6 +2963,7 @@ enum XMPPStreamConfig
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
 			[iq addAttributeWithName:@"type" stringValue:@"set"];
+			[iq addAttributeWithName:@"id" stringValue:[self generateUUID]];
 			[iq addChild:bind];
 			
 			NSString *outgoingStr = [iq compactXMLString];
@@ -2983,6 +2984,7 @@ enum XMPPStreamConfig
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
 			[iq addAttributeWithName:@"type" stringValue:@"set"];
+			[iq addAttributeWithName:@"id" stringValue:[self generateUUID]];
 			[iq addChild:bind];
 			
 			NSString *outgoingStr = [iq compactXMLString];
