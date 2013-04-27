@@ -102,6 +102,7 @@ enum XMPPStreamConfig
 	UInt16 hostPort;
 	
 	id <XMPPSASLAuthentication> auth;
+	NSDate *authenticationDate;
 	
 	XMPPJID *myJID_setByClient;
 	XMPPJID *myJID_setByServer;
@@ -813,6 +814,27 @@ enum XMPPStreamConfig
 	return result;
 }
 
+/**
+ * Returns YES is the connection is currently connecting
+ **/
+
+- (BOOL)isConnecting{
+	
+	XMPPLogTrace();
+	
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = (state == STATE_XMPP_CONNECTING);
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
 /**
  * Returns YES if the connection is open, and the stream has been properly established.
  * If the stream is neither disconnected, nor connected, then a connection is currently being established.
@@ -1740,6 +1762,24 @@ enum XMPPStreamConfig
 	return result;
 }
 
+- (BOOL)isAuthenticating{
+	
+	XMPPLogTrace();
+	
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = (state == STATE_XMPP_AUTH);
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+
+	return result;
+}
+
 - (BOOL)isAuthenticated
 {
 	__block BOOL result = NO;
@@ -1760,15 +1800,39 @@ enum XMPPStreamConfig
 {
 	dispatch_block_t block = ^{
 		if(flag)
+		{
 			flags |= kIsAuthenticated;
+			authenticationDate = [NSDate date];
+		}
 		else
+		{
 			flags &= ~kIsAuthenticated;
+			authenticationDate = nil;
+		}
 	};
 	
 	if (dispatch_get_specific(xmppQueueTag))
 		block();
 	else
 		dispatch_async(xmppQueue, block);
+}
+
+- (NSDate *)authenticationDate{
+	__block NSDate *result = nil;
+	
+	dispatch_block_t block = ^{
+		if(flags & kIsAuthenticated)
+		{
+			result =  authenticationDate;
+		}
+	};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3494,6 +3558,8 @@ enum XMPPStreamConfig
 		
 		// Clear any saved authentication information
 		auth = nil;
+		
+		authenticationDate = nil;
 		
 		// Clear stored elements
 		myJID_setByServer = nil;
