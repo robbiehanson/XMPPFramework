@@ -502,7 +502,7 @@ enum XMPPRoomState
 		// </iq>
 		
 		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
-		NSArray *items = [query elementsForName:@"items"];
+		NSArray *items = [query elementsForName:@"item"];
 		
 		[multicastDelegate xmppRoom:self didFetchBanList:items];
 	}
@@ -563,7 +563,7 @@ enum XMPPRoomState
 		// </iq>
 		
 		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
-		NSArray *items = [query elementsForName:@"items"];
+		NSArray *items = [query elementsForName:@"item"];
 		
 		[multicastDelegate xmppRoom:self didFetchMembersList:items];
 	}
@@ -626,7 +626,7 @@ enum XMPPRoomState
 		// </iq>
 		
 		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
-		NSArray *items = [query elementsForName:@"items"];
+		NSArray *items = [query elementsForName:@"item"];
 		
 		[multicastDelegate xmppRoom:self didFetchModeratorsList:items];
 	}
