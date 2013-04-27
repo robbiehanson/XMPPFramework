@@ -235,6 +235,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (BOOL)isDisconnected;
 
 /**
+ * Returns YES is the connection is currently connecting
+**/
+
+- (BOOL)isConnecting;
+
+/**
  * Returns YES if the connection is open, and the stream has been properly established.
  * If the stream is neither disconnected, nor connected, then a connection is currently being established.
  * 
@@ -444,9 +450,20 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
 
 /**
+ * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.
+ **/
+
+- (BOOL)isAuthenticating;
+
+/**
  * Returns whether or not the xmpp stream has successfully authenticated with the server.
 **/
 - (BOOL)isAuthenticated;
+
+/**
+ * Returns the date when the xmpp stream successfully authenticated with the server.
+ **/
+- (NSDate *)authenticationDate;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Server Info
