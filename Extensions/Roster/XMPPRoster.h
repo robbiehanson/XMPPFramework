@@ -139,9 +139,27 @@
 - (void)fetchRoster;
 
 /**
- * Adds the given user to the roster and requests permission to receive presence information from them.
+ * Adds the given user to the roster with an optional nickname 
+ * and requests permission to receive presence information from them.
 **/
+
 - (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName;
+
+/**
+ * Adds the given user to the roster with an optional nickname, 
+ * adds the given user to groups
+ * and requests permission to receive presence information from them.
+**/
+
+- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups;
+
+/**
+ * Adds the given user to the roster with an optional nickname,
+ * adds the given user to groups
+ * and optionally requests permission to receive presence information from them.
+**/
+
+- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups subscribeToPresence:(BOOL)subscribe;
 
 /**
  * Sets/modifies the nickname for the given user.
