@@ -211,8 +211,12 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		BOOL waitingForFetch = [vCard.waitingForFetch boolValue];
-		
-		if (!waitingForFetch)
+        
+        if(![stream isAuthenticated])
+        {
+            result = NO;
+		}
+        else if (!waitingForFetch)
 		{
 			vCard.waitingForFetch = [NSNumber numberWithBool:YES];
 			vCard.lastUpdated = [NSDate date];
