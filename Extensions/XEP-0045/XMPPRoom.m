@@ -477,9 +477,12 @@ enum XMPPRoomState
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)chageNickname:(NSString *)newNickname
+- (void)changeNickname:(NSString *)newNickname
 {
-	// Todo
+	myNickname = [newNickname copy];
+    myRoomJID = [XMPPJID jidWithUser:[roomJID user] domain:[roomJID domain] resource:myNickname];
+    XMPPPresence *presence = [XMPPPresence presenceWithType:nil to:myRoomJID];
+    [xmppStream sendElement:presence];
 }
 
 - (void)changeRoomSubject:(NSString *)newRoomSubject
