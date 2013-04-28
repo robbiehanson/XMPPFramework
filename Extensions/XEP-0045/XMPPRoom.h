@@ -3,6 +3,8 @@
 #import "XMPPRoomMessage.h"
 #import "XMPPRoomOccupant.h"
 
+#define _XMPP_ROOM_H
+
 @class XMPPIDTracker;
 @protocol XMPPRoomStorage;
 @protocol XMPPRoomDelegate;
