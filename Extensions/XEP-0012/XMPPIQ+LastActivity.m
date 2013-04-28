@@ -17,7 +17,7 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 
 @implementation XMPPIQ (LastActivity)
 
-+ (XMPPIQ *)lastActivityQueryToJID:(XMPPJID *)jid
++ (XMPPIQ *)lastActivityQueryTo:(XMPPJID *)jid
 {
 	NSXMLElement *query = [[NSXMLElement alloc] initWithName:@"query" xmlns:XMPPLastActivityNamespace];
 	return [[self alloc] initWithType:@"get" to:jid elementID:[XMPPStream generateUUID] child:query];
