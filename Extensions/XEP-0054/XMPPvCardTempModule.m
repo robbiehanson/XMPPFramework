@@ -9,6 +9,8 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "XMPPvCardTempModule.h"
+#import "XMPPvCardTemp.h"
+#import "XMPPIDTracker.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -81,6 +83,8 @@
 	{
 		// Custom code goes here (if needed)
 		
+        myvCardTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
+
 		return YES;
 	}
 	
@@ -90,6 +94,18 @@
 - (void)deactivate
 {
 	// Custom code goes here (if needed)
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+		
+		[myvCardTracker removeAllIDs];
+		myvCardTracker = nil;
+		
+	}};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
 	
 	[super deactivate];
 }
@@ -145,13 +161,29 @@
 
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp
 {
-	XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
-
-	myvCardElementID = [xmppStream generateUUID];
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:myvCardElementID child:newvCardTemp];
-	[xmppStream sendElement:iq];
     
-	[self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
+    dispatch_block_t block = ^{ @autoreleasepool {
+
+        XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
+
+        NSString *myvCardElementID = [xmppStream generateUUID];
+        
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:myvCardElementID child:newvCardTemp];
+        [xmppStream sendElement:iq];
+        
+        [myvCardTracker addID:myvCardElementID
+                       target:self
+                     selector:@selector(handleMyvcard:withInfo:)
+                      timeout:60];
+        
+        [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
+        
+    }};
+	
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
 
 }
 
@@ -183,6 +215,20 @@
 		dispatch_async(moduleQueue, block);
 }
 
+- (void)handleMyvcard:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo{
+
+    if([iq isResultIQ])
+    {
+        [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModuleDidUpdateMyvCard:self];
+    }
+    else if([iq isErrorIQ])
+    {
+        NSXMLElement *errorElement = [iq elementForName:@"error"];
+        [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToUpdateMyvCard:errorElement];
+    }        
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,11 +237,14 @@
 {
 	// This method is invoked on the moduleQueue.
 	
+    [myvCardTracker invokeForID:[iq elementID] withObject:iq];
+    
 	// Remember XML heirarchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
 	// 
 	// Therefore we use vCardTempCopyFromIQ instead of vCardTempSubElementFromIQ.
 	
+    
 	XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempCopyFromIQ:iq];
 	if (vCardTemp != nil)
 	{
@@ -203,23 +252,13 @@
 		
 		return YES;
 	}
-    
-    if([[iq elementID] isEqualToString:myvCardElementID])
-    {
-        if([iq isResultIQ])
-        {
-            [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModuleDidUpdateMyvCard:self];
-        }else if([iq isErrorIQ])
-        {
-            NSXMLElement *errorElement = [iq elementForName:@"error"];
-            [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToUpdateMyvCard:errorElement];
-            
-        }
-        
-        myvCardElementID = nil;
-    }
 	
 	return NO;
+}
+
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+	[myvCardTracker removeAllIDs];
 }
 
 @end

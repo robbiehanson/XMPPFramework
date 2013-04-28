@@ -9,7 +9,9 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPP.h"
-#import "XMPPvCardTemp.h"
+
+@class XMPPvCardTemp;
+@class XMPPIDTracker;
 
 #define _XMPP_VCARD_TEMP_MODULE_H
 
@@ -19,7 +21,7 @@
 @interface XMPPvCardTempModule : XMPPModule
 {
 	id <XMPPvCardTempModuleStorage> __strong _moduleStorage;
-    NSString *myvCardElementID; 
+    XMPPIDTracker *myvCardTracker;
 }
 
 
