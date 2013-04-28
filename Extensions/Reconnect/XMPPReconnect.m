@@ -353,7 +353,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #pragma mark Reachability
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
+static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
 {
 	@autoreleasepool {
 	
@@ -440,7 +440,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 		if (reachability)
 		{
 			SCNetworkReachabilityContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
-			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
+			SCNetworkReachabilitySetCallback(reachability, XMPPReconnectReachabilityCallback, &context);
 			
 			CFRunLoopRef xmppRunLoop = [[xmppStream xmppUtilityRunLoop] getCFRunLoop];
 			if (xmppRunLoop)
