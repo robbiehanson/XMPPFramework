@@ -127,7 +127,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 
 - (NSString *)sendLastActivityQueryToJID:(XMPPJID *)jid withTimeout:(NSTimeInterval)timeout
 {
-	XMPPIQ *query = [XMPPIQ lastActivityQueryToJID:jid];
+	XMPPIQ *query = [XMPPIQ lastActivityQueryTo:jid];
 	NSString *queryID = query.elementID;
     
 	dispatch_async(moduleQueue, ^{

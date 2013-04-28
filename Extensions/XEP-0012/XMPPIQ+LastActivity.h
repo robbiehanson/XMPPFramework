@@ -26,7 +26,7 @@ extern NSString *const XMPPLastActivityNamespace;
  * Returns an get XMPPIQ with a last activity query child element addressed to
  * the given JID.
  */
-+ (XMPPIQ *)lastActivityQueryToJID:(XMPPJID *)jid;
++ (XMPPIQ *)lastActivityQueryTo:(XMPPJID *)jid;
 
 /**
  * Returns a result XMPPIQ answering the given XMPPIQ request with the given
