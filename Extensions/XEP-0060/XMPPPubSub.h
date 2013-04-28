@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "XMPP.h"
 
+#define _XMPP_PUB_SUB_H
 
 @interface XMPPPubSub : XMPPModule
 

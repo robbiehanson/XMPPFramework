@@ -8,6 +8,8 @@
 #import "XMPPUser.h"
 #import "XMPPResource.h"
 
+#define _XMPP_ROSTER_H
+
 @protocol XMPPRosterStorage;
 @class DDList;
 
