@@ -28,9 +28,22 @@
 {
 	__strong XMPPvCardTempModule *_xmppvCardTempModule;
 	__strong id <XMPPvCardAvatarStorage> _moduleStorage;
+	
+	BOOL _autoClearMyvcard;
 }
 
 @property(nonatomic, strong, readonly) XMPPvCardTempModule *xmppvCardTempModule;
+
+
+/*
+ * XEP-0153 Section 4.2 rule 1
+ *
+ * A client MUST NOT advertise an avatar image without first downloading the current vCard.
+ * Once it has done this, it MAY advertise an image.
+ *
+ * Default YES
+ */
+@property(nonatomic, assign) BOOL autoClearMyvcard;
 
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;

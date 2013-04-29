@@ -71,6 +71,8 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		_moduleStorage = (id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage;
 
 		[_xmppvCardTempModule addDelegate:self delegateQueue:moduleQueue];
+		
+		_autoClearMyvcard = YES;
 	}
 	return self;
 }
@@ -82,6 +84,38 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	_moduleStorage = nil;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Properties
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+- (BOOL)autoClearMyvcard
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		result = _autoClearMyvcard;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoClearMyvcard:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		_autoClearMyvcard = flag;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,13 +155,17 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (void)xmppStreamDidConnect:(XMPPStream *)sender {
 	XMPPLogTrace();
-	/* 
-	 * XEP-0153 Section 4.2 rule 1
-	 *
-	 * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
-	 * Once it has done this, it MAY advertise an image. 
-	 */
-	[_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:sender];
+	
+	if(self.autoClearMyvcard)
+	{
+		/*
+		 * XEP-0153 Section 4.2 rule 1
+		 *
+		 * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
+		 * Once it has done this, it MAY advertise an image. 
+		 */
+		[_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:sender];
+	}
 }
 
 
