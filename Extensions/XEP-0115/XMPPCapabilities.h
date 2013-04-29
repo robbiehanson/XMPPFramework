@@ -342,7 +342,7 @@
  * Duplicates features are automatically discarded
  * For more control over your capablities use xmppCapabilities:collectingMyCapabilities:
 **/
-- (NSArray *)featureElementsForXMPPCapabilities:(XMPPCapabilities *)sender;
+- (NSArray *)featuresForXMPPCapabilities:(XMPPCapabilities *)sender;
 
 /**
  * Invoked when capabilities have been discovered for an available JID.
