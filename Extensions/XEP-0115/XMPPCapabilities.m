@@ -665,10 +665,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// Now prompt the delegates to add any additional features.
 	
 	SEL collectingMyCapabilitiesSelector = @selector(xmppCapabilities:collectingMyCapabilities:);
-	SEL featureElementsForXMPPCapabilitiesSelector = @selector(featureElementsForXMPPCapabilities:);
+	SEL featuresForXMPPCapabilitiesSelector = @selector(featuresForXMPPCapabilities:);
 		
 	if (![multicastDelegate hasDelegateThatRespondsToSelector:collectingMyCapabilitiesSelector]
-		&& ![multicastDelegate hasDelegateThatRespondsToSelector:featureElementsForXMPPCapabilitiesSelector])
+		&& ![multicastDelegate hasDelegateThatRespondsToSelector:featuresForXMPPCapabilitiesSelector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
@@ -681,7 +681,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// This must be done serially to allow them to alter the element in a thread-safe manner.
 		
 		GCDMulticastDelegateEnumerator *collectingMyCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
-		GCDMulticastDelegateEnumerator *featureElementsForXMPPCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
+		GCDMulticastDelegateEnumerator *featuresForXMPPCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
 
 		
 		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -699,11 +699,11 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 				}});
 			}
 						
-			while ([featureElementsForXMPPCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:featureElementsForXMPPCapabilitiesSelector])
+			while ([featuresForXMPPCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:featuresForXMPPCapabilitiesSelector])
 			{
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-					NSArray *featureElements =  [del featureElementsForXMPPCapabilities:self];
+					NSArray *featureElements =  [del featuresForXMPPCapabilities:self];
 					
 					for(NSXMLElement *featureElement in featureElements){
 					
