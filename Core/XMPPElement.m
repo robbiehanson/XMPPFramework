@@ -4,6 +4,10 @@
 
 #import <objc/runtime.h>
 
+// When printing XMPPElements, format the XML with indenting
+// Simplified output is more readable, and uses *'s instead of opening tags, and omits closing tags
+#define XMPPElementPrettyPrintEnabled 1
+#define XMPPElementPrettyPrintUsesSimplifiedOutput YES
 
 @implementation XMPPElement
 
@@ -102,6 +106,78 @@
 - (XMPPJID *)from
 {
 	return [XMPPJID jidWithString:[self fromStr]];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Debugging
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)description
+{
+#if XMPPElementPrettyPrintEnabled
+    return [self.class _descriptionForNode:self indent:@"" simplified:XMPPElementPrettyPrintUsesSimplifiedOutput];
+#else
+    return [super description];
+#endif
+}
+
++ (NSString *)_descriptionForNode:(NSXMLNode *) node indent:(NSString *) indent simplified:(BOOL) simplified {
+	NSMutableString *result = [NSMutableString string];
+    NSString *childIndent = [indent stringByAppendingString:@"    "];
+    
+    if (simplified) {
+        
+        if ([node isKindOfClass:[NSXMLElement class]]) {
+            [result appendFormat:@"%@* %@", indent, node.name];
+            for (NSXMLNode *attribute in [(NSXMLElement *) node attributes])
+            {
+                [result appendFormat:@" %@='%@'", attribute.name, attribute.stringValue];
+            }
+            for (NSXMLElement *child in node.children)
+            {
+                [result appendFormat:@"\n%@", [self _descriptionForNode:child
+                                                                 indent:childIndent
+                                                             simplified:simplified]];
+            }
+        }
+        else if (node.stringValue.length)
+        {
+            [result appendFormat:@"%@%@", indent, node.stringValue];
+        }
+        
+    } else {
+        
+        if ([node isKindOfClass:[NSXMLElement class]]) {
+            [result appendFormat:@"%@<%@", indent, node.name];
+            for (NSXMLNode *attribute in [(NSXMLElement *) node attributes])
+            {
+                [result appendFormat:@" %@=\"%@\"", attribute.name, attribute.stringValue];
+            }
+            
+            if (node.childCount) {
+                [result appendString:@">"];
+                NSString *childIndent = [indent stringByAppendingString:@"    "];
+                for (NSXMLElement *child in node.children)
+                {
+                    [result appendFormat:@"\n%@", [self _descriptionForNode:child
+                                                                     indent:childIndent
+                                                                 simplified:simplified]];
+                }
+                [result appendFormat:@"\n%@</%@>", indent, node.name];
+            }
+        }
+        else if (node.stringValue.length)
+        {
+            [result appendFormat:@"%@%@", indent, node.stringValue];
+        }
+        else
+        {
+            [result appendString:@"/>"];
+        }
+        
+    }
+    
+	return result;
 }
 
 @end
