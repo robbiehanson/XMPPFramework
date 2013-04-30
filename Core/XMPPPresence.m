@@ -79,6 +79,14 @@
 	return self;
 }
 
+- (id)initWithXMLString:(NSString *)string error:(NSError *__autoreleasing *)error
+{
+	if((self = [super initWithXMLString:string error:error])){
+		self = [XMPPPresence presenceFromElement:self];
+	}	
+	return self;
+}
+
 - (NSString *)type
 {
 	NSString *type = [self attributeStringValueForName:@"type"];

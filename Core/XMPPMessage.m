@@ -134,6 +134,14 @@
 	return [self initWithType:type to:nil elementID:nil child:childElement];
 }
 
+- (id)initWithXMLString:(NSString *)string error:(NSError *__autoreleasing *)error
+{
+	if((self = [super initWithXMLString:string error:error])){
+		self = [XMPPMessage messageFromElement:self];
+	}	
+	return self;
+}
+
 - (NSString *)body
 {
 	return [[self elementForName:@"body"] stringValue];
