@@ -459,7 +459,7 @@ static NSMutableSet *databaseFileNames;
 			result = managedObjectModel;
 			return;
 		}
-		
+		        
 		NSString *momName = [self managedObjectModelName];
 		
 		XMPPLogVerbose(@"%@: Creating managedObjectModel (%@)", [self class], momName);
@@ -477,12 +477,36 @@ static NSMutableSet *databaseFileNames;
 			
 			NSURL *momUrl = [NSURL fileURLWithPath:momPath];
 			
-			managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:momUrl];
+			managedObjectModel = [[[NSManagedObjectModel alloc] initWithContentsOfURL:momUrl] copy];
 		}
 		else
 		{
 			XMPPLogWarn(@"%@: Couldn't find managedObjectModel file - %@", [self class], momName);
 		}
+        
+        if([NSAttributeDescription instancesRespondToSelector:@selector(setAllowsExternalBinaryDataStorage:)])
+        {
+            if(autoAllowExternalBinaryDataStorage)
+            {
+                NSArray *entities = [managedObjectModel entities];
+                
+                for(NSEntityDescription *entity in entities)
+                {
+                    NSDictionary *attributesByName = [entity attributesByName];
+                    
+                    [attributesByName enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+                        
+                        if([obj attributeType] == NSBinaryDataAttributeType)
+                        {
+                            [obj setAllowsExternalBinaryDataStorage:YES];
+                        }
+                        
+                    }];			
+                }
+                
+            }
+            
+        }
 		
 		result = managedObjectModel;
 	}};
@@ -684,6 +708,35 @@ static NSMutableSet *databaseFileNames;
 			[self mainThreadManagedObjectContextDidMergeChanges];
 		});
     }
+}
+
+
+- (BOOL)autoAllowExternalBinaryDataStorage
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = autoAllowExternalBinaryDataStorage;
+	}};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoAllowExternalBinaryDataStorage:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoAllowExternalBinaryDataStorage = flag;
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
