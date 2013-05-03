@@ -703,16 +703,16 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			{
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-					NSArray *featureElements =  [del featuresForXMPPCapabilities:self];
+					NSArray *features =  [del featuresForXMPPCapabilities:self];
 					
-					for(NSXMLElement *featureElement in featureElements){
+					for(NSString *feature in features){
 					
 						BOOL found = NO;
 						
 						//Check to see if the feature is already in my capabilities
 						for (NSXMLElement *childElement in query.children) {
 							
-							if([[childElement attributeStringValueForName:@"var"] isEqualToString:[featureElement attributeStringValueForName:@"var"]])
+							if([[childElement attributeStringValueForName:@"var"] isEqualToString:feature])
 							{
 								found = YES;
 								break;
@@ -722,6 +722,8 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 						//The feature is not already in our capabilities so add it
 						if(!found)
 						{
+							NSXMLElement *featureElement = [NSXMLElement elementWithName:@"feature"];
+							[featureElement addAttributeWithName:@"var" stringValue:feature];
 							[query addChild:featureElement];
 						}
 					}

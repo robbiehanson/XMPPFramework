@@ -338,8 +338,8 @@
 
 
 /**
- * Use this delegate method to return the feature elements you want to have in your capabilities
- * Duplicates features are automatically discarded
+ * Use this delegate method to return the feature you want to have in your capabilities e.g. @[@"urn:xmpp:archive"]
+ * Duplicate features are automatically discarded
  * For more control over your capablities use xmppCapabilities:collectingMyCapabilities:
 **/
 - (NSArray *)featuresForXMPPCapabilities:(XMPPCapabilities *)sender;
