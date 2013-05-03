@@ -27,6 +27,7 @@
 @interface XMPPvCardTempModule()
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid;
+- (void)_fetchvCardTempForJID:(XMPPJID *)jid;
 
 @end
 
@@ -36,7 +37,7 @@
 
 @implementation XMPPvCardTempModule
 
-@synthesize moduleStorage = _moduleStorage;
+@synthesize xmppvCardTempModuleStorage = _xmppvCardTempModuleStorage;
 
 - (id)init
 {
@@ -67,7 +68,7 @@
 	{
 		if ([storage configureWithParent:self queue:moduleQueue])
 		{
-			_moduleStorage = storage;
+			_xmppvCardTempModuleStorage = storage;
 		}
 		else
 		{
@@ -83,7 +84,7 @@
 	{
 		// Custom code goes here (if needed)
 		
-        myvCardTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
+        _myvCardTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
 
 		return YES;
 	}
@@ -97,8 +98,8 @@
     
     dispatch_block_t block = ^{ @autoreleasepool {
 		
-		[myvCardTracker removeAllIDs];
-		myvCardTracker = nil;
+		[_myvCardTracker removeAllIDs];
+		_myvCardTracker = nil;
 		
 	}};
 	
@@ -112,35 +113,54 @@
 
 - (void)dealloc
 {
-	_moduleStorage = nil;
+	_xmppvCardTempModuleStorage = nil;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Fetch vCardTemp methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid
+- (void)fetchvCardTempForJID:(XMPPJID *)jid
 {
-	return [self fetchvCardTempForJID:jid useCache:YES];
+	return [self fetchvCardTempForJID:jid ignoreStorage:NO];
 }
 
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid useCache:(BOOL)useCache
-{
-	__block XMPPvCardTemp *result;
-	
+- (void)fetchvCardTempForJID:(XMPPJID *)jid ignoreStorage:(BOOL)ignoreStorage
+{	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPvCardTemp *vCardTemp = nil;
 		
-		if (useCache)
+		if (!ignoreStorage)
 		{
-			// Try loading from the cache
-			vCardTemp = [_moduleStorage vCardTempForJID:jid xmppStream:xmppStream];
+			// Try loading from storage
+			vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
 		}
 		
-		if (vCardTemp == nil && [_moduleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
+		if (vCardTemp == nil && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
 		{
-			[xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:jid]];
+			[self _fetchvCardTempForJID:jid];
+		}
+		
+	}};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+}
+
+- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch{
+    
+    __block XMPPvCardTemp *result;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		XMPPvCardTemp *vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
+		
+		if (vCardTemp == nil && shouldFetch && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
+		{
+			[self _fetchvCardTempForJID:jid];
 		}
 		
 		result = vCardTemp;
@@ -156,7 +176,7 @@
 
 - (XMPPvCardTemp *)myvCardTemp
 {
-	return [self fetchvCardTempForJID:[xmppStream myJID]];
+	return [self vCardTempForJID:[xmppStream myJID] shouldFetch:YES];
 }
 
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp
@@ -171,10 +191,10 @@
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:myvCardElementID child:newvCardTemp];
         [xmppStream sendElement:iq];
         
-        [myvCardTracker addID:myvCardElementID
+        [_myvCardTracker addID:myvCardElementID
                        target:self
                      selector:@selector(handleMyvcard:withInfo:)
-                      timeout:60];
+                      timeout:600];
         
         [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
         
@@ -193,16 +213,14 @@
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
 {
-    if(jid == nil){
-        return;
-    }
+    if(!jid) return;
     
 	// this method could be called from anywhere
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
 		
-		[_moduleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
+		[_xmppvCardTempModuleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
 		
 		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
 		                                                     didReceivevCardTemp:vCardTemp
@@ -213,6 +231,12 @@
 		block();
 	else
 		dispatch_async(moduleQueue, block);
+}
+
+- (void)_fetchvCardTempForJID:(XMPPJID *)jid{
+    if(!jid) return;
+
+    [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:jid]];
 }
 
 - (void)handleMyvcard:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo{
@@ -237,7 +261,7 @@
 {
 	// This method is invoked on the moduleQueue.
 	
-    [myvCardTracker invokeForID:[iq elementID] withObject:iq];
+    [_myvCardTracker invokeForID:[iq elementID] withObject:iq];
     
 	// Remember XML heirarchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
@@ -258,7 +282,7 @@
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	[myvCardTracker removeAllIDs];
+	[_myvCardTracker removeAllIDs];
 }
 
 @end
