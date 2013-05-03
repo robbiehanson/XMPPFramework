@@ -465,6 +465,37 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  **/
 - (NSDate *)authenticationDate;
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Compression
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * Returns the server's list of supported compression methods in accordance to XEP-0138: Stream Compression
+ * Each item in the array will be of type NSString.
+ *
+ * For example, if the server supplied this stanza within it's reported stream:features:
+ *
+ * <compression xmlns='http://jabber.org/features/compress'>
+ *	  <method>zlib</method>
+ *    <method>lzw</method>
+ * </compression>
+ *
+ * Then this method would return [@"zlib", @"lzw"].
+ **/
+- (NSArray *)supportedCompressionMethods;
+
+
+/**
+ * Returns whether or not the given compression method name was specified in the
+ * server's list of supported compression methods.
+ *
+ * Note: The XMPPStream doesn't currently support any compression methods 
+**/
+
+- (BOOL)supportsCompressionMethod:(NSString *)compressionMethod;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Server Info
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
