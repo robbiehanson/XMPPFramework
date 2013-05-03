@@ -169,14 +169,16 @@
 	NSXMLElement * decline = [x elementForName:@"decline"];
 	
 	NSXMLElement * directInvite = [message elementForName:@"x" xmlns:@"jabber:x:conference"];
+    
+    XMPPJID * roomJID = [message from];
 	
 	if (invite || directInvite)
 	{
-		[multicastDelegate xmppMUC:self didReceiveRoomInvitation:message];
+		[multicastDelegate xmppMUC:self roomJID:roomJID didReceiveInvitation:message];
 	}
 	else if (decline)
 	{
-		[multicastDelegate xmppMUC:self didReceiveRoomInvitationDecline:message];
+		[multicastDelegate xmppMUC:self roomJID:roomJID didReceiveInvitationDecline:message];
 	}
 }
 
