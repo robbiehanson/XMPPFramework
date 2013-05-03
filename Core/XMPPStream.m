@@ -1836,6 +1836,84 @@ enum XMPPStreamConfig
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Compression
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSArray *)supportedCompressionMethods
+{
+	__block NSMutableArray *result = [[NSMutableArray alloc] init];
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		// The root element can be properly queried for compression methods anytime after the
+		// stream:features are received, and TLS has been setup (if required).
+		
+		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		{
+			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *compression = [features elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
+			
+			NSArray *methods = [compression elementsForName:@"method"];
+			
+			for (NSXMLElement *method in methods)
+			{
+				[result addObject:[method stringValue]];
+			}
+		}
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+/**
+ * This method checks the stream features of the connected server to determine
+ * if the given compression method is supported.
+ *
+ * If we are not connected to a server, this method simply returns NO.
+ **/
+
+
+- (BOOL)supportsCompressionMethod:(NSString *)compressionMethod
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		// The root element can be properly queried for compression methods anytime after the
+		// stream:features are received, and TLS has been setup (if required).
+		
+		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		{
+			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *compression = [features elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
+			
+			NSArray *methods = [compression elementsForName:@"method"];
+			
+			for (NSXMLElement *method in methods)
+			{
+				if ([[method stringValue] isEqualToString:compressionMethod])
+				{
+					result = YES;
+					break;
+				}
+			}
+		}
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark General Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
