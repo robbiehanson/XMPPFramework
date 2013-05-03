@@ -20,22 +20,36 @@
 
 @interface XMPPvCardTempModule : XMPPModule
 {
-	id <XMPPvCardTempModuleStorage> __strong _moduleStorage;
-    XMPPIDTracker *myvCardTracker;
+	id <XMPPvCardTempModuleStorage> __strong _xmppvCardTempModuleStorage;
+    XMPPIDTracker *_myvCardTracker;
 }
 
 
-@property(nonatomic, strong, readonly) id <XMPPvCardTempModuleStorage> moduleStorage;
+@property(nonatomic, strong, readonly) id <XMPPvCardTempModuleStorage> xmppvCardTempModuleStorage;
 @property(nonatomic, strong, readonly) XMPPvCardTemp *myvCardTemp;
 
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage;
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-/*
- * Return the cached vCard for the user or fetch it, if we don't have it.
- */
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid;
-- (XMPPvCardTemp *)fetchvCardTempForJID:(XMPPJID *)jid useCache:(BOOL)useCache;
+/**
+ * Fetches the vCardTemp for the given JID if it is not in the storage
+**/
+- (void)fetchvCardTempForJID:(XMPPJID *)jid;
+
+/**
+ * Fetches the vCardTemp for the given JID, optionally ignoring the storage
+**/
+- (void)fetchvCardTempForJID:(XMPPJID *)jid ignoreStorage:(BOOL)ignoreStorage;
+
+/**
+ * Returns the vCardTemp for the given JID, this is the equivalent of calling the vCardTempForJID:xmppStream: on the moduleStorage
+ * If there is no vCardTemp in the storage for the given jid and shouldFetch is YES, it will automatically fetch it from the network
+**/
+- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch;
+
+/**
+ * Updates myvCard in storage and sends it to the server
+**/
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp;
 
 @end
@@ -54,7 +68,6 @@
 - (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule;
 
 - (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule failedToUpdateMyvCard:(NSXMLElement *)error;
-
 
 @end
 
@@ -89,6 +102,11 @@
  * Used to set the vCardTemp object when we get it from the XMPP server.
 **/
 - (void)setvCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+
+/**
+ * Returns My vCardTemp object or nil
+**/
+- (XMPPvCardTemp *)myvCardTempForXMPPStream:(XMPPStream *)stream;
 
 /**
  * Asks the backend if we should fetch the vCardTemp from the network.

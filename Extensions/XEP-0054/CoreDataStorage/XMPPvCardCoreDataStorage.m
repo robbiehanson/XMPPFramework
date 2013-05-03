@@ -61,6 +61,11 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 #pragma mark Overrides
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)commonInit
+{
+    autoAllowExternalBinaryDataStorage = YES;
+    [super commonInit];
+}
 - (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr
 {    
     BOOL result = [super addPersistentStoreWithPath:storePath error:errorPtr];
@@ -193,6 +198,13 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		
 		vCard.lastUpdated = [NSDate date];
 	}];
+}
+
+- (XMPPvCardTemp *)myvCardTempForXMPPStream:(XMPPStream *)stream
+{
+    if(!stream) return nil;
+    
+    return [self vCardTempForJID:[[stream myJID] bareJID] xmppStream:stream];
 }
 
 - (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream

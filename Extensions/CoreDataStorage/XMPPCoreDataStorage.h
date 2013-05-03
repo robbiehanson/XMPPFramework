@@ -49,12 +49,13 @@
 	NSManagedObjectContext *managedObjectContext;
 	NSManagedObjectContext *mainThreadManagedObjectContext;
 	
-    BOOL autoAllowExternalBinaryDataStorage;
 @protected
 	
 	NSString *databaseFileName;
 	NSUInteger saveThreshold;
 	NSUInteger saveCount;
+    
+    BOOL autoAllowExternalBinaryDataStorage;
 	
 	dispatch_queue_t storageQueue;
 	void *storageQueueTag;

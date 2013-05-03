@@ -68,7 +68,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 		// we don't need to call the storage configureWithParent:queue: method,
 		// because the vCardTempModule already did that.
-		_moduleStorage = (id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage;
+		_moduleStorage = (id <XMPPvCardAvatarStorage>)xmppvCardTempModule.xmppvCardTempModuleStorage;
 
 		[_xmppvCardTempModule addDelegate:self delegateQueue:moduleQueue];
 		
@@ -136,7 +136,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		
 		if (photoData == nil) 
 		{
-			[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
+			[_xmppvCardTempModule vCardTempForJID:jid shouldFetch:YES];
 		}
 		
 	}};
@@ -171,7 +171,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
 	XMPPLogTrace();
-	[_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] useCache:NO];
+	[_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] ignoreStorage:YES];
 }
 
 
@@ -236,7 +236,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	// check the hash
 	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]
         && !([photoHash length] == 0 && [savedPhotoHash length] == 0)) {
-		[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:NO];
+		[_xmppvCardTempModule fetchvCardTempForJID:jid ignoreStorage:YES];
 	}
 }
 
@@ -287,12 +287,12 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule{
     //The vCard has been updated on the server so we need to cache it
-    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] useCache:NO]; 
+    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] ignoreStorage:YES];
 }
 
 - (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule failedToUpdateMyvCard:(NSXMLElement *)error{
 		//The vCard failed to update so we fetch the current one from the server
-    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] useCache:NO];
+    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] ignoreStorage:YES];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
