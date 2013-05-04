@@ -6,6 +6,10 @@ static NSString *const xmlns_chatstates = @"http://jabber.org/protocol/chatstate
 
 @implementation XMPPMessage (XEP_0085)
 
+- (NSString *)chatState{
+    return [[[self elementsForXmlns:xmlns_chatstates] lastObject] name];
+}
+
 - (BOOL)hasChatState
 {
 	return ([[self elementsForXmlns:xmlns_chatstates] count] > 0);

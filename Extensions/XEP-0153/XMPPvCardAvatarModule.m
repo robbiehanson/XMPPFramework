@@ -5,15 +5,6 @@
 //  Created by Eric Chamberlain on 3/9/11.
 //  Copyright 2011 RF.com. All rights reserved.
 
-
-// TODO: publish after upload vCard
-/*
- * XEP-0153 Section 4.2 rule 1
- *
- * However, a client MUST advertise an image if it has just uploaded the vCard with a new avatar 
- * image. In this case, the client MAY choose not to redownload the vCard to verify its contents.
- */
-
 #import "XMPPvCardAvatarModule.h"
 
 #import "NSData+XMPP.h"
@@ -22,6 +13,7 @@
 #import "XMPPPresence.h"
 #import "XMPPStream.h"
 #import "XMPPvCardTempModule.h"
+#import "XMPPvCardTemp.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -76,9 +68,11 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 		// we don't need to call the storage configureWithParent:queue: method,
 		// because the vCardTempModule already did that.
-		_moduleStorage = (id <XMPPvCardAvatarStorage>)xmppvCardTempModule.moduleStorage;
+		_moduleStorage = (id <XMPPvCardAvatarStorage>)xmppvCardTempModule.xmppvCardTempModuleStorage;
 
 		[_xmppvCardTempModule addDelegate:self delegateQueue:moduleQueue];
+		
+		_autoClearMyvcard = YES;
 	}
 	return self;
 }
@@ -90,6 +84,38 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	_moduleStorage = nil;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Properties
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+- (BOOL)autoClearMyvcard
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		result = _autoClearMyvcard;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoClearMyvcard:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		_autoClearMyvcard = flag;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,19 +136,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		
 		if (photoData == nil) 
 		{
-			[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:YES];
-		}
-		else
-		{
-		#if TARGET_OS_IPHONE
-			UIImage *photo = [UIImage imageWithData:photoData];
-		#else
-			NSImage *photo = [[NSImage alloc] initWithData:photoData];
-		#endif
-			
-			[multicastDelegate xmppvCardAvatarModule:self 
-			                         didReceivePhoto:photo 
-			                                  forJID:jid];
+			[_xmppvCardTempModule vCardTempForJID:jid shouldFetch:YES];
 		}
 		
 	}};
@@ -139,47 +153,59 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 #pragma mark XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)xmppStreamWillConnect:(XMPPStream *)sender {
+- (void)xmppStreamDidConnect:(XMPPStream *)sender {
 	XMPPLogTrace();
-	/* 
-	 * XEP-0153 Section 4.2 rule 1
-	 *
-	 * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
-	 * Once it has done this, it MAY advertise an image. 
-	 */
-	[_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:xmppStream];
+	
+	if(self.autoClearMyvcard)
+	{
+		/*
+		 * XEP-0153 Section 4.2 rule 1
+		 *
+		 * A client MUST NOT advertise an avatar image without first downloading the current vCard. 
+		 * Once it has done this, it MAY advertise an image. 
+		 */
+		[_moduleStorage clearvCardTempForJID:[sender myJID] xmppStream:sender];
+	}
 }
 
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
 	XMPPLogTrace();
-	[_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] useCache:NO];
+	[_xmppvCardTempModule fetchvCardTempForJID:[sender myJID] ignoreStorage:YES];
 }
 
 
 - (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {
 	XMPPLogTrace();
-
+    
+	NSXMLElement *currentXElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+	
+	//If there is already a x element then remove it
+	if(currentXElement)
+	{
+	    NSUInteger currentXElementIndex = [[presence children] indexOfObject:currentXElement];
+	    
+	    if(currentXElementIndex != NSNotFound)
+	    {
+	        [presence removeChildAtIndex:currentXElementIndex];
+	    }
+	}
 	// add our photo info to the presence stanza
 	NSXMLElement *photoElement = nil;
-	NSXMLElement *xElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+	NSXMLElement *xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
 
-	if (xElement) {
-		photoElement = [xElement elementForName:kXMPPvCardAvatarPhotoElement];
+	NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:sender];
+
+	if (photoHash != nil)
+    {
+	    photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
 	} else {
-		xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
-		[presence addChild:xElement];
+	    photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement];
 	}
 
-	NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:xmppStream];
-
-	if (photoElement) {
-		photoElement.stringValue = photoHash;
-	} else {
-		photoElement = [NSXMLElement elementWithName:kXMPPvCardAvatarPhotoElement stringValue:photoHash];
-		[xElement addChild:photoElement];
-	}
-
+	[xElement addChild:photoElement];
+	[presence addChild:xElement];
+    
 	// Question: If photoElement is nil, should we be adding xElement?
 	
 	return presence;
@@ -195,17 +221,22 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 		return;
 	}
 
-	NSString *photoHash = [[xElement elementForName:kXMPPvCardAvatarPhotoElement] stringValue];
+	NSXMLElement *photoElement = [xElement elementForName:kXMPPvCardAvatarPhotoElement];
 
-	if (photoHash == nil || [photoHash isEqualToString:@""]) {
+	if (photoElement == nil) {
 		return;
 	}
+    
+    NSString *photoHash = [photoElement stringValue];
 
 	XMPPJID *jid = [presence from];
+    
+    NSString *savedPhotoHash = [_moduleStorage photoHashForJID:jid xmppStream:xmppStream];
 
 	// check the hash
-	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]) {
-		[_xmppvCardTempModule fetchvCardTempForJID:jid useCache:NO];
+	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]
+        && !([photoHash length] == 0 && [savedPhotoHash length] == 0)) {
+		[_xmppvCardTempModule fetchvCardTempForJID:jid ignoreStorage:YES];
 	}
 }
 
@@ -240,13 +271,28 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	 * If the client subsequently obtains an avatar image (e.g., by updating or retrieving the vCard), 
 	 * it SHOULD then publish a new <presence/> stanza with character data in the <photo/> element.
 	 */
+    
 	if ([[xmppStream myJID] isEqualToJID:jid options:XMPPJIDCompareBare])
 	{
 		XMPPPresence *presence = xmppStream.myPresence;
-		if(presence) {
-			[xmppStream sendElement:presence];
-		}
+        
+        if(presence)
+        {
+            [xmppStream sendElement:presence];
+        }
+
+
 	}
+}
+
+- (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule{
+    //The vCard has been updated on the server so we need to cache it
+    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] ignoreStorage:YES];
+}
+
+- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule failedToUpdateMyvCard:(NSXMLElement *)error{
+		//The vCard failed to update so we fetch the current one from the server
+    [_xmppvCardTempModule fetchvCardTempForJID:[xmppStream myJID] ignoreStorage:YES];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

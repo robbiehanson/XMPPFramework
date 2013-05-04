@@ -459,7 +459,7 @@ static NSMutableSet *databaseFileNames;
 			result = managedObjectModel;
 			return;
 		}
-		
+		        
 		NSString *momName = [self managedObjectModelName];
 		
 		XMPPLogVerbose(@"%@: Creating managedObjectModel (%@)", [self class], momName);
@@ -477,12 +477,36 @@ static NSMutableSet *databaseFileNames;
 			
 			NSURL *momUrl = [NSURL fileURLWithPath:momPath];
 			
-			managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:momUrl];
+			managedObjectModel = [[[NSManagedObjectModel alloc] initWithContentsOfURL:momUrl] copy];
 		}
 		else
 		{
 			XMPPLogWarn(@"%@: Couldn't find managedObjectModel file - %@", [self class], momName);
 		}
+        
+        if([NSAttributeDescription instancesRespondToSelector:@selector(setAllowsExternalBinaryDataStorage:)])
+        {
+            if(autoAllowExternalBinaryDataStorage)
+            {
+                NSArray *entities = [managedObjectModel entities];
+                
+                for(NSEntityDescription *entity in entities)
+                {
+                    NSDictionary *attributesByName = [entity attributesByName];
+                    
+                    [attributesByName enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+                        
+                        if([obj attributeType] == NSBinaryDataAttributeType)
+                        {
+                            [obj setAllowsExternalBinaryDataStorage:YES];
+                        }
+                        
+                    }];			
+                }
+                
+            }
+            
+        }
 		
 		result = managedObjectModel;
 	}};
@@ -686,6 +710,35 @@ static NSMutableSet *databaseFileNames;
     }
 }
 
+
+- (BOOL)autoAllowExternalBinaryDataStorage
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = autoAllowExternalBinaryDataStorage;
+	}};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoAllowExternalBinaryDataStorage:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoAllowExternalBinaryDataStorage = flag;
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);	
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -765,7 +818,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
+	NSAssert(!dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	//
@@ -795,7 +848,7 @@ static NSMutableSet *databaseFileNames;
 	// If you remove the assert statement below, you are destroying the sole purpose for this class,
 	// which is to optimize the disk IO by buffering save operations.
 	// 
-	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
+	NSAssert(!dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
 	// 
 	// For a full discussion of this method, please see XMPPCoreDataStorageProtocol.h
 	// 

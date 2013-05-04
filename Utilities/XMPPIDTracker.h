@@ -2,6 +2,7 @@
 
 @protocol XMPPTrackingInfo;
 
+@class XMPPElement;
 
 /**
  * A common operation in XMPP is to send some kind of request with a unique id,
@@ -91,11 +92,19 @@
 
 - (void)addID:(NSString *)elementID target:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout;
 
+- (void)addElement:(XMPPElement *)element target:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout;
+
 - (void)addID:(NSString *)elementID
         block:(void (^)(id obj, id <XMPPTrackingInfo> info))block
       timeout:(NSTimeInterval)timeout;
 
+- (void)addElement:(XMPPElement *)element
+             block:(void (^)(id obj, id <XMPPTrackingInfo> info))block
+           timeout:(NSTimeInterval)timeout;
+
 - (void)addID:(NSString *)elementID trackingInfo:(id <XMPPTrackingInfo>)trackingInfo;
+
+- (void)addElement:(XMPPElement *)element trackingInfo:(id <XMPPTrackingInfo>)trackingInfo;
 
 - (BOOL)invokeForID:(NSString *)elementID withObject:(id)obj;
 
@@ -113,6 +122,8 @@
 @property (nonatomic, readonly) NSTimeInterval timeout;
 
 @property (nonatomic, readwrite, copy) NSString *elementID;
+
+@property (nonatomic, readwrite, copy) XMPPElement *element;
 
 - (void)createTimerWithDispatchQueue:(dispatch_queue_t)queue;
 - (void)cancelTimer;
@@ -144,6 +155,9 @@
 @property (nonatomic, readonly) NSTimeInterval timeout;
 
 @property (nonatomic, readwrite, copy) NSString *elementID;
+
+@property (nonatomic, readwrite, copy) XMPPElement *element;
+
 
 - (void)createTimerWithDispatchQueue:(dispatch_queue_t)queue;
 - (void)cancelTimer;

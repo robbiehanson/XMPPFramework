@@ -664,9 +664,11 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	// Now prompt the delegates to add any additional features.
 	
-	SEL selector = @selector(xmppCapabilities:collectingMyCapabilities:);
-	
-	if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
+	SEL collectingMyCapabilitiesSelector = @selector(xmppCapabilities:collectingMyCapabilities:);
+	SEL featuresForXMPPCapabilitiesSelector = @selector(featuresForXMPPCapabilities:);
+		
+	if (![multicastDelegate hasDelegateThatRespondsToSelector:collectingMyCapabilitiesSelector]
+		&& ![multicastDelegate hasDelegateThatRespondsToSelector:featuresForXMPPCapabilitiesSelector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
@@ -678,24 +680,57 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// Query all interested delegates.
 		// This must be done serially to allow them to alter the element in a thread-safe manner.
 		
-		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+		GCDMulticastDelegateEnumerator *collectingMyCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
+		GCDMulticastDelegateEnumerator *featuresForXMPPCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
+
 		
 		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 		dispatch_async(concurrentQueue, ^{ @autoreleasepool {
 			
-			// Allow delegates to modify outgoing element
-			
+						
 			id del;
 			dispatch_queue_t dq;
 			
-			while ([delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:selector])
+			while ([collectingMyCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:collectingMyCapabilitiesSelector])
 			{
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
 					[del xmppCapabilities:self collectingMyCapabilities:query];
 				}});
 			}
-			
+						
+			while ([featuresForXMPPCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:featuresForXMPPCapabilitiesSelector])
+			{
+				dispatch_sync(dq, ^{ @autoreleasepool {
+					
+					NSArray *features =  [del featuresForXMPPCapabilities:self];
+					
+					for(NSString *feature in features){
+					
+						BOOL found = NO;
+						
+						//Check to see if the feature is already in my capabilities
+						for (NSXMLElement *childElement in query.children) {
+							
+							if([[childElement attributeStringValueForName:@"var"] isEqualToString:feature])
+							{
+								found = YES;
+								break;
+							}
+						}
+						
+						//The feature is not already in our capabilities so add it
+						if(!found)
+						{
+							NSXMLElement *featureElement = [NSXMLElement elementWithName:@"feature"];
+							[featureElement addAttributeWithName:@"var" stringValue:feature];
+							[query addChild:featureElement];
+						}
+					}
+					
+				}});
+			}
+						
 			dispatch_async(moduleQueue, ^{ @autoreleasepool {
 				
 				[self continueCollectMyCapabilities:query];

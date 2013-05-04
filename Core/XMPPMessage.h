@@ -19,10 +19,22 @@
 + (XMPPMessage *)message;
 + (XMPPMessage *)messageWithType:(NSString *)type;
 + (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)to;
++ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
++ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid;
++ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (XMPPMessage *)messageWithType:(NSString *)type child:(NSXMLElement *)childElement;
 
 - (id)init;
 - (id)initWithType:(NSString *)type;
 - (id)initWithType:(NSString *)type to:(XMPPJID *)to;
+- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
+- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
+- (id)initWithType:(NSString *)type elementID:(NSString *)eid;
+- (id)initWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
+- (id)initWithType:(NSString *)type child:(NSXMLElement *)childElement;
+
+- (NSString *)body;
 
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;

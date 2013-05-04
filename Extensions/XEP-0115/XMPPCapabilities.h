@@ -336,6 +336,14 @@
 **/
 - (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query;
 
+
+/**
+ * Use this delegate method to return the feature you want to have in your capabilities e.g. @[@"urn:xmpp:archive"]
+ * Duplicate features are automatically discarded
+ * For more control over your capablities use xmppCapabilities:collectingMyCapabilities:
+**/
+- (NSArray *)featuresForXMPPCapabilities:(XMPPCapabilities *)sender;
+
 /**
  * Invoked when capabilities have been discovered for an available JID.
  * 

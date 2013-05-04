@@ -61,6 +61,11 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 #pragma mark Overrides
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)commonInit
+{
+    autoAllowExternalBinaryDataStorage = YES;
+    [super commonInit];
+}
 - (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr
 {    
     BOOL result = [super addPersistentStoreWithPath:storePath error:errorPtr];
@@ -195,6 +200,13 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	}];
 }
 
+- (XMPPvCardTemp *)myvCardTempForXMPPStream:(XMPPStream *)stream
+{
+    if(!stream) return nil;
+    
+    return [self vCardTempForJID:[[stream myJID] bareJID] xmppStream:stream];
+}
+
 - (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
 	// This is a public method.
@@ -211,8 +223,12 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
 		BOOL waitingForFetch = [vCard.waitingForFetch boolValue];
-		
-		if (!waitingForFetch)
+        
+        if(![stream isAuthenticated])
+        {
+            result = NO;
+		}
+        else if (!waitingForFetch)
 		{
 			vCard.waitingForFetch = [NSNumber numberWithBool:YES];
 			vCard.lastUpdated = [NSDate date];

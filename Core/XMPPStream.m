@@ -102,6 +102,7 @@ enum XMPPStreamConfig
 	UInt16 hostPort;
 	
 	id <XMPPSASLAuthentication> auth;
+	NSDate *authenticationDate;
 	
 	XMPPJID *myJID_setByClient;
 	XMPPJID *myJID_setByServer;
@@ -813,6 +814,27 @@ enum XMPPStreamConfig
 	return result;
 }
 
+/**
+ * Returns YES is the connection is currently connecting
+ **/
+
+- (BOOL)isConnecting{
+	
+	XMPPLogTrace();
+	
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = (state == STATE_XMPP_CONNECTING);
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
 /**
  * Returns YES if the connection is open, and the stream has been properly established.
  * If the stream is neither disconnected, nor connected, then a connection is currently being established.
@@ -1740,6 +1762,24 @@ enum XMPPStreamConfig
 	return result;
 }
 
+- (BOOL)isAuthenticating{
+	
+	XMPPLogTrace();
+	
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = (state == STATE_XMPP_AUTH);
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+
+	return result;
+}
+
 - (BOOL)isAuthenticated
 {
 	__block BOOL result = NO;
@@ -1760,15 +1800,117 @@ enum XMPPStreamConfig
 {
 	dispatch_block_t block = ^{
 		if(flag)
+		{
 			flags |= kIsAuthenticated;
+			authenticationDate = [NSDate date];
+		}
 		else
+		{
 			flags &= ~kIsAuthenticated;
+			authenticationDate = nil;
+		}
 	};
 	
 	if (dispatch_get_specific(xmppQueueTag))
 		block();
 	else
 		dispatch_async(xmppQueue, block);
+}
+
+- (NSDate *)authenticationDate{
+	__block NSDate *result = nil;
+	
+	dispatch_block_t block = ^{
+		if(flags & kIsAuthenticated)
+		{
+			result =  authenticationDate;
+		}
+	};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Compression
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSArray *)supportedCompressionMethods
+{
+	__block NSMutableArray *result = [[NSMutableArray alloc] init];
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		// The root element can be properly queried for compression methods anytime after the
+		// stream:features are received, and TLS has been setup (if required).
+		
+		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		{
+			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *compression = [features elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
+			
+			NSArray *methods = [compression elementsForName:@"method"];
+			
+			for (NSXMLElement *method in methods)
+			{
+				[result addObject:[method stringValue]];
+			}
+		}
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+/**
+ * This method checks the stream features of the connected server to determine
+ * if the given compression method is supported.
+ *
+ * If we are not connected to a server, this method simply returns NO.
+ **/
+
+
+- (BOOL)supportsCompressionMethod:(NSString *)compressionMethod
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		// The root element can be properly queried for compression methods anytime after the
+		// stream:features are received, and TLS has been setup (if required).
+		
+		if (state >= STATE_XMPP_POST_NEGOTIATION)
+		{
+			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+			NSXMLElement *compression = [features elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
+			
+			NSArray *methods = [compression elementsForName:@"method"];
+			
+			for (NSXMLElement *method in methods)
+			{
+				if ([[method stringValue] isEqualToString:compressionMethod])
+				{
+					result = YES;
+					break;
+				}
+			}
+		}
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2899,6 +3041,7 @@ enum XMPPStreamConfig
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
 			[iq addAttributeWithName:@"type" stringValue:@"set"];
+			[iq addAttributeWithName:@"id" stringValue:[self generateUUID]];
 			[iq addChild:bind];
 			
 			NSString *outgoingStr = [iq compactXMLString];
@@ -2919,6 +3062,7 @@ enum XMPPStreamConfig
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
 			[iq addAttributeWithName:@"type" stringValue:@"set"];
+			[iq addAttributeWithName:@"id" stringValue:[self generateUUID]];
 			[iq addChild:bind];
 			
 			NSString *outgoingStr = [iq compactXMLString];
@@ -2996,14 +3140,9 @@ enum XMPPStreamConfig
 }
 
 /**
- * After the authenticateWithPassword:error: or authenticateWithFacebookAccessToken:error: methods are invoked, an 
+ * After the authenticate:error: or authenticateWithPassword:error: methods are invoked, some kind of
  * authentication message is sent to the server.
- * If the server supports digest-md5 sasl authentication, it is used.  Otherwise plain sasl authentication is used,
- * assuming the server supports it.
- * 
- * Now if digest-md5 or X-FACEBOOK-PLATFORM was used, we sent a challenge request, and we're waiting for a 
- * challenge response.  If plain sasl was used, we sent our authentication information, and we're waiting for a 
- * success response.
+ * This method forwards the response to the authentication module, and handles the resulting authentication state.
 **/
 - (void)handleAuth:(NSXMLElement *)authResponse
 {
@@ -3499,6 +3638,8 @@ enum XMPPStreamConfig
 		
 		// Clear any saved authentication information
 		auth = nil;
+		
+		authenticationDate = nil;
 		
 		// Clear stored elements
 		myJID_setByServer = nil;

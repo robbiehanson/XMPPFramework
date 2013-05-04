@@ -418,7 +418,8 @@ static XMPPRoomHybridStorage *sharedInstance;
 		
 		[self updateDeleteTimer];
 		
-		dispatch_resume(deleteTimer);
+		if (deleteTimer)
+			dispatch_resume(deleteTimer);
 	}
 }
 

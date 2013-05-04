@@ -8,6 +8,8 @@
 #import <Foundation/Foundation.h>
 #import "XMPPModule.h"
 
+#define _XMPP_JABBER_RPC_MODULE_H
+
 extern NSString *const XMPPJabberRPCErrorDomain;
 
 @class XMPPJID;

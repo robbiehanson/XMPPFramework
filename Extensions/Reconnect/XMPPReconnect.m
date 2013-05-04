@@ -11,7 +11,7 @@
 
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -448,7 +448,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #pragma mark Reachability
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
+static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
 {
 	@autoreleasepool {
 	
@@ -536,7 +536,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 		if (reachability)
 		{
 			SCNetworkReachabilityContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
-			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
+			SCNetworkReachabilitySetCallback(reachability, XMPPReconnectReachabilityCallback, &context);
 			
 			CFRunLoopRef xmppRunLoop = [[xmppStream xmppUtilityRunLoop] getCFRunLoop];
 			if (xmppRunLoop)
@@ -621,7 +621,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 
 - (void)maybeAttemptReconnectWithReachabilityFlags:(SCNetworkReachabilityFlags)reachabilityFlags
 {
-	if (dispatch_get_specific(moduleQueueTag))
+	if (!dispatch_get_specific(moduleQueueTag))
 	{
 		dispatch_async(moduleQueue, ^{ @autoreleasepool {
 			
@@ -695,7 +695,14 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 						[self setMultipleReachabilityChanges:NO];
 						previousReachabilityFlags = reachabilityFlags;
 						
-						[xmppStream connect:nil];
+                        if (self.usesOldSchoolSecureConnect)
+                        {
+                            [xmppStream oldSchoolSecureConnect:nil];
+                        }
+                        else
+                        {
+                            [xmppStream connect:nil];
+                        }
 					}
 					else if ([self multipleReachabilityChanges])
 					{

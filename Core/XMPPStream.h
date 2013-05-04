@@ -235,6 +235,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (BOOL)isDisconnected;
 
 /**
+ * Returns YES is the connection is currently connecting
+**/
+
+- (BOOL)isConnecting;
+
+/**
  * Returns YES if the connection is open, and the stream has been properly established.
  * If the stream is neither disconnected, nor connected, then a connection is currently being established.
  * 
@@ -444,9 +450,51 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
 
 /**
+ * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.
+ **/
+
+- (BOOL)isAuthenticating;
+
+/**
  * Returns whether or not the xmpp stream has successfully authenticated with the server.
 **/
 - (BOOL)isAuthenticated;
+
+/**
+ * Returns the date when the xmpp stream successfully authenticated with the server.
+ **/
+- (NSDate *)authenticationDate;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Compression
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * Returns the server's list of supported compression methods in accordance to XEP-0138: Stream Compression
+ * Each item in the array will be of type NSString.
+ *
+ * For example, if the server supplied this stanza within it's reported stream:features:
+ *
+ * <compression xmlns='http://jabber.org/features/compress'>
+ *	  <method>zlib</method>
+ *    <method>lzw</method>
+ * </compression>
+ *
+ * Then this method would return [@"zlib", @"lzw"].
+ **/
+- (NSArray *)supportedCompressionMethods;
+
+
+/**
+ * Returns whether or not the given compression method name was specified in the
+ * server's list of supported compression methods.
+ *
+ * Note: The XMPPStream doesn't currently support any compression methods 
+**/
+
+- (BOOL)supportsCompressionMethod:(NSString *)compressionMethod;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Server Info
