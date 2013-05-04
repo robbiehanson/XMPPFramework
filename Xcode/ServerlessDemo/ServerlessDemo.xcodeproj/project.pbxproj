@@ -18,6 +18,7 @@
 		2899E5600DE3E45000AC0155 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E55F0DE3E45000AC0155 /* RootViewController.xib */; };
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
+		962032021735837200C43080 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 962032011735837200C43080 /* Default-568h@2x.png */; };
 		DC26A534152A3EBF004B71C0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC26A533152A3EBF004B71C0 /* Security.framework */; };
 		DC30E6EA153E09FA001B9E6D /* XMPPAnonymousAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E6D9153E09FA001B9E6D /* XMPPAnonymousAuthentication.m */; };
 		DC30E6EB153E09FA001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E6DC153E09FA001B9E6D /* XMPPDeprecatedDigestAuthentication.m */; };
@@ -82,6 +83,7 @@
 		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* ServerlessDemo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ServerlessDemo-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		962032011735837200C43080 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		DC26A533152A3EBF004B71C0 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC30E6D8153E09FA001B9E6D /* XMPPAnonymousAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAnonymousAuthentication.h; sourceTree = "<group>"; };
 		DC30E6D9153E09FA001B9E6D /* XMPPAnonymousAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAnonymousAuthentication.m; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				962032011735837200C43080 /* Default-568h@2x.png */,
 				DCE60CA710F7A6ED00E20271 /* Core Data */,
 				DCE60D7210F8EEC300E20271 /* Categories */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -578,6 +581,7 @@
 				DCE60EA910FA88EB00E20271 /* ChatViewController.xib in Resources */,
 				DCE60EFA10FAD0DD00E20271 /* BlueBubble.png in Resources */,
 				DCE60EFB10FAD0DD00E20271 /* GreenBubble.png in Resources */,
+				962032021735837200C43080 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
