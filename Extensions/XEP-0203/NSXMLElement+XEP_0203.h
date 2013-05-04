@@ -1,8 +1,10 @@
 #import <Foundation/Foundation.h>
-#import "XMPPElement.h"
+#if TARGET_OS_IPHONE
+#import "DDXML.h"
+#endif
 
 
-@interface XMPPElement (XEP0203)
+@interface NSXMLElement (XEP_0203)
 
 - (BOOL)wasDelayed;
 - (NSDate *)delayedDeliveryDate;

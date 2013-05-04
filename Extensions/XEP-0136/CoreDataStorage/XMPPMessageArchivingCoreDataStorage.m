@@ -1,7 +1,7 @@
 #import "XMPPMessageArchivingCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPPLogging.h"
-#import "XMPPElement+Delay.h"
+#import "NSXMLElement+XEP_0203.h"
 #import "XMPPMessage+XEP_0085.h"
 
 #if ! __has_feature(objc_arc)
