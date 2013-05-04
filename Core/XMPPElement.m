@@ -104,4 +104,76 @@
 	return [XMPPJID jidWithString:[self fromStr]];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark To and From Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)isTo:(XMPPJID *)to
+{
+	return [self.to isEqualToJID:to];
+}
+
+- (BOOL)isTo:(XMPPJID *)to options:(XMPPJIDCompareOptions)mask
+{
+	return [self.to isEqualToJID:to options:mask];
+}
+
+- (BOOL)isFrom:(XMPPJID *)from
+{
+	return [self.from isEqualToJID:from];
+}
+
+- (BOOL)isFrom:(XMPPJID *)from options:(XMPPJIDCompareOptions)mask
+{
+	return [self.from isEqualToJID:from options:mask];
+}
+
+- (BOOL)isToOrFrom:(XMPPJID *)toOrFrom
+{
+	if([self isTo:toOrFrom] || [self isFrom:toOrFrom])
+	{
+		return YES;
+	}
+	else
+	{
+		return NO;
+	}
+}
+
+- (BOOL)isToOrFrom:(XMPPJID *)toOrFrom options:(XMPPJIDCompareOptions)mask
+{
+	if([self isTo:toOrFrom options:mask] || [self isFrom:toOrFrom options:mask])
+	{
+		return YES;
+	}
+	else
+	{
+		return NO;
+	}
+}
+
+- (BOOL)isTo:(XMPPJID *)to from:(XMPPJID *)from
+{
+	if([self isTo:to] && [self isFrom:from])
+	{
+		return YES;
+	}
+	else
+	{
+		return NO;
+	}
+}
+
+- (BOOL)isTo:(XMPPJID *)to from:(XMPPJID *)from options:(XMPPJIDCompareOptions)mask
+{
+	if([self isTo:to options:mask] && [self isFrom:from options:mask])
+	{
+		return YES;
+	}
+	else
+	{
+		return NO;
+	}
+}
+
 @end
