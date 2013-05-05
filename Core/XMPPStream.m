@@ -4326,6 +4326,17 @@ enum XMPPStreamConfig
 		dispatch_sync(xmppQueue, block);
 }
 
+- (void)enumerateModulesOfClass:(Class)aClass withBlock:(void (^)(XMPPModule *module, NSUInteger idx, BOOL *stop))block
+{
+    [self enumerateModulesWithBlock:^(XMPPModule *module, NSUInteger idx, BOOL *stop)
+    {
+        if([module isKindOfClass:aClass])
+        {
+            block(module,idx,stop);
+        }
+    }];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
