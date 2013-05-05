@@ -141,7 +141,7 @@
     {
         
 #ifdef _XMPP_CAPABILITIES_H
-        BOOL addReadReceipt = NO;
+        BOOL addReceiptRequest = NO;
         
         __block XMPPCapabilities *xmppCapabilities = nil;
         
@@ -158,7 +158,7 @@
                 if([[feature name] isEqualToString:@"feature"]
                    && [[feature attributeStringValueForName:@"var"] isEqualToString:XMLNS_URN_XMPP_RECEIPTS])
                 {
-                    addReadReceipt = YES;
+                    addReceiptRequest = YES;
                     break;
                 }
                 
@@ -167,13 +167,13 @@
         }
         else
         {
-            addReadReceipt = YES;
+            addReceiptRequest = YES;
         }
 #else
-        BOOL addReadReceipt = YES;
+        BOOL addReceiptRequest = YES;
 #endif
         
-        if(addReadReceipt)
+        if(addReceiptRequest)
         {
             [message addReceiptRequest];
         }
