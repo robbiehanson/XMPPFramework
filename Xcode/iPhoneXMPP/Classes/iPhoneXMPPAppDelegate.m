@@ -301,7 +301,7 @@
 	password = myPassword;
 
 	NSError *error = nil;
-	if (![xmppStream connect:&error])
+	if (![xmppStream connectWithTimeout:XMPPStreamTimeoutNone error:&error])
 	{
 		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error connecting" 
 		                                                    message:@"See console for error details." 

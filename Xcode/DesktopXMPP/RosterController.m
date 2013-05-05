@@ -248,9 +248,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	if(![[self xmppStream] isConnected])
 	{
 		if (useSSL)
-			success = [[self xmppStream] oldSchoolSecureConnect:&error];
+			success = [[self xmppStream] oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:&error];
 		else
-			success = [[self xmppStream] connect:&error];
+			success = [[self xmppStream] connectWithTimeout:XMPPStreamTimeoutNone error:&error];
 	}
 	else
 	{
@@ -282,9 +282,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	if(![[self xmppStream] isConnected])
 	{
 		if (useSSL)
-			success = [[self xmppStream] oldSchoolSecureConnect:&error];
+			success = [[self xmppStream] oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:&error];
 		else
-			success = [[self xmppStream] connect:&error];
+			success = [[self xmppStream] connectWithTimeout:XMPPStreamTimeoutNone error:&error];
 	}
 	else
 	{

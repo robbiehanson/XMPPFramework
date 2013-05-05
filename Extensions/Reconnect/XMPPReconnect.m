@@ -601,11 +601,11 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 						
                         if (self.usesOldSchoolSecureConnect)
                         {
-                            [xmppStream oldSchoolSecureConnect:nil];
+                            [xmppStream oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:nil];
                         }
                         else
                         {
-                            [xmppStream connect:nil];
+                            [xmppStream connectWithTimeout:XMPPStreamTimeoutNone error:nil];
                         }
 					}
 					else if ([self multipleReachabilityChanges])

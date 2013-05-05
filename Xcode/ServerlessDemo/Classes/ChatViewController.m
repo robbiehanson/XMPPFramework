@@ -649,7 +649,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		xmppStream = [[XMPPStream alloc] initP2PFrom:myJID];
 		
 		[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
-		[xmppStream connectTo:serviceJID withAddress:address error:nil];
+		[xmppStream connectTo:serviceJID withAddress:address withTimeout:XMPPStreamTimeoutNone error:nil];
 	}
 	
 	[ns stop];
