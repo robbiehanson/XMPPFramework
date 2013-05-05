@@ -46,6 +46,26 @@
 	return elements;
 }
 
+- (NSArray *)elementsForXmlnsPrefix:(NSString *)nsPrefix
+{
+    NSMutableArray *elements = [NSMutableArray array];
+	
+	for (NSXMLNode *node in [self children])
+	{
+		if ([node isKindOfClass:[NSXMLElement class]])
+		{
+			NSXMLElement *element = (NSXMLElement *)node;
+			
+			if ([[element xmlns] hasPrefix:nsPrefix])
+			{
+				[elements addObject:element];
+			}
+		}
+	}
+	
+	return elements;
+}
+
 /**
  * This method returns the first child element for the given name (as an NSXMLElement).
  * If no child elements exist for the given name, nil is returned.
@@ -97,6 +117,27 @@
 	{
 		return nil;
 	}
+}
+
+- (NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix{
+    
+    NSXMLElement *result = nil;
+	
+	for (NSXMLNode *node in [self children])
+	{
+		if ([node isKindOfClass:[NSXMLElement class]])
+		{
+			NSXMLElement *element = (NSXMLElement *)node;
+			
+			if ([[element name] isEqualToString:name] && [[element xmlns] hasPrefix:xmlnsPrefix])
+			{
+				result = element;
+                break;
+			}
+		}
+	}
+	
+	return result;
 }
 
 /**
