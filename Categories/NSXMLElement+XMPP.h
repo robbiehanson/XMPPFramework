@@ -22,6 +22,7 @@
 **/
 
 - (NSArray *)elementsForXmlns:(NSString *)ns;
+- (NSArray *)elementsForXmlnsPrefix:(NSString *)nsPrefix;
 
 /**
  * Extracting a single element.
@@ -29,6 +30,7 @@
 
 - (NSXMLElement *)elementForName:(NSString *)name;
 - (NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns;
+- (NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
 
 /**
  * Working with the common xmpp xmlns value.
