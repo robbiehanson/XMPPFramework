@@ -111,10 +111,10 @@
 @property (nonatomic, assign) NSTimeInterval reconnectTimerInterval;
 
 /**
- * Whether you want to reconnect using the legacy method -[XMPPStream oldSchoolSecureConnect:]
+ * Whether you want to reconnect using the legacy method -[XMPPStream oldSchoolSecureConnectWithTimeout:error:]
  * instead of the standard -[XMPPStream connect:].
  *
- * If you initially connect using -oldSchoolSecureConnect:, set this to YES to reconnect the same way.
+ * If you initially connect using -oldSchoolSecureConnectWithTimeout:error:, set this to YES to reconnect the same way.
  *
  * The default value is NO (disabled).
  */
