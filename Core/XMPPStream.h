@@ -635,6 +635,12 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 **/
 - (void)enumerateModulesWithBlock:(void (^)(XMPPModule *module, NSUInteger idx, BOOL *stop))block;
 
+/**
+ * Allows for enumeration of the currently registered modules that are a kind of Class.
+ * idx is in relation to all modules not just those of the given class.
+**/
+- (void)enumerateModulesOfClass:(Class)aClass withBlock:(void (^)(XMPPModule *module, NSUInteger idx, BOOL *stop))block;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
