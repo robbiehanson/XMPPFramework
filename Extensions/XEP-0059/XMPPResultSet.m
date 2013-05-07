@@ -76,8 +76,8 @@
 {
     return [[XMPPResultSet alloc] initWithMax:max
                                    firstIndex:firstIndex
-                                        after:before
-                                       before:after];
+                                        after:after
+                                       before:before];
 }
 
 - (id)init
