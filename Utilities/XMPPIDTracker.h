@@ -4,6 +4,8 @@
 
 @class XMPPElement;
 
+extern const NSTimeInterval XMPPIDTrackerTimeoutNone;
+
 /**
  * A common operation in XMPP is to send some kind of request with a unique id,
  * and wait for the response to come back.
