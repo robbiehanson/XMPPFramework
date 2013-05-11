@@ -719,7 +719,7 @@
 			
 			user = myUser;
 		}
-		else
+		else if([parent allowRosterlessOperation])
 		{
 			// Unknown user (this is the first time we've encountered them).
 			// This happens if the roster is in rosterlessOperation mode.
