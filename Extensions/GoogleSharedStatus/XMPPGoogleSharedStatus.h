@@ -1,17 +1,20 @@
 #import <Foundation/Foundation.h>
 #import "XMPPModule.h"
 
-extern NSString *const XMPPSharedStatusShow;
-extern NSString *const XMPPSharedStatusInvisible;
-extern NSString *const XMPPSharedStatusStatus;
+extern NSString *const XMPPGoogleSharedStatusShow;
+extern NSString *const XMPPGoogleSharedStatusInvisible;
+extern NSString *const XMPPGoogleSharedStatusStatus;
 
-extern NSString *const XMPPSharedStatusShowAvailable;
-extern NSString *const XMPPSharedStatusShowBusy;
-extern NSString *const XMPPSharedStatusShowIdle;
+extern NSString *const XMPPGoogleSharedStatusShowAvailable;
+extern NSString *const XMPPGoogleSharedStatusShowBusy;
+extern NSString *const XMPPGoogleSharedStatusShowIdle;
 
-@protocol XMPPSharedStatusDelegate;
+@protocol XMPPGoogleSharedStatusDelegate;
 
-@interface XMPPSharedStatus : XMPPModule
+
+#define _XMPP_GOOGLE_SHARED_STATUS_H
+
+@interface XMPPGoogleSharedStatus : XMPPModule
 
 @property (nonatomic, assign) BOOL sharedStatusSupported;
 @property (nonatomic, strong) NSDictionary *sharedStatus;
@@ -25,24 +28,24 @@ extern NSString *const XMPPSharedStatusShowIdle;
 @property (nonatomic, assign) BOOL invisible;
 
 // Convenience auto-updater for presence status.
-// Does not use XMPPSharedStatus.
+// Does not use XMPPGoogleSharedStatus.
 @property (nonatomic, copy) NSString *statusMessage;
 @property (nonatomic, copy) NSString *statusAvailability;
 
 - (void)updateSharedStatus:(NSString *)status
-  				  show:(NSString *)show
+					  show:(NSString *)show
 				 invisible:(BOOL)invisible;
 
 - (void)refreshSharedStatus;
 
 @end
 
-@protocol XMPPSharedStatusDelegate
+@protocol XMPPGoogleSharedStatusDelegate
 
 @optional
 
 // This delegate method is called when the server updates the shared
 // status module with new status information, or upon manual refresh.
-- (void)xmppSharedStatus:(XMPPSharedStatus *)sender didRecieveUpdatedStatus:(NSDictionary *)sharedStatus;
+- (void)xmppGoogleSharedStatus:(XMPPGoogleSharedStatus *)sender didRecieveUpdatedStatus:(NSDictionary *)sharedStatus;
 
 @end
