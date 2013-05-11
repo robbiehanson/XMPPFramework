@@ -471,4 +471,42 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	}];
 }
 
+- (NSArray *)jidsForXMPPStream:(XMPPStream *)stream{
+    
+    XMPPLogTrace();
+    
+    __block NSMutableArray *results = [NSMutableArray array];
+	
+	[self executeBlock:^{
+		
+		NSManagedObjectContext *moc = [self managedObjectContext];
+		
+		NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
+												  inManagedObjectContext:moc];
+		
+		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+		[fetchRequest setEntity:entity];
+		[fetchRequest setFetchBatchSize:saveThreshold];
+		
+		if (stream)
+		{
+			NSPredicate *predicate;
+			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
+                         [[self myJIDForXMPPStream:stream] bare]];
+			
+			[fetchRequest setPredicate:predicate];
+		}
+		
+		NSArray *allUsers = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        for(XMPPUserCoreDataStorageObject *user in allUsers){
+            [results addObject:[user.jid bareJID]];
+        }
+		
+	}];
+    
+    return results;
+}
+
+
 @end
