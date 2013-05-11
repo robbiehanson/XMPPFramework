@@ -1,9 +1,6 @@
 #import "XMPPGoogleSharedStatus.h"
-#import "NSXMLElement+XMPP.h"
-#import "XMPPPresence.h"
-#import "XMPPStream.h"
-#import "XMPPJID.h"
-#import "XMPPIQ.h"
+#import "XMPP.h"
+#import "XMPPFramework.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -32,46 +29,10 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 }
 
 @property (nonatomic, copy) NSString *previousShow;
-@property (nonatomic, copy) void (^idleDispatcher)(BOOL);
 
 @end
 
 @implementation XMPPGoogleSharedStatus
-
-#pragma mark - Idle Observers
-
-static NSMutableArray *observers = nil;
-+ (void)initialize {
-	if(self.class == XMPPGoogleSharedStatus.class)
-		observers = @[].mutableCopy;
-}
-
-
-#if !TARGET_OS_IPHONE
-+ (void)startIdleObserver {
-	static NSTimeInterval const PRTDefaultIdleInterval = 10;
-	static NSTimeInterval const PRTDefaultIdleDuration = (5 * 60);
-	
-	static dispatch_once_t onceToken;
-	dispatch_once(&onceToken, ^{
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-			while(YES) {
-				CFTimeInterval secondsSinceLastUserInteraction = CGEventSourceSecondsSinceLastEventType(kCGEventSourceStateHIDSystemState, kCGAnyInputEventType);
-				
-				dispatch_async(dispatch_get_main_queue(), ^{
-					BOOL userIsActive = secondsSinceLastUserInteraction >= PRTDefaultIdleDuration;
-					for(XMPPGoogleSharedStatus *stat in observers) {
-						if(stat.idleDispatcher != nil)
-							stat.idleDispatcher(userIsActive);
-					}
-				});
-				sleep(PRTDefaultIdleInterval);
-			}
-		});
-	});
-}
-
-#endif
 
 #pragma mark - Object Lifecycle
 
@@ -82,18 +43,44 @@ static NSMutableArray *observers = nil;
 		_show = XMPPGoogleSharedStatusShowAvailable;
 		_invisible = NO;
 		
-		[observers addObject:self];
-#if !TARGET_OS_IPHONE
-		[self.class startIdleObserver];
+#ifdef _XMPP_SYSTEM_INPUT_ACTIVITY_MONITOR_H
 		self.assumeIdleUpdateResponsibility = YES;
 #endif
 	}
 	return self;
 }
 
-- (void)dealloc {
-	[observers removeObject:self];
+
+- (BOOL)activate:(XMPPStream *)aXmppStream
+{	
+	if ([super activate:aXmppStream])
+	{
+		
+#ifdef _XMPP_SYSTEM_INPUT_ACTIVITY_MONITOR_H
+		[xmppStream autoAddDelegate:self
+					  delegateQueue:moduleQueue
+				   toModulesOfClass:[XMPPSystemInputActivityMonitor class]];
+#endif
+		
+		return YES;
+	}
+	
+	return NO;
 }
+
+- (void)deactivate
+{
+	
+#ifdef _XMPP_SYSTEM_INPUT_ACTIVITY_MONITOR_H
+	[xmppStream removeAutoDelegate:self
+					 delegateQueue:moduleQueue
+				fromModulesOfClass:[XMPPSystemInputActivityMonitor class]];
+#endif
+	
+	[super deactivate];
+}
+
+
 
 #pragma mark - Convenience Properties
 
@@ -320,19 +307,6 @@ static NSMutableArray *observers = nil;
 
 - (void)setAssumeIdleUpdateResponsibility:(BOOL)flag {
 	_assumeIdleUpdateResponsibility = flag;
-	if(flag) {
-		__weak XMPPGoogleSharedStatus *this = self;
-		self.idleDispatcher = ^(BOOL active) {
-			if(active && ![this.previousShow isEqualToString:XMPPGoogleSharedStatusShowIdle]) {
-				this.previousShow = this.show;
-				this.show = XMPPGoogleSharedStatusShowIdle;
-			} else if(active) {
-				this.show = this.previousShow;
-			}
-		};
-	} else {
-		self.idleDispatcher = nil;
-	}
 }
 
 - (void)setStatusAvailability:(NSString *)statusAvailability {
@@ -375,5 +349,22 @@ static NSMutableArray *observers = nil;
 	
     [self.xmppStream sendElement:presence];
 }
+
+#ifdef _XMPP_SYSTEM_INPUT_ACTIVITY_MONITOR_H
+
+#pragma mark - XMPP System Input Activity Monitor Delegate
+
+- (void)xmppSystemInputActivityMonitorDidDetectActivity:(XMPPSystemInputActivityMonitor *)xmppSystemInputActivityMonitor
+{
+	self.show = self.previousShow;
+}
+
+- (void)xmppSystemInputActivityMonitorDidDetectInactivity:(XMPPSystemInputActivityMonitor *)xmppSystemInputActivityMonitor
+{
+	self.previousShow = self.show;
+	self.show = XMPPGoogleSharedStatusShowIdle;
+}
+
+#endif
 
 @end
