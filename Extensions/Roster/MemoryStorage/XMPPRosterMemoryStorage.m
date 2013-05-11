@@ -804,4 +804,19 @@
 	[[self multicastDelegate] xmppRosterDidChange:self];
 }
 
+- (NSArray *)jidsForXMPPStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+	AssertParentQueue();
+	
+    NSMutableArray *results = [NSMutableArray array];
+    
+	for (XMPPUserMemoryStorageObject *user in [roster objectEnumerator])
+	{
+        [results addObject:[user.jid bareJID]];
+	}
+    
+    return results;
+}
+
 @end
