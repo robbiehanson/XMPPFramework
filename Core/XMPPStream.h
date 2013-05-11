@@ -238,7 +238,6 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 /**
  * Returns YES is the connection is currently connecting
 **/
-
 - (BOOL)isConnecting;
 
 /**
@@ -456,7 +455,6 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 /**
  * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.
 **/
-
 - (BOOL)isAuthenticating;
 
 /**
