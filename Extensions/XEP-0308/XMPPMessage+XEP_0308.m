@@ -7,7 +7,7 @@
 
 - (BOOL)isCorrectionMessage
 {    
-    if([[self correctedMessageElementID] length])
+    if([[self correctedMessageID] length])
     {
         return YES;
     }else{
@@ -15,7 +15,7 @@
     }
 }
 
-- (NSString *)correctedMessageElementID
+- (NSString *)correctedMessageID
 {
     return [[self elementForName:@"replace" xmlns:XMLNS_XMPP_MESSAGE_CORRECT] attributeStringValueForName:@"id"];
 }
