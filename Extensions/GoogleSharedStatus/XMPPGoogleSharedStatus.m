@@ -354,12 +354,12 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 
 #pragma mark - XMPP System Input Activity Monitor Delegate
 
-- (void)xmppSystemInputActivityMonitorDidDetectActivity:(XMPPSystemInputActivityMonitor *)xmppSystemInputActivityMonitor
+- (void)xmppSystemInputActivityMonitorDidBecomeActive:(XMPPSystemInputActivityMonitor *)xmppSystemInputActivityMonitor
 {
 	self.show = self.previousShow;
 }
 
-- (void)xmppSystemInputActivityMonitorDidDetectInactivity:(XMPPSystemInputActivityMonitor *)xmppSystemInputActivityMonitor
+- (void)xmppSystemInputActivityMonitorDidBecomeInactive:(XMPPSystemInputActivityMonitor *)xmppSystemInputActivityMonitor
 {
 	self.previousShow = self.show;
 	self.show = XMPPGoogleSharedStatusShowIdle;
