@@ -64,7 +64,12 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 		NSXMLNode *attribute = [query attributeForName:@"seconds"];
 		if (attribute)
 		{
-			seconds = (NSUInteger) [query attributeIntegerValueForName:@"seconds"];
+            /**
+             * Some servers return -1
+             */
+			if ([query attributeIntegerValueForName:@"seconds"]) {
+                seconds = [query attributeIntegerValueForName:@"seconds"] ;
+            }
 		}
 	}
     
