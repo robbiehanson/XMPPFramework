@@ -104,8 +104,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	
 	dispatch_block_t block = ^{
         
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
-        
 		result = (config & kAutoReconnect) ? YES : NO;
 	};
 	
@@ -120,8 +118,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 - (void)setAutoReconnect:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-        
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
         
 		if (flag)
 			config |= kAutoReconnect;
@@ -141,8 +137,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
     
 	dispatch_block_t block = ^{
         
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
-        
         result = (flags & kShouldReconnect) ? YES : NO;
 	};
 	
@@ -156,8 +150,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 - (void)setShouldReconnect:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-        
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
         
         if (flag)
             flags |= kShouldReconnect;
@@ -178,8 +170,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
     
 	dispatch_block_t block = ^{
         
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
-        
 		result = (flags & kMultipleChanges) ? YES : NO;
 	};
 	
@@ -193,8 +183,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 - (void)setMultipleReachabilityChanges:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-        
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
         
         if (flag)
             flags |= kMultipleChanges;
@@ -217,8 +205,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
     
 	dispatch_block_t block = ^{
         
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
-        
 		result = (flags & kManuallyStarted) ? YES : NO;
 	};
 	
@@ -234,8 +220,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 - (void)setManuallyStarted:(BOOL)flag
 {
     dispatch_block_t block = ^{
-        
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
         
         if (flag)
             flags |= kManuallyStarted;
@@ -256,8 +240,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
     
 	dispatch_block_t block = ^{
         
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
-        
 		result = (flags & kQueryingDelegates) ? YES : NO;
 	};
 	
@@ -272,8 +254,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 - (void)setQueryingDelegates:(BOOL)flag
 {
     dispatch_block_t block = ^{
-        
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
         
         if (flag)
             flags |= kQueryingDelegates;
@@ -296,8 +276,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
-        
 		if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
 		{
 			[self setManuallyStarted:YES];
@@ -317,8 +295,6 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
-        
 		// Clear all flags to disable any further reconnect attemts regardless of the state we're in.
 		
 		flags = 0;
@@ -697,11 +673,11 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 						
                         if (self.usesOldSchoolSecureConnect)
                         {
-                            [xmppStream oldSchoolSecureConnect:nil];
+                            [xmppStream oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:nil];
                         }
                         else
                         {
-                            [xmppStream connect:nil];
+                            [xmppStream connectWithTimeout:XMPPStreamTimeoutNone error:nil];
                         }
 					}
 					else if ([self multipleReachabilityChanges])
