@@ -17,7 +17,6 @@
 
 static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 
-
 @interface XMPPLastActivity ()
 
 @property (atomic, strong) XMPPIDTracker *queryTracker;
@@ -72,7 +71,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 		_queryTracker = nil;
 	}};
     
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -82,7 +81,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 
 - (BOOL)respondsToQueries
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return _respondsToQueries;
 	}
@@ -114,7 +113,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 		}
 	};
     
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -131,7 +130,14 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 	NSString *queryID = query.elementID;
     
 	dispatch_async(moduleQueue, ^{
+        
+#if __has_feature(objc_arc_weak)
 		__weak __typeof__(self) self_weak_ = self;
+#else
+		__unsafe_unretained __typeof__(self) self_weak_ = self;
+#endif
+
+        
 		[_queryTracker addID:queryID block:^(XMPPIQ *iq, id<XMPPTrackingInfo> info) {
 			__strong __typeof__(self) self = self_weak_;
 			if (iq)
