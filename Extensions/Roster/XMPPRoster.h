@@ -1,7 +1,9 @@
 #import <Foundation/Foundation.h>
 
-#if !TARGET_OS_IPHONE
-  #import <Cocoa/Cocoa.h>
+#if TARGET_OS_IPHONE
+   #import  <UIKit/UIKit.h>
+#else
+   #import <Cocoa/Cocoa.h>
 #endif
 
 #import "XMPP.h"
@@ -135,6 +137,20 @@
 @property (assign) BOOL allowRosterlessOperation;
 
 /**
+ * The roster has either been requested manually (fetchRoster:)
+ * or automatically (autoFetchRoster) but has yet to be populated.
+**/
+@property (assign, getter = hasRequestedRoster, readonly) BOOL requestedRoster;
+
+/**
+ * The initial roster has been received by client and is currently being populated.
+ * @see xmppRosterDidBeginPopulating:
+ * @see xmppRosterDidEndPopulating:
+**/
+@property (assign, getter = isPopulating, readonly) BOOL populating;
+
+
+/**
  * Manually fetch the roster from the server.
  * Useful if you disable autoFetchRoster.
 **/
@@ -144,7 +160,6 @@
  * Adds the given user to the roster with an optional nickname 
  * and requests permission to receive presence information from them.
 **/
-
 - (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName;
 
 /**
@@ -152,7 +167,6 @@
  * adds the given user to groups
  * and requests permission to receive presence information from them.
 **/
-
 - (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups;
 
 /**
@@ -160,7 +174,6 @@
  * adds the given user to groups
  * and optionally requests permission to receive presence information from them.
 **/
-
 - (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups subscribeToPresence:(BOOL)subscribe;
 
 /**
@@ -303,6 +316,8 @@
 - (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream;
 - (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream;
 
+- (NSArray *)jidsForXMPPStream:(XMPPStream *)stream;
+
 @optional
 
 /**
@@ -336,5 +351,26 @@
  * be used to respond to the request.
 **/
 - (void)xmppRoster:(XMPPRoster *)sender didReceivePresenceSubscriptionRequest:(XMPPPresence *)presence;
+
+/**
+ * Sent when the initial roster is recieved.
+**/
+- (void)xmppRosterDidBeginPopulating:(XMPPRoster *)sender;
+
+/**
+ * Sent when the initial roster has been populated into storage.
+**/
+- (void)xmppRosterDidEndPopulating:(XMPPRoster *)sender;
+
+/**
+ * Sent when the roster recieves a roster item.
+ *
+ * Example:
+ *
+ * <item jid='romeo@example.net' name='Romeo' subscription='both'>
+ *   <group>Friends</group>
+ * </item>
+**/
+- (void)xmppRoster:(XMPPRoster *)sender didRecieveRosterItem:(NSXMLElement *)item;
 
 @end
