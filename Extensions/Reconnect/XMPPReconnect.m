@@ -103,6 +103,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
 		result = (config & kAutoReconnect) ? YES : NO;
 	};
 	
@@ -117,6 +120,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 - (void)setAutoReconnect:(BOOL)flag
 {
 	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
 		if (flag)
 			config |= kAutoReconnect;
 		else
@@ -131,70 +137,155 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 
 - (BOOL)shouldReconnect
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+        result = (flags & kShouldReconnect) ? YES : NO;
+	};
 	
-	return (flags & kShouldReconnect) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
 }
 
 - (void)setShouldReconnect:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+        if (flag)
+            flags |= kShouldReconnect;
+        else
+            flags &= ~kShouldReconnect;
+	};
 	
-	if (flag)
-		flags |= kShouldReconnect;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kShouldReconnect;
+		dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)multipleReachabilityChanges
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+		result = (flags & kMultipleChanges) ? YES : NO;
+	};
 	
-	return (flags & kMultipleChanges) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
 }
 
 - (void)setMultipleReachabilityChanges:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+        if (flag)
+            flags |= kMultipleChanges;
+        else
+            flags &= ~kMultipleChanges;
+	};
 	
-	if (flag)
-		flags |= kMultipleChanges;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kMultipleChanges;
+		dispatch_async(moduleQueue, block);
+
+	
 }
 
 - (BOOL)manuallyStarted
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+		result = (flags & kManuallyStarted) ? YES : NO;
+	};
 	
-	return (flags & kManuallyStarted) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
+
+    
 }
 
 - (void)setManuallyStarted:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+        if (flag)
+            flags |= kManuallyStarted;
+        else
+            flags &= ~kManuallyStarted;
+	};
 	
-	if (flag)
-		flags |= kManuallyStarted;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kManuallyStarted;
+		dispatch_async(moduleQueue, block);
+
 }
 
 - (BOOL)queryingDelegates
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    __block BOOL result = NO;
+    
+	dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+		result = (flags & kQueryingDelegates) ? YES : NO;
+	};
 	
-	return (flags & kQueryingDelegates) ? YES : NO;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	return result;
+    
 }
 
 - (void)setQueryingDelegates:(BOOL)flag
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+    dispatch_block_t block = ^{
+        
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
+        if (flag)
+            flags |= kQueryingDelegates;
+        else
+            flags &= ~kQueryingDelegates;
+	};
 	
-	if (flag)
-		flags |= kQueryingDelegates;
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
 	else
-		flags &= ~kQueryingDelegates;
+		dispatch_async(moduleQueue, block);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +296,8 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
 		if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
 		{
 			[self setManuallyStarted:YES];
@@ -224,6 +317,8 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
+        NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+        
 		// Clear all flags to disable any further reconnect attemts regardless of the state we're in.
 		
 		flags = 0;
@@ -368,8 +463,7 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 
 - (void)setupReconnectTimer
 {
-	NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
-	
+
 	if (reconnectTimer == NULL)
 	{
 		if ((reconnectDelay <= 0.0) && (reconnectTimerInterval <= 0.0))
@@ -382,6 +476,8 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 		
 		dispatch_source_set_event_handler(reconnectTimer, ^{ @autoreleasepool {
 			
+            NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
+            
 			[self maybeAttemptReconnect];
 			
 		}});

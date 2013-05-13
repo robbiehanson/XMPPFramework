@@ -81,7 +81,7 @@ extern NSString *const XMPPLastActivityNamespace;
  * element does not have a seconds attribute. Returns 0 in case the seconds
  * attribute cannot be parsed as a integer.
  */
-- (NSUInteger)lastActivitySeconds;
+- (NSInteger)lastActivitySeconds;
 
 /**
  * Returns the contents of the query subelement.
