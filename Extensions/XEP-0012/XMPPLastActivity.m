@@ -72,7 +72,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 		_queryTracker = nil;
 	}};
     
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -82,7 +82,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 
 - (BOOL)respondsToQueries
 {
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 	{
 		return _respondsToQueries;
 	}
@@ -114,7 +114,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 		}
 	};
     
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
