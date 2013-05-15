@@ -1,10 +1,7 @@
 //
 //  XMPPMessage+XEP_0066.m
-//  Blabbling
 //
 //  Created by Kay Tsar on 5/14/13.
-//  www.mingism.com
-//  www.blabbling.com
 
 #import "XMPPIQ+XEP_0066.h"
 
@@ -23,7 +20,7 @@
     [iqStanza addAttributeWithName:@"to" stringValue:to];
     [iqStanza addAttributeWithName:@"id" stringValue:stanzaId];
     
-    if (uri){
+    if (uri) {
         iqStanza = [XMPPIQ addOobElement : uri : description : iqStanza ];
     };
 
@@ -51,15 +48,13 @@
 	NSXMLElement *oobUriElement = [NSXMLElement elementWithName:@"query" xmlns: xmlns_outofband];
 
     
-	if (uri)
-	{
+	if (uri) {
         NSXMLElement *urlElement = [NSXMLElement elementWithName:@"url"];
 		[urlElement setStringValue: uri];
         [oobUriElement addChild:urlElement];
 	}
     
-    if (description)
-	{
+    if (description) {
         NSXMLElement *descElement = [NSXMLElement elementWithName:@"desc"];
 		[descElement setStringValue: description];
         [oobUriElement addChild:descElement];
@@ -73,6 +68,7 @@
 - (BOOL *) oobIsSuccesfull
 {
     NSInteger *errorcode = [self getOobHttpErrorCode];
+    
     if (errorcode > 0){
         return false;
     }
@@ -86,14 +82,12 @@
 	NSXMLElement *errorElement = [self elementForName:@"error"];
 	NSString *errorCode = [errorElement attributeStringValueForName:@"code"];
 	
-    if (errorCode)
-    {
+    if (errorCode) {
         NSNumberFormatter * f = [[NSNumberFormatter alloc] init];
         [f setNumberStyle:NSNumberFormatterDecimalStyle];
         return [f numberFromString:errorCode].intValue;
     }
-    else
-    {
+    else {
         return nil;
     }
 }

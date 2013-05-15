@@ -1,10 +1,8 @@
 //
 //  XMPPMessage+XEP_0066.m
-//  Blabbling
 //
 //  Created by Kay Tsar on 5/14/13.
-//  www.mingism.com
-//  www.blabbling.com
+
 
 #import "XMPPIQ.h"
 

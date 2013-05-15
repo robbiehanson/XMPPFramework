@@ -1,10 +1,7 @@
 //
 //  XMPPMessage+XEP_0066.m
-//  Blabbling
 //
 //  Created by Kay Tsar on 5/14/13.
-//  www.mingism.com 
-//  www.blabbling.com
 
 #import "XMPPMessage+XEP_0066.h"
 
@@ -30,15 +27,13 @@
     
 	NSXMLElement *oobUriElement = [NSXMLElement elementWithName:@"x" xmlns: xmlns_outofband];
     
-	if (uri)
-	{
+	if (uri) {
         NSXMLElement *urlElement = [NSXMLElement elementWithName:@"url"];
 		[urlElement setStringValue: uri];
         [oobUriElement addChild:urlElement];
 	}
     
-    if (description)
-	{
+    if (description) {
         NSXMLElement *descElement = [NSXMLElement elementWithName:@"desc"];
 		[descElement setStringValue: description];
         [oobUriElement addChild:descElement];
