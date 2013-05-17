@@ -78,6 +78,8 @@ static XMPPRoomHybridStorage *sharedInstance;
 	deleteInterval = (60 * 5);           // 5 days
 	
 	pausedMessageDeletion = [[NSMutableSet alloc] init];
+	
+	autoRecreateDatabaseFile = YES;
 }
 
 /**
@@ -101,34 +103,6 @@ static XMPPRoomHybridStorage *sharedInstance;
 	// We prefer a slightly shorter version.
 	
 	return @"XMPPRoomHybrid";
-}
-
-/**
- * Documentation from the superclass (XMPPCoreDataStorage):
- * 
- * Override me, if needed, to provide customized behavior.
- *
- * For example, if you are using the database for non-persistent data and the model changes, you may want
- * to delete the database file if it already exists on disk and a core data migration is not worthwhile.
- *
- * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
- * If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
- *
- * The default implementation simply writes to the XMPP error log.
-**/
-- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error
-{
-	// Optional hook
-	//
-    // If we ever have problems opening the database file,
-	// it's likely because the model changed or the file became corrupt.
-	//
-	// In this case we don't have to worry about migrating the data, because it's all stored on servers.
-	// So we're just going to delete the sqlite file from disk, and create a new one.
-	
-	[[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
-	
-	[self addPersistentStoreWithPath:storePath error:NULL];
 }
 
 - (void)dealloc

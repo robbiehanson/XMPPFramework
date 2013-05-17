@@ -55,6 +55,7 @@
 	NSUInteger saveThreshold;
 	NSUInteger saveCount;
     
+	BOOL autoRecreateDatabaseFile;
     BOOL autoAllowExternalBinaryDataStorage;
 	
 	dispatch_queue_t storageQueue;
@@ -129,12 +130,19 @@
 @property (strong, readonly) NSManagedObjectContext *mainThreadManagedObjectContext;
 
 /**
+ * The Database File is automatically recreated if the persistant store cannot read it e.g. the model changed or the file became corrupt.
+ * For greater control overide didNotAddPersistentStoreWithPath:
+ *
+ * Default NO
+**/
+@property (readwrite) BOOL autoRecreateDatabaseFile;
+
+/**
  * This method calls setAllowsExternalBinaryDataStorage:YES for all Binary Data Attributes in the Managed Object Model.
  * On OS Versions that do not support external binary data storage, this property does nothing.
  *
  * Default NO
 **/
-
 @property (readwrite) BOOL autoAllowExternalBinaryDataStorage;
 
 @end

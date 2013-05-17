@@ -557,7 +557,17 @@ static NSMutableSet *databaseFileNames;
 				[self willCreatePersistentStoreWithPath:storePath];
 				
 				NSError *error = nil;
-				if (![self addPersistentStoreWithPath:storePath error:&error])
+				
+				BOOL didAddPersistentStore = [self addPersistentStoreWithPath:storePath error:&error];
+				
+				if(autoRecreateDatabaseFile && !didAddPersistentStore)
+				{
+					[[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
+					
+					didAddPersistentStore = [self addPersistentStoreWithPath:storePath error:&error];
+				}
+				
+				if (!didAddPersistentStore)
 				{
 					[self didNotAddPersistentStoreWithPath:storePath error:error];
 				}
@@ -710,6 +720,33 @@ static NSMutableSet *databaseFileNames;
     }
 }
 
+- (BOOL)autoRecreateDatabaseFile
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = autoRecreateDatabaseFile;
+	}};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoRecreateDatabaseFile:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoRecreateDatabaseFile = flag;
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+}
 
 - (BOOL)autoAllowExternalBinaryDataStorage
 {
