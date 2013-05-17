@@ -857,7 +857,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	return NO;
 }
 
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender
+-(void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
 	// If there are any pending queries,
 	// they just failed due to the disconnection.

@@ -64,7 +64,11 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 		NSXMLNode *attribute = [query attributeForName:@"seconds"];
 		if (attribute)
 		{
-			seconds = (NSUInteger) [query attributeIntegerValueForName:@"seconds"];
+            // Some Servers Return -1 to indicate no activity, so we need to ignore these
+            if([query attributeIntegerValueForName:@"seconds"] >= 0)
+            {
+                seconds = [query attributeUnsignedIntegerValueForName:@"seconds"];
+            }
 		}
 	}
     
