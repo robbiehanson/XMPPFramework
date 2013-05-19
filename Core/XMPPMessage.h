@@ -36,6 +36,8 @@
 
 - (NSString *)body;
 
+- (void)addBody:(NSString *)body;
+
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;
 - (BOOL)isErrorMessage;

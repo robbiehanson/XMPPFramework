@@ -15,7 +15,7 @@ extern const NSTimeInterval XMPPSystemInputActivityMonitorInactivityTimeInterval
 	
 	BOOL active;
 	NSDate *lastActivityDate;
-    NSTimeInterval inactivityTimeInterval;
+	NSTimeInterval inactivityTimeInterval;
 }
 
 /**

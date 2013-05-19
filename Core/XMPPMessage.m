@@ -147,6 +147,12 @@
 	return [[self elementForName:@"body"] stringValue];
 }
 
+- (void)addBody:(NSString *)body
+{
+    NSXMLElement *bodyElement = [NSXMLElement elementWithName:@"body" stringValue:body];
+    [self addChild:bodyElement];
+}
+
 - (BOOL)isChatMessage
 {
 	return [[[self attributeForName:@"type"] stringValue] isEqualToString:@"chat"];
