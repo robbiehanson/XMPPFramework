@@ -2,8 +2,10 @@
 
 @interface XMPPMessage (XEP_0308)
 
-- (BOOL)isCorrectionMessage;
+- (BOOL)isMessageCorrection;
 
-- (NSString *)correctedMessageElementID;
+- (NSString *)correctedMessageID;
+
+- (void)addMessageCorrectionWithID:(NSString *)messageCorrectionID;
 
 @end

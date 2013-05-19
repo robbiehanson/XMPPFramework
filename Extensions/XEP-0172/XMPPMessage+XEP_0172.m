@@ -5,7 +5,8 @@
 
 @implementation XMPPMessage (XEP_0172)
 
-- (NSString *)nick{
+- (NSString *)nick
+{
 	return [[self elementForName:@"nick" xmlns:XMLNS_NICK] stringValue];
 }
 
