@@ -81,6 +81,7 @@
 @dynamic xmppCapabilitiesStorage;
 @dynamic autoFetchHashedCapabilities;
 @dynamic autoFetchNonHashedCapabilities;
+@dynamic autoFetchMyServerCapabilities;
 
 - (id)init
 {
@@ -143,34 +144,13 @@
 		
 		autoFetchHashedCapabilities = YES;
 		autoFetchNonHashedCapabilities = NO;
+		autoFetchMyServerCapabilities = NO;
 	}
 	return self;
 }
 
-- (BOOL)activate:(XMPPStream *)aXmppStream
-{
-	if ([super activate:aXmppStream])
-	{
-		// Custom code goes here (if needed)
-		
-		return YES;
-	}
-	
-	return NO;
-}
-
-- (void)deactivate
-{
-	// Custom code goes here (if needed)
-	
-	[super deactivate];
-}
-
 - (void)dealloc
-{
-	
-	
-	
+{	
 	for (GCDTimerWrapper *timerWrapper in discoTimerJidDict)
 	{
 		[timerWrapper cancel];
@@ -235,6 +215,34 @@
 {
 	dispatch_block_t block = ^{
 		autoFetchNonHashedCapabilities = flag;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)autoFetchMyServerCapabilities
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		result = autoFetchMyServerCapabilities;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoFetchMyServerCapabilities:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoFetchMyServerCapabilities = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -665,10 +673,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// Now prompt the delegates to add any additional features.
 	
 	SEL collectingMyCapabilitiesSelector = @selector(xmppCapabilities:collectingMyCapabilities:);
-	SEL featuresForXMPPCapabilitiesSelector = @selector(featuresForXMPPCapabilities:);
+	SEL myFeaturesForXMPPCapabilitiesSelector = @selector(myFeaturesForXMPPCapabilities:);
 		
 	if (![multicastDelegate hasDelegateThatRespondsToSelector:collectingMyCapabilitiesSelector]
-		&& ![multicastDelegate hasDelegateThatRespondsToSelector:featuresForXMPPCapabilitiesSelector])
+		&& ![multicastDelegate hasDelegateThatRespondsToSelector:myFeaturesForXMPPCapabilitiesSelector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
@@ -681,7 +689,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// This must be done serially to allow them to alter the element in a thread-safe manner.
 		
 		GCDMulticastDelegateEnumerator *collectingMyCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
-		GCDMulticastDelegateEnumerator *featuresForXMPPCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
+		GCDMulticastDelegateEnumerator *myFeaturesForXMPPCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
 
 		
 		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -699,11 +707,11 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 				}});
 			}
 						
-			while ([featuresForXMPPCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:featuresForXMPPCapabilitiesSelector])
+			while ([myFeaturesForXMPPCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:myFeaturesForXMPPCapabilitiesSelector])
 			{
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-					NSArray *features =  [del featuresForXMPPCapabilities:self];
+					NSArray *features =  [del myFeaturesForXMPPCapabilities:self];
 					
 					for(NSString *feature in features){
 					
@@ -1420,6 +1428,16 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	if (myCapabilitiesQuery == nil)
 	{
 		[self collectMyCapabilities];
+	}
+}
+
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
+{	
+	if (autoFetchMyServerCapabilities)
+	{
+		XMPPJID *myJID = [xmppStream myJID];
+		XMPPJID *myServerJID = [XMPPJID jidWithUser:nil domain:[myJID domain] resource:nil];
+		[self fetchCapabilitiesForJID:myServerJID];
 	}
 }
 
