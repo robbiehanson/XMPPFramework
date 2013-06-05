@@ -774,7 +774,7 @@ enum XMPPRoomState
 	}
 }
 
-- (void)destoryRoom
+- (void)destroyRoom
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
