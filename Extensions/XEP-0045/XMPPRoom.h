@@ -117,7 +117,7 @@ static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#
 - (void)configureRoomUsingOptions:(NSXMLElement *)roomConfigForm;
 
 - (void)leaveRoom;
-- (void)destoryRoom;
+- (void)destroyRoom;
 
 #pragma mark Room Interaction
 
