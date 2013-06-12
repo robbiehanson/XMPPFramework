@@ -1017,14 +1017,49 @@
 
 - (NSString *)description
 {
-	return [@{@"filePath": self.filePath,
-		@"fileName": self.fileName,
-		@"fileAttributes": self.fileAttributes,
-		@"creationDate": self.creationDate,
-		@"modificationDate": self.modificationDate,
-		@"fileSize": @(self.fileSize),
-		@"age": @(self.age),
-		@"isArchived": @(self.isArchived)} description];
+    NSMutableDictionary *description = [NSMutableDictionary dictionary];
+    
+    if(self.filePath)
+    {
+        [description setValue:self.filePath forKey:@"filePath"];
+    }
+    
+    if(self.fileName)
+    {
+        [description setValue:self.fileName forKey:@"fileName"];
+    }
+    
+    if(self.fileAttributes)
+    {
+        [description setValue:self.fileAttributes forKey:@"fileAttributes"];
+    }
+    
+    if(self.creationDate)
+    {
+        [description setValue:self.creationDate forKey:@"creationDate"];
+    }
+    
+    if(self.modificationDate)
+    {
+        [description setValue:self.modificationDate forKey:@"modificationDate"];
+    }
+    
+    if(self.fileSize)
+    {
+        [description setValue:@(self.fileSize) forKey:@"fileSize"];
+    }
+    
+    if(self.age)
+    {
+        [description setValue:@(self.age) forKey:@"age"];
+    }
+    
+    if(self.isArchived)
+    {
+        [description setValue:@(self.isArchived) forKey:@"isArchived"];
+    }
+    
+	return [description description];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

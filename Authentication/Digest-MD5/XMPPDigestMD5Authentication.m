@@ -242,7 +242,10 @@
 				[value deleteCharactersInRange:NSMakeRange([value length]-1, 1)];
 			}
 			
-			[auth setObject:value forKey:key];
+            if(key && value)
+            {
+                [auth setObject:value forKey:key];
+            }
 		}
 	}
 	
