@@ -105,6 +105,14 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 **/
 @property (readwrite, assign) UInt16 hostPort;
 
+
+/**
+ * When this property is set to YES, if the server supports TLS authentication, TLS will be used to authenticate.
+**/
+
+@property (nonatomic) BOOL useTLSIfSupported;
+
+
 /**
  * The JID of the user.
  * 
