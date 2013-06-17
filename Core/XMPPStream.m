@@ -3107,7 +3107,7 @@ enum XMPPStreamConfig
 	
 	if (f_starttls)
 	{
-		if ([f_starttls elementForName:@"required"])
+		if ([f_starttls elementForName:@"required"] || self.useTLSIfSupported )
 		{
 			// TLS is required for this connection
 			
