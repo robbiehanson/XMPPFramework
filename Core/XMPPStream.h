@@ -107,10 +107,11 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 
 /**
- * When this property is set to YES, if the server supports TLS authentication, TLS will be used to authenticate.
+ * Start TLS is used if the server supports it, regardless of wether it is required or not.
+ *
+ * The default is NO
 **/
-
-@property (nonatomic) BOOL useTLSIfSupported;
+@property (readwrite, assign) BOOL autoStartTLS;
 
 
 /**

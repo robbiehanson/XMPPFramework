@@ -106,6 +106,8 @@ enum XMPPStreamConfig
 	
 	NSString *hostName;
 	UInt16 hostPort;
+    
+    BOOL autoStartTLS;
 	
 	id <XMPPSASLAuthentication> auth;
 	NSDate *authenticationDate;
@@ -380,6 +382,35 @@ enum XMPPStreamConfig
 {
 	dispatch_block_t block = ^{
 		hostPort = newHostPort;
+	};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_async(xmppQueue, block);
+}
+
+
+- (BOOL)autoStartTLS
+{
+    __block BOOL result;
+
+    dispatch_block_t block = ^{
+        result = autoStartTLS;
+    };
+
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+
+    return result;
+}
+
+- (void)setAutoStartTLS:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoStartTLS = flag;
 	};
 	
 	if (dispatch_get_specific(xmppQueueTag))
@@ -3107,7 +3138,7 @@ enum XMPPStreamConfig
 	
 	if (f_starttls)
 	{
-		if ([f_starttls elementForName:@"required"] || self.useTLSIfSupported )
+		if ([f_starttls elementForName:@"required"] || [self autoStartTLS])
 		{
 			// TLS is required for this connection
 			
