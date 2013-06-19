@@ -60,7 +60,7 @@
 	//     from='capulet.com'
 	//    stamp='20020910T23:08:25'>
 	
-	delay = [self elementForName:@"delay" xmlns:@"jabber:x:delay"];
+	delay = [self elementForName:@"x" xmlns:@"jabber:x:delay"];
 	if (delay)
 	{
 		NSDate *stamp;
