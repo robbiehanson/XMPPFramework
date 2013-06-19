@@ -86,6 +86,11 @@ static NSMutableSet *databaseFileNames;
 	}
 }
 
+- (NSBundle *)managedObjectModelBundle
+{
+    return [NSBundle bundleForClass:[self class]];
+}
+
 - (NSString *)defaultDatabaseFileName
 {
 	// Override me, if needed, to provide customized behavior.
@@ -464,11 +469,11 @@ static NSMutableSet *databaseFileNames;
 		
 		XMPPLogVerbose(@"%@: Creating managedObjectModel (%@)", [self class], momName);
 		
-		NSString *momPath = [[NSBundle mainBundle] pathForResource:momName ofType:@"mom"];
+		NSString *momPath = [[self managedObjectModelBundle] pathForResource:momName ofType:@"mom"];
 		if (momPath == nil)
 		{
 			// The model may be versioned or created with Xcode 4, try momd as an extension.
-			momPath = [[NSBundle mainBundle] pathForResource:momName ofType:@"momd"];
+			momPath = [[self managedObjectModelBundle] pathForResource:momName ofType:@"momd"];
 		}
     
 		if (momPath)
