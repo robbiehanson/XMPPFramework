@@ -22,7 +22,7 @@
 /**
  * Override me, if needed, to provide customized behavior.
  * 
- * This method is queried to get the name of the ManagedObjectModel within the app bundle.
+ * This method is queried to get the name of the ManagedObjectModel within a bundle.
  * It should return the name of the appropriate file (*.xdatamodel / *.mom / *.momd) sans file extension.
  * 
  * The default implementation returns the name of the subclass, stripping any suffix of "CoreDataStorage".
@@ -31,6 +31,14 @@
  * Note that a file extension should NOT be included.
 **/
 - (NSString *)managedObjectModelName;
+
+
+/**
+ * Override me, if needed, to provide customized behavior.
+ *
+ * This method is queried to get the bundle containing the ManagedObjectModel.
+**/
+- (NSBundle *)managedObjectModelBundle;
 
 /**
  * Override me, if needed, to provide customized behavior.
