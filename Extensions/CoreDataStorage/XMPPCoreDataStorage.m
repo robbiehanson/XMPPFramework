@@ -464,11 +464,11 @@ static NSMutableSet *databaseFileNames;
 		
 		XMPPLogVerbose(@"%@: Creating managedObjectModel (%@)", [self class], momName);
 		
-		NSString *momPath = [[NSBundle mainBundle] pathForResource:momName ofType:@"mom"];
+		NSString *momPath = [[NSBundle bundleForClass:self.class] pathForResource:momName ofType:@"mom"];
 		if (momPath == nil)
 		{
 			// The model may be versioned or created with Xcode 4, try momd as an extension.
-			momPath = [[NSBundle mainBundle] pathForResource:momName ofType:@"momd"];
+			momPath = [[NSBundle bundleForClass:self.class] pathForResource:momName ofType:@"momd"];
 		}
     
 		if (momPath)
