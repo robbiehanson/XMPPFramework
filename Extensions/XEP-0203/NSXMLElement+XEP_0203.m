@@ -18,7 +18,7 @@
 		return YES;
 	}
 	
-	delay = [self elementForName:@"delay" xmlns:@"jabber:x:delay"];
+	delay = [self elementForName:@"x" xmlns:@"jabber:x:delay"];
 	if (delay)
 	{
 		return YES;
