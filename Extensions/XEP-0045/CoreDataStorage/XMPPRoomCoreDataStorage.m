@@ -359,7 +359,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	NSPredicate *predicate;
 	if ([pausedMessageDeletion count] > 0)
 	{
-		predicate = [NSPredicate predicateWithFormat:@"localTimestamp <= %@ AND roomJIDStr NOT IN %@",
+		predicate = [NSPredicate predicateWithFormat:@"localTimestamp <= %@ AND NOT roomJIDStr IN %@",
 		                                                  minLocalTimestamp, pausedMessageDeletion];
 	}
 	else
