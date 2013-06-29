@@ -351,7 +351,7 @@
 - (void)xmppRoster:(XMPPRoster *)sender didReceivePresenceSubscriptionRequest:(XMPPPresence *)presence;
 
 /**
- * Sent when the initial roster is recieved.
+ * Sent when the initial roster is received.
 **/
 - (void)xmppRosterDidBeginPopulating:(XMPPRoster *)sender;
 

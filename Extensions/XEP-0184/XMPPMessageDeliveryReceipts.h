@@ -22,7 +22,7 @@
 @property (assign) BOOL autoSendMessageDeliveryRequests;
 
 /**
- * Automatically send message delivery receipts when a message with a delivery request is recieved
+ * Automatically send message delivery receipts when a message with a delivery request is received 
  *
  * Default NO
 **/
