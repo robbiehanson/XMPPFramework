@@ -855,24 +855,14 @@ enum XMPPRoomState
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)sendMessage:(NSString *)msg
+- (void)sendMessage:(XMPPMessage *)message
 {
-	if ([msg length] == 0) return;
-	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		XMPPLogTrace();
-		
-		// <message type='groupchat' to='darkcave@chat.shakespeare.lit/firstwitch'>
-		//   <body>I'll give thee a wind.</body>
-		// </message>
-	
-		NSXMLElement *body = [NSXMLElement elementWithName:@"body" stringValue:msg];
-		
-		XMPPMessage *message = [XMPPMessage message];
+				
 		[message addAttributeWithName:@"to" stringValue:[roomJID full]];
 		[message addAttributeWithName:@"type" stringValue:@"groupchat"];
-		[message addChild:body];
 		
 		[xmppStream sendElement:message];
 		
@@ -882,6 +872,18 @@ enum XMPPRoomState
 		block();
 	else
 		dispatch_async(moduleQueue, block);
+}
+
+- (void)sendMessageWithBody:(NSString *)messageBody
+{
+	if ([messageBody length] == 0) return;
+		
+	NSXMLElement *body = [NSXMLElement elementWithName:@"body" stringValue:messageBody];
+	
+	XMPPMessage *message = [XMPPMessage message];
+	[message addChild:body];
+	
+	[self sendMessage:message];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

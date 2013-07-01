@@ -126,7 +126,9 @@ static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#
 
 - (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)invitationMessage;
 
-- (void)sendMessage:(NSString *)msg;
+- (void)sendMessage:(XMPPMessage *)message;
+
+- (void)sendMessageWithBody:(NSString *)messageBody;
 
 #pragma mark Room Moderation
 
