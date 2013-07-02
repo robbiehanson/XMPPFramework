@@ -2458,6 +2458,14 @@ enum XMPPStreamConfig
 		{
 			[self sendElement:element withTag:TAG_XMPP_WRITE_STREAM];
 		}
+		else
+		{
+			NSError *error = [NSError errorWithDomain:XMPPStreamErrorDomain
+												 code:XMPPStreamInvalidState
+											 userInfo:nil];
+            
+			[self failToSendElement:element error:error];
+		}
 	}};
 	
 	if (dispatch_get_specific(xmppQueueTag))
@@ -2494,6 +2502,14 @@ enum XMPPStreamConfig
 				
 				[self sendElement:element withTag:TAG_XMPP_WRITE_RECEIPT];
 			}
+            else
+            {
+                NSError *error = [NSError errorWithDomain:XMPPStreamErrorDomain
+                                                     code:XMPPStreamInvalidState
+                                                 userInfo:nil];
+                
+                [self failToSendElement:element error:error];
+            }
 		}};
 		
 		if (dispatch_get_specific(xmppQueueTag))
@@ -2503,6 +2519,62 @@ enum XMPPStreamConfig
 		
 		*receiptPtr = receipt;
 	}
+}
+
+- (void)failToSendElement:(NSXMLElement *)element error:(NSError *)error
+{
+	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+	
+	if ([element isKindOfClass:[XMPPIQ class]])
+	{
+		[self failToSendIQ:(XMPPIQ *)element error:error];
+	}
+	else if ([element isKindOfClass:[XMPPMessage class]])
+	{
+		[self failToSendMessage:(XMPPMessage *)element error:error];
+	}
+	else if ([element isKindOfClass:[XMPPPresence class]])
+	{
+		[self failToSendPresence:(XMPPPresence *)element error:error];
+	}
+	else
+	{
+		NSString *elementName = [element name];
+		
+		if ([elementName isEqualToString:@"iq"])
+		{
+			[self failToSendIQ:[XMPPIQ iqFromElement:element] error:error];
+		}
+		else if ([elementName isEqualToString:@"message"])
+		{
+			[self failToSendMessage:[XMPPMessage messageFromElement:element] error:error];
+		}
+		else if ([elementName isEqualToString:@"presence"])
+		{
+			[self failToSendPresence:[XMPPPresence presenceFromElement:element] error:error];
+		}
+	}
+}
+
+- (void)failToSendIQ:(XMPPIQ *)iq error:(NSError *)error
+{
+	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+	
+	[multicastDelegate xmppStream:self didFailToSendIQ:iq error:error];
+}
+
+- (void)failToSendMessage:(XMPPMessage *)message error:(NSError *)error
+{
+	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+	
+	[multicastDelegate xmppStream:self didFailToSendMessage:message error:error];
+}
+
+- (void)failToSendPresence:(XMPPPresence *)presence error:(NSError *)error
+{
+	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+	
+	[multicastDelegate xmppStream:self didFailToSendPresence:presence error:error];
 }
 
 /**
