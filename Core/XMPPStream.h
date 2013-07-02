@@ -921,6 +921,13 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (void)xmppStream:(XMPPStream *)sender didSendPresence:(XMPPPresence *)presence;
 
 /**
+ * These methods are called after failing to send the respective XML elements over the stream.
+**/
+- (void)xmppStream:(XMPPStream *)sender didFailToSendIQ:(XMPPIQ *)iq error:(NSError *)error;
+- (void)xmppStream:(XMPPStream *)sender didFailToSendMessage:(XMPPMessage *)message error:(NSError *)error;
+- (void)xmppStream:(XMPPStream *)sender didFailToSendPresence:(XMPPPresence *)presence error:(NSError *)error;
+
+/**
  * This method is called if the disconnect method is called.
  * It may be used to determine if a disconnection was purposeful, or due to an error.
 **/
