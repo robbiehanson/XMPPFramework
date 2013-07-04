@@ -539,10 +539,10 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	NSString *orderStr2 = [item2 attributeStringValueForName:@"order"];
 	
 	NSUInteger order1;
-	BOOL parse1 = [NSNumber parseString:orderStr1 intoNSUInteger:&order1];
+	BOOL parse1 = [NSNumber xmpp_parseString:orderStr1 intoNSUInteger:&order1];
 	
 	NSUInteger order2;
-	BOOL parse2 = [NSNumber parseString:orderStr2 intoNSUInteger:&order2];
+	BOOL parse2 = [NSNumber xmpp_parseString:orderStr2 intoNSUInteger:&order2];
 	
 	if (parse1)
 	{
