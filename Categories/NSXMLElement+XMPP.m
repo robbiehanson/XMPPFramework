@@ -204,37 +204,37 @@
 - (int32_t)attributeInt32ValueForName:(NSString *)name
 {
 	int32_t result = 0;
-	[NSNumber parseString:[self attributeStringValueForName:name] intoInt32:&result];
+	[NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt32:&result];
 	return result;
 }
 - (uint32_t)attributeUInt32ValueForName:(NSString *)name
 {
 	uint32_t result = 0;
-	[NSNumber parseString:[self attributeStringValueForName:name] intoUInt32:&result];
+	[NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt32:&result];
 	return result;
 }
 - (int64_t)attributeInt64ValueForName:(NSString *)name
 {
 	int64_t result;
-	[NSNumber parseString:[self attributeStringValueForName:name] intoInt64:&result];
+	[NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt64:&result];
 	return result;
 }
 - (uint64_t)attributeUInt64ValueForName:(NSString *)name
 {
 	uint64_t result;
-	[NSNumber parseString:[self attributeStringValueForName:name] intoUInt64:&result];
+	[NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt64:&result];
 	return result;
 }
 - (NSInteger)attributeIntegerValueForName:(NSString *)name
 {
 	NSInteger result;
-	[NSNumber parseString:[self attributeStringValueForName:name] intoNSInteger:&result];
+	[NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSInteger:&result];
 	return result;
 }
 - (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name
 {
 	NSUInteger result = 0;
-	[NSNumber parseString:[self attributeStringValueForName:name] intoNSUInteger:&result];
+	[NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSUInteger:&result];
 	return result;
 }
 - (NSString *)attributeStringValueForName:(NSString *)name
@@ -362,7 +362,7 @@
 - (int32_t)stringValueAsInt32
 {
 	int32_t result;
-	if ([NSNumber parseString:[self stringValue] intoInt32:&result])
+	if ([NSNumber xmpp_parseString:[self stringValue] intoInt32:&result])
 		return result;
 	else
 		return 0;
@@ -370,7 +370,7 @@
 - (uint32_t)stringValueAsUInt32
 {
 	uint32_t result;
-	if ([NSNumber parseString:[self stringValue] intoUInt32:&result])
+	if ([NSNumber xmpp_parseString:[self stringValue] intoUInt32:&result])
 		return result;
 	else
 		return 0;
@@ -378,7 +378,7 @@
 - (int64_t)stringValueAsInt64
 {
 	int64_t result = 0;
-	if ([NSNumber parseString:[self stringValue] intoInt64:&result])
+	if ([NSNumber xmpp_parseString:[self stringValue] intoInt64:&result])
 		return result;
 	else
 		return 0;
@@ -386,7 +386,7 @@
 - (uint64_t)stringValueAsUInt64
 {
 	uint64_t result = 0;
-	if ([NSNumber parseString:[self stringValue] intoUInt64:&result])
+	if ([NSNumber xmpp_parseString:[self stringValue] intoUInt64:&result])
 		return result;
 	else
 		return 0;
@@ -394,7 +394,7 @@
 - (NSInteger)stringValueAsNSInteger
 {
 	NSInteger result = 0;
-	if ([NSNumber parseString:[self stringValue] intoNSInteger:&result])
+	if ([NSNumber xmpp_parseString:[self stringValue] intoNSInteger:&result])
 		return result;
 	else
 		return 0;
@@ -402,7 +402,7 @@
 - (NSUInteger)stringValueAsNSUInteger
 {
 	NSUInteger result = 0;
-	if ([NSNumber parseString:[self stringValue] intoNSUInteger:&result])
+	if ([NSNumber xmpp_parseString:[self stringValue] intoNSUInteger:&result])
 		return result;
 	else
 		return 0;
