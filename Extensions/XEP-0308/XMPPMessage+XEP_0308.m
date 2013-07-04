@@ -19,13 +19,13 @@
 
 - (NSString *)correctedMessageID
 {
-    return [[self elementForName:NAME_XMPP_MESSAGE_CORRECT xmlns:XMLNS_XMPP_MESSAGE_CORRECT] attributeStringValueForName:@"id"];
+    return [[self xmpp_elementForName:NAME_XMPP_MESSAGE_CORRECT xmlns:XMLNS_XMPP_MESSAGE_CORRECT] xmpp_attributeStringValueForName:@"id"];
 }
 
 - (void)addMessageCorrectionWithID:(NSString *)messageCorrectionID
 {
     NSXMLElement *replace = [NSXMLElement elementWithName:NAME_XMPP_MESSAGE_CORRECT stringValue:XMLNS_XMPP_MESSAGE_CORRECT];
-    [replace addAttributeWithName:@"id" stringValue:messageCorrectionID];
+    [replace xmpp_addAttributeWithName:@"id" stringValue:messageCorrectionID];
     [self addChild:replace];
 }
 

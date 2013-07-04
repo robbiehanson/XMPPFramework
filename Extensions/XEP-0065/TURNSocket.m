@@ -121,7 +121,7 @@ static NSMutableArray *proxyCandidates;
 	// If this attribute is not included, the default value of "tcp" MUST be assumed.
 	// This attribute is OPTIONAL.
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 	if (query == nil) {
 		return NO;
 	}
@@ -240,7 +240,7 @@ static NSMutableArray *proxyCandidates;
 		isClient = NO;
 		
 		// Extract streamhost information from turn request
-		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+		NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 		streamhosts = [[query elementsForName:@"streamhost"] mutableCopy];
 		
 		// Configure everything else
@@ -434,9 +434,9 @@ static NSMutableArray *proxyCandidates;
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	[query addAttributeWithName:@"sid" stringValue:uuid];
-	[query addAttributeWithName:@"mode" stringValue:@"tcp"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	[query xmpp_addAttributeWithName:@"sid" stringValue:uuid];
+	[query xmpp_addAttributeWithName:@"mode" stringValue:@"tcp"];
 	
 	NSUInteger i;
 	for(i = 0; i < [streamhosts count]; i++)
@@ -468,10 +468,10 @@ static NSMutableArray *proxyCandidates;
 	// </iq>
 	
 	NSXMLElement *streamhostUsed = [NSXMLElement elementWithName:@"streamhost-used"];
-	[streamhostUsed addAttributeWithName:@"jid" stringValue:[proxyJID full]];
+	[streamhostUsed xmpp_addAttributeWithName:@"jid" stringValue:[proxyJID full]];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	[query addAttributeWithName:@"sid" stringValue:uuid];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	[query xmpp_addAttributeWithName:@"sid" stringValue:uuid];
 	[query addChild:streamhostUsed];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:jid elementID:uuid child:query];
@@ -491,8 +491,8 @@ static NSMutableArray *proxyCandidates;
 	
 	NSXMLElement *activate = [NSXMLElement elementWithName:@"activate" stringValue:[jid full]];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	[query addAttributeWithName:@"sid" stringValue:uuid];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	[query xmpp_addAttributeWithName:@"sid" stringValue:uuid];
 	[query addChild:activate];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:proxyJID elementID:uuid child:query];
@@ -518,11 +518,11 @@ static NSMutableArray *proxyCandidates;
 	//   </error>
 	// </iq>
 	
-	NSXMLElement *inf = [NSXMLElement elementWithName:@"item-not-found" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
+	NSXMLElement *inf = [NSXMLElement xmpp_elementWithName:@"item-not-found" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
 	
 	NSXMLElement *error = [NSXMLElement elementWithName:@"error"];
-	[error addAttributeWithName:@"code" stringValue:@"404"];
-	[error addAttributeWithName:@"type" stringValue:@"cancel"];
+	[error xmpp_addAttributeWithName:@"code" stringValue:@"404"];
+	[error xmpp_addAttributeWithName:@"type" stringValue:@"cancel"];
 	[error addChild:inf];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"error" to:jid elementID:uuid child:error];
@@ -595,7 +595,7 @@ static NSMutableArray *proxyCandidates;
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/disco#items"];
+	NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"http://jabber.org/protocol/disco#items"];
 	NSArray *items = [query elementsForName:@"item"];
 	
 	candidateJIDs = [[NSMutableArray alloc] initWithCapacity:[items count]];
@@ -628,7 +628,7 @@ static NSMutableArray *proxyCandidates;
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+	NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 	NSArray *identities = [query elementsForName:@"identity"];
 	
 	BOOL found = NO;
@@ -697,8 +697,8 @@ static NSMutableArray *proxyCandidates;
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	NSXMLElement *streamhost = [query elementForName:@"streamhost"];
+	NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	NSXMLElement *streamhost = [query xmpp_elementForName:@"streamhost"];
 	
 	NSString *jidStr = [[streamhost attributeForName:@"jid"] stringValue];
 	XMPPJID *streamhostJID = [XMPPJID jidWithString:jidStr];
@@ -722,8 +722,8 @@ static NSMutableArray *proxyCandidates;
 	
 	// Target has replied - hopefully they've been able to connect to one of the streamhosts
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	NSXMLElement *streamhostUsed = [query elementForName:@"streamhost-used"];
+	NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	NSXMLElement *streamhostUsed = [query xmpp_elementForName:@"streamhost-used"];
 	
 	NSString *streamhostUsedJID = [[streamhostUsed attributeForName:@"jid"] stringValue];
 	
@@ -853,7 +853,7 @@ static NSMutableArray *proxyCandidates;
 	{
 		[self updateDiscoUUID];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#items"];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#items"];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:proxyCandidateJID elementID:discoUUID child:query];
 		
@@ -932,7 +932,7 @@ static NSMutableArray *proxyCandidates;
 		
 		XMPPJID *candidateJID = [candidateJIDs objectAtIndex:candidateJIDIndex];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:candidateJID elementID:discoUUID child:query];
 		
@@ -962,7 +962,7 @@ static NSMutableArray *proxyCandidates;
 	
 	XMPPJID *candidateJID = [candidateJIDs objectAtIndex:candidateJIDIndex];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:candidateJID elementID:discoUUID child:query];
 	

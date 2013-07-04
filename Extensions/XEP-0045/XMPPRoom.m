@@ -282,7 +282,7 @@ enum XMPPRoomState
 		//   </x>
 		// </presence>
 		
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCNamespace];
+		NSXMLElement *x = [NSXMLElement xmpp_elementWithName:@"x" xmlns:XMPPMUCNamespace];
 		if (history)
 		{
 			[x addChild:history];
@@ -340,8 +340,8 @@ enum XMPPRoomState
 		//   </query>
 		// </iq>
 		
-		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCOwnerNamespace];
-		NSXMLElement *x = [query elementForName:@"x" xmlns:@"jabber:x:data"];
+		NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:XMPPMUCOwnerNamespace];
+		NSXMLElement *x = [query xmpp_elementForName:@"x" xmlns:@"jabber:x:data"];
 		
 		[multicastDelegate xmppRoom:self didFetchConfigurationForm:x];
 	}
@@ -361,7 +361,7 @@ enum XMPPRoomState
 		
 		NSString *fetchID = [xmppStream generateUUID];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
 		
 		[xmppStream sendElement:iq];
@@ -423,9 +423,9 @@ enum XMPPRoomState
 			// </iq>
 			
 			NSXMLElement *x = roomConfigForm;
-			[x addAttributeWithName:@"type" stringValue:@"submit"];
+			[x xmpp_addAttributeWithName:@"type" stringValue:@"submit"];
 			
-			NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+			NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
 			[query addChild:x];
 			
 			NSString *iqID = [xmppStream generateUUID];
@@ -452,10 +452,10 @@ enum XMPPRoomState
 			//   </query>
 			// </iq>
 			
-			NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
-			[x addAttributeWithName:@"type" stringValue:@"submit"];
+			NSXMLElement *x = [NSXMLElement xmpp_elementWithName:@"x" xmlns:@"jabber:x:data"];
+			[x xmpp_addAttributeWithName:@"type" stringValue:@"submit"];
 			
-			NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+			NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
 			[query addChild:x];
 			
 			NSString *iqID = [xmppStream generateUUID];
@@ -504,7 +504,7 @@ enum XMPPRoomState
 		//   </query>
 		// </iq>
 		
-		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
 		NSArray *items = [query elementsForName:@"item"];
 		
 		[multicastDelegate xmppRoom:self didFetchBanList:items];
@@ -532,9 +532,9 @@ enum XMPPRoomState
 		NSString *fetchID = [xmppStream generateUUID];
 		
 		NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-		[item addAttributeWithName:@"affiliation" stringValue:@"outcast"];
+		[item xmpp_addAttributeWithName:@"affiliation" stringValue:@"outcast"];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
 		[query addChild:item];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
@@ -565,7 +565,7 @@ enum XMPPRoomState
 		//   </query>
 		// </iq>
 		
-		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
 		NSArray *items = [query elementsForName:@"item"];
 		
 		[multicastDelegate xmppRoom:self didFetchMembersList:items];
@@ -593,9 +593,9 @@ enum XMPPRoomState
 		NSString *fetchID = [xmppStream generateUUID];
 		
 		NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-		[item addAttributeWithName:@"affiliation" stringValue:@"member"];
+		[item xmpp_addAttributeWithName:@"affiliation" stringValue:@"member"];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
 		[query addChild:item];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
@@ -628,7 +628,7 @@ enum XMPPRoomState
 		//   </query>
 		// </iq>
 		
-		NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
 		NSArray *items = [query elementsForName:@"item"];
 		
 		[multicastDelegate xmppRoom:self didFetchModeratorsList:items];
@@ -654,9 +654,9 @@ enum XMPPRoomState
 		NSString *fetchID = [xmppStream generateUUID];
 		
 		NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-		[item addAttributeWithName:@"role" stringValue:@"moderator"];
+		[item xmpp_addAttributeWithName:@"role" stringValue:@"moderator"];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
 		[query addChild:item];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
@@ -705,7 +705,7 @@ enum XMPPRoomState
 		//   </query>
 		// </iq>
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
 		for (NSXMLElement *item in items)
 		{
 			[query addChild:item];
@@ -743,8 +743,8 @@ enum XMPPRoomState
 		// <presence type='unavailable' to='darkcave@chat.shakespeare.lit/thirdwitch'/>
 		
 		XMPPPresence *presence = [XMPPPresence presence];
-		[presence addAttributeWithName:@"to" stringValue:[myRoomJID full]];
-		[presence addAttributeWithName:@"type" stringValue:@"unavailable"];
+		[presence xmpp_addAttributeWithName:@"to" stringValue:[myRoomJID full]];
+		[presence xmpp_addAttributeWithName:@"type" stringValue:@"unavailable"];
 		
 		[xmppStream sendElement:presence];
 		
@@ -788,7 +788,7 @@ enum XMPPRoomState
 		
 		NSXMLElement *destroy = [NSXMLElement elementWithName:@"destroy"];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMPPMUCOwnerNamespace];
 		[query addChild:destroy];
 		
 		NSString *iqID = [xmppStream generateUUID];
@@ -831,18 +831,18 @@ enum XMPPRoomState
 		// </message>
 		
 		NSXMLElement *invite = [NSXMLElement elementWithName:@"invite"];
-		[invite addAttributeWithName:@"to" stringValue:[jid full]];
+		[invite xmpp_addAttributeWithName:@"to" stringValue:[jid full]];
 		
 		if ([inviteMessageStr length] > 0)
 		{
 			[invite addChild:[NSXMLElement elementWithName:@"reason" stringValue:inviteMessageStr]];
 		}
 		
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
+		NSXMLElement *x = [NSXMLElement xmpp_elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
 		[x addChild:invite];
 		
 		XMPPMessage *message = [XMPPMessage message];
-		[message addAttributeWithName:@"to" stringValue:[roomJID full]];
+		[message xmpp_addAttributeWithName:@"to" stringValue:[roomJID full]];
 		[message addChild:x];
 		
 		[xmppStream sendElement:message];
@@ -861,8 +861,8 @@ enum XMPPRoomState
 		
 		XMPPLogTrace();
 				
-		[message addAttributeWithName:@"to" stringValue:[roomJID full]];
-		[message addAttributeWithName:@"type" stringValue:@"groupchat"];
+		[message xmpp_addAttributeWithName:@"to" stringValue:[roomJID full]];
+		[message xmpp_addAttributeWithName:@"type" stringValue:@"groupchat"];
 		
 		[xmppStream sendElement:message];
 		
@@ -947,7 +947,7 @@ enum XMPPRoomState
 	//   </x>
 	// </presence>
 	
-	NSXMLElement *x = [presence elementForName:@"x" xmlns:XMPPMUCUserNamespace];
+	NSXMLElement *x = [presence xmpp_elementForName:@"x" xmlns:XMPPMUCUserNamespace];
 	
 	// Process status codes.
 	// 
@@ -962,7 +962,7 @@ enum XMPPRoomState
 	
 	for (NSXMLElement *status in [x elementsForName:@"status"])
 	{
-		switch ([status attributeIntValueForName:@"code"])
+		switch ([status xmpp_attributeIntValueForName:@"code"])
 		{
 			case 110 : isMyPresence = YES;     break;
 			case 201 : didCreateRoom = YES;    break;
@@ -1132,10 +1132,10 @@ enum XMPPRoomState
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	
 	if (affiliation)
-		[item addAttributeWithName:@"affiliation" stringValue:affiliation];
+		[item xmpp_addAttributeWithName:@"affiliation" stringValue:affiliation];
 	
 	if (jid)
-		[item addAttributeWithName:@"jid" stringValue:[jid full]];
+		[item xmpp_addAttributeWithName:@"jid" stringValue:[jid full]];
 	
 	return item;
 }
@@ -1145,10 +1145,10 @@ enum XMPPRoomState
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	
 	if (role)
-		[item addAttributeWithName:@"role" stringValue:role];
+		[item xmpp_addAttributeWithName:@"role" stringValue:role];
 	
 	if (jid)
-		[item addAttributeWithName:@"jid" stringValue:[jid full]];
+		[item xmpp_addAttributeWithName:@"jid" stringValue:[jid full]];
 	
 	return item;
 }

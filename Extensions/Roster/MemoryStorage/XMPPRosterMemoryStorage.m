@@ -638,7 +638,7 @@
 	XMPPLogTrace();
 	AssertParentQueue();
 	
-	NSString *jidStr = [item attributeStringValueForName:@"jid"];
+	NSString *jidStr = [item xmpp_attributeStringValueForName:@"jid"];
 	XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
 	
 	if (isRosterPopulation)
@@ -652,7 +652,7 @@
 	}
 	else
 	{
-		NSString *subscription = [item attributeStringValueForName:@"subscription"];
+		NSString *subscription = [item xmpp_attributeStringValueForName:@"subscription"];
 		
 		if ([subscription isEqualToString:@"remove"])
 		{

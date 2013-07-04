@@ -247,7 +247,7 @@
     }
     else if([iq isErrorIQ])
     {
-        NSXMLElement *errorElement = [iq elementForName:@"error"];
+        NSXMLElement *errorElement = [iq xmpp_elementForName:@"error"];
         [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToUpdateMyvCard:errorElement];
     }        
 

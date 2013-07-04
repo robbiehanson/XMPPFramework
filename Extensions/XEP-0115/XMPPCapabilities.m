@@ -279,8 +279,8 @@ static NSInteger sortIdentities(NSXMLElement *identity1, NSXMLElement *identity2
 	
 	NSComparisonResult result;
 	
-	NSString *category1 = [identity1 attributeStringValueForName:@"category" withDefaultValue:@""];
-	NSString *category2 = [identity2 attributeStringValueForName:@"category" withDefaultValue:@""];
+	NSString *category1 = [identity1 xmpp_attributeStringValueForName:@"category" withDefaultValue:@""];
+	NSString *category2 = [identity2 xmpp_attributeStringValueForName:@"category" withDefaultValue:@""];
 	
 	category1 = encodeLt(category1);
 	category2 = encodeLt(category2);
@@ -291,8 +291,8 @@ static NSInteger sortIdentities(NSXMLElement *identity1, NSXMLElement *identity2
 		return result;
 	}
 	
-	NSString *type1 = [identity1 attributeStringValueForName:@"type" withDefaultValue:@""];
-	NSString *type2 = [identity2 attributeStringValueForName:@"type" withDefaultValue:@""];
+	NSString *type1 = [identity1 xmpp_attributeStringValueForName:@"type" withDefaultValue:@""];
+	NSString *type2 = [identity2 xmpp_attributeStringValueForName:@"type" withDefaultValue:@""];
 	
 	type1 = encodeLt(type1);
 	type2 = encodeLt(type2);
@@ -303,8 +303,8 @@ static NSInteger sortIdentities(NSXMLElement *identity1, NSXMLElement *identity2
 		return result;
 	}
 	
-	NSString *lang1 = [identity1 attributeStringValueForName:@"xml:lang" withDefaultValue:@""];
-	NSString *lang2 = [identity2 attributeStringValueForName:@"xml:lang" withDefaultValue:@""];
+	NSString *lang1 = [identity1 xmpp_attributeStringValueForName:@"xml:lang" withDefaultValue:@""];
+	NSString *lang2 = [identity2 xmpp_attributeStringValueForName:@"xml:lang" withDefaultValue:@""];
 	
 	lang1 = encodeLt(lang1);
 	lang2 = encodeLt(lang2);
@@ -315,8 +315,8 @@ static NSInteger sortIdentities(NSXMLElement *identity1, NSXMLElement *identity2
 		return result;
 	}
 	
-	NSString *name1 = [identity1 attributeStringValueForName:@"name" withDefaultValue:@""];
-	NSString *name2 = [identity2 attributeStringValueForName:@"name" withDefaultValue:@""];
+	NSString *name1 = [identity1 xmpp_attributeStringValueForName:@"name" withDefaultValue:@""];
+	NSString *name2 = [identity2 xmpp_attributeStringValueForName:@"name" withDefaultValue:@""];
 	
 	name1 = encodeLt(name1);
 	name2 = encodeLt(name2);
@@ -328,8 +328,8 @@ static NSInteger sortFeatures(NSXMLElement *feature1, NSXMLElement *feature2, vo
 {
 	// All sort operations MUST be performed using "i;octet" collation as specified in Section 9.3 of RFC 4790.
 	
-	NSString *var1 = [feature1 attributeStringValueForName:@"var" withDefaultValue:@""];
-	NSString *var2 = [feature2 attributeStringValueForName:@"var" withDefaultValue:@""];
+	NSString *var1 = [feature1 xmpp_attributeStringValueForName:@"var" withDefaultValue:@""];
+	NSString *var2 = [feature2 xmpp_attributeStringValueForName:@"var" withDefaultValue:@""];
 	
 	var1 = encodeLt(var1);
 	var2 = encodeLt(var2);
@@ -364,8 +364,8 @@ static NSString* extractFormTypeValue(NSXMLElement *form)
 	NSArray *fields = [form elementsForName:@"field"];
 	for (NSXMLElement *field in fields)
 	{
-		NSString *var = [field attributeStringValueForName:@"var"];
-		NSString *type = [field attributeStringValueForName:@"type"];
+		NSString *var = [field xmpp_attributeStringValueForName:@"var"];
+		NSString *type = [field xmpp_attributeStringValueForName:@"type"];
 		
 		if ([var isEqualToString:@"FORM_TYPE"] && [type isEqualToString:@"hidden"])
 		{
@@ -439,8 +439,8 @@ static NSInteger sortFormFields(NSXMLElement *field1, NSXMLElement *field2, void
 	// 
 	// All sort operations MUST be performed using "i;octet" collation as specified in Section 9.3 of RFC 4790.
 	
-	NSString *var1 = [field1 attributeStringValueForName:@"var" withDefaultValue:@""];
-	NSString *var2 = [field2 attributeStringValueForName:@"var" withDefaultValue:@""];
+	NSString *var1 = [field1 xmpp_attributeStringValueForName:@"var" withDefaultValue:@""];
+	NSString *var2 = [field2 xmpp_attributeStringValueForName:@"var" withDefaultValue:@""];
 	
 	var1 = encodeLt(var1);
 	var2 = encodeLt(var2);
@@ -475,10 +475,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	{
 		// Format as: category / type / lang / name
 		
-		NSString *category = [identity attributeStringValueForName:@"category" withDefaultValue:@""];
-		NSString *type     = [identity attributeStringValueForName:@"type"     withDefaultValue:@""];
-		NSString *lang     = [identity attributeStringValueForName:@"xml:lang" withDefaultValue:@""];
-		NSString *name     = [identity attributeStringValueForName:@"name"     withDefaultValue:@""];
+		NSString *category = [identity xmpp_attributeStringValueForName:@"category" withDefaultValue:@""];
+		NSString *type     = [identity xmpp_attributeStringValueForName:@"type"     withDefaultValue:@""];
+		NSString *lang     = [identity xmpp_attributeStringValueForName:@"xml:lang" withDefaultValue:@""];
+		NSString *name     = [identity xmpp_attributeStringValueForName:@"name"     withDefaultValue:@""];
 		
 		category = encodeLt(category);
 		type     = encodeLt(type);
@@ -510,7 +510,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	NSArray *features = [[query elementsForName:@"feature"] sortedArrayUsingFunction:sortFeatures context:NULL];
 	for (NSXMLElement *feature in features)
 	{
-		NSString *var = [feature attributeStringValueForName:@"var" withDefaultValue:@""];
+		NSString *var = [feature xmpp_attributeStringValueForName:@"var" withDefaultValue:@""];
 		
 		var = encodeLt(var);
 		
@@ -565,7 +565,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			// 2. Sort values by the XML character data of the <value/> element.
 			// 3. For each <value/> element, append the XML character data, followed by the '<' character.
 			
-			NSString *var = [field attributeStringValueForName:@"var" withDefaultValue:@""];
+			NSString *var = [field xmpp_attributeStringValueForName:@"var" withDefaultValue:@""];
 			
 			var = encodeLt(var);
 			
@@ -659,13 +659,13 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	//   <feature var="http://jabber.org/protocol/caps"/>
 	// </query>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
 	
 	NSXMLElement *feature1 = [NSXMLElement elementWithName:@"feature"];
-	[feature1 addAttributeWithName:@"var" stringValue:XMLNS_DISCO_INFO];
+	[feature1 xmpp_addAttributeWithName:@"var" stringValue:XMLNS_DISCO_INFO];
 	
 	NSXMLElement *feature2 = [NSXMLElement elementWithName:@"feature"];
-	[feature2 addAttributeWithName:@"var" stringValue:XMLNS_CAPS];
+	[feature2 xmpp_addAttributeWithName:@"var" stringValue:XMLNS_CAPS];
 	
 	[query addChild:feature1];
 	[query addChild:feature2];
@@ -720,7 +720,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 						//Check to see if the feature is already in my capabilities
 						for (NSXMLElement *childElement in query.children) {
 							
-							if([[childElement attributeStringValueForName:@"var"] isEqualToString:feature])
+							if([[childElement xmpp_attributeStringValueForName:@"var"] isEqualToString:feature])
 							{
 								found = YES;
 								break;
@@ -731,7 +731,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 						if(!found)
 						{
 							NSXMLElement *featureElement = [NSXMLElement elementWithName:@"feature"];
-							[featureElement addAttributeWithName:@"var" stringValue:feature];
+							[featureElement xmpp_addAttributeWithName:@"var" stringValue:feature];
 							[query addChild:featureElement];
 						}
 					}
@@ -786,9 +786,9 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	//     ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
 	
 	myCapabilitiesC = [[NSXMLElement alloc] initWithName:@"c" xmlns:XMLNS_CAPS];
-	[myCapabilitiesC addAttributeWithName:@"hash" stringValue:hashAlg];
-	[myCapabilitiesC addAttributeWithName:@"node" stringValue:DISCO_NODE];
-	[myCapabilitiesC addAttributeWithName:@"ver"  stringValue:hash];
+	[myCapabilitiesC xmpp_addAttributeWithName:@"hash" stringValue:hashAlg];
+	[myCapabilitiesC xmpp_addAttributeWithName:@"node" stringValue:DISCO_NODE];
+	[myCapabilitiesC xmpp_addAttributeWithName:@"ver"  stringValue:hash];
 	
 	// If the collection process started when the stream was connected,
 	// and ended up taking so long as to not be available when the presence was sent,
@@ -823,13 +823,13 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// Some xmpp clients will return an error if we don't specify the proper query node.
 	// Some xmpp clients will return an error if we don't include an id attribute in the iq.
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:XMLNS_DISCO_INFO];
 	
 	if (node && ver)
 	{
 		NSString *nodeValue = [NSString stringWithFormat:@"%@#%@", node, ver];
 		
-		[query addAttributeWithName:@"node" stringValue:nodeValue];
+		[query xmpp_addAttributeWithName:@"node" stringValue:nodeValue];
 	}
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:[xmppStream generateUUID] child:query];
@@ -965,9 +965,9 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	//       ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
 	// </presence>
 	
-	NSString *node = [c attributeStringValueForName:@"node"];
-	NSString *ver  = [c attributeStringValueForName:@"ver"];
-	NSString *hash = [c attributeStringValueForName:@"hash"];
+	NSString *node = [c xmpp_attributeStringValueForName:@"node"];
+	NSString *ver  = [c xmpp_attributeStringValueForName:@"ver"];
+	NSString *hash = [c xmpp_attributeStringValueForName:@"hash"];
 	
 	if ((node == nil) || (ver == nil))
 	{
@@ -1090,9 +1090,9 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, jid);
 	
-	NSString *node = [c attributeStringValueForName:@"node"];
-	NSString *ver  = [c attributeStringValueForName:@"ver"];
-	NSString *ext  = [c attributeStringValueForName:@"ext"];
+	NSString *node = [c xmpp_attributeStringValueForName:@"node"];
+	NSString *ver  = [c xmpp_attributeStringValueForName:@"ver"];
+	NSString *ext  = [c xmpp_attributeStringValueForName:@"ext"];
 	
 	if ((node == nil) || (ver == nil))
 	{
@@ -1171,7 +1171,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	else if (myCapabilitiesC)
 	{
 		NSXMLElement *queryRequest = [iqRequest childElement];
-		NSString *node = [queryRequest attributeStringValueForName:@"node"];
+		NSString *node = [queryRequest xmpp_attributeStringValueForName:@"node"];
 		
 		// <iq to="jid" id="id" type="result">
 		//   <query xmlns="http://jabber.org/protocol/disco#info">
@@ -1183,7 +1183,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		NSXMLElement *query = [myCapabilitiesQuery copy];
 		if (node)
 		{
-			[query addAttributeWithName:@"node" stringValue:node];
+			[query xmpp_addAttributeWithName:@"node" stringValue:node];
 		}
 		
 		XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"result"
@@ -1469,7 +1469,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 	else if ([type isEqualToString:@"available"])
 	{
-		NSXMLElement *c = [presence elementForName:@"c" xmlns:XMLNS_CAPS];
+		NSXMLElement *c = [presence xmpp_elementForName:@"c" xmlns:XMLNS_CAPS];
 		if (c == nil)
 		{
 			if (autoFetchNonHashedCapabilities)
@@ -1479,7 +1479,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		}
 		else
 		{
-			NSString *hash = [c attributeStringValueForName:@"hash"];
+			NSString *hash = [c xmpp_attributeStringValueForName:@"hash"];
 			if (hash)
 			{
 				[self handlePresenceCapabilities:c fromJID:[presence from]];
@@ -1511,16 +1511,16 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNS_DISCO_INFO];
+	NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:XMLNS_DISCO_INFO];
 	if (query == nil)
 	{
 		return NO;
 	}
 	
-	NSString *type = [[iq attributeStringValueForName:@"type"] lowercaseString];
+	NSString *type = [[iq xmpp_attributeStringValueForName:@"type"] lowercaseString];
 	if ([type isEqualToString:@"get"])
 	{
-		NSString *node = [query attributeStringValueForName:@"node"];
+		NSString *node = [query xmpp_attributeStringValueForName:@"node"];
 		
 		if (node == nil || [node hasPrefix:DISCO_NODE])
 		{
@@ -1569,7 +1569,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		else if (myCapabilitiesC)
 		{
 			NSXMLElement *c = [myCapabilitiesC copy];
-			NSXMLElement *oldC = [presence elementForName:c.name xmlns:c.xmlns];
+			NSXMLElement *oldC = [presence xmpp_elementForName:c.name xmlns:c.xmlns];
 			if (oldC)
 			{
 				[presence removeChildAtIndex:[presence.children indexOfObject:oldC]];

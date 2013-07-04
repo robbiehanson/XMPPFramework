@@ -1458,8 +1458,8 @@ enum XMPPStreamConfig
 		// stream:features are received, and TLS has been setup (if required)
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *starttls = [features elementForName:@"starttls" xmlns:@"urn:ietf:params:xml:ns:xmpp-tls"];
+			NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *starttls = [features xmpp_elementForName:@"starttls" xmlns:@"urn:ietf:params:xml:ns:xmpp-tls"];
 			
 			result = (starttls != nil);
 		}
@@ -1574,8 +1574,8 @@ enum XMPPStreamConfig
 		// stream:features are received, and TLS has been setup (if required)
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *reg = [features elementForName:@"register" xmlns:@"http://jabber.org/features/iq-register"];
+			NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *reg = [features xmpp_elementForName:@"register" xmlns:@"http://jabber.org/features/iq-register"];
 			
 			result = (reg != nil);
 		}
@@ -1639,15 +1639,15 @@ enum XMPPStreamConfig
 		
 		NSString *username = [myJID_setByClient user];
 		
-		NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
+		NSXMLElement *queryElement = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:register"];
 		[queryElement addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
 		[queryElement addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
 		
 		NSXMLElement *iqElement = [NSXMLElement elementWithName:@"iq"];
-		[iqElement addAttributeWithName:@"type" stringValue:@"set"];
+		[iqElement xmpp_addAttributeWithName:@"type" stringValue:@"set"];
 		[iqElement addChild:queryElement];
 		
-		NSString *outgoingStr = [iqElement compactXMLString];
+		NSString *outgoingStr = [iqElement xmpp_compactXMLString];
 		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
 		XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -1688,8 +1688,8 @@ enum XMPPStreamConfig
 		
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *mech = [features elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+			NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *mech = [features xmpp_elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			
 			NSArray *mechanisms = [mech elementsForName:@"mechanism"];
 			
@@ -1725,8 +1725,8 @@ enum XMPPStreamConfig
 		
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *mech = [features elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+			NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *mech = [features xmpp_elementForName:@"mechanisms" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			
 			NSArray *mechanisms = [mech elementsForName:@"mechanism"];
 			
@@ -1989,8 +1989,8 @@ enum XMPPStreamConfig
 		
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *compression = [features elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
+			NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *compression = [features xmpp_elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
 			
 			NSArray *methods = [compression elementsForName:@"method"];
 			
@@ -2028,8 +2028,8 @@ enum XMPPStreamConfig
 		
 		if (state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [rootElement elementForName:@"stream:features"];
-			NSXMLElement *compression = [features elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
+			NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *compression = [features xmpp_elementForName:@"compression" xmlns:@"http://jabber.org/features/compress"];
 			
 			NSArray *methods = [compression elementsForName:@"method"];
 			
@@ -2091,14 +2091,14 @@ enum XMPPStreamConfig
 {
 	if (dispatch_get_specific(xmppQueueTag))
 	{
-		return [rootElement attributeFloatValueForName:@"version" withDefaultValue:0.0F];
+		return [rootElement xmpp_attributeFloatValueForName:@"version" withDefaultValue:0.0F];
 	}
 	else
 	{
 		__block float result;
 		
 		dispatch_sync(xmppQueue, ^{
-			result = [rootElement attributeFloatValueForName:@"version" withDefaultValue:0.0F];
+			result = [rootElement xmpp_attributeFloatValueForName:@"version" withDefaultValue:0.0F];
 		});
 		
 		return result;
@@ -2320,7 +2320,7 @@ enum XMPPStreamConfig
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
-	NSString *outgoingStr = [iq compactXMLString];
+	NSString *outgoingStr = [iq xmpp_compactXMLString];
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -2338,7 +2338,7 @@ enum XMPPStreamConfig
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
-	NSString *outgoingStr = [message compactXMLString];
+	NSString *outgoingStr = [message xmpp_compactXMLString];
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -2356,7 +2356,7 @@ enum XMPPStreamConfig
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
-	NSString *outgoingStr = [presence compactXMLString];
+	NSString *outgoingStr = [presence xmpp_compactXMLString];
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -2389,7 +2389,7 @@ enum XMPPStreamConfig
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
 	NSAssert(state == STATE_XMPP_CONNECTED, @"Invoked with incorrect state");
 	
-	NSString *outgoingStr = [element compactXMLString];
+	NSString *outgoingStr = [element xmpp_compactXMLString];
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -2608,7 +2608,7 @@ enum XMPPStreamConfig
 		
 		if (state == STATE_XMPP_AUTH)
 		{
-			NSString *outgoingStr = [element compactXMLString];
+			NSString *outgoingStr = [element xmpp_compactXMLString];
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -2620,7 +2620,7 @@ enum XMPPStreamConfig
 		}
 		else
 		{
-			XMPPLogWarn(@"Unable to send element while not in STATE_XMPP_AUTH: %@", [element compactXMLString]);
+			XMPPLogWarn(@"Unable to send element while not in STATE_XMPP_AUTH: %@", [element xmpp_compactXMLString]);
 		}
 	}};
 	
@@ -2852,12 +2852,12 @@ enum XMPPStreamConfig
 				//   </error>
 				// </iq>
 				
-				NSXMLElement *reason = [NSXMLElement elementWithName:@"feature-not-implemented"
+				NSXMLElement *reason = [NSXMLElement xmpp_elementWithName:@"feature-not-implemented"
 				                                               xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
 				
 				NSXMLElement *error = [NSXMLElement elementWithName:@"error"];
-				[error addAttributeWithName:@"type" stringValue:@"cancel"];
-				[error addAttributeWithName:@"code" stringValue:@"501"];
+				[error xmpp_addAttributeWithName:@"type" stringValue:@"cancel"];
+				[error xmpp_addAttributeWithName:@"code" stringValue:@"501"];
 				[error addChild:reason];
 				
 				XMPPIQ *iqResponse = [XMPPIQ iqWithType:@"error"
@@ -3202,15 +3202,15 @@ enum XMPPStreamConfig
 	XMPPLogTrace();
 	
 	// Extract the stream features
-	NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+	NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
 	
 	// Check to see if TLS is required
 	// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
-	NSXMLElement *f_starttls = [features elementForName:@"starttls" xmlns:@"urn:ietf:params:xml:ns:xmpp-tls"];
+	NSXMLElement *f_starttls = [features xmpp_elementForName:@"starttls" xmlns:@"urn:ietf:params:xml:ns:xmpp-tls"];
 	
 	if (f_starttls)
 	{
-		if ([f_starttls elementForName:@"required"] || [self autoStartTLS])
+		if ([f_starttls xmpp_elementForName:@"required"] || [self autoStartTLS])
 		{
 			// TLS is required for this connection
 			
@@ -3231,7 +3231,7 @@ enum XMPPStreamConfig
 	
 	// Check to see if resource binding is required
 	// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
-	NSXMLElement *f_bind = [features elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+	NSXMLElement *f_bind = [features xmpp_elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
 	
 	if (f_bind)
 	{
@@ -3247,15 +3247,15 @@ enum XMPPStreamConfig
 			NSXMLElement *resource = [NSXMLElement elementWithName:@"resource"];
 			[resource setStringValue:requestedResource];
 			
-			NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+			NSXMLElement *bind = [NSXMLElement xmpp_elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
 			[bind addChild:resource];
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-			[iq addAttributeWithName:@"type" stringValue:@"set"];
-			[iq addAttributeWithName:@"id" stringValue:[self generateUUID]];
+			[iq xmpp_addAttributeWithName:@"type" stringValue:@"set"];
+			[iq xmpp_addAttributeWithName:@"id" stringValue:[self generateUUID]];
 			[iq addChild:bind];
 			
-			NSString *outgoingStr = [iq compactXMLString];
+			NSString *outgoingStr = [iq xmpp_compactXMLString];
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -3269,14 +3269,14 @@ enum XMPPStreamConfig
 		{
 			// The user didn't specify a resource, so we ask the server to bind one for us
 			
-			NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+			NSXMLElement *bind = [NSXMLElement xmpp_elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-			[iq addAttributeWithName:@"type" stringValue:@"set"];
-			[iq addAttributeWithName:@"id" stringValue:[self generateUUID]];
+			[iq xmpp_addAttributeWithName:@"type" stringValue:@"set"];
+			[iq xmpp_addAttributeWithName:@"id" stringValue:[self generateUUID]];
 			[iq addChild:bind];
 			
-			NSString *outgoingStr = [iq compactXMLString];
+			NSString *outgoingStr = [iq xmpp_compactXMLString];
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -3334,7 +3334,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	if ([[response attributeStringValueForName:@"type"] isEqualToString:@"error"])
+	if ([[response xmpp_attributeStringValueForName:@"type"] isEqualToString:@"error"])
 	{
 		// Revert back to connected state (from authenticating state)
 		state = STATE_XMPP_CONNECTED;
@@ -3434,8 +3434,8 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	NSXMLElement *r_bind = [response elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
-	NSXMLElement *r_jid = [r_bind elementForName:@"jid"];
+	NSXMLElement *r_bind = [response xmpp_elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+	NSXMLElement *r_jid = [r_bind xmpp_elementForName:@"jid"];
 	
 	if (r_jid)
 	{
@@ -3446,23 +3446,23 @@ enum XMPPStreamConfig
 		[self setMyJID_setByServer:[XMPPJID jidWithString:fullJIDStr]];
 		
 		// And we may now have to do one last thing before we're ready - start an IM session
-		NSXMLElement *features = [rootElement elementForName:@"stream:features"];
+		NSXMLElement *features = [rootElement xmpp_elementForName:@"stream:features"];
 		
 		// Check to see if a session is required
 		// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
-		NSXMLElement *f_session = [features elementForName:@"session" xmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
+		NSXMLElement *f_session = [features xmpp_elementForName:@"session" xmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
 		
 		if (f_session)
 		{
 			NSXMLElement *session = [NSXMLElement elementWithName:@"session"];
-			[session setXmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
+			[session xmpp_setXmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-			[iq addAttributeWithName:@"type" stringValue:@"set"];
-            [iq addAttributeWithName:@"id" stringValue:[self generateUUID]];
+			[iq xmpp_addAttributeWithName:@"type" stringValue:@"set"];
+            [iq xmpp_addAttributeWithName:@"id" stringValue:[self generateUUID]];
 			[iq addChild:session];
 			
-			NSString *outgoingStr = [iq compactXMLString];
+			NSString *outgoingStr = [iq xmpp_compactXMLString];
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -3488,8 +3488,8 @@ enum XMPPStreamConfig
 		// It appears the server didn't allow our resource choice
 		// First check if we want to try an alternative resource
 		
-		NSXMLElement *r_error = [response elementForName:@"error"];
-		NSXMLElement *r_conflict = [r_error elementForName:@"conflict" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
+		NSXMLElement *r_error = [response xmpp_elementForName:@"error"];
+		NSXMLElement *r_conflict = [r_error xmpp_elementForName:@"conflict" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
         
 		if (r_conflict)
 		{
@@ -3562,13 +3562,13 @@ enum XMPPStreamConfig
 		NSXMLElement *resource = [NSXMLElement elementWithName:@"resource"];
 		[resource setStringValue:alternativeResource];
 		
-		NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+		NSXMLElement *bind = [NSXMLElement xmpp_elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
 		[bind addChild:resource];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
 		[iq addChild:bind];
 		
-		NSString *outgoingStr = [iq compactXMLString];
+		NSString *outgoingStr = [iq xmpp_compactXMLString];
 		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
 		XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -3584,12 +3584,12 @@ enum XMPPStreamConfig
 	{
 		// We'll simply let the server choose then
 		
-		NSXMLElement *bind = [NSXMLElement elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
+		NSXMLElement *bind = [NSXMLElement xmpp_elementWithName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
 		[iq addChild:bind];
 		
-		NSString *outgoingStr = [iq compactXMLString];
+		NSString *outgoingStr = [iq xmpp_compactXMLString];
 		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
 		XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -3609,7 +3609,7 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
-	if ([[response attributeStringValueForName:@"type"] isEqualToString:@"result"])
+	if ([[response xmpp_attributeStringValueForName:@"type"] isEqualToString:@"result"])
 	{
 		// Revert back to connected state (from start session state)
 		state = STATE_XMPP_CONNECTED;
@@ -3914,7 +3914,7 @@ enum XMPPStreamConfig
 	if (sender != parser) return;
 	
 	XMPPLogTrace();
-	XMPPLogRecvPost(@"RECV: %@", [root compactXMLString]);
+	XMPPLogRecvPost(@"RECV: %@", [root xmpp_compactXMLString]);
 		
 	// At this point we've sent our XML stream header, and we've received the response XML stream header.
 	// We save the root element of our stream for future reference.
@@ -3946,7 +3946,7 @@ enum XMPPStreamConfig
 			
 			[multicastDelegate xmppStream:self willSendP2PFeatures:streamFeatures];
 			
-			NSString *outgoingStr = [streamFeatures compactXMLString];
+			NSString *outgoingStr = [streamFeatures xmpp_compactXMLString];
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -3984,13 +3984,13 @@ enum XMPPStreamConfig
 			// Update state - we're onto psuedo negotiation
 			state = STATE_XMPP_NEGOTIATING;
 			
-			NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
+			NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:auth"];
 			
 			NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-			[iq addAttributeWithName:@"type" stringValue:@"get"];
+			[iq xmpp_addAttributeWithName:@"type" stringValue:@"get"];
 			[iq addChild:query];
 			
-			NSString *outgoingStr = [iq compactXMLString];
+			NSString *outgoingStr = [iq xmpp_compactXMLString];
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
@@ -4012,7 +4012,7 @@ enum XMPPStreamConfig
 	if (sender != parser) return;
 	
 	XMPPLogTrace();
-	XMPPLogRecvPost(@"RECV: %@", [element compactXMLString]);
+	XMPPLogRecvPost(@"RECV: %@", [element xmpp_compactXMLString]);
 		
 	NSString *elementName = [element name];
 	

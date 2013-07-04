@@ -35,13 +35,13 @@
 	//   <query xmlns="http://jabber.org/protocol/disco#info"/>
 	// </iq>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
-	[iq addAttributeWithName:@"to" stringValue:toValue];
-	[iq addAttributeWithName:@"id" stringValue:@"disco1"];
+	[iq xmpp_addAttributeWithName:@"type" stringValue:@"get"];
+	[iq xmpp_addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq xmpp_addAttributeWithName:@"to" stringValue:toValue];
+	[iq xmpp_addAttributeWithName:@"id" stringValue:@"disco1"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -55,13 +55,13 @@
 	//   <query xmlns="jabber:iq:agents"/>
 	// </iq>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:agents"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:agents"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
-	[iq addAttributeWithName:@"to" stringValue:[myJID domain]];
-	[iq addAttributeWithName:@"id" stringValue:@"agent1"];
+	[iq xmpp_addAttributeWithName:@"type" stringValue:@"get"];
+	[iq xmpp_addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq xmpp_addAttributeWithName:@"to" stringValue:[myJID domain]];
+	[iq xmpp_addAttributeWithName:@"id" stringValue:@"agent1"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -77,13 +77,13 @@
 	//   <query xmlns="jabber:iq:register"/>
 	// </iq>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:register"];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"get"];
-	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
-	[iq addAttributeWithName:@"to" stringValue:toValue];
-	[iq addAttributeWithName:@"id" stringValue:@"reg1"];
+	[iq xmpp_addAttributeWithName:@"type" stringValue:@"get"];
+	[iq xmpp_addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq xmpp_addAttributeWithName:@"to" stringValue:toValue];
+	[iq xmpp_addAttributeWithName:@"id" stringValue:@"reg1"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -102,15 +102,15 @@
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:register"];
 	[query addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
 	[query addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
-	[iq addAttributeWithName:@"to" stringValue:toValue];
-	[iq addAttributeWithName:@"id" stringValue:@"reg2"];
+	[iq xmpp_addAttributeWithName:@"type" stringValue:@"set"];
+	[iq xmpp_addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq xmpp_addAttributeWithName:@"to" stringValue:toValue];
+	[iq xmpp_addAttributeWithName:@"id" stringValue:@"reg2"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -132,14 +132,14 @@
 	//   </query>
 	// </iq>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:register"];
 	[query addChild:[NSXMLElement elementWithName:@"remove"]];
 	
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addAttributeWithName:@"from" stringValue:[myJID full]];
-	[iq addAttributeWithName:@"to" stringValue:toValue];
-	[iq addAttributeWithName:@"id" stringValue:@"unreg1"];
+	[iq xmpp_addAttributeWithName:@"type" stringValue:@"set"];
+	[iq xmpp_addAttributeWithName:@"from" stringValue:[myJID full]];
+	[iq xmpp_addAttributeWithName:@"to" stringValue:toValue];
+	[iq xmpp_addAttributeWithName:@"id" stringValue:@"unreg1"];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];

@@ -12,7 +12,7 @@
 
 - (void)addOutOfBandURL:(NSURL *)URL desc:(NSString *)desc
 {
-	NSXMLElement *outOfBand = [NSXMLElement elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [NSXMLElement xmpp_elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
 	if([[URL path] length])
 	{
@@ -31,7 +31,7 @@
 
 - (void)addOutOfBandURI:(NSString *)URI desc:(NSString *)desc
 {
-	NSXMLElement *outOfBand = [NSXMLElement elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [NSXMLElement xmpp_elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
 	if([URI length])
 	{
@@ -50,16 +50,16 @@
 
 - (BOOL)hasOutOfBandData
 {
-	return ([self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND] ? YES : NO);
+	return ([self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND] ? YES : NO);
 }
 
 - (NSURL *)outOfBandURL
 {
 	NSURL *URL = nil;
 	
-	NSXMLElement *outOfBand = [self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
-	NSXMLElement *URLElement = [outOfBand elementForName:@"url"];
+	NSXMLElement *URLElement = [outOfBand xmpp_elementForName:@"url"];
 	
 	NSString *URLString = [URLElement stringValue];
 	
@@ -74,9 +74,9 @@
 
 - (NSString *)outOfBandURI
 {	
-	NSXMLElement *outOfBand = [self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
-	NSXMLElement *URLElement = [outOfBand elementForName:@"url"];
+	NSXMLElement *URLElement = [outOfBand xmpp_elementForName:@"url"];
 	
 	NSString *URI= [URLElement stringValue];
 	
@@ -85,9 +85,9 @@
 
 - (NSString *)outOfBandDesc
 {
-	NSXMLElement *outOfBand = [self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
-	NSXMLElement *descElement = [outOfBand elementForName:@"desc"];
+	NSXMLElement *descElement = [outOfBand xmpp_elementForName:@"desc"];
 	
 	NSString *desc = [descElement stringValue];
 	

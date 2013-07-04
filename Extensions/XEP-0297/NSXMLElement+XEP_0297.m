@@ -18,7 +18,7 @@
 
 - (NSXMLElement *)forwardedStanza
 {
-    return [self elementForName:NAME_XMPP_STANZA_FORWARDING xmlns:XMLNS_XMPP_STANZA_FORWARDING];
+    return [self xmpp_elementForName:NAME_XMPP_STANZA_FORWARDING xmlns:XMLNS_XMPP_STANZA_FORWARDING];
 }
 
 - (BOOL)hasForwardedStanza
@@ -35,7 +35,7 @@
 
 - (BOOL)isForwardedStanza
 {
-    if([[self name] isEqualToString:NAME_XMPP_STANZA_FORWARDING] && [[self xmlns] isEqualToString:XMLNS_XMPP_STANZA_FORWARDING])
+    if([[self name] isEqualToString:NAME_XMPP_STANZA_FORWARDING] && [[self xmpp_xmlns] isEqualToString:XMLNS_XMPP_STANZA_FORWARDING])
     {
         return YES;
     }
@@ -66,11 +66,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPIQ iqFromElement:[self elementForName:@"iq"]];
+        return [XMPPIQ iqFromElement:[self xmpp_elementForName:@"iq"]];
     }
     else
     {
-        return [XMPPIQ iqFromElement:[[self forwardedStanza] elementForName:@"iq"]];
+        return [XMPPIQ iqFromElement:[[self forwardedStanza] xmpp_elementForName:@"iq"]];
     }
 }
 
@@ -90,11 +90,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPMessage messageFromElement:[self elementForName:@"message"]];
+        return [XMPPMessage messageFromElement:[self xmpp_elementForName:@"message"]];
     }
     else
     {
-        return [XMPPMessage messageFromElement:[[self forwardedStanza] elementForName:@"message"]];
+        return [XMPPMessage messageFromElement:[[self forwardedStanza] xmpp_elementForName:@"message"]];
     }
 }
 
@@ -115,11 +115,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPPresence presenceFromElement:[self elementForName:@"presence"]];
+        return [XMPPPresence presenceFromElement:[self xmpp_elementForName:@"presence"]];
     }
     else
     {
-        return [XMPPPresence presenceFromElement:[[self forwardedStanza] elementForName:@"presence"]];
+        return [XMPPPresence presenceFromElement:[[self forwardedStanza] xmpp_elementForName:@"presence"]];
     }
 }
 

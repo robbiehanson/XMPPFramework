@@ -7,7 +7,7 @@
 
 - (NSString *)nick
 {
-	return [[self elementForName:@"nick" xmlns:XMLNS_NICK] stringValue];
+	return [[self xmpp_elementForName:@"nick" xmlns:XMLNS_NICK] stringValue];
 }
 
 @end

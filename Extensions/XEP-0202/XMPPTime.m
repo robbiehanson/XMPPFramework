@@ -168,7 +168,7 @@
 	// 
 	// Note: Sometimes the to attribute is required. (ejabberd)
 	
-	NSXMLElement *time = [NSXMLElement elementWithName:@"time" xmlns:@"urn:xmpp:time"];
+	NSXMLElement *time = [NSXMLElement xmpp_elementWithName:@"time" xmlns:@"urn:xmpp:time"];
 	XMPPJID *domainJID = [[xmppStream myJID] domainJID];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:domainJID elementID:queryID child:time];
@@ -199,7 +199,7 @@
 	//   <time xmlns="urn:xmpp:time"/>
 	// </iq>
 	
-	NSXMLElement *time = [NSXMLElement elementWithName:@"time" xmlns:@"urn:xmpp:time"];
+	NSXMLElement *time = [NSXMLElement xmpp_elementWithName:@"time" xmlns:@"urn:xmpp:time"];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:queryID child:time];
 	
@@ -257,7 +257,7 @@
 		//   <time xmlns="urn:xmpp:time"/>
 		// </iq>
 		
-		NSXMLElement *time = [iq elementForName:@"time" xmlns:@"urn:xmpp:time"];
+		NSXMLElement *time = [iq xmpp_elementForName:@"time" xmlns:@"urn:xmpp:time"];
 		if (time)
 		{
 			NSXMLElement *currentTime = [[self class] timeElement];
@@ -296,7 +296,7 @@
 		// </query>
 		
 		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-		[feature addAttributeWithName:@"var" stringValue:@"urn:xmpp:time"];
+		[feature xmpp_addAttributeWithName:@"var" stringValue:@"urn:xmpp:time"];
 		
 		[query addChild:feature];
 	}
@@ -312,10 +312,10 @@
 	//   </time>
 	// </iq>
 	
-	NSXMLElement *time = [iq elementForName:@"time" xmlns:@"urn:xmpp:time"];
+	NSXMLElement *time = [iq xmpp_elementForName:@"time" xmlns:@"urn:xmpp:time"];
 	if (time == nil) return nil;
 	
-	NSString *utc = [[time elementForName:@"utc"] stringValue];
+	NSString *utc = [[time xmpp_elementForName:@"utc"] stringValue];
 	if (utc == nil) return nil;
 	
 	// Note:
@@ -351,10 +351,10 @@
 	//   </time>
 	// </iq>
 	
-	NSXMLElement *time = [iq elementForName:@"time" xmlns:@"urn:xmpp:time"];
+	NSXMLElement *time = [iq xmpp_elementForName:@"time" xmlns:@"urn:xmpp:time"];
 	if (time == nil) return 0;
 	
-	NSString *tzo = [[time elementForName:@"tzo"] stringValue];
+	NSString *tzo = [[time xmpp_elementForName:@"tzo"] stringValue];
 	if (tzo == nil) return 0;
 	
 	return [XMPPDateTimeProfiles parseTimeZoneOffset:tzo];
@@ -368,10 +368,10 @@
 	
 	// Then worry about the calculations
 	
-	NSXMLElement *time = [iq elementForName:@"time" xmlns:@"urn:xmpp:time"];
+	NSXMLElement *time = [iq xmpp_elementForName:@"time" xmlns:@"urn:xmpp:time"];
 	if (time == nil) return 0.0;
 	
-	NSString *utc = [[time elementForName:@"utc"] stringValue];
+	NSString *utc = [[time xmpp_elementForName:@"utc"] stringValue];
 	if (utc == nil) return 0.0;
 	
 	NSDate *remoteDate = [XMPPDateTimeProfiles parseDateTime:utc];
@@ -469,7 +469,7 @@
 	NSXMLElement *tzo = [NSXMLElement elementWithName:@"tzo" stringValue:tzoValue];
 	NSXMLElement *utc = [NSXMLElement elementWithName:@"utc" stringValue:utcValue];
 	
-	NSXMLElement *time = [NSXMLElement elementWithName:@"time" xmlns:@"urn:xmpp:time"];
+	NSXMLElement *time = [NSXMLElement xmpp_elementWithName:@"time" xmlns:@"urn:xmpp:time"];
 	[time addChild:tzo];
 	[time addChild:utc];
 	

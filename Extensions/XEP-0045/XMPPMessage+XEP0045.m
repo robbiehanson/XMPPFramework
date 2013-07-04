@@ -13,7 +13,7 @@
 {
 	if ([self isGroupChatMessage])
 	{
-		NSString *body = [[self elementForName:@"body"] stringValue];
+		NSString *body = [[self xmpp_elementForName:@"body"] stringValue];
 		
 		return ((body != nil) && ([body length] > 0));
 	}

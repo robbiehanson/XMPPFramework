@@ -235,7 +235,7 @@
 	// and break if we find a message with localTimestamp <= maxLocalTimestamp.
 	
 	XMPPJID *messageJid = [message from];
-	NSString *messageBody = [[message elementForName:@"body"] stringValue];
+	NSString *messageBody = [[message xmpp_elementForName:@"body"] stringValue];
 	
 	NSInteger index;
 	for (index = mid; index < [messages count]; index++)

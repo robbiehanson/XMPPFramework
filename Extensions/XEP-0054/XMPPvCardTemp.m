@@ -67,7 +67,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 {
 	if ([iq isResultIQ])
 	{
-		NSXMLElement *query = [iq elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+		NSXMLElement *query = [iq xmpp_elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
 		if (query)
 		{
 			return [self vCardTempFromElement:query];
@@ -85,7 +85,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid {
   XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID]];
-  NSXMLElement *vCardElem = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+  NSXMLElement *vCardElem = [NSXMLElement xmpp_elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
   
   [iq addChild:vCardElem];
   return iq;
@@ -98,7 +98,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSDate *)bday {
 	NSDate *bday = nil;
-	NSXMLElement *elem = [self elementForName:@"BDAY"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"BDAY"];
 	
 	if (elem != nil) {
 		bday = [NSDate dateWithXmppDateString:[elem stringValue]];
@@ -109,7 +109,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setBday:(NSDate *)bday {
-	NSXMLElement *elem = [self elementForName:@"BDAY"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"BDAY"];
   
 	if (elem == nil) {
 		elem = [NSXMLElement elementWithName:@"BDAY"];
@@ -122,12 +122,12 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSData *)photo {
 	NSData *decodedData = nil;
-	NSXMLElement *photo = [self elementForName:@"PHOTO"];
+	NSXMLElement *photo = [self xmpp_elementForName:@"PHOTO"];
 	
 	if (photo != nil) {
 		// There is a PHOTO element. It should have a TYPE and a BINVAL
 		//NSXMLElement *fileType = [photo elementForName:@"TYPE"];
-		NSXMLElement *binval = [photo elementForName:@"BINVAL"];
+		NSXMLElement *binval = [photo xmpp_elementForName:@"BINVAL"];
 		
 		if (binval) {
 			NSData *base64Data = [[binval stringValue] dataUsingEncoding:NSASCIIStringEncoding];
@@ -140,14 +140,14 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setPhoto:(NSData *)data {
-	NSXMLElement *photo = [self elementForName:@"PHOTO"];
+	NSXMLElement *photo = [self xmpp_elementForName:@"PHOTO"];
 	
 	if (photo == nil) {
 		photo = [NSXMLElement elementWithName:@"PHOTO"];
 		[self addChild:photo];
 	}
 	
-	NSXMLElement *binval = [photo elementForName:@"BINVAL"];
+	NSXMLElement *binval = [photo xmpp_elementForName:@"BINVAL"];
 	
 	if (binval == nil) {
 		binval = [NSXMLElement elementWithName:@"BINVAL"];
@@ -159,7 +159,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)nickname {
-	return [[self elementForName:@"NICKNAME"] stringValue];
+	return [[self xmpp_elementForName:@"NICKNAME"] stringValue];
 }
 
 
@@ -169,7 +169,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)formattedName {
-	return [[self elementForName:@"FN"] stringValue];
+	return [[self xmpp_elementForName:@"FN"] stringValue];
 }
 
 
@@ -180,10 +180,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)familyName {
 	NSString *result = nil;
-	NSXMLElement *name = [self elementForName:@"N"];
+	NSXMLElement *name = [self xmpp_elementForName:@"N"];
 	
 	if (name != nil) {
-		NSXMLElement *part = [name elementForName:@"FAMILY"];
+		NSXMLElement *part = [name xmpp_elementForName:@"FAMILY"];
 		
 		if (part != nil) {
 			result = [part stringValue];
@@ -201,10 +201,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)givenName {
 	NSString *result = nil;
-	NSXMLElement *name = [self elementForName:@"N"];
+	NSXMLElement *name = [self xmpp_elementForName:@"N"];
 	
 	if (name != nil) {
-		NSXMLElement *part = [name elementForName:@"GIVEN"];
+		NSXMLElement *part = [name xmpp_elementForName:@"GIVEN"];
 		
 		if (part != nil) {
 			result = [part stringValue];
@@ -222,10 +222,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)middleName {
 	NSString *result = nil;
-	NSXMLElement *name = [self elementForName:@"N"];
+	NSXMLElement *name = [self xmpp_elementForName:@"N"];
 	
 	if (name != nil) {
-		NSXMLElement *part = [name elementForName:@"MIDDLE"];
+		NSXMLElement *part = [name xmpp_elementForName:@"MIDDLE"];
 		
 		if (part != nil) {
 			result = [part stringValue];
@@ -243,10 +243,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)prefix {
 	NSString *result = nil;
-	NSXMLElement *name = [self elementForName:@"N"];
+	NSXMLElement *name = [self xmpp_elementForName:@"N"];
 	
 	if (name != nil) {
-		NSXMLElement *part = [name elementForName:@"PREFIX"];
+		NSXMLElement *part = [name xmpp_elementForName:@"PREFIX"];
 		
 		if (part != nil) {
 			result = [part stringValue];
@@ -264,10 +264,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)suffix {
 	NSString *result = nil;
-	NSXMLElement *name = [self elementForName:@"N"];
+	NSXMLElement *name = [self xmpp_elementForName:@"N"];
 	
 	if (name != nil) {
-		NSXMLElement *part = [name elementForName:@"SUFFIX"];
+		NSXMLElement *part = [name xmpp_elementForName:@"SUFFIX"];
 		
 		if (part != nil) {
 			result = [part stringValue];
@@ -316,7 +316,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (XMPPJID *)jid {
 	XMPPJID *jid = nil;
-	NSXMLElement *elem = [self elementForName:@"JABBERID"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"JABBERID"];
 	
 	if (elem != nil) {
 		jid = [XMPPJID jidWithString:[elem stringValue]];
@@ -327,7 +327,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setJid:(XMPPJID *)jid {
-	NSXMLElement *elem = [self elementForName:@"JABBERID"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"JABBERID"];
 	
 	if (elem == nil && jid != nil) {
 		elem = [NSXMLElement elementWithName:@"JABBERID"];
@@ -343,7 +343,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)mailer {
-	return [[self elementForName:@"MAILER"] stringValue];
+	return [[self xmpp_elementForName:@"MAILER"] stringValue];
 }
 
 
@@ -357,7 +357,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSTimeZone *)timeZone {
 	// Turns out this is hard. Being lazy for now (not like anyone actually uses this, right?)
-	NSXMLElement *tz = [self elementForName:@"TZ"];
+	NSXMLElement *tz = [self xmpp_elementForName:@"TZ"];
 	if (tz != nil) {
 		// This is unlikely to work. :-(
 		return [NSTimeZone timeZoneWithName:[tz stringValue]];
@@ -368,7 +368,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setTimeZone:(NSTimeZone *)tz {
-	NSXMLElement *elem = [self elementForName:@"TZ"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"TZ"];
   
 	if (elem == nil && tz != nil) {
 		elem = [NSXMLElement elementWithName:@"TZ"];
@@ -387,11 +387,11 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (CLLocation *)location {
 	CLLocation *loc = nil;
-	NSXMLElement *geo = [self elementForName:@"GEO"];
+	NSXMLElement *geo = [self xmpp_elementForName:@"GEO"];
 	
 	if (geo != nil) {
-		NSXMLElement *lat = [geo elementForName:@"LAT"];
-		NSXMLElement *lon = [geo elementForName:@"LON"];
+		NSXMLElement *lat = [geo xmpp_elementForName:@"LAT"];
+		NSXMLElement *lon = [geo xmpp_elementForName:@"LON"];
 		
 		loc = [[CLLocation alloc] initWithLatitude:[[lat stringValue] doubleValue] longitude:[[lon stringValue] doubleValue]];
 	}
@@ -401,7 +401,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setLocation:(CLLocation *)geo {
-	NSXMLElement *elem = [self elementForName:@"GEO"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"GEO"];
 	NSXMLElement *lat;
 	NSXMLElement *lon;
 	
@@ -416,8 +416,8 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 			lon = [NSXMLElement elementWithName:@"LON"];
 			[elem addChild:lon];
 		} else {
-			lat = [elem elementForName:@"LAT"];
-			lon = [elem elementForName:@"LON"];
+			lat = [elem xmpp_elementForName:@"LAT"];
+			lon = [elem xmpp_elementForName:@"LON"];
 		}
     
 		[lat setStringValue:[NSString stringWithFormat:@"%.6f", coord.latitude]];
@@ -432,7 +432,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)title {
-	return [[self elementForName:@"TITLE"] stringValue];
+	return [[self xmpp_elementForName:@"TITLE"] stringValue];
 }
 
 
@@ -442,7 +442,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)role {
-	return [[self elementForName:@"ROLE"] stringValue];
+	return [[self xmpp_elementForName:@"ROLE"] stringValue];
 }
 
 
@@ -453,12 +453,12 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSData *)logo {
 	NSData *decodedData = nil;
-	NSXMLElement *logo = [self elementForName:@"LOGO"];
+	NSXMLElement *logo = [self xmpp_elementForName:@"LOGO"];
 	
 	if (logo != nil) {
 		// There is a LOGO element. It should have a TYPE and a BINVAL
 		//NSXMLElement *fileType = [photo elementForName:@"TYPE"];
-		NSXMLElement *binval = [logo elementForName:@"BINVAL"];
+		NSXMLElement *binval = [logo xmpp_elementForName:@"BINVAL"];
 		
 		if (binval) {
 			NSData *base64Data = [[binval stringValue] dataUsingEncoding:NSASCIIStringEncoding];
@@ -471,14 +471,14 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setLogo:(NSData *)data {
-	NSXMLElement *logo = [self elementForName:@"LOGO"];
+	NSXMLElement *logo = [self xmpp_elementForName:@"LOGO"];
 	
 	if (logo == nil) {
 		logo = [NSXMLElement elementWithName:@"LOGO"];
 		[self addChild:logo];
 	}
 	
-	NSXMLElement *binval = [logo elementForName:@"BINVAL"];
+	NSXMLElement *binval = [logo xmpp_elementForName:@"BINVAL"];
 	
 	if (binval == nil) {
 		binval = [NSXMLElement elementWithName:@"BINVAL"];
@@ -491,7 +491,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (XMPPvCardTemp *)agent {
 	XMPPvCardTemp *agent = nil;
-	NSXMLElement *elem = [self elementForName:@"AGENT"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"AGENT"];
 	
 	if (elem != nil) {
 		agent = [XMPPvCardTemp vCardTempFromElement:elem];
@@ -502,7 +502,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setAgent:(XMPPvCardTemp *)agent {
-	NSXMLElement *elem = [self elementForName:@"AGENT"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"AGENT"];
 	
 	if (elem != nil) {
 		[self removeChildAtIndex:[[self children] indexOfObject:elem]];
@@ -516,10 +516,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)orgName {
 	NSString *result = nil;
-	NSXMLElement *org = [self elementForName:@"ORG"];
+	NSXMLElement *org = [self xmpp_elementForName:@"ORG"];
 	
 	if (org != nil) {
-		NSXMLElement *orgname = [org elementForName:@"ORGNAME"];
+		NSXMLElement *orgname = [org xmpp_elementForName:@"ORGNAME"];
 		
 		if (orgname != nil) {
 			result = [orgname stringValue];
@@ -531,7 +531,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setOrgName:(NSString *)orgname {
-	NSXMLElement *org = [self elementForName:@"ORG"];
+	NSXMLElement *org = [self xmpp_elementForName:@"ORG"];
 	NSXMLElement *elem = nil;
   
 	if (orgname != nil) {
@@ -539,7 +539,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 			org = [NSXMLElement elementWithName:@"ORG"];
 			[self addChild:org];
 		} else {
-			elem = [org elementForName:@"ORGNAME"];
+			elem = [org xmpp_elementForName:@"ORGNAME"];
 		}
 		
 		if (elem == nil) {
@@ -557,7 +557,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSArray *)orgUnits {
 	NSArray *result = nil;
-	NSXMLElement *org = [self elementForName:@"ORG"];
+	NSXMLElement *org = [self xmpp_elementForName:@"ORG"];
 	
 	if (org != nil) {
 		NSArray *elems = [org elementsForName:@"ORGUNIT"];
@@ -575,7 +575,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setOrgUnits:(NSArray *)orgunits {
-	NSXMLElement *org = [self elementForName:@"ORG"];
+	NSXMLElement *org = [self xmpp_elementForName:@"ORG"];
 	
 	// If there is no org, then there is nothing to do (need ORGNAME first)
 	if (org != nil) {
@@ -599,7 +599,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSArray *)categories {
 	NSArray *result = nil;
-	NSXMLElement *categories = [self elementForName:@"CATEGORIES"];
+	NSXMLElement *categories = [self xmpp_elementForName:@"CATEGORIES"];
 	
 	if (categories != nil) {
 		NSArray *elems = [categories elementsForName:@"KEYWORD"];
@@ -617,7 +617,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setCategories:(NSArray *)categories {
-	NSXMLElement *cat = [self elementForName:@"CATEGORIES"];
+	NSXMLElement *cat = [self xmpp_elementForName:@"CATEGORIES"];
 	
 	if (categories != nil) {
 		if (cat == nil) {
@@ -643,7 +643,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)note {
-	return [[self elementForName:@"NOTE"] stringValue];
+	return [[self xmpp_elementForName:@"NOTE"] stringValue];
 }
 
 
@@ -653,7 +653,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)prodid {
-	return [[self elementForName:@"PRODID"] stringValue];
+	return [[self xmpp_elementForName:@"PRODID"] stringValue];
 }
 
 
@@ -664,7 +664,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSDate *)revision {
 	NSDate *rev = nil;
-	NSXMLElement *elem = [self elementForName:@"REV"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"REV"];
 	
 	if (elem != nil) {
 		rev = [NSDate dateWithXmppDateTimeString:[elem stringValue]];
@@ -675,7 +675,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setRevision:(NSDate *)rev {
-	NSXMLElement *elem = [self elementForName:@"REV"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"REV"];
 	
 	if (elem == nil) {
 		elem = [NSXMLElement elementWithName:@"REV"];
@@ -687,7 +687,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)sortString {
-	return [[self elementForName:@"SORT-STRING"] stringValue];
+	return [[self xmpp_elementForName:@"SORT-STRING"] stringValue];
 }
 - (void)setSortString:(NSString *)sortString {
 	XMPP_VCARD_SET_STRING_CHILD(sortString, @"SORT-STRING");
@@ -696,10 +696,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)phoneticSound {
 	NSString *phon = nil;
-	NSXMLElement *sound = [self elementForName:@"SOUND"];
+	NSXMLElement *sound = [self xmpp_elementForName:@"SOUND"];
 	
 	if (sound != nil) {
-		NSXMLElement *elem = [sound elementForName:@"PHONETIC"];
+		NSXMLElement *elem = [sound xmpp_elementForName:@"PHONETIC"];
 		
 		if (elem != nil) {
 			phon = [elem stringValue];
@@ -711,7 +711,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setPhoneticSound:(NSString *)phonetic {
-	NSXMLElement *sound = [self elementForName:@"SOUND"];
+	NSXMLElement *sound = [self xmpp_elementForName:@"SOUND"];
 	NSXMLElement *elem = nil;
 	
 	if (sound == nil && phonetic != nil) {
@@ -720,7 +720,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	}
 	
 	if (sound != nil) {
-		elem = [sound elementForName:@"PHONETIC"];
+		elem = [sound xmpp_elementForName:@"PHONETIC"];
 		
 		if (elem != nil && phonetic != nil) {
 			elem = [NSXMLElement elementWithName:@"PHONETIC"];
@@ -738,10 +738,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSData *)sound {
 	NSData *decodedData = nil;
-	NSXMLElement *sound = [self elementForName:@"SOUND"];
+	NSXMLElement *sound = [self xmpp_elementForName:@"SOUND"];
 	
 	if (sound != nil) {
-		NSXMLElement *binval = [sound elementForName:@"BINVAL"];
+		NSXMLElement *binval = [sound xmpp_elementForName:@"BINVAL"];
 		
 		if (binval) {
 			NSData *base64Data = [[binval stringValue] dataUsingEncoding:NSASCIIStringEncoding];
@@ -754,14 +754,14 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setSound:(NSData *)data {
-	NSXMLElement *sound = [self elementForName:@"SOUND"];
+	NSXMLElement *sound = [self xmpp_elementForName:@"SOUND"];
 	
 	if (sound == nil) {
 		sound = [NSXMLElement elementWithName:@"SOUND"];
 		[self addChild:sound];
 	}
 	
-	NSXMLElement *binval = [sound elementForName:@"BINVAL"];
+	NSXMLElement *binval = [sound xmpp_elementForName:@"BINVAL"];
 	
 	if (binval == nil) {
 		binval = [NSXMLElement elementWithName:@"BINVAL"];
@@ -773,7 +773,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)uid {
-	return [[self elementForName:@"UID"] stringValue];
+	return [[self xmpp_elementForName:@"UID"] stringValue];
 }
 
 
@@ -783,7 +783,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)url {
-	return [[self elementForName:@"URL"] stringValue];
+	return [[self xmpp_elementForName:@"URL"] stringValue];
 }
 
 
@@ -793,17 +793,17 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (NSString *)version {
-	return [self attributeStringValueForName:@"version"];
+	return [self xmpp_attributeStringValueForName:@"version"];
 }
 
 
 - (void)setVersion:(NSString *)version {
-	[self addAttributeWithName:@"version" stringValue:version];
+	[self xmpp_addAttributeWithName:@"version" stringValue:version];
 }
 
 
 - (NSString *)description {
-	return [[self elementForName:@"DESC"] stringValue];
+	return [[self xmpp_elementForName:@"DESC"] stringValue];
 }
 
 
@@ -817,14 +817,14 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (XMPPvCardTempClass)privacyClass {
 	XMPPvCardTempClass priv = XMPPvCardTempClassNone;
-	NSXMLElement *elem = [self elementForName:@"CLASS"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"CLASS"];
 	
 	if (elem != nil) {
-		if ([elem elementForName:@"PUBLIC"] != nil) {
+		if ([elem xmpp_elementForName:@"PUBLIC"] != nil) {
 			priv = XMPPvCardTempClassPublic;
-		} else if ([elem elementForName:@"PRIVATE"] != nil) {
+		} else if ([elem xmpp_elementForName:@"PRIVATE"] != nil) {
 			priv = XMPPvCardTempClassPrivate;
-		} else if ([elem elementForName:@"CONFIDENTIAL"] != nil) {
+		} else if ([elem xmpp_elementForName:@"CONFIDENTIAL"] != nil) {
 			priv = XMPPvCardTempClassConfidential;
 		}
 	}
@@ -834,7 +834,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setPrivacyClass:(XMPPvCardTempClass)privacyClass {
-	NSXMLElement *elem = [self elementForName:@"CLASS"];
+	NSXMLElement *elem = [self xmpp_elementForName:@"CLASS"];
   
 	if (elem == nil && privacyClass != XMPPvCardTempClassNone) {
 		elem = [NSXMLElement elementWithName:@"CLASS"];
@@ -842,7 +842,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	
 	if (elem != nil) {
 		for (NSString *cls in [NSArray arrayWithObjects:@"PUBLIC", @"PRIVATE", @"CONFIDENTIAL", nil]) {
-			NSXMLElement *priv = [elem elementForName:cls];
+			NSXMLElement *priv = [elem xmpp_elementForName:cls];
 			if (priv != nil) {
 				[elem removeChildAtIndex:[[elem children] indexOfObject:priv]];
 			}
@@ -874,10 +874,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 - (NSString *)keyType {
 	NSString *typ = nil;
-	NSXMLElement *key = [self elementForName:@"KEY"];
+	NSXMLElement *key = [self xmpp_elementForName:@"KEY"];
 	
 	if (key != nil) {
-		NSXMLElement *elem = [key elementForName:@"TYPE"];
+		NSXMLElement *elem = [key xmpp_elementForName:@"TYPE"];
 		
 		if (elem != nil) {
 			typ = [elem stringValue];
@@ -889,7 +889,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setKeyType:(NSString *)type {
-	NSXMLElement *key = [self elementForName:@"KEY"];
+	NSXMLElement *key = [self xmpp_elementForName:@"KEY"];
 	NSXMLElement *elem = nil;
 	
 	if (key == nil && type != nil) {
@@ -898,7 +898,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	}
 	
 	if (key != nil) {
-		elem = [key elementForName:@"TYPE"];
+		elem = [key xmpp_elementForName:@"TYPE"];
 		
 		if (elem != nil && type != nil) {
 			elem = [NSXMLElement elementWithName:@"TYPE"];

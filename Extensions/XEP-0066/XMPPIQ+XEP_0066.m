@@ -62,7 +62,7 @@
 
 - (void)addOutOfBandURL:(NSURL *)URL desc:(NSString *)desc
 {
-	NSXMLElement *outOfBand = [NSXMLElement elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [NSXMLElement xmpp_elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
 	if([[URL path] length])
 	{
@@ -81,7 +81,7 @@
 
 - (void)addOutOfBandURI:(NSString *)URI desc:(NSString *)desc
 {
-	NSXMLElement *outOfBand = [NSXMLElement elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [NSXMLElement xmpp_elementWithName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
 	if([URI length])
 	{
@@ -110,10 +110,10 @@
 	[outOfBandDataFailureResponse addOutOfBandURI:[self outOfBandURI] desc:[self outOfBandDesc]];
 	
 	NSXMLElement *errorElement = [NSXMLElement elementWithName:@"error"];
-	[errorElement addAttributeWithName:@"code" stringValue:@"404"];
-	[errorElement addAttributeWithName:@"type" stringValue:@"cancel"];
+	[errorElement xmpp_addAttributeWithName:@"code" stringValue:@"404"];
+	[errorElement xmpp_addAttributeWithName:@"type" stringValue:@"cancel"];
 	
-	NSXMLElement *itemNotFoundElement = [NSXMLElement elementWithName:@"item-not-found" xmlns:@"rn:ietf:params:xml:ns:xmpp-stanzas"];
+	NSXMLElement *itemNotFoundElement = [NSXMLElement xmpp_elementWithName:@"item-not-found" xmlns:@"rn:ietf:params:xml:ns:xmpp-stanzas"];
 	[errorElement addChild:itemNotFoundElement];
 	
 	[outOfBandDataFailureResponse addChild:errorElement];
@@ -129,10 +129,10 @@
 	[outOfBandDataRejectResponse addOutOfBandURI:[self outOfBandURI] desc:[self outOfBandDesc]];
 
 	NSXMLElement *errorElement = [NSXMLElement elementWithName:@"error"];
-	[errorElement addAttributeWithName:@"code" stringValue:@"406"];
-	[errorElement addAttributeWithName:@"type" stringValue:@"modify"];
+	[errorElement xmpp_addAttributeWithName:@"code" stringValue:@"406"];
+	[errorElement xmpp_addAttributeWithName:@"type" stringValue:@"modify"];
 	
-	NSXMLElement *notAcceptableElement = [NSXMLElement elementWithName:@"not-acceptable" xmlns:@"rn:ietf:params:xml:ns:xmpp-stanzas"];
+	NSXMLElement *notAcceptableElement = [NSXMLElement xmpp_elementWithName:@"not-acceptable" xmlns:@"rn:ietf:params:xml:ns:xmpp-stanzas"];
 	[errorElement addChild:notAcceptableElement];
 	
 	[outOfBandDataRejectResponse addChild:errorElement];
@@ -152,10 +152,10 @@
 
 - (BOOL)isOutOfBandDataFailureResponse
 {
-	NSXMLElement *errorElement = [self elementForName:@"error"];
+	NSXMLElement *errorElement = [self xmpp_elementForName:@"error"];
 
-	NSUInteger errorCode = [errorElement attributeIntegerValueForName:@"code"];
-	NSString *errorType = [errorElement attributeStringValueForName:@"type"];
+	NSUInteger errorCode = [errorElement xmpp_attributeIntegerValueForName:@"code"];
+	NSString *errorType = [errorElement xmpp_attributeStringValueForName:@"type"];
 	
 	if([self hasOutOfBandData] && [self isErrorIQ] && errorCode == 404 && [errorType isEqualToString:@"cancel"])
 	{
@@ -167,10 +167,10 @@
 
 - (BOOL)isOutOfBandDataRejectResponse
 {
-	NSXMLElement *errorElement = [self elementForName:@"error"];
+	NSXMLElement *errorElement = [self xmpp_elementForName:@"error"];
 	
-	NSUInteger errorCode = [errorElement attributeIntegerValueForName:@"code"];
-	NSString *errorType = [errorElement attributeStringValueForName:@"type"];
+	NSUInteger errorCode = [errorElement xmpp_attributeIntegerValueForName:@"code"];
+	NSString *errorType = [errorElement xmpp_attributeStringValueForName:@"type"];
 	
 	if([self hasOutOfBandData] && [self isErrorIQ] && errorCode == 406 && [errorType isEqualToString:@"modify"])
 	{
@@ -182,16 +182,16 @@
 
 - (BOOL)hasOutOfBandData
 {
-	return ([self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND] ? YES : NO);
+	return ([self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND] ? YES : NO);
 }
 
 - (NSURL *)outOfBandURL
 {
 	NSURL *URL = nil;
 	
-	NSXMLElement *outOfBand = [self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
-	NSXMLElement *URLElement = [outOfBand elementForName:@"url"];
+	NSXMLElement *URLElement = [outOfBand xmpp_elementForName:@"url"];
 	
 	NSString *URLString = [URLElement stringValue];
 	
@@ -206,9 +206,9 @@
 
 - (NSString *)outOfBandURI
 {
-	NSXMLElement *outOfBand = [self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
-	NSXMLElement *URLElement = [outOfBand elementForName:@"url"];
+	NSXMLElement *URLElement = [outOfBand xmpp_elementForName:@"url"];
 	
 	NSString *URI= [URLElement stringValue];
 	
@@ -217,9 +217,9 @@
 
 - (NSString *)outOfBandDesc
 {
-	NSXMLElement *outOfBand = [self elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
+	NSXMLElement *outOfBand = [self xmpp_elementForName:NAME_OUT_OF_BAND xmlns:XMLNS_OUT_OF_BAND];
 	
-	NSXMLElement *descElement = [outOfBand elementForName:@"desc"];
+	NSXMLElement *descElement = [outOfBand xmpp_elementForName:@"desc"];
 	
 	NSString *desc = [descElement stringValue];
 	

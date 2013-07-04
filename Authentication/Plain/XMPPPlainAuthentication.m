@@ -61,8 +61,8 @@
 	
 	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">Base-64-Info</auth>
 	
-	NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-	[auth addAttributeWithName:@"mechanism" stringValue:@"PLAIN"];
+	NSXMLElement *auth = [NSXMLElement xmpp_elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	[auth xmpp_addAttributeWithName:@"mechanism" stringValue:@"PLAIN"];
 	[auth setStringValue:base64];
 	
 	[xmppStream sendAuthElement:auth];

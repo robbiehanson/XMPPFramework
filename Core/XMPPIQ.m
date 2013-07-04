@@ -105,13 +105,13 @@
 	if ((self = [super initWithName:@"iq"]))
 	{
 		if (type)
-			[self addAttributeWithName:@"type" stringValue:type];
+			[self xmpp_addAttributeWithName:@"type" stringValue:type];
 		
 		if (jid)
-			[self addAttributeWithName:@"to" stringValue:[jid full]];
+			[self xmpp_addAttributeWithName:@"to" stringValue:[jid full]];
 		
 		if (eid)
-			[self addAttributeWithName:@"id" stringValue:eid];
+			[self xmpp_addAttributeWithName:@"id" stringValue:eid];
 		
 		if (childElement)
 			[self addChild:childElement];
@@ -144,7 +144,7 @@
 
 - (NSString *)type
 {
-	return [[self attributeStringValueForName:@"type"] lowercaseString];
+	return [[self xmpp_attributeStringValueForName:@"type"] lowercaseString];
 }
 
 - (BOOL)isGetIQ

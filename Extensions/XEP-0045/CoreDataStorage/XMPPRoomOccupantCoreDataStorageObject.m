@@ -71,7 +71,7 @@
 	[self willChangeValueForKey:@"presenceStr"];
 	
 	self.primitivePresence = newPresence;
-	self.primitivePresenceStr = [newPresence compactXMLString];
+	self.primitivePresenceStr = [newPresence xmpp_compactXMLString];
 	
 	[self didChangeValueForKey:@"presence"];
 	[self didChangeValueForKey:@"presenceStr"];

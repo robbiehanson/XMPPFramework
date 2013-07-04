@@ -299,7 +299,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	
 	if ([elementName isEqualToString:@"stream:error"] || [elementName isEqualToString:@"error"])
 	{
-		NSXMLElement *conflict = [element elementForName:@"conflict" xmlns:@"urn:ietf:params:xml:ns:xmpp-streams"];
+		NSXMLElement *conflict = [element xmpp_elementForName:@"conflict" xmlns:@"urn:ietf:params:xml:ns:xmpp-streams"];
 		if (conflict)
 		{
 			[self setShouldReconnect:NO];

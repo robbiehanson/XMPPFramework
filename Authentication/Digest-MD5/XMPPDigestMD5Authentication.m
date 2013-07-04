@@ -85,8 +85,8 @@
 	
 	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="DIGEST-MD5" />
 	
-	NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-	[auth addAttributeWithName:@"mechanism" stringValue:@"DIGEST-MD5"];
+	NSXMLElement *auth = [NSXMLElement xmpp_elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	[auth xmpp_addAttributeWithName:@"mechanism" stringValue:@"DIGEST-MD5"];
 	
 	[xmppStream sendAuthElement:auth];
 	awaitingChallenge = YES;
@@ -144,7 +144,7 @@
 	
 	// Create and send challenge response element
 	
-	NSXMLElement *response = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	NSXMLElement *response = [NSXMLElement xmpp_elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 	[response setStringValue:[self base64EncodedFullResponse]];
 	
 	[xmppStream sendAuthElement:response];
@@ -178,7 +178,7 @@
 			// Create and send empty challenge response element.
 			
 			NSXMLElement *response =
-			    [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+			    [NSXMLElement xmpp_elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			
 			[xmppStream sendAuthElement:response];
 			

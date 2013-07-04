@@ -348,12 +348,12 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		}
 		else
 		{
-			NSString *jidStr = [item attributeStringValueForName:@"jid"];
+			NSString *jidStr = [item xmpp_attributeStringValueForName:@"jid"];
 			XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
 			
 			XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 			
-			NSString *subscription = [item attributeStringValueForName:@"subscription"];
+			NSString *subscription = [item xmpp_attributeStringValueForName:@"subscription"];
 			if ([subscription isEqualToString:@"remove"])
 			{
 				if (user)

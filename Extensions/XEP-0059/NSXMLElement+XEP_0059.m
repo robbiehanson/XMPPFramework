@@ -15,7 +15,7 @@
 
 - (BOOL)isResultSet
 {    
-    if([[self name] isEqualToString:NAME_XMPP_RESULT_SET] && [[self xmlns] isEqualToString:XMLNS_XMPP_RESULT_SET])
+    if([[self name] isEqualToString:NAME_XMPP_RESULT_SET] && [[self xmpp_xmlns] isEqualToString:XMLNS_XMPP_RESULT_SET])
     {
         return YES;
     }
@@ -39,7 +39,7 @@
 
 - (XMPPResultSet *)resultSet
 {
-    NSXMLElement *resultSetElement = [self elementForName:NAME_XMPP_RESULT_SET xmlns:XMLNS_XMPP_RESULT_SET];
+    NSXMLElement *resultSetElement = [self xmpp_elementForName:NAME_XMPP_RESULT_SET xmlns:XMLNS_XMPP_RESULT_SET];
     XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:resultSetElement];
     return resultSet;    
 }

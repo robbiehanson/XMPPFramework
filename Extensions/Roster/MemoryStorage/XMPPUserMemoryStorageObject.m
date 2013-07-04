@@ -42,10 +42,10 @@
 {
 	if ((self = [super init]))
 	{
-		NSString *jidStr = [item attributeStringValueForName:@"jid"];
+		NSString *jidStr = [item xmpp_attributeStringValueForName:@"jid"];
 		jid = [[XMPPJID jidWithString:jidStr] bareJID];
 		
-		itemAttributes = [item attributesAsDictionary];
+		itemAttributes = [item xmpp_attributesAsDictionary];
 		
 		[self commonInit];
 	}

@@ -62,7 +62,7 @@
 #pragma mark Getter/setter methods
 
 - (BOOL)isHome {
-	return [self elementForName:@"HOME"] != nil;
+	return [self xmpp_elementForName:@"HOME"] != nil;
 }
 
 
@@ -72,7 +72,7 @@
 
 
 - (BOOL)isWork {
-	return [self elementForName:@"WORK"] != nil;
+	return [self xmpp_elementForName:@"WORK"] != nil;
 }
 
 
@@ -82,7 +82,7 @@
 
 
 - (BOOL)isVoice {
-	return [self elementForName:@"VOICE"] != nil;
+	return [self xmpp_elementForName:@"VOICE"] != nil;
 }
 
 
@@ -92,7 +92,7 @@
 
 
 - (BOOL)isFax {
-	return [self elementForName:@"FAX"] != nil;
+	return [self xmpp_elementForName:@"FAX"] != nil;
 }
 
 
@@ -102,7 +102,7 @@
 
 
 - (BOOL)isPager {
-	return [self elementForName:@"PAGER"] != nil;
+	return [self xmpp_elementForName:@"PAGER"] != nil;
 }
 
 
@@ -112,7 +112,7 @@
 
 
 - (BOOL)hasMessaging {
-	return [self elementForName:@"MSG"] != nil;
+	return [self xmpp_elementForName:@"MSG"] != nil;
 }
 
 
@@ -122,7 +122,7 @@
 
 
 - (BOOL)isCell {
-	return [self elementForName:@"CELL"] != nil;
+	return [self xmpp_elementForName:@"CELL"] != nil;
 }
 
 
@@ -132,7 +132,7 @@
 
 
 - (BOOL)isVideo {
-	return [self elementForName:@"VIDEO"] != nil;
+	return [self xmpp_elementForName:@"VIDEO"] != nil;
 }
 
 
@@ -142,7 +142,7 @@
 
 
 - (BOOL)isBBS {
-	return [self elementForName:@"BBS"] != nil;
+	return [self xmpp_elementForName:@"BBS"] != nil;
 }
 
 
@@ -152,7 +152,7 @@
 
 
 - (BOOL)isModem {
-	return [self elementForName:@"MODEM"] != nil;
+	return [self xmpp_elementForName:@"MODEM"] != nil;
 }
 
 
@@ -162,7 +162,7 @@
 
 
 - (BOOL)isISDN {
-	return [self elementForName:@"ISDN"] != nil;
+	return [self xmpp_elementForName:@"ISDN"] != nil;
 }
 
 
@@ -172,7 +172,7 @@
 
 
 - (BOOL)isPCS {
-	return [self elementForName:@"PCS"] != nil;
+	return [self xmpp_elementForName:@"PCS"] != nil;
 }
 
 
@@ -182,7 +182,7 @@
 
 
 - (BOOL)isPreferred {
-	return [self elementForName:@"PREF"] != nil;
+	return [self xmpp_elementForName:@"PREF"] != nil;
 }
 
 
@@ -192,7 +192,7 @@
 
 
 - (NSString *)number {
-	return [[self elementForName:@"NUMBER"] stringValue];
+	return [[self xmpp_elementForName:@"NUMBER"] stringValue];
 }
 
 

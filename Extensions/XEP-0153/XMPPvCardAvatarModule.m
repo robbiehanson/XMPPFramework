@@ -178,7 +178,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 - (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence {
 	XMPPLogTrace();
     
-	NSXMLElement *currentXElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+	NSXMLElement *currentXElement = [presence xmpp_elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
 	
 	//If there is already a x element then remove it
 	if(currentXElement)
@@ -192,7 +192,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	}
 	// add our photo info to the presence stanza
 	NSXMLElement *photoElement = nil;
-	NSXMLElement *xElement = [NSXMLElement elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+	NSXMLElement *xElement = [NSXMLElement xmpp_elementWithName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
 
 	NSString *photoHash = [_moduleStorage photoHashForJID:[sender myJID] xmppStream:sender];
 
@@ -215,13 +215,13 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence  {
 	XMPPLogTrace();
 
-	NSXMLElement *xElement = [presence elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
+	NSXMLElement *xElement = [presence xmpp_elementForName:kXMPPvCardAvatarElement xmlns:kXMPPvCardAvatarNS];
 
 	if (xElement == nil) {
 		return;
 	}
 
-	NSXMLElement *photoElement = [xElement elementForName:kXMPPvCardAvatarPhotoElement];
+	NSXMLElement *photoElement = [xElement xmpp_elementForName:kXMPPvCardAvatarPhotoElement];
 
 	if (photoElement == nil) {
 		return;

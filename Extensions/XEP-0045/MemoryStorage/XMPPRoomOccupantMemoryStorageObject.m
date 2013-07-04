@@ -111,11 +111,11 @@
 
 - (NSString *)itemAttributeStringValueForName:(NSString *)attrName
 {
-	NSXMLElement *x = [presence elementForName:@"x" xmlns:@"http://jabber.org/protocol/muc#user"];
-	NSXMLElement *item = [x elementForName:@"item"];
+	NSXMLElement *x = [presence xmpp_elementForName:@"x" xmlns:@"http://jabber.org/protocol/muc#user"];
+	NSXMLElement *item = [x xmpp_elementForName:@"item"];
 	if (item)
 	{
-		NSString *result = [item attributeStringValueForName:attrName];
+		NSString *result = [item xmpp_attributeStringValueForName:attrName];
 		if (result)
 		{
 			return [result lowercaseString];

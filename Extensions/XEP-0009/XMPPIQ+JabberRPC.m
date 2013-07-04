@@ -55,7 +55,7 @@
 #pragma mark Element helper methods
 
 +(NSXMLElement *)elementRpcQuery {
-	return [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:rpc"];
+	return [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:rpc"];
 }
 
 +(NSXMLElement *)elementMethodCall {
@@ -76,8 +76,8 @@
 
 +(NSXMLElement *)elementRpcIdentity {
 	NSXMLElement *identity = [NSXMLElement elementWithName:@"identity"];
-	[identity addAttributeWithName:@"category" stringValue:@"automation"];
-	[identity addAttributeWithName:@"type" stringValue:@"rpc"];
+	[identity xmpp_addAttributeWithName:@"category" stringValue:@"automation"];
+	[identity xmpp_addAttributeWithName:@"type" stringValue:@"rpc"];
 	return identity;
 }
 
@@ -85,7 +85,7 @@
 //	 <feature var='jabber:iq:rpc'/>
 +(NSXMLElement *)elementRpcFeature {
 	NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-	[feature addAttributeWithName:@"var" stringValue:@"jabber:iq:rpc"];
+	[feature xmpp_addAttributeWithName:@"var" stringValue:@"jabber:iq:rpc"];
 	return feature;
 }
 #pragma mark Conversion methods

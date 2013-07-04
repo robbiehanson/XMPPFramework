@@ -164,11 +164,11 @@
 	//      reason='Hey Hecate, this is the place for all good witches!'/>
 	// </message>
 	
-	NSXMLElement * x = [message elementForName:@"x" xmlns:XMPPMUCUserNamespace];
-	NSXMLElement * invite  = [x elementForName:@"invite"];
-	NSXMLElement * decline = [x elementForName:@"decline"];
+	NSXMLElement * x = [message xmpp_elementForName:@"x" xmlns:XMPPMUCUserNamespace];
+	NSXMLElement * invite  = [x xmpp_elementForName:@"invite"];
+	NSXMLElement * decline = [x xmpp_elementForName:@"decline"];
 	
-	NSXMLElement * directInvite = [message elementForName:@"x" xmlns:@"jabber:x:conference"];
+	NSXMLElement * directInvite = [message xmpp_elementForName:@"x" xmlns:@"jabber:x:conference"];
     
     XMPPJID * roomJID = [message from];
 	

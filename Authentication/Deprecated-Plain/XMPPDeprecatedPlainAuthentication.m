@@ -62,7 +62,7 @@
 		resource = [XMPPStream generateUUID];
 	}
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:auth"];
 	[query addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];
 	[query addChild:[NSXMLElement elementWithName:@"resource" stringValue:resource]];
 	[query addChild:[NSXMLElement elementWithName:@"password" stringValue:password]];
@@ -81,7 +81,7 @@
 	
 	// We used the old fashioned jabber:iq:auth mechanism
 	
-	if ([[authResponse attributeStringValueForName:@"type"] isEqualToString:@"error"])
+	if ([[authResponse xmpp_attributeStringValueForName:@"type"] isEqualToString:@"error"])
 	{
 		return XMPP_AUTH_FAIL;
 	}
@@ -138,8 +138,8 @@
 				}
 			}
 			
-			NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:auth"];
-			NSXMLElement *plain = [query elementForName:@"password"];
+			NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"jabber:iq:auth"];
+			NSXMLElement *plain = [query xmpp_elementForName:@"password"];
 			
 			result = (plain != nil);
 		}
