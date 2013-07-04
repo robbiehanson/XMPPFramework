@@ -593,9 +593,9 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 	
 	NSData *data = [s dataUsingEncoding:NSUTF8StringEncoding];
-	NSData *hash = [data sha1Digest];
+	NSData *hash = [data xmpp_sha1Digest];
 	
-	return [hash base64Encoded];
+	return [hash xmpp_base64Encoded];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

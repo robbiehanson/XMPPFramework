@@ -283,7 +283,7 @@
 - (NSData *)parseData: (NSString *)value {
 	// Convert the base 64 encoded data into a string
 	NSData *base64Data = [value dataUsingEncoding:NSASCIIStringEncoding];
-	NSData *decodedData = [base64Data base64Decoded];
+	NSData *decodedData = [base64Data xmpp_base64Decoded];
 	
     return decodedData;
 }
