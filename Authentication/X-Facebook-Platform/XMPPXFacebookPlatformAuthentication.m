@@ -162,7 +162,7 @@ static char facebookAppIdKey;
 	// Once "decoded", it's just a string of key=value pairs separated by ampersands.
 	
 	NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
-	NSData *decodedData = [base64Data base64Decoded];
+	NSData *decodedData = [base64Data xmpp_base64Decoded];
 	
 	NSString *authStr = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
 	
@@ -216,7 +216,7 @@ static char facebookAppIdKey;
 	
 	NSData *utf8data = [buffer dataUsingEncoding:NSUTF8StringEncoding];
 	
-	return [utf8data base64Encoded];
+	return [utf8data xmpp_base64Encoded];
 }
 
 @end
