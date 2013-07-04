@@ -280,7 +280,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet addObject:[NSNumber numberWithPtr:(__bridge void *)stream]];
+		[rosterPopulationSet addObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]];
     
 		// Clear anything already in the roster core data store.
 		// 
@@ -322,7 +322,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet removeObject:[NSNumber numberWithPtr:(__bridge void *)stream]];
+		[rosterPopulationSet removeObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]];
 	}];
 }
 
@@ -338,7 +338,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		NSManagedObjectContext *moc = [self managedObjectContext];
 		
-		if ([rosterPopulationSet containsObject:[NSNumber numberWithPtr:(__bridge void *)stream]])
+		if ([rosterPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]])
 		{
 			NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 			

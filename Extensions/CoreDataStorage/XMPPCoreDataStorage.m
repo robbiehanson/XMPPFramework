@@ -352,7 +352,7 @@ static NSMutableSet *databaseFileNames;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSNumber *key = [NSNumber numberWithPtr:(__bridge void *)stream];
+		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
 		
 		result = (XMPPJID *)[myJidCache objectForKey:key];
 		if (!result)
@@ -389,7 +389,7 @@ static NSMutableSet *databaseFileNames;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSNumber *key = [NSNumber numberWithPtr:(__bridge void *)stream];
+		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
 		XMPPJID *cachedJID = [myJidCache objectForKey:key];
 		
 		if (cachedJID)
