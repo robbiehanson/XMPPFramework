@@ -167,6 +167,23 @@
 	return nil;
 }
 
+//XEP-0106: JID Escaping
+//http://xmpp.org/extensions/xep-0106.html
++ (XMPPJID *)jidWithUnescapedUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
+{
+    NSString *escapedUser = [user stringByReplacingOccurrencesOfString:@"\\" withString:@"\\5c"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@"\"" withString:@"\\22"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@"&" withString:@"\\26"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@"\'" withString:@"\\27"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@"/" withString:@"\\2f"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@":" withString:@"\\3a"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@"<" withString:@"\\3c"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@">" withString:@"\\3e"];
+    escapedUser = [escapedUser stringByReplacingOccurrencesOfString:@"@" withString:@"\\40"];
+    
+    return [XMPPJID jidWithUser:escapedUser domain:domain resource:resource];
+}
+
 + (XMPPJID *)jidWithPrevalidatedUser:(NSString *)user
                   prevalidatedDomain:(NSString *)domain
                 prevalidatedResource:(NSString *)resource
