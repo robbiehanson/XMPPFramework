@@ -132,7 +132,7 @@
 	self.vCardAvatarRel.photoData = photoData;
 	[self didChangeValueForKey:@"photoData"];
 	
-	[self setPrimitiveValue:[[photoData sha1Digest] hexStringValue] forKey:@"photoHash"];
+	[self setPrimitiveValue:[[photoData xmpp_sha1Digest] xmpp_hexStringValue] forKey:@"photoHash"];
 }
 
 

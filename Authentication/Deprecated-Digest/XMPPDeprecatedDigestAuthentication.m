@@ -66,7 +66,7 @@
 	NSString *rootID = [[[xmppStream rootElement] attributeForName:@"id"] stringValue];
 	NSString *digestStr = [NSString stringWithFormat:@"%@%@", rootID, password];
 	
-	NSString *digest = [[[digestStr dataUsingEncoding:NSUTF8StringEncoding] sha1Digest] hexStringValue];
+	NSString *digest = [[[digestStr dataUsingEncoding:NSUTF8StringEncoding] xmpp_sha1Digest] xmpp_hexStringValue];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:auth"];
 	[query addChild:[NSXMLElement elementWithName:@"username" stringValue:username]];

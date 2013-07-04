@@ -1120,8 +1120,8 @@ static NSMutableArray *proxyCandidates;
 	XMPPJID *targetJID    = isClient ? jid   : myJID;
 	
 	NSString *hashMe = [NSString stringWithFormat:@"%@%@%@", uuid, [initiatorJID full], [targetJID full]];
-	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] sha1Digest];
-	NSData *hash = [[hashRaw hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] xmpp_sha1Digest];
+	NSData *hash = [[hashRaw xmpp_hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogVerbose(@"TURNSocket: hashMe : %@", hashMe);
 	XMPPLogVerbose(@"TURNSocket: hashRaw: %@", hashRaw);
