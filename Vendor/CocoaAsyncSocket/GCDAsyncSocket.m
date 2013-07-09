@@ -5835,25 +5835,29 @@ enum GCDAsyncSocketConfig
 		#if TARGET_OS_IPHONE
 		{
 			GCDAsyncSpecialPacket *tlsPacket = (GCDAsyncSpecialPacket *)currentRead;
-			NSDictionary *tlsSettings = tlsPacket->tlsSettings;
-			
-			NSNumber *value;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
-			if (value && [value boolValue] == YES)
-				canUseSecureTransport = NO;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredRoots];
-			if (value && [value boolValue] == YES)
-				canUseSecureTransport = NO;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLValidatesCertificateChain];
-			if (value && [value boolValue] == NO)
-				canUseSecureTransport = NO;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredCertificates];
-			if (value && [value boolValue] == YES)
-				canUseSecureTransport = NO;
+            
+            if(tlsPacket)
+            {
+                NSDictionary *tlsSettings = tlsPacket->tlsSettings;
+                
+                NSNumber *value = nil;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
+                if (value && [value boolValue] == YES)
+                    canUseSecureTransport = NO;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredRoots];
+                if (value && [value boolValue] == YES)
+                    canUseSecureTransport = NO;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLValidatesCertificateChain];
+                if (value && [value boolValue] == NO)
+                    canUseSecureTransport = NO;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredCertificates];
+                if (value && [value boolValue] == YES)
+                    canUseSecureTransport = NO;
+            }
 		}
 		#endif
 		
