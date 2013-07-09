@@ -20,7 +20,7 @@
 		DC34A2DB1488A0F9004F0A03 /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2DA1488A0F9004F0A03 /* NSXMLElement+XMPP.m */; };
 		DC34A2DE1488A10F004F0A03 /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2DD1488A10F004F0A03 /* NSNumber+XMPP.m */; };
 		DC34A2E11488A134004F0A03 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2E01488A134004F0A03 /* XMPPJID.m */; };
-		DC34A2E51488A14A004F0A03 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2E41488A14A004F0A03 /* LibIDN.m */; };
+		DC34A2E51488A14A004F0A03 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A2E41488A14A004F0A03 /* XMPPStringPrep.m */; };
 		DC34A2ED1488A16B004F0A03 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC34A2EA1488A16B004F0A03 /* libidn.a */; };
 /* End PBXBuildFile section */
 
@@ -52,8 +52,8 @@
 		DC34A2DD1488A10F004F0A03 /* NSNumber+XMPP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSNumber+XMPP.m"; path = "../../../../Categories/NSNumber+XMPP.m"; sourceTree = "<group>"; };
 		DC34A2DF1488A134004F0A03 /* XMPPJID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPJID.h; path = ../../../../Core/XMPPJID.h; sourceTree = "<group>"; };
 		DC34A2E01488A134004F0A03 /* XMPPJID.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPJID.m; path = ../../../../Core/XMPPJID.m; sourceTree = "<group>"; };
-		DC34A2E31488A14A004F0A03 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../../../Utilities/LibIDN.h; sourceTree = "<group>"; };
-		DC34A2E41488A14A004F0A03 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../../../Utilities/LibIDN.m; sourceTree = "<group>"; };
+		DC34A2E31488A14A004F0A03 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStringPrep.h; path = ../../../../Utilities/XMPPStringPrep.h; sourceTree = "<group>"; };
+		DC34A2E41488A14A004F0A03 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStringPrep.m; path = ../../../../Utilities/XMPPStringPrep.m; sourceTree = "<group>"; };
 		DC34A2E81488A16B004F0A03 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "idn-int.h"; sourceTree = "<group>"; };
 		DC34A2EA1488A16B004F0A03 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libidn.a; sourceTree = "<group>"; };
 		DC34A2EB1488A16B004F0A03 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringprep.h; sourceTree = "<group>"; };
@@ -174,8 +174,8 @@
 		DC34A2E21488A13E004F0A03 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				DC34A2E31488A14A004F0A03 /* LibIDN.h */,
-				DC34A2E41488A14A004F0A03 /* LibIDN.m */,
+				DC34A2E31488A14A004F0A03 /* XMPPStringPrep.h */,
+				DC34A2E41488A14A004F0A03 /* XMPPStringPrep.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -271,7 +271,7 @@
 				DC34A2DB1488A0F9004F0A03 /* NSXMLElement+XMPP.m in Sources */,
 				DC34A2DE1488A10F004F0A03 /* NSNumber+XMPP.m in Sources */,
 				DC34A2E11488A134004F0A03 /* XMPPJID.m in Sources */,
-				DC34A2E51488A14A004F0A03 /* LibIDN.m in Sources */,
+				DC34A2E51488A14A004F0A03 /* XMPPStringPrep.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
