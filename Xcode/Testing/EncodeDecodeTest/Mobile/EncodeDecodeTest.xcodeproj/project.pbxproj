@@ -27,7 +27,7 @@
 		DC34A34E1488AC34004F0A03 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A3471488AC34004F0A03 /* XMPPJID.m */; };
 		DC34A34F1488AC34004F0A03 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A3491488AC34004F0A03 /* XMPPMessage.m */; };
 		DC34A3501488AC34004F0A03 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A34B1488AC34004F0A03 /* XMPPPresence.m */; };
-		DC34A3531488AC44004F0A03 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A3521488AC44004F0A03 /* LibIDN.m */; };
+		DC34A3531488AC44004F0A03 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DC34A3521488AC44004F0A03 /* XMPPStringPrep.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -71,8 +71,8 @@
 		DC34A3491488AC34004F0A03 /* XMPPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMessage.m; path = ../../../../Core/XMPPMessage.m; sourceTree = "<group>"; };
 		DC34A34A1488AC34004F0A03 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPPresence.h; path = ../../../../Core/XMPPPresence.h; sourceTree = "<group>"; };
 		DC34A34B1488AC34004F0A03 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPPresence.m; path = ../../../../Core/XMPPPresence.m; sourceTree = "<group>"; };
-		DC34A3511488AC44004F0A03 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../../../Utilities/LibIDN.h; sourceTree = "<group>"; };
-		DC34A3521488AC44004F0A03 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../../../Utilities/LibIDN.m; sourceTree = "<group>"; };
+		DC34A3511488AC44004F0A03 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStringPrep.h; path = ../../../../Utilities/XMPPStringPrep.h; sourceTree = "<group>"; };
+		DC34A3521488AC44004F0A03 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStringPrep.m; path = ../../../../Utilities/XMPPStringPrep.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,8 +238,8 @@
 		DC34A33B1488AC0B004F0A03 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				DC34A3511488AC44004F0A03 /* LibIDN.h */,
-				DC34A3521488AC44004F0A03 /* LibIDN.m */,
+				DC34A3511488AC44004F0A03 /* XMPPStringPrep.h */,
+				DC34A3521488AC44004F0A03 /* XMPPStringPrep.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -320,7 +320,7 @@
 				DC34A34E1488AC34004F0A03 /* XMPPJID.m in Sources */,
 				DC34A34F1488AC34004F0A03 /* XMPPMessage.m in Sources */,
 				DC34A3501488AC34004F0A03 /* XMPPPresence.m in Sources */,
-				DC34A3531488AC44004F0A03 /* LibIDN.m in Sources */,
+				DC34A3531488AC44004F0A03 /* XMPPStringPrep.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -39,7 +39,7 @@
 		DCC0C33B1303496E00EC45D2 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C33A1303496E00EC45D2 /* GCDAsyncSocket.m */; };
 		DCC0C348130349A600EC45D2 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C341130349A600EC45D2 /* DDList.m */; };
 		DCC0C349130349A600EC45D2 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C343130349A600EC45D2 /* GCDMulticastDelegate.m */; };
-		DCC0C34A130349A600EC45D2 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C345130349A600EC45D2 /* LibIDN.m */; };
+		DCC0C34A130349A600EC45D2 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C345130349A600EC45D2 /* XMPPStringPrep.m */; };
 		DCC0C361130349C300EC45D2 /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C34F130349C300EC45D2 /* XMPPElement.m */; };
 		DCC0C362130349C300EC45D2 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C351130349C300EC45D2 /* XMPPIQ.m */; };
 		DCC0C363130349C300EC45D2 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C353130349C300EC45D2 /* XMPPJID.m */; };
@@ -124,8 +124,8 @@
 		DCC0C341130349A600EC45D2 /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDList.m; path = ../../../../../Utilities/DDList.m; sourceTree = SOURCE_ROOT; };
 		DCC0C342130349A600EC45D2 /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDMulticastDelegate.h; path = ../../../../../Utilities/GCDMulticastDelegate.h; sourceTree = SOURCE_ROOT; };
 		DCC0C343130349A600EC45D2 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDMulticastDelegate.m; path = ../../../../../Utilities/GCDMulticastDelegate.m; sourceTree = SOURCE_ROOT; };
-		DCC0C344130349A600EC45D2 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../../../../Utilities/LibIDN.h; sourceTree = SOURCE_ROOT; };
-		DCC0C345130349A600EC45D2 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../../../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
+		DCC0C344130349A600EC45D2 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStringPrep.h; path = ../../../../../Utilities/XMPPStringPrep.h; sourceTree = SOURCE_ROOT; };
+		DCC0C345130349A600EC45D2 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStringPrep.m; path = ../../../../../Utilities/XMPPStringPrep.m; sourceTree = SOURCE_ROOT; };
 		DCC0C34D130349C300EC45D2 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../../../../../Core/XMPP.h; sourceTree = SOURCE_ROOT; };
 		DCC0C34E130349C300EC45D2 /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPElement.h; path = ../../../../../Core/XMPPElement.h; sourceTree = SOURCE_ROOT; };
 		DCC0C34F130349C300EC45D2 /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPElement.m; path = ../../../../../Core/XMPPElement.m; sourceTree = SOURCE_ROOT; };
@@ -433,8 +433,8 @@
 				56F8385714C7962300AF62B3 /* RFImageToDataTransformer.m */,
 				56F8385A14C7962300AF62B3 /* XMPPIDTracker.h */,
 				56F8385B14C7962300AF62B3 /* XMPPIDTracker.m */,
-				DCC0C344130349A600EC45D2 /* LibIDN.h */,
-				DCC0C345130349A600EC45D2 /* LibIDN.m */,
+				DCC0C344130349A600EC45D2 /* XMPPStringPrep.h */,
+				DCC0C345130349A600EC45D2 /* XMPPStringPrep.m */,
 				DCC0C342130349A600EC45D2 /* GCDMulticastDelegate.h */,
 				DCC0C343130349A600EC45D2 /* GCDMulticastDelegate.m */,
 				DCF3C1671367299200111BA3 /* XMPPSRVResolver.h */,
@@ -592,7 +592,7 @@
 				DCC0C33B1303496E00EC45D2 /* GCDAsyncSocket.m in Sources */,
 				DCC0C348130349A600EC45D2 /* DDList.m in Sources */,
 				DCC0C349130349A600EC45D2 /* GCDMulticastDelegate.m in Sources */,
-				DCC0C34A130349A600EC45D2 /* LibIDN.m in Sources */,
+				DCC0C34A130349A600EC45D2 /* XMPPStringPrep.m in Sources */,
 				DCC0C361130349C300EC45D2 /* XMPPElement.m in Sources */,
 				DCC0C362130349C300EC45D2 /* XMPPIQ.m in Sources */,
 				DCC0C363130349C300EC45D2 /* XMPPJID.m in Sources */,

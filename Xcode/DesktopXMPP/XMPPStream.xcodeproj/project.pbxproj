@@ -65,7 +65,7 @@
 		DC7302D312F3D26700549AC7 /* XMPPCapsCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7302CE12F3D26700549AC7 /* XMPPCapsCoreDataStorageObject.m */; };
 		DC7302D412F3D26700549AC7 /* XMPPCapsResourceCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DC7302D012F3D26700549AC7 /* XMPPCapsResourceCoreDataStorageObject.m */; };
 		DC73031312F532BF00549AC7 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC73031212F532BF00549AC7 /* Security.framework */; };
-		DC84BAE4124407B60055A459 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE1124407B60055A459 /* LibIDN.m */; };
+		DC84BAE4124407B60055A459 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE1124407B60055A459 /* XMPPStringPrep.m */; };
 		DC84BAE5124407B60055A459 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAE3124407B60055A459 /* GCDMulticastDelegate.m */; };
 		DC84BB03124407F50055A459 /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAF2124407F50055A459 /* XMPPElement.m */; };
 		DC84BB04124407F50055A459 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BAF4124407F50055A459 /* XMPPIQ.m */; };
@@ -248,8 +248,8 @@
 		DC73031212F532BF00549AC7 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC84BAD6124407510055A459 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "idn-int.h"; path = "../../Vendor/libidn/idn-int.h"; sourceTree = SOURCE_ROOT; };
 		DC84BAD7124407510055A459 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stringprep.h; path = ../../Vendor/libidn/stringprep.h; sourceTree = SOURCE_ROOT; };
-		DC84BAE0124407B60055A459 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../Utilities/LibIDN.h; sourceTree = SOURCE_ROOT; };
-		DC84BAE1124407B60055A459 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
+		DC84BAE0124407B60055A459 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStringPrep.h; path = ../../Utilities/XMPPStringPrep.h; sourceTree = SOURCE_ROOT; };
+		DC84BAE1124407B60055A459 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStringPrep.m; path = ../../Utilities/XMPPStringPrep.m; sourceTree = SOURCE_ROOT; };
 		DC84BAE2124407B60055A459 /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDMulticastDelegate.h; path = ../../Utilities/GCDMulticastDelegate.h; sourceTree = SOURCE_ROOT; };
 		DC84BAE3124407B60055A459 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDMulticastDelegate.m; path = ../../Utilities/GCDMulticastDelegate.m; sourceTree = SOURCE_ROOT; };
 		DC84BAF0124407F50055A459 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../../Core/XMPP.h; sourceTree = SOURCE_ROOT; };
@@ -930,8 +930,8 @@
 				DC73028212F37F8A00549AC7 /* DDList.m */,
 				DC84BAE2124407B60055A459 /* GCDMulticastDelegate.h */,
 				DC84BAE3124407B60055A459 /* GCDMulticastDelegate.m */,
-				DC84BAE0124407B60055A459 /* LibIDN.h */,
-				DC84BAE1124407B60055A459 /* LibIDN.m */,
+				DC84BAE0124407B60055A459 /* XMPPStringPrep.h */,
+				DC84BAE1124407B60055A459 /* XMPPStringPrep.m */,
 				07AF18A7134BC3C30084D82A /* XMPPSRVResolver.h */,
 				07AF18A8134BC3C30084D82A /* XMPPSRVResolver.m */,
 			);
@@ -1154,7 +1154,7 @@
 				DCF825F50D749A5100BFABDE /* ChatController.m in Sources */,
 				DCF8260F0D74A5A000BFABDE /* WindowManager.m in Sources */,
 				DC6E98ED1098A4C700070ADE /* AppDelegate.m in Sources */,
-				DC84BAE4124407B60055A459 /* LibIDN.m in Sources */,
+				DC84BAE4124407B60055A459 /* XMPPStringPrep.m in Sources */,
 				DC84BAE5124407B60055A459 /* GCDMulticastDelegate.m in Sources */,
 				DC84BB03124407F50055A459 /* XMPPElement.m in Sources */,
 				DC84BB04124407F50055A459 /* XMPPIQ.m in Sources */,

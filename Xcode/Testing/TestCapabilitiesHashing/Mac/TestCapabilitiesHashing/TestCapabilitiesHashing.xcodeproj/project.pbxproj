@@ -40,7 +40,7 @@
 		DCC0C23C130340D200EC45D2 /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C235130340D200EC45D2 /* XMPPStream.m */; };
 		DCC0C2531303412E00EC45D2 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C2521303412E00EC45D2 /* GCDAsyncSocket.m */; };
 		DCC0C2631303418B00EC45D2 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C25E1303418B00EC45D2 /* DDList.m */; };
-		DCC0C2641303418B00EC45D2 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C2601303418B00EC45D2 /* LibIDN.m */; };
+		DCC0C2641303418B00EC45D2 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC0C2601303418B00EC45D2 /* XMPPStringPrep.m */; };
 		DCC0C270130341FE00EC45D2 /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC0C26F130341FE00EC45D2 /* libresolv.dylib */; };
 		DCC0C2721303421500EC45D2 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC0C2711303421500EC45D2 /* libxml2.dylib */; };
 		DCC0C28A1303459A00EC45D2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC0C2891303459A00EC45D2 /* Security.framework */; };
@@ -125,8 +125,8 @@
 		DCC0C2591303416E00EC45D2 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = "/Users/robbie/Programs/Google Code/XMPPFramework/Vendor/libidn/libidn.a"; sourceTree = "<absolute>"; };
 		DCC0C25D1303418B00EC45D2 /* DDList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDList.h; path = ../../../../../Utilities/DDList.h; sourceTree = SOURCE_ROOT; };
 		DCC0C25E1303418B00EC45D2 /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDList.m; path = ../../../../../Utilities/DDList.m; sourceTree = SOURCE_ROOT; };
-		DCC0C25F1303418B00EC45D2 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../../../../Utilities/LibIDN.h; sourceTree = SOURCE_ROOT; };
-		DCC0C2601303418B00EC45D2 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../../../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
+		DCC0C25F1303418B00EC45D2 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStringPrep.h; path = ../../../../../Utilities/XMPPStringPrep.h; sourceTree = SOURCE_ROOT; };
+		DCC0C2601303418B00EC45D2 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStringPrep.m; path = ../../../../../Utilities/XMPPStringPrep.m; sourceTree = SOURCE_ROOT; };
 		DCC0C268130341AD00EC45D2 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../../../../../Core/XMPP.h; sourceTree = SOURCE_ROOT; };
 		DCC0C26F130341FE00EC45D2 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		DCC0C2711303421500EC45D2 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
@@ -331,8 +331,8 @@
 				56F8384514C794BF00AF62B3 /* RFImageToDataTransformer.m */,
 				56F8384814C794BF00AF62B3 /* XMPPIDTracker.h */,
 				56F8384914C794BF00AF62B3 /* XMPPIDTracker.m */,
-				DCC0C25F1303418B00EC45D2 /* LibIDN.h */,
-				DCC0C2601303418B00EC45D2 /* LibIDN.m */,
+				DCC0C25F1303418B00EC45D2 /* XMPPStringPrep.h */,
+				DCC0C2601303418B00EC45D2 /* XMPPStringPrep.m */,
 				DCC0C2171303407000EC45D2 /* GCDMulticastDelegate.h */,
 				DCC0C2181303407000EC45D2 /* GCDMulticastDelegate.m */,
 				DCF3C18013672B0B00111BA3 /* XMPPSRVResolver.h */,
@@ -550,7 +550,7 @@
 				DCC0C23C130340D200EC45D2 /* XMPPStream.m in Sources */,
 				DCC0C2531303412E00EC45D2 /* GCDAsyncSocket.m in Sources */,
 				DCC0C2631303418B00EC45D2 /* DDList.m in Sources */,
-				DCC0C2641303418B00EC45D2 /* LibIDN.m in Sources */,
+				DCC0C2641303418B00EC45D2 /* XMPPStringPrep.m in Sources */,
 				DCC0C2E71303467700EC45D2 /* XMPPCapabilities.xcdatamodel in Sources */,
 				DCC0C2E81303467700EC45D2 /* XMPPCapabilitiesCoreDataStorage.m in Sources */,
 				DCC0C2E91303467700EC45D2 /* XMPPCapsCoreDataStorageObject.m in Sources */,

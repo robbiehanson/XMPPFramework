@@ -1,8 +1,8 @@
-#import "LibIDN.h"
+#import "XMPPStringPrep.h"
 #import "stringprep.h"
 
 
-@implementation LibIDN
+@implementation XMPPStringPrep
 
 + (NSString *)prepNode:(NSString *)node
 {
