@@ -16,10 +16,10 @@
 	//   </pubsub>
 	// </iq>
 	
-	NSXMLElement *pubsub = [self elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
-	NSXMLElement *subscription = [pubsub elementForName:@"subscription"];
+	NSXMLElement *pubsub = [self xmpp_elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	NSXMLElement *subscription = [pubsub xmpp_elementForName:@"subscription"];
 	
-	return [subscription attributeStringValueForName:@"subid"];
+	return [subscription xmpp_attributeStringValueForName:@"subid"];
 }
 
 @end

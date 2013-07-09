@@ -54,7 +54,7 @@
 	[self willChangeValueForKey:@"messageStr"];
 	
 	self.primitiveMessage = message;
-	self.primitiveMessageStr = [message compactXMLString];
+	self.primitiveMessageStr = [message xmpp_compactXMLString];
 	
 	[self didChangeValueForKey:@"message"];
 	[self didChangeValueForKey:@"messageStr"];

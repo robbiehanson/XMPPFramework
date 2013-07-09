@@ -218,7 +218,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 	//   <query xmlns='jabber:iq:privacy'/>
 	// </iq>
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
 	
 	NSString *uuid = [xmppStream generateUUID];
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:uuid child:query];
@@ -242,9 +242,9 @@ typedef enum XMPPPrivacyQueryInfoType {
 	// </iq>
 	
 	NSXMLElement *list = [NSXMLElement elementWithName:@"list"];
-	[list addAttributeWithName:@"name" stringValue:privacyListName];
+	[list xmpp_addAttributeWithName:@"name" stringValue:privacyListName];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
 	[query addChild:list];
 	
 	NSString *uuid = [xmppStream generateUUID];
@@ -355,10 +355,10 @@ typedef enum XMPPPrivacyQueryInfoType {
 	NSXMLElement *active = [NSXMLElement elementWithName:@"active"];
 	if (privacyListName)
 	{
-		[active addAttributeWithName:@"name" stringValue:privacyListName];
+		[active xmpp_addAttributeWithName:@"name" stringValue:privacyListName];
 	}
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
 	[query addChild:active];
 	
 	NSString *uuid = [xmppStream generateUUID];
@@ -401,10 +401,10 @@ typedef enum XMPPPrivacyQueryInfoType {
 	NSXMLElement *dfault = [NSXMLElement elementWithName:@"default"];
 	if (privacyListName)
 	{
-		[dfault addAttributeWithName:@"name" stringValue:privacyListName];
+		[dfault xmpp_addAttributeWithName:@"name" stringValue:privacyListName];
 	}
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
 	[query addChild:dfault];
 	
 	NSString *uuid = [xmppStream generateUUID];
@@ -440,14 +440,14 @@ typedef enum XMPPPrivacyQueryInfoType {
 	// </iq>
 	
 	NSXMLElement *list = [NSXMLElement elementWithName:@"list"];
-	[list addAttributeWithName:@"name" stringValue:privacyListName];
+	[list xmpp_addAttributeWithName:@"name" stringValue:privacyListName];
 	
 	if (items && ([items count] > 0))
 	{
 		[list setChildren:items];
 	}
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:privacy"];
 	[query addChild:list];
 	
 	NSString *uuid = [xmppStream generateUUID];
@@ -535,14 +535,14 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	NSXMLElement *item1 = (NSXMLElement *)itemOne;
 	NSXMLElement *item2 = (NSXMLElement *)itemTwo;
 	
-	NSString *orderStr1 = [item1 attributeStringValueForName:@"order"];
-	NSString *orderStr2 = [item2 attributeStringValueForName:@"order"];
+	NSString *orderStr1 = [item1 xmpp_attributeStringValueForName:@"order"];
+	NSString *orderStr2 = [item2 xmpp_attributeStringValueForName:@"order"];
 	
 	NSUInteger order1;
-	BOOL parse1 = [NSNumber parseString:orderStr1 intoNSUInteger:&order1];
+	BOOL parse1 = [NSNumber xmpp_parseString:orderStr1 intoNSUInteger:&order1];
 	
 	NSUInteger order2;
-	BOOL parse2 = [NSNumber parseString:orderStr2 intoNSUInteger:&order2];
+	BOOL parse2 = [NSNumber xmpp_parseString:orderStr2 intoNSUInteger:&order2];
 	
 	if (parse1)
 	{
@@ -600,19 +600,19 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 		
 		if ([[iq type] isEqualToString:@"result"])
 		{
-			NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:privacy"];
+			NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"jabber:iq:privacy"];
 			if (query == nil) return;
 			
-			NSXMLElement *active = [query elementForName:@"active"];
-			activeListName = [[active attributeStringValueForName:@"name"] copy];
+			NSXMLElement *active = [query xmpp_elementForName:@"active"];
+			activeListName = [[active xmpp_attributeStringValueForName:@"name"] copy];
 			
-			NSXMLElement *dfault = [query elementForName:@"default"];
-			defaultListName = [[dfault attributeStringValueForName:@"name"] copy];
+			NSXMLElement *dfault = [query xmpp_elementForName:@"default"];
+			defaultListName = [[dfault xmpp_attributeStringValueForName:@"name"] copy];
 			
 			NSArray *listNames = [query elementsForName:@"list"];
 			for (NSXMLElement *listName in listNames)
 			{
-				NSString *name = [listName attributeStringValueForName:@"name"];
+				NSString *name = [listName xmpp_attributeStringValueForName:@"name"];
 				if (name)
 				{
 					id value = [privacyDict objectForKey:name];
@@ -657,10 +657,10 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 		
 		if ([[iq type] isEqualToString:@"result"])
 		{
-			NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:privacy"];
+			NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"jabber:iq:privacy"];
 			if (query == nil) return;
 			
-			NSXMLElement *list = [query elementForName:@"list"];
+			NSXMLElement *list = [query xmpp_elementForName:@"list"];
 			if (list == nil) return;
 			
 			NSArray *items = [[list elementsForName:@"item"] sortedArrayUsingFunction:sortItems context:NULL];
@@ -791,7 +791,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	
 	if ([type isEqualToString:@"set"])
 	{
-		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:privacy"];
+		NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"jabber:iq:privacy"];
 		if (query)
 		{
 			// Privacy List Push:
@@ -807,9 +807,9 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 			// 
 			// <iq type='result' id='push1'/>
 			
-			NSXMLElement *list = [query elementForName:@"list"];
+			NSXMLElement *list = [query xmpp_elementForName:@"list"];
 			
-			NSString *listName = [list attributeStringValueForName:@"name"];
+			NSString *listName = [list xmpp_attributeStringValueForName:@"name"];
 			if (listName == nil)
 			{
 				return NO;
@@ -910,13 +910,13 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	
 	if (type)
-		[item addAttributeWithName:@"type"  stringValue:type];
+		[item xmpp_addAttributeWithName:@"type"  stringValue:type];
 	
 	if (value)
-		[item addAttributeWithName:@"value" stringValue:value];
+		[item xmpp_addAttributeWithName:@"value" stringValue:value];
 	
-	[item addAttributeWithName:@"action" stringValue:action];
-	[item addAttributeWithName:@"order"  stringValue:order];
+	[item xmpp_addAttributeWithName:@"action" stringValue:action];
+	[item xmpp_addAttributeWithName:@"order"  stringValue:order];
 	
 	return item;
 }

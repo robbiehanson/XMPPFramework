@@ -211,7 +211,7 @@
                           withItem:(NSXMLElement *)item
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-	NSString *jidStr = [item attributeStringValueForName:@"jid"];
+	NSString *jidStr = [item xmpp_attributeStringValueForName:@"jid"];
 	XMPPJID *jid = [XMPPJID jidWithString:jidStr];
 	
 	if (jid == nil)
@@ -257,7 +257,7 @@
 
 - (void)updateWithItem:(NSXMLElement *)item
 {
-	NSString *jidStr = [item attributeStringValueForName:@"jid"];
+	NSString *jidStr = [item xmpp_attributeStringValueForName:@"jid"];
 	XMPPJID *jid = [XMPPJID jidWithString:jidStr];
 	
 	if (jid == nil)
@@ -267,12 +267,12 @@
 	}
 	
 	self.jid = jid;
-	self.nickname = [item attributeStringValueForName:@"name"];
+	self.nickname = [item xmpp_attributeStringValueForName:@"name"];
 	
 	self.displayName = (self.nickname != nil) ? self.nickname : jidStr;
 	
-	self.subscription = [item attributeStringValueForName:@"subscription"];
-	self.ask = [item attributeStringValueForName:@"ask"];
+	self.subscription = [item xmpp_attributeStringValueForName:@"subscription"];
+	self.ask = [item xmpp_attributeStringValueForName:@"ask"];
 	
 	[self updateGroupsWithItem:item];
 }

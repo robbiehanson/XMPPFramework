@@ -165,7 +165,7 @@
 	//   <ping xmlns="urn:xmpp:ping"/>
 	// </iq>
 	
-	NSXMLElement *ping = [NSXMLElement elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
+	NSXMLElement *ping = [NSXMLElement xmpp_elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:pingID child:ping];
 	
@@ -195,7 +195,7 @@
 	//   <ping xmlns="urn:xmpp:ping"/>
 	// </iq>
 	
-	NSXMLElement *ping = [NSXMLElement elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
+	NSXMLElement *ping = [NSXMLElement xmpp_elementWithName:@"ping" xmlns:@"urn:xmpp:ping"];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:pingID child:ping];
 	
@@ -243,7 +243,7 @@
 		//   <ping xmlns="urn:xmpp:ping"/>
 		// </iq>
 		
-		NSXMLElement *ping = [iq elementForName:@"ping" xmlns:@"urn:xmpp:ping"];
+		NSXMLElement *ping = [iq xmpp_elementForName:@"ping" xmlns:@"urn:xmpp:ping"];
 		if (ping)
 		{
 			XMPPIQ *pong = [XMPPIQ iqWithType:@"result" to:[iq from] elementID:[iq elementID]];
@@ -279,7 +279,7 @@
 		// </query>
 		
 		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature"];
-		[feature addAttributeWithName:@"var" stringValue:@"urn:xmpp:ping"];
+		[feature xmpp_addAttributeWithName:@"var" stringValue:@"urn:xmpp:ping"];
 		
 		[query addChild:feature];
 	}

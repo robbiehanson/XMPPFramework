@@ -23,7 +23,7 @@
 
 
 - (BOOL)isHome {
-	return [self elementForName:@"HOME"] != nil;
+	return [self xmpp_elementForName:@"HOME"] != nil;
 }
 
 
@@ -33,7 +33,7 @@
 
 
 - (BOOL)isWork {
-	return [self elementForName:@"WORK"] != nil;
+	return [self xmpp_elementForName:@"WORK"] != nil;
 }
 
 
@@ -43,7 +43,7 @@
 
 
 - (BOOL)isParcel {
-	return [self elementForName:@"PARCEL"] != nil;
+	return [self xmpp_elementForName:@"PARCEL"] != nil;
 }
 
 
@@ -53,7 +53,7 @@
 
 
 - (BOOL)isPostal {
-	return [self elementForName:@"POSTAL"] != nil;
+	return [self xmpp_elementForName:@"POSTAL"] != nil;
 }
 
 
@@ -63,7 +63,7 @@
 
 
 - (BOOL)isDomestic {
-	return [self elementForName:@"DOM"] != nil;
+	return [self xmpp_elementForName:@"DOM"] != nil;
 }
 
 
@@ -77,7 +77,7 @@
 
 
 - (BOOL)isInternational {
-	return [self elementForName:@"INTL"] != nil;
+	return [self xmpp_elementForName:@"INTL"] != nil;
 }
 
 
@@ -91,7 +91,7 @@
 
 
 - (BOOL)isPreferred {
-	return [self elementForName:@"PREF"] != nil;
+	return [self xmpp_elementForName:@"PREF"] != nil;
 }
 
 

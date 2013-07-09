@@ -55,8 +55,8 @@
 {
 	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="ANONYMOUS" />
 	
-	NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-	[auth addAttributeWithName:@"mechanism" stringValue:@"ANONYMOUS"];
+	NSXMLElement *auth = [NSXMLElement xmpp_elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	[auth xmpp_addAttributeWithName:@"mechanism" stringValue:@"ANONYMOUS"];
 	
 	[xmppStream sendAuthElement:auth];
 	

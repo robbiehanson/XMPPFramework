@@ -25,8 +25,8 @@
 @implementation XMPPIQ(JabberRPCResonse)
 
 -(NSXMLElement *)methodResponseElement {
-	NSXMLElement *query = [self elementForName:@"query"];
-	return [query elementForName:@"methodResponse"];
+	NSXMLElement *query = [self xmpp_elementForName:@"query"];
+	return [query xmpp_elementForName:@"methodResponse"];
 }
 
 // is this a Jabber RPC method response
@@ -65,7 +65,7 @@
 	*/
 	NSXMLElement *methodResponse = [self methodResponseElement];
 	
-	return [methodResponse elementForName:@"fault"] != nil;
+	return [methodResponse xmpp_elementForName:@"fault"] != nil;
 }
 
 -(BOOL)isJabberRPC {
@@ -74,7 +74,7 @@
 		...
 	 </query>
 	*/
-	NSXMLElement *rpcQuery = [self elementForName:@"query" xmlns:@"jabber:iq:rpc"];
+	NSXMLElement *rpcQuery = [self xmpp_elementForName:@"query" xmlns:@"jabber:iq:rpc"];
 	return rpcQuery != nil;
 }
 
@@ -226,8 +226,8 @@
 }
 
 -(NSDictionary *)parseMember:(NSXMLElement *)memberElement {
-	NSString *key = [self objectFromElement:[memberElement elementForName:@"name"]];
-	id value = [self objectFromElement:[memberElement elementForName:@"value"]];
+	NSString *key = [self objectFromElement:[memberElement xmpp_elementForName:@"name"]];
+	id value = [self objectFromElement:[memberElement xmpp_elementForName:@"value"]];
 	
 	return [NSDictionary dictionaryWithObject:value forKey:key];	
 }
@@ -283,7 +283,7 @@
 - (NSData *)parseData: (NSString *)value {
 	// Convert the base 64 encoded data into a string
 	NSData *base64Data = [value dataUsingEncoding:NSASCIIStringEncoding];
-	NSData *decodedData = [base64Data base64Decoded];
+	NSData *decodedData = [base64Data xmpp_base64Decoded];
 	
     return decodedData;
 }

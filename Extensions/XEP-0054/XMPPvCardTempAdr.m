@@ -64,7 +64,7 @@
 
 
 - (NSString *)pobox {
-	return [[self elementForName:@"POBOX"] stringValue];
+	return [[self xmpp_elementForName:@"POBOX"] stringValue];
 }
 
 
@@ -74,7 +74,7 @@
 
 
 - (NSString *)extendedAddress {
-	return [[self elementForName:@"EXTADD"] stringValue];
+	return [[self xmpp_elementForName:@"EXTADD"] stringValue];
 }
 
 
@@ -84,7 +84,7 @@
 
 
 - (NSString *)street {
-	return [[self elementForName:@"STREET"] stringValue];
+	return [[self xmpp_elementForName:@"STREET"] stringValue];
 }
 
 
@@ -94,7 +94,7 @@
 
 
 - (NSString *)locality {
-	return [[self elementForName:@"LOCALITY"] stringValue];
+	return [[self xmpp_elementForName:@"LOCALITY"] stringValue];
 }
 
 
@@ -104,7 +104,7 @@
 
 
 - (NSString *)region {
-	return [[self elementForName:@"REGION"] stringValue];
+	return [[self xmpp_elementForName:@"REGION"] stringValue];
 }
 
 
@@ -114,7 +114,7 @@
 
 
 - (NSString *)postalCode {
-	return [[self elementForName:@"PCODE"] stringValue];
+	return [[self xmpp_elementForName:@"PCODE"] stringValue];
 }
 
 
@@ -124,7 +124,7 @@
 
 
 - (NSString *)country {
-	return [[self elementForName:@"CTRY"] stringValue];
+	return [[self xmpp_elementForName:@"CTRY"] stringValue];
 }
 
 

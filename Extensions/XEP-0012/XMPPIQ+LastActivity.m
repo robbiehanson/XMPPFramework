@@ -31,7 +31,7 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 + (XMPPIQ *)lastActivityResponseToIQ:(XMPPIQ *)request withSeconds:(NSUInteger)seconds status:(NSString *)status
 {
 	NSXMLElement *query = [[NSXMLElement alloc] initWithName:@"query" xmlns:XMPPLastActivityNamespace];
-    [query addAttributeWithName:@"seconds" stringValue:[NSString stringWithFormat:@"%lu", (unsigned long)seconds]];
+    [query xmpp_addAttributeWithName:@"seconds" stringValue:[NSString stringWithFormat:@"%lu", (unsigned long)seconds]];
 	if (status && [status length] > 0)
 	{
 		[query setStringValue:status];
@@ -44,7 +44,7 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 {
 	NSXMLElement *reason = [[NSXMLElement alloc] initWithName:@"forbidden" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
 	NSXMLElement *error = [[NSXMLElement alloc] initWithName:@"error"];
-	[error addAttributeWithName:@"type" stringValue:@"auth"];
+	[error xmpp_addAttributeWithName:@"type" stringValue:@"auth"];
 	[error addChild:reason];
     
 	return [[self alloc] initWithType:@"error" to:request.from elementID:request.elementID child:error];
@@ -65,9 +65,9 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 		if (attribute)
 		{
             // Some Servers Return -1 to indicate no activity, so we need to ignore these
-            if([query attributeIntegerValueForName:@"seconds"] >= 0)
+            if([query xmpp_attributeIntegerValueForName:@"seconds"] >= 0)
             {
-                seconds = [query attributeUnsignedIntegerValueForName:@"seconds"];
+                seconds = [query xmpp_attributeUnsignedIntegerValueForName:@"seconds"];
             }
 		}
 	}
@@ -90,7 +90,7 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 
 - (NSXMLElement *)lastActivityQueryElement
 {
-	return [self elementForName:@"query" xmlns:XMPPLastActivityNamespace];
+	return [self xmpp_elementForName:@"query" xmlns:XMPPLastActivityNamespace];
 }
 
 @end

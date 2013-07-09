@@ -71,10 +71,10 @@
 	if ((self = [super initWithName:@"presence"]))
 	{
 		if (type)
-			[self addAttributeWithName:@"type" stringValue:type];
+			[self xmpp_addAttributeWithName:@"type" stringValue:type];
 		
 		if (to)
-			[self addAttributeWithName:@"to" stringValue:[to description]];
+			[self xmpp_addAttributeWithName:@"to" stringValue:[to description]];
 	}
 	return self;
 }
@@ -89,7 +89,7 @@
 
 - (NSString *)type
 {
-	NSString *type = [self attributeStringValueForName:@"type"];
+	NSString *type = [self xmpp_attributeStringValueForName:@"type"];
 	if(type)
 		return [type lowercaseString];
 	else
@@ -98,17 +98,17 @@
 
 - (NSString *)show
 {
-	return [[self elementForName:@"show"] stringValue];
+	return [[self xmpp_elementForName:@"show"] stringValue];
 }
 
 - (NSString *)status
 {
-	return [[self elementForName:@"status"] stringValue];
+	return [[self xmpp_elementForName:@"status"] stringValue];
 }
 
 - (int)priority
 {
-	return [[[self elementForName:@"priority"] stringValue] intValue];
+	return [[[self xmpp_elementForName:@"priority"] stringValue] intValue];
 }
 
 - (int)intShow

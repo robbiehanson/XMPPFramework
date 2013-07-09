@@ -528,7 +528,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
 	
 	XMPPJID *messageJID = [message from];
-	NSString *messageBody = [[message elementForName:@"body"] stringValue];
+	NSString *messageBody = [[message xmpp_elementForName:@"body"] stringValue];
 	
 	NSDate *minLocalTimestamp = [remoteTimestamp dateByAddingTimeInterval:-60];
 	NSDate *maxLocalTimestamp = [remoteTimestamp dateByAddingTimeInterval: 60];
@@ -611,7 +611,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		}
 	}
 	
-	NSString *messageBody = [[message elementForName:@"body"] stringValue];
+	NSString *messageBody = [[message xmpp_elementForName:@"body"] stringValue];
 	
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
@@ -684,14 +684,14 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	NSString *affiliation = nil;
 	XMPPJID *realJID = nil;
 	
-	NSXMLElement *x = [presence elementForName:@"x" xmlns:@"http://jabber.org/protocol/muc#user"];
-	NSXMLElement *item = [x elementForName:@"item"];
+	NSXMLElement *x = [presence xmpp_elementForName:@"x" xmlns:@"http://jabber.org/protocol/muc#user"];
+	NSXMLElement *item = [x xmpp_elementForName:@"item"];
 	if (item)
 	{
-		role = [[item attributeStringValueForName:@"role"] lowercaseString];
-		affiliation = [[item attributeStringValueForName:@"affiliation"] lowercaseString];
+		role = [[item xmpp_attributeStringValueForName:@"role"] lowercaseString];
+		affiliation = [[item xmpp_attributeStringValueForName:@"affiliation"] lowercaseString];
 		
-		NSString *realJIDStr = [item attributeStringValueForName:@"jid"];
+		NSString *realJIDStr = [item xmpp_attributeStringValueForName:@"jid"];
 		if (realJIDStr)
 		{
 			realJID = [XMPPJID jidWithString:realJIDStr];
@@ -739,14 +739,14 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	NSString *affiliation = nil;
 	XMPPJID *realJID = nil;
 	
-	NSXMLElement *x = [presence elementForName:@"x" xmlns:@"http://jabber.org/protocol/muc#user"];
-	NSXMLElement *item = [x elementForName:@"item"];
+	NSXMLElement *x = [presence xmpp_elementForName:@"x" xmlns:@"http://jabber.org/protocol/muc#user"];
+	NSXMLElement *item = [x xmpp_elementForName:@"item"];
 	if (item)
 	{
-		role = [[item attributeStringValueForName:@"role"] lowercaseString];
-		affiliation = [[item attributeStringValueForName:@"affiliation"] lowercaseString];
+		role = [[item xmpp_attributeStringValueForName:@"role"] lowercaseString];
+		affiliation = [[item xmpp_attributeStringValueForName:@"affiliation"] lowercaseString];
 		
-		NSString *realJIDStr = [item attributeStringValueForName:@"jid"];
+		NSString *realJIDStr = [item xmpp_attributeStringValueForName:@"jid"];
 		if (realJIDStr)
 		{
 			realJID = [XMPPJID jidWithString:realJIDStr];

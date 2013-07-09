@@ -154,7 +154,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		//   <disable xmlns='p1:push'>
 		// </iq>
 		
-		NSXMLElement *disable = [NSXMLElement elementWithName:@"disable" xmlns:@"p1:push"];
+		NSXMLElement *disable = [NSXMLElement xmpp_elementWithName:@"disable" xmlns:@"p1:push"];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" child:disable];
 		
@@ -219,7 +219,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 
 + (NSXMLElement *)pushConfigurationContainer
 {
-	return [NSXMLElement elementWithName:@"push" xmlns:@"p1:push"];
+	return [NSXMLElement xmpp_elementWithName:@"push" xmlns:@"p1:push"];
 }
 
 + (NSXMLElement *)keepaliveWithMax:(NSTimeInterval)max
@@ -230,7 +230,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	NSString *maxStr = [NSString stringWithFormat:@"%.0f", max];
 	
 	NSXMLElement *keepalive = [NSXMLElement elementWithName:@"keepalive"];
-	[keepalive addAttributeWithName:@"max" stringValue:maxStr];
+	[keepalive xmpp_addAttributeWithName:@"max" stringValue:maxStr];
 	
 	return keepalive;
 }
@@ -248,7 +248,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	NSString *durationStr = [NSString stringWithFormat:@"%.0f", durationInMinutes];
 	
 	NSXMLElement *session = [NSXMLElement elementWithName:@"session"];
-	[session addAttributeWithName:@"duration" stringValue:durationStr];
+	[session xmpp_addAttributeWithName:@"duration" stringValue:durationStr];
 	
 	return session;
 }
@@ -263,7 +263,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	NSXMLElement *status = [NSXMLElement elementWithName:@"status"];
 	
 	if (type)
-		[status addAttributeWithName:@"type" stringValue:type];
+		[status xmpp_addAttributeWithName:@"type" stringValue:type];
 	
 	if (message)
 		[status setStringValue:message];
@@ -335,7 +335,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	NSXMLElement *jid = [NSXMLElement elementWithName:@"jid" stringValue:[sessionJID full]];
 	NSXMLElement *sid = [NSXMLElement elementWithName:@"sid" stringValue:sessionID];
 	
-	NSXMLElement *rebind = [NSXMLElement elementWithName:@"rebind" xmlns:@"p1:rebind"];
+	NSXMLElement *rebind = [NSXMLElement xmpp_elementWithName:@"rebind" xmlns:@"p1:rebind"];
 	[rebind addChild:jid];
 	[rebind addChild:sid];
 	
@@ -378,8 +378,8 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		// stream:features are received, and TLS has been setup (if required)
 		if (self.state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [self.rootElement elementForName:@"stream:features"];
-			NSXMLElement *push = [features elementForName:@"push" xmlns:@"p1:push"];
+			NSXMLElement *features = [self.rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *push = [features xmpp_elementForName:@"push" xmlns:@"p1:push"];
 			
 			result = (push != nil);
 		}
@@ -403,8 +403,8 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		// stream:features are received, and TLS has been setup (if required)
 		if (self.state >= STATE_XMPP_POST_NEGOTIATION)
 		{
-			NSXMLElement *features = [self.rootElement elementForName:@"stream:features"];
-			NSXMLElement *rebind = [features elementForName:@"rebind" xmlns:@"p1:rebind"];
+			NSXMLElement *features = [self.rootElement xmpp_elementForName:@"stream:features"];
+			NSXMLElement *rebind = [features xmpp_elementForName:@"rebind" xmlns:@"p1:rebind"];
 			
 			result = (rebind != nil);
 		}
@@ -420,7 +420,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 
 - (NSString *)rebindSessionID
 {
-	return [[self rootElement] attributeStringValueForName:@"id"];
+	return [[self rootElement] xmpp_attributeStringValueForName:@"id"];
 }
 
 @end

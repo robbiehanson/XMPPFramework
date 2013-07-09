@@ -105,13 +105,13 @@
 	if ((self = [super initWithName:@"message"]))
 	{
 		if (type)
-			[self addAttributeWithName:@"type" stringValue:type];
+			[self xmpp_addAttributeWithName:@"type" stringValue:type];
 		
 		if (jid)
-			[self addAttributeWithName:@"to" stringValue:[jid full]];
+			[self xmpp_addAttributeWithName:@"to" stringValue:[jid full]];
 		
 		if (eid)
-			[self addAttributeWithName:@"id" stringValue:eid];
+			[self xmpp_addAttributeWithName:@"id" stringValue:eid];
 		
 		if (childElement)
 			[self addChild:childElement];
@@ -144,12 +144,12 @@
 
 - (NSString *)body
 {
-	return [[self elementForName:@"body"] stringValue];
+	return [[self xmpp_elementForName:@"body"] stringValue];
 }
 
 - (NSString *)thread
 {
-	return [[self elementForName:@"thread"] stringValue];
+	return [[self xmpp_elementForName:@"thread"] stringValue];
 }
 
 - (void)addBody:(NSString *)body
@@ -190,16 +190,16 @@
         return nil;
     }
     
-    NSXMLElement *error = [self elementForName:@"error"];
+    NSXMLElement *error = [self xmpp_elementForName:@"error"];
     return [NSError errorWithDomain:@"urn:ietf:params:xml:ns:xmpp-stanzas" 
-                               code:[error attributeIntValueForName:@"code"] 
-                           userInfo:[NSDictionary dictionaryWithObject:[error compactXMLString] forKey:NSLocalizedDescriptionKey]];
+                               code:[error xmpp_attributeIntValueForName:@"code"] 
+                           userInfo:[NSDictionary dictionaryWithObject:[error xmpp_compactXMLString] forKey:NSLocalizedDescriptionKey]];
 
 }
 
 - (BOOL)isMessageWithBody
 {
-	return ([self elementForName:@"body"] != nil);
+	return ([self xmpp_elementForName:@"body"] != nil);
 }
 
 @end

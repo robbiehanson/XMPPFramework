@@ -85,8 +85,8 @@
 	
 	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="DIGEST-MD5" />
 	
-	NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-	[auth addAttributeWithName:@"mechanism" stringValue:@"DIGEST-MD5"];
+	NSXMLElement *auth = [NSXMLElement xmpp_elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	[auth xmpp_addAttributeWithName:@"mechanism" stringValue:@"DIGEST-MD5"];
 	
 	[xmppStream sendAuthElement:auth];
 	awaitingChallenge = YES;
@@ -144,7 +144,7 @@
 	
 	// Create and send challenge response element
 	
-	NSXMLElement *response = [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	NSXMLElement *response = [NSXMLElement xmpp_elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 	[response setStringValue:[self base64EncodedFullResponse]];
 	
 	[xmppStream sendAuthElement:response];
@@ -178,7 +178,7 @@
 			// Create and send empty challenge response element.
 			
 			NSXMLElement *response =
-			    [NSXMLElement elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+			    [NSXMLElement xmpp_elementWithName:@"response" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 			
 			[xmppStream sendAuthElement:response];
 			
@@ -215,7 +215,7 @@
 	// Once "decoded", it's just a string of key=value pairs separated by commas.
 	
 	NSData *base64Data = [[challenge stringValue] dataUsingEncoding:NSASCIIStringEncoding];
-	NSData *decodedData = [base64Data base64Decoded];
+	NSData *decodedData = [base64Data xmpp_base64Decoded];
 	
 	NSString *authStr = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
 	
@@ -260,7 +260,7 @@
 	XMPPLogVerbose(@"HA1str: %@", HA1str);
 	XMPPLogVerbose(@"HA2str: %@", HA2str);
 	
-	NSData *HA1dataA = [[HA1str dataUsingEncoding:NSUTF8StringEncoding] md5Digest];
+	NSData *HA1dataA = [[HA1str dataUsingEncoding:NSUTF8StringEncoding] xmpp_md5Digest];
 	NSData *HA1dataB = [[NSString stringWithFormat:@":%@:%@", nonce, cnonce] dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogVerbose(@"HA1dataA: %@", HA1dataA);
@@ -272,9 +272,9 @@
 	
 	XMPPLogVerbose(@"HA1data: %@", HA1data);
 	
-	NSString *HA1 = [[HA1data md5Digest] hexStringValue];
+	NSString *HA1 = [[HA1data xmpp_md5Digest] xmpp_hexStringValue];
 	
-	NSString *HA2 = [[[HA2str dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
+	NSString *HA2 = [[[HA2str dataUsingEncoding:NSUTF8StringEncoding] xmpp_md5Digest] xmpp_hexStringValue];
 	
 	XMPPLogVerbose(@"HA1: %@", HA1);
 	XMPPLogVerbose(@"HA2: %@", HA2);
@@ -284,7 +284,7 @@
 	
 	XMPPLogVerbose(@"responseStr: %@", responseStr);
 	
-	NSString *response = [[[responseStr dataUsingEncoding:NSUTF8StringEncoding] md5Digest] hexStringValue];
+	NSString *response = [[[responseStr dataUsingEncoding:NSUTF8StringEncoding] xmpp_md5Digest] xmpp_hexStringValue];
 	
 	XMPPLogVerbose(@"response: %@", response);
 	
@@ -308,7 +308,7 @@
 	
 	NSData *utf8data = [buffer dataUsingEncoding:NSUTF8StringEncoding];
 	
-	return [utf8data base64Encoded];
+	return [utf8data xmpp_base64Encoded];
 }
 
 @end

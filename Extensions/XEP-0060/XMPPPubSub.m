@@ -31,7 +31,7 @@
 
 + (BOOL)isPubSubMessage:(XMPPMessage *)message
 {
-	NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
+	NSXMLElement *event = [message xmpp_elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
 	return (event != nil);
 }
 
@@ -418,7 +418,7 @@
 	//   </event>
 	// </message>
 	
-	NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
+	NSXMLElement *event = [message xmpp_elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
 	if (event)
 	{
 		[multicastDelegate xmppPubSub:self didReceiveMessage:message];
@@ -457,12 +457,12 @@
 	//   </field>
 	// </x>
 	
-	NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
-	[x addAttributeWithName:@"type" stringValue:@"submit"];
+	NSXMLElement *x = [NSXMLElement xmpp_elementWithName:@"x" xmlns:@"jabber:x:data"];
+	[x xmpp_addAttributeWithName:@"type" stringValue:@"submit"];
 	
 	NSXMLElement *formTypeField = [NSXMLElement elementWithName:@"field"];
-	[formTypeField addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
-	[formTypeField addAttributeWithName:@"type" stringValue:@"hidden"];
+	[formTypeField xmpp_addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
+	[formTypeField xmpp_addAttributeWithName:@"type" stringValue:@"hidden"];
 	[formTypeField addChild:[NSXMLElement elementWithName:@"value" stringValue:formTypeValue]];
 	
 	[x addChild:formTypeField];
@@ -474,7 +474,7 @@
 		NSXMLElement *field = [NSXMLElement elementWithName:@"field"];
 		
 		NSString *var = (NSString *)key;
-		[field addAttributeWithName:@"var" stringValue:var];
+		[field xmpp_addAttributeWithName:@"var" stringValue:var];
 		
 		if ([obj isKindOfClass:[NSArray class]])
 		{
@@ -537,10 +537,10 @@
 	// </iq>
 	
 	NSXMLElement *subscribe = [NSXMLElement elementWithName:@"subscribe"];
-	[subscribe addAttributeWithName:@"node" stringValue:node];
-	[subscribe addAttributeWithName:@"jid" stringValue:jidStr];
+	[subscribe xmpp_addAttributeWithName:@"node" stringValue:node];
+	[subscribe xmpp_addAttributeWithName:@"jid" stringValue:jidStr];
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
 	[pubsub addChild:subscribe];
 	
 	if (options)
@@ -613,12 +613,12 @@
 	// </iq>
 	
 	NSXMLElement *unsubscribe = [NSXMLElement elementWithName:@"unsubscribe"];
-	[unsubscribe addAttributeWithName:@"node" stringValue:node];
-	[unsubscribe addAttributeWithName:@"jid" stringValue:jidStr];
+	[unsubscribe xmpp_addAttributeWithName:@"node" stringValue:node];
+	[unsubscribe xmpp_addAttributeWithName:@"jid" stringValue:jidStr];
     if (subid)
-        [unsubscribe addAttributeWithName:@"subid" stringValue:subid];
+        [unsubscribe xmpp_addAttributeWithName:@"subid" stringValue:subid];
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
 	[pubsub addChild:unsubscribe];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
@@ -668,10 +668,10 @@
 	
 	NSXMLElement *subscriptions = [NSXMLElement elementWithName:@"subscriptions"];
 	if (node) {
-		[subscriptions addAttributeWithName:@"node" stringValue:node];
+		[subscriptions xmpp_addAttributeWithName:@"node" stringValue:node];
 	}
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
 	[pubsub addChild:subscriptions];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:uuid];
@@ -723,17 +723,17 @@
 	// </iq>
 	
 	NSXMLElement *optionsStanza = [NSXMLElement elementWithName:@"options"];
-	[optionsStanza addAttributeWithName:@"node" stringValue:node];
-	[optionsStanza addAttributeWithName:@"jid" stringValue:jidStr];
+	[optionsStanza xmpp_addAttributeWithName:@"node" stringValue:node];
+	[optionsStanza xmpp_addAttributeWithName:@"jid" stringValue:jidStr];
 	if (subid) {
-		[optionsStanza addAttributeWithName:@"subid" stringValue:subid];
+		[optionsStanza xmpp_addAttributeWithName:@"subid" stringValue:subid];
 	}
 	if (options) {
 		NSXMLElement *x = [self formForOptions:options withFromType:XMLNS_PUBSUB_NODE_CONFIG];
 		[optionsStanza addChild:x];
 	}
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
 	[pubsub addChild:optionsStanza];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
@@ -785,9 +785,9 @@
 	// </iq>
 	
 	NSXMLElement *create = [NSXMLElement elementWithName:@"create"];
-	[create addAttributeWithName:@"node" stringValue:node];
+	[create xmpp_addAttributeWithName:@"node" stringValue:node];
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
 	[pubsub addChild:create];
 
 	if (options)
@@ -834,9 +834,9 @@
 	// </iq>
 
 	NSXMLElement *delete = [NSXMLElement elementWithName:@"delete"];
-	[delete addAttributeWithName:@"node" stringValue:node];
+	[delete xmpp_addAttributeWithName:@"node" stringValue:node];
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
 	[pubsub addChild:delete];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
@@ -871,14 +871,14 @@
 	// </iq>
 	
 	NSXMLElement *configure  = [NSXMLElement elementWithName:@"configure"];
-	[configure addAttributeWithName:@"node" stringValue:node];
+	[configure xmpp_addAttributeWithName:@"node" stringValue:node];
 	if (options)
 	{
 		NSXMLElement *x = [self formForOptions:options withFromType:XMLNS_PUBSUB_NODE_CONFIG];
 		[configure addChild:x];
 	}
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB_OWNER];
 	[pubsub addChild:configure];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:serviceJID elementID:uuid];
@@ -927,14 +927,14 @@
 
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
 	if (itemId)
-		[item addAttributeWithName:@"id" stringValue:itemId];
+		[item xmpp_addAttributeWithName:@"id" stringValue:itemId];
 	[item addChild:entry];
 	
 	NSXMLElement *publish = [NSXMLElement elementWithName:@"publish"];
-	[publish addAttributeWithName:@"node" stringValue:node];
+	[publish xmpp_addAttributeWithName:@"node" stringValue:node];
 	[publish addChild:item];
 	
-	NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+	NSXMLElement *pubsub = [NSXMLElement xmpp_elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
 	[pubsub addChild:publish];
 	
 	if (options)

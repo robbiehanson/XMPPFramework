@@ -51,7 +51,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	NSString *xmlString = [self compactXMLString];
+	NSString *xmlString = [self xmpp_compactXMLString];
 	
 	if([coder allowsKeyedCoding])
 	{

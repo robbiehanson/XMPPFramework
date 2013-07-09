@@ -63,7 +63,7 @@
 
 
 - (BOOL)isHome {
-	return [self elementForName:@"HOME"] != nil;
+	return [self xmpp_elementForName:@"HOME"] != nil;
 }
 
 
@@ -73,7 +73,7 @@
 
 
 - (BOOL)isWork {
-	return [self elementForName:@"WORK"] != nil;
+	return [self xmpp_elementForName:@"WORK"] != nil;
 }
 
 
@@ -83,7 +83,7 @@
 
 
 - (BOOL)isInternet {
-	return [self elementForName:@"INTERNET"] != nil;
+	return [self xmpp_elementForName:@"INTERNET"] != nil;
 }
 
 
@@ -93,7 +93,7 @@
 
 
 - (BOOL)isX400 {
-	return [self elementForName:@"X400"] != nil;
+	return [self xmpp_elementForName:@"X400"] != nil;
 }
 
 
@@ -103,7 +103,7 @@
 
 
 - (BOOL)isPreferred {
-	return [self elementForName:@"PREF"] != nil;
+	return [self xmpp_elementForName:@"PREF"] != nil;
 }
 
 
@@ -113,7 +113,7 @@
 
 
 - (NSString *)userid {
-	return [[self elementForName:@"USERID"] stringValue];
+	return [[self xmpp_elementForName:@"USERID"] stringValue];
 }
 
 

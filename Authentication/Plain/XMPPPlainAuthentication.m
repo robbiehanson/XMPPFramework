@@ -57,12 +57,12 @@
 	NSString *username = [xmppStream.myJID user];
 	
 	NSString *payload = [NSString stringWithFormat:@"\0%@\0%@", username, password];
-	NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] base64Encoded];
+	NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] xmpp_base64Encoded];
 	
 	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">Base-64-Info</auth>
 	
-	NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-	[auth addAttributeWithName:@"mechanism" stringValue:@"PLAIN"];
+	NSXMLElement *auth = [NSXMLElement xmpp_elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+	[auth xmpp_addAttributeWithName:@"mechanism" stringValue:@"PLAIN"];
 	[auth setStringValue:base64];
 	
 	[xmppStream sendAuthElement:auth];

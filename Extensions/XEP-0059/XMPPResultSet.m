@@ -170,9 +170,9 @@
 
 - (NSInteger)max
 {
-    if([self elementForName:@"max"])
+    if([self xmpp_elementForName:@"max"])
     {
-        return [[[self elementForName:@"max"] stringValue] intValue];
+        return [[[self xmpp_elementForName:@"max"] stringValue] intValue];
     }else{
         return NSNotFound;
     }
@@ -180,13 +180,13 @@
 
 - (NSInteger)firstIndex
 {
-    if([[self elementForName:@"first"] attributeForName:@"index"])
+    if([[self xmpp_elementForName:@"first"] attributeForName:@"index"])
     {
-        return [[self elementForName:@"first"] attributeIntegerValueForName:@"index"];
+        return [[self xmpp_elementForName:@"first"] xmpp_attributeIntegerValueForName:@"index"];
     }
-    else if([self elementForName:@"index"])
+    else if([self xmpp_elementForName:@"index"])
     {
-        return [[[self elementForName:@"index"] stringValue] intValue];
+        return [[[self xmpp_elementForName:@"index"] stringValue] intValue];
     }
     else
     {
@@ -197,19 +197,19 @@
 
 - (NSString *)after
 {
-    return [[self elementForName:@"after"] stringValue];
+    return [[self xmpp_elementForName:@"after"] stringValue];
 }
 
 - (NSString *)before
 {
-    return [[self elementForName:@"before"] stringValue];
+    return [[self xmpp_elementForName:@"before"] stringValue];
 }
 
 - (NSInteger)count
 {
-    if([self elementForName:@"count"])
+    if([self xmpp_elementForName:@"count"])
     {
-        return [[[self elementForName:@"count"] stringValue] intValue];
+        return [[[self xmpp_elementForName:@"count"] stringValue] intValue];
     }
     else
     {
@@ -219,12 +219,12 @@
 
 - (NSString *)first
 {
-    return [[self elementForName:@"first"] stringValue];
+    return [[self xmpp_elementForName:@"first"] stringValue];
 }
 
 - (NSString *)last
 {
-    return [[self elementForName:@"last"] stringValue];
+    return [[self xmpp_elementForName:@"last"] stringValue];
 }
 
 @end

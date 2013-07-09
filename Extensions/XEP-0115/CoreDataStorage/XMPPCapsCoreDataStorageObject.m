@@ -24,7 +24,7 @@
 
 - (void)setCapabilities:(NSXMLElement *)caps
 {
-	self.capabilitiesStr = [caps compactXMLString];
+	self.capabilitiesStr = [caps xmpp_compactXMLString];
 }
 
 @end

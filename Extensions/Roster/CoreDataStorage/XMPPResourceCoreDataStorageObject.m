@@ -84,7 +84,7 @@
 	[self setPrimitiveValue:newPresence forKey:@"presence"];
 	[self didChangeValueForKey:@"presence"];
     
-	self.presenceStr = [newPresence compactXMLString];
+	self.presenceStr = [newPresence xmpp_compactXMLString];
 }
 
 - (int)priority

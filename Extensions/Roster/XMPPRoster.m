@@ -361,10 +361,10 @@ enum XMPPRosterFlags
 **/
 - (BOOL)isRosterItem:(NSXMLElement *)item
 {
-	NSString *subscription = [item attributeStringValueForName:@"subscription"];
+	NSString *subscription = [item xmpp_attributeStringValueForName:@"subscription"];
 	if ([subscription isEqualToString:@"none"])
 	{
-		NSString *ask = [item attributeStringValueForName:@"ask"];
+		NSString *ask = [item xmpp_attributeStringValueForName:@"ask"];
 		if ([ask isEqualToString:@"subscribe"])
 		{
 			return YES;
@@ -419,11 +419,11 @@ enum XMPPRosterFlags
 	// </iq>
 
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
+	[item xmpp_addAttributeWithName:@"jid" stringValue:[jid bare]];
 
 	if(optionalName)
 	{
-		[item addAttributeWithName:@"name" stringValue:optionalName];
+		[item xmpp_addAttributeWithName:@"name" stringValue:optionalName];
 	}
 
 	for (NSString *group in groups) {
@@ -432,11 +432,11 @@ enum XMPPRosterFlags
 		[item addChild:groupElement];
 	}
 
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 
 	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
+	[iq xmpp_addAttributeWithName:@"type" stringValue:@"set"];
 	[iq addChild:query];
 
 	[xmppStream sendElement:iq];
@@ -460,10 +460,10 @@ enum XMPPRosterFlags
 	// </iq>
 	
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
-	[item addAttributeWithName:@"name" stringValue:nickname];
+	[item xmpp_addAttributeWithName:@"jid" stringValue:[jid bare]];
+	[item xmpp_addAttributeWithName:@"name" stringValue:nickname];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
@@ -558,10 +558,10 @@ enum XMPPRosterFlags
 	// </iq>
 	
 	NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-	[item addAttributeWithName:@"jid" stringValue:[jid bare]];
-	[item addAttributeWithName:@"subscription" stringValue:@"remove"];
+	[item xmpp_addAttributeWithName:@"jid" stringValue:[jid bare]];
+	[item xmpp_addAttributeWithName:@"subscription" stringValue:@"remove"];
 	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+	NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
@@ -617,10 +617,10 @@ enum XMPPRosterFlags
 		//   <query xmlns="jabber:iq:roster"/>
 		// </iq>
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+		NSXMLElement *query = [NSXMLElement xmpp_elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 		
 		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-		[iq addAttributeWithName:@"type" stringValue:@"get"];
+		[iq xmpp_addAttributeWithName:@"type" stringValue:@"get"];
 		[iq addChild:query];
 		
 		[xmppStream sendElement:iq];
@@ -660,7 +660,7 @@ enum XMPPRosterFlags
 	// Because of the bug in Apple's NSXML (documented in our elementForName method),
 	// it is important we specify the xmlns for the query.
 	
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:roster"];
+	NSXMLElement *query = [iq xmpp_elementForName:@"query" xmlns:@"jabber:iq:roster"];
 	if (query)
 	{
 		BOOL hasRoster = [self _hasRoster];

@@ -291,9 +291,9 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 				// not much specified in XEP, only 403 forbidden error
 				NSXMLElement *errorElement = [iq childErrorElement];
 				NSError *error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain 
-													 code:[errorElement attributeIntValueForName:@"code"] 
+													 code:[errorElement xmpp_attributeIntValueForName:@"code"] 
 												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:	
-														   [errorElement attributesAsDictionary],@"error",
+														   [errorElement xmpp_attributesAsDictionary],@"error",
 														   [[errorElement childAtIndex:0] name], @"condition",
 														   iq,@"iq",
 														   nil]];

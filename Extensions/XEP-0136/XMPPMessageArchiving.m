@@ -57,10 +57,10 @@
 		}
 		
 		NSXMLElement *_default = [NSXMLElement elementWithName:@"default"];
-		[_default addAttributeWithName:@"expire" stringValue:@"604800"];
-		[_default addAttributeWithName:@"save" stringValue:@"body"];
+		[_default xmpp_addAttributeWithName:@"expire" stringValue:@"604800"];
+		[_default xmpp_addAttributeWithName:@"save" stringValue:@"body"];
 		
-		NSXMLElement *pref = [NSXMLElement elementWithName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
+		NSXMLElement *pref = [NSXMLElement xmpp_elementWithName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
 		[pref addChild:_default];
 		
 		preferences = pref;
@@ -189,14 +189,14 @@
 	
 	NSXMLElement *match = nil;
 	
-	NSString *messageThread = [[message elementForName:@"thread"] stringValue];
+	NSString *messageThread = [[message xmpp_elementForName:@"thread"] stringValue];
 	if (messageThread)
 	{
 		// First priority - matching session element
 		
 		for (NSXMLElement *session in [preferences elementsForName:@"session"])
 		{
-			NSString *sessionThread = [session attributeStringValueForName:@"thread"];
+			NSString *sessionThread = [session xmpp_attributeStringValueForName:@"thread"];
 			if ([messageThread isEqualToString:sessionThread])
 			{
 				match = session;
@@ -237,7 +237,7 @@
 		
 		for (NSXMLElement *item in [preferences elementsForName:@"item"])
 		{
-			XMPPJID *itemJid = [XMPPJID jidWithString:[item attributeStringValueForName:@"jid"]];
+			XMPPJID *itemJid = [XMPPJID jidWithString:[item xmpp_attributeStringValueForName:@"jid"]];
 			
 			if (itemJid.resource)
 			{
@@ -250,7 +250,7 @@
 			}
 			else if (itemJid.user)
 			{
-				BOOL exactmatch = [item attributeBoolValueForName:@"exactmatch" withDefaultValue:NO];
+				BOOL exactmatch = [item xmpp_attributeBoolValueForName:@"exactmatch" withDefaultValue:NO];
 				BOOL match;
 				
 				if (exactmatch)
@@ -265,7 +265,7 @@
 			}
 			else
 			{
-				BOOL exactmatch = [item attributeBoolValueForName:@"exactmatch" withDefaultValue:NO];
+				BOOL exactmatch = [item xmpp_attributeBoolValueForName:@"exactmatch" withDefaultValue:NO];
 				BOOL match;
 				
 				if (exactmatch)
@@ -292,7 +292,7 @@
 	{
 		// Third priority - default element
 		
-		match = [preferences elementForName:@"default"];
+		match = [preferences xmpp_elementForName:@"default"];
 	}
 	
 	if (match == nil)
@@ -311,7 +311,7 @@
 	// 
 	// Note: We currently only support body, and treat values of 'message' or 'stream' the same as 'body'.
 	
-	NSString *save = [[match attributeStringValueForName:@"save"] lowercaseString];
+	NSString *save = [[match xmpp_attributeStringValueForName:@"save"] lowercaseString];
 	
 	if ([save isEqualToString:@"false"])
 		return NO;
@@ -344,7 +344,7 @@
 	//   <pref xmlns='urn:xmpp:archive'/>
 	// </iq>
 	
-	NSXMLElement *pref = [NSXMLElement elementWithName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
+	NSXMLElement *pref = [NSXMLElement xmpp_elementWithName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:nil child:pref];
 	
 	[sender sendElement:iq];
@@ -356,7 +356,7 @@
 	
 	if ([type isEqualToString:@"result"])
 	{
-		NSXMLElement *pref = [iq elementForName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
+		NSXMLElement *pref = [iq xmpp_elementForName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
 		if (pref)
 		{
 			[self setPreferences:pref];
@@ -372,18 +372,18 @@
 		//   </own-message>
 		// </iq>
 		
-		NSXMLElement *ownMessage = [iq elementForName:@"own-message" xmlns:@"http://www.facebook.com/xmpp/messages"];
+		NSXMLElement *ownMessage = [iq xmpp_elementForName:@"own-message" xmlns:@"http://www.facebook.com/xmpp/messages"];
 		if (ownMessage)
 		{
-			BOOL isSelf = [ownMessage attributeBoolValueForName:@"self" withDefaultValue:NO];
+			BOOL isSelf = [ownMessage xmpp_attributeBoolValueForName:@"self" withDefaultValue:NO];
 			if (!isSelf)
 			{
-				NSString *bodyStr = [[ownMessage elementForName:@"body"] stringValue];
+				NSString *bodyStr = [[ownMessage xmpp_elementForName:@"body"] stringValue];
 				if ([bodyStr length] > 0)
 				{
 					NSXMLElement *body = [NSXMLElement elementWithName:@"body" stringValue:bodyStr];
 					
-					XMPPJID *to = [XMPPJID jidWithString:[ownMessage attributeStringValueForName:@"to"]];
+					XMPPJID *to = [XMPPJID jidWithString:[ownMessage xmpp_attributeStringValueForName:@"to"]];
 					XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:to];
 					[message addChild:body];
 					

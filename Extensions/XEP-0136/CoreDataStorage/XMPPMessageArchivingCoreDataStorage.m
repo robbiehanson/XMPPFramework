@@ -334,7 +334,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 {
 	// Message should either have a body, or be a composing notification
 	
-	NSString *messageBody = [[message elementForName:@"body"] stringValue];
+	NSString *messageBody = [[message xmpp_elementForName:@"body"] stringValue];
 	BOOL isComposing = NO;
 	BOOL shouldDeleteComposingMessage = NO;
 	
@@ -415,7 +415,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 			else
 				archivedMessage.timestamp = [[NSDate alloc] init];
 			
-			archivedMessage.thread = [[message elementForName:@"thread"] stringValue];
+			archivedMessage.thread = [[message xmpp_elementForName:@"thread"] stringValue];
 			archivedMessage.isOutgoing = isOutgoing;
 			archivedMessage.isComposing = isComposing;
 			

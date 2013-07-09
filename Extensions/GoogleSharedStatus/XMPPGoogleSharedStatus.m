@@ -160,7 +160,7 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 	
 	// Wrap it in an XMPPIQ "set" and send it to the server.
 	XMPPIQ *statusIQ = [XMPPIQ iqWithType:@"set" to:self.xmppStream.myJID.bareJID];
-	[statusIQ addAttributeWithName:@"id" stringValue:self.xmppStream.myJID.resource];
+	[statusIQ xmpp_addAttributeWithName:@"id" stringValue:self.xmppStream.myJID.resource];
 	[statusIQ addChild:[self packSharedStatus:sharedStatusUpdate]];
 	[self.xmppStream sendElement:statusIQ];
 	
@@ -188,7 +188,7 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 // we can continue with the shared status support.
 - (void)discoverCapabilities {
 	XMPPIQ *discoIQ = [XMPPIQ iqWithType:@"get" to:[XMPPJID jidWithString:@"gmail.com"]];
-	[discoIQ addChild:[XMPPElement elementWithName:@"query" xmlns:GOOGLE_DISCO_INFO]];
+	[discoIQ addChild:[XMPPElement xmpp_elementWithName:@"query" xmlns:GOOGLE_DISCO_INFO]];
 	[self.xmppStream sendElement:discoIQ];
 }
 
@@ -196,10 +196,10 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 // return an XML stanza containing status-lists and current status info.
 - (void)refreshSharedStatus {
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:self.xmppStream.myJID.bareJID];
-	[iq addAttributeWithName:@"id" stringValue:self.xmppStream.myJID.resource];
+	[iq xmpp_addAttributeWithName:@"id" stringValue:self.xmppStream.myJID.resource];
 	
-	XMPPElement *query = (XMPPElement *)[XMPPElement elementWithName:@"query" xmlns:GOOGLE_SHARED_STATUS];
-	[query addAttributeWithName:@"version" stringValue:@"2"];
+	XMPPElement *query = (XMPPElement *)[XMPPElement xmpp_elementWithName:@"query" xmlns:GOOGLE_SHARED_STATUS];
+	[query xmpp_addAttributeWithName:@"version" stringValue:@"2"];
 	
 	[iq addChild:query];
 	[self.xmppStream sendElement:iq];
@@ -269,8 +269,8 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 // back into an XMPPElement "query" for shared status. This must be
 // further wrapped in an XMPPIQ to send a status update.
 - (XMPPElement *)packSharedStatus:(NSDictionary *)sharedStatus {
-	XMPPElement *element = (XMPPElement *)[XMPPElement elementWithName:@"query" xmlns:GOOGLE_SHARED_STATUS];
-	[element addAttributeWithName:@"version" stringValue:@"2"];
+	XMPPElement *element = (XMPPElement *)[XMPPElement xmpp_elementWithName:@"query" xmlns:GOOGLE_SHARED_STATUS];
+	[element xmpp_addAttributeWithName:@"version" stringValue:@"2"];
 	
 	[element addChild:[XMPPElement elementWithName:XMPPGoogleSharedStatusStatus
 									   stringValue:[sharedStatus objectForKey:XMPPGoogleSharedStatusStatus]]];
@@ -283,7 +283,7 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 			
 			NSArray *statusList = [sharedStatus objectForKey:key];
 			XMPPElement *statusElement = [XMPPElement elementWithName:@"status-list"];
-			[statusElement addAttributeWithName:@"show" stringValue:key];
+			[statusElement xmpp_addAttributeWithName:@"show" stringValue:key];
 			
 			for(NSString *status in statusList)
 				[statusElement addChild:[XMPPElement elementWithName:@"status" stringValue:status]];
@@ -296,7 +296,7 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 	}
 	
 	XMPPElement *invisible = [XMPPElement elementWithName:XMPPGoogleSharedStatusInvisible];
-	[invisible addAttributeWithName:@"value"
+	[invisible xmpp_addAttributeWithName:@"value"
 						stringValue:[sharedStatus[XMPPGoogleSharedStatusInvisible] boolValue] ? @"true" : @"false"];
 	[element addChild:invisible];
 	
