@@ -32,7 +32,7 @@
 		DC84BC7C12440D6B0055A459 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC7412440D6B0055A459 /* DDXMLDocument.m */; };
 		DC84BC7D12440D6B0055A459 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC7612440D6B0055A459 /* DDXMLElement.m */; };
 		DC84BC7E12440D6B0055A459 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC7812440D6B0055A459 /* DDXMLNode.m */; };
-		DC84BC9312440DBE0055A459 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC8E12440DBE0055A459 /* LibIDN.m */; };
+		DC84BC9312440DBE0055A459 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC8E12440DBE0055A459 /* XMPPStringPrep.m */; };
 		DC84BCA912440DD80055A459 /* XMPPElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC9812440DD80055A459 /* XMPPElement.m */; };
 		DC84BCAA12440DD80055A459 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC9A12440DD80055A459 /* XMPPIQ.m */; };
 		DC84BCAB12440DD80055A459 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DC84BC9C12440DD80055A459 /* XMPPJID.m */; };
@@ -113,8 +113,8 @@
 		DC84BC7612440D6B0055A459 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLElement.m; path = ../../Vendor/KissXML/DDXMLElement.m; sourceTree = SOURCE_ROOT; };
 		DC84BC7712440D6B0055A459 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDXMLNode.h; path = ../../Vendor/KissXML/DDXMLNode.h; sourceTree = SOURCE_ROOT; };
 		DC84BC7812440D6B0055A459 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDXMLNode.m; path = ../../Vendor/KissXML/DDXMLNode.m; sourceTree = SOURCE_ROOT; };
-		DC84BC8D12440DBE0055A459 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../Utilities/LibIDN.h; sourceTree = SOURCE_ROOT; };
-		DC84BC8E12440DBE0055A459 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../Utilities/LibIDN.m; sourceTree = SOURCE_ROOT; };
+		DC84BC8D12440DBE0055A459 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStringPrep.h; path = ../../Utilities/XMPPStringPrep.h; sourceTree = SOURCE_ROOT; };
+		DC84BC8E12440DBE0055A459 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStringPrep.m; path = ../../Utilities/XMPPStringPrep.m; sourceTree = SOURCE_ROOT; };
 		DC84BC9612440DD80055A459 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPP.h; path = ../../Core/XMPP.h; sourceTree = SOURCE_ROOT; };
 		DC84BC9712440DD80055A459 /* XMPPElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPElement.h; path = ../../Core/XMPPElement.h; sourceTree = SOURCE_ROOT; };
 		DC84BC9812440DD80055A459 /* XMPPElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPElement.m; path = ../../Core/XMPPElement.m; sourceTree = SOURCE_ROOT; };
@@ -512,8 +512,8 @@
 			children = (
 				07AF18BB134BC4960084D82A /* XMPPSRVResolver.h */,
 				07AF18BC134BC4960084D82A /* XMPPSRVResolver.m */,
-				DC84BC8D12440DBE0055A459 /* LibIDN.h */,
-				DC84BC8E12440DBE0055A459 /* LibIDN.m */,
+				DC84BC8D12440DBE0055A459 /* XMPPStringPrep.h */,
+				DC84BC8E12440DBE0055A459 /* XMPPStringPrep.m */,
 				DCB81EB6130AC9C3002ACF2E /* GCDMulticastDelegate.h */,
 				DCB81EB7130AC9C3002ACF2E /* GCDMulticastDelegate.m */,
 				DCB81EB4130AC9C3002ACF2E /* DDList.h */,
@@ -605,7 +605,7 @@
 				DC84BC7C12440D6B0055A459 /* DDXMLDocument.m in Sources */,
 				DC84BC7D12440D6B0055A459 /* DDXMLElement.m in Sources */,
 				DC84BC7E12440D6B0055A459 /* DDXMLNode.m in Sources */,
-				DC84BC9312440DBE0055A459 /* LibIDN.m in Sources */,
+				DC84BC9312440DBE0055A459 /* XMPPStringPrep.m in Sources */,
 				DC84BCA912440DD80055A459 /* XMPPElement.m in Sources */,
 				DC84BCAA12440DD80055A459 /* XMPPIQ.m in Sources */,
 				DC84BCAB12440DD80055A459 /* XMPPJID.m in Sources */,

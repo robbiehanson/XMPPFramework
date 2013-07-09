@@ -20,7 +20,7 @@
 		DC30E51D153DFFAD001B9E6D /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E47D153DFFAD001B9E6D /* XMPPStream.m */; };
 		DC30E51E153DFFAD001B9E6D /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E480153DFFAD001B9E6D /* DDList.m */; };
 		DC30E51F153DFFAD001B9E6D /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E482153DFFAD001B9E6D /* GCDMulticastDelegate.m */; };
-		DC30E520153DFFAD001B9E6D /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E484153DFFAD001B9E6D /* LibIDN.m */; };
+		DC30E520153DFFAD001B9E6D /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E484153DFFAD001B9E6D /* XMPPStringPrep.m */; };
 		DC30E521153DFFAD001B9E6D /* RFImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E486153DFFAD001B9E6D /* RFImageToDataTransformer.m */; };
 		DC30E523153DFFAD001B9E6D /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E48A153DFFAD001B9E6D /* XMPPIDTracker.m */; };
 		DC30E524153DFFAD001B9E6D /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E48D153DFFAD001B9E6D /* XMPPSRVResolver.m */; };
@@ -90,8 +90,8 @@
 		DC30E480153DFFAD001B9E6D /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDList.m; sourceTree = "<group>"; };
 		DC30E481153DFFAD001B9E6D /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDMulticastDelegate.h; sourceTree = "<group>"; };
 		DC30E482153DFFAD001B9E6D /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDMulticastDelegate.m; sourceTree = "<group>"; };
-		DC30E483153DFFAD001B9E6D /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibIDN.h; sourceTree = "<group>"; };
-		DC30E484153DFFAD001B9E6D /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
+		DC30E483153DFFAD001B9E6D /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStringPrep.h; sourceTree = "<group>"; };
+		DC30E484153DFFAD001B9E6D /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStringPrep.m; sourceTree = "<group>"; };
 		DC30E485153DFFAD001B9E6D /* RFImageToDataTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFImageToDataTransformer.h; sourceTree = "<group>"; };
 		DC30E486153DFFAD001B9E6D /* RFImageToDataTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RFImageToDataTransformer.m; sourceTree = "<group>"; };
 		DC30E489153DFFAD001B9E6D /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIDTracker.h; sourceTree = "<group>"; };
@@ -246,8 +246,8 @@
 				DC30E480153DFFAD001B9E6D /* DDList.m */,
 				DC30E481153DFFAD001B9E6D /* GCDMulticastDelegate.h */,
 				DC30E482153DFFAD001B9E6D /* GCDMulticastDelegate.m */,
-				DC30E483153DFFAD001B9E6D /* LibIDN.h */,
-				DC30E484153DFFAD001B9E6D /* LibIDN.m */,
+				DC30E483153DFFAD001B9E6D /* XMPPStringPrep.h */,
+				DC30E484153DFFAD001B9E6D /* XMPPStringPrep.m */,
 				DC30E485153DFFAD001B9E6D /* RFImageToDataTransformer.h */,
 				DC30E486153DFFAD001B9E6D /* RFImageToDataTransformer.m */,
 				DC30E489153DFFAD001B9E6D /* XMPPIDTracker.h */,
@@ -563,7 +563,7 @@
 				DC30E51D153DFFAD001B9E6D /* XMPPStream.m in Sources */,
 				DC30E51E153DFFAD001B9E6D /* DDList.m in Sources */,
 				DC30E51F153DFFAD001B9E6D /* GCDMulticastDelegate.m in Sources */,
-				DC30E520153DFFAD001B9E6D /* LibIDN.m in Sources */,
+				DC30E520153DFFAD001B9E6D /* XMPPStringPrep.m in Sources */,
 				DC30E521153DFFAD001B9E6D /* RFImageToDataTransformer.m in Sources */,
 				DC30E523153DFFAD001B9E6D /* XMPPIDTracker.m in Sources */,
 				DC30E524153DFFAD001B9E6D /* XMPPSRVResolver.m in Sources */,

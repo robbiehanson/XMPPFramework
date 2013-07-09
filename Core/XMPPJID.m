@@ -1,5 +1,5 @@
 #import "XMPPJID.h"
-#import "LibIDN.h"
+#import "XMPPStringPrep.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -92,9 +92,9 @@
 		}
 	}
 	
-	NSString *prepUser = [LibIDN prepNode:rawUser];
-	NSString *prepDomain = [LibIDN prepDomain:rawDomain];
-	NSString *prepResource = [LibIDN prepResource:rawResource];
+	NSString *prepUser = [XMPPStringPrep prepNode:rawUser];
+	NSString *prepDomain = [XMPPStringPrep prepDomain:rawDomain];
+	NSString *prepResource = [XMPPStringPrep prepResource:rawResource];
 	
 	if ([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
 	{
@@ -129,7 +129,7 @@
 
 + (XMPPJID *)jidWithString:(NSString *)jidStr resource:(NSString *)resource
 {
-	NSString *prepResource = [LibIDN prepResource:resource];
+	NSString *prepResource = [XMPPStringPrep prepResource:resource];
 	if (![self validateResource:prepResource]) return nil;
 	
 	NSString *user;
@@ -150,9 +150,9 @@
 
 + (XMPPJID *)jidWithUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource
 {
-	NSString *prepUser = [LibIDN prepNode:user];
-	NSString *prepDomain = [LibIDN prepDomain:domain];
-	NSString *prepResource = [LibIDN prepResource:resource];
+	NSString *prepUser = [XMPPStringPrep prepNode:user];
+	NSString *prepDomain = [XMPPStringPrep prepDomain:domain];
+	NSString *prepResource = [XMPPStringPrep prepResource:resource];
 	
 	if ([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
 	{
@@ -183,7 +183,7 @@
                   prevalidatedDomain:(NSString *)domain
                             resource:(NSString *)resource
 {
-	NSString *prepResource = [LibIDN prepResource:resource];
+	NSString *prepResource = [XMPPStringPrep prepResource:resource];
 	if (![self validateResource:prepResource]) return nil;
 	
 	XMPPJID *jid = [[XMPPJID alloc] init];

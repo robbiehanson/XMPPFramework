@@ -34,7 +34,7 @@
 		DCC494FB1333043200F3C8F6 /* XMPPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494C91333043200F3C8F6 /* XMPPStream.m */; };
 		DCC494FC1333043200F3C8F6 /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CC1333043200F3C8F6 /* DDList.m */; };
 		DCC494FD1333043200F3C8F6 /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */; };
-		DCC494FE1333043200F3C8F6 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D01333043200F3C8F6 /* LibIDN.m */; };
+		DCC494FE1333043200F3C8F6 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D01333043200F3C8F6 /* XMPPStringPrep.m */; };
 		DCC495001333043200F3C8F6 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D61333043200F3C8F6 /* GCDAsyncSocket.m */; };
 		DCC495011333043200F3C8F6 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494D91333043200F3C8F6 /* DDASLLogger.m */; };
 		DCC495021333043200F3C8F6 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC494DB1333043200F3C8F6 /* DDFileLogger.m */; };
@@ -145,8 +145,8 @@
 		DCC494CC1333043200F3C8F6 /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDList.m; sourceTree = "<group>"; };
 		DCC494CD1333043200F3C8F6 /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDMulticastDelegate.h; sourceTree = "<group>"; };
 		DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDMulticastDelegate.m; sourceTree = "<group>"; };
-		DCC494CF1333043200F3C8F6 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibIDN.h; sourceTree = "<group>"; };
-		DCC494D01333043200F3C8F6 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
+		DCC494CF1333043200F3C8F6 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStringPrep.h; sourceTree = "<group>"; };
+		DCC494D01333043200F3C8F6 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStringPrep.m; sourceTree = "<group>"; };
 		DCC494D51333043200F3C8F6 /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncSocket.h; sourceTree = "<group>"; };
 		DCC494D61333043200F3C8F6 /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncSocket.m; sourceTree = "<group>"; };
 		DCC494D81333043200F3C8F6 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
@@ -386,8 +386,8 @@
 			children = (
 				DCC494CD1333043200F3C8F6 /* GCDMulticastDelegate.h */,
 				DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */,
-				DCC494CF1333043200F3C8F6 /* LibIDN.h */,
-				DCC494D01333043200F3C8F6 /* LibIDN.m */,
+				DCC494CF1333043200F3C8F6 /* XMPPStringPrep.h */,
+				DCC494D01333043200F3C8F6 /* XMPPStringPrep.m */,
 				DCF3C1371367276900111BA3 /* XMPPSRVResolver.h */,
 				DCF3C1381367276900111BA3 /* XMPPSRVResolver.m */,
 				DCC494CB1333043200F3C8F6 /* DDList.h */,
@@ -633,7 +633,7 @@
 				DCC494FB1333043200F3C8F6 /* XMPPStream.m in Sources */,
 				DCC494FC1333043200F3C8F6 /* DDList.m in Sources */,
 				DCC494FD1333043200F3C8F6 /* GCDMulticastDelegate.m in Sources */,
-				DCC494FE1333043200F3C8F6 /* LibIDN.m in Sources */,
+				DCC494FE1333043200F3C8F6 /* XMPPStringPrep.m in Sources */,
 				DCC495001333043200F3C8F6 /* GCDAsyncSocket.m in Sources */,
 				DCC495011333043200F3C8F6 /* DDASLLogger.m in Sources */,
 				DCC495021333043200F3C8F6 /* DDFileLogger.m in Sources */,

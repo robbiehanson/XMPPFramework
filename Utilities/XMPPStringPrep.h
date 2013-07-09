@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface LibIDN : NSObject
+@interface XMPPStringPrep : NSObject
 
 /**
  * Preps a node identifier for use in a JID.
