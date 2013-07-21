@@ -132,5 +132,10 @@
 	return [[self type] isEqualToString:@"error"];
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSXMLElement *element = [super copyWithZone:zone];
+    return [[self class] presenceFromElement:element];
+}
 
 @end
