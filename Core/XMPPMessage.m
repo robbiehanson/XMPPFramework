@@ -142,6 +142,12 @@
 	return self;
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSXMLElement *element = [super copyWithZone:zone];
+    return [XMPPMessage messageFromElement:element];
+}
+
 - (NSString *)body
 {
 	return [[self elementForName:@"body"] stringValue];
