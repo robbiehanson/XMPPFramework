@@ -663,6 +663,11 @@ enum XMPPRosterFlags
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:roster"];
 	if (query)
 	{
+        if([iq isSetIQ])
+        {
+            [multicastDelegate xmppRoster:self didReceiveRosterPush:iq];
+        }
+        
 		BOOL hasRoster = [self _hasRoster];
 		
 		if (!hasRoster)
