@@ -382,13 +382,14 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * If there is something immediately wrong, such as the stream is not connected,
  * this method will return NO and set the error.
  * 
+ * The attributes parameter is optional - you may pass nil.
  * The errPtr parameter is optional - you may pass nil.
- * 
+ *
  * Security Note:
  * The password will be sent in the clear unless the stream has been secured.
 **/
 - (BOOL)supportsInBandRegistration;
-- (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr;
+- (BOOL)registerWithPassword:(NSString *)password attributes:(NSDictionary *)attributes error:(NSError **)errPtr;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Authentication
