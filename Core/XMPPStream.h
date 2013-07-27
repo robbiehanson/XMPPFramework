@@ -375,7 +375,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * In Band Registration.
  * Creating a user account on the xmpp server within the xmpp protocol.
  * 
- * The registerWithPassword:error: method is asynchronous.
+ * The registerWithElements:error: method is asynchronous.
  * It will return immediately, and the delegate methods are used to determine success.
  * See the xmppStreamDidRegister: and xmppStream:didNotRegister: methods.
  * 
@@ -384,10 +384,13 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * The errPtr parameter is optional - you may pass nil.
  * 
+ * registerWithPassword:error: is a convience method for creating an account using the given username and password.
+ *
  * Security Note:
  * The password will be sent in the clear unless the stream has been secured.
 **/
 - (BOOL)supportsInBandRegistration;
+- (BOOL)registerWithElements:(NSArray *)elements error:(NSError **)errPtr;
 - (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
