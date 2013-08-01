@@ -6,5 +6,9 @@
 
 - (BOOL)isGroupChatMessage;
 - (BOOL)isGroupChatMessageWithBody;
+- (BOOL)isGroupChatMessageWithSubject;
+
+- (NSString *)subject;
+- (void)addSubject:(NSString *)subject;
 
 @end
