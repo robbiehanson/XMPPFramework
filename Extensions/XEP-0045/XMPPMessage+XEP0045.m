@@ -15,7 +15,7 @@
 	{
 		NSString *body = [[self elementForName:@"body"] stringValue];
 		
-		return ((body != nil) && ([body length] > 0));
+		return ([body length] > 0);
 	}
 	
 	return NO;
@@ -23,10 +23,11 @@
 
 - (BOOL)isGroupChatMessageWithSubject
 {
-    if ([self isGroupChatMessage]) {
+    if ([self isGroupChatMessage])
+	{
         NSString *subject = [[self elementForName:@"subject"] stringValue];
 
-		return ((subject != nil) && ([subject length] > 0));
+		return ([subject length] > 0);
     }
 
     return NO;
