@@ -1073,6 +1073,10 @@ enum XMPPRoomState
 		[xmppRoomStorage handleIncomingMessage:message room:self];
 		[multicastDelegate xmppRoom:self didReceiveMessage:message fromOccupant:from];
 	}
+    else if ([message isGroupChatMessageWithSubject])
+    {
+        roomSubject = [message subject];
+    }
 	else
 	{
 		// Todo... Handle other types of messages.
