@@ -315,6 +315,8 @@
 		{
 			[self removeResourcesObject:resource];
 			[[self managedObjectContext] deleteObject:resource];
+			[[self managedObjectContext] save:nil];
+
 		}
 	}
 	else
