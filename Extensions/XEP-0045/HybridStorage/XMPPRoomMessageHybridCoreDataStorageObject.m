@@ -13,6 +13,9 @@
 @property(nonatomic,strong) XMPPJID * primitiveJid;
 @property(nonatomic,strong) NSString * primitiveJidStr;
 
+@property(nonatomic,strong) XMPPMessage * primitiveMessage;
+@property(nonatomic,strong) NSString * primitiveMessageStr;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,6 +43,9 @@
 @dynamic type;
 
 @dynamic streamBareJidStr;
+
+@dynamic primitiveMessage;
+@dynamic primitiveMessageStr;
 
 #pragma mark Transient roomJID
 
@@ -145,6 +151,56 @@
 - (void)setIsFromMe:(BOOL)value
 {
 	self.fromMe = [NSNumber numberWithBool:value];
+}
+
+#pragma mark - Message
+- (XMPPMessage *)message
+{
+	// Create and cache on demand
+	[self willAccessValueForKey:@"message"];
+    
+	XMPPMessage *message = self.primitiveMessage;
+    
+	[self didAccessValueForKey:@"message"];
+    
+	if (message == nil)
+	{
+		NSString *messageStr = self.messageStr;
+		if (messageStr)
+		{
+			NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:
+                messageStr error:nil];
+			message = [XMPPMessage messageFromElement:element];
+			self.primitiveMessage = message;
+		}
+    }
+    
+    return message;
+}
+
+- (void)setMessage:(XMPPMessage *)message
+{
+	[self willChangeValueForKey:@"message"];
+	[self willChangeValueForKey:@"messageStr"];
+	
+	self.primitiveMessage = message;
+	self.primitiveMessageStr = [message compactXMLString];
+	
+	[self didChangeValueForKey:@"message"];
+	[self didChangeValueForKey:@"messageStr"];
+}
+
+- (void)setMessageStr:(NSString *)messageStr
+{
+	[self willChangeValueForKey:@"message"];
+	[self willChangeValueForKey:@"messageStr"];
+	
+	NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:messageStr error:nil];
+	self.primitiveMessage = [XMPPMessage messageFromElement:element];
+	self.primitiveMessageStr = messageStr;
+	
+	[self didChangeValueForKey:@"message"];
+	[self didChangeValueForKey:@"messageStr"];
 }
 
 @end
