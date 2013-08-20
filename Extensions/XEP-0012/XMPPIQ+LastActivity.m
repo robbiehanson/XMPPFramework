@@ -94,3 +94,4 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 }
 
 @end
+
