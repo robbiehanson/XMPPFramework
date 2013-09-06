@@ -51,3 +51,5 @@
 
 #import "XMPPTime.h"
 #import "XMPPAutoTime.h"
+
+#import "XMPPCompression.h"

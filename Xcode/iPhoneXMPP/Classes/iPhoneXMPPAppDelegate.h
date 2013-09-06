@@ -17,7 +17,8 @@
 	XMPPvCardAvatarModule *xmppvCardAvatarModule;
 	XMPPCapabilities *xmppCapabilities;
 	XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
-	
+	XMPPCompression *xmppCompression;
+    
 	NSString *password;
 	
 	BOOL allowSelfSignedCertificates;

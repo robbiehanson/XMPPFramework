@@ -14,7 +14,8 @@
 	XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
 	XMPPPing *xmppPing;
 	XMPPTime *xmppTime;
-	
+	XMPPCompression *xmppCompression;
+    
 	NSMutableArray *turnSockets;
 	
 	IBOutlet RosterController *rosterController;
@@ -27,6 +28,7 @@
 @property (nonatomic, readonly) XMPPCapabilities *xmppCapabilities;
 @property (nonatomic, readonly) XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage;
 @property (nonatomic, readonly) XMPPPing *xmppPing;
+@property (nonatomic, readonly) XMPPCompression *xmppCompression;
 
 - (void)connectViaXEP65:(XMPPJID *)jid;
 

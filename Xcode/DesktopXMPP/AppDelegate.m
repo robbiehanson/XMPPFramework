@@ -16,6 +16,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @synthesize xmppCapabilities;
 @synthesize xmppCapabilitiesStorage;
 @synthesize xmppPing;
+@synthesize xmppCompression;
 
 - (id)init
 {
@@ -51,6 +52,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	//	xmppPing = [[XMPPPing alloc] init];
 	//	xmppTime = [[XMPPTime alloc] init];
 		
+        xmppCompression = [[XMPPCompression alloc] init];
 		// Activate xmpp modules
 		
 		[xmppReconnect activate:xmppStream];
@@ -58,12 +60,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		[xmppCapabilities activate:xmppStream];
 		[xmppPing activate:xmppStream];
 		[xmppTime activate:xmppStream];
-		
+
 		// Add ourself as a delegate to anything we may be interested in
 		
 		[xmppReconnect addDelegate:self delegateQueue:dispatch_get_main_queue()];
 		[xmppCapabilities addDelegate:self delegateQueue:dispatch_get_main_queue()];
 		
+        [xmppCompression activate:xmppStream];
+        
 		// Initialize other stuff
 		
 		turnSockets = [[NSMutableArray alloc] init];

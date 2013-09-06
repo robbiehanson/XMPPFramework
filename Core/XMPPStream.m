@@ -4,9 +4,11 @@
 #import "XMPPInternal.h"
 #import "XMPPSRVResolver.h"
 #import "NSData+XMPP.h"
+#import "XMPPFeature.h"
 
 #import <objc/runtime.h>
 #import <libkern/OSAtomic.h>
+#import "XMPPStreamInternal.h"
 
 #if TARGET_OS_IPHONE
   // Note: You may need to add the CFNetwork Framework to your project
@@ -31,142 +33,10 @@
 **/
 #define return_from_block  return
 
-// Define the timeouts (in seconds) for retreiving various parts of the XML stream
-#define TIMEOUT_XMPP_WRITE         -1
-#define TIMEOUT_XMPP_READ_START    10
-#define TIMEOUT_XMPP_READ_STREAM   -1
-
-// Define the tags we'll use to differentiate what it is we're currently reading or writing
-#define TAG_XMPP_READ_START         100
-#define TAG_XMPP_READ_STREAM        101
-#define TAG_XMPP_WRITE_START        200
-#define TAG_XMPP_WRITE_STREAM       201
-#define TAG_XMPP_WRITE_RECEIPT      202
-
-// Define the timeouts (in seconds) for SRV
-#define TIMEOUT_SRV_RESOLUTION 30.0
-
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
 NSString *const XMPPStreamDidChangeMyJIDNotification = @"XMPPStreamDidChangeMyJID";
 
 const NSTimeInterval XMPPStreamTimeoutNone = -1;
-
-enum XMPPStreamFlags
-{
-	kP2PInitiator                 = 1 << 0,  // If set, we are the P2P initializer
-	kIsSecure                     = 1 << 1,  // If set, connection has been secured via SSL/TLS
-	kIsAuthenticated              = 1 << 2,  // If set, authentication has succeeded
-	kDidStartNegotiation          = 1 << 3,  // If set, negotiation has started at least once
-};
-
-enum XMPPStreamConfig
-{
-	kP2PMode                      = 1 << 0,  // If set, the XMPPStream was initialized in P2P mode
-	kResetByteCountPerConnection  = 1 << 1,  // If set, byte count should be reset per connection
-#if TARGET_OS_IPHONE
-	kEnableBackgroundingOnSocket  = 1 << 2,  // If set, the VoIP flag should be set on the socket
-#endif
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@interface XMPPStream ()
-{
-	dispatch_queue_t xmppQueue;
-	void *xmppQueueTag;
-	
-	dispatch_queue_t willSendIqQueue;
-	dispatch_queue_t willSendMessageQueue;
-	dispatch_queue_t willSendPresenceQueue;
-	
-	dispatch_queue_t willReceiveIqQueue;
-	dispatch_queue_t willReceiveMessageQueue;
-	dispatch_queue_t willReceivePresenceQueue;
-	
-	dispatch_queue_t didReceiveIqQueue;
-    
-	dispatch_source_t connectTimer;
-	
-	GCDMulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
-	
-	int state;
-	
-	GCDAsyncSocket *asyncSocket;
-	
-	UInt64 numberOfBytesSent;
-	UInt64 numberOfBytesReceived;
-	
-	XMPPParser *parser;
-	NSError *parserError;
-	
-	Byte flags;
-	Byte config;
-	
-	NSString *hostName;
-	UInt16 hostPort;
-    
-	BOOL autoStartTLS;
-	
-	id <XMPPSASLAuthentication> auth;
-	NSDate *authenticationDate;
-	
-	XMPPJID *myJID_setByClient;
-	XMPPJID *myJID_setByServer;
-	XMPPJID *remoteJID;
-	
-	XMPPPresence *myPresence;
-	NSXMLElement *rootElement;
-	
-	NSTimeInterval keepAliveInterval;
-	dispatch_source_t keepAliveTimer;
-	NSTimeInterval lastSendReceiveTime;
-	NSData *keepAliveData;
-	
-	NSMutableArray *registeredModules;
-	NSMutableDictionary *autoDelegateDict;
-	
-	XMPPSRVResolver *srvResolver;
-	NSArray *srvResults;
-	NSUInteger srvResultsIndex;
-	
-	NSMutableArray *receipts;
-	
-	NSThread *xmppUtilityThread;
-	NSRunLoop *xmppUtilityRunLoop;
-	
-	id userTag;
-}
-
-- (void)setIsSecure:(BOOL)flag;
-- (void)setIsAuthenticated:(BOOL)flag;
-- (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag;
-- (void)continueSendMessage:(XMPPMessage *)message withTag:(long)tag;
-- (void)continueSendPresence:(XMPPPresence *)presence withTag:(long)tag;
-- (void)startNegotiation;
-- (void)sendOpeningNegotiation;
-- (void)continueStartTLS:(NSMutableDictionary *)settings;
-- (void)continueHandleBinding:(NSString *)alternativeResource;
-- (void)setupKeepAliveTimer;
-- (void)keepAlive;
-
-- (void)startConnectTimeout:(NSTimeInterval)timeout;
-- (void)endConnectTimeout;
-- (void)doConnectTimeout;
-
-- (void)continueReceiveMessage:(XMPPMessage *)message;
-- (void)continueReceiveIQ:(XMPPIQ *)iq;
-- (void)continueReceivePresence:(XMPPPresence *)presence;
-
-@end
-
-@interface XMPPElementReceipt (PrivateAPI)
-
-- (void)signalSuccess;
-- (void)signalFailure;
-
-@end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -214,6 +84,10 @@ enum XMPPStreamConfig
 	
 	receipts = [[NSMutableArray alloc] init];
 	
+    registeredFeatures = [[NSMutableArray alloc] init];
+    registeredStreamPreprocessors = [[NSMutableArray alloc] init];
+    registeredElementHandlers = [[NSMutableArray alloc] init];
+    
 	// Setup and start the utility thread.
 	// We need to be careful to ensure the thread doesn't retain a reference to us longer than necessary.
 	
@@ -1391,9 +1265,8 @@ enum XMPPStreamConfig
 				NSData *termData = [termStr dataUsingEncoding:NSUTF8StringEncoding];
 				
 				XMPPLogSend(@"SEND: %@", termStr);
-				numberOfBytesSent += [termData length];
 				
-				[asyncSocket writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STREAM];
+				[self writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STREAM];
 				[asyncSocket disconnectAfterWriting];
 				
 				// Everthing will be handled in socketDidDisconnect:withError:
@@ -1484,9 +1357,8 @@ enum XMPPStreamConfig
 	NSData *outgoingData = [starttls dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", starttls);
-	numberOfBytesSent += [outgoingData length];
 	
-	[asyncSocket writeData:outgoingData
+	[self writeData:outgoingData
 			   withTimeout:TIMEOUT_XMPP_WRITE
 					   tag:TAG_XMPP_WRITE_STREAM];
 }
@@ -1641,9 +1513,8 @@ enum XMPPStreamConfig
 		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
 		XMPPLogSend(@"SEND: %@", outgoingStr);
-		numberOfBytesSent += [outgoingData length];
 		
-		[asyncSocket writeData:outgoingData
+		[self writeData:outgoingData
 		           withTimeout:TIMEOUT_XMPP_WRITE
 		                   tag:TAG_XMPP_WRITE_STREAM];
 		
@@ -2362,9 +2233,8 @@ enum XMPPStreamConfig
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
-	numberOfBytesSent += [outgoingData length];
 	
-	[asyncSocket writeData:outgoingData
+	[self writeData:outgoingData
 	           withTimeout:TIMEOUT_XMPP_WRITE
 	                   tag:tag];
 	
@@ -2380,9 +2250,8 @@ enum XMPPStreamConfig
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
-	numberOfBytesSent += [outgoingData length];
 	
-	[asyncSocket writeData:outgoingData
+	[self writeData:outgoingData
 	           withTimeout:TIMEOUT_XMPP_WRITE
 	                   tag:tag];
 	
@@ -2398,9 +2267,8 @@ enum XMPPStreamConfig
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
-	numberOfBytesSent += [outgoingData length];
 	
-	[asyncSocket writeData:outgoingData
+	[self writeData:outgoingData
 	           withTimeout:TIMEOUT_XMPP_WRITE
 	                   tag:tag];
 	
@@ -2431,9 +2299,8 @@ enum XMPPStreamConfig
 	NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", outgoingStr);
-	numberOfBytesSent += [outgoingData length];
 	
-	[asyncSocket writeData:outgoingData
+	[self writeData:outgoingData
 	           withTimeout:TIMEOUT_XMPP_WRITE
 	                   tag:tag];
 }
@@ -2650,9 +2517,8 @@ enum XMPPStreamConfig
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
 			
-			[asyncSocket writeData:outgoingData
+			[self writeData:outgoingData
 			           withTimeout:TIMEOUT_XMPP_WRITE
 			                   tag:TAG_XMPP_WRITE_STREAM];
 		}
@@ -2999,6 +2865,21 @@ enum XMPPStreamConfig
 		dispatch_async(xmppQueue, block);
 }
 
+- (void)writeData:(NSData *)data withTimeout:(NSTimeInterval)timeout tag:(long)tag
+{
+    NSData * newData = data;
+    for (id<XMPPStreamPreprocessor> f in registeredStreamPreprocessors) {
+        newData = [f processOutputData:newData];
+    }
+    numberOfBytesSent += [newData length];
+    [asyncSocket writeData:newData withTimeout:timeout tag:tag];
+}
+
+- (void)readDataWithTimeout:(NSTimeInterval)timeout tag:(long)tag
+{
+    [asyncSocket readDataWithTimeout:timeout tag:tag];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Stream Negotiation
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3020,7 +2901,7 @@ enum XMPPStreamConfig
 	[multicastDelegate xmppStreamDidStartNegotiation:self];
 	
 	// And start reading in the server's XML stream
-	[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
+	[self readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
 }
 
 /**
@@ -3040,9 +2921,8 @@ enum XMPPStreamConfig
 		NSData *outgoingData = [s1 dataUsingEncoding:NSUTF8StringEncoding];
 		
 		XMPPLogSend(@"SEND: %@", s1);
-		numberOfBytesSent += [outgoingData length];
 		
-		[asyncSocket writeData:outgoingData
+		[self writeData:outgoingData
 				   withTimeout:TIMEOUT_XMPP_WRITE
 						   tag:TAG_XMPP_WRITE_START];
 		
@@ -3113,9 +2993,8 @@ enum XMPPStreamConfig
 	NSData *outgoingData = [s2 dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogSend(@"SEND: %@", s2);
-	numberOfBytesSent += [outgoingData length];
 	
-	[asyncSocket writeData:outgoingData
+	[self writeData:outgoingData
 			   withTimeout:TIMEOUT_XMPP_WRITE
 					   tag:TAG_XMPP_WRITE_START];
 	
@@ -3219,7 +3098,7 @@ enum XMPPStreamConfig
 			
 			// We paused reading from the socket.
 			// We're ready to continue now.
-			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
+			[self readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
 		}
 		else
 		{
@@ -3267,6 +3146,19 @@ enum XMPPStreamConfig
 		}
 	}
 	
+    // According to XEP-0170: Recommended Order of Stream Feature Negotiation
+    // Stream Compression should be before resource binding.
+    // Currently only Stream Compression external feature is supported,
+    // so just put the for loop before the resource binding.
+    // When (if has more requirement) resource binding feature is also removed
+    // out of XMPStream as a separated Feature (module), we can use the sequence
+    // of the array items to control the order.
+    for (XMPPFeature * feature in registeredFeatures) {
+        if ([feature handleFeatures:features]) {
+            return ;
+        }
+    }
+    
 	// Check to see if resource binding is required
 	// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
 	NSXMLElement *f_bind = [features elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
@@ -3297,9 +3189,8 @@ enum XMPPStreamConfig
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
 			
-			[asyncSocket writeData:outgoingData
+			[self writeData:outgoingData
 					   withTimeout:TIMEOUT_XMPP_WRITE
 							   tag:TAG_XMPP_WRITE_STREAM];
 		}
@@ -3318,9 +3209,8 @@ enum XMPPStreamConfig
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
 			
-			[asyncSocket writeData:outgoingData
+			[self writeData:outgoingData
 					   withTimeout:TIMEOUT_XMPP_WRITE
 							   tag:TAG_XMPP_WRITE_STREAM];
 		}
@@ -3424,7 +3314,7 @@ enum XMPPStreamConfig
 				// So start read request here.
 				// The state is STATE_XMPP_OPENING, set via sendOpeningNegotiation method.
 				
-				[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
+				[self readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
 			}
 		}
 		else
@@ -3504,9 +3394,8 @@ enum XMPPStreamConfig
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
 			
-			[asyncSocket writeData:outgoingData
+			[self writeData:outgoingData
 					   withTimeout:TIMEOUT_XMPP_WRITE
 							   tag:TAG_XMPP_WRITE_STREAM];
 			
@@ -3610,9 +3499,8 @@ enum XMPPStreamConfig
 		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
 		XMPPLogSend(@"SEND: %@", outgoingStr);
-		numberOfBytesSent += [outgoingData length];
 		
-		[asyncSocket writeData:outgoingData
+		[self writeData:outgoingData
 		           withTimeout:TIMEOUT_XMPP_WRITE
 		                   tag:TAG_XMPP_WRITE_STREAM];
 		
@@ -3631,9 +3519,8 @@ enum XMPPStreamConfig
 		NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 		
 		XMPPLogSend(@"SEND: %@", outgoingStr);
-		numberOfBytesSent += [outgoingData length];
 		
-		[asyncSocket writeData:outgoingData
+		[self writeData:outgoingData
 		           withTimeout:TIMEOUT_XMPP_WRITE
 		                   tag:TAG_XMPP_WRITE_STREAM];
 		
@@ -3819,21 +3706,26 @@ enum XMPPStreamConfig
 	lastSendReceiveTime = [NSDate timeIntervalSinceReferenceDate];
 	numberOfBytesReceived += [data length];
 	
-	XMPPLogRecvPre(@"RECV: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-	
+    NSData * newData = data;
+    for (id<XMPPStreamPreprocessor> f in registeredStreamPreprocessors) {
+        newData = [f processInputData:newData];
+    }
+    
+    XMPPLogRecvPre(@"RECV: %@", [[NSString alloc] initWithData:newData encoding:NSUTF8StringEncoding]);
+    
 	// Asynchronously parse the xml data
-	[parser parseData:data];
+	[parser parseData:newData];
 	
 	if ([self isSecure])
 	{
 		// Continue reading for XML elements
 		if (state == STATE_XMPP_OPENING)
 		{
-			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
+			[self readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
 		}
 		else
 		{
-			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
+			[self readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
 		}
 	}
 	else
@@ -3988,9 +3880,8 @@ enum XMPPStreamConfig
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
 			
-			[asyncSocket writeData:outgoingData
+			[self writeData:outgoingData
 			           withTimeout:TIMEOUT_XMPP_WRITE
 			                   tag:TAG_XMPP_WRITE_STREAM];
 		}
@@ -4032,9 +3923,8 @@ enum XMPPStreamConfig
 			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
 			
 			XMPPLogSend(@"SEND: %@", outgoingStr);
-			numberOfBytesSent += [outgoingData length];
 			
-			[asyncSocket writeData:outgoingData
+			[self writeData:outgoingData
 			           withTimeout:TIMEOUT_XMPP_WRITE
 			                   tag:TAG_XMPP_WRITE_STREAM];
 			
@@ -4063,10 +3953,17 @@ enum XMPPStreamConfig
 	
 	if (state == STATE_XMPP_NEGOTIATING)
 	{
+        
+        //During processing other features, we shall not set rootElement
+        for (id<XMPPElementHandler> handler in registeredElementHandlers) {
+            if ([handler handleElement:element]) {
+                return ;
+            }
+        }
+
 		// We've just read in the stream features
 		// We consider this part of the root element, so we'll add it (replacing any previously sent features)
 		[rootElement setChildren:[NSArray arrayWithObject:element]];
-		
 		// Call a method to handle any requirements set forth in the features
 		[self handleStreamFeatures];
 	}
@@ -4134,11 +4031,11 @@ enum XMPPStreamConfig
 		// Continue reading for XML elements
 		if (state == STATE_XMPP_OPENING)
 		{
-			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
+			[self readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
 		}
 		else if (state != STATE_XMPP_STARTTLS_2) // Don't queue read operation prior to [asyncSocket startTLS:]
 		{
-			[asyncSocket readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
+			[self readDataWithTimeout:TIMEOUT_XMPP_READ_STREAM tag:TAG_XMPP_READ_STREAM];
 		}
 	}
 }
@@ -4228,9 +4125,8 @@ enum XMPPStreamConfig
 		
 		if (elapsed < 0 || elapsed >= keepAliveInterval)
 		{
-			numberOfBytesSent += [keepAliveData length];
 			
-			[asyncSocket writeData:keepAliveData
+			[self writeData:keepAliveData
 			           withTimeout:TIMEOUT_XMPP_WRITE
 			                   tag:TAG_XMPP_WRITE_STREAM];
 			
@@ -4477,6 +4373,48 @@ enum XMPPStreamConfig
             block(module,idx,stop);
         }
     }];
+}
+
+- (void)addFeature:(XMPPFeature *)feature
+{
+    if (![registeredFeatures containsObject:feature]) {
+        [registeredFeatures addObject:feature];
+    }
+}
+
+- (void)removeFeature:(XMPPFeature *)feature
+{
+    if ([registeredFeatures containsObject:feature]) {
+        [registeredFeatures removeObject:feature];
+    }
+}
+
+- (void)addStreamPreprocessor:(id<XMPPStreamPreprocessor>)preprocessor
+{
+    if (![registeredStreamPreprocessors containsObject:preprocessor]) {
+        [registeredStreamPreprocessors addObject:preprocessor];
+    }
+}
+
+- (void)removeStreamPreprocessor:(id<XMPPStreamPreprocessor>)preprocessor
+{
+    if ([registeredStreamPreprocessors containsObject:preprocessor]) {
+        [registeredStreamPreprocessors removeObject:preprocessor];
+    }
+}
+
+- (void)addElementHandler:(id<XMPPElementHandler>)handler
+{
+    if (![registeredElementHandlers containsObject:handler]) {
+        [registeredElementHandlers addObject:handler];
+    }
+}
+
+- (void)removeElementHandler:(id<XMPPElementHandler>)handler
+{
+    if ([registeredElementHandlers containsObject:handler]) {
+        [registeredElementHandlers removeObject:handler];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

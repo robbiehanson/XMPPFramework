@@ -191,6 +191,7 @@
     xmppCapabilities.autoFetchHashedCapabilities = YES;
     xmppCapabilities.autoFetchNonHashedCapabilities = NO;
 
+    xmppCompression = [[XMPPCompression alloc] init];
 	// Activate xmpp modules
 
 	[xmppReconnect         activate:xmppStream];
@@ -198,7 +199,7 @@
 	[xmppvCardTempModule   activate:xmppStream];
 	[xmppvCardAvatarModule activate:xmppStream];
 	[xmppCapabilities      activate:xmppStream];
-
+    [xmppCompression       activate:xmppStream];
 	// Add ourself as a delegate to anything we may be interested in
 
 	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
@@ -234,7 +235,8 @@
 	[xmppvCardTempModule   deactivate];
 	[xmppvCardAvatarModule deactivate];
 	[xmppCapabilities      deactivate];
-	
+	[xmppCompression       deactivate];
+    
 	[xmppStream disconnect];
 	
 	xmppStream = nil;
