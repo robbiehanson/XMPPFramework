@@ -194,11 +194,12 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
 {
     NSData * returnData = data;
     if (XMPPCompressionStateCompressing == self.compressionState) {
-        NSMutableData * newData = [NSMutableData dataWithCapacity:1024];
+        NSMutableData * newMutableData = nil; //if inflated buffer exceeds buffer size, then use NSMutableData
+        NSData * newData = nil;               // else use a NSData instead -- to minize alloca operations
         uLongf offset = 0;
         Bytef output[1024];
         const uLongf outputSz = sizeof(output);
-        
+        int ret = Z_ERRNO;
         while (offset < data.length) {
             int flush = Z_NO_FLUSH;
             uLongf blockSz = 256;
@@ -214,23 +215,44 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
             _inflation_strm.avail_out = sizeof(output);
             _inflation_strm.next_out = output;
 
-            int ret = inflate(&_inflation_strm, flush);
+            ret = inflate(&_inflation_strm, flush);
             if (Z_OK == ret || Z_STREAM_END == ret) {
                 uLongf sz = outputSz - _inflation_strm.avail_out;
                 if (sz) {
-                    [newData appendBytes:output length:sz];
+                    if (!newData && !newMutableData) {
+                        if(Z_NO_FLUSH != flush) {
+                            newData = [NSData dataWithBytes:output length:sz];
+                        }
+                        else {
+                             // current output buffer is not enough, so double it
+                            newMutableData = [NSMutableData dataWithCapacity:outputSz * 2];
+                        }
+                    }
+                    if (newMutableData) {
+                        [newMutableData appendBytes:output length:sz];
+                    }
                 }
             }
             else {
                 _inflation_strm.total_out = 0;
                 XMPPLogError(@"Inflation failed: %d(%s)", ret, _inflation_strm.msg);
-                [newData setLength:_inflation_strm.total_out];
+                newData = [NSData data];
                 break;
             }
             offset += blockSz;
         }
-        XMPPLogVerbose(@"RECV: Compression Rate:%.4f%%(%d/%d)", data.length * 1.0 / newData.length * 100.0f, data.length, newData.length);
-        returnData = [newData copy];
+        if (!newData) {
+            if (newMutableData) {
+                newData = [newMutableData copy];
+            }
+            else {
+                newData = [NSData data];
+            }
+        }
+        if (ret >= Z_OK) {
+            XMPPLogRecvPost(@"RECV: Compression Rate:%.4f%%(%d/%d)", data.length * 1.0 / newData.length * 100.0f, data.length, newData.length);
+        }
+        returnData = newData;
     }
     return returnData;
 }
@@ -239,38 +261,34 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
 {
     NSData * returnData = data;
     if (XMPPCompressionStateCompressing == self.compressionState) {
-        NSMutableData * newData = [NSMutableData dataWithCapacity:1024];
-        Bytef buffer[256];
-        const uLongf bufferSize = sizeof(buffer);
-        Bytef *pointer = (Bytef *)data.bytes;
-        const uLongf totalLength = data.length;
-        uLongf offset = 0;
-        
-        while (offset < totalLength) {
+        const uLongf bufferSize = deflateBound(&_deflation_strm, data.length);
+        Bytef * buffer = (Bytef *)malloc(bufferSize);
+        int ret = Z_ERRNO;
+        if (buffer) {
             _deflation_strm.next_out = buffer;
             _deflation_strm.avail_out = bufferSize;
-            uLongf length = totalLength - offset;
-            int flush = Z_NO_FLUSH;
-            if (length > bufferSize) {
-                length = bufferSize;
+            _deflation_strm.next_in = (Bytef *)data.bytes;
+            _deflation_strm.avail_in = data.length;
+            ret = deflate(&_deflation_strm, Z_PARTIAL_FLUSH);
+
+            if (ret >= Z_OK) {
+                const uLongf len = bufferSize - _deflation_strm.avail_out;
+                XMPPLogSend(@"SEND: Compression Rate:%.4f%%(%ld/%d)", len * 1.0 / data.length * 100.0f, len, data.length);
+                returnData = [NSData dataWithBytesNoCopy:buffer length:len freeWhenDone:YES];
             }
             else {
-                flush = Z_PARTIAL_FLUSH;
+                XMPPLogError(@"Deflation failed:%d(%s)", ret, _deflation_strm.msg?_deflation_strm.msg:"");
+                returnData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
             }
-
-            _deflation_strm.next_in = pointer + offset;
-            _deflation_strm.avail_in = length;
-
-            int ret = deflate(&_deflation_strm, flush);
-            if (ret >= Z_OK) {
-                [newData appendBytes:buffer length:bufferSize - _deflation_strm.avail_out];
-            }
-            offset += length;
+            
         }
-        
-        XMPPLogVerbose(@"SEND: Compression Rate:%.4f%%(%d/%d)", newData.length * 1.0 / data.length * 100.0f, newData.length, data.length);
-        returnData = [newData copy];
+        else {
+            // I think returning a space (keepalive) is better than returning a empty data
+            returnData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
+            XMPPLogError(@"Cannot alloca enough memory");
+        }
     }
+    
     return returnData;
 }
 
