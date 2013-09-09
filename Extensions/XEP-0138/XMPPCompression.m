@@ -246,7 +246,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
                 newData = [newMutableData copy];
             }
             else {
-                newData = [NSData data];
+                newData = nil;
             }
         }
         if (ret >= Z_OK) {
@@ -283,8 +283,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
             
         }
         else {
-            // I think returning a space (keepalive) is better than returning a empty data
-            returnData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
+            returnData = nil;
             XMPPLogError(@"Cannot alloca enough memory");
         }
     }
