@@ -32,7 +32,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		
-		sharedInstance = [[XMPPRosterCoreDataStorage alloc] initWithDatabaseFilename:nil];
+		sharedInstance = [[XMPPRosterCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
 	});
 	
 	return sharedInstance;
@@ -48,7 +48,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	[super commonInit];
 	
 	// This method is invoked by all public init methods of the superclass
-	
+	autoRecreateDatabaseFile = YES;
+    
 	rosterPopulationSet = [[NSMutableSet alloc] init];
 }
 
@@ -132,7 +133,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 #pragma mark Overrides
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)willCreatePersistentStore:(NSString *)filePath
+- (void)willCreatePersistentStoreWithPath:(NSString *)filePath options:(NSDictionary *)theStoreOptions
 {
 	// This method is overriden from the XMPPCoreDataStore superclass.
 	// From the documentation:
