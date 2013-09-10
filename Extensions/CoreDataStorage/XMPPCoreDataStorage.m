@@ -95,14 +95,32 @@ static NSMutableSet *databaseFileNames;
 {
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// This method is queried if the initWithDatabaseFileName method is invoked with a nil parameter.
+	// This method is queried if the initWithDatabaseFileName:storeOptions: method is invoked with a nil parameter for databaseFileName.
 	// 
 	// You are encouraged to use the sqlite file extension.
 	
 	return [NSString stringWithFormat:@"%@.sqlite", [self managedObjectModelName]];
 }
 
-- (void)willCreatePersistentStoreWithPath:(NSString *)storePath
+- (NSDictionary *)defaultStoreOptions
+{
+    
+    // Override me, if needed, to provide customized behavior.
+	//
+	// This method is queried if the initWithDatabaseFileName:storeOptions: method is invoked with a nil parameter for defaultStoreOptions.
+    
+    NSDictionary *defaultStoreOptions = nil;
+    
+    if(databaseFileName)
+    {
+        defaultStoreOptions = @{ NSMigratePersistentStoresAutomaticallyOption: @(YES),
+                                 NSInferMappingModelAutomaticallyOption : @(YES) };
+    }
+    
+    return defaultStoreOptions;
+}
+
+- (void)willCreatePersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)theStoreOptions
 {
 	// Override me, if needed, to provide customized behavior.
 	// 
@@ -113,7 +131,7 @@ static NSMutableSet *databaseFileNames;
 	// If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
 }
 
-- (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr
+- (BOOL)addPersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)theStoreOptions error:(NSError **)errorPtr
 {
 	// Override me, if needed, to completely customize the persistent store.
 	// 
@@ -131,16 +149,10 @@ static NSMutableSet *databaseFileNames;
 		
 		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
 		
-		// Default support for automatic lightweight migrations
-		NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
-		                         [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
-		                         [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, 
-		                         nil];
-		
 		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
 		                                                           configuration:nil
 		                                                                     URL:storeUrl
-		                                                                 options:options
+		                                                                 options:storeOptions
 		                                                                   error:errorPtr];
 	}
 	else
@@ -157,7 +169,7 @@ static NSMutableSet *databaseFileNames;
     return persistentStore != nil;
 }
 
-- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error
+- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)theStoreOptions error:(NSError *)error
 {
     // Override me, if needed, to provide customized behavior.
 	// 
@@ -225,6 +237,7 @@ static NSMutableSet *databaseFileNames;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @synthesize databaseFileName;
+@synthesize storeOptions;
 
 - (void)commonInit
 {
@@ -245,10 +258,10 @@ static NSMutableSet *databaseFileNames;
 
 - (id)init
 {
-    return [self initWithDatabaseFilename:nil];
+    return [self initWithDatabaseFilename:nil storeOptions:nil];
 }
 
-- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
+- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName storeOptions:(NSDictionary *)theStoreOptions
 {
 	if ((self = [super init]))
 	{
@@ -256,6 +269,11 @@ static NSMutableSet *databaseFileNames;
 			databaseFileName = [aDatabaseFileName copy];
 		else
 			databaseFileName = [[self defaultDatabaseFileName] copy];
+        
+        if(theStoreOptions)
+            storeOptions = theStoreOptions;
+        else
+            storeOptions = [self defaultStoreOptions];
 		
 		if (![[self class] registerDatabaseFileName:databaseFileName])
 		{
@@ -559,22 +577,22 @@ static NSMutableSet *databaseFileNames;
 			{
 				// If storePath is nil, then NSURL will throw an exception
 				
-				[self willCreatePersistentStoreWithPath:storePath];
+				[self willCreatePersistentStoreWithPath:storePath options:storeOptions];
 				
 				NSError *error = nil;
 				
-				BOOL didAddPersistentStore = [self addPersistentStoreWithPath:storePath error:&error];
+				BOOL didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:storeOptions error:&error];
 				
 				if(autoRecreateDatabaseFile && !didAddPersistentStore)
 				{
 					[[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
 					
-					didAddPersistentStore = [self addPersistentStoreWithPath:storePath error:&error];
+					didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:storeOptions error:&error];
 				}
 				
 				if (!didAddPersistentStore)
 				{
-					[self didNotAddPersistentStoreWithPath:storePath error:error];
+					[self didNotAddPersistentStoreWithPath:storePath options:storeOptions error:error];
 				}
 			}
 			else
@@ -587,12 +605,12 @@ static NSMutableSet *databaseFileNames;
 		{
 			// In-Memory persistent store
 			
-			[self willCreatePersistentStoreWithPath:nil];
+			[self willCreatePersistentStoreWithPath:nil options:storeOptions];
 			
 			NSError *error = nil;
-			if (![self addPersistentStoreWithPath:nil error:&error])
+			if (![self addPersistentStoreWithPath:nil options:storeOptions error:&error])
 			{
-				[self didNotAddPersistentStoreWithPath:nil error:error];
+				[self didNotAddPersistentStoreWithPath:nil options:storeOptions error:error];
 			}
 		}
 		

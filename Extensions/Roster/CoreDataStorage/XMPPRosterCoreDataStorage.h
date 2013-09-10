@@ -44,7 +44,7 @@
 /* Inherited from XMPPCoreDataStorage
  * Please see the XMPPCoreDataStorage header file for extensive documentation.
  
-- (id)initWithDatabaseFilename:(NSString *)databaseFileName;
+- (id)initWithDatabaseFilename:(NSString *)databaseFileName storeOptions:(NSDictionary *)storeOptions;
 - (id)initWithInMemoryStore;
 
 @property (readonly) NSString *databaseFileName;
