@@ -1021,42 +1021,42 @@
     
     if(self.filePath)
     {
-        [description setValue:self.filePath forKey:@"filePath"];
+        [description setObject:self.filePath forKey:@"filePath"];
     }
     
     if(self.fileName)
     {
-        [description setValue:self.fileName forKey:@"fileName"];
+        [description setObject:self.fileName forKey:@"fileName"];
     }
     
     if(self.fileAttributes)
     {
-        [description setValue:self.fileAttributes forKey:@"fileAttributes"];
+        [description setObject:self.fileAttributes forKey:@"fileAttributes"];
     }
     
     if(self.creationDate)
     {
-        [description setValue:self.creationDate forKey:@"creationDate"];
+        [description setObject:self.creationDate forKey:@"creationDate"];
     }
     
     if(self.modificationDate)
     {
-        [description setValue:self.modificationDate forKey:@"modificationDate"];
+        [description setObject:self.modificationDate forKey:@"modificationDate"];
     }
     
     if(self.fileSize)
     {
-        [description setValue:@(self.fileSize) forKey:@"fileSize"];
+        [description setObject:@(self.fileSize) forKey:@"fileSize"];
     }
     
     if(self.age)
     {
-        [description setValue:@(self.age) forKey:@"age"];
+        [description setObject:@(self.age) forKey:@"age"];
     }
     
     if(self.isArchived)
     {
-        [description setValue:@(self.isArchived) forKey:@"isArchived"];
+        [description setObject:@(self.isArchived) forKey:@"isArchived"];
     }
     
 	return [description description];
