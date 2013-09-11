@@ -491,11 +491,7 @@
 		
 		[x addChild:field];
 	}];
-	
-	NSXMLElement *optionsStanza = [NSXMLElement elementWithName:@"options"];
-	[optionsStanza addChild:x];
-	
-	return optionsStanza;
+	return x;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
