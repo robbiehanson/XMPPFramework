@@ -133,9 +133,6 @@ enum XMPPStreamConfig
 	
 	NSMutableArray *receipts;
 	
-	NSThread *xmppUtilityThread;
-	NSRunLoop *xmppUtilityRunLoop;
-	
 	id userTag;
 }
 
@@ -213,13 +210,6 @@ enum XMPPStreamConfig
 	autoDelegateDict = [[NSMutableDictionary alloc] init];
 	
 	receipts = [[NSMutableArray alloc] init];
-	
-	// Setup and start the utility thread.
-	// We need to be careful to ensure the thread doesn't retain a reference to us longer than necessary.
-	
-	xmppUtilityThread = [[NSThread alloc] initWithTarget:[self class] selector:@selector(xmppThreadMain) object:nil];
-	[[xmppUtilityThread threadDictionary] setObject:self forKey:@"XMPPStream"];
-	[xmppUtilityThread start];
 }
 
 /**
@@ -292,11 +282,6 @@ enum XMPPStreamConfig
 	{
 		[receipt signalFailure];
 	}
-	
-	[[self class] performSelector:@selector(xmppThreadStop)
-	                     onThread:xmppUtilityThread
-	                   withObject:nil
-	                waitUntilDone:NO];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1939,10 +1924,8 @@ enum XMPPStreamConfig
 	return result;
 }
 
-- (BOOL)isAuthenticating{
-	
-	XMPPLogTrace();
-	
+- (BOOL)isAuthenticating
+{		
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
@@ -1994,7 +1977,8 @@ enum XMPPStreamConfig
 		dispatch_async(xmppQueue, block);
 }
 
-- (NSDate *)authenticationDate{
+- (NSDate *)authenticationDate
+{
 	__block NSDate *result = nil;
 	
 	dispatch_block_t block = ^{
@@ -4500,93 +4484,6 @@ enum XMPPStreamConfig
 - (NSString *)generateUUID
 {
 	return [[self class] generateUUID];
-}
-
-- (NSThread *)xmppUtilityThread
-{
-	// This is a read-only variable, set in the init method and never altered.
-	// Thus we supply direct access to it in this method.
-	
-	return xmppUtilityThread;
-}
-
-- (NSRunLoop *)xmppUtilityRunLoop
-{
-	__block NSRunLoop *result = nil;
-	
-	dispatch_block_t block = ^{
-		result = xmppUtilityRunLoop;
-	};
-	
-	if (dispatch_get_specific(xmppQueueTag))
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	return result;
-}
-
-- (void)setXmppUtilityRunLoop:(NSRunLoop *)runLoop
-{
-	dispatch_async(xmppQueue, ^{
-		if (xmppUtilityRunLoop == nil)
-		{
-			xmppUtilityRunLoop = runLoop;
-		}
-	});
-}
-
-+ (void)xmppThreadMain
-{
-	// This is the xmppUtilityThread.
-	// It is designed to be used only if absolutely necessary.
-	// If there is a GCD alternative, it should be used instead.
-	
-	@autoreleasepool {
-	
-		[[NSThread currentThread] setName:@"XMPPUtilityThread"];
-		
-		// Set XMPPStream's xmppUtilityRunLoop variable.
-		// 
-		// And when done, remove the xmppStream reference from the dictionary so it's no longer retained.
-		
-		XMPPStream *creator = [[[NSThread currentThread] threadDictionary] objectForKey:@"XMPPStream"];
-		[creator setXmppUtilityRunLoop:[NSRunLoop currentRunLoop]];
-		[[[NSThread currentThread] threadDictionary] removeObjectForKey:@"XMPPStream"];
-		
-		// We can't iteratively run the run loop unless it has at least one source or timer.
-		// So we'll create a timer that will probably never fire.
-		
-		[NSTimer scheduledTimerWithTimeInterval:[[NSDate distantFuture] timeIntervalSinceNow]
-		                                 target:self
-		                               selector:@selector(xmppThreadIgnore:)
-		                               userInfo:nil
-		                                repeats:YES];
-		
-		BOOL isCancelled = NO;
-		BOOL hasRunLoopSources = YES;
-		
-		while (!isCancelled && hasRunLoopSources)
-		{
-			@autoreleasepool {
-			
-				hasRunLoopSources = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-				                                             beforeDate:[NSDate distantFuture]];
-				
-				isCancelled = [[NSThread currentThread] isCancelled];
-			}
-		}
-	}
-}
-
-+ (void)xmppThreadStop
-{
-	[[NSThread currentThread] cancel];
-}
-
-+ (void)xmppThreadIgnore:(NSTimer *)aTimer
-{
-	// Ignore
 }
 
 @end
