@@ -668,27 +668,6 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 + (NSString *)generateUUID;
 - (NSString *)generateUUID;
 
-/**
- * The XMPP Framework is designed to be entirely GCD based.
- * However, there are various utility classes provided by Apple that are still dependent upon a thread/runloop model.
- * For example, monitoring a network for changes related to connectivity requires we register a runloop-based delegate.
- * Thus XMPPStream creates a dedicated thread/runloop for any xmpp classes that may need it.
- * This provides multiple benefits:
- * 
- * - Development is simplified for those transitioning from previous thread/runloop versions.
- * - Development is simplified for those who rely on utility classes that don't yet support pure GCD,
- *   as they don't have to setup and maintain a thread/runloop on their own.
- * - It prevents multiple xmpp classes from creating multiple internal threads (which would be resource costly).
- * 
- * Please note:
- * This thread is designed to be used only if absolutely necessary.
- * That is, if you MUST use a class that doesn't yet support pure GCD.
- * If there is a GCD alternative, you should be using it instead.
- * For example, do NOT use NSTimer. Instead setup a GCD timer using a dispatch_source.
-**/
-- (NSThread *)xmppUtilityThread;
-- (NSRunLoop *)xmppUtilityRunLoop;
-
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
