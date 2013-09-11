@@ -405,7 +405,7 @@
 		if (![serviceJID isEqualToJID:[message from]]) return;
 	}
 	else {
-		if (![myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+		if ([myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
 	}
 	
 	// <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
