@@ -15,27 +15,27 @@ static NSString *const xmlns_chatstates = @"http://jabber.org/protocol/chatstate
 	return ([[self elementsForXmlns:xmlns_chatstates] count] > 0);
 }
 
-- (BOOL)isActiveChatState
+- (BOOL)hasActiveChatState
 {
 	return ([self elementForName:@"active" xmlns:xmlns_chatstates] != nil);
 }
 
-- (BOOL)isComposingChatState
+- (BOOL)hasComposingChatState
 {
 	return ([self elementForName:@"composing" xmlns:xmlns_chatstates] != nil);
 }
 
-- (BOOL)isPausedChatState
+- (BOOL)hasPausedChatState
 {
 	return ([self elementForName:@"paused" xmlns:xmlns_chatstates] != nil);
 }
 
-- (BOOL)isInactiveChatState
+- (BOOL)hasInactiveChatState
 {
 	return ([self elementForName:@"inactive" xmlns:xmlns_chatstates] != nil);
 }
 
-- (BOOL)isGoneChatState
+- (BOOL)hasGoneChatState
 {
 	return ([self elementForName:@"gone" xmlns:xmlns_chatstates] != nil);
 }

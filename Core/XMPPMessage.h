@@ -34,6 +34,7 @@
 - (id)initWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
 - (id)initWithType:(NSString *)type child:(NSXMLElement *)childElement;
 
+- (NSString *)type;
 - (NSString *)body;
 - (NSString *)thread;
 

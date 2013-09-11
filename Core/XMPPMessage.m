@@ -148,6 +148,11 @@
     return [XMPPMessage messageFromElement:element];
 }
 
+- (NSString *)type
+{
+    return [[self attributeForName:@"type"] stringValue];
+}
+
 - (NSString *)body
 {
 	return [[self elementForName:@"body"] stringValue];
