@@ -273,11 +273,11 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	
 	dispatch_async(delegateQueue, ^{ @autoreleasepool {
 		
-		SEL selector = @selector(srvResolver:didResolveRecords:);
+		SEL selector = @selector(xmppSRVResolver:didResolveRecords:);
 		
 		if ([theDelegate respondsToSelector:selector])
 		{
-			[theDelegate srvResolver:self didResolveRecords:records];
+			[theDelegate xmppSRVResolver:self didResolveRecords:records];
 		}
 		else
 		{
@@ -301,11 +301,11 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	{
 		dispatch_async(delegateQueue, ^{ @autoreleasepool {
 			
-			SEL selector = @selector(srvResolver:didNotResolveDueToError:);
+			SEL selector = @selector(xmppSRVResolver:didNotResolveDueToError:);
 			
 			if ([theDelegate respondsToSelector:selector])
 			{
-				[theDelegate srvResolver:self didNotResolveDueToError:error];
+				[theDelegate xmppSRVResolver:self didNotResolveDueToError:error];
 			}
 			else
 			{

@@ -3701,7 +3701,7 @@ enum XMPPStreamConfig
 	}
 }
 
-- (void)srvResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records
+- (void)xmppSRVResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records
 {
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
 	
@@ -3717,7 +3717,7 @@ enum XMPPStreamConfig
 	[self tryNextSrvResult];
 }
 
-- (void)srvResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error
+- (void)xmppSRVResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error
 {
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
 	
