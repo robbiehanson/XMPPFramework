@@ -89,6 +89,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.viewController.statusLabel.text = @"Facebook login failed";
 }
 
+- (void)fbDidLogout
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (void)fbDidExtendToken:(NSString *)accessToken expiresAt:(NSDate *)expiresAt
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (void)fbSessionInvalidated
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
