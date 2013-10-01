@@ -45,6 +45,7 @@
 	
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
+	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSDate *result = [df dateFromString:dateStr];
@@ -84,6 +85,7 @@
 	
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
+	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSString *today = [df stringFromDate:[NSDate date]];
@@ -187,6 +189,7 @@
 	
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
+	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
 	[df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
 
 	NSDate *result = nil;
