@@ -55,13 +55,16 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	}
 }
 
-
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTemp class]);
 	
 	return (XMPPvCardTemp *)elem;
 }
 
++ (XMPPvCardTemp *)vCardTemp{
+    NSXMLElement *vCardTempElement = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+    return [XMPPvCardTemp vCardTempFromElement:vCardTempElement];
+}
 
 + (XMPPvCardTemp *)vCardTempSubElementFromIQ:(XMPPIQ *)iq
 {
