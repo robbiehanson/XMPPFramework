@@ -910,6 +910,11 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (void)xmppStream:(XMPPStream *)sender didFailToSendPresence:(XMPPPresence *)presence error:(NSError *)error;
 
 /**
+ * This method is called if the XMPP Stream's jid changes.
+**/
+- (void)xmppStreamDidChangeMyJID:(XMPPStream *)xmppStream;
+
+/**
  * This method is called if the disconnect method is called.
  * It may be used to determine if a disconnection was purposeful, or due to an error.
 **/
