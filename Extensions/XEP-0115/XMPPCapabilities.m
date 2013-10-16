@@ -189,7 +189,7 @@
 
 - (void)setMyCapabilitiesNode:(NSString *)flag
 {
-    NSAssert([flag length], @"myCapabilitiesNode must not be a URI");
+    NSAssert([flag length], @"myCapabilitiesNode MUST NOT be nil");
 
 	dispatch_block_t block = ^{
 		myCapabilitiesNode = flag;
