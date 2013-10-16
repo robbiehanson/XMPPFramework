@@ -438,6 +438,7 @@ enum XMPPStreamConfig
 			{
 				[[NSNotificationCenter defaultCenter] postNotificationName:XMPPStreamDidChangeMyJIDNotification
 				                                                    object:self];
+                [multicastDelegate xmppStreamDidChangeMyJID:self];
 			}
 		}
 	};
@@ -468,6 +469,7 @@ enum XMPPStreamConfig
 			{
 				[[NSNotificationCenter defaultCenter] postNotificationName:XMPPStreamDidChangeMyJIDNotification
 				                                                    object:self];
+                [multicastDelegate xmppStreamDidChangeMyJID:self];
 			}
 		}
 	};
