@@ -257,7 +257,7 @@
 // No problem - we use the KissXML library as a drop in replacement.
 // 
 // For more information on working with XML elements, see the Wiki article:
-// http://code.google.com/p/xmppframework/wiki/WorkingWithElements
+// https://github.com/robbiehanson/XMPPFramework/wiki/WorkingWithElements
 
 - (void)goOnline
 {

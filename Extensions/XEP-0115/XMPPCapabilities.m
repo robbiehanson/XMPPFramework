@@ -817,7 +817,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// 
 	// <c xmlns="http://jabber.org/protocol/caps"
 	//     hash="sha-1"
-	//     node="http://code.google.com/p/xmppframework"
+	//     node="https://github.com/robbiehanson/XMPPFramework"
 	//     ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
 	
 	myCapabilitiesC = [[NSXMLElement alloc] initWithName:@"c" xmlns:XMLNS_CAPS];
