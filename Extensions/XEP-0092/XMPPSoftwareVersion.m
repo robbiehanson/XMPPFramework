@@ -18,10 +18,10 @@
 {
     NSString *name = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
     NSString *version = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
-#if !TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
     NSString *os = [NSString stringWithFormat:@"%@ %@",[[UIDevice currentDevice] systemName],[[UIDevice currentDevice] systemVersion]];
 #else
-    NSString *os = [[NSProcessInfo processInfo] operatingSystemVersionString];
+    NSString *os = [NSString stringWithFormat:@"OS X %@",[[NSProcessInfo processInfo] operatingSystemVersionString]];
 #endif
     
     return [self initWithName:name version:version os:os dispatchQueue:queue];
@@ -105,7 +105,7 @@
 /**
  * If an XMPPCapabilites instance is used we want to advertise our support for XEP-0092.
  **/
-- (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query
+- (NSArray *)myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender
 {
     // This method is invoked on the moduleQueue.
     
@@ -115,10 +115,7 @@
     //   ...
     // </query>
     
-    NSXMLElement *messageDeliveryReceiptsFeatureElement = [NSXMLElement elementWithName:@"feature"];
-    [messageDeliveryReceiptsFeatureElement addAttributeWithName:@"var" stringValue:XMLNS_URN_XMPP_VERSION];
-    
-    [query addChild:messageDeliveryReceiptsFeatureElement];
+    return @[XMLNS_URN_XMPP_VERSION];
 }
 #endif
 
