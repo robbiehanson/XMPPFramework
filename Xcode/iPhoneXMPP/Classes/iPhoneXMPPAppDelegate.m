@@ -384,36 +384,8 @@
 	}
 	else
 	{
-		// Google does things incorrectly (does not conform to RFC).
-		// Because so many people ask questions about this (assume xmpp framework is broken),
-		// I've explicitly added code that shows how other xmpp clients "do the right thing"
-		// when connecting to a google server (gmail, or google apps for domains).
-		
-		NSString *expectedCertName = nil;
-		
-		NSString *serverDomain = xmppStream.hostName;
-		NSString *virtualDomain = [xmppStream.myJID domain];
-		
-		if ([serverDomain isEqualToString:@"talk.google.com"])
-		{
-			if ([virtualDomain isEqualToString:@"gmail.com"])
-			{
-				expectedCertName = virtualDomain;
-			}
-			else
-			{
-				expectedCertName = serverDomain;
-			}
-		}
-		else if (serverDomain == nil)
-		{
-			expectedCertName = virtualDomain;
-		}
-		else
-		{
-			expectedCertName = serverDomain;
-		}
-		
+		NSString *expectedCertName = [xmppStream.myJID domain];
+				
 		if (expectedCertName)
 		{
 			[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
