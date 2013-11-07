@@ -241,7 +241,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
                 _inflation_strm.total_out = 0;
                 XMPPLogError(@"Inflation failed: %d(%s)", ret, _inflation_strm.msg);
                 newData = [NSData data];
-                
+                [self sendStreamError];
                 break;
             }
             offset += blockSz;
@@ -251,7 +251,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
                 newData = [newMutableData copy];
             }
             else {
-                newData = [NSData data];
+                newData = nil;
             }
         }
         if (ret >= Z_OK) {
@@ -307,8 +307,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
     int r = strncmp(stream_error_tag, bytes, len);
     if (0 == r) { // restart stream
         XMPPLogTrace();
-        [self sendStreamError];
-        [self startStream];
+        // should restart stream, but current stream handler in XMPPStream will disconnectAfterSending ...
         return YES;
     }
     else {
