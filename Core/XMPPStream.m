@@ -3154,9 +3154,13 @@ const NSTimeInterval XMPPStreamTimeoutNone = -1;
     // When (if has more requirement) resource binding feature is also removed
     // out of XMPStream as a separated Feature (module), we can use the sequence
     // of the array items to control the order.
-    for (XMPPFeature * feature in registeredFeatures) {
-        if ([feature handleFeatures:features]) {
-            return ;
+    
+    NSXMLElement *f_need_auth = [features elementForName:@"auth" xmlns:@"http://jabber.org/features/iq-auth"];
+    if (!f_need_auth) { // we must ensure authentication come first
+        for (XMPPFeature * feature in registeredFeatures) {
+            if ([feature handleFeatures:features]) {
+                return ;
+            }
         }
     }
     
