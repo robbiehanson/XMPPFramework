@@ -146,10 +146,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
         if([[element name] isEqualToString:@"compressed"]) {
             self.compressionState = XMPPCompressionStateCompressing;
             [self prepareCompression];
-            [self.xmppStream sendOpeningNegotiation];
-
-            // And start reading in the server's XML stream
-            [self.xmppStream readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
+            [self startStream];
             return YES;
         }
     }
@@ -180,6 +177,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
 
 - (void)prepareCompression
 {
+    [self endCompression];
     inflateInit(&_inflation_strm);
     deflateInit(&_deflation_strm, Z_BEST_COMPRESSION);
 }
@@ -188,11 +186,17 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
 {
     inflateEnd(&_inflation_strm);
     deflateEnd(&_deflation_strm);
+    
+    memset(&_inflation_strm, 0, sizeof(z_stream));
+    memset(&_deflation_strm, 0, sizeof(z_stream));
 }
 
 - (NSData *)processInputData:(NSData *)data
 {
     NSData * returnData = data;
+    if ([self handleStreamError:data]) {
+        return returnData; //if it has an stream error, it is plain xml text
+    }
     if (XMPPCompressionStateCompressing == self.compressionState) {
         NSMutableData * newMutableData = nil; //if inflated buffer exceeds buffer size, then use NSMutableData
         NSData * newData = nil;               // else use a NSData instead -- to minize alloca operations
@@ -237,6 +241,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
                 _inflation_strm.total_out = 0;
                 XMPPLogError(@"Inflation failed: %d(%s)", ret, _inflation_strm.msg);
                 newData = [NSData data];
+                
                 break;
             }
             offset += blockSz;
@@ -278,13 +283,13 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
             }
             else {
                 XMPPLogError(@"Deflation failed:%d(%s)", ret, _deflation_strm.msg?_deflation_strm.msg:"");
-                returnData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
+                returnData = [NSData data];
             }
             
         }
         else {
             // I think returning a space (keepalive) is better than returning a empty data
-            returnData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
+            returnData = [NSData data];
             XMPPLogError(@"Cannot alloca enough memory");
         }
     }
@@ -292,4 +297,52 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
     return returnData;
 }
 
+// return YES if this has handled stream error
+// NO, if not a stream error
+- (BOOL)handleStreamError:(NSData *)data
+{
+    const char * bytes = (const char *)data.bytes;
+    static const char stream_error_tag[] = "<stream:error>";
+    static const int len = sizeof(stream_error_tag);
+    int r = strncmp(stream_error_tag, bytes, len);
+    if (0 == r) { // restart stream
+        XMPPLogTrace();
+        [self sendStreamError];
+        [self startStream];
+        return YES;
+    }
+    else {
+        return NO;
+    }
+}
+
+- (void)sendStreamError
+{
+    NSXMLElement *streamErrorElement = [NSXMLElement elementWithName:@"stream:error"];
+    NSXMLElement *undefinedConditionElement = [NSXMLElement elementWithName:@"undefined-condition" xmlns:@"urn:ietf:params:xml:ns:xmpp-streams"];
+    [streamErrorElement addChild:undefinedConditionElement];
+    
+    NSXMLElement *failure = [NSXMLElement elementWithName:@"failure" xmlns:@"http://jabber.org/protocol/compress"];
+    NSXMLElement *processFailed = [NSXMLElement elementWithName:@"processing-failed"];
+    [failure addChild:processFailed];
+    [streamErrorElement addChild:failure];
+    [self.xmppStream sendElement:streamErrorElement];
+    
+    [self endStream];
+}
+
+- (void)startStream
+{
+    //This will reset parser, restart stream
+    [self.xmppStream sendOpeningNegotiation];
+    [self.xmppStream readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
+}
+
+- (void)endStream
+{
+    NSString *termStr = @"</stream:stream>";
+    NSData *termData = [termStr dataUsingEncoding:NSUTF8StringEncoding];
+    XMPPLogSend(@"SEND: %@", termStr);
+    [self.xmppStream writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STREAM];
+}
 @end
