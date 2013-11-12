@@ -335,7 +335,19 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (void)goOnline
 {
-	NSXMLElement *presence = [NSXMLElement elementWithName:@"presence"];
+	XMPPPresence *presence = [XMPPPresence presence]; // type="available" is implicit
+    
+    NSString *domain = [[[self xmppStream] myJID] domain];
+    
+    //Google set their presence priority to 24, so we do the same to be compatible.
+    
+    if([domain isEqualToString:@"gmail.com"]
+       || [domain isEqualToString:@"gtalk.com"]
+       || [domain isEqualToString:@"talk.google.com"])
+    {
+        NSXMLElement *priority = [NSXMLElement elementWithName:@"priority" stringValue:@"24"];
+        [presence addChild:priority];
+    }
 	
 	[[self xmppStream] sendElement:presence];
 }

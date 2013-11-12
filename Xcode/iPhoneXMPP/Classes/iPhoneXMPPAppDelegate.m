@@ -262,6 +262,18 @@
 - (void)goOnline
 {
 	XMPPPresence *presence = [XMPPPresence presence]; // type="available" is implicit
+    
+    NSString *domain = [xmppStream.myJID domain];
+    
+    //Google set their presence priority to 24, so we do the same to be compatible.
+    
+    if([domain isEqualToString:@"gmail.com"]
+       || [domain isEqualToString:@"gtalk.com"]
+       || [domain isEqualToString:@"talk.google.com"])
+    {
+        NSXMLElement *priority = [NSXMLElement elementWithName:@"priority" stringValue:@"24"];
+        [presence addChild:priority];
+    }
 	
 	[[self xmppStream] sendElement:presence];
 }
