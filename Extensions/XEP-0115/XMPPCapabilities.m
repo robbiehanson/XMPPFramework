@@ -193,7 +193,6 @@
 
 	dispatch_block_t block = ^{
 		myCapabilitiesNode = flag;
-        [self recollectMyCapabilities];
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
