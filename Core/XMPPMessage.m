@@ -163,29 +163,25 @@
 	return [[self elementForName:@"body"] stringValue];
 }
 
-- (NSString*)bodyWithLang:(NSString*)lang
+- (NSString *)bodyForLanguage:(NSString *)language
 {
-    if (lang == nil)
-        return [self body];
-    NSArray *bodies = [self elementsForName:@"body"];
-    if (bodies == nil)
-        return nil;
-    for (int i = 0; i < bodies.count; i++)
+    if ([language length] == 0)
     {
-        DDXMLElement *elem = [bodies objectAtIndex:i];
-        DDXMLNode *langAttr = [elem attributeForName:@"lang"];
-        if (lang == nil)
+        return [self body];
+    }
+    
+    NSString *bodyForLanguage = nil;
+    
+    for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
+    {
+        if ([language isEqualToString:[[bodyElement attributeForName:@"xml:lang"] stringValue]])
         {
-            if (langAttr == nil)
-                return [elem stringValue];
-        }
-        else
-        {
-            if ([lang isEqualToString:[langAttr stringValue]])
-                return [elem stringValue];
+            bodyForLanguage = [bodyElement stringValue];
+            break;
         }
     }
-    return nil;
+    
+    return bodyForLanguage;
 }
 
 - (NSString *)thread
@@ -205,11 +201,15 @@
     [self addChild:bodyElement];
 }
 
-- (void)addBody:(NSString *)body withLang:(NSString *)lang
+- (void)addBody:(NSString *)body withLanguage:(NSString *)language
 {
     NSXMLElement *bodyElement = [NSXMLElement elementWithName:@"body" stringValue:body];
-    if (lang)
-        [bodyElement addAttributeWithName:@"xml:lang" stringValue:lang];
+    
+    if ([language length])
+    {
+        [bodyElement addAttributeWithName:@"xml:lang" stringValue:language];
+    }
+    
     [self addChild:bodyElement];
 }
 
