@@ -165,19 +165,29 @@
 
 - (NSString *)bodyForLanguage:(NSString *)language
 {
-    if ([language length] == 0)
-    {
-        return [self body];
-    }
+    // When language is nil retrieve the <body> element with no xml:lang attribute
+    BOOL noLanguage = [language length] == 0;
     
     NSString *bodyForLanguage = nil;
     
     for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
     {
-        if ([language isEqualToString:[[bodyElement attributeForName:@"xml:lang"] stringValue]])
+        NSXMLNode *langAttr = [bodyElement attributeForName:@"xml:lang"];
+        if (noLanguage)
         {
-            bodyForLanguage = [bodyElement stringValue];
-            break;
+            if (langAttr == nil)
+            {
+                bodyForLanguage = [bodyElement stringValue];
+                break;
+            }
+        }
+        else
+        {
+            if ([language isEqualToString:[langAttr stringValue]])
+            {
+                bodyForLanguage = [bodyElement stringValue];
+                break;
+            }
         }
     }
     
