@@ -37,12 +37,12 @@
 - (NSString *)type;
 - (NSString *)subject;
 - (NSString *)body;
-- (NSString *)bodyWithLang:(NSString *)lang;
+- (NSString *)bodyForLanguage:(NSString *)language;
 - (NSString *)thread;
 
 - (void)addSubject:(NSString *)subject;
 - (void)addBody:(NSString *)body;
-- (void)addBody:(NSString*)body withLang:(NSString*)lang;
+- (void)addBody:(NSString *)body withLanguage:(NSString *)language;
 - (void)addThread:(NSString *)thread;
 
 - (BOOL)isChatMessage;
