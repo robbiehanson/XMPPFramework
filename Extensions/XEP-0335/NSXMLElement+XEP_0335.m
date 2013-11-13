@@ -36,7 +36,7 @@
 
 - (BOOL)hasJSONContainer
 {
-    return ([self elementForName:XEP_0335_NAME xmlns:XEP_0335_XMLNS]);
+    return [self elementForName:XEP_0335_NAME xmlns:XEP_0335_XMLNS] != nil;
 }
 
 - (NSString *)JSONContainerString
