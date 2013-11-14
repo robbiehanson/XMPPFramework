@@ -165,16 +165,13 @@
 
 - (NSString *)bodyForLanguage:(NSString *)language
 {
-    if ([language length] == 0)
-    {
-        return [self body];
-    }
-    
     NSString *bodyForLanguage = nil;
     
     for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
     {
-        if ([language isEqualToString:[[bodyElement attributeForName:@"xml:lang"] stringValue]])
+        NSString *lang = [[bodyElement attributeForName:@"xml:lang"] stringValue];
+        
+        if ([language isEqualToString:lang] || ([language length] == 0  && [lang length] == 0))
         {
             bodyForLanguage = [bodyElement stringValue];
             break;
