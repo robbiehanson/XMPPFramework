@@ -153,9 +153,32 @@
     return [[self attributeForName:@"type"] stringValue];
 }
 
+- (NSString *)subject
+{
+	return [[self elementForName:@"subject"] stringValue];
+}
+
 - (NSString *)body
 {
 	return [[self elementForName:@"body"] stringValue];
+}
+
+- (NSString *)bodyForLanguage:(NSString *)language
+{
+    NSString *bodyForLanguage = nil;
+    
+    for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
+    {
+        NSString *lang = [[bodyElement attributeForName:@"xml:lang"] stringValue];
+        
+        if ([language isEqualToString:lang] || ([language length] == 0  && [lang length] == 0))
+        {
+            bodyForLanguage = [bodyElement stringValue];
+            break;
+        }
+    }
+    
+    return bodyForLanguage;
 }
 
 - (NSString *)thread
@@ -163,9 +186,27 @@
 	return [[self elementForName:@"thread"] stringValue];
 }
 
+- (void)addSubject:(NSString *)subject
+{
+    NSXMLElement *subjectElement = [NSXMLElement elementWithName:@"subject" stringValue:subject];
+    [self addChild:subjectElement];
+}
+
 - (void)addBody:(NSString *)body
 {
     NSXMLElement *bodyElement = [NSXMLElement elementWithName:@"body" stringValue:body];
+    [self addChild:bodyElement];
+}
+
+- (void)addBody:(NSString *)body withLanguage:(NSString *)language
+{
+    NSXMLElement *bodyElement = [NSXMLElement elementWithName:@"body" stringValue:body];
+    
+    if ([language length])
+    {
+        [bodyElement addAttributeWithName:@"xml:lang" stringValue:language];
+    }
+    
     [self addChild:bodyElement];
 }
 

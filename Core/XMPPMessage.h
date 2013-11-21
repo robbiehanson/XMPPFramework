@@ -35,10 +35,14 @@
 - (id)initWithType:(NSString *)type child:(NSXMLElement *)childElement;
 
 - (NSString *)type;
+- (NSString *)subject;
 - (NSString *)body;
+- (NSString *)bodyForLanguage:(NSString *)language;
 - (NSString *)thread;
 
+- (void)addSubject:(NSString *)subject;
 - (void)addBody:(NSString *)body;
+- (void)addBody:(NSString *)body withLanguage:(NSString *)language;
 - (void)addThread:(NSString *)thread;
 
 - (BOOL)isChatMessage;

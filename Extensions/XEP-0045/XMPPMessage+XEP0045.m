@@ -33,15 +33,4 @@
     return NO;
 }
 
-- (NSString *)subject
-{
-	return [[self elementForName:@"subject"] stringValue];
-}
-
-- (void)addSubject:(NSString *)subject
-{
-    NSXMLElement *subjectElement = [NSXMLElement elementWithName:@"subject" stringValue:subject];
-    [self addChild:subjectElement];
-}
-
 @end
