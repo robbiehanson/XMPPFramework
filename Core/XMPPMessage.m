@@ -170,8 +170,12 @@
     for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
     {
         NSString *lang = [[bodyElement attributeForName:@"xml:lang"] stringValue];
+        
+        // Openfire strips off the xml prefix
         if (lang == nil)
+        {
             lang = [[bodyElement attributeForName:@"lang"] stringValue];
+        }
         
         if ([language isEqualToString:lang] || ([language length] == 0  && [lang length] == 0))
         {
