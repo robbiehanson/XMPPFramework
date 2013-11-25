@@ -176,9 +176,45 @@
 /**
  *	Shortcut to avoid having to use NSXMLNode everytime
 **/
+
+- (void)addAttributeWithName:(NSString *)name intValue:(int)intValue
+{
+    [self addAttributeWithName:name numberValue:[NSNumber numberWithInt:intValue]];
+}
+
+- (void)addAttributeWithName:(NSString *)name boolValue:(BOOL)boolValue
+{
+    [self addAttributeWithName:name numberValue:[NSNumber numberWithBool:boolValue]];
+}
+
+- (void)addAttributeWithName:(NSString *)name floatValue:(float)floatValue
+{
+    [self addAttributeWithName:name numberValue:[NSNumber numberWithFloat:floatValue]];
+}
+
+- (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue
+{
+    [self addAttributeWithName:name numberValue:[NSNumber numberWithDouble:doubleValue]];
+}
+
+- (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue
+{
+    [self addAttributeWithName:name numberValue:[NSNumber numberWithInteger:integerValue]];
+}
+
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue
+{
+    [self addAttributeWithName:name numberValue:[NSNumber numberWithUnsignedInteger:unsignedIntegerValue]];
+}
+
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string
 {
 	[self addAttribute:[NSXMLNode attributeWithName:name stringValue:string]];
+}
+
+- (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number
+{
+    [self addAttributeWithName:name stringValue:[number stringValue]];
 }
 
 /**
