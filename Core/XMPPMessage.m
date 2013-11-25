@@ -170,6 +170,8 @@
     for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
     {
         NSString *lang = [[bodyElement attributeForName:@"xml:lang"] stringValue];
+        if (lang == nil)
+            lang = [[bodyElement attributeForName:@"lang"] stringValue];
         
         if ([language isEqualToString:lang] || ([language length] == 0  && [lang length] == 0))
         {
