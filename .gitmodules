@@ -8,3 +8,6 @@
 [submodule "Vendor/CocoaLumberjack"]
 	path = Vendor/CocoaLumberjack
 	url = git@github.com:robbiehanson/CocoaLumberjack.git
+[submodule "Vendor/KissXML"]
+	path = Vendor/KissXML
+	url = git@github.com:robbiehanson/KissXML.git
