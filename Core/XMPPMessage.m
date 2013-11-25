@@ -15,10 +15,10 @@
 {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
 	// The size of the two classes is expected to be the same.
-	// 
+	//
 	// If a developer adds instance methods to this class, bad things happen at runtime that are very hard to debug.
 	// This check is here to aid future developers who may make this mistake.
-	// 
+	//
 	// For Fearless And Experienced Objective-C Developers:
 	// It may be possible to support adding instance variables to this class if you seriously need it.
 	// To do so, try realloc'ing self after altering the class, and then initialize your variables.
@@ -138,7 +138,7 @@
 {
 	if((self = [super initWithXMLString:string error:error])){
 		self = [XMPPMessage messageFromElement:self];
-	}	
+	}
 	return self;
 }
 
@@ -170,6 +170,8 @@
     for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
     {
         NSString *lang = [[bodyElement attributeForName:@"xml:lang"] stringValue];
+        if (lang == nil)
+            lang = [[bodyElement attributeForName:@"lang"] stringValue];
         
         if ([language isEqualToString:lang] || ([language length] == 0  && [lang length] == 0))
         {
@@ -243,10 +245,10 @@
     }
     
     NSXMLElement *error = [self elementForName:@"error"];
-    return [NSError errorWithDomain:@"urn:ietf:params:xml:ns:xmpp-stanzas" 
-                               code:[error attributeIntValueForName:@"code"] 
+    return [NSError errorWithDomain:@"urn:ietf:params:xml:ns:xmpp-stanzas"
+                               code:[error attributeIntValueForName:@"code"]
                            userInfo:[NSDictionary dictionaryWithObject:[error compactXMLString] forKey:NSLocalizedDescriptionKey]];
-
+    
 }
 
 - (BOOL)isMessageWithBody
