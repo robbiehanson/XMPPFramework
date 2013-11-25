@@ -5,3 +5,6 @@
 [submodule "Vendor/CocoaAsyncSocket"]
 	path = Vendor/CocoaAsyncSocket
 	url = git@github.com:robbiehanson/CocoaAsyncSocket.git
+[submodule "Vendor/CocoaLumberjack"]
+	path = Vendor/CocoaLumberjack
+	url = git@github.com:robbiehanson/CocoaLumberjack.git
