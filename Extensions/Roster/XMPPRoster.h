@@ -366,7 +366,7 @@
 - (void)xmppRosterDidEndPopulating:(XMPPRoster *)sender;
 
 /**
- * Sent when the roster recieves a roster item.
+ * Sent when the roster receives a roster item.
  *
  * Example:
  *
@@ -374,6 +374,6 @@
  *   <group>Friends</group>
  * </item>
 **/
-- (void)xmppRoster:(XMPPRoster *)sender didRecieveRosterItem:(NSXMLElement *)item;
+- (void)xmppRoster:(XMPPRoster *)sender didReceiveRosterItem:(NSXMLElement *)item;
 
 @end

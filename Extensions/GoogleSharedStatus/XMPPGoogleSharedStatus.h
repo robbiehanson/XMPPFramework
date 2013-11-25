@@ -46,6 +46,6 @@ extern NSString *const XMPPGoogleSharedStatusShowIdle;
 
 // This delegate method is called when the server updates the shared
 // status module with new status information, or upon manual refresh.
-- (void)xmppGoogleSharedStatus:(XMPPGoogleSharedStatus *)sender didRecieveUpdatedStatus:(NSDictionary *)sharedStatus;
+- (void)xmppGoogleSharedStatus:(XMPPGoogleSharedStatus *)sender didReceiveUpdatedStatus:(NSDictionary *)sharedStatus;
 
 @end
