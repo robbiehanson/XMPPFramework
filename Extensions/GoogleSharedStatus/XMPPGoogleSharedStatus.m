@@ -217,7 +217,7 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 		_show = [self.sharedStatus objectForKey:XMPPGoogleSharedStatusShow];
 		_status = [self.sharedStatus objectForKey:XMPPGoogleSharedStatusStatus];
 		_invisible = [[self.sharedStatus objectForKey:XMPPGoogleSharedStatusInvisible] boolValue];
-		[multicastDelegate xmppGoogleSharedStatus:self didRecieveUpdatedStatus:self.sharedStatus];
+		[multicastDelegate xmppGoogleSharedStatus:self didReceiveUpdatedStatus:self.sharedStatus];
 		
 		if([query attributeForName:@"status-max"])
 			_statusMessageMaxLength = [[query attributeForName:@"status-max"].stringValue integerValue];
