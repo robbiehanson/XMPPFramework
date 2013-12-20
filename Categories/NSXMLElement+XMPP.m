@@ -141,6 +141,62 @@
 }
 
 /**
+ * This method removes the first child element for the given name.
+ * If no child elements exist for the given name, this method does nothing.
+**/
+- (void)removeElementForName:(NSString *)name
+{
+    NSXMLElement *element = [self elementForName:name];
+
+    if(element)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
+}
+
+/**
+ * This method removes the all child elements for the given name.
+ * If no child elements exist for the given name, this method does nothing.
+**/
+- (void)removeElementsForName:(NSString *)name
+{
+    NSArray *elements = [self elementsForName:name];
+    
+    for(NSXMLElement *element in elements)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
+}
+
+/**
+ * This method removes the first child element for the given name and given xmlns.
+ * If no child elements exist for the given name and given xmlns, this method does nothing.
+**/
+- (void)removeElementForName:(NSString *)name xmlns:(NSString *)xmlns
+{
+    NSXMLElement *element = [self elementForName:name xmlns:xmlns];
+    
+    if(element)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
+}
+
+/**
+ * This method removes the first child element for the given name and given xmlns prefix.
+ * If no child elements exist for the given name and given xmlns prefix, this method does nothing.
+**/
+- (void)removeElementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix
+{
+    NSXMLElement *element = [self elementForName:name xmlnsPrefix:xmlnsPrefix];
+    
+    if(element)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
+}
+
+/**
  * Returns the common xmlns "attribute", which is only accessible via the namespace methods.
  * The xmlns value is often used in jabber elements.
 **/

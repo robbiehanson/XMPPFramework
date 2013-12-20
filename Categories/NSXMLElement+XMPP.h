@@ -33,6 +33,17 @@
 - (NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
 
 /**
+ * Convenience methods for removing child elements.
+ *
+ * If the element doesn't exist, these methods do nothing.
+**/
+
+- (void)removeElementForName:(NSString *)name;
+- (void)removeElementsForName:(NSString *)name;
+- (void)removeElementForName:(NSString *)name xmlns:(NSString *)xmlns;
+- (void)removeElementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
+
+/**
  * Working with the common xmpp xmlns value.
  * 
  * Use these instead of getting/setting the URI.
