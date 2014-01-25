@@ -283,7 +283,26 @@
 }
 - (BOOL)attributeBoolValueForName:(NSString *)name
 {
-	return [[self attributeStringValueForName:name] boolValue];
+    NSString *attributeStringValueForName = [self attributeStringValueForName:name];
+    
+    BOOL result = NO;
+    
+    // An XML boolean datatype can have the following legal literals: true, false, 1, 0
+    
+    if ([attributeStringValueForName isEqualToString:@"true"] || [attributeStringValueForName isEqualToString:@"1"])
+    {
+        result = YES;
+    }
+    else if([attributeStringValueForName isEqualToString:@"false"] || [attributeStringValueForName isEqualToString:@"0"])
+    {
+        result = NO;
+    }
+    else
+    {
+        result = [attributeStringValueForName boolValue];
+    }
+    
+    return result;
 }
 - (float)attributeFloatValueForName:(NSString *)name
 {
