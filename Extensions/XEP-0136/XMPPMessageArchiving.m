@@ -97,6 +97,13 @@
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (id <XMPPMessageArchivingStorage>)xmppMessageArchivingStorage
+{
+    // Note: The xmppMessageArchivingStorage variable is read-only (set in the init method)
+    
+    return xmppMessageArchivingStorage;
+}
+
 - (BOOL)clientSideMessageArchivingOnly
 {
 	__block BOOL result = NO;
