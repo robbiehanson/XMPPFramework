@@ -684,7 +684,7 @@ enum XMPPRosterFlags
 			// That is, those users who have requested to be our buddy, but we haven't approved yet.
 			// This is described in more detail in the method isRosterItem above.
 			
-            [multicastDelegate xmppRoster:self didRecieveRosterItem:item];
+            [multicastDelegate xmppRoster:self didReceiveRosterItem:item];
             
 			if (hasRoster || [self isRosterItem:item])
 			{

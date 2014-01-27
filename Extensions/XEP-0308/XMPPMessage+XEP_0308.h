@@ -8,4 +8,7 @@
 
 - (void)addMessageCorrectionWithID:(NSString *)messageCorrectionID;
 
+- (XMPPMessage *)generateCorrectionMessageWithID:(NSString *)elementID;
+- (XMPPMessage *)generateCorrectionMessageWithID:(NSString *)elementID body:(NSString *)body;
+
 @end

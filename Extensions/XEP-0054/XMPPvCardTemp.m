@@ -143,21 +143,32 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setPhoto:(NSData *)data {
-	NSXMLElement *photo = [self elementForName:@"PHOTO"];
-	
-	if (photo == nil) {
-		photo = [NSXMLElement elementWithName:@"PHOTO"];
-		[self addChild:photo];
-	}
-	
-	NSXMLElement *binval = [photo elementForName:@"BINVAL"];
-	
-	if (binval == nil) {
-		binval = [NSXMLElement elementWithName:@"BINVAL"];
-		[photo addChild:binval];
-	}
-	
-	[binval setStringValue:[data xmpp_base64Encoded]];
+    
+    NSXMLElement *photo = [self elementForName:@"PHOTO"];
+    
+    if(photo)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:photo]];
+    }
+    
+    if([data length])
+    {    
+        NSXMLElement *photo = [NSXMLElement elementWithName:@"PHOTO"];
+        [self addChild:photo];
+        
+        NSString *imageType = [data xmpp_imageType];
+        
+        if([imageType length])
+        {
+            NSXMLElement *type = [NSXMLElement elementWithName:@"TYPE"];
+            [photo addChild:type];
+            [type setStringValue:imageType];
+        }
+        
+        NSXMLElement *binval = [NSXMLElement elementWithName:@"BINVAL"];
+        [photo addChild:binval];
+        [binval setStringValue:[data xmpp_base64Encoded]];
+    }
 }
 
 

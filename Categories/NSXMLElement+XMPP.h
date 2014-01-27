@@ -33,6 +33,17 @@
 - (NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
 
 /**
+ * Convenience methods for removing child elements.
+ *
+ * If the element doesn't exist, these methods do nothing.
+**/
+
+- (void)removeElementForName:(NSString *)name;
+- (void)removeElementsForName:(NSString *)name;
+- (void)removeElementForName:(NSString *)name xmlns:(NSString *)xmlns;
+- (void)removeElementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
+
+/**
  * Working with the common xmpp xmlns value.
  * 
  * Use these instead of getting/setting the URI.
@@ -53,7 +64,14 @@
  * Convenience methods for adding attributes.
 **/
 
+- (void)addAttributeWithName:(NSString *)name intValue:(int)intValue;
+- (void)addAttributeWithName:(NSString *)name boolValue:(BOOL)boolValue;
+- (void)addAttributeWithName:(NSString *)name floatValue:(float)floatValue;
+- (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue;
+- (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue;
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue;
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
+- (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number;
 
 /**
  * Convenience methods for extracting attribute values in different formats.
