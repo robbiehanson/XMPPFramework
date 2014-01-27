@@ -86,12 +86,12 @@
 
 - (XMPPMessage *)generateReceivedChatMarker
 {
-    [self generateReceivedChatMarkerIncludingThread:NO];
+    return [self generateReceivedChatMarkerIncludingThread:NO];
 }
 
 - (XMPPMessage *)generateDisplayedChatMarker
 {
-    [self generateDisplayedChatMarkerIncludingThread:NO];
+    return [self generateDisplayedChatMarkerIncludingThread:NO];
 }
 
 - (XMPPMessage *)generateAcknowledgedChatMarker
