@@ -56,7 +56,8 @@
 	NSUInteger saveThreshold;
 	NSUInteger saveCount;
     
-	BOOL autoRecreateDatabaseFile;
+    BOOL autoRemovePreviousDatabaseFile;
+    BOOL autoRecreateDatabaseFile;
     BOOL autoAllowExternalBinaryDataStorage;
 	
 	dispatch_queue_t storageQueue;
@@ -135,6 +136,14 @@
  * and configured to automatically merge changesets from other threads.
 **/
 @property (strong, readonly) NSManagedObjectContext *mainThreadManagedObjectContext;
+
+/**
+ * The Previous Database File is removed before creating a persistant store.
+ *
+ * Default NO
+**/
+
+@property (readwrite) BOOL autoRemovePreviousDatabaseFile;
 
 /**
  * The Database File is automatically recreated if the persistant store cannot read it e.g. the model changed or the file became corrupt.

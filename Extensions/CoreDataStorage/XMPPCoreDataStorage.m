@@ -576,6 +576,14 @@ static NSMutableSet *databaseFileNames;
 			if (storePath)
 			{
 				// If storePath is nil, then NSURL will throw an exception
+                
+                if(autoRemovePreviousDatabaseFile)
+                {
+                    if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
+                    {
+                        [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
+                    }
+                }
 				
 				[self willCreatePersistentStoreWithPath:storePath options:storeOptions];
 				
@@ -743,6 +751,34 @@ static NSMutableSet *databaseFileNames;
     }
 }
 
+- (BOOL)autoRemovePreviousDatabaseFile
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = autoRemovePreviousDatabaseFile;
+	}};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoRemovePreviousDatabaseFile:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoRemovePreviousDatabaseFile = flag;
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+}
+
 - (BOOL)autoRecreateDatabaseFile
 {
 	__block BOOL result = NO;
@@ -841,7 +877,6 @@ static NSMutableSet *databaseFileNames;
 - (void)maybeSave:(int32_t)currentPendingRequests
 {
 	NSAssert(dispatch_get_specific(storageQueueTag), @"Invoked on incorrect queue");
-	
 	
 	if ([[self managedObjectContext] hasChanges])
 	{
