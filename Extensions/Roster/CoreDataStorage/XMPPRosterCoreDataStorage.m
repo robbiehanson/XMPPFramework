@@ -48,6 +48,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	[super commonInit];
 	
 	// This method is invoked by all public init methods of the superclass
+    autoRemovePreviousDatabaseFile = YES;
 	autoRecreateDatabaseFile = YES;
     
 	rosterPopulationSet = [[NSMutableSet alloc] init];
@@ -119,8 +120,10 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	for (XMPPResourceCoreDataStorageObject *resource in allResources)
 	{
+        XMPPUserCoreDataStorageObject *user = resource.user;
 		[moc deleteObject:resource];
-		
+        [user recalculatePrimaryResource];
+        
 		if (++unsavedCount >= saveThreshold)
 		{
 			[self save];
@@ -132,24 +135,6 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Overrides
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)willCreatePersistentStoreWithPath:(NSString *)filePath options:(NSDictionary *)theStoreOptions
-{
-	// This method is overriden from the XMPPCoreDataStore superclass.
-	// From the documentation:
-	// 
-	// Override me, if needed, to provide customized behavior.
-	// 
-	// For example, if you are using the database for pure non-persistent data you may want to delete the database
-	// file if it already exists on disk.
-	// 
-	// The default implementation does nothing.
-	
-	if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
-	{
-		[[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
-	}
-}
 
 - (void)didCreateManagedObjectContext
 {
