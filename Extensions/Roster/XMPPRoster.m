@@ -21,6 +21,7 @@ enum XMPPRosterConfig
 	kAutoFetchRoster = 1 << 0,                   // If set, we automatically fetch roster after authentication
 	kAutoAcceptKnownPresenceSubscriptionRequests = 1 << 1, // See big description in header file... :D
 	kRosterlessOperation = 1 << 2,
+    kAutoClearAllUsersAndResources = 1 << 3,
 };
 enum XMPPRosterFlags
 {
@@ -71,7 +72,7 @@ enum XMPPRosterFlags
 			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
 		}
 		
-		config = kAutoFetchRoster | kAutoAcceptKnownPresenceSubscriptionRequests;
+		config = kAutoFetchRoster | kAutoAcceptKnownPresenceSubscriptionRequests | kAutoClearAllUsersAndResources;
 		flags = 0;
 		
 		earlyPresenceElements = [[NSMutableArray alloc] initWithCapacity:2];
@@ -112,7 +113,7 @@ enum XMPPRosterFlags
 			}];
 		}
 		#endif
-		
+        		
 		return YES;
 	}
 	
@@ -180,6 +181,38 @@ enum XMPPRosterFlags
 			config |= kAutoFetchRoster;
 		else
 			config &= ~kAutoFetchRoster;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)autoClearAllUsersAndResources
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		result = (config & kAutoClearAllUsersAndResources) ? YES : NO;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoClearAllUsersAndResources:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		
+		if (flag)
+			config |= kAutoClearAllUsersAndResources;
+		else
+			config &= ~kAutoClearAllUsersAndResources;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -672,6 +705,7 @@ enum XMPPRosterFlags
 		
 		if (!hasRoster)
 		{
+            [xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
             [self _setPopulatingRoster:YES];
             [multicastDelegate xmppRosterDidBeginPopulating:self];
 			[xmppRosterStorage beginRosterPopulationForXMPPStream:xmppStream];
@@ -823,7 +857,14 @@ enum XMPPRosterFlags
 	
 	XMPPLogTrace();
 	
-	[xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
+    if([self autoClearAllUsersAndResources])
+    {
+        [xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
+    }
+    else
+    {
+        [xmppRosterStorage clearAllResourcesForXMPPStream:xmppStream];
+    }
 	
 	[self _setRequestedRoster:NO];
 	[self _setHasRoster:NO];
