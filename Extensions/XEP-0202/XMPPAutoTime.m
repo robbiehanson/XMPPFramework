@@ -199,6 +199,24 @@
 	}
 }
 
+- (NSDate *)date
+{
+	if (dispatch_get_specific(moduleQueueTag))
+	{
+		return [[NSDate date] dateByAddingTimeInterval:-timeDifference];
+	}
+	else
+	{
+		__block NSDate *result;
+		
+		dispatch_sync(moduleQueue, ^{
+			result = [[NSDate date] dateByAddingTimeInterval:-timeDifference];
+		});
+		
+		return result;
+	}
+}
+
 - (dispatch_time_t)lastCalibrationTime
 {
 	if (dispatch_get_specific(moduleQueueTag))
@@ -425,6 +443,46 @@
 	
 	// We do NOT reset the lastCalibrationTime here.
 	// If we reconnect to the same server, the lastCalibrationTime remains valid.
+}
+
+@end
+
+@implementation XMPPStream (XMPPAutoTime)
+
+- (NSTimeInterval)xmppAutoTime_timeDifferenceForTargetJID:(XMPPJID *)targetJID
+{
+    __block NSTimeInterval timeDifference = 0.0;
+    
+    [self enumerateModulesOfClass:[XMPPAutoTime class] withBlock:^(XMPPModule *module, NSUInteger idx, BOOL *stop) {
+       
+        XMPPAutoTime *autoTime = (XMPPAutoTime *)module;
+        
+        if([targetJID isEqualToJID:autoTime.targetJID] || (!targetJID && !autoTime.targetJID))
+        {
+            timeDifference = autoTime.timeDifference;
+            *stop = YES;
+        }
+    }];
+    
+    return timeDifference;
+}
+
+- (NSDate *)xmppAutoTime_dateForTargetJID:(XMPPJID *)targetJID
+{
+    __block NSDate *date = [NSDate date];
+    
+    [self enumerateModulesOfClass:[XMPPAutoTime class] withBlock:^(XMPPModule *module, NSUInteger idx, BOOL *stop) {
+        
+        XMPPAutoTime *autoTime = (XMPPAutoTime *)module;
+        
+        if([targetJID isEqualToJID:autoTime.targetJID] || (!targetJID && !autoTime.targetJID))
+        {
+            date = autoTime.date;
+            *stop = YES;
+        }
+    }];
+    
+    return date;
 }
 
 @end
