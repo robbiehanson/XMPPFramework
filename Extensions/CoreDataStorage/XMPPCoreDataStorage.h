@@ -48,6 +48,9 @@
 	NSPersistentStoreCoordinator *persistentStoreCoordinator;
 	NSManagedObjectContext *managedObjectContext;
 	NSManagedObjectContext *mainThreadManagedObjectContext;
+    
+    NSMutableArray *willSaveManagedObjectContextBlocks;
+    NSMutableArray *didSaveManagedObjectContextBlocks;
 	
 @protected
 	
