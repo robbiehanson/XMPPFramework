@@ -249,6 +249,9 @@ static NSMutableSet *databaseFileNames;
 	dispatch_queue_set_specific(storageQueue, storageQueueTag, storageQueueTag, NULL);
 	
 	myJidCache = [[NSMutableDictionary alloc] init];
+    
+    willSaveManagedObjectContextBlocks = [[NSMutableArray alloc] init];
+    didSaveManagedObjectContextBlocks = [[NSMutableArray alloc] init];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 	                                         selector:@selector(updateJidCache:)
@@ -576,6 +579,14 @@ static NSMutableSet *databaseFileNames;
 			if (storePath)
 			{
 				// If storePath is nil, then NSURL will throw an exception
+                
+                if(autoRemovePreviousDatabaseFile)
+                {
+                    if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
+                    {
+                        [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
+                    }
+                }
 				
 				[self willCreatePersistentStoreWithPath:storePath options:storeOptions];
 				
@@ -743,6 +754,34 @@ static NSMutableSet *databaseFileNames;
     }
 }
 
+- (BOOL)autoRemovePreviousDatabaseFile
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = autoRemovePreviousDatabaseFile;
+	}};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoRemovePreviousDatabaseFile:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoRemovePreviousDatabaseFile = flag;
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+}
+
 - (BOOL)autoRecreateDatabaseFile
 {
 	__block BOOL result = NO;
@@ -821,20 +860,31 @@ static NSMutableSet *databaseFileNames;
 	// internally checks to see if it has anything to save before it actually does anthing.
 	// So there's no need for us to do it here, especially since this method is usually
 	// called from maybeSave below, which already does this check.
-	
-	[self willSaveManagedObjectContext];
-	
+    
+    for(void (^block)(void) in willSaveManagedObjectContextBlocks) {
+        block();
+    }
+    
+    [willSaveManagedObjectContextBlocks removeAllObjects];
+    
 	NSError *error = nil;
 	if ([[self managedObjectContext] save:&error])
 	{
 		saveCount++;
-		[self didSaveManagedObjectContext];
+        
+        for(void (^block)(void) in didSaveManagedObjectContextBlocks) {
+            block();
+        }
+        
+        [didSaveManagedObjectContextBlocks removeAllObjects];
 	}
 	else
 	{
 		XMPPLogWarn(@"%@: Error saving - %@ %@", [self class], error, [error userInfo]);
 		
 		[[self managedObjectContext] rollback];
+        
+        [didSaveManagedObjectContextBlocks removeAllObjects];
 	}
 }
 
@@ -921,6 +971,30 @@ static NSMutableSet *databaseFileNames;
 		block();
 		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
 	}});
+}
+
+- (void)addWillSaveManagedObjectContextBlock:(void (^)(void))willSaveBlock
+{
+    dispatch_block_t block = ^{
+		[willSaveManagedObjectContextBlocks addObject:[willSaveBlock copy]];
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+}
+
+- (void)addDidSaveManagedObjectContextBlock:(void (^)(void))didSaveBlock
+{
+    dispatch_block_t block = ^{
+		[didSaveManagedObjectContextBlocks addObject:[didSaveBlock copy]];
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -78,6 +78,16 @@
 @property (assign) BOOL autoFetchRoster;
 
 /**
+ * Whether or not to automatically clear all Users and Resources when the stream disconnects.
+ * If you are using XMPPRosterCoreDataStorage you may want to set autoRemovePreviousDatabaseFile to NO.
+ *
+ * All Users and Resources will be cleared when the roster is next populated regardless of this property.
+ *
+ * The default value is YES.
+**/
+@property (assign) BOOL autoClearAllUsersAndResources;
+
+/**
  * In traditional IM applications, the "buddy" system is rather straightforward.
  * User A sends a request to become "friends" with user B.
  * User B accepts the friend request.

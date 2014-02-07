@@ -315,4 +315,20 @@
 **/
 - (void)scheduleBlock:(dispatch_block_t)block;
 
+/**
+ * Sometimes you want to call a method before calling save on a Managed Object Context e.g. willSaveObject:
+ *
+ * addWillSaveManagedObjectContextBlock allows you to add a block of code to be called before saving a Managed Object Context,
+ * without the overhead of having to call save at that moment.
+**/
+- (void)addWillSaveManagedObjectContextBlock:(void (^)(void))willSaveBlock;
+
+/**
+ * Sometimes you want to call a method after calling save on a Managed Object Context e.g. didSaveObject:
+ *
+ * addDidSaveManagedObjectContextBlock allows you to add a block of code to be after saving a Managed Object Context,
+ * without the overhead of having to call save at that moment.
+**/
+- (void)addDidSaveManagedObjectContextBlock:(void (^)(void))didSaveBlock;
+
 @end
