@@ -147,7 +147,7 @@
 	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
-		dispatch_sync(moduleQueue, block);
+		dispatch_async(moduleQueue, block);
 }
 
 - (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch{
@@ -203,7 +203,7 @@
 	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
-		dispatch_sync(moduleQueue, block);
+		dispatch_async(moduleQueue, block);
 
 }
 
