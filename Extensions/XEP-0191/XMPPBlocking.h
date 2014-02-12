@@ -75,17 +75,17 @@ typedef enum XMPPBlockingErrorCode
 /**
  * Block JID.
  */
-- (void)blockJID:(NSString*)jid;
+- (void)blockJID:(XMPPJID*)xmppJID;
 
 /**
  * Unblock JID.
  */
-- (void)unblockJID:(NSString*)jid;
+- (void)unblockJID:(XMPPJID*)xmppJID;
 
 /**
  * Return whether a jid is in blocking list or not.
  */
-- (BOOL)containsJID:(NSString*)jid;
+- (BOOL)containsJID:(XMPPJID*)xmppJID;
 
 /**
  * Unblock all.
@@ -120,11 +120,11 @@ typedef enum XMPPBlockingErrorCode
 
 - (void)xmppBlocking:(XMPPBlocking *)sender didReceivePushWithBlockingList:(NSString *)name;
 
-- (void)xmppBlocking:(XMPPBlocking *)sender didBlockJID:(NSString*)jid;
-- (void)xmppBlocking:(XMPPBlocking *)sender didNotBlockJID:(NSString*)jid error:(id)error;
+- (void)xmppBlocking:(XMPPBlocking *)sender didBlockJID:(XMPPJID*)xmppJID;
+- (void)xmppBlocking:(XMPPBlocking *)sender didNotBlockJID:(XMPPJID*)xmppJID error:(id)error;
 
-- (void)xmppBlocking:(XMPPBlocking *)sender didUnblockJID:(NSString*)jid;
-- (void)xmppBlocking:(XMPPBlocking *)sender didNotUnblockJID:(NSString*)jid error:(id)error;
+- (void)xmppBlocking:(XMPPBlocking *)sender didUnblockJID:(XMPPJID*)xmppJID;
+- (void)xmppBlocking:(XMPPBlocking *)sender didNotUnblockJID:(XMPPJID*)xmppJID error:(id)error;
 
 - (void)xmppBlocking:(XMPPBlocking *)sender didUnblockAllWithError:(id)error;
 - (void)xmppBlocking:(XMPPBlocking *)sender didNotUnblockAllDueToError:(id)error;

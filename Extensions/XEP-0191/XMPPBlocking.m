@@ -30,7 +30,7 @@ typedef enum XMPPBlockingQueryInfoType {
 @interface XMPPBlockingQueryInfo : NSObject
 {
 	XMPPBlockingQueryInfoType type;
-    NSString *blockingJID;
+    XMPPJID *blockingXMPPJID;
 	NSArray *blockingListItems;
 	
 	dispatch_source_t timer;
@@ -39,14 +39,14 @@ typedef enum XMPPBlockingQueryInfoType {
 @property (nonatomic, readonly) XMPPBlockingQueryInfoType type;
 @property (nonatomic, readonly) NSArray *blockingListItems;
 
-@property (nonatomic, readwrite) NSString *blockingJID;
+@property (nonatomic, readwrite) XMPPJID *blockingXMPPJID;
 @property (nonatomic, readwrite) dispatch_source_t timer;
 
 - (void)cancel;
 
 + (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type;
-+ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type name:(NSString *)name;
-+ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type name:(NSString *)name items:(NSArray *)items;
++ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type jid:(XMPPJID *)jid;
++ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type jid:(XMPPJID *)jid items:(NSArray *)items;
 
 @end
 
@@ -232,14 +232,14 @@ typedef enum XMPPBlockingQueryInfoType {
 	}
 }
 
-- (void)blockJID:(NSString*)jid
+- (void)blockJID:(XMPPJID*)xmppJID
 {
     XMPPLogTrace();
     
-    id value = [blockingDict objectForKey:jid];
+    id value = [blockingDict objectForKey:[xmppJID full]];
     if (value == nil)
     {
-        [blockingDict setObject:[NSNull null] forKey:jid];
+        [blockingDict setObject:[NSNull null] forKey:[xmppJID full]];
     }
     
     // <iq from='juliet@capulet.com/chamber' type='set' id='block1'>
@@ -250,7 +250,7 @@ typedef enum XMPPBlockingQueryInfoType {
     
     NSXMLElement *block = [NSXMLElement elementWithName:@"block" xmlns:@"urn:xmpp:blocking"];
     NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-    [item addAttributeWithName:@"jid" stringValue:jid];
+    [item addAttributeWithName:@"jid" stringValue:[xmppJID full]];
     [block addChild:item];
     
     NSString *uuid = [xmppStream generateUUID];
@@ -260,18 +260,18 @@ typedef enum XMPPBlockingQueryInfoType {
     [xmppStream sendElement:iq];
     
     XMPPBlockingQueryInfo *qi = [XMPPBlockingQueryInfo queryInfoWithType:BlockUser];
-    qi.blockingJID = jid;
+    qi.blockingXMPPJID = xmppJID;
     [self addQueryInfo:qi withKey:uuid];
 }
 
-- (void)unblockJID:(NSString*)jid
+- (void)unblockJID:(XMPPJID*)xmppJID
 {
     XMPPLogTrace();
     
-    id value = [blockingDict objectForKey:jid];
+    id value = [blockingDict objectForKey:[xmppJID full]];
     if (value != nil)
     {
-        [blockingDict removeObjectForKey:jid];
+        [blockingDict removeObjectForKey:[xmppJID full]];
     }
     
     // <iq type='set' id='unblock1'>
@@ -282,7 +282,7 @@ typedef enum XMPPBlockingQueryInfoType {
     
     NSXMLElement *block = [NSXMLElement elementWithName:@"unblock" xmlns:@"urn:xmpp:blocking"];
     NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
-    [item addAttributeWithName:@"jid" stringValue:jid];
+    [item addAttributeWithName:@"jid" stringValue:[xmppJID full]];
     [block addChild:item];
     
     NSString *uuid = [xmppStream generateUUID];
@@ -291,13 +291,13 @@ typedef enum XMPPBlockingQueryInfoType {
     [xmppStream sendElement:iq];
     
     XMPPBlockingQueryInfo *qi = [XMPPBlockingQueryInfo queryInfoWithType:UnblockUser];
-    qi.blockingJID = jid;
+    qi.blockingXMPPJID = xmppJID;
 	[self addQueryInfo:qi withKey:uuid];
 }
 
-- (BOOL)containsJID:(NSString*)jid
+- (BOOL)containsJID:(XMPPJID*)xmppJID
 {
-    if ([blockingDict objectForKey:jid])
+    if ([blockingDict objectForKey:[xmppJID full]])
     {
         return true;
     }
@@ -371,11 +371,11 @@ typedef enum XMPPBlockingQueryInfoType {
 	}
 	else if (queryInfo.type == BlockUser)
 	{
-		[multicastDelegate xmppBlocking:self didNotBlockJID:queryInfo.blockingJID error:error];
+		[multicastDelegate xmppBlocking:self didNotBlockJID:queryInfo.blockingXMPPJID error:error];
 	}
 	else if (queryInfo.type == UnblockUser)
 	{
-		[multicastDelegate xmppBlocking:self didNotUnblockJID:queryInfo.blockingJID error:error];
+		[multicastDelegate xmppBlocking:self didNotUnblockJID:queryInfo.blockingXMPPJID error:error];
 	}
     else if (queryInfo.type == UnblockAll)
     {
@@ -385,7 +385,7 @@ typedef enum XMPPBlockingQueryInfoType {
 
 - (void)queryTimeout:(NSString *)uuid
 {
-	XMPPBlockingQueryInfo *queryInfo = [blockingDict objectForKey:uuid];
+	XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:uuid];
 	if (queryInfo)
 	{
 		[self processQuery:queryInfo withFailureCode:XMPPBlockingQueryTimeout];
@@ -440,12 +440,12 @@ typedef enum XMPPBlockingQueryInfoType {
         if ([[iq type] isEqualToString:@"result"])
 		{
             [self removeQueryInfo:queryInfo withKey:[iq elementID]];
-            [multicastDelegate xmppBlocking:self didBlockJID:queryInfo.blockingJID];
+            [multicastDelegate xmppBlocking:self didBlockJID:queryInfo.blockingXMPPJID];
         }
         else
         {
-            [blockingDict removeObjectForKey:[iq elementID]];
-            [multicastDelegate xmppBlocking:self didNotBlockJID:queryInfo.blockingJID error:iq];
+            [blockingDict removeObjectForKey:[queryInfo.blockingXMPPJID full]];
+            [multicastDelegate xmppBlocking:self didNotBlockJID:queryInfo.blockingXMPPJID error:iq];
         }
     }
     else if (queryInfo.type == UnblockUser)
@@ -455,19 +455,19 @@ typedef enum XMPPBlockingQueryInfoType {
         if ([[iq type] isEqualToString:@"result"])
 		{
              [self removeQueryInfo:queryInfo withKey:[iq elementID]];
-            [multicastDelegate xmppBlocking:self didUnblockJID:queryInfo.blockingJID];
+            [multicastDelegate xmppBlocking:self didUnblockJID:queryInfo.blockingXMPPJID];
         }
         else
         {
             XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:[iq elementID]];
             
-            id value = [blockingDict objectForKey:queryInfo.blockingJID];
+            id value = [blockingDict objectForKey:[queryInfo.blockingXMPPJID full]];
             if (value == nil)
             {
-                [blockingDict setObject:[NSNull null] forKey:queryInfo.blockingJID];
+                [blockingDict setObject:[NSNull null] forKey:[queryInfo.blockingXMPPJID full]];
             }
             
-            [multicastDelegate xmppBlocking:self didNotBlockJID:queryInfo.blockingJID error:iq];
+            [multicastDelegate xmppBlocking:self didNotBlockJID:queryInfo.blockingXMPPJID error:iq];
         }
     }
     else if (queryInfo.type == UnblockAll)
@@ -483,10 +483,10 @@ typedef enum XMPPBlockingQueryInfoType {
         {
             XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:[iq elementID]];
             
-            id value = [blockingDict objectForKey:queryInfo.blockingJID];
+            id value = [blockingDict objectForKey:[queryInfo.blockingXMPPJID full]];
             if (value == nil)
             {
-                [blockingDict setObject:[NSNull null] forKey:queryInfo.blockingJID];
+                [blockingDict setObject:[NSNull null] forKey:queryInfo.blockingXMPPJID];
             }
             
             [multicastDelegate xmppBlocking:self didNotUnblockAllDueToError:iq];
@@ -562,7 +562,7 @@ typedef enum XMPPBlockingQueryInfoType {
 	
 	for (NSString *uuid in pendingQueries)
 	{
-		XMPPBlockingQueryInfo *queryInfo = [blockingDict objectForKey:uuid];
+		XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:uuid];
 		
 		[self processQuery:queryInfo withFailureCode:XMPPBlockingDisconnect];
 	}
@@ -588,16 +588,16 @@ typedef enum XMPPBlockingQueryInfoType {
 @implementation XMPPBlockingQueryInfo
 
 @synthesize type;
-@synthesize blockingJID;
+@synthesize blockingXMPPJID;
 @synthesize blockingListItems;
 @synthesize timer;
 
-- (id)initWithType:(XMPPBlockingQueryInfoType)aType name:(NSString *)name items:(NSArray *)items
+- (id)initWithType:(XMPPBlockingQueryInfoType)aType jid:(XMPPJID *)jid items:(NSArray *)items
 {
 	if ((self = [super init]))
 	{
 		type = aType;
-		blockingJID = [name copy];
+		blockingXMPPJID = [jid copy];
 		blockingListItems = [items copy];
 	}
 	return self;
@@ -622,17 +622,17 @@ typedef enum XMPPBlockingQueryInfoType {
 
 + (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type
 {
-	return [self queryInfoWithType:type name:nil items:nil];
+	return [self queryInfoWithType:type jid:nil items:nil];
 }
 
-+ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type name:(NSString *)name
++ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type jid:(XMPPJID *)jid
 {
-	return [self queryInfoWithType:type name:name items:nil];
+	return [self queryInfoWithType:type jid:jid items:nil];
 }
 
-+ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type name:(NSString *)name items:(NSArray *)items
++ (XMPPBlockingQueryInfo *)queryInfoWithType:(XMPPBlockingQueryInfoType)type jid:(XMPPJID *)jid items:(NSArray *)items
 {
-	return [[XMPPBlockingQueryInfo alloc] initWithType:type name:name items:items];
+	return [[XMPPBlockingQueryInfo alloc] initWithType:type jid:jid items:items];
 }
 
 @end
