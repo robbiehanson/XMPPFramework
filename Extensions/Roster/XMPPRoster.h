@@ -12,6 +12,7 @@
 
 @protocol XMPPRosterStorage;
 @class DDList;
+@class XMPPIDTracker;
 
 /**
  * The XMPPRoster provides the scaffolding for a roster solution.
@@ -41,6 +42,8 @@
 	id multicastDelegate;
  */
 	__strong id <XMPPRosterStorage> xmppRosterStorage;
+    
+    XMPPIDTracker *xmppIDTracker;
 	
 	Byte config;
 	Byte flags;
