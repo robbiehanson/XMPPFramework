@@ -481,12 +481,12 @@
 			NSArray *values = (NSArray *)obj;
 			for (id value in values)
 			{
-				[field addChild:[NSXMLElement elementWithName:@"value" stringValue:[value description]]];
+				[field addChild:[NSXMLElement elementWithName:@"value" objectValue:value]];
 			}
 		}
 		else
 		{
-			[field addChild:[NSXMLElement elementWithName:@"value" stringValue:[obj description]]];
+			[field addChild:[NSXMLElement elementWithName:@"value" objectValue:obj]];
 		}
 		
 		[x addChild:field];
