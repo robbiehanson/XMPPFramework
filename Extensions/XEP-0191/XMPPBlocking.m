@@ -518,6 +518,12 @@ typedef enum XMPPBlockingQueryInfoType {
 		if (block || unblock)
 		{
             NSXMLElement *list = [block elementForName:@"item"];
+            
+            if (!list)
+            {
+                list = [unblock elementForName:@"item"];
+            }
+            
             NSString *itemName = [list attributeStringValueForName:@"jid"];
 			if (itemName == nil)
 			{
