@@ -8,6 +8,16 @@
 @interface NSXMLElement (XMPP)
 
 /**
+ * Convenience methods for Creating elements.
+**/
+
++ (NSXMLElement *)elementWithName:(NSString *)name numberValue:(NSNumber *)number;
+- (id)initWithName:(NSString *)name numberValue:(NSNumber *)number;
+
++ (NSXMLElement *)elementWithName:(NSString *)name objectValue:(id)objectValue;
+- (id)initWithName:(NSString *)name objectValue:(id)objectValue;
+
+/**
  * Creating elements with explicit xmlns values.
  * 
  * Use these instead of [NSXMLElement initWithName:URI:].
@@ -72,6 +82,7 @@
 - (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue;
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
 - (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number;
+- (void)addAttributeWithName:(NSString *)name objectValue:(id)objectValue;
 
 /**
  * Convenience methods for extracting attribute values in different formats.
