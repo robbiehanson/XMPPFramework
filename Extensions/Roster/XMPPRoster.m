@@ -91,7 +91,7 @@ enum XMPPRosterFlags
 	{
         XMPPLogVerbose(@"%@: Activated", THIS_FILE);
 
-        xmppIDTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
+        xmppIDTracker = [[XMPPIDTracker alloc] initWithStream:xmppStream dispatchQueue:moduleQueue];
 		
 		#ifdef _XMPP_VCARD_AVATAR_MODULE_H
 		{
@@ -798,7 +798,7 @@ enum XMPPRosterFlags
         }
         else if([iq isResultIQ])
         {
-            [xmppIDTracker invokeForID:[iq elementID] withObject:iq];
+            [xmppIDTracker invokeForElement:iq withObject:iq];
         }
 		
 		return YES;
