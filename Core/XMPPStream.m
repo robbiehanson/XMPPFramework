@@ -682,6 +682,8 @@ enum XMPPStreamConfig
     block();
   else
     dispatch_sync(xmppQueue, block);
+  
+  return result;
 }
 
 - (void)setBypassSession:(BOOL)flag
