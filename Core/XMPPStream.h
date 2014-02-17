@@ -224,6 +224,15 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 **/
 @property (readwrite, strong) id tag;
 
+/**
+ * Session is a deprecated stream feature now that is usually sent now to handle any needed 
+ * backwards compatibility with server implementations. If set, the stream will not 
+ * send the Session element after Binding.
+ *
+ * The default value is NO
+**/
+@property (readwrite, assign) BOOL bypassSession;
+
 #if TARGET_OS_IPHONE
 
 /**
