@@ -3517,7 +3517,7 @@ enum XMPPStreamConfig
 		// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
 		NSXMLElement *f_session = [features elementForName:@"session" xmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
 		
-		if (f_session && [self bypassSession])
+		if (f_session && (![self bypassSession]))
 		{
 			NSXMLElement *session = [NSXMLElement elementWithName:@"session"];
 			[session setXmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
