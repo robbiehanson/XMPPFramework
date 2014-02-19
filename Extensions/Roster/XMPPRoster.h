@@ -160,6 +160,10 @@
 **/
 @property (assign, getter = isPopulating, readonly) BOOL populating;
 
+/**
+ * The initial roster has been received by client and populated.
+**/
+@property (assign, readonly) BOOL hasRoster;
 
 /**
  * Manually fetch the roster from the server.
