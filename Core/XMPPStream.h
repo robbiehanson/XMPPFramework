@@ -225,13 +225,20 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 @property (readwrite, strong) id tag;
 
 /**
- * Session is a deprecated stream feature now that is usually sent now to handle any needed 
- * backwards compatibility with server implementations. If set, the stream will not 
- * send the Session element after Binding.
+ * RFC 6121 states that starting a session is no longer required.
+ * To skip this step set skipStartSession to YES.
  *
- * The default value is NO
+ * [RFC3921] specified one additional
+ * precondition: formal establishment of an instant messaging and
+ * presence session.  Implementation and deployment experience has
+ * shown that this additional step is unnecessary.  However, for
+ * backward compatibility an implementation MAY still offer that
+ * feature.  This enables older software to connect while letting
+ * newer software save a round trip.
+ *
+ * The default value is NO.
 **/
-@property (readwrite, assign) BOOL bypassSession;
+@property (readwrite, assign) BOOL skipStartSession;
 
 #if TARGET_OS_IPHONE
 
