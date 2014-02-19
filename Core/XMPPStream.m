@@ -109,7 +109,7 @@ enum XMPPStreamConfig
 	UInt16 hostPort;
     
 	BOOL autoStartTLS;
-  BOOL bypassSession;
+    BOOL skipStartSession;
 	
 	id <XMPPSASLAuthentication> auth;
 	NSDate *authenticationDate;
@@ -670,32 +670,32 @@ enum XMPPStreamConfig
 		dispatch_async(xmppQueue, block);
 }
 
-- (BOOL)bypassSession
+- (BOOL)skipStartSession
 {
-  __block BOOL result = NO;
-  
-  dispatch_block_t block = ^{
-    result = bypassSession;
-  };
-  
-  if (dispatch_get_specific(xmppQueueTag))
-    block();
-  else
-    dispatch_sync(xmppQueue, block);
-  
-  return result;
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = skipStartSession;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    return result;
 }
 
-- (void)setBypassSession:(BOOL)flag
+- (void)setSkipStartSession:(BOOL)flag
 {
-  dispatch_block_t block = ^{
-    bypassSession = flag;
-  };
-  
-  if (dispatch_get_specific(xmppQueueTag))
-    block();
-  else
-    dispatch_async(xmppQueue, block);
+    dispatch_block_t block = ^{
+        skipStartSession = flag;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_async(xmppQueue, block);
 }
 
 #if TARGET_OS_IPHONE
@@ -3517,7 +3517,7 @@ enum XMPPStreamConfig
 		// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
 		NSXMLElement *f_session = [features elementForName:@"session" xmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
 		
-		if (f_session && (![self bypassSession]))
+		if (f_session && (![self skipStartSession]))
 		{
 			NSXMLElement *session = [NSXMLElement elementWithName:@"session"];
 			[session setXmlns:@"urn:ietf:params:xml:ns:xmpp-session"];
