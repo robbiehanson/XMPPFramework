@@ -6,5 +6,6 @@
 
 - (BOOL)isGroupChatMessage;
 - (BOOL)isGroupChatMessageWithBody;
+- (BOOL)isGroupChatMessageWithSubject;
 
 @end

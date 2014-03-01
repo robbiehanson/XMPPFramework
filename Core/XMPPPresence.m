@@ -74,7 +74,7 @@
 			[self addAttributeWithName:@"type" stringValue:type];
 		
 		if (to)
-			[self addAttributeWithName:@"to" stringValue:[to description]];
+			[self addAttributeWithName:@"to" stringValue:[to full]];
 	}
 	return self;
 }
@@ -85,6 +85,12 @@
 		self = [XMPPPresence presenceFromElement:self];
 	}	
 	return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSXMLElement *element = [super copyWithZone:zone];
+    return [XMPPPresence presenceFromElement:element];
 }
 
 - (NSString *)type
@@ -131,6 +137,5 @@
 {
 	return [[self type] isEqualToString:@"error"];
 }
-
 
 @end

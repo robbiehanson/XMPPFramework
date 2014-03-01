@@ -1,7 +1,7 @@
 #import "XMPPMessageArchivingCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPPLogging.h"
-#import "XMPPElement+Delay.h"
+#import "NSXMLElement+XEP_0203.h"
 #import "XMPPMessage+XEP_0085.h"
 
 #if ! __has_feature(objc_arc)
@@ -37,7 +37,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		
-		sharedInstance = [[XMPPMessageArchivingCoreDataStorage alloc] initWithDatabaseFilename:nil];
+		sharedInstance = [[XMPPMessageArchivingCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
 	});
 	
 	return sharedInstance;
@@ -343,7 +343,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 		// Message doesn't have a body.
 		// Check to see if it has a chat state (composing, paused, etc).
 		
-		isComposing = [message isComposingChatState];
+		isComposing = [message hasComposingChatState];
 		if (!isComposing)
 		{
 			if ([message hasChatState])

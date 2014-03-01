@@ -1,6 +1,6 @@
 #import "XMPPRoomCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
-#import "XMPPElement+Delay.h"
+#import "NSXMLElement+XEP_0203.h"
 #import "XMPPLogging.h"
 
 #if ! __has_feature(objc_arc)
@@ -65,7 +65,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		
-		sharedInstance = [[XMPPRoomCoreDataStorage alloc] initWithDatabaseFilename:nil];
+		sharedInstance = [[XMPPRoomCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
 	});
 	
 	return sharedInstance;
@@ -359,7 +359,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	NSPredicate *predicate;
 	if ([pausedMessageDeletion count] > 0)
 	{
-		predicate = [NSPredicate predicateWithFormat:@"localTimestamp <= %@ AND roomJIDStr NOT IN %@",
+		predicate = [NSPredicate predicateWithFormat:@"localTimestamp <= %@ AND NOT roomJIDStr IN %@",
 		                                                  minLocalTimestamp, pausedMessageDeletion];
 	}
 	else

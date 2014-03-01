@@ -76,7 +76,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     self.viewController.statusLabel.text = @"XMPP connecting...";
     
 	NSError *error = nil;
-	if (![xmppStream connect:&error])
+	if (![xmppStream connectWithTimeout:5 error:&error])
 	{
 		DDLogError(@"%@: Error in xmpp connection: %@", THIS_FILE, error);
         self.viewController.statusLabel.text = @"XMPP connect failed";
@@ -87,6 +87,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
     self.viewController.statusLabel.text = @"Facebook login failed";
+}
+
+- (void)fbDidLogout
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (void)fbDidExtendToken:(NSString *)accessToken expiresAt:(NSDate *)expiresAt
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (void)fbSessionInvalidated
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

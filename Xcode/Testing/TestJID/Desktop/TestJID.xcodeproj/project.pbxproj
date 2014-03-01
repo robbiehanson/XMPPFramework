@@ -14,7 +14,7 @@
 		DCD1908F1548E56200659E75 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD1908E1548E56200659E75 /* AppDelegate.m */; };
 		DCD190921548E56200659E75 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DCD190901548E56200659E75 /* MainMenu.xib */; };
 		DCD190C5154A1CE500659E75 /* XMPPJID.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD190C4154A1CE500659E75 /* XMPPJID.m */; };
-		DCD190C8154A1CF400659E75 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD190C7154A1CF400659E75 /* LibIDN.m */; };
+		DCD190C8154A1CF400659E75 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DCD190C7154A1CF400659E75 /* XMPPStringPrep.m */; };
 		DCD190CF154A1CFD00659E75 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD190CC154A1CFD00659E75 /* libidn.a */; };
 /* End PBXBuildFile section */
 
@@ -34,8 +34,8 @@
 		DCD190911548E56200659E75 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		DCD190C3154A1CE500659E75 /* XMPPJID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPJID.h; path = ../../../../Core/XMPPJID.h; sourceTree = "<group>"; };
 		DCD190C4154A1CE500659E75 /* XMPPJID.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPJID.m; path = ../../../../Core/XMPPJID.m; sourceTree = "<group>"; };
-		DCD190C6154A1CF400659E75 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibIDN.h; path = ../../../../Utilities/LibIDN.h; sourceTree = "<group>"; };
-		DCD190C7154A1CF400659E75 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibIDN.m; path = ../../../../Utilities/LibIDN.m; sourceTree = "<group>"; };
+		DCD190C6154A1CF400659E75 /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPStringPrep.h; path = ../../../../Utilities/XMPPStringPrep.h; sourceTree = "<group>"; };
+		DCD190C7154A1CF400659E75 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStringPrep.m; path = ../../../../Utilities/XMPPStringPrep.m; sourceTree = "<group>"; };
 		DCD190CA154A1CFD00659E75 /* idn-int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "idn-int.h"; sourceTree = "<group>"; };
 		DCD190CC154A1CFD00659E75 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libidn.a; sourceTree = "<group>"; };
 		DCD190CD154A1CFD00659E75 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringprep.h; sourceTree = "<group>"; };
@@ -144,8 +144,8 @@
 		DCD190C2154A1CD200659E75 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				DCD190C6154A1CF400659E75 /* LibIDN.h */,
-				DCD190C7154A1CF400659E75 /* LibIDN.m */,
+				DCD190C6154A1CF400659E75 /* XMPPStringPrep.h */,
+				DCD190C7154A1CF400659E75 /* XMPPStringPrep.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -227,7 +227,7 @@
 				DCD190881548E56200659E75 /* main.m in Sources */,
 				DCD1908F1548E56200659E75 /* AppDelegate.m in Sources */,
 				DCD190C5154A1CE500659E75 /* XMPPJID.m in Sources */,
-				DCD190C8154A1CF400659E75 /* LibIDN.m in Sources */,
+				DCD190C8154A1CF400659E75 /* XMPPStringPrep.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

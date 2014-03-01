@@ -257,11 +257,23 @@
 // No problem - we use the KissXML library as a drop in replacement.
 // 
 // For more information on working with XML elements, see the Wiki article:
-// http://code.google.com/p/xmppframework/wiki/WorkingWithElements
+// https://github.com/robbiehanson/XMPPFramework/wiki/WorkingWithElements
 
 - (void)goOnline
 {
 	XMPPPresence *presence = [XMPPPresence presence]; // type="available" is implicit
+    
+    NSString *domain = [xmppStream.myJID domain];
+    
+    //Google set their presence priority to 24, so we do the same to be compatible.
+    
+    if([domain isEqualToString:@"gmail.com"]
+       || [domain isEqualToString:@"gtalk.com"]
+       || [domain isEqualToString:@"talk.google.com"])
+    {
+        NSXMLElement *priority = [NSXMLElement elementWithName:@"priority" stringValue:@"24"];
+        [presence addChild:priority];
+    }
 	
 	[[self xmppStream] sendElement:presence];
 }
@@ -301,7 +313,7 @@
 	password = myPassword;
 
 	NSError *error = nil;
-	if (![xmppStream connect:&error])
+	if (![xmppStream connectWithTimeout:XMPPStreamTimeoutNone error:&error])
 	{
 		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error connecting" 
 		                                                    message:@"See console for error details." 
@@ -384,36 +396,8 @@
 	}
 	else
 	{
-		// Google does things incorrectly (does not conform to RFC).
-		// Because so many people ask questions about this (assume xmpp framework is broken),
-		// I've explicitly added code that shows how other xmpp clients "do the right thing"
-		// when connecting to a google server (gmail, or google apps for domains).
-		
-		NSString *expectedCertName = nil;
-		
-		NSString *serverDomain = xmppStream.hostName;
-		NSString *virtualDomain = [xmppStream.myJID domain];
-		
-		if ([serverDomain isEqualToString:@"talk.google.com"])
-		{
-			if ([virtualDomain isEqualToString:@"gmail.com"])
-			{
-				expectedCertName = virtualDomain;
-			}
-			else
-			{
-				expectedCertName = serverDomain;
-			}
-		}
-		else if (serverDomain == nil)
-		{
-			expectedCertName = virtualDomain;
-		}
-		else
-		{
-			expectedCertName = serverDomain;
-		}
-		
+		NSString *expectedCertName = [xmppStream.myJID domain];
+				
 		if (expectedCertName)
 		{
 			[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];

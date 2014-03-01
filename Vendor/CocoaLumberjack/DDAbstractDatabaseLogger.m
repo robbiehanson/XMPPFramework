@@ -204,7 +204,10 @@
 
             [self updateDeleteTimer];
             
-            dispatch_resume(deleteTimer);
+            if(deleteTimer != NULL)
+            {
+                dispatch_resume(deleteTimer);
+            }
         }
 	}
 }

@@ -405,7 +405,7 @@
 		if (![serviceJID isEqualToJID:[message from]]) return;
 	}
 	else {
-		if (![myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+		if ([myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
 	}
 	
 	// <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
@@ -481,21 +481,17 @@
 			NSArray *values = (NSArray *)obj;
 			for (id value in values)
 			{
-				[field addChild:[NSXMLElement elementWithName:@"value" stringValue:[value description]]];
+				[field addChild:[NSXMLElement elementWithName:@"value" objectValue:value]];
 			}
 		}
 		else
 		{
-			[field addChild:[NSXMLElement elementWithName:@"value" stringValue:[obj description]]];
+			[field addChild:[NSXMLElement elementWithName:@"value" objectValue:obj]];
 		}
 		
 		[x addChild:field];
 	}];
-	
-	NSXMLElement *optionsStanza = [NSXMLElement elementWithName:@"options"];
-	[optionsStanza addChild:x];
-	
-	return optionsStanza;
+	return x;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

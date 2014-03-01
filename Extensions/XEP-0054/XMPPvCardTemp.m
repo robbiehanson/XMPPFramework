@@ -55,13 +55,16 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	}
 }
 
-
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTemp class]);
 	
 	return (XMPPvCardTemp *)elem;
 }
 
++ (XMPPvCardTemp *)vCardTemp{
+    NSXMLElement *vCardTempElement = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+    return [XMPPvCardTemp vCardTempFromElement:vCardTempElement];
+}
 
 + (XMPPvCardTemp *)vCardTempSubElementFromIQ:(XMPPIQ *)iq
 {
@@ -131,7 +134,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		
 		if (binval) {
 			NSData *base64Data = [[binval stringValue] dataUsingEncoding:NSASCIIStringEncoding];
-			decodedData = [base64Data base64Decoded];
+			decodedData = [base64Data xmpp_base64Decoded];
 		}
 	}
 	
@@ -140,21 +143,32 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setPhoto:(NSData *)data {
-	NSXMLElement *photo = [self elementForName:@"PHOTO"];
-	
-	if (photo == nil) {
-		photo = [NSXMLElement elementWithName:@"PHOTO"];
-		[self addChild:photo];
-	}
-	
-	NSXMLElement *binval = [photo elementForName:@"BINVAL"];
-	
-	if (binval == nil) {
-		binval = [NSXMLElement elementWithName:@"BINVAL"];
-		[photo addChild:binval];
-	}
-	
-	[binval setStringValue:[data base64Encoded]];
+    
+    NSXMLElement *photo = [self elementForName:@"PHOTO"];
+    
+    if(photo)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:photo]];
+    }
+    
+    if([data length])
+    {    
+        NSXMLElement *photo = [NSXMLElement elementWithName:@"PHOTO"];
+        [self addChild:photo];
+        
+        NSString *imageType = [data xmpp_imageType];
+        
+        if([imageType length])
+        {
+            NSXMLElement *type = [NSXMLElement elementWithName:@"TYPE"];
+            [photo addChild:type];
+            [type setStringValue:imageType];
+        }
+        
+        NSXMLElement *binval = [NSXMLElement elementWithName:@"BINVAL"];
+        [photo addChild:binval];
+        [binval setStringValue:[data xmpp_base64Encoded]];
+    }
 }
 
 
@@ -462,7 +476,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		
 		if (binval) {
 			NSData *base64Data = [[binval stringValue] dataUsingEncoding:NSASCIIStringEncoding];
-			decodedData = [base64Data base64Decoded];
+			decodedData = [base64Data xmpp_base64Decoded];
 		}
 	}
 	
@@ -485,7 +499,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		[logo addChild:binval];
 	}
 	
-	[binval setStringValue:[data base64Encoded]];
+	[binval setStringValue:[data xmpp_base64Encoded]];
 }
 
 
@@ -745,7 +759,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		
 		if (binval) {
 			NSData *base64Data = [[binval stringValue] dataUsingEncoding:NSASCIIStringEncoding];
-			decodedData = [base64Data base64Decoded];
+			decodedData = [base64Data xmpp_base64Decoded];
 		}
 	}
 	
@@ -768,7 +782,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		[sound addChild:binval];
 	}
 	
-	[binval setStringValue:[data base64Encoded]];
+	[binval setStringValue:[data xmpp_base64Encoded]];
 }
 
 

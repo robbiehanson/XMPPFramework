@@ -8,6 +8,16 @@
 @interface NSXMLElement (XMPP)
 
 /**
+ * Convenience methods for Creating elements.
+**/
+
++ (NSXMLElement *)elementWithName:(NSString *)name numberValue:(NSNumber *)number;
+- (id)initWithName:(NSString *)name numberValue:(NSNumber *)number;
+
++ (NSXMLElement *)elementWithName:(NSString *)name objectValue:(id)objectValue;
+- (id)initWithName:(NSString *)name objectValue:(id)objectValue;
+
+/**
  * Creating elements with explicit xmlns values.
  * 
  * Use these instead of [NSXMLElement initWithName:URI:].
@@ -22,6 +32,7 @@
 **/
 
 - (NSArray *)elementsForXmlns:(NSString *)ns;
+- (NSArray *)elementsForXmlnsPrefix:(NSString *)nsPrefix;
 
 /**
  * Extracting a single element.
@@ -29,6 +40,18 @@
 
 - (NSXMLElement *)elementForName:(NSString *)name;
 - (NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns;
+- (NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
+
+/**
+ * Convenience methods for removing child elements.
+ *
+ * If the element doesn't exist, these methods do nothing.
+**/
+
+- (void)removeElementForName:(NSString *)name;
+- (void)removeElementsForName:(NSString *)name;
+- (void)removeElementForName:(NSString *)name xmlns:(NSString *)xmlns;
+- (void)removeElementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
 
 /**
  * Working with the common xmpp xmlns value.
@@ -51,7 +74,15 @@
  * Convenience methods for adding attributes.
 **/
 
+- (void)addAttributeWithName:(NSString *)name intValue:(int)intValue;
+- (void)addAttributeWithName:(NSString *)name boolValue:(BOOL)boolValue;
+- (void)addAttributeWithName:(NSString *)name floatValue:(float)floatValue;
+- (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue;
+- (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue;
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue;
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
+- (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number;
+- (void)addAttributeWithName:(NSString *)name objectValue:(id)objectValue;
 
 /**
  * Convenience methods for extracting attribute values in different formats.

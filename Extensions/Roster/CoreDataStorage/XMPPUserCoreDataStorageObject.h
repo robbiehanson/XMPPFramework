@@ -51,6 +51,7 @@
 
 - (void)updateWithItem:(NSXMLElement *)item;
 - (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr;
+- (void)recalculatePrimaryResource;
 
 - (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another;
 - (NSComparisonResult)compareByName:(XMPPUserCoreDataStorageObject *)another options:(NSStringCompareOptions)mask;

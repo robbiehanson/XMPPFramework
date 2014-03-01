@@ -45,6 +45,7 @@
 	
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
+	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSDate *result = [df dateFromString:dateStr];
@@ -84,6 +85,7 @@
 	
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
+	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSString *today = [df stringFromDate:[NSDate date]];
@@ -187,6 +189,7 @@
 	
 	NSDateFormatter *df = [[NSDateFormatter alloc] init];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
+	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
 	[df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
 
 	NSDate *result = nil;
@@ -252,11 +255,11 @@
 	NSString *minutesStr = [tzo substringWithRange:NSMakeRange(4, 2)];
 	
 	NSUInteger hours;
-	if (![NSNumber parseString:hoursStr intoNSUInteger:&hours])
+	if (![NSNumber xmpp_parseString:hoursStr intoNSUInteger:&hours])
 		return nil;
 	
 	NSUInteger minutes;
-	if (![NSNumber parseString:minutesStr intoNSUInteger:&minutes])
+	if (![NSNumber xmpp_parseString:minutesStr intoNSUInteger:&minutes])
 		return nil;
 	
 	if (hours > 23) return nil;

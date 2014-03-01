@@ -4217,7 +4217,7 @@ enum GCDAsyncSocketConfig
 		return;
 	}
 	
-	BOOL hasBytesAvailable;
+	BOOL hasBytesAvailable = NO;
 	unsigned long estimatedBytesAvailable;
 	
 	if ([self usingCFStreamForTLS])
@@ -5835,25 +5835,29 @@ enum GCDAsyncSocketConfig
 		#if TARGET_OS_IPHONE
 		{
 			GCDAsyncSpecialPacket *tlsPacket = (GCDAsyncSpecialPacket *)currentRead;
-			NSDictionary *tlsSettings = tlsPacket->tlsSettings;
-			
-			NSNumber *value;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
-			if (value && [value boolValue] == YES)
-				canUseSecureTransport = NO;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredRoots];
-			if (value && [value boolValue] == YES)
-				canUseSecureTransport = NO;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLValidatesCertificateChain];
-			if (value && [value boolValue] == NO)
-				canUseSecureTransport = NO;
-			
-			value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredCertificates];
-			if (value && [value boolValue] == YES)
-				canUseSecureTransport = NO;
+            
+            if(tlsPacket)
+            {
+                NSDictionary *tlsSettings = tlsPacket->tlsSettings;
+                
+                NSNumber *value = nil;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
+                if (value && [value boolValue] == YES)
+                    canUseSecureTransport = NO;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredRoots];
+                if (value && [value boolValue] == YES)
+                    canUseSecureTransport = NO;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLValidatesCertificateChain];
+                if (value && [value boolValue] == NO)
+                    canUseSecureTransport = NO;
+                
+                value = [tlsSettings objectForKey:(NSString *)kCFStreamSSLAllowsExpiredCertificates];
+                if (value && [value boolValue] == YES)
+                    canUseSecureTransport = NO;
+            }
 		}
 		#endif
 		
@@ -6685,6 +6689,8 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 
 #if TARGET_OS_IPHONE
 
++ (void)ignore:(id)sender {}
+
 + (void)startCFStreamThreadIfNeeded
 {
 	static dispatch_once_t predicate;
@@ -6707,7 +6713,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	// So we'll just create a timer that will never fire - unless the server runs for decades.
 	[NSTimer scheduledTimerWithTimeInterval:[[NSDate distantFuture] timeIntervalSinceNow]
 	                                 target:self
-	                               selector:@selector(doNothingAtAll:)
+	                               selector:@selector(ignore:)
 	                               userInfo:nil
 	                                repeats:YES];
 	

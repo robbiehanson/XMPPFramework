@@ -19,6 +19,8 @@
 @interface XMPPCapabilities : XMPPModule
 {
 	__strong id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
+    
+    NSString *myCapabilitiesNode;
 	
 	NSXMLElement *myCapabilitiesQuery; // Full list of capabilites <query/>
 	NSXMLElement *myCapabilitiesC;     // Hashed element <c/>
@@ -30,6 +32,7 @@
 	
 	BOOL autoFetchHashedCapabilities;
 	BOOL autoFetchNonHashedCapabilities;
+	BOOL autoFetchMyServerCapabilities;
 	
 	NSTimeInterval capabilitiesRequestTimeout;
 	
@@ -40,6 +43,20 @@
 - (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 @property (nonatomic, strong, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
+
+/**
+ * Defines the node attribute in a <c/> element qualified by the 'http://jabber.org/protocol/caps' namespace.
+ *
+ * It is RECOMMENDED for the value of the 'node' attribute to be an HTTP URL
+ * at which a user could find further information about the software product, 
+ * such as "http://github.com/robbiehanson/XMPPFramework"
+ *
+ * This MUST NOT be nil
+ *
+ * The default value is http://github.com/robbiehanson/XMPPFramework
+**/
+
+@property (nonatomic, copy) NSString *myCapabilitiesNode;
 
 /**
  * Defines fetching behavior for entities using the XEP-0115 standard.
@@ -70,6 +87,15 @@
  * You may always fetch the capabilities (if/when needed) via the fetchCapabilitiesForJID method.
 **/
 @property (assign) BOOL autoFetchNonHashedCapabilities;
+
+/**
+ * Auto fetch the capabilities of the server upon authentication.
+ * This uses the non hashed approach outlined in XEP-0030: Service Discovery.
+ *
+ * The default value is NO.
+**/
+
+@property (assign) BOOL autoFetchMyServerCapabilities;
 
 /**
  * Manually fetch the capabilities for the given jid.
@@ -342,7 +368,7 @@
  * Duplicate features are automatically discarded
  * For more control over your capablities use xmppCapabilities:collectingMyCapabilities:
 **/
-- (NSArray *)featuresForXMPPCapabilities:(XMPPCapabilities *)sender;
+- (NSArray *)myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender;
 
 /**
  * Invoked when capabilities have been discovered for an available JID.

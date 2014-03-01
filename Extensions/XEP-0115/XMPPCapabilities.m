@@ -43,7 +43,7 @@
  * According to the XEP it is RECOMMENDED for the value of the 'node' attribute to be an HTTP URL.
 **/
 #ifndef DISCO_NODE
-	#define DISCO_NODE @"http://code.google.com/p/xmppframework"
+	#define DISCO_NODE @"https://github.com/robbiehanson/XMPPFramework"
 #endif
 
 @interface GCDTimerWrapper : NSObject
@@ -81,6 +81,7 @@
 @dynamic xmppCapabilitiesStorage;
 @dynamic autoFetchHashedCapabilities;
 @dynamic autoFetchNonHashedCapabilities;
+@dynamic autoFetchMyServerCapabilities;
 
 - (id)init
 {
@@ -117,6 +118,8 @@
 		{
 			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
 		}
+        
+        myCapabilitiesNode = DISCO_NODE;
 		
 		// discoRequestJidSet:
 		// 
@@ -143,34 +146,13 @@
 		
 		autoFetchHashedCapabilities = YES;
 		autoFetchNonHashedCapabilities = NO;
+		autoFetchMyServerCapabilities = NO;
 	}
 	return self;
 }
 
-- (BOOL)activate:(XMPPStream *)aXmppStream
-{
-	if ([super activate:aXmppStream])
-	{
-		// Custom code goes here (if needed)
-		
-		return YES;
-	}
-	
-	return NO;
-}
-
-- (void)deactivate
-{
-	// Custom code goes here (if needed)
-	
-	[super deactivate];
-}
-
 - (void)dealloc
-{
-	
-	
-	
+{	
 	for (GCDTimerWrapper *timerWrapper in discoTimerJidDict)
 	{
 		[timerWrapper cancel];
@@ -185,6 +167,38 @@
 - (id <XMPPCapabilitiesStorage>)xmppCapabilitiesStorage
 {
 	return xmppCapabilitiesStorage;
+}
+
+- (NSString *)myCapabilitiesNode
+{
+	if (dispatch_get_specific(moduleQueueTag))
+	{
+		return myCapabilitiesNode;
+	}
+	else
+	{
+		__block NSString *result;
+		
+		dispatch_sync(moduleQueue, ^{
+			result = myCapabilitiesNode;
+		});
+		
+		return result;
+	}
+}
+
+- (void)setMyCapabilitiesNode:(NSString *)flag
+{
+    NSAssert([flag length], @"myCapabilitiesNode MUST NOT be nil");
+
+	dispatch_block_t block = ^{
+		myCapabilitiesNode = flag;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)autoFetchHashedCapabilities
@@ -235,6 +249,34 @@
 {
 	dispatch_block_t block = ^{
 		autoFetchNonHashedCapabilities = flag;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)autoFetchMyServerCapabilities
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{
+		result = autoFetchMyServerCapabilities;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_sync(moduleQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoFetchMyServerCapabilities:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoFetchMyServerCapabilities = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -585,9 +627,9 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 	
 	NSData *data = [s dataUsingEncoding:NSUTF8StringEncoding];
-	NSData *hash = [data sha1Digest];
+	NSData *hash = [data xmpp_sha1Digest];
 	
-	return [hash base64Encoded];
+	return [hash xmpp_base64Encoded];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -665,10 +707,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// Now prompt the delegates to add any additional features.
 	
 	SEL collectingMyCapabilitiesSelector = @selector(xmppCapabilities:collectingMyCapabilities:);
-	SEL featuresForXMPPCapabilitiesSelector = @selector(featuresForXMPPCapabilities:);
+	SEL myFeaturesForXMPPCapabilitiesSelector = @selector(myFeaturesForXMPPCapabilities:);
 		
 	if (![multicastDelegate hasDelegateThatRespondsToSelector:collectingMyCapabilitiesSelector]
-		&& ![multicastDelegate hasDelegateThatRespondsToSelector:featuresForXMPPCapabilitiesSelector])
+		&& ![multicastDelegate hasDelegateThatRespondsToSelector:myFeaturesForXMPPCapabilitiesSelector])
 	{
 		// None of the delegates implement the method.
 		// Use a shortcut.
@@ -681,7 +723,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// This must be done serially to allow them to alter the element in a thread-safe manner.
 		
 		GCDMulticastDelegateEnumerator *collectingMyCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
-		GCDMulticastDelegateEnumerator *featuresForXMPPCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
+		GCDMulticastDelegateEnumerator *myFeaturesForXMPPCapabilitiesDelegateEnumerator = [multicastDelegate delegateEnumerator];
 
 		
 		dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -699,11 +741,11 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 				}});
 			}
 						
-			while ([featuresForXMPPCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:featuresForXMPPCapabilitiesSelector])
+			while ([myFeaturesForXMPPCapabilitiesDelegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:myFeaturesForXMPPCapabilitiesSelector])
 			{
 				dispatch_sync(dq, ^{ @autoreleasepool {
 					
-					NSArray *features =  [del featuresForXMPPCapabilities:self];
+					NSArray *features =  [del myFeaturesForXMPPCapabilities:self];
 					
 					for(NSString *feature in features){
 					
@@ -774,12 +816,12 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// 
 	// <c xmlns="http://jabber.org/protocol/caps"
 	//     hash="sha-1"
-	//     node="http://code.google.com/p/xmppframework"
+	//     node="https://github.com/robbiehanson/XMPPFramework"
 	//     ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
 	
 	myCapabilitiesC = [[NSXMLElement alloc] initWithName:@"c" xmlns:XMLNS_CAPS];
 	[myCapabilitiesC addAttributeWithName:@"hash" stringValue:hashAlg];
-	[myCapabilitiesC addAttributeWithName:@"node" stringValue:DISCO_NODE];
+	[myCapabilitiesC addAttributeWithName:@"node" stringValue:myCapabilitiesNode];
 	[myCapabilitiesC addAttributeWithName:@"ver"  stringValue:hash];
 	
 	// If the collection process started when the stream was connected,
@@ -1423,6 +1465,16 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 }
 
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
+{	
+	if (autoFetchMyServerCapabilities)
+	{
+		XMPPJID *myJID = [xmppStream myJID];
+		XMPPJID *myServerJID = [XMPPJID jidWithUser:nil domain:[myJID domain] resource:nil];
+		[self fetchCapabilitiesForJID:myServerJID];
+	}
+}
+
 - (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
 {
 	// This method is invoked on the moduleQueue.
@@ -1504,7 +1556,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	{
 		NSString *node = [query attributeStringValueForName:@"node"];
 		
-		if (node == nil || [node hasPrefix:DISCO_NODE])
+		if (node == nil || [node hasPrefix:myCapabilitiesNode])
 		{
 			[self handleDiscoRequest:iq];
 		}

@@ -48,13 +48,19 @@
 	NSPersistentStoreCoordinator *persistentStoreCoordinator;
 	NSManagedObjectContext *managedObjectContext;
 	NSManagedObjectContext *mainThreadManagedObjectContext;
+    
+    NSMutableArray *willSaveManagedObjectContextBlocks;
+    NSMutableArray *didSaveManagedObjectContextBlocks;
 	
 @protected
 	
 	NSString *databaseFileName;
+    NSDictionary *storeOptions;
 	NSUInteger saveThreshold;
 	NSUInteger saveCount;
     
+    BOOL autoRemovePreviousDatabaseFile;
+    BOOL autoRecreateDatabaseFile;
     BOOL autoAllowExternalBinaryDataStorage;
 	
 	dispatch_queue_t storageQueue;
@@ -67,11 +73,11 @@
  * If you pass nil, a default database filename is automatically used.
  * This default is derived from the classname,
  * meaning subclasses will get a default database filename derived from the subclass classname.
- * 
+ *
  * If you attempt to create an instance of this class with the same databaseFileName as another existing instance,
  * this method will return nil.
-**/
-- (id)initWithDatabaseFilename:(NSString *)databaseFileName;
+ **/
+- (id)initWithDatabaseFilename:(NSString *)databaseFileName storeOptions:(NSDictionary *)storeOptions;
 
 /**
  * Initializes a core data storage instance, backed by an in-memory store.
@@ -83,6 +89,12 @@
  * If nil was passed to the init method, returns the actual databaseFileName being used (the default filename).
 **/
 @property (readonly) NSString *databaseFileName;
+
+/**
+ * Readonly access to the databaseOptions used during initialization.
+ * If nil was passed to the init method, returns the actual databaseOptions being used (the default databaseOptions).
+ **/
+@property (readonly) NSDictionary *storeOptions;
 
 /**
  * The saveThreshold specifies the maximum number of unsaved changes to NSManagedObjects before a save is triggered.
@@ -129,12 +141,27 @@
 @property (strong, readonly) NSManagedObjectContext *mainThreadManagedObjectContext;
 
 /**
+ * The Previous Database File is removed before creating a persistant store.
+ *
+ * Default NO
+**/
+
+@property (readwrite) BOOL autoRemovePreviousDatabaseFile;
+
+/**
+ * The Database File is automatically recreated if the persistant store cannot read it e.g. the model changed or the file became corrupt.
+ * For greater control overide didNotAddPersistentStoreWithPath:
+ *
+ * Default NO
+**/
+@property (readwrite) BOOL autoRecreateDatabaseFile;
+
+/**
  * This method calls setAllowsExternalBinaryDataStorage:YES for all Binary Data Attributes in the Managed Object Model.
  * On OS Versions that do not support external binary data storage, this property does nothing.
  *
  * Default NO
 **/
-
 @property (readwrite) BOOL autoAllowExternalBinaryDataStorage;
 
 @end

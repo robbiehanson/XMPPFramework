@@ -15,7 +15,7 @@ static char encodingTable[64] = {
         'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/' };
 
 
-- (NSData *)md5Digest
+- (NSData *)xmpp_md5Digest
 {
 	unsigned char result[CC_MD5_DIGEST_LENGTH];
     
@@ -23,7 +23,7 @@ static char encodingTable[64] = {
     return [NSData dataWithBytes:result length:CC_MD5_DIGEST_LENGTH];
 }
 
-- (NSData *)sha1Digest
+- (NSData *)xmpp_sha1Digest
 {
 	unsigned char result[CC_SHA1_DIGEST_LENGTH];
     
@@ -31,7 +31,7 @@ static char encodingTable[64] = {
     return [NSData dataWithBytes:result length:CC_SHA1_DIGEST_LENGTH];
 }
 
-- (NSString *)hexStringValue
+- (NSString *)xmpp_hexStringValue
 {
 	NSMutableString *stringBuffer = [NSMutableString stringWithCapacity:([self length] * 2)];
 	
@@ -46,7 +46,7 @@ static char encodingTable[64] = {
     return [stringBuffer copy];
 }
 
-- (NSString *)base64Encoded
+- (NSString *)xmpp_base64Encoded
 {
 	const unsigned char	*bytes = [self bytes];
 	NSMutableString *result = [NSMutableString stringWithCapacity:[self length]];
@@ -98,7 +98,7 @@ static char encodingTable[64] = {
 	return [NSString stringWithString:result];
 }
 
-- (NSData *)base64Decoded
+- (NSData *)xmpp_base64Decoded
 {
 	const unsigned char	*bytes = [self bytes];
 	NSMutableData *result = [NSMutableData dataWithCapacity:[self length]];
@@ -160,4 +160,81 @@ static char encodingTable[64] = {
 	return [NSData dataWithData:result];
 }
 
+
+- (BOOL)xmpp_isJPEG
+{
+    if (self.length > 4)
+    {
+        unsigned char buffer[4];
+        [self getBytes:&buffer length:4];
+        
+        return buffer[0]==0xff &&
+        buffer[1]==0xd8 &&
+        buffer[2]==0xff &&
+        buffer[3]==0xe0;
+    }
+    
+    return NO;
+}
+
+- (BOOL)xmpp_isPNG
+{
+    if (self.length > 4)
+    {
+        unsigned char buffer[4];
+        [self getBytes:&buffer length:4];
+        
+        return buffer[0]==0x89 &&
+        buffer[1]==0x50 &&
+        buffer[2]==0x4e &&
+        buffer[3]==0x47;
+    }
+    
+    return NO;
+}
+
+- (NSString *)xmpp_imageType
+{
+    NSString *result = nil;
+    
+    if([self xmpp_isPNG])
+    {
+        result = @"image/png";
+    }
+    else if([self xmpp_isJPEG])
+    {
+        result = @"image/jpeg";
+    }
+    
+    return result;
+}
+
 @end
+
+#ifndef XMPP_EXCLUDE_DEPRECATED
+
+@implementation NSData (XMPPDeprecated)
+
+- (NSData *)md5Digest {
+    return [self xmpp_md5Digest];
+}
+
+- (NSData *)sha1Digest {
+    return [self xmpp_sha1Digest];
+}
+
+- (NSString *)hexStringValue {
+    return [self xmpp_hexStringValue];
+}
+
+- (NSString *)base64Encoded {
+    return [self xmpp_base64Encoded];
+}
+
+- (NSData *)base64Decoded {
+    return [self xmpp_base64Decoded];
+}
+
+@end
+
+#endif

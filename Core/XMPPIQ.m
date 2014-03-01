@@ -142,6 +142,12 @@
 	return self;
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSXMLElement *element = [super copyWithZone:zone];
+    return [XMPPIQ iqFromElement:element];
+}
+
 - (NSString *)type
 {
 	return [[self attributeStringValueForName:@"type"] lowercaseString];

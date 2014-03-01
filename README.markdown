@@ -6,12 +6,13 @@ XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), al
 **[Overview of the XMPP Framework](https://github.com/robbiehanson/XMPPFramework/wiki/IntroToFramework)**<br/>
 **[Getting started using XMPPFramework on Mac OS X](https://github.com/robbiehanson/XMPPFramework/wiki/GettingStarted_Mac)**<br/>
 **[Getting started using XMPPFramework on iOS](https://github.com/robbiehanson/XMPPFramework/wiki/GettingStarted_iOS)**<br/>
+**[XEPs supported by the XMPPFramework](https://github.com/robbiehanson/XMPPFramework/wiki/XEPs)**<br/>
 **[Learn more about XMPPFramework](https://github.com/robbiehanson/XMPPFramework/wiki)**<br/>
 
 <br/>
 Can't find the answer to your question in any of the [wiki](https://github.com/robbiehanson/XMPPFramework/wiki) articles? Try the **[mailing list](http://groups.google.com/group/xmppframework)**.
 <br/>
 <br/>
-Love the project? Wanna buy me a coffee? (or a beer :D) [![donation](http://www.paypal.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CV6XGZTPQU9HY)
+Love the project? Wanna buy me a coffee? (or a beer :D) [![donation](https://www.paypal.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CV6XGZTPQU9HY)
 
 

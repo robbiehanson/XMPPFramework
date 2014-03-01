@@ -1120,8 +1120,8 @@ static NSMutableArray *proxyCandidates;
 	XMPPJID *targetJID    = isClient ? jid   : myJID;
 	
 	NSString *hashMe = [NSString stringWithFormat:@"%@%@%@", uuid, [initiatorJID full], [targetJID full]];
-	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] sha1Digest];
-	NSData *hash = [[hashRaw hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] xmpp_sha1Digest];
+	NSData *hash = [[hashRaw xmpp_hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
 	
 	XMPPLogVerbose(@"TURNSocket: hashMe : %@", hashMe);
 	XMPPLogVerbose(@"TURNSocket: hashRaw: %@", hashRaw);
@@ -1212,8 +1212,8 @@ static NSMutableArray *proxyCandidates;
 	{
 		// See socksOpen method for socks reply format
 		
-		UInt8 ver = [NSNumber extractUInt8FromData:data atOffset:0];
-		UInt8 mtd = [NSNumber extractUInt8FromData:data atOffset:1];
+		UInt8 ver = [NSNumber xmpp_extractUInt8FromData:data atOffset:0];
+		UInt8 mtd = [NSNumber xmpp_extractUInt8FromData:data atOffset:1];
 		
 		XMPPLogVerbose(@"TURNSocket: SOCKS_OPEN: ver(%o) mtd(%o)", ver, mtd);
 		
@@ -1234,8 +1234,8 @@ static NSMutableArray *proxyCandidates;
 		
 		XMPPLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_1: %@", data);
 		
-		UInt8 ver = [NSNumber extractUInt8FromData:data atOffset:0];
-		UInt8 rep = [NSNumber extractUInt8FromData:data atOffset:1];
+		UInt8 ver = [NSNumber xmpp_extractUInt8FromData:data atOffset:0];
+		UInt8 rep = [NSNumber xmpp_extractUInt8FromData:data atOffset:1];
 		
 		XMPPLogVerbose(@"TURNSocket: SOCKS_CONNECT_REPLY_1: ver(%o) rep(%o)", ver, rep);
 		
@@ -1250,11 +1250,11 @@ static NSMutableArray *proxyCandidates;
 			// 
 			// However, some servers don't follow the protocol, and send a atyp value of 0.
 			
-			UInt8 atyp = [NSNumber extractUInt8FromData:data atOffset:3];
+			UInt8 atyp = [NSNumber xmpp_extractUInt8FromData:data atOffset:3];
 			
 			if (atyp == 3)
 			{
-				UInt8 addrLength = [NSNumber extractUInt8FromData:data atOffset:4];
+				UInt8 addrLength = [NSNumber xmpp_extractUInt8FromData:data atOffset:4];
 				UInt8 portLength = 2;
 				
 				XMPPLogVerbose(@"TURNSocket: addrLength: %o", addrLength);

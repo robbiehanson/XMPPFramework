@@ -14,6 +14,7 @@
 @class XMPPMessage;
 @class XMPPPresence;
 @class XMPPModule;
+@class XMPPElement;
 @class XMPPElementReceipt;
 @protocol XMPPStreamDelegate;
 
@@ -37,6 +38,7 @@ enum XMPPStreamErrorCode
 };
 typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
+extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 @interface XMPPStream : NSObject <GCDAsyncSocketDelegate>
 
@@ -103,6 +105,15 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The default port is 5222.
 **/
 @property (readwrite, assign) UInt16 hostPort;
+
+
+/**
+ * Start TLS is used if the server supports it, regardless of wether it is required or not.
+ *
+ * The default is NO
+**/
+@property (readwrite, assign) BOOL autoStartTLS;
+
 
 /**
  * The JID of the user.
@@ -213,6 +224,22 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 **/
 @property (readwrite, strong) id tag;
 
+/**
+ * RFC 6121 states that starting a session is no longer required.
+ * To skip this step set skipStartSession to YES.
+ *
+ * [RFC3921] specified one additional
+ * precondition: formal establishment of an instant messaging and
+ * presence session.  Implementation and deployment experience has
+ * shown that this additional step is unnecessary.  However, for
+ * backward compatibility an implementation MAY still offer that
+ * feature.  This enables older software to connect while letting
+ * newer software save a round trip.
+ *
+ * The default value is NO.
+**/
+@property (readwrite, assign) BOOL skipStartSession;
+
 #if TARGET_OS_IPHONE
 
 /**
@@ -237,7 +264,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 /**
  * Returns YES is the connection is currently connecting
 **/
-
 - (BOOL)isConnecting;
 
 /**
@@ -254,9 +280,10 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * Connects to the configured hostName on the configured hostPort.
+ * The timeout is optional. To not time out use XMPPStreamTimeoutNone.
  * If the hostName or myJID are not set, this method will return NO and set the error parameter.
 **/
-- (BOOL)connect:(NSError **)errPtr;
+- (BOOL)connectWithTimeout:(NSTimeInterval)timeout error:(NSError **)errPtr;
 
 /**
  * THIS IS DEPRECATED BY THE XMPP SPECIFICATION.
@@ -264,19 +291,21 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * The xmpp specification outlines the proper use of SSL/TLS by negotiating
  * the startTLS upgrade within the stream negotiation.
  * This method exists for those ancient servers that still require the connection to be secured prematurely.
- * 
+ * The timeout is optional. To not time out use XMPPStreamTimeoutNone.
+ *
  * Note: Such servers generally use port 5223 for this, which you will need to set.
 **/
-- (BOOL)oldSchoolSecureConnect:(NSError **)errPtr;
+- (BOOL)oldSchoolSecureConnectWithTimeout:(NSTimeInterval)timeout error:(NSError **)errPtr;
 
 /**
  * Starts a P2P connection to the given user and given address.
+ * The timeout is optional. To not time out use XMPPStreamTimeoutNone.
  * This method only works with XMPPStream objects created using the initP2P method.
  * 
  * The given address is specified as a sockaddr structure wrapped in a NSData object.
  * For example, a NSData object returned from NSNetservice's addresses method.
 **/
-- (BOOL)connectTo:(XMPPJID *)remoteJID withAddress:(NSData *)remoteAddr error:(NSError **)errPtr;
+- (BOOL)connectTo:(XMPPJID *)remoteJID withAddress:(NSData *)remoteAddr withTimeout:(NSTimeInterval)timeout error:(NSError **)errPtr;
 
 /**
  * Starts a P2P connection with the given accepted socket.
@@ -363,7 +392,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * In Band Registration.
  * Creating a user account on the xmpp server within the xmpp protocol.
  * 
- * The registerWithPassword:error: method is asynchronous.
+ * The registerWithElements:error: method is asynchronous.
  * It will return immediately, and the delegate methods are used to determine success.
  * See the xmppStreamDidRegister: and xmppStream:didNotRegister: methods.
  * 
@@ -372,10 +401,13 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
  * 
  * The errPtr parameter is optional - you may pass nil.
  * 
+ * registerWithPassword:error: is a convience method for creating an account using the given username and password.
+ *
  * Security Note:
  * The password will be sent in the clear unless the stream has been secured.
 **/
 - (BOOL)supportsInBandRegistration;
+- (BOOL)registerWithElements:(NSArray *)elements error:(NSError **)errPtr;
 - (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -451,8 +483,7 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 
 /**
  * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.
- **/
-
+**/
 - (BOOL)isAuthenticating;
 
 /**
@@ -576,6 +607,18 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)resendMyPresence;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Stanza Validation
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Validates that a response element is FROM the jid that the request element was sent TO.
+ * Supports validating responses when request didn't specify a TO.
+**/
+- (BOOL)isValidResponseElementFrom:(XMPPJID *)from forRequestElementTo:(XMPPJID *)to;
+
+- (BOOL)isValidResponseElement:(XMPPElement *)response forRequestElement:(XMPPElement *)request;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Module Plug-In System
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -631,6 +674,12 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 **/
 - (void)enumerateModulesWithBlock:(void (^)(XMPPModule *module, NSUInteger idx, BOOL *stop))block;
 
+/**
+ * Allows for enumeration of the currently registered modules that are a kind of Class.
+ * idx is in relation to all modules not just those of the given class.
+**/
+- (void)enumerateModulesOfClass:(Class)aClass withBlock:(void (^)(XMPPModule *module, NSUInteger idx, BOOL *stop))block;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -647,27 +696,6 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 **/
 + (NSString *)generateUUID;
 - (NSString *)generateUUID;
-
-/**
- * The XMPP Framework is designed to be entirely GCD based.
- * However, there are various utility classes provided by Apple that are still dependent upon a thread/runloop model.
- * For example, monitoring a network for changes related to connectivity requires we register a runloop-based delegate.
- * Thus XMPPStream creates a dedicated thread/runloop for any xmpp classes that may need it.
- * This provides multiple benefits:
- * 
- * - Development is simplified for those transitioning from previous thread/runloop versions.
- * - Development is simplified for those who rely on utility classes that don't yet support pure GCD,
- *   as they don't have to setup and maintain a thread/runloop on their own.
- * - It prevents multiple xmpp classes from creating multiple internal threads (which would be resource costly).
- * 
- * Please note:
- * This thread is designed to be used only if absolutely necessary.
- * That is, if you MUST use a class that doesn't yet support pure GCD.
- * If there is a GCD alternative, you should be using it instead.
- * For example, do NOT use NSTimer. Instead setup a GCD timer using a dispatch_source.
-**/
-- (NSThread *)xmppUtilityThread;
-- (NSRunLoop *)xmppUtilityRunLoop;
 
 @end
 
@@ -904,10 +932,27 @@ typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
 - (void)xmppStream:(XMPPStream *)sender didSendPresence:(XMPPPresence *)presence;
 
 /**
+ * These methods are called after failing to send the respective XML elements over the stream.
+**/
+- (void)xmppStream:(XMPPStream *)sender didFailToSendIQ:(XMPPIQ *)iq error:(NSError *)error;
+- (void)xmppStream:(XMPPStream *)sender didFailToSendMessage:(XMPPMessage *)message error:(NSError *)error;
+- (void)xmppStream:(XMPPStream *)sender didFailToSendPresence:(XMPPPresence *)presence error:(NSError *)error;
+
+/**
+ * This method is called if the XMPP Stream's jid changes.
+**/
+- (void)xmppStreamDidChangeMyJID:(XMPPStream *)xmppStream;
+
+/**
  * This method is called if the disconnect method is called.
  * It may be used to determine if a disconnection was purposeful, or due to an error.
 **/
 - (void)xmppStreamWasToldToDisconnect:(XMPPStream *)sender;
+
+/**
+ * This methods is called if the XMPP Stream's connect times out
+**/
+- (void)xmppStreamConnectDidTimeout:(XMPPStream *)sender;
 
 /**
  * This method is called after the stream is closed.

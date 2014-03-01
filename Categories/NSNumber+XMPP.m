@@ -7,17 +7,17 @@
 
 @implementation NSNumber (XMPP)
 
-+ (NSNumber *)numberWithPtr:(const void *)ptr
++ (NSNumber *)xmpp_numberWithPtr:(const void *)ptr
 {
-	return [[NSNumber alloc] initWithPtr:ptr];
+	return [[NSNumber alloc] xmpp_initWithPtr:ptr];
 }
 
-- (id)initWithPtr:(const void *)ptr
+- (id)xmpp_initWithPtr:(const void *)ptr
 {
 	return [self initWithLong:(long)ptr];
 }
 
-+ (BOOL)parseString:(NSString *)str intoInt32:(int32_t *)pNum
++ (BOOL)xmpp_parseString:(NSString *)str intoInt32:(int32_t *)pNum
 {
 	if (str == nil)
 	{
@@ -59,7 +59,7 @@
 		return YES;
 }
 
-+ (BOOL)parseString:(NSString *)str intoUInt32:(uint32_t *)pNum
++ (BOOL)xmpp_parseString:(NSString *)str intoUInt32:(uint32_t *)pNum
 {
 	if (str == nil)
 	{
@@ -96,7 +96,7 @@
 		return YES;
 }
 
-+ (BOOL)parseString:(NSString *)str intoInt64:(int64_t *)pNum
++ (BOOL)xmpp_parseString:(NSString *)str intoInt64:(int64_t *)pNum
 {
 	if (str == nil)
 	{
@@ -124,7 +124,7 @@
 		return YES;
 }
 
-+ (BOOL)parseString:(NSString *)str intoUInt64:(uint64_t *)pNum
++ (BOOL)xmpp_parseString:(NSString *)str intoUInt64:(uint64_t *)pNum
 {
 	if (str == nil)
 	{
@@ -152,23 +152,23 @@
 		return YES;
 }
 
-+ (BOOL)parseString:(NSString *)str intoNSInteger:(NSInteger *)pNum
++ (BOOL)xmpp_parseString:(NSString *)str intoNSInteger:(NSInteger *)pNum
 {
 	if (NSIntegerMax == INT32_MAX)
-		return [self parseString:str intoInt32:(int32_t *)pNum];
+		return [self xmpp_parseString:str intoInt32:(int32_t *)pNum];
 	else
-		return [self parseString:str intoInt64:(int64_t *)pNum];
+		return [self xmpp_parseString:str intoInt64:(int64_t *)pNum];
 }
 
-+ (BOOL)parseString:(NSString *)str intoNSUInteger:(NSUInteger *)pNum
++ (BOOL)xmpp_parseString:(NSString *)str intoNSUInteger:(NSUInteger *)pNum
 {
 	if (NSUIntegerMax == UINT32_MAX)
-		return [self parseString:str intoUInt32:(uint32_t *)pNum];
+		return [self xmpp_parseString:str intoUInt32:(uint32_t *)pNum];
 	else
-		return [self parseString:str intoUInt64:(uint64_t *)pNum];
+		return [self xmpp_parseString:str intoUInt64:(uint64_t *)pNum];
 }
 
-+ (UInt8)extractUInt8FromData:(NSData *)data atOffset:(unsigned int)offset
++ (UInt8)xmpp_extractUInt8FromData:(NSData *)data atOffset:(unsigned int)offset
 {
 	// 8 bits = 1 byte
 	
@@ -180,7 +180,7 @@
 	return result;
 }
 
-+ (UInt16)extractUInt16FromData:(NSData *)data atOffset:(unsigned int)offset andConvertFromNetworkOrder:(BOOL)flag
++ (UInt16)xmpp_extractUInt16FromData:(NSData *)data atOffset:(unsigned int)offset andConvertFromNetworkOrder:(BOOL)flag
 {
 	// 16 bits = 2 bytes
 	
@@ -195,7 +195,7 @@
 		return result;
 }
 
-+ (UInt32)extractUInt32FromData:(NSData *)data atOffset:(unsigned int)offset andConvertFromNetworkOrder:(BOOL)flag
++ (UInt32)xmpp_extractUInt32FromData:(NSData *)data atOffset:(unsigned int)offset andConvertFromNetworkOrder:(BOOL)flag
 {
 	// 32 bits = 4 bytes
 	
@@ -211,3 +211,55 @@
 }
 
 @end
+
+#ifndef XMPP_EXCLUDE_DEPRECATED
+
+@implementation NSNumber (XMPPDeprecated)
+
++ (NSNumber *)numberWithPtr:(const void *)ptr {
+    return [self xmpp_numberWithPtr:ptr];
+}
+
+- (id)initWithPtr:(const void *)ptr {
+    return [self xmpp_initWithPtr:ptr];
+}
+
++ (BOOL)parseString:(NSString *)str intoInt32:(int32_t *)pNum {
+    return [self xmpp_parseString:str intoInt32:pNum];
+}
+
++ (BOOL)parseString:(NSString *)str intoUInt32:(uint32_t *)pNum {
+    return [self xmpp_parseString:str intoUInt32:pNum];
+}
+
++ (BOOL)parseString:(NSString *)str intoInt64:(int64_t *)pNum {
+    return [self xmpp_parseString:str intoInt64:pNum];
+}
+
++ (BOOL)parseString:(NSString *)str intoUInt64:(uint64_t *)pNum {
+    return [self xmpp_parseString:str intoUInt64:pNum];
+}
+
++ (BOOL)parseString:(NSString *)str intoNSInteger:(NSInteger *)pNum {
+    return [self xmpp_parseString:str intoNSInteger:pNum];
+}
+
++ (BOOL)parseString:(NSString *)str intoNSUInteger:(NSUInteger *)pNum {
+    return [self xmpp_parseString:str intoNSUInteger:pNum];
+}
+
++ (UInt8)extractUInt8FromData:(NSData *)data atOffset:(unsigned int)offset {
+    return [self xmpp_extractUInt8FromData:data atOffset:offset];
+}
+
++ (UInt16)extractUInt16FromData:(NSData *)data atOffset:(unsigned int)offset andConvertFromNetworkOrder:(BOOL)flag {
+    return [self xmpp_extractUInt16FromData:data atOffset:offset andConvertFromNetworkOrder:flag];
+}
+
++ (UInt32)extractUInt32FromData:(NSData *)data atOffset:(unsigned int)offset andConvertFromNetworkOrder:(BOOL)flag {
+    return [self xmpp_extractUInt32FromData:data atOffset:offset andConvertFromNetworkOrder:flag];
+}
+
+@end
+
+#endif

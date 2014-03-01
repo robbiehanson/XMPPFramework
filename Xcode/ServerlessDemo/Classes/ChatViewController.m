@@ -325,7 +325,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // Add text label for timestamp
     timestampLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, cell.frame.size.width, kTimeStampHeight)];
     timestampLabel.font = [UIFont systemFontOfSize:13];
-    timestampLabel.textAlignment = UITextAlignmentCenter;
+    timestampLabel.textAlignment = NSTextAlignmentCenter;
     timestampLabel.backgroundColor = cell.backgroundColor;
     timestampLabel.opaque = YES;
     timestampLabel.tag = kTimestampLabelTag;
@@ -497,14 +497,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		UIImage *img = [[UIImage imageNamed:@"GreenBubble.png"] stretchableImageWithLeftCapWidth:kGreenLeftCapWidth
 		                                                                            topCapHeight:kTopCapHeight];
 		bubbleImageView.image = img;
-        contentLabel.textAlignment = UITextAlignmentRight;
+        contentLabel.textAlignment = NSTextAlignmentLeft;
     }
     else
     {
 		UIImage *img = [[UIImage imageNamed:@"BlueBubble.png"] stretchableImageWithLeftCapWidth:kBlueLeftCapWidth
 		                                                                           topCapHeight:kTopCapHeight];
         bubbleImageView.image = img;
-        contentLabel.textAlignment = UITextAlignmentLeft;
+        contentLabel.textAlignment = NSTextAlignmentLeft;
     }
 	
 	contentLabel.frame = textFrame;
@@ -649,7 +649,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		xmppStream = [[XMPPStream alloc] initP2PFrom:myJID];
 		
 		[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
-		[xmppStream connectTo:serviceJID withAddress:address error:nil];
+		[xmppStream connectTo:serviceJID withAddress:address withTimeout:XMPPStreamTimeoutNone error:nil];
 	}
 	
 	[ns stop];

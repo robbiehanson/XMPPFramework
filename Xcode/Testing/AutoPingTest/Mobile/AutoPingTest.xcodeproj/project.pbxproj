@@ -43,7 +43,7 @@
 		DC5981F2141033210050774C /* XMPPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = DC598185141033210050774C /* XMPPPing.m */; };
 		DC5981F6141033210050774C /* DDList.m in Sources */ = {isa = PBXBuildFile; fileRef = DC598190141033210050774C /* DDList.m */; };
 		DC5981F7141033210050774C /* GCDMulticastDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC598192141033210050774C /* GCDMulticastDelegate.m */; };
-		DC5981F8141033210050774C /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = DC598194141033210050774C /* LibIDN.m */; };
+		DC5981F8141033210050774C /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = DC598194141033210050774C /* XMPPStringPrep.m */; };
 		DC5981F9141033210050774C /* RFImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = DC598196141033210050774C /* RFImageToDataTransformer.m */; };
 		DC5981FA141033210050774C /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DC598198141033210050774C /* XMPPIDTracker.m */; };
 		DC5981FB141033210050774C /* XMPPSRVResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = DC59819A141033210050774C /* XMPPSRVResolver.m */; };
@@ -129,8 +129,8 @@
 		DC598190141033210050774C /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDList.m; sourceTree = "<group>"; };
 		DC598191141033210050774C /* GCDMulticastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDMulticastDelegate.h; sourceTree = "<group>"; };
 		DC598192141033210050774C /* GCDMulticastDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDMulticastDelegate.m; sourceTree = "<group>"; };
-		DC598193141033210050774C /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibIDN.h; sourceTree = "<group>"; };
-		DC598194141033210050774C /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
+		DC598193141033210050774C /* XMPPStringPrep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStringPrep.h; sourceTree = "<group>"; };
+		DC598194141033210050774C /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStringPrep.m; sourceTree = "<group>"; };
 		DC598195141033210050774C /* RFImageToDataTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFImageToDataTransformer.h; sourceTree = "<group>"; };
 		DC598196141033210050774C /* RFImageToDataTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RFImageToDataTransformer.m; sourceTree = "<group>"; };
 		DC598197141033210050774C /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIDTracker.h; sourceTree = "<group>"; };
@@ -404,8 +404,8 @@
 				DC598190141033210050774C /* DDList.m */,
 				DC598191141033210050774C /* GCDMulticastDelegate.h */,
 				DC598192141033210050774C /* GCDMulticastDelegate.m */,
-				DC598193141033210050774C /* LibIDN.h */,
-				DC598194141033210050774C /* LibIDN.m */,
+				DC598193141033210050774C /* XMPPStringPrep.h */,
+				DC598194141033210050774C /* XMPPStringPrep.m */,
 				DC598195141033210050774C /* RFImageToDataTransformer.h */,
 				DC598196141033210050774C /* RFImageToDataTransformer.m */,
 				DC598197141033210050774C /* XMPPIDTracker.h */,
@@ -581,7 +581,7 @@
 				DC5981F2141033210050774C /* XMPPPing.m in Sources */,
 				DC5981F6141033210050774C /* DDList.m in Sources */,
 				DC5981F7141033210050774C /* GCDMulticastDelegate.m in Sources */,
-				DC5981F8141033210050774C /* LibIDN.m in Sources */,
+				DC5981F8141033210050774C /* XMPPStringPrep.m in Sources */,
 				DC5981F9141033210050774C /* RFImageToDataTransformer.m in Sources */,
 				DC5981FA141033210050774C /* XMPPIDTracker.m in Sources */,
 				DC5981FB141033210050774C /* XMPPSRVResolver.m in Sources */,

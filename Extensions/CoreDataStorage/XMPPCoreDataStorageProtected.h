@@ -22,7 +22,7 @@
 /**
  * Override me, if needed, to provide customized behavior.
  * 
- * This method is queried to get the name of the ManagedObjectModel within the app bundle.
+ * This method is queried to get the name of the ManagedObjectModel within a bundle.
  * It should return the name of the appropriate file (*.xdatamodel / *.mom / *.momd) sans file extension.
  * 
  * The default implementation returns the name of the subclass, stripping any suffix of "CoreDataStorage".
@@ -32,10 +32,18 @@
 **/
 - (NSString *)managedObjectModelName;
 
+
+/**
+ * Override me, if needed, to provide customized behavior.
+ *
+ * This method is queried to get the bundle containing the ManagedObjectModel.
+**/
+- (NSBundle *)managedObjectModelBundle;
+
 /**
  * Override me, if needed, to provide customized behavior.
  * 
- * This method is queried if the initWithDatabaseFileName method is invoked with a nil parameter.
+ * This method is queried if the initWithDatabaseFileName:storeOptions: method is invoked with a nil parameter for databaseFileName.
  * The default implementation returns:
  * 
  * [NSString stringWithFormat:@"%@.sqlite", [self managedObjectModelName]];
@@ -43,6 +51,18 @@
  * You are encouraged to use the sqlite file extension.
 **/
 - (NSString *)defaultDatabaseFileName;
+
+
+/**
+ * Override me, if needed, to provide customized behavior.
+ *
+ * This method is queried if the initWithDatabaseFileName:storeOptions method is invoked with a nil parameter for storeOptions.
+ * The default implementation returns the following:
+ *
+ * @{ NSMigratePersistentStoresAutomaticallyOption: @(YES),
+ *    NSInferMappingModelAutomaticallyOption : @(YES) };
+ **/
+- (NSDictionary *)defaultStoreOptions;
 
 /**
  * Override me, if needed, to provide customized behavior.
@@ -55,7 +75,7 @@
  * 
  * The default implementation does nothing.
 **/
-- (void)willCreatePersistentStoreWithPath:(NSString *)storePath;
+- (void)willCreatePersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)storeOptions;
 
 /**
  * Override me, if needed, to completely customize the persistent store.
@@ -66,7 +86,7 @@
  * If this instance was created via initWithDatabaseFilename, then the storePath parameter will be non-nil.
  * If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
 **/
-- (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr;
+- (BOOL)addPersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)storeOptions error:(NSError **)errorPtr;
 
 /**
  * Override me, if needed, to provide customized behavior.
@@ -79,7 +99,7 @@
  * 
  * The default implementation simply writes to the XMPP error log.
 **/
-- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error;
+- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)storeOptions error:(NSError *)error;
 
 /**
  * Override me, if needed, to provide customized behavior.
@@ -294,5 +314,21 @@
  * See the executeBlock method above for a full discussion.
 **/
 - (void)scheduleBlock:(dispatch_block_t)block;
+
+/**
+ * Sometimes you want to call a method before calling save on a Managed Object Context e.g. willSaveObject:
+ *
+ * addWillSaveManagedObjectContextBlock allows you to add a block of code to be called before saving a Managed Object Context,
+ * without the overhead of having to call save at that moment.
+**/
+- (void)addWillSaveManagedObjectContextBlock:(void (^)(void))willSaveBlock;
+
+/**
+ * Sometimes you want to call a method after calling save on a Managed Object Context e.g. didSaveObject:
+ *
+ * addDidSaveManagedObjectContextBlock allows you to add a block of code to be after saving a Managed Object Context,
+ * without the overhead of having to call save at that moment.
+**/
+- (void)addDidSaveManagedObjectContextBlock:(void (^)(void))didSaveBlock;
 
 @end
