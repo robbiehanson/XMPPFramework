@@ -55,9 +55,13 @@ NSString *const XMPPLastActivityNamespace = @"jabber:iq:last";
 	return nil != [self lastActivityQueryElement];
 }
 
-- (NSUInteger)lastActivitySeconds
+- (NSInteger)lastActivitySeconds
 {
-	NSUInteger seconds = NSNotFound;
+    /**
+     * Use NSNotFound for both missing name space
+     * and when seconds returned by server or client is -1
+     */
+	NSInteger seconds = NSNotFound;
 	NSXMLElement *query = [self lastActivityQueryElement];
 	if (query)
 	{

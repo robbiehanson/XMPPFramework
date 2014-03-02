@@ -17,7 +17,6 @@
 
 static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 
-
 @interface XMPPLastActivity ()
 
 @property (atomic, strong) XMPPIDTracker *queryTracker;
@@ -131,7 +130,14 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 	NSString *queryID = query.elementID;
     
 	dispatch_async(moduleQueue, ^{
+        
+#if __has_feature(objc_arc_weak)
 		__weak __typeof__(self) self_weak_ = self;
+#else
+		__unsafe_unretained __typeof__(self) self_weak_ = self;
+#endif
+
+        
 		[_queryTracker addID:queryID block:^(XMPPIQ *iq, id<XMPPTrackingInfo> info) {
 			__strong __typeof__(self) self = self_weak_;
 			if (iq)
