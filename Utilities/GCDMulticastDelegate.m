@@ -109,7 +109,15 @@
 	NSUInteger i;
 	for (i = [delegateNodes count]; i > 0; i--)
 	{
-		GCDMulticastDelegateNode *node = [delegateNodes objectAtIndex:(i-1)];
+        NSUInteger delegateNodesIndex = i - 1;
+        
+        // Skip and continue iterating if we something has modified the delegateNodes mutable array
+        // in such a way that the size is no longer safe to count on
+        if (delegateNodesIndex >= [delegateNodes count]) {
+            continue;
+        }
+        
+        GCDMulticastDelegateNode *node = [delegateNodes objectAtIndex:delegateNodesIndex];
 		
 		id nodeDelegate = node.delegate;
 		#if __has_feature(objc_arc_weak) && !TARGET_OS_IPHONE
