@@ -108,7 +108,7 @@ enum XMPPStreamConfig
 	NSString *hostName;
 	UInt16 hostPort;
     
-	BOOL autoStartTLS;
+    XMPPStreamStartTLSPolicy startTLSPolicy;
     BOOL skipStartSession;
 	
 	id <XMPPSASLAuthentication> auth;
@@ -383,27 +383,26 @@ enum XMPPStreamConfig
 		dispatch_async(xmppQueue, block);
 }
 
-
-- (BOOL)autoStartTLS
+- (XMPPStreamStartTLSPolicy)startTLSPolicy
 {
-    __block BOOL result;
-
+    __block XMPPStreamStartTLSPolicy result;
+    
     dispatch_block_t block = ^{
-        result = autoStartTLS;
+        result = startTLSPolicy;
     };
-
+    
     if (dispatch_get_specific(xmppQueueTag))
         block();
     else
         dispatch_sync(xmppQueue, block);
-
+    
     return result;
 }
 
-- (void)setAutoStartTLS:(BOOL)flag
+- (void)setStartTLSPolicy:(XMPPStreamStartTLSPolicy)flag
 {
 	dispatch_block_t block = ^{
-		autoStartTLS = flag;
+		startTLSPolicy = flag;
 	};
 	
 	if (dispatch_get_specific(xmppQueueTag))
@@ -3269,7 +3268,7 @@ enum XMPPStreamConfig
 	
 	if (f_starttls)
 	{
-		if ([f_starttls elementForName:@"required"] || [self autoStartTLS])
+		if ([f_starttls elementForName:@"required"] || [self startTLSPolicy] >= XMPPStreamStartTLSPolicyPrefered)
 		{
 			// TLS is required for this connection
 			
@@ -3287,6 +3286,14 @@ enum XMPPStreamConfig
 			return;
 		}
 	}
+    else if(![self isSecure] && [self startTLSPolicy] == XMPPStreamStartTLSPolicyRequired)
+    {
+        // We can close our TCP connection now as the server doesn't support TLS.
+		[self disconnect];
+		
+		// The socketDidDisconnect:withError: method will handle everything else
+		return;
+    }
 	
 	// Check to see if resource binding is required
 	// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
