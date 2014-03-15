@@ -28,15 +28,19 @@
 
 extern NSString *const XMPPStreamErrorDomain;
 
-enum XMPPStreamErrorCode
-{
+typedef NS_ENUM(NSUInteger, XMPPStreamErrorCode) {
 	XMPPStreamInvalidType,       // Attempting to access P2P methods in a non-P2P stream, or vice-versa
 	XMPPStreamInvalidState,      // Invalid state for requested action, such as connect when already connected
 	XMPPStreamInvalidProperty,   // Missing a required property, such as myJID
 	XMPPStreamInvalidParameter,  // Invalid parameter, such as a nil JID
 	XMPPStreamUnsupportedAction, // The server doesn't support the requested action
 };
-typedef enum XMPPStreamErrorCode XMPPStreamErrorCode;
+
+typedef NS_ENUM(NSUInteger, XMPPStreamStartTLSPolicy) {
+    XMPPStreamStartTLSPolicyAllowed,   // TLS will be used if the server requires it
+    XMPPStreamStartTLSPolicyPrefered,  // TLS will be used if the server offers it
+    XMPPStreamStartTLSPolicyRequired   // TLS will be used if the server offers it, else the stream won't connect
+};
 
 extern const NSTimeInterval XMPPStreamTimeoutNone;
 
@@ -106,14 +110,14 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 **/
 @property (readwrite, assign) UInt16 hostPort;
 
-
 /**
- * Start TLS is used if the server supports it, regardless of wether it is required or not.
+ * The stream's policy on when to Start TLS.
  *
- * The default is NO
+ * The default is XMPPStreamStartTLSPolicyAllowed.
+ *
+ * @see XMPPStreamStartTLSPolicy
 **/
-@property (readwrite, assign) BOOL autoStartTLS;
-
+@property (readwrite, assign) XMPPStreamStartTLSPolicy startTLSPolicy;
 
 /**
  * The JID of the user.
