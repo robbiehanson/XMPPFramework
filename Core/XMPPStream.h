@@ -38,7 +38,7 @@ typedef NS_ENUM(NSUInteger, XMPPStreamErrorCode) {
 
 typedef NS_ENUM(NSUInteger, XMPPStreamStartTLSPolicy) {
     XMPPStreamStartTLSPolicyAllowed,   // TLS will be used if the server requires it
-    XMPPStreamStartTLSPolicyPrefered,  // TLS will be used if the server offers it
+    XMPPStreamStartTLSPolicyPreferred, // TLS will be used if the server offers it
     XMPPStreamStartTLSPolicyRequired   // TLS will be used if the server offers it, else the stream won't connect
 };
 
