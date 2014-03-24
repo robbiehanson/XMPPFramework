@@ -41,6 +41,7 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
 		28F335F11007B36200424DE2 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* RootViewController.xib */; };
+		631C7B7618E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 631C7B7518E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.m */; };
 		962031FD1735831C00C43080 /* NSXMLElement+XEP_0203.m in Sources */ = {isa = PBXBuildFile; fileRef = 962031FC1735831C00C43080 /* NSXMLElement+XEP_0203.m */; };
 		DC19DDA1170B4138000D2178 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DC19DDA0170B4138000D2178 /* Default-568h@2x.png */; };
 		DC1CF89B1361F28000E71363 /* NSString+DDXML.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1CF8901361F28000E71363 /* NSString+DDXML.m */; };
@@ -196,6 +197,8 @@
 		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = RootViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		631C7B7418E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
+		631C7B7518E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* iPhoneXMPP-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhoneXMPP-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		962031FB1735831C00C43080 /* NSXMLElement+XEP_0203.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSXMLElement+XEP_0203.h"; sourceTree = "<group>"; };
 		962031FC1735831C00C43080 /* NSXMLElement+XEP_0203.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSXMLElement+XEP_0203.m"; sourceTree = "<group>"; };
@@ -606,6 +609,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		631C7B7318E0E7C70015DBDF /* SCRAM-SHA-1 */ = {
+			isa = PBXGroup;
+			children = (
+				631C7B7418E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.h */,
+				631C7B7518E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.m */,
+			);
+			path = "SCRAM-SHA-1";
+			sourceTree = "<group>";
+		};
 		DC1CF88D1361F28000E71363 /* KissXML */ = {
 			isa = PBXGroup;
 			children = (
@@ -724,6 +736,7 @@
 		DC30E6B8153E09D2001B9E6D /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
+				631C7B7318E0E7C70015DBDF /* SCRAM-SHA-1 */,
 				DC30E6B9153E09D2001B9E6D /* Anonymous */,
 				DC30E6BC153E09D2001B9E6D /* Deprecated-Digest */,
 				DC30E6BF153E09D2001B9E6D /* Deprecated-Plain */,
@@ -1242,6 +1255,7 @@
 				DC3730B7139E9FDA00A8407D /* XMPPGroupCoreDataStorageObject.m in Sources */,
 				DC3730B8139E9FDA00A8407D /* XMPPResourceCoreDataStorageObject.m in Sources */,
 				DC3730B9139E9FDA00A8407D /* XMPPRoster.xcdatamodel in Sources */,
+				631C7B7618E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				DC3730BA139E9FDA00A8407D /* XMPPRosterCoreDataStorage.m in Sources */,
 				DC3730BB139E9FDA00A8407D /* XMPPUserCoreDataStorageObject.m in Sources */,
 				DC3730BF139E9FDA00A8407D /* XMPPRoster.m in Sources */,
