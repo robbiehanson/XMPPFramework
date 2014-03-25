@@ -75,8 +75,8 @@ enum XMPPStreamConfig
 
 @interface XMPPStream ()
 {
-	dispatch_queue_t xmppQueue;
-	void *xmppQueueTag;
+    dispatch_queue_t xmppQueue;
+    void *xmppQueueTag;
 	
 	dispatch_queue_t willSendIqQueue;
 	dispatch_queue_t willSendMessageQueue;
@@ -98,6 +98,8 @@ enum XMPPStreamConfig
 	
 	UInt64 numberOfBytesSent;
 	UInt64 numberOfBytesReceived;
+    UInt64 numberOfStanzasSent;
+    UInt64 numberOfStanzasReceived;
 	
 	XMPPParser *parser;
 	NSError *parserError;
@@ -637,6 +639,57 @@ enum XMPPStreamConfig
 		return result;
 	}
 }
+
+- (UInt64)numberOfStanzasSent
+{
+	if (dispatch_get_specific(xmppQueueTag))
+	{
+		return numberOfStanzasSent;
+	}
+	else
+	{
+		__block UInt64 result;
+		
+		dispatch_sync(xmppQueue, ^{
+			result = numberOfStanzasSent;
+		});
+		
+		return result;
+	}
+}
+
+-(void) setNumberOfStanzasReceived:(UInt64)number {
+    if (dispatch_get_specific(xmppQueueTag))
+	{
+		[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithUnsignedLongLong:number] forKey:@"h"];
+	}
+	else
+	{
+		dispatch_sync(xmppQueue, ^{
+			[[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithUnsignedLongLong:number] forKey:@"h"];
+		});
+	}
+    
+}
+
+- (UInt64)numberOfStanzasReceived
+{
+	if (dispatch_get_specific(xmppQueueTag))
+	{
+		return [[[NSUserDefaults standardUserDefaults] valueForKey:@"h"] unsignedLongLongValue];;
+	}
+	else
+	{
+		__block UInt64 result;
+		
+		dispatch_sync(xmppQueue, ^{
+			result = [[[NSUserDefaults standardUserDefaults] valueForKey:@"h"] unsignedLongLongValue];
+		});
+		
+		return result;
+	}
+}
+
 
 - (BOOL)resetByteCountPerConnection
 {
@@ -3295,6 +3348,27 @@ enum XMPPStreamConfig
 		return;
     }
 	
+    
+    NSXMLElement *sm = [features elementForName:@"sm" xmlns:@"urn:xmpp:sm:3"];
+    if (sm) {
+        if (self.sessionId != nil) {
+            NSXMLElement *resume = [NSXMLElement elementWithName:@"resume" xmlns:@"urn:xmpp:sm:3"];
+            [resume addAttributeWithName:@"previd" stringValue:self.sessionId];
+            [resume addAttributeWithName:@"h" stringValue:[NSString stringWithFormat:@"%lld", self.numberOfStanzasReceived]];
+            NSString *outgoingStr = [resume compactXMLString];
+			NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+            
+            XMPPLogSend(@"SEND: %@", outgoingStr);
+			numberOfBytesSent += [outgoingData length];
+			
+			[asyncSocket writeData:outgoingData
+					   withTimeout:TIMEOUT_XMPP_WRITE
+							   tag:TAG_XMPP_WRITE_STREAM];
+            state = STATE_XMPP_CONNECTED;
+            return;
+        }
+    }
+    
 	// Check to see if resource binding is required
 	// Don't forget about that NSXMLElement bug you reported to apple (xmlns is required or element won't be found)
 	NSXMLElement *f_bind = [features elementForName:@"bind" xmlns:@"urn:ietf:params:xml:ns:xmpp-bind"];
@@ -4156,6 +4230,11 @@ enum XMPPStreamConfig
 	}
 	else
 	{
+        if (self.streamManagementEnabled) {
+            if ([[element xmlns] isEqualToString:@"jabber:client"]) {
+                self.numberOfStanzasReceived += 1;
+            }
+        }
 		if ([elementName isEqualToString:@"iq"])
 		{
 			[self receiveIQ:[XMPPIQ iqFromElement:element]];
@@ -4173,6 +4252,12 @@ enum XMPPStreamConfig
 		{
 			[multicastDelegate xmppStream:self didReceiveP2PFeatures:element];
 		}
+        
+        else if ([self isStreamManagementSupported]) {
+            if ([[element xmlns] isEqualToString:@"urn:xmpp:sm:3"]) {
+                [self handleStreamManagementElement:element];
+            }
+        }
 		else
 		{
 			[multicastDelegate xmppStream:self didReceiveError:element];
@@ -4302,6 +4387,79 @@ enum XMPPStreamConfig
 		}
 	}
 }
+
+-(NSString *) sessionId {
+    return [[NSUserDefaults standardUserDefaults] stringForKey:@"sessionId"];
+}
+
+-(void) setSessionId:(NSString *)sessionId {
+    [[NSUserDefaults standardUserDefaults] setValue:sessionId forKey:@"sessionId"];
+}
+
+
+-(BOOL) isStreamManagementSupported {
+    __block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		// The root element can be properly queried for authentication mechanisms anytime after the
+		// stream:features are received, and TLS has been setup (if required)
+		if (self.state > STATE_XMPP_AUTH)
+		{
+			NSXMLElement *features = [self.rootElement elementForName:@"stream:features"];
+			NSXMLElement *sm = [features elementForName:@"sm" xmlns:@"urn:xmpp:sm:3"];
+			
+			result = (sm != nil);
+		}
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(self.xmppQueue, block);
+	
+	return result;
+}
+
+
+-(void) handleStreamManagementElement:(NSXMLElement *)element {
+    if ([self isStreamManagementSupported]) {
+        NSString *elementName = [element name];
+        if ([elementName isEqualToString:@"enabled"]) {
+            [self handleEnabled:element];
+        } else if ([elementName isEqualToString:@"resumed"]) {
+            self.streamManagementEnabled = YES;
+        } else if ([elementName isEqualToString:@"failed"]) {
+            [self handleFailed:element];
+        } else if ([elementName isEqualToString:@"r"]) {
+            [self handleAckRequest:element];
+        }
+    }
+}
+
+
+-(void) handleEnabled:(NSXMLElement *) element
+{
+    self.streamManagementEnabled = YES;
+    [self setSessionId:[[element attributeForName:@"id"] stringValue]];
+    [multicastDelegate xmppStream:self didStreamManagementEnabled:element];
+}
+
+-(void) handleAckRequest:(NSXMLElement *)element
+{
+    XMPPElement *ack = [[XMPPElement alloc] initWithName:@"a" xmlns:@"urn:xmpp:sm:3"];
+    [ack addAttributeWithName:@"h" stringValue:[NSString stringWithFormat:@"%lld", self.numberOfStanzasReceived]];
+    [self sendElement:ack];
+}
+
+-(void) handleFailed:(NSXMLElement *) element
+{
+    self.streamManagementEnabled = NO;
+    self.numberOfStanzasReceived = 0;
+    self.sessionId = nil;
+    [self handleStreamFeatures];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Stanza Validation

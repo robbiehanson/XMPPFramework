@@ -923,6 +923,11 @@ enum XMPPRosterFlags
 	// This method is invoked on the moduleQueue.
 	
 	XMPPLogTrace();
+
+	if (sender.sessionId != nil) {
+		// save roster state for resuming session
+		return;
+	}
 	
     if([self autoClearAllUsersAndResources])
     {
