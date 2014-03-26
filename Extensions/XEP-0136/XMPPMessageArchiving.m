@@ -68,31 +68,6 @@
 	return self;
 }
 
-- (BOOL)activate:(XMPPStream *)aXmppStream
-{
-	XMPPLogTrace();
-	
-	if ([super activate:aXmppStream])
-	{
-		XMPPLogVerbose(@"%@: Activated", THIS_FILE);
-		
-		// Reserved for future potential use
-		
-		return YES;
-	}
-	
-	return NO;
-}
-
-- (void)deactivate
-{
-	XMPPLogTrace();
-	
-	// Reserved for future potential use
-	
-	[super deactivate];
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
