@@ -27,7 +27,7 @@
 
 static XMPPRosterCoreDataStorage *sharedInstance;
 
-+ (XMPPRosterCoreDataStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{

@@ -35,7 +35,7 @@ XMPPvCardTempModuleStorage
  * 
  * All other aspects of vCard handling (such as lookup failures, etc) are kept separate between streams.
 **/
-+ (XMPPvCardCoreDataStorage *)sharedInstance;
++ (instancetype)sharedInstance;
 
 // 
 // This class inherits from XMPPCoreDataStorage.

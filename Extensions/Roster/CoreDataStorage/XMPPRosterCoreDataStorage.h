@@ -38,7 +38,7 @@
  * multiple instances of this class instead (using different database filenames), as this way you can have
  * concurrent writes to multiple databases.
 **/
-+ (XMPPRosterCoreDataStorage *)sharedInstance;
++ (instancetype)sharedInstance;
 
 
 /* Inherited from XMPPCoreDataStorage
