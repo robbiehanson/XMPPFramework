@@ -51,7 +51,7 @@
 
 static XMPPRoomHybridStorage *sharedInstance;
 
-+ (XMPPRoomHybridStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{

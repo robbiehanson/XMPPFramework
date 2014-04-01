@@ -32,7 +32,7 @@
 
 static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
-+ (XMPPMessageArchivingCoreDataStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
