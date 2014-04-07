@@ -244,6 +244,17 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 **/
 @property (readwrite, assign) BOOL skipStartSession;
 
+/**
+ * Validates that a response element is FROM the jid that the request element was sent TO.
+ * Supports validating responses when request didn't specify a TO.
+ *
+ * @see isValidResponseElementFrom:forRequestElementTo:
+ * @see isValidResponseElement:forRequestElement:
+ *
+ * The default value is NO.
+**/
+@property (readwrite, assign) BOOL validatesResponses;
+
 #if TARGET_OS_IPHONE
 
 /**
