@@ -110,6 +110,7 @@ enum XMPPStreamConfig
     
     XMPPStreamStartTLSPolicy startTLSPolicy;
     BOOL skipStartSession;
+    BOOL validatesResponses;
 	
 	id <XMPPSASLAuthentication> auth;
 	NSDate *authenticationDate;
@@ -689,6 +690,34 @@ enum XMPPStreamConfig
 {
     dispatch_block_t block = ^{
         skipStartSession = flag;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_async(xmppQueue, block);
+}
+
+- (BOOL)validatesResponses
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = validatesResponses;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    return result;
+}
+
+- (void)setValidatesResponses:(BOOL)flag
+{
+    dispatch_block_t block = ^{
+        validatesResponses = flag;
     };
     
     if (dispatch_get_specific(xmppQueueTag))
@@ -4143,7 +4172,7 @@ enum XMPPStreamConfig
 	{
         XMPPIQ *iq = [XMPPIQ iqFromElement:element];
         
-        if([idTracker invokeForElement:iq withObject:element])
+        if(![self validatesResponses] || ([self validatesResponses] && [idTracker invokeForElement:iq withObject:element]))
         {
             // The response from our binding request
             [self handleBinding:element];
@@ -4153,7 +4182,7 @@ enum XMPPStreamConfig
 	{
         XMPPIQ *iq = [XMPPIQ iqFromElement:element];
         
-        if([idTracker invokeForElement:iq withObject:element])
+        if(![self validatesResponses] || ([self validatesResponses] && [idTracker invokeForElement:iq withObject:element]))
         {
             // The response from our start session request
             [self handleStartSessionResponse:element];
