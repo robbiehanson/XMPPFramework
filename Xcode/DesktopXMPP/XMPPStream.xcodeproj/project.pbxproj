@@ -97,6 +97,7 @@
 		DCC220FC1492EAAF00736DC1 /* XMPPRoomOccupantCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC220FB1492EAAE00736DC1 /* XMPPRoomOccupantCoreDataStorageObject.m */; };
 		DCC220FF1496740800736DC1 /* XMPPRoomMessageCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC220FE1496740700736DC1 /* XMPPRoomMessageCoreDataStorageObject.m */; };
 		DCC221081497CCAA00736DC1 /* MucController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC221061497CCAA00736DC1 /* MucController.m */; };
+		DCC55BFF1905F3F500775BAF /* XMPPSCRAMSHA1Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC55BFE1905F3F500775BAF /* XMPPSCRAMSHA1Authentication.m */; };
 		DCC891ED13F1D09000CDAB56 /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC891EC13F1D09000CDAB56 /* XMPPIDTracker.m */; };
 		DCCE55610BDC6FAC000E2798 /* RosterController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCCE55600BDC6FAC000E2798 /* RosterController.m */; };
 		DCD493CD1223483B004BEE1A /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD493CC1223483B004BEE1A /* libresolv.dylib */; };
@@ -310,6 +311,8 @@
 		DCC220FD1496740600736DC1 /* XMPPRoomMessageCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPRoomMessageCoreDataStorageObject.h; path = CoreDataStorage/XMPPRoomMessageCoreDataStorageObject.h; sourceTree = "<group>"; };
 		DCC220FE1496740700736DC1 /* XMPPRoomMessageCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomMessageCoreDataStorageObject.m; path = CoreDataStorage/XMPPRoomMessageCoreDataStorageObject.m; sourceTree = "<group>"; };
 		DCC221061497CCAA00736DC1 /* MucController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MucController.m; sourceTree = "<group>"; };
+		DCC55BFD1905F3F500775BAF /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
+		DCC55BFE1905F3F500775BAF /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
 		DCC891EB13F1D09000CDAB56 /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPIDTracker.h; path = ../../Utilities/XMPPIDTracker.h; sourceTree = "<group>"; };
 		DCC891EC13F1D09000CDAB56 /* XMPPIDTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPIDTracker.m; path = ../../Utilities/XMPPIDTracker.m; sourceTree = "<group>"; };
 		DCCE555F0BDC6FAC000E2798 /* RosterController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = RosterController.h; sourceTree = "<group>"; };
@@ -477,6 +480,7 @@
 		DC30E699153E099A001B9E6D /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
+				DCC55BFC1905F3F500775BAF /* SCRAM-SHA-1 */,
 				DC30E69A153E099A001B9E6D /* Anonymous */,
 				DC30E69D153E099A001B9E6D /* Deprecated-Digest */,
 				DC30E6A0153E099A001B9E6D /* Deprecated-Plain */,
@@ -951,6 +955,15 @@
 			name = Categories;
 			sourceTree = "<group>";
 		};
+		DCC55BFC1905F3F500775BAF /* SCRAM-SHA-1 */ = {
+			isa = PBXGroup;
+			children = (
+				DCC55BFD1905F3F500775BAF /* XMPPSCRAMSHA1Authentication.h */,
+				DCC55BFE1905F3F500775BAF /* XMPPSCRAMSHA1Authentication.m */,
+			);
+			path = "SCRAM-SHA-1";
+			sourceTree = "<group>";
+		};
 		DCCE55630BDC6FBC000E2798 /* App - MainMenu */ = {
 			isa = PBXGroup;
 			children = (
@@ -1107,7 +1120,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "XMPPStream" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1212,6 +1225,7 @@
 				DCE112601406F52D007A2A46 /* XMPPAutoTime.m in Sources */,
 				DC90AC37147B31B60022DF52 /* DDAbstractDatabaseLogger.m in Sources */,
 				DC90AC38147B31B60022DF52 /* DDASLLogger.m in Sources */,
+				DCC55BFF1905F3F500775BAF /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				DC90AC39147B31B60022DF52 /* DDFileLogger.m in Sources */,
 				DC90AC3A147B31B60022DF52 /* DDLog.m in Sources */,
 				DC90AC3B147B31B60022DF52 /* DDTTYLogger.m in Sources */,
@@ -1308,7 +1322,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1330,7 +1344,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = XMPPStream;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1339,7 +1353,6 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
 				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
@@ -1349,7 +1362,6 @@
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -1358,7 +1370,6 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
@@ -1367,7 +1378,6 @@
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				MACOSX_DEPLOYMENT_TARGET = "";
 				SDKROOT = macosx;
 			};
 			name = Release;
