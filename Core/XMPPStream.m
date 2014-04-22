@@ -3879,6 +3879,43 @@ enum XMPPStreamConfig
 	}
 }
 
+- (void)socket:(GCDAsyncSocket *)sock didReceiveTrust:(SecTrustRef)trust
+                                    completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler
+{
+	XMPPLogTrace();
+	
+	SEL selector = @selector(xmppStream:didReceiveTrust:completionHandler:);
+	
+	if ([multicastDelegate hasDelegateThatRespondsToSelector:selector])
+	{
+		[multicastDelegate xmppStream:self didReceiveTrust:trust completionHandler:completionHandler];
+	}
+	else
+	{
+		XMPPLogWarn(@"%@: Stream secured with (GCDAsyncSocketManuallyEvaluateTrust == YES),"
+		            @" but there are no delegates that implement xmppStream:didReceiveTrust:completionHandler:."
+		            @" This is likely a mistake.", THIS_FILE);
+		
+		// The delegate method should likely have code similar to this,
+		// but will presumably perform some extra security code stuff.
+		// For example, allowing a specific self-signed certificate that is known to the app.
+		
+		dispatch_queue_t bgQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		dispatch_async(bgQueue, ^{
+			
+			SecTrustResultType result = kSecTrustResultDeny;
+			OSStatus status = SecTrustEvaluate(trust, &result);
+			
+			if (status == noErr && (result == kSecTrustResultProceed || result == kSecTrustResultUnspecified)) {
+				completionHandler(YES);
+			}
+			else {
+				completionHandler(NO);
+			}
+		});
+	}
+}
+
 - (void)socketDidSecure:(GCDAsyncSocket *)sock
 {
 	// This method is invoked on the xmppQueue.
