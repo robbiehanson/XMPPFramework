@@ -396,6 +396,12 @@
 			[origInvocation getArgument:&value atIndex:i];
 			[dupInvocation setArgument:&value atIndex:i];
 		}
+		else if (*type == '^')
+		{
+			void *block;
+			[origInvocation getArgument:&block atIndex:i];
+			[dupInvocation setArgument:&block atIndex:i];
+		}
 		else
 		{
 			NSString *selectorStr = NSStringFromSelector([origInvocation selector]);

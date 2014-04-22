@@ -783,20 +783,9 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Servers have the option of requiring connections to be secured during the opening process.
  * If this is the case, the XMPPStream will automatically attempt to properly secure the connection.
  * 
- * The possible keys and values for the security settings are well documented.
- * Some possible keys are:
- * - kCFStreamSSLLevel
- * - kCFStreamSSLAllowsExpiredCertificates
- * - kCFStreamSSLAllowsExpiredRoots
- * - kCFStreamSSLAllowsAnyRoot
- * - kCFStreamSSLValidatesCertificateChain
- * - kCFStreamSSLPeerName
- * - kCFStreamSSLCertificates
- * 
- * Please refer to Apple's documentation for associated values, as well as other possible keys.
- * 
- * The dictionary of settings is what will be passed to the startTLS method of ther underlying AsyncSocket.
- * The AsyncSocket header file also contains a discussion of the security consequences of various options.
+ * The dictionary of settings is what will be passed to the startTLS method of the underlying GCDAsyncSocket.
+ * The GCDAsyncSocket header file contains a discussion of the available key/value pairs,
+ * as well as the security consequences of various options.
  * It is recommended reading if you are planning on implementing this method.
  * 
  * The dictionary of settings that are initially passed will be an empty dictionary.
@@ -812,8 +801,51 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * These settings are most likely the right fit for most production environments,
  * but may need to be tweaked for development or testing,
  * where the development server may be using a self-signed certificate.
+ * 
+ * Note: If your development server is using a self-signed certificate,
+ * you likely need to add GCDAsyncSocketManuallyEvaluateTrust=YES to the settings.
+ * Then implement the xmppStream:didReceiveTrust:completionHandler: delegate method to perform custom validation.
 **/
 - (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings;
+
+/**
+ * Allows a delegate to hook into the TLS handshake and manually validate the peer it's connecting to.
+ *
+ * This is only called if the stream is secured with settings that include:
+ * - GCDAsyncSocketManuallyEvaluateTrust == YES
+ * That is, if a delegate implements xmppStream:willSecureWithSettings:, and plugs in that key/value pair.
+ *
+ * Thus this delegate method is forwarding the TLS evaluation callback from the underlying GCDAsyncSocket.
+ *
+ * Typically the delegate will use SecTrustEvaluate (and related functions) to properly validate the peer.
+ *
+ * Note from Apple's documentation:
+ *   Because [SecTrustEvaluate] might look on the network for certificates in the certificate chain,
+ *   [it] might block while attempting network access. You should never call it from your main thread;
+ *   call it only from within a function running on a dispatch queue or on a separate thread.
+ *
+ * This is why this method uses a completionHandler block rather than a normal return value.
+ * The idea is that you should be performing SecTrustEvaluate on a background thread.
+ * The completionHandler block is thread-safe, and may be invoked from a background queue/thread.
+ * It is safe to invoke the completionHandler block even if the socket has been closed.
+ * 
+ * Keep in mind that you can do all kinds of cool stuff here.
+ * For example:
+ * 
+ * If your development server is using a self-signed certificate,
+ * then you could embed info about the self-signed cert within your app, and use this callback to ensure that
+ * you're actually connecting to the expected dev server.
+ * 
+ * Also, you could present certificates that don't pass SecTrustEvaluate to the client.
+ * That is, if SecTrustEvaluate comes back with problems, you could invoke the completionHandler with NO,
+ * and then ask the client if the cert can be trusted. This is similar to how most browsers act.
+ * 
+ * Generally, only one delegate should implement this method.
+ * However, if multiple delegates implement this method, then the first to invoke the completionHandler "wins".
+ * And subsequent invocations of the completionHandler are ignored.
+**/
+- (void)xmppStream:(XMPPStream *)sender didReceiveTrust:(SecTrustRef)trust
+                                      completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler;
 
 /**
  * This method is called after the stream has been secured via SSL/TLS.
