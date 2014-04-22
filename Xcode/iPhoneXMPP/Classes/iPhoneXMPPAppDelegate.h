@@ -20,8 +20,7 @@
 	
 	NSString *password;
 	
-	BOOL allowSelfSignedCertificates;
-	BOOL allowSSLHostNameMismatch;
+	BOOL customCertEvaluation;
 	
 	BOOL isXmppConnected;
 	
