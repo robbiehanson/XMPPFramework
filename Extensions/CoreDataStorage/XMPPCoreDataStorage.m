@@ -747,6 +747,11 @@ static NSMutableSet *databaseFileNames;
 		XMPPLogVerbose(@"%@: %@ - Merging changes into mainThreadManagedObjectContext", THIS_FILE, THIS_METHOD);
 		
 		dispatch_async(dispatch_get_main_queue(), ^{
+            
+            // http://stackoverflow.com/questions/3923826/nsfetchedresultscontroller-with-predicate-ignores-changes-merged-from-different
+            for (NSManagedObject *object in [[notification userInfo] objectForKey:NSUpdatedObjectsKey]) {
+                [[mainThreadManagedObjectContext objectWithID:[object objectID]] willAccessValueForKey:nil];
+            }
 			
 			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
 			[self mainThreadManagedObjectContextDidMergeChanges];
