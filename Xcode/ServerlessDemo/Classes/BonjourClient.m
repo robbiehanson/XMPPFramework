@@ -75,7 +75,8 @@ static BonjourClient *sharedInstance;
 
 - (void)publishServiceOnPort:(UInt16)port
 {
-	localService = [[NSNetService alloc] initWithDomain:@"local." type:SERVICE_TYPE name:@"robbie@demo" port:port];
+    NSString *serviceName = [NSString stringWithFormat:@"demo@%@", [[[UIDevice currentDevice] name] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+	localService = [[NSNetService alloc] initWithDomain:@"local." type:SERVICE_TYPE name:serviceName port:port];
 	
 	[localService setDelegate:self];
 	[localService publish];
