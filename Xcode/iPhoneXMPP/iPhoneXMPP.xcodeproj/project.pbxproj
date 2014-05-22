@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		003B8C11192E505400063765 /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 003B8C0C192E505400063765 /* DDContextFilterLogFormatter.m */; };
+		003B8C12192E505400063765 /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 003B8C0E192E505400063765 /* DDDispatchQueueLogFormatter.m */; };
+		003B8C13192E505400063765 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 003B8C10192E505400063765 /* DDMultiFormatter.m */; };
 		070400451347CB140092A737 /* defaultPerson.png in Resources */ = {isa = PBXBuildFile; fileRef = 070400441347CB140092A737 /* defaultPerson.png */; };
 		0704009E1347CB520092A737 /* XMPPvCard.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0704005B1347CB510092A737 /* XMPPvCard.xcdatamodeld */; };
 		0704009F1347CB520092A737 /* XMPPvCardAvatarCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 0704005E1347CB510092A737 /* XMPPvCardAvatarCoreDataStorageObject.m */; };
@@ -87,8 +90,6 @@
 		DC90AC68147C28850022DF52 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90AC5B147C28850022DF52 /* DDFileLogger.m */; };
 		DC90AC69147C28850022DF52 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90AC5D147C28850022DF52 /* DDLog.m */; };
 		DC90AC6A147C28850022DF52 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90AC5F147C28850022DF52 /* DDTTYLogger.m */; };
-		DC90AC6B147C28850022DF52 /* ContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90AC62147C28850022DF52 /* ContextFilterLogFormatter.m */; };
-		DC90AC6C147C28850022DF52 /* DispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90AC64147C28850022DF52 /* DispatchQueueLogFormatter.m */; };
 		DC90AC6D147C28850022DF52 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC90AC65147C28850022DF52 /* README.txt */; };
 		DCB215791715EC0600719845 /* XMPPBandwidthMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB215781715EC0600719845 /* XMPPBandwidthMonitor.m */; };
 		DCB215821715EC3600719845 /* XMPPResourceMemoryStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB2157C1715EC3600719845 /* XMPPResourceMemoryStorageObject.m */; };
@@ -137,6 +138,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		003B8C09192E504300063765 /* DDLog+LOGV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "DDLog+LOGV.h"; path = "../../Vendor/CocoaLumberjack/DDLog+LOGV.h"; sourceTree = "<group>"; };
+		003B8C0B192E505400063765 /* DDContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDContextFilterLogFormatter.h; sourceTree = "<group>"; };
+		003B8C0C192E505400063765 /* DDContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDContextFilterLogFormatter.m; sourceTree = "<group>"; };
+		003B8C0D192E505400063765 /* DDDispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDDispatchQueueLogFormatter.h; sourceTree = "<group>"; };
+		003B8C0E192E505400063765 /* DDDispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDDispatchQueueLogFormatter.m; sourceTree = "<group>"; };
+		003B8C0F192E505400063765 /* DDMultiFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDMultiFormatter.h; sourceTree = "<group>"; };
+		003B8C10192E505400063765 /* DDMultiFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDMultiFormatter.m; sourceTree = "<group>"; };
 		070400441347CB140092A737 /* defaultPerson.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = defaultPerson.png; sourceTree = "<group>"; };
 		0704005C1347CB510092A737 /* XMPPvCard.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPvCard.xcdatamodel; sourceTree = "<group>"; };
 		0704005D1347CB510092A737 /* XMPPvCardAvatarCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPvCardAvatarCoreDataStorageObject.h; sourceTree = "<group>"; };
@@ -291,10 +299,6 @@
 		DC90AC5D147C28850022DF52 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDLog.m; path = ../../Vendor/CocoaLumberjack/DDLog.m; sourceTree = "<group>"; };
 		DC90AC5E147C28850022DF52 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDTTYLogger.h; path = ../../Vendor/CocoaLumberjack/DDTTYLogger.h; sourceTree = "<group>"; };
 		DC90AC5F147C28850022DF52 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDTTYLogger.m; path = ../../Vendor/CocoaLumberjack/DDTTYLogger.m; sourceTree = "<group>"; };
-		DC90AC61147C28850022DF52 /* ContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextFilterLogFormatter.h; sourceTree = "<group>"; };
-		DC90AC62147C28850022DF52 /* ContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContextFilterLogFormatter.m; sourceTree = "<group>"; };
-		DC90AC63147C28850022DF52 /* DispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DispatchQueueLogFormatter.h; sourceTree = "<group>"; };
-		DC90AC64147C28850022DF52 /* DispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DispatchQueueLogFormatter.m; sourceTree = "<group>"; };
 		DC90AC65147C28850022DF52 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		DCB215771715EC0600719845 /* XMPPBandwidthMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPBandwidthMonitor.h; sourceTree = "<group>"; };
 		DCB215781715EC0600719845 /* XMPPBandwidthMonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPBandwidthMonitor.m; sourceTree = "<group>"; };
@@ -884,10 +888,12 @@
 		DC90AC60147C28850022DF52 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				DC90AC61147C28850022DF52 /* ContextFilterLogFormatter.h */,
-				DC90AC62147C28850022DF52 /* ContextFilterLogFormatter.m */,
-				DC90AC63147C28850022DF52 /* DispatchQueueLogFormatter.h */,
-				DC90AC64147C28850022DF52 /* DispatchQueueLogFormatter.m */,
+				003B8C0B192E505400063765 /* DDContextFilterLogFormatter.h */,
+				003B8C0C192E505400063765 /* DDContextFilterLogFormatter.m */,
+				003B8C0D192E505400063765 /* DDDispatchQueueLogFormatter.h */,
+				003B8C0E192E505400063765 /* DDDispatchQueueLogFormatter.m */,
+				003B8C0F192E505400063765 /* DDMultiFormatter.h */,
+				003B8C10192E505400063765 /* DDMultiFormatter.m */,
 				DC90AC65147C28850022DF52 /* README.txt */,
 			);
 			name = Extensions;
@@ -1074,6 +1080,7 @@
 		DCC0BED51301CDE000EC45D2 /* Logging */ = {
 			isa = PBXGroup;
 			children = (
+				003B8C09192E504300063765 /* DDLog+LOGV.h */,
 				DC90AC56147C28850022DF52 /* DDAbstractDatabaseLogger.h */,
 				DC90AC57147C28850022DF52 /* DDAbstractDatabaseLogger.m */,
 				DC90AC58147C28850022DF52 /* DDASLLogger.h */,
@@ -1232,6 +1239,7 @@
 				070400A41347CB520092A737 /* XMPPvCardTempAdr.m in Sources */,
 				070400A51347CB520092A737 /* XMPPvCardTempAdrTypes.m in Sources */,
 				070400A61347CB520092A737 /* XMPPvCardTempBase.m in Sources */,
+				003B8C11192E505400063765 /* DDContextFilterLogFormatter.m in Sources */,
 				070400A71347CB520092A737 /* XMPPvCardTempEmail.m in Sources */,
 				070400A81347CB520092A737 /* XMPPvCardTempLabel.m in Sources */,
 				070400A91347CB520092A737 /* XMPPvCardTempModule.m in Sources */,
@@ -1258,6 +1266,7 @@
 				631C7B7618E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				DC3730BA139E9FDA00A8407D /* XMPPRosterCoreDataStorage.m in Sources */,
 				DC3730BB139E9FDA00A8407D /* XMPPUserCoreDataStorageObject.m in Sources */,
+				003B8C13192E505400063765 /* DDMultiFormatter.m in Sources */,
 				DC3730BF139E9FDA00A8407D /* XMPPRoster.m in Sources */,
 				DC37318F139F07CC00A8407D /* NSData+XMPP.m in Sources */,
 				DC373190139F07CC00A8407D /* NSNumber+XMPP.m in Sources */,
@@ -1267,8 +1276,6 @@
 				DC90AC68147C28850022DF52 /* DDFileLogger.m in Sources */,
 				DC90AC69147C28850022DF52 /* DDLog.m in Sources */,
 				DC90AC6A147C28850022DF52 /* DDTTYLogger.m in Sources */,
-				DC90AC6B147C28850022DF52 /* ContextFilterLogFormatter.m in Sources */,
-				DC90AC6C147C28850022DF52 /* DispatchQueueLogFormatter.m in Sources */,
 				DCC22139149A61F000736DC1 /* XMPPRoom.xcdatamodeld in Sources */,
 				DCC2213A149A61F000736DC1 /* XMPPRoomCoreDataStorage.m in Sources */,
 				DCC2213B149A61F000736DC1 /* XMPPRoomMessageCoreDataStorageObject.m in Sources */,
@@ -1291,6 +1298,7 @@
 				DCB2158D1715EC7E00719845 /* XMPPIQ+JabberRPCResonse.m in Sources */,
 				DCB2158E1715EC7E00719845 /* XMPPJabberRPCModule.m in Sources */,
 				DCB215921715EC8F00719845 /* XMPPPrivacy.m in Sources */,
+				003B8C12192E505400063765 /* DDDispatchQueueLogFormatter.m in Sources */,
 				DCB2159A1715ECAF00719845 /* XMPPRoomMemoryStorage.m in Sources */,
 				DCB2159B1715ECAF00719845 /* XMPPRoomMessageMemoryStorageObject.m in Sources */,
 				DCB2159C1715ECAF00719845 /* XMPPRoomOccupantMemoryStorageObject.m in Sources */,
