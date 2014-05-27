@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "RosterController.h"
+#import "XMPPLogging.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -31,7 +32,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		// 
 		// But this one line is all we need to configure the logging framework to dump to the Xcode console.
 		
-		[DDLog addLogger:[DDTTYLogger sharedInstance]];
+        [DDLog addLogger:[DDTTYLogger sharedInstance] withLogLevel:XMPP_LOG_FLAG_SEND_RECV];
 		
 		// Initialize xmpp stream and modules
 		

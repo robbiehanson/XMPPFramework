@@ -4,6 +4,7 @@
 
 #import "GCDAsyncSocket.h"
 #import "XMPP.h"
+#import "XMPPLogging.h"
 #import "XMPPReconnect.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
 #import "XMPPRosterCoreDataStorage.h"
@@ -57,7 +58,7 @@
 {
 	// Configure logging framework
 	
-	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+	[DDLog addLogger:[DDTTYLogger sharedInstance] withLogLevel:XMPP_LOG_FLAG_SEND_RECV];
 
   // Setup the XMPP stream
   

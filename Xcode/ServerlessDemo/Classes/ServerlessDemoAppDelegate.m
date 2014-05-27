@@ -3,6 +3,7 @@
 #import "BonjourClient.h"
 #import "StreamController.h"
 #import "XMPPJID.h"
+#import "XMPPLogging.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -25,7 +26,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 - (BOOL) application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 	// Configure logging
 	
-	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+    [DDLog addLogger:[DDTTYLogger sharedInstance] withLogLevel:XMPP_LOG_FLAG_SEND_RECV];
 	
 	// Configure UI
 	
