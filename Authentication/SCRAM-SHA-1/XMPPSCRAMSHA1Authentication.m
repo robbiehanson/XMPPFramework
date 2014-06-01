@@ -68,7 +68,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if ((self = [super init])) {
         xmppStream = stream;
         self.username = [XMPPStringPrep prepNode:[xmppStream.myJID user]];
-        self.password = [XMPPStringPrep prepNode:password];
+        self.password = [XMPPStringPrep prepResource:password];
         self.hashAlgorithm = kCCHmacAlgSHA1;
     }
     return self;
