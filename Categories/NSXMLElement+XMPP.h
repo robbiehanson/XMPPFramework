@@ -116,6 +116,12 @@
 - (BOOL)attributeBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
 - (float)attributeFloatValueForName:(NSString *)name withDefaultValue:(float)defaultValue;
 - (double)attributeDoubleValueForName:(NSString *)name withDefaultValue:(double)defaultValue;
+- (int32_t)attributeInt32ValueForName:(NSString *)name withDefaultValue:(int32_t)defaultValue;
+- (uint32_t)attributeUInt32ValueForName:(NSString *)name withDefaultValue:(uint32_t)defaultValue;
+- (int64_t)attributeInt64ValueForName:(NSString *)name withDefaultValue:(int64_t)defaultValue;
+- (uint64_t)attributeUInt64ValueForName:(NSString *)name withDefaultValue:(uint64_t)defaultValue;
+- (NSInteger)attributeIntegerValueForName:(NSString *)name withDefaultValue:(NSInteger)defaultValue;
+- (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name withDefaultValue:(NSUInteger)defaultValue;
 - (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue;
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;

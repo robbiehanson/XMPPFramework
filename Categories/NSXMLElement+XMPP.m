@@ -488,6 +488,54 @@
 	NSXMLNode *attr = [self attributeForName:name];
 	return (attr) ? [[attr stringValue] doubleValue] : defaultValue;
 }
+- (int32_t)attributeInt32ValueForName:(NSString *)name withDefaultValue:(int32_t)defaultValue
+{
+	int32_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt32:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (uint32_t)attributeUInt32ValueForName:(NSString *)name withDefaultValue:(uint32_t)defaultValue
+{
+	uint32_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt32:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (int64_t)attributeInt64ValueForName:(NSString *)name withDefaultValue:(int64_t)defaultValue
+{
+	int64_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt64:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (uint64_t)attributeUInt64ValueForName:(NSString *)name withDefaultValue:(uint64_t)defaultValue
+{
+	uint64_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt64:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (NSInteger)attributeIntegerValueForName:(NSString *)name withDefaultValue:(NSInteger)defaultValue
+{
+	NSInteger result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSInteger:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name withDefaultValue:(NSUInteger)defaultValue
+{
+	NSUInteger result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSUInteger:&result])
+		return result;
+	else
+		return defaultValue;
+}
 - (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue
 {
     NSXMLNode *attr = [self attributeForName:name];
