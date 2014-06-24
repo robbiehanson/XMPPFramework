@@ -19,17 +19,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (XMPPStream *)xmppStream
 {
-	return [[NSApp delegate] xmppStream];
+	return [(AppDelegate *)[NSApp delegate] xmppStream];
 }
 
 - (XMPPRoster *)xmppRoster
 {
-	return [[NSApp delegate] xmppRoster];
+	return [(AppDelegate *)[NSApp delegate] xmppRoster];
 }
 
 - (XMPPRosterMemoryStorage *)xmppRosterStorage
 {
-	return [[NSApp delegate] xmppRosterStorage];
+	return [(AppDelegate *)[NSApp delegate] xmppRosterStorage];
 }
 
 - (void)awakeFromNib
@@ -389,7 +389,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
 		id <XMPPResource> resource = [user primaryResource];
 		
-		[[NSApp delegate] connectViaXEP65:[resource jid]];
+		[(AppDelegate *)[NSApp delegate] connectViaXEP65:[resource jid]];
 	}
 }
 
