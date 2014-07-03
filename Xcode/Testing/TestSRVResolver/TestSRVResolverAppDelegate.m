@@ -16,8 +16,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[DDLog addLogger:[DDTTYLogger sharedInstance]];
 	
 	srvResolver = [[XMPPSRVResolver alloc] initWithdDelegate:self
-	                                         delegateQueue:dispatch_get_main_queue()
-	                                         resolverQueue:NULL];
+                                               delegateQueue:dispatch_get_main_queue()
+                                               resolverQueue:NULL];
 	
 //	srvResolver = [[XMPPSRVResolver alloc] initWithdDelegate:self
 //	                                         delegateQueue:dispatch_get_main_queue()
@@ -39,12 +39,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 //	[srvResolver stop];
 }
 
-- (void)srvResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records
+- (void)xmppSRVResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records
 {
 	DDLogInfo(@"srvResolver:%p didResolveRecords:\n%@", sender, records);
 }
 
-- (void)srvResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error
+- (void)xmppSRVResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error
 {
 	DDLogInfo(@"srvResolver:%p didNotResolveDueToError:\n%@", sender, error);
 }
