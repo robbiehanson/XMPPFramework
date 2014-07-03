@@ -171,7 +171,7 @@
 	NSData *dataToParse = [self dataToParse:YES];
 	NSDate *start = [NSDate date];
 	
-	XMPPParser *parser = [[XMPPParser alloc] initWithDelegate:self];
+	XMPPParser *parser = [[XMPPParser alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
 	[parser parseData:dataToParse];
 	
