@@ -41,8 +41,9 @@
 #define TAG_XMPP_READ_START         100
 #define TAG_XMPP_READ_STREAM        101
 #define TAG_XMPP_WRITE_START        200
-#define TAG_XMPP_WRITE_STREAM       201
-#define TAG_XMPP_WRITE_RECEIPT      202
+#define TAG_XMPP_WRITE_STOP         201
+#define TAG_XMPP_WRITE_STREAM       202
+#define TAG_XMPP_WRITE_RECEIPT      203
 
 // Define the timeouts (in seconds) for SRV
 #define TIMEOUT_SRV_RESOLUTION 30.0
@@ -1421,7 +1422,7 @@ enum XMPPStreamConfig
 				XMPPLogSend(@"SEND: %@", termStr);
 				numberOfBytesSent += [termData length];
 				
-				[asyncSocket writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STREAM];
+				[asyncSocket writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STOP];
 				[asyncSocket disconnectAfterWriting];
 				
 				// Everthing will be handled in socketDidDisconnect:withError:
@@ -3969,6 +3970,10 @@ enum XMPPStreamConfig
 		XMPPElementReceipt *receipt = [receipts objectAtIndex:0];
 		[receipt signalSuccess];
 		[receipts removeObjectAtIndex:0];
+	}
+	else if (tag == TAG_XMPP_WRITE_STOP)
+	{
+		[multicastDelegate xmppStreamDidSendClosingStreamStanza:self];
 	}
 }
 

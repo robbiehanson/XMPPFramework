@@ -994,11 +994,31 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 /**
  * This method is called if the disconnect method is called.
  * It may be used to determine if a disconnection was purposeful, or due to an error.
+ * 
+ * Note: A disconnect may be either "clean" or "dirty".
+ * A "clean" disconnect is when the stream sends the closing </stream:stream> stanza before disconnecting.
+ * A "dirty" disconnect is when the stream simply closes its TCP socket.
+ * In most cases it makes no difference how the disconnect occurs,
+ * but there are a few contexts in which the difference has various protocol implications.
+ * 
+ * @see xmppStreamDidSendClosingStreamStanza
 **/
 - (void)xmppStreamWasToldToDisconnect:(XMPPStream *)sender;
 
 /**
- * This methods is called if the XMPP Stream's connect times out
+ * This method is called after the stream has sent the closing </stream:stream> stanza.
+ * This signifies a "clean" disconnect.
+ * 
+ * Note: A disconnect may be either "clean" or "dirty".
+ * A "clean" disconnect is when the stream sends the closing </stream:stream> stanza before disconnecting.
+ * A "dirty" disconnect is when the stream simply closes its TCP socket.
+ * In most cases it makes no difference how the disconnect occurs,
+ * but there are a few contexts in which the difference has various protocol implications.
+**/
+- (void)xmppStreamDidSendClosingStreamStanza:(XMPPStream *)sender;
+
+/**
+ * This methods is called if the XMPP stream's connect times out.
 **/
 - (void)xmppStreamConnectDidTimeout:(XMPPStream *)sender;
 
@@ -1009,7 +1029,9 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Some examples:
  * - The TCP socket was unexpectedly disconnected.
  * - The SRV resolution of the domain failed.
- * - Error parsing xml sent from server. 
+ * - Error parsing xml sent from server.
+ * 
+ * @see xmppStreamConnectDidTimeout:
 **/
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error;
 
