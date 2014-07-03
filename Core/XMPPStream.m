@@ -141,26 +141,6 @@ enum XMPPStreamConfig
 	id userTag;
 }
 
-- (void)setIsSecure:(BOOL)flag;
-- (void)setIsAuthenticated:(BOOL)flag;
-- (void)continueSendIQ:(XMPPIQ *)iq withTag:(long)tag;
-- (void)continueSendMessage:(XMPPMessage *)message withTag:(long)tag;
-- (void)continueSendPresence:(XMPPPresence *)presence withTag:(long)tag;
-- (void)startNegotiation;
-- (void)sendOpeningNegotiation;
-- (void)continueStartTLS:(NSMutableDictionary *)settings;
-- (void)continueHandleBinding:(NSString *)alternativeResource;
-- (void)setupKeepAliveTimer;
-- (void)keepAlive;
-
-- (void)startConnectTimeout:(NSTimeInterval)timeout;
-- (void)endConnectTimeout;
-- (void)doConnectTimeout;
-
-- (void)continueReceiveMessage:(XMPPMessage *)message;
-- (void)continueReceiveIQ:(XMPPIQ *)iq;
-- (void)continueReceivePresence:(XMPPPresence *)presence;
-
 @end
 
 @interface XMPPElementReceipt (PrivateAPI)
@@ -2255,6 +2235,8 @@ enum XMPPStreamConfig
 					
 					if (state == STATE_XMPP_CONNECTED) {
 						[self continueSendIQ:modifiedIQ withTag:tag];
+					} else {
+						[self failToSendIQ:modifiedIQ];
 					}
 				}});
 			}
@@ -2326,6 +2308,9 @@ enum XMPPStreamConfig
 					if (state == STATE_XMPP_CONNECTED) {
 						[self continueSendMessage:modifiedMessage withTag:tag];
 					}
+					else {
+						[self failToSendMessage:modifiedMessage];
+					}
 				}});
 			}
 		}});
@@ -2395,6 +2380,8 @@ enum XMPPStreamConfig
 					
 					if (state == STATE_XMPP_CONNECTED) {
 						[self continueSendPresence:modifiedPresence withTag:tag];
+					} else {
+						[self failToSendPresence:modifiedPresence];
 					}
 				}});
 			}
@@ -2547,11 +2534,7 @@ enum XMPPStreamConfig
 		}
 		else
 		{
-			NSError *error = [NSError errorWithDomain:XMPPStreamErrorDomain
-												 code:XMPPStreamInvalidState
-											 userInfo:nil];
-            
-			[self failToSendElement:element error:error];
+			[self failToSendElement:element];
 		}
 	}};
 	
@@ -2591,11 +2574,7 @@ enum XMPPStreamConfig
 			}
             else
             {
-                NSError *error = [NSError errorWithDomain:XMPPStreamErrorDomain
-                                                     code:XMPPStreamInvalidState
-                                                 userInfo:nil];
-                
-                [self failToSendElement:element error:error];
+                [self failToSendElement:element];
             }
 		}};
 		
@@ -2608,21 +2587,21 @@ enum XMPPStreamConfig
 	}
 }
 
-- (void)failToSendElement:(NSXMLElement *)element error:(NSError *)error
+- (void)failToSendElement:(NSXMLElement *)element
 {
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
 	
 	if ([element isKindOfClass:[XMPPIQ class]])
 	{
-		[self failToSendIQ:(XMPPIQ *)element error:error];
+		[self failToSendIQ:(XMPPIQ *)element];
 	}
 	else if ([element isKindOfClass:[XMPPMessage class]])
 	{
-		[self failToSendMessage:(XMPPMessage *)element error:error];
+		[self failToSendMessage:(XMPPMessage *)element];
 	}
 	else if ([element isKindOfClass:[XMPPPresence class]])
 	{
-		[self failToSendPresence:(XMPPPresence *)element error:error];
+		[self failToSendPresence:(XMPPPresence *)element];
 	}
 	else
 	{
@@ -2630,36 +2609,48 @@ enum XMPPStreamConfig
 		
 		if ([elementName isEqualToString:@"iq"])
 		{
-			[self failToSendIQ:[XMPPIQ iqFromElement:element] error:error];
+			[self failToSendIQ:[XMPPIQ iqFromElement:element]];
 		}
 		else if ([elementName isEqualToString:@"message"])
 		{
-			[self failToSendMessage:[XMPPMessage messageFromElement:element] error:error];
+			[self failToSendMessage:[XMPPMessage messageFromElement:element]];
 		}
 		else if ([elementName isEqualToString:@"presence"])
 		{
-			[self failToSendPresence:[XMPPPresence presenceFromElement:element] error:error];
+			[self failToSendPresence:[XMPPPresence presenceFromElement:element]];
 		}
 	}
 }
 
-- (void)failToSendIQ:(XMPPIQ *)iq error:(NSError *)error
+- (void)failToSendIQ:(XMPPIQ *)iq
 {
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+	
+	NSError *error = [NSError errorWithDomain:XMPPStreamErrorDomain
+	                                     code:XMPPStreamInvalidState
+	                                 userInfo:nil];
 	
 	[multicastDelegate xmppStream:self didFailToSendIQ:iq error:error];
 }
 
-- (void)failToSendMessage:(XMPPMessage *)message error:(NSError *)error
+- (void)failToSendMessage:(XMPPMessage *)message
 {
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+	
+	NSError *error = [NSError errorWithDomain:XMPPStreamErrorDomain
+	                                     code:XMPPStreamInvalidState
+	                                 userInfo:nil];
 	
 	[multicastDelegate xmppStream:self didFailToSendMessage:message error:error];
 }
 
-- (void)failToSendPresence:(XMPPPresence *)presence error:(NSError *)error
+- (void)failToSendPresence:(XMPPPresence *)presence
 {
 	NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+	
+	NSError *error = [NSError errorWithDomain:XMPPStreamErrorDomain
+	                                     code:XMPPStreamInvalidState
+	                                 userInfo:nil];
 	
 	[multicastDelegate xmppStream:self didFailToSendPresence:presence error:error];
 }
