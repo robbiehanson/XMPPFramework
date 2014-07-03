@@ -980,6 +980,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 /**
  * These methods are called after failing to send the respective XML elements over the stream.
+ * This occurs when the stream gets disconnected before the element can get sent out.
 **/
 - (void)xmppStream:(XMPPStream *)sender didFailToSendIQ:(XMPPIQ *)iq error:(NSError *)error;
 - (void)xmppStream:(XMPPStream *)sender didFailToSendMessage:(XMPPMessage *)message error:(NSError *)error;
