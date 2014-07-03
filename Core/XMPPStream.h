@@ -289,6 +289,17 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 **/
 - (BOOL)isConnected;
 
+
+
+- (BOOL)isStreamManagementSupported;
+
+@property (nonatomic, assign) BOOL streamManagementEnabled;
+@property (nonatomic, strong) NSString *sessionId;
+
+@property (readonly) UInt64 numberOfStanzasSent;
+@property UInt64 numberOfStanzasReceived;
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Connect & Disconnect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1050,6 +1061,10 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * adding any specific featues the delegate might support.
 **/
 - (void)xmppStream:(XMPPStream *)sender willSendP2PFeatures:(NSXMLElement *)streamFeatures;
+
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveStreamManagementElement:(NSXMLElement *)element;
+
+- (void)xmppStream:(XMPPStream *)sender didStreamManagementEnabled:(NSXMLElement *)element;
 
 /**
  * These methods are called as xmpp modules are registered and unregistered with the stream.

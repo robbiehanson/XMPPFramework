@@ -28,3 +28,7 @@
 // 
 
 #import "NSXMLElement+XMPP.h"
+
+// Stream Management
+#import "XMPPStreamManagement.h"
+
