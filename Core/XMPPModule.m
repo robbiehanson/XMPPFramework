@@ -54,8 +54,9 @@
 
 /**
  * The activate method is the point at which the module gets plugged into the xmpp stream.
- * Subclasses may override this method to perform any custom actions,
- * but must invoke [super activate:aXmppStream] at some point within their implementation.
+ *
+ * It is recommended that subclasses override didActivate, instead of this method,
+ * to perform any custom actions upon activation.
 **/
 - (BOOL)activate:(XMPPStream *)aXmppStream
 {
@@ -73,6 +74,8 @@
 			
 			[xmppStream addDelegate:self delegateQueue:moduleQueue];
 			[xmppStream registerModule:self];
+			
+			[self didActivate];
 		}
 	};
 	
@@ -85,12 +88,27 @@
 }
 
 /**
+ * It is recommended that subclasses override this method (instead of activate:)
+ * to perform tasks after the module has been activated.
+ * 
+ * This method is only invoked if the module is successfully activated.
+ * This method is always invoked on the moduleQueue.
+**/
+- (void)didActivate
+{
+	// Override me to do custom work after the module is activated
+}
+
+/**
  * The deactivate method unplugs a module from the xmpp stream.
  * When this method returns, no further delegate methods on this module will be dispatched.
  * However, there may be delegate methods that have already been dispatched.
  * If this is the case, the module will be properly retained until the delegate methods have completed.
  * If your custom module requires that delegate methods are not run after the deactivate method has been run,
  * then simply check the xmppStream variable in your delegate methods.
+ *
+ * It is recommended that subclasses override didDeactivate, instead of this method,
+ * to perform any custom actions upon deactivation.
 **/
 - (void)deactivate
 {
@@ -102,6 +120,8 @@
 			[xmppStream unregisterModule:self];
 			
 			xmppStream = nil;
+			
+			[self didDeactivate];
 		}
 	};
 	
@@ -109,6 +129,18 @@
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
+}
+
+/**
+ * It is recommended that subclasses override this method (instead of deactivate:)
+ * to perform tasks after the module has been deactivated.
+ *
+ * This method is only invoked if the module is transitioned from activated to deactivated.
+ * This method is always invoked on the moduleQueue.
+**/
+- (void)didDeactivate
+{
+	// Override me to do custom work after the module is deactivated
 }
 
 - (dispatch_queue_t)moduleQueue
