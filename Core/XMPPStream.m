@@ -954,7 +954,6 @@ enum XMPPStreamConfig
 /**
  * Start Connect Timeout
 **/
-
 - (void)startConnectTimeout:(NSTimeInterval)timeout
 {
     XMPPLogTrace();
@@ -986,7 +985,6 @@ enum XMPPStreamConfig
 /**
  * End Connect Timeout
 **/
-
 - (void)endConnectTimeout
 {
 	XMPPLogTrace();
@@ -1001,7 +999,6 @@ enum XMPPStreamConfig
 /**
  * Connect has timed out, so inform the delegates and close the connection
 **/
-
 - (void)doConnectTimeout
 {
 	XMPPLogTrace();
@@ -2106,9 +2103,7 @@ enum XMPPStreamConfig
  * if the given compression method is supported.
  *
  * If we are not connected to a server, this method simply returns NO.
- **/
-
-
+**/
 - (BOOL)supportsCompressionMethod:(NSString *)compressionMethod
 {
 	__block BOOL result = NO;
@@ -2399,7 +2394,7 @@ enum XMPPStreamConfig
 				dispatch_async(xmppQueue, ^{ @autoreleasepool {
 					
 					if (state == STATE_XMPP_CONNECTED) {
-						[self continueSendPresence:presence withTag:tag];
+						[self continueSendPresence:modifiedPresence withTag:tag];
 					}
 				}});
 			}
@@ -4240,7 +4235,7 @@ enum XMPPStreamConfig
 			[self receivePresence:[XMPPPresence presenceFromElement:element]];
 		}
 		else if ([self isP2P] &&
-				([elementName isEqualToString:@"stream:features"] || [elementName isEqualToString:@"features"]))
+		        ([elementName isEqualToString:@"stream:features"] || [elementName isEqualToString:@"features"]))
 		{
 			[multicastDelegate xmppStream:self didReceiveP2PFeatures:element];
 		}
