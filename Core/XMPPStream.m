@@ -97,8 +97,8 @@ enum XMPPStreamConfig
 	
 	GCDAsyncSocket *asyncSocket;
 	
-	UInt64 numberOfBytesSent;
-	UInt64 numberOfBytesReceived;
+	uint64_t numberOfBytesSent;
+	uint64_t numberOfBytesReceived;
 	
 	XMPPParser *parser;
 	NSError *parserError;
@@ -585,40 +585,55 @@ enum XMPPStreamConfig
 		dispatch_async(xmppQueue, block);
 }
 
-- (UInt64)numberOfBytesSent
+- (uint64_t)numberOfBytesSent
 {
+	__block uint64_t result = 0;
+	
+	dispatch_block_t block = ^{
+		result = numberOfBytesSent;
+	};
+	
 	if (dispatch_get_specific(xmppQueueTag))
-	{
-		return numberOfBytesSent;
-	}
+		block();
 	else
-	{
-		__block UInt64 result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = numberOfBytesSent;
-		});
-		
-		return result;
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
 }
 
-- (UInt64)numberOfBytesReceived
+- (uint64_t)numberOfBytesReceived
 {
+	__block uint64_t result = 0;
+	
+	dispatch_block_t block = ^{
+		result = numberOfBytesReceived;
+	};
+	
 	if (dispatch_get_specific(xmppQueueTag))
-	{
-		return numberOfBytesReceived;
-	}
+		block();
 	else
-	{
-		__block UInt64 result;
-		
-		dispatch_sync(xmppQueue, ^{
-			result = numberOfBytesReceived;
-		});
-		
-		return result;
-	}
+		dispatch_sync(xmppQueue, block);
+	
+	return result;
+}
+
+- (void)getNumberOfBytesSent:(uint64_t *)bytesSentPtr numberOfBytesReceived:(uint64_t *)bytesReceivedPtr
+{
+	__block uint64_t bytesSent = 0;
+	__block uint64_t bytesReceived = 0;
+	
+	dispatch_block_t block = ^{
+		bytesSent = numberOfBytesSent;
+		bytesReceived = numberOfBytesReceived;
+	};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	if (bytesSentPtr) *bytesSentPtr = bytesSent;
+	if (bytesReceivedPtr) *bytesReceivedPtr = bytesReceived;
 }
 
 - (BOOL)resetByteCountPerConnection
