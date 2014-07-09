@@ -61,6 +61,20 @@ extern NSString *const XMPPStreamDidChangeMyJIDNotification;
 **/
 - (void)injectElement:(NSXMLElement *)element;
 
+/**
+ * The XMPP standard only supports <iq>, <message> and <presence> stanzas (excluding session setup stuff).
+ * But some extensions use non-standard element types.
+ * The standard example is XEP-0198, which uses <r> & <a> elements.
+ * 
+ * XMPPStream will assume that any non-standard element types are errors, unless you register them.
+ * Once registered the stream can recognize them, and will use the following delegate methods:
+ * 
+ * xmppStream:didSendCustomElement:
+ * xmppStream:didReceiveCustomElement:
+**/
+- (void)registerCustomElementNames:(NSSet *)names;
+- (void)unregisterCustomElementNames:(NSSet *)names;
+
 @end
 
 @interface XMPPModule (/* Internal */)

@@ -1061,4 +1061,20 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module;
 - (void)xmppStream:(XMPPStream *)sender willUnregisterModule:(id)module;
 
+/**
+ * Custom elements are Non-XMPP elements.
+ * In other words, not <iq>, <message> or <presence> elements.
+ * 
+ * Typically these kinds of elements are not allowed by the XMPP server.
+ * But some custom implementations may use them.
+ * The standard example is XEP-0198, which uses <r> & <a> elements.
+ * 
+ * If you're using custom elements, you must register the custom element name(s).
+ * Otherwise the xmppStream will treat an non-XMPP elements as errors (xmppStream:didReceiveError:).
+ * 
+ * @see registerCustomElementNames (in XMPPInternal.h)
+**/
+- (void)xmppStream:(XMPPStream *)sender didSendCustomElement:(NSXMLElement *)element;
+- (void)xmppStream:(XMPPStream *)sender didReceiveCustomElement:(NSXMLElement *)element;
+
 @end
