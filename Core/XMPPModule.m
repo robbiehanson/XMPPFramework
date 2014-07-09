@@ -116,12 +116,12 @@
 		
 		if (xmppStream)
 		{
+			[self willDeactivate];
+			
 			[xmppStream removeDelegate:self delegateQueue:moduleQueue];
 			[xmppStream unregisterModule:self];
 			
 			xmppStream = nil;
-			
-			[self didDeactivate];
 		}
 	};
 	
@@ -135,10 +135,10 @@
  * It is recommended that subclasses override this method (instead of deactivate:)
  * to perform tasks after the module has been deactivated.
  *
- * This method is only invoked if the module is transitioned from activated to deactivated.
+ * This method is only invoked if the module is transitioning from activated to deactivated.
  * This method is always invoked on the moduleQueue.
 **/
-- (void)didDeactivate
+- (void)willDeactivate
 {
 	// Override me to do custom work after the module is deactivated
 }
