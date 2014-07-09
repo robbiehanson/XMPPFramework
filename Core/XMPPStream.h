@@ -208,10 +208,16 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * the count will be the summation of all connections.
  * 
  * The functionality may optionaly be changed to count only the current socket connection.
- * See the resetByteCountPerConnection property.
+ * @see resetByteCountPerConnection
 **/
-@property (readonly) UInt64 numberOfBytesSent;
-@property (readonly) UInt64 numberOfBytesReceived;
+@property (readonly) uint64_t numberOfBytesSent;
+@property (readonly) uint64_t numberOfBytesReceived;
+
+/**
+ * Same as the individual properties,
+ * but provides a way to fetch them in one atomic operation.
+**/
+- (void)getNumberOfBytesSent:(uint64_t *)bytesSentPtr numberOfBytesReceived:(uint64_t *)bytesReceivedPtr;
 
 /**
  * Affects the funtionality of the byte counter.
@@ -320,7 +326,10 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * The given address is specified as a sockaddr structure wrapped in a NSData object.
  * For example, a NSData object returned from NSNetservice's addresses method.
 **/
-- (BOOL)connectTo:(XMPPJID *)remoteJID withAddress:(NSData *)remoteAddr withTimeout:(NSTimeInterval)timeout error:(NSError **)errPtr;
+- (BOOL)connectTo:(XMPPJID *)remoteJID
+      withAddress:(NSData *)remoteAddr
+      withTimeout:(NSTimeInterval)timeout
+            error:(NSError **)errPtr;
 
 /**
  * Starts a P2P connection with the given accepted socket.
