@@ -577,6 +577,10 @@ enum XMPPStreamConfig
 		{
 			keepAliveData = [[NSString stringWithFormat:@"%c", keepAliveChar] dataUsingEncoding:NSUTF8StringEncoding];
 		}
+		else
+		{
+			XMPPLogWarn(@"Invalid whitespace character! Must be: space, newline, or tab");
+		}
 	};
 	
 	if (dispatch_get_specific(xmppQueueTag))
