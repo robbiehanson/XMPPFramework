@@ -210,6 +210,7 @@
 		8D1107310486CEB800E47090 /* iPhoneXMPP-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhoneXMPP-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		962031FB1735831C00C43080 /* NSXMLElement+XEP_0203.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSXMLElement+XEP_0203.h"; sourceTree = "<group>"; };
 		962031FC1735831C00C43080 /* NSXMLElement+XEP_0203.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSXMLElement+XEP_0203.m"; sourceTree = "<group>"; };
+		CF3EF8A8197E8CD9007FBE12 /* XMPPModule+Subclass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPModule+Subclass.h"; sourceTree = "<group>"; };
 		DC19DDA0170B4138000D2178 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		DC1CF88F1361F28000E71363 /* NSString+DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+DDXML.h"; sourceTree = "<group>"; };
 		DC1CF8901361F28000E71363 /* NSString+DDXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+DDXML.m"; sourceTree = "<group>"; };
@@ -733,6 +734,7 @@
 				DC84BBD612440A8E0055A459 /* XMPPPresence.m */,
 				DC84BBD112440A8E0055A459 /* XMPPModule.h */,
 				DC84BBD212440A8E0055A459 /* XMPPModule.m */,
+				CF3EF8A8197E8CD9007FBE12 /* XMPPModule+Subclass.h */,
 			);
 			name = Core;
 			sourceTree = "<group>";
