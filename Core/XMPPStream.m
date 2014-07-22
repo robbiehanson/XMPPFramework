@@ -2545,7 +2545,7 @@ enum XMPPStreamConfig
 }
 
 /**
- * This methods handles sending an XML stanza.
+ * This method handles sending an XML stanza.
  * If the XMPPStream is not connected, this method does nothing.
 **/
 - (void)sendElement:(NSXMLElement *)element
