@@ -172,6 +172,7 @@
  * Useful if you disable autoFetchRoster.
 **/
 - (void)fetchRoster;
+- (void)fetchRosterVersion:(NSString *)version;
 
 /**
  * Adds the given user to the roster with an optional nickname 
@@ -322,7 +323,7 @@
 **/
 - (BOOL)configureWithParent:(XMPPRoster *)aParent queue:(dispatch_queue_t)queue;
 
-- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream;
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream withVersion:(NSString *)version;
 - (void)endRosterPopulationForXMPPStream:(XMPPStream *)stream;
 
 - (void)handleRosterItem:(NSXMLElement *)item xmppStream:(XMPPStream *)stream;
@@ -384,7 +385,7 @@
 /**
  * Sent when the initial roster is received.
 **/
-- (void)xmppRosterDidBeginPopulating:(XMPPRoster *)sender;
+- (void)xmppRosterDidBeginPopulating:(XMPPRoster *)sender withVersion:(NSString *)version;
 
 /**
  * Sent when the initial roster has been populated into storage.

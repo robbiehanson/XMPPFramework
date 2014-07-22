@@ -680,8 +680,22 @@ enum XMPPRosterFlags
 	XMPPPresence *presence = [XMPPPresence presenceWithType:@"unsubscribed" to:[jid bareJID]];
 	[xmppStream sendElement:presence];
 }
-
 - (void)fetchRoster
+{
+	// This is a public method, so it may be invoked on any thread/queue.
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		[self fetchRosterVersion:nil];
+        
+	}};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+- (void)fetchRosterVersion:(NSString *)version
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
@@ -694,10 +708,12 @@ enum XMPPRosterFlags
 		}
 		
 		// <iq type="get">
-		//   <query xmlns="jabber:iq:roster"/>
+		//   <query xmlns="jabber:iq:roster" ver="ver14"/>
 		// </iq>
 		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+        if (version)
+            [query addAttributeWithName:@"ver" stringValue:version];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
 		[iq addChild:query];
@@ -727,6 +743,7 @@ enum XMPPRosterFlags
     dispatch_block_t block = ^{ @autoreleasepool {
         
         NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:roster"];
+        NSString * version = [query attributeStringValueForName:@"ver"];
         
 		BOOL hasRoster = [self hasRoster];
 		
@@ -734,8 +751,8 @@ enum XMPPRosterFlags
 		{
             [xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
             [self _setPopulatingRoster:YES];
-            [multicastDelegate xmppRosterDidBeginPopulating:self];
-			[xmppRosterStorage beginRosterPopulationForXMPPStream:xmppStream];
+            [multicastDelegate xmppRosterDidBeginPopulating:self withVersion:version];
+			[xmppRosterStorage beginRosterPopulationForXMPPStream:xmppStream withVersion:version];
 		}
 		
 		NSArray *items = [query elementsForName:@"item"];
