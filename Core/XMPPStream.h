@@ -1049,7 +1049,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (void)xmppStreamDidSendClosingStreamStanza:(XMPPStream *)sender;
 
 /**
- * This methods is called if the XMPP stream's connect times out.
+ * This method is called if the XMPP stream's connect times out.
 **/
 - (void)xmppStreamConnectDidTimeout:(XMPPStream *)sender;
 
