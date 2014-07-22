@@ -610,7 +610,7 @@
 #pragma mark XMPPRosterStorage Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream withVersion:(NSString *)version
 {
 	XMPPLogTrace();
 	AssertParentQueue();

@@ -260,7 +260,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 #pragma mark Protocol Private API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream
+- (void)beginRosterPopulationForXMPPStream:(XMPPStream *)stream withVersion:(NSString *)version
 {
 	XMPPLogTrace();
 	
