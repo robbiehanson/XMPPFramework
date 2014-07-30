@@ -6,8 +6,7 @@
 #import "XMPPModule.h"
 
 // Define the various states we'll use to track our progress
-enum XMPPStreamState
-{
+typedef NS_ENUM(NSInteger, XMPPStreamState) {
 	STATE_XMPP_DISCONNECTED,
 	STATE_XMPP_RESOLVING_SRV,
 	STATE_XMPP_CONNECTING,
@@ -22,7 +21,6 @@ enum XMPPStreamState
 	STATE_XMPP_START_SESSION,
 	STATE_XMPP_CONNECTED,
 };
-typedef enum XMPPStreamState XMPPStreamState;
 
 /**
  * It is recommended that storage classes cache a stream's myJID.

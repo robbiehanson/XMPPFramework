@@ -93,7 +93,7 @@ enum XMPPStreamConfig
 	
 	GCDMulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
 	
-	int state;
+	XMPPStreamState state;
 	
 	GCDAsyncSocket *asyncSocket;
 	
@@ -287,7 +287,7 @@ enum XMPPStreamConfig
 	__block XMPPStreamState result = STATE_XMPP_DISCONNECTED;
 	
 	dispatch_block_t block = ^{
-		result = (XMPPStreamState)state;
+		result = state;
 	};
 	
 	if (dispatch_get_specific(xmppQueueTag))
