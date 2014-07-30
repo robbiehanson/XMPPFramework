@@ -76,6 +76,15 @@ extern NSString *const XMPPStreamDidChangeMyJIDNotification;
 - (void)sendAuthElement:(NSXMLElement *)element;
 
 /**
+ * This method is for use by xmpp custom binding classes.
+ * They should send elements using this method instead of the public sendElement methods,
+ * as those methods don't send the elements while authentication/binding is in progress.
+ * 
+ * @see XMPPCustomBinding
+**/
+- (void)sendBindElement:(NSXMLElement *)element;
+
+/**
  * This method allows you to inject an element into the stream as if it was received on the socket.
  * This is an advanced technique, but makes for some interesting possibilities.
 **/
