@@ -102,6 +102,7 @@ enum XMPPStreamConfig
 	
 	XMPPParser *parser;
 	NSError *parserError;
+	NSError *otherError;
 	
 	Byte flags;
 	Byte config;
@@ -3373,9 +3374,16 @@ enum XMPPStreamConfig
 			return;
 		}
 	}
-    else if(![self isSecure] && [self startTLSPolicy] == XMPPStreamStartTLSPolicyRequired)
+    else if (![self isSecure] && [self startTLSPolicy] == XMPPStreamStartTLSPolicyRequired)
     {
-        // We can close our TCP connection now as the server doesn't support TLS.
+		// We must abort the connection as the server doesn't support our requirements.
+		
+		NSString *errMsg = @"The server does not support startTLS. And the startTLSPolicy is Required.";
+		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+		
+		otherError = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+		
+        // Close the TCP connection.
 		[self disconnect];
 		
 		// The socketDidDisconnect:withError: method will handle everything else
@@ -4103,11 +4111,14 @@ enum XMPPStreamConfig
 		
 		// Notify delegate
 		
-		if (parserError)
+		if (parserError || otherError)
 		{
-			[multicastDelegate xmppStreamDidDisconnect:self withError:parserError];
+			NSError *error = parserError ? parserError : otherError;
+			
+			[multicastDelegate xmppStreamDidDisconnect:self withError:error];
 			
 			parserError = nil;
+			otherError = nil;
 		}
 		else
 		{
