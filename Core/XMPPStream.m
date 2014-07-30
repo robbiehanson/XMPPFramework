@@ -2703,8 +2703,10 @@ enum XMPPStreamConfig
 
 /**
  * This method is for use by xmpp authentication mechanism classes.
- * They should send elements using this method instead of the public sendElement classes,
+ * They should send elements using this method instead of the public sendElement methods,
  * as those methods don't send the elements while authentication is in progress.
+ *
+ * @see XMPPSASLAuthentication
 **/
 - (void)sendAuthElement:(NSXMLElement *)element
 {
