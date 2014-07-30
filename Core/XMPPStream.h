@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "XMPPSASLAuthentication.h"
+#import "XMPPCustomBinding.h"
 #import "GCDAsyncSocket.h"
 #import "GCDMulticastDelegate.h"
 
@@ -892,6 +893,19 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * This method is called if authentication fails.
 **/
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;
+
+/**
+ * Binding a JID resource is a standard part of the authentication process,
+ * and occurs after SASL authentication completes (which generally authenticates the JID username).
+ * 
+ * This delegate method allows for a custom binding procedure to be used.
+ * For example:
+ * - a custom SASL authentication scheme might combine auth with binding
+ * - stream management (xep-0198) replaces binding if it can resume a previous session
+ * 
+ * Return nil (or don't implement this method) if you wish to use the standard binding procedure.
+**/
+- (id <XMPPCustomBinding>)xmppStreamWillBind:(XMPPStream *)sender;
 
 /**
  * This method is called if the XMPP server doesn't allow our resource of choice
