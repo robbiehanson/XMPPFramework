@@ -49,6 +49,11 @@
  * 
  * @param stream
  *   The associated xmppStream (standard parameter for storage classes)
+ * 
+ * This method should also nil out the following values (if needed) associated with the account:
+ * - lastHandledByClient
+ * - lastHandledByServer
+ * - pendingOutgoingStanzas
 **/
 - (void)setResumptionId:(NSString *)inResumptionId
                 timeout:(uint32_t)inTimeout
@@ -58,6 +63,10 @@
 	resumptionId = inResumptionId;
 	timeout = inTimeout;
 	lastDisconnect = inLastDisconnect;
+	
+	lastHandledByClient = 0;
+	lastHandledByServer = 0;
+	pendingOutgoingStanzas = nil;
 }
 
 /**
