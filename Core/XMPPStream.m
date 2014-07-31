@@ -83,9 +83,7 @@ enum XMPPStreamConfig
 	dispatch_queue_t willSendMessageQueue;
 	dispatch_queue_t willSendPresenceQueue;
 	
-	dispatch_queue_t willReceiveIqQueue;
-	dispatch_queue_t willReceiveMessageQueue;
-	dispatch_queue_t willReceivePresenceQueue;
+	dispatch_queue_t willReceiveStanzaQueue;
 	
 	dispatch_queue_t didReceiveIqQueue;
     
@@ -168,18 +166,14 @@ enum XMPPStreamConfig
 - (void)commonInit
 {
 	xmppQueueTag = &xmppQueueTag;
-	xmppQueue = dispatch_queue_create("xmpp", NULL);
+	xmppQueue = dispatch_queue_create("xmpp", DISPATCH_QUEUE_SERIAL);
 	dispatch_queue_set_specific(xmppQueue, xmppQueueTag, xmppQueueTag, NULL);
 	
-	willSendIqQueue = dispatch_queue_create("xmpp.willSendIq", NULL);
-	willSendMessageQueue = dispatch_queue_create("xmpp.willSendMessage", NULL);
-	willSendPresenceQueue = dispatch_queue_create("xmpp.willSendPresence", NULL);
+	willSendIqQueue = dispatch_queue_create("xmpp.willSendIq", DISPATCH_QUEUE_SERIAL);
+	willSendMessageQueue = dispatch_queue_create("xmpp.willSendMessage", DISPATCH_QUEUE_SERIAL);
+	willSendPresenceQueue = dispatch_queue_create("xmpp.willSendPresence", DISPATCH_QUEUE_SERIAL);
 	
-	willReceiveIqQueue = dispatch_queue_create("xmpp.willReceiveIq", NULL);
-	willReceiveMessageQueue = dispatch_queue_create("xmpp.willReceiveMessage", NULL);
-	willReceivePresenceQueue = dispatch_queue_create("xmpp.willReceivePresence", NULL);
-	
-	didReceiveIqQueue = dispatch_queue_create("xmpp.didReceiveIq", NULL);
+	didReceiveIqQueue = dispatch_queue_create("xmpp.didReceiveIq", DISPATCH_QUEUE_SERIAL);
 	
 	multicastDelegate = (GCDMulticastDelegate <XMPPStreamDelegate> *)[[GCDMulticastDelegate alloc] init];
 	
@@ -250,12 +244,15 @@ enum XMPPStreamConfig
 {
 	#if !OS_OBJECT_USE_OBJC
 	dispatch_release(xmppQueue);
+	
 	dispatch_release(willSendIqQueue);
 	dispatch_release(willSendMessageQueue);
 	dispatch_release(willSendPresenceQueue);
-	dispatch_release(willReceiveIqQueue);
-	dispatch_release(willReceiveMessageQueue);
-	dispatch_release(willReceivePresenceQueue);
+	
+	if (willReceiveStanzaQueue) {
+		dispatch_release(willReceiveStanzaQueue);
+	}
+	
 	dispatch_release(didReceiveIqQueue);
 	#endif
 	
@@ -2788,7 +2785,22 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueReceiveIQ:iq];
+		if (willReceiveStanzaQueue)
+		{
+			// But still go through the stanzaQueue in order to guarantee in-order-delivery of all received stanzas.
+			
+			dispatch_async(willReceiveStanzaQueue, ^{
+				dispatch_async(xmppQueue, ^{ @autoreleasepool {
+					if (state == STATE_XMPP_CONNECTED) {
+						[self continueReceiveIQ:iq];
+					}
+				}});
+			});
+		}
+		else
+		{
+			[self continueReceiveIQ:iq];
+		}
 	}
 	else
 	{
@@ -2797,7 +2809,10 @@ enum XMPPStreamConfig
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
-		dispatch_async(willReceiveIqQueue, ^{ @autoreleasepool {
+		if (willReceiveStanzaQueue == NULL)
+			willReceiveStanzaQueue = dispatch_queue_create("xmpp.willReceiveStanza", DISPATCH_QUEUE_SERIAL);
+		
+		dispatch_async(willReceiveStanzaQueue, ^{ @autoreleasepool {
 			
 			// Allow delegates to modify and/or filter incoming element
 			
@@ -2843,7 +2858,23 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueReceiveMessage:message];
+		if (willReceiveStanzaQueue)
+		{
+			// But still go through the stanzaQueue in order to guarantee in-order-delivery of all received stanzas.
+			
+			dispatch_async(willReceiveStanzaQueue, ^{
+				dispatch_async(xmppQueue, ^{ @autoreleasepool {
+					
+					if (state == STATE_XMPP_CONNECTED) {
+						[self continueReceiveMessage:message];
+					}
+				}});
+			});
+		}
+		else
+		{
+			[self continueReceiveMessage:message];
+		}
 	}
 	else
 	{
@@ -2852,7 +2883,10 @@ enum XMPPStreamConfig
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
-		dispatch_async(willReceiveMessageQueue, ^{ @autoreleasepool {
+		if (willReceiveStanzaQueue == NULL)
+			willReceiveStanzaQueue = dispatch_queue_create("xmpp.willReceiveStanza", DISPATCH_QUEUE_SERIAL);
+		
+		dispatch_async(willReceiveStanzaQueue, ^{ @autoreleasepool {
 			
 			// Allow delegates to modify incoming element
 			
@@ -2898,7 +2932,23 @@ enum XMPPStreamConfig
 		// None of the delegates implement the method.
 		// Use a shortcut.
 		
-		[self continueReceivePresence:presence];
+		if (willReceiveStanzaQueue)
+		{
+			// But still go through the stanzaQueue in order to guarantee in-order-delivery of all received stanzas.
+			
+			dispatch_async(willReceiveStanzaQueue, ^{
+				dispatch_async(xmppQueue, ^{ @autoreleasepool {
+					
+					if (state == STATE_XMPP_CONNECTED) {
+						[self continueReceivePresence:presence];
+					}
+				}});
+			});
+		}
+		else
+		{
+			[self continueReceivePresence:presence];
+		}
 	}
 	else
 	{
@@ -2907,7 +2957,10 @@ enum XMPPStreamConfig
 		
 		GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
 		
-		dispatch_async(willSendPresenceQueue, ^{ @autoreleasepool {
+		if (willReceiveStanzaQueue == NULL)
+			willReceiveStanzaQueue = dispatch_queue_create("xmpp.willReceiveStanza", DISPATCH_QUEUE_SERIAL);
+		
+		dispatch_async(willReceiveStanzaQueue, ^{ @autoreleasepool {
 			
 			// Allow delegates to modify outgoing element
 			
