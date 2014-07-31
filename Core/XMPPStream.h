@@ -941,6 +941,14 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (XMPPPresence *)xmppStream:(XMPPStream *)sender willReceivePresence:(XMPPPresence *)presence;
 
 /**
+ * This method is called if any of the xmppStream:willReceiveX: methods filter the incoming stanza.
+ * 
+ * It may be useful for some extensions to know that something was received,
+ * even if it was filtered for some reason.
+**/
+- (void)xmppStreamDidFilterStanza:(XMPPStream *)sender;
+
+/**
  * These methods are called after their respective XML elements are received on the stream.
  * 
  * In the case of an IQ, the delegate method should return YES if it has or will respond to the given IQ.
@@ -1093,7 +1101,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * The standard example is XEP-0198, which uses <r> & <a> elements.
  * 
  * If you're using custom elements, you must register the custom element name(s).
- * Otherwise the xmppStream will treat an non-XMPP elements as errors (xmppStream:didReceiveError:).
+ * Otherwise the xmppStream will treat non-XMPP elements as errors (xmppStream:didReceiveError:).
  * 
  * @see registerCustomElementNames (in XMPPInternal.h)
 **/

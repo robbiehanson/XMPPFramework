@@ -2830,15 +2830,16 @@ enum XMPPStreamConfig
 				}});
 			}
 			
-			if (modifiedIQ)
-			{
-				dispatch_async(xmppQueue, ^{ @autoreleasepool {
-					
-					if (state == STATE_XMPP_CONNECTED) {
+			dispatch_async(xmppQueue, ^{ @autoreleasepool {
+				
+				if (state == STATE_XMPP_CONNECTED)
+				{
+					if (modifiedIQ)
 						[self continueReceiveIQ:modifiedIQ];
-					}
-				}});
-			}
+					else
+						[multicastDelegate xmppStreamDidFilterStanza:self];
+				}
+			}});
 		}});
 	}
 }
@@ -2904,15 +2905,16 @@ enum XMPPStreamConfig
 				}});
 			}
 			
-			if (modifiedMessage)
-			{
-				dispatch_async(xmppQueue, ^{ @autoreleasepool {
-					
-					if (state == STATE_XMPP_CONNECTED) {
+			dispatch_async(xmppQueue, ^{ @autoreleasepool {
+				
+				if (state == STATE_XMPP_CONNECTED)
+				{
+					if (modifiedMessage)
 						[self continueReceiveMessage:modifiedMessage];
-					}
-				}});
-			}
+					else
+						[multicastDelegate xmppStreamDidFilterStanza:self];
+				}
+			}});
 		}});
 	}
 }
@@ -2978,15 +2980,16 @@ enum XMPPStreamConfig
 				}});
 			}
 			
-			if (modifiedPresence)
-			{
-				dispatch_async(xmppQueue, ^{ @autoreleasepool {
-					
-					if (state == STATE_XMPP_CONNECTED) {
+			dispatch_async(xmppQueue, ^{ @autoreleasepool {
+				
+				if (state == STATE_XMPP_CONNECTED)
+				{
+					if (modifiedPresence)
 						[self continueReceivePresence:presence];
-					}
-				}});
-			}
+					else
+						[multicastDelegate xmppStreamDidFilterStanza:self];
+				}
+			}});
 		}});
 	}
 }
