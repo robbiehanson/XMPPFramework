@@ -171,11 +171,12 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 {
     AssertProperQueue();
     
-    if([[element elementID] length] == 0) return NO;
+	NSString *elementID = [element elementID];
 	
-	id <XMPPTrackingInfo> info = [dict objectForKey:[element elementID]];
-    
-    if(info)
+	if ([elementID length] == 0) return NO;
+	
+	id <XMPPTrackingInfo> info = [dict objectForKey:elementID];
+	if(info)
     {
         BOOL valid = YES;
             
