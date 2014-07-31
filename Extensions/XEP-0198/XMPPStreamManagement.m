@@ -1540,11 +1540,6 @@
 	}
 }
 
-- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
-{
-	
-}
-
 - (void)xmppStream:(XMPPStream *)sender didSendIQ:(XMPPIQ *)iq
 {
 	XMPPLogTrace();
@@ -1604,6 +1599,32 @@
 	if (isStarted)
 	{
 		[self processReceivedElement:presence];
+	}
+}
+
+/**
+ * This method is called if any of the xmppStream:willReceiveX: methods filter the incoming stanza.
+ *
+ * It may be useful for some extensions to know that something was received,
+ * even if it was filtered for some reason.
+**/
+- (void)xmppStreamDidFilterStanza:(XMPPStream *)sender
+{
+	XMPPLogTrace();
+	
+	if (isStarted)
+	{
+		// The element was filtered/consumed by something in the stack.
+		// So it is implicitly 'handled'.
+		
+		XMPPStreamManagementIncomingStanza *stanza =
+		  [[XMPPStreamManagementIncomingStanza alloc] initWithStanzaId:nil isHandled:YES];
+		[unackedByClient addObject:stanza];
+		
+		if (![self maybeSendAck])
+		{
+			[self maybeUpdateStoredLastHandledByClient];
+		}
 	}
 }
 
