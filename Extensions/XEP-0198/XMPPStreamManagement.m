@@ -1254,6 +1254,8 @@
 {
 	XMPPLogTrace();
 	
+	if (stanzaId == nil) return;
+	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		// It's theoretically possible that the delegate(s) returned the same stanzaId for multiple elements.
