@@ -146,6 +146,7 @@
 		8D1107320486CEB800E47090 /* XMPPStream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XMPPStream.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		962031FE1735833E00C43080 /* NSXMLElement+XEP_0203.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSXMLElement+XEP_0203.h"; path = "../../Extensions/XEP-0203/NSXMLElement+XEP_0203.h"; sourceTree = "<group>"; };
 		962031FF1735833E00C43080 /* NSXMLElement+XEP_0203.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSXMLElement+XEP_0203.m"; path = "../../Extensions/XEP-0203/NSXMLElement+XEP_0203.m"; sourceTree = "<group>"; };
+		96CB5A3D19921EAA002F679C /* XMPPCustomBinding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPCustomBinding.h; sourceTree = "<group>"; };
 		DC0AC2771346E20800D053E3 /* XMPPvCard.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPvCard.xcdatamodel; sourceTree = "<group>"; };
 		DC0AC2781346E20800D053E3 /* XMPPvCardAvatarCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPvCardAvatarCoreDataStorageObject.h; path = CoreDataStorage/XMPPvCardAvatarCoreDataStorageObject.h; sourceTree = "<group>"; };
 		DC0AC2791346E20800D053E3 /* XMPPvCardAvatarCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardAvatarCoreDataStorageObject.m; path = CoreDataStorage/XMPPvCardAvatarCoreDataStorageObject.m; sourceTree = "<group>"; };
@@ -492,6 +493,7 @@
 				DC30E6A6153E099A001B9E6D /* Plain */,
 				DC30E6A9153E099A001B9E6D /* X-Facebook-Platform */,
 				DC30E6AC153E099A001B9E6D /* XMPPSASLAuthentication.h */,
+				96CB5A3D19921EAA002F679C /* XMPPCustomBinding.h */,
 			);
 			name = Authentication;
 			path = ../../Authentication;
