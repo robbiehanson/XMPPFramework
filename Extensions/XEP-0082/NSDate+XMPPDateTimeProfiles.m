@@ -67,6 +67,7 @@
 {
 	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
 	[dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [dateFormatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
 	[dateFormatter setDateFormat:dateFormat];
 	[dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
