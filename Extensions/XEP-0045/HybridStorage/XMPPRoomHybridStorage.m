@@ -697,7 +697,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSManagedObjectContext *moc = inMoc ? inMoc : [self managedObjectContext];
+		NSManagedObjectContext *moc = inMoc ? : [self managedObjectContext];
 		
 		NSEntityDescription *entity = [self messageEntity:moc];
 		

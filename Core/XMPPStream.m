@@ -4363,7 +4363,7 @@ enum XMPPStreamConfig
 		
 		if (parserError || otherError)
 		{
-			NSError *error = parserError ? parserError : otherError;
+			NSError *error = parserError ? : otherError;
 			
 			[multicastDelegate xmppStreamDidDisconnect:self withError:error];
 			
