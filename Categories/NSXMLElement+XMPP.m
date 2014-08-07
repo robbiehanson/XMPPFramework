@@ -312,7 +312,7 @@
     [self addAttributeWithName:name numberValue:[NSNumber numberWithInteger:integerValue]];
 }
 
-- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSUInteger)unsignedIntegerValue
 {
     [self addAttributeWithName:name numberValue:[NSNumber numberWithUnsignedInteger:unsignedIntegerValue]];
 }

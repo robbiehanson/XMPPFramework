@@ -79,7 +79,7 @@
 - (void)addAttributeWithName:(NSString *)name floatValue:(float)floatValue;
 - (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue;
 - (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue;
-- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue;
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSUInteger)unsignedIntegerValue;
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
 - (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number;
 - (void)addAttributeWithName:(NSString *)name objectValue:(id)objectValue;

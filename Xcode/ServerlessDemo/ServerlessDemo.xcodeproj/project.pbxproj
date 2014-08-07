@@ -88,6 +88,7 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* ServerlessDemo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ServerlessDemo-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		962032011735837200C43080 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		96CB5A3E19921EE3002F679C /* XMPPCustomBinding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPCustomBinding.h; sourceTree = "<group>"; };
 		D978F42D18AB6DAC0099D05F /* XMPPIQ+XEP_0066.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPIQ+XEP_0066.h"; sourceTree = "<group>"; };
 		D978F42E18AB6DAC0099D05F /* XMPPIQ+XEP_0066.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XMPPIQ+XEP_0066.m"; sourceTree = "<group>"; };
 		D978F42F18AB6DAC0099D05F /* XMPPMessage+XEP_0066.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPMessage+XEP_0066.h"; sourceTree = "<group>"; };
@@ -320,6 +321,7 @@
 				DC30E6E3153E09FA001B9E6D /* Plain */,
 				DC30E6E6153E09FA001B9E6D /* X-Facebook-Platform */,
 				DC30E6E9153E09FA001B9E6D /* XMPPSASLAuthentication.h */,
+				96CB5A3E19921EE3002F679C /* XMPPCustomBinding.h */,
 			);
 			name = Authentication;
 			path = ../../Authentication;
