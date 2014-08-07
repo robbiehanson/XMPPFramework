@@ -47,7 +47,7 @@ static NSString * const kXEP0082SharedDateFormatterKey = @"xep0082_shared_date_f
 	
 	NSDateFormatter *df = [self threadDateFormatter];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
-	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
+    [df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSDate *result = [df dateFromString:dateStr];
@@ -87,7 +87,7 @@ static NSString * const kXEP0082SharedDateFormatterKey = @"xep0082_shared_date_f
 	
 	NSDateFormatter *df = [self threadDateFormatter];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
-	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
+    [df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
 	[df setDateFormat:@"yyyy-MM-dd"];
 	
 	NSString *today = [df stringFromDate:[NSDate date]];
@@ -191,7 +191,7 @@ static NSString * const kXEP0082SharedDateFormatterKey = @"xep0082_shared_date_f
 	
 	NSDateFormatter *df = [self threadDateFormatter];
 	[df setFormatterBehavior:NSDateFormatterBehavior10_4]; // Use unicode patterns (as opposed to 10_3)
-	[df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"]]; //Bypass NSDateFormatter locale bug
+    [df setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
 	[df setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
 
 	NSDate *result = nil;

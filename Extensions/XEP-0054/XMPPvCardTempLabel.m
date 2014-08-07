@@ -26,6 +26,7 @@
 
 @implementation XMPPvCardTempLabel
 
+#if DEBUG
 
 + (void)initialize {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
@@ -50,6 +51,7 @@
 	}
 }
 
+#endif
 
 + (XMPPvCardTempLabel *)vCardLabelFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTempLabel class]);
