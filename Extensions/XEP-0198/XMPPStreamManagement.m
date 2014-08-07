@@ -75,6 +75,8 @@
 	NSMutableArray *unackedByServer;              // array of XMPPStreamManagementOutgoingStanza objects
 	NSUInteger unackedByServer_lastRequestOffset; // represents point at which we last sent a request
 	
+	NSArray *prev_unackedByServer;                // from previous connection, used when resuming session
+	
 	NSMutableArray *unprocessedReceivedAcks; // acks received from server that we haven't processed yet
 	
 	XMPPTimer *autoRequestTimer;                  // timer to fire a request
@@ -84,7 +86,7 @@
 	uint32_t lastHandledByClient; // latest h value we can send to the server
 	
 	NSMutableArray *unackedByClient;          // array of XMPPStreamManagementIncomingStanza objects
-	NSUInteger unackedByClient_lastAckOffset; // represents point at which we last sent an ack
+	NSUInteger unackedByClient_lastAckOffset; // number of items removed from array, but ack not sent to server
 	
 	NSMutableArray *pendingHandledStanzaIds;// edge case handling
 	NSUInteger outstandingStanzaIds;        // edge case handling + defensive programming
@@ -172,6 +174,8 @@
 
 - (void)setAutoResume:(BOOL)newAutoResume
 {
+	XMPPLogTrace();
+	
 	dispatch_block_t block = ^{
 		autoResume = newAutoResume;
 	};
@@ -293,6 +297,8 @@
 
 - (void)setAckResponseDelay:(NSTimeInterval)delay
 {
+	XMPPLogTrace();
+	
 	dispatch_block_t block = ^{
 		
 		ackResponseDelay = delay;
@@ -349,9 +355,10 @@
 		// State transition cleanup
 		
 		[unackedByServer removeAllObjects];
-		[unackedByClient removeAllObjects];
-		
 		unackedByServer_lastRequestOffset = 0;
+		
+		[unackedByClient removeAllObjects];
+		unackedByClient_lastAckOffset = 0;
 		
 		unprocessedReceivedAcks = nil;
 		
@@ -394,15 +401,27 @@
                                 timeout:(uint32_t)timeout
                          lastDisconnect:(NSDate *)lastDisconnect
 {
-	if (resumptionId == nil) return NO;
-	if (lastDisconnect == nil) return NO;
+	if (resumptionId == nil) {
+		XMPPLogVerbose(@"%@: Cannot resume stream: resumptionId is nil", THIS_FILE);
+		return NO;
+	}
+	if (lastDisconnect == nil) {
+		XMPPLogVerbose(@"%@: Cannot resume stream: lastDisconnect is nil", THIS_FILE);
+		return NO;
+	}
 	
 	NSTimeInterval elapsed = [lastDisconnect timeIntervalSinceNow] * -1.0;
 	
 	if (elapsed < 0.0) // lastDisconnect is in the future ?
+	{
+		XMPPLogVerbose(@"%@: Cannot resume stream: invalid lastDisconnect - appears to be in future", THIS_FILE);
 		return NO;
+	}
 	if ((uint32_t)elapsed > timeout) // too much time has elapsed
+	{
+		XMPPLogVerbose(@"%@: Cannot resume stream: elapsed(%u) > timeout(%u)", THIS_FILE, (uint32_t)elapsed, timeout);
 		return NO;
+	}
 	
 	return YES;
 }
@@ -459,9 +478,10 @@
 		// State transition cleanup
 		
 		[unackedByServer removeAllObjects];
-		[unackedByClient removeAllObjects];
-		
 		unackedByServer_lastRequestOffset = 0;
+		
+		[unackedByClient removeAllObjects];
+		unackedByClient_lastAckOffset = 0;
 		
 		unprocessedReceivedAcks = nil;
 		
@@ -483,8 +503,11 @@
 		lastHandledByServer = newLastHandledByServer;
 		
 		if ([pendingOutgoingStanzas count] > 0) {
-			unackedByServer = [[NSMutableArray alloc] initWithArray:pendingOutgoingStanzas copyItems:YES];
+			prev_unackedByServer = [[NSMutableArray alloc] initWithArray:pendingOutgoingStanzas copyItems:YES];
 		}
+		
+		XMPPLogVerbose(@"%@: Attempting to resume: lastHandledByClient(%u) lastHandledByServer(%u)",
+		               THIS_FILE, lastHandledByClient, lastHandledByServer);
 		
 		// Send the resume stanza:
 		//
@@ -522,88 +545,48 @@
 		else
 			diff = (UINT32_MAX - lastHandledByServer) + h;
 		
-		if (diff > [unackedByServer count])
+		// IMPORTATNT:
+		// This code path uses prev_unackedByServer (NOT unackedByServer).
+		// This is because the ack has to do with stanzas sent from the previous connection.
+		
+		if (diff > [prev_unackedByServer count])
 		{
-			XMPPLogWarn(@"Unexpected h value from ack: lastH=%lu, newH=%lu, numPendingStanzas=%lu",
+			XMPPLogWarn(@"Unexpected h value from resume: lastH=%lu, newH=%lu, numPendingStanzas=%lu",
 			            (unsigned long)lastHandledByServer,
 			            (unsigned long)h,
-			            (unsigned long)[unackedByServer count]);
+			            (unsigned long)[prev_unackedByServer count]);
 			
-			diff = (uint32_t)[unackedByServer count];
+			diff = (uint32_t)[prev_unackedByServer count];
 		}
-		
-		BOOL canProcessEntireAck = YES;
-		NSUInteger processed = 0;
 		
 		NSMutableArray *stanzaIds = [NSMutableArray arrayWithCapacity:(NSUInteger)diff];
 		
 		for (uint32_t i = 0; i < diff; i++)
 		{
-			XMPPStreamManagementOutgoingStanza *outgoingStanza = [unackedByServer objectAtIndex:(NSUInteger)i];
+			XMPPStreamManagementOutgoingStanza *outgoingStanza = [prev_unackedByServer objectAtIndex:(NSUInteger)i];
 			
-			if ([outgoingStanza awaitingStanzaId])
-			{
-				canProcessEntireAck = NO;
-				break;
-			}
-			else
-			{
-				if (outgoingStanza.stanzaId) {
-					[stanzaIds addObject:outgoingStanza.stanzaId];
-				}
-				processed++;
+			if (outgoingStanza.stanzaId) {
+				[stanzaIds addObject:outgoingStanza.stanzaId];
 			}
 		}
 		
-		if (canProcessEntireAck)
-		{
-			// Handle processing
-			[unackedByServer removeObjectsInRange:NSMakeRange(0, (NSUInteger)diff)];
-			if (unackedByServer_lastRequestOffset > diff)
-				unackedByServer_lastRequestOffset -= diff;
-			else
-				unackedByServer_lastRequestOffset = 0;
-			
-			lastHandledByServer = h;
-		}
-		else
-		{
-			// Can't process the entire ack yet.
-			// Inject an ack into the unprocessedReceivedAcks array.
-			
-			NSXMLElement *a = [NSXMLElement elementWithName:@"a" xmlns:XMLNS_STREAM_MANAGEMENT];
-			[a addAttributeWithName:@"h" stringValue:[NSString stringWithFormat:@"%u", h]];
-			
-			unprocessedReceivedAcks = [[NSMutableArray alloc] initWithCapacity:1];
-			[unprocessedReceivedAcks addObject:a];
-			
-			// Process what we can
-			
-			if (processed > 0)
-			{
-				[unackedByServer removeObjectsInRange:NSMakeRange(0, processed)];
-				if (unackedByServer_lastRequestOffset > processed)
-					unackedByServer_lastRequestOffset -= processed;
-				else
-					unackedByServer_lastRequestOffset = 0;
-				
-				lastHandledByServer += processed;
-			}
-		}
+		lastHandledByServer = h;
+		
+		XMPPLogVerbose(@"%@: processResumed: lastHandledByServer(%u)", THIS_FILE, lastHandledByServer);
 		
 		isStarted = YES;
 		didResume = YES;
+		
+		prev_unackedByServer = nil;
 		
 		resume_response = resumed;
 		resume_stanzaIds = [stanzaIds copy];
 		
 		// Update storage
 		
-		NSArray *pending = [[NSArray alloc] initWithArray:unackedByServer copyItems:YES];
-		
 		[storage setLastDisconnect:[NSDate date]
 		       lastHandledByServer:lastHandledByServer
-		    pendingOutgoingStanzas:pending
+		    pendingOutgoingStanzas:nil
 		                 forStream:xmppStream];
 	}};
 	
@@ -764,6 +747,8 @@
 			
 			didResume = NO;
 			resume_response = element;
+			
+			prev_unackedByServer = nil;
 		}});
 		
 		return XMPP_BIND_FAIL_FALLBACK;
@@ -814,7 +799,7 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		if (isStarted)
+		if (isStarted || enableQueued || enableSent)
 		{
 			[self _requestAck];
 		}
@@ -830,10 +815,17 @@
 {
 	XMPPLogTrace();
 	
-	NSXMLElement *r = [NSXMLElement elementWithName:@"r" xmlns:XMLNS_STREAM_MANAGEMENT];
-	[xmppStream sendElement:r];
-	
-	unackedByServer_lastRequestOffset = [unackedByServer count];
+	if (isStarted || enableQueued || enableSent)
+	{
+		// Send the XML element
+		
+		NSXMLElement *r = [NSXMLElement elementWithName:@"r" xmlns:XMLNS_STREAM_MANAGEMENT];
+		[xmppStream sendElement:r];
+		
+		// Reset offset
+		
+		unackedByServer_lastRequestOffset = [unackedByServer count];
+	}
 	
 	[autoRequestTimer cancel];
 	autoRequestTimer = nil;
@@ -843,6 +835,11 @@
 {
 	XMPPLogTrace();
 	
+	if (!isStarted && !(enableQueued || enableSent))
+	{
+		// cannot request ack if not started (or at least sent <enable/>)
+		return NO;
+	}
 	if ((autoRequest_stanzaCount == 0) && (autoRequest_timeout == 0.0))
 	{
 		// auto request disabled
@@ -896,6 +893,9 @@
 		[unackedByServer addObject:stanza];
 		
 		[self updateStoredPendingOutgoingStanzas];
+		
+		// At bottom of this method:
+		// [self maybeRequestAck];
 	}
 	else
 	{
@@ -949,11 +949,13 @@
 				{
 					NSXMLElement *ack = [unprocessedReceivedAcks objectAtIndex:0];
 					
-					if ([self processReceivedAck:ack]) {
+					if ([self processReceivedAck:ack])
+					{
 						[unprocessedReceivedAcks removeObjectAtIndex:0];
 						dequeuedPendingAck = YES;
 					}
-					else {
+					else
+					{
 						break;
 					}
 				}
@@ -965,6 +967,9 @@
 			}});
 		}});
 	}
+	
+	XMPPLogVerbose(@"%@: processSentElement (%@): lastHandledByServer(%u) pending(%lu)",
+	               THIS_FILE, [element name], lastHandledByServer, (unsigned long)[unackedByServer count]);
 	
 	[self maybeRequestAck];
 }
@@ -1051,6 +1056,9 @@
 				unackedByServer_lastRequestOffset = 0;
 			
 			lastHandledByServer = h;
+			
+			XMPPLogVerbose(@"%@: processReceivedAck (fully processed): lastHandledByServer(%u) pending(%lu)",
+			               THIS_FILE, lastHandledByServer, (unsigned long)[unackedByServer count]);
 		}
 		else // if (processed > 0)
 		{
@@ -1061,6 +1069,9 @@
 				unackedByServer_lastRequestOffset = 0;
 			
 			lastHandledByServer += processed;
+			
+			XMPPLogVerbose(@"%@: processReceivedAck (partially processed): lastHandledByServer(%u) pending(%lu)",
+			               THIS_FILE, lastHandledByServer, (unsigned long)[unackedByServer count]);
 		}
 		
 		// Update storage
@@ -1086,12 +1097,14 @@
 		// Notify delegate
 		
 		[multicastDelegate xmppStreamManagement:self didReceiveAckForStanzaIds:stanzaIds];
-		return YES;
 	}
 	else
 	{
-		return NO;
+		XMPPLogVerbose(@"%@: processReceivedAck (unprocessed): lastHandledByServer(%u) pending(%lu)",
+		               THIS_FILE, lastHandledByServer, (unsigned long)[unackedByServer count]);
 	}
+	
+	return canProcessEntireAck;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1114,7 +1127,10 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		[self _sendAck];
+		if (isStarted)
+		{
+			[self _sendAck];
+		}
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -1140,7 +1156,13 @@
 	if (pending > 0)
 	{
 		[unackedByClient removeObjectsInRange:NSMakeRange(0, pending)];
+		unackedByClient_lastAckOffset += pending;
 		lastHandledByClient += pending;
+		
+		XMPPLogVerbose(@"%@: sendAck: lastHandledByClient(%u) inc(%lu) totalPending(%lu)", THIS_FILE,
+		               lastHandledByClient,
+		               (unsigned long)pending,
+		               (unsigned long)unackedByClient_lastAckOffset);
 		
 		// Update info in storage.
 		
@@ -1174,11 +1196,11 @@
 		[a addAttributeWithName:@"h" stringValue:h];
 		
 		[xmppStream sendElement:a];
+		
+		// Reset offset
+		
+		unackedByClient_lastAckOffset = 0;
 	}
-	
-	// Reset offset
-	
-	unackedByClient_lastAckOffset = 0;
 	
 	// Stop the timer(s)
 	
@@ -1194,19 +1216,54 @@
  * Returns the number of incoming stanzas that have been handled on our side,
  * but which we haven't yet sent an ack to the server.
 **/
-- (NSUInteger)pendingAckCount
+- (NSUInteger)numIncomingStanzasThatCanBeAcked
 {
-	NSUInteger pending = unackedByClient_lastAckOffset;
+	// What is unackedByClient_lastAckOffset ?
+	//
+	// In the method maybeUpdateStoredLastHandledByClient,
+	// we remove items from the unackedByClient array, and increase the lastHandledByClient value.
+	// But we do NOT actually send an ack to the server at this point.
+	//
+	// Thus unackedByClient_lastAckOffset represents the number of items we're removed from the unackedByClient array,
+	// and for which we still need to send an ack to the server.
+	
+	NSUInteger count = unackedByClient_lastAckOffset;
 	
 	for (XMPPStreamManagementIncomingStanza *stanza in unackedByClient)
 	{
 		if (stanza.isHandled)
-			pending++;
+			count++;
 		else
 			break;
 	}
 	
-	return pending;
+	return count;
+}
+
+/**
+ * Returns the number of incoming stanzas that cannot yet be acked because
+ * - the stanza hasn't been marked as handled yet
+ * - or a preceeding stanza has hasn't been marked as handled yet
+**/
+- (NSUInteger)numIncomingStanzasThatCannnotBeAcked
+{
+	BOOL foundUnhandledStanza = NO;
+	NSUInteger count = 0;
+	
+	for (XMPPStreamManagementIncomingStanza *stanza in unackedByClient)
+	{
+		if (foundUnhandledStanza)
+		{
+			count++;
+		}
+		else if (!stanza.isHandled)
+		{
+			foundUnhandledStanza = YES;
+			count++;
+		}
+	}
+	
+	return count;
 }
 
 /**
@@ -1216,13 +1273,18 @@
 {
 	XMPPLogTrace();
 	
+	if (!isStarted)
+	{
+		// cannot send acks if we're not started
+		return NO;
+	}
 	if ((autoAck_stanzaCount == 0) && (autoAck_timeout == 0.0))
 	{
 		// auto ack disabled
 		return NO;
 	}
 	
-	NSUInteger pending = [self pendingAckCount];
+	NSUInteger pending = [self numIncomingStanzasThatCanBeAcked];
 	if (pending == 0)
 	{
 		// nothing new to ack
@@ -1329,6 +1391,8 @@
 - (void)processReceivedElement:(XMPPElement *)element
 {
 	XMPPLogTrace();
+	
+	NSAssert(isStarted, @"State machine exception");
 	
 	SEL selector = @selector(xmppStreamManagement:getIsHandled:stanzaId:forReceivedElement:);
 	
@@ -1454,7 +1518,7 @@
 	
 	if (isStarted)
 	{
-		[storage setLastDisconnect:(isStarted ? [NSDate date] : disconnectDate)
+		[storage setLastDisconnect:[NSDate date]
 		       lastHandledByServer:lastHandledByServer
 		    pendingOutgoingStanzas:pending
 		                 forStream:xmppStream];
@@ -1479,6 +1543,16 @@
 {
 	XMPPLogTrace();
 	
+	// Edge case note:
+	//
+	// This method may be invoked shortly after being disconnected.
+	// How is this handled?
+	//
+	// The unackedByClient array is cleared when we send <enable> or <resume>.
+	// And it cannot be appended to unless isStarted is YES.
+	// Thus this method works properly shortly after a disconnect, and can increment lastHandledByClient.
+	// And properly handles the edge case of being called in the middle of resuming a session.
+	
 	NSUInteger pending = 0;
 	for (XMPPStreamManagementIncomingStanza *stanza in unackedByClient)
 	{
@@ -1491,7 +1565,13 @@
 	if (pending > 0)
 	{
 		[unackedByClient removeObjectsInRange:NSMakeRange(0, pending)];
+		unackedByClient_lastAckOffset += pending;
 		lastHandledByClient += pending;
+		
+		XMPPLogVerbose(@"%@: sendAck: lastHandledByClient(%u) inc(%lu) totalPending(%lu)", THIS_FILE,
+					   lastHandledByClient,
+					   (unsigned long)pending,
+					   (unsigned long)unackedByClient_lastAckOffset);
 		
 		if (isStarted)
 		{
@@ -1623,6 +1703,11 @@
 		  [[XMPPStreamManagementIncomingStanza alloc] initWithStanzaId:nil isHandled:YES];
 		[unackedByClient addObject:stanza];
 		
+		XMPPLogVerbose(@"%@: xmppStreamDidFilterStanza: lastHandledByClient(%u) pendingToAck(%lu), pendingHandled(%lu)",
+		               THIS_FILE, lastHandledByClient,
+		               (unsigned long)[self numIncomingStanzasThatCanBeAcked],
+		               (unsigned long)[self numIncomingStanzasThatCannnotBeAcked]);
+		
 		if (![self maybeSendAck])
 		{
 			[self maybeUpdateStoredLastHandledByClient];
@@ -1740,6 +1825,9 @@
 			
 			isStarted = NO;
 			enableSent = NO;
+			
+			[autoRequestTimer cancel];
+			autoRequestTimer = nil;
 		}
 	}
 }
@@ -1782,6 +1870,8 @@
 	
 	didAttemptResume = NO;
 	didResume = NO;
+	
+	prev_unackedByServer = nil;
 	
 	resume_response = nil;
 	resume_stanzaIds = nil;
