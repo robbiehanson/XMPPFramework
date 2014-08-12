@@ -306,7 +306,8 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 		dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
 			
 			[self invokeWithObject:nil];
-			
+            [self cancelTimer];
+            
 		}});
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
