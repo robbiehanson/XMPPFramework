@@ -171,11 +171,12 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 {
     AssertProperQueue();
     
-    if([[element elementID] length] == 0) return NO;
+	NSString *elementID = [element elementID];
 	
-	id <XMPPTrackingInfo> info = [dict objectForKey:[element elementID]];
-    
-    if(info)
+	if ([elementID length] == 0) return NO;
+	
+	id <XMPPTrackingInfo> info = [dict objectForKey:elementID];
+	if(info)
     {
         BOOL valid = YES;
             
@@ -305,7 +306,8 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 		dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
 			
 			[self invokeWithObject:nil];
-			
+            [self cancelTimer];
+            
 		}});
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));

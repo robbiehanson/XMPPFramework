@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "XMPPSASLAuthentication.h"
+#import "XMPPCustomBinding.h"
 #import "GCDAsyncSocket.h"
 #import "GCDMulticastDelegate.h"
 
@@ -894,6 +895,19 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;
 
 /**
+ * Binding a JID resource is a standard part of the authentication process,
+ * and occurs after SASL authentication completes (which generally authenticates the JID username).
+ * 
+ * This delegate method allows for a custom binding procedure to be used.
+ * For example:
+ * - a custom SASL authentication scheme might combine auth with binding
+ * - stream management (xep-0198) replaces binding if it can resume a previous session
+ * 
+ * Return nil (or don't implement this method) if you wish to use the standard binding procedure.
+**/
+- (id <XMPPCustomBinding>)xmppStreamWillBind:(XMPPStream *)sender;
+
+/**
  * This method is called if the XMPP server doesn't allow our resource of choice
  * because it conflicts with an existing resource.
  * 
@@ -925,6 +939,14 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (XMPPIQ *)xmppStream:(XMPPStream *)sender willReceiveIQ:(XMPPIQ *)iq;
 - (XMPPMessage *)xmppStream:(XMPPStream *)sender willReceiveMessage:(XMPPMessage *)message;
 - (XMPPPresence *)xmppStream:(XMPPStream *)sender willReceivePresence:(XMPPPresence *)presence;
+
+/**
+ * This method is called if any of the xmppStream:willReceiveX: methods filter the incoming stanza.
+ * 
+ * It may be useful for some extensions to know that something was received,
+ * even if it was filtered for some reason.
+**/
+- (void)xmppStreamDidFilterStanza:(XMPPStream *)sender;
 
 /**
  * These methods are called after their respective XML elements are received on the stream.
@@ -1079,7 +1101,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * The standard example is XEP-0198, which uses <r> & <a> elements.
  * 
  * If you're using custom elements, you must register the custom element name(s).
- * Otherwise the xmppStream will treat an non-XMPP elements as errors (xmppStream:didReceiveError:).
+ * Otherwise the xmppStream will treat non-XMPP elements as errors (xmppStream:didReceiveError:).
  * 
  * @see registerCustomElementNames (in XMPPInternal.h)
 **/

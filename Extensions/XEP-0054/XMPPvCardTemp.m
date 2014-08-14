@@ -31,6 +31,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 @implementation XMPPvCardTemp
 
+#if DEBUG
 
 + (void)initialize {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
@@ -54,6 +55,8 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		exit(15);
 	}
 }
+
+#endif
 
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTemp class]);
