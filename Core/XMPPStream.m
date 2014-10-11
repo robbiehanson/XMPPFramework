@@ -4756,6 +4756,19 @@ enum XMPPStreamConfig
 - (BOOL)isValidResponseElement:(XMPPElement *)response forRequestElement:(XMPPElement *)request
 {
     if(!response || !request) return NO;
+
+    /*
+     * Handle fringe scenario.
+     *
+     * @link {https://github.com/robbiehanson/XMPPFramework/issues/446}
+     */
+    NSString *requestType = [request attributeStringValueForName:@"type"];
+    NSString *responseType = [response attributeStringValueForName:@"type"];
+
+    if ([requestType isEqualToString:@"set"]
+        && [responseType isEqualToString:@"result"]
+        && response.childCount == 0)
+        return YES;
     
     return [self isValidResponseElementFrom:[response from] forRequestElementTo:[request to]];
 }
