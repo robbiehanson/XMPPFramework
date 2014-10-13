@@ -28,6 +28,21 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+* This method provides functionality of XEP-0077 3.3 User Changes Password.
+*
+* @link {http://xmpp.org/extensions/xep-0077.html#usecases-changepw}
+*
+* Example 18. Password Change
+*
+* <iq type='set' to='shakespeare.lit' id='change1'>
+*   <query xmlns='jabber:iq:register'>
+*     <username>bill</username>
+*     <password>newpass</password>
+*   </query>
+* </iq>
+*
+*/
 - (BOOL)changePassword:(NSString *)newPassword
 {
   if (![xmppStream isAuthenticated])
@@ -51,9 +66,9 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
                                   child:query];
 
         [xmppIDTracker addID:[iq elementID]
-                           target:self
-                         selector:@selector(handlePasswordChangeQueryIQ:withInfo:)
-                          timeout:60];
+                      target:self
+                    selector:@selector(handlePasswordChangeQueryIQ:withInfo:)
+                     timeout:60];
 
         [xmppStream sendElement:iq];
       }
@@ -67,6 +82,26 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
   return YES;
 }
 
+/**
+* This method provides functionality of XEP-0077 3.2 Entity Cancels an Existing Registration.
+*
+* @link {http://xmpp.org/extensions/xep-0077.html#usecases-cancel}
+*
+* <iq type='set' from='bill@shakespeare.lit/globe' id='unreg1'>
+*   <query xmlns='jabber:iq:register'>
+*     <remove/>
+*   </query>
+* </iq>
+*
+*/
+- (BOOL)cancelRegistration
+{
+  return [self cancelRegistrationUsingPassword:nil];
+}
+
+/**
+* Same as cancelRegistration. Handling authentication challenges is not yet implemented.
+*/
 - (BOOL)cancelRegistrationUsingPassword:(NSString *)password
 {
   // TODO: Handle the scenario of using password
@@ -102,6 +137,9 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
 #pragma mark - XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+* This method handles the response received (or not received) after calling changePassword.
+*/
 - (void)handlePasswordChangeQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)info
 {
   dispatch_block_t block = ^{
@@ -140,6 +178,9 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
     dispatch_async(moduleQueue, block);
 }
 
+/**
+* This method handles the response received (or not received) after calling cancelRegistration.
+*/
 - (void)handleRegistrationCancelQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)info
 {
   dispatch_block_t block = ^{
