@@ -84,7 +84,7 @@ extern NSString *const kXMPPvCardTempElement;
 @property (nonatomic, strong) NSString *uid;
 @property (nonatomic, strong) NSString *url;
 @property (nonatomic, strong) NSString *version;
-@property (nonatomic, strong) NSString *description;
+@property (nonatomic, strong) NSString *desc;
 
 @property (nonatomic, assign) XMPPvCardTempClass privacyClass;
 @property (nonatomic, strong) NSData *key;

@@ -819,12 +819,12 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-- (NSString *)description {
+- (NSString *)desc {
 	return [[self elementForName:@"DESC"] stringValue];
 }
 
 
-- (void)setDescription:(NSString *)desc {
+- (void)setDesc:(NSString *)desc {
 	XMPP_VCARD_SET_STRING_CHILD(desc, @"DESC");
 }
 
