@@ -21,7 +21,7 @@
 #import "NSData+XMPP.h"
 
 #if DEBUG
-static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;
 #else
     static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
