@@ -510,6 +510,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
     _asyncSocket = nil;
   }
 
+  _streamMethods &= 0;
   _transferState = XMPPIFTStateNone;
   _senderJID = nil;
   _streamhostsQueryId = nil;

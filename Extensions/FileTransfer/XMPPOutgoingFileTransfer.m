@@ -63,6 +63,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // XMPP_LOG_LEVEL_VERBOSE |
 // XMPP Outgoing File Transfer State
 typedef NS_ENUM(int, XMPPOFTState) {
   XMPPOFTStateNone,
+  XMPPOFTStateStarted,
   XMPPOFTStateSOCKSLive,
   XMPPOFTStateConnectingToProxy,
   XMPPOFTStateFinished
@@ -87,6 +88,8 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
   XMPPOFTState _transferState;
 
   XMPPJID *_proxyJID;
+
+  NSMutableDictionary *_pastRecipients;
 }
 
 @end
@@ -107,6 +110,7 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
     _blockSize = 4096;
 
     _transferState = XMPPOFTStateNone;
+    _pastRecipients = [NSMutableDictionary new];
   }
   return self;
 }
@@ -171,8 +175,36 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
     return NO;
   }
 
+  if (_transferState != XMPPOFTStateNone) {
+    if (errPtr) {
+      NSString *errMsg = @"Transfer already in progress.";
+      *errPtr = [self localErrorWithMessage:errMsg code:-1];
+    }
+
+    return NO;
+  }
+
   dispatch_block_t block = ^{
       @autoreleasepool {
+        _transferState = XMPPOFTStateStarted;
+
+        if (_pastRecipients[_recipientJID.full]) {
+          uint8_t methods = (gl_uint8_t) [_pastRecipients[_recipientJID.full] unsignedIntValue];
+
+          if (methods & XMPPFileTransferStreamMethodBytestreams) {
+            _streamMethods |= XMPPFileTransferStreamMethodBytestreams;
+          }
+
+          if (methods & XMPPFileTransferStreamMethodIBB) {
+            _streamMethods |= XMPPFileTransferStreamMethodIBB;
+          }
+
+          if (_streamMethods) {
+            [self querySIOffer];
+            return_from_block;
+          }
+        }
+
         [self queryRecipientDiscoInfo];
       }
   };
@@ -187,7 +219,12 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
 
 - (BOOL)sendData:(NSData *)data toRecipient:(XMPPJID *)recipient
 {
-  return [self sendData:data named:nil toRecipient:recipient description:nil error:nil];
+  return _transferState != XMPPOFTStateNone ? NO : [self sendData:data
+                                                            named:nil
+                                                      toRecipient:recipient
+                                                      description:nil
+                                                            error:nil];
+
 }
 
 - (BOOL)sendData:(NSData *)data
@@ -196,6 +233,15 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
      description:(NSString *)description
            error:(NSError **)errPtr
 {
+  if (_transferState != XMPPOFTStateNone) {
+    if (errPtr) {
+      NSString *errMsg = @"Transfer already in progress.";
+      *errPtr = [self localErrorWithMessage:errMsg code:-1];
+    }
+
+    return NO;
+  }
+
   self.outgoingData = data;
   self.outgoingFileName = name;
   self.recipientJID = recipient;
@@ -398,7 +444,10 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
   dispatch_block_t block = ^{
       @autoreleasepool {
         _localIPAddress = [self getIPAddress:YES];
-        _localPort = [XMPPOutgoingFileTransfer getRandomPort];
+
+        if (!_localPort) {
+          _localPort = [XMPPOutgoingFileTransfer getRandomPort];
+        }
 
         _streamhosts = [NSMutableArray new];
 
@@ -564,6 +613,7 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
         [query addAttributeWithName:@"sid" stringValue:self.sid];
 
         for (NSXMLElement *streamhost in _streamhosts) {
+          [streamhost detach];
           [query addChild:streamhost];
         }
 
@@ -577,12 +627,12 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
         // Send the list of streamhosts to the recipient
         [xmppStream sendElement:iq];
 
-
-        NSAssert(_asyncSocket == nil, @"_asyncSocket should be nil at this point.");
-
         // Create a socket to listen for a direct connection
-        _asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self
-                                                  delegateQueue:moduleQueue];
+        if (!_asyncSocket) {
+          _asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self
+                                                    delegateQueue:moduleQueue];
+        }
+
         NSError *error;
 
         if (![_asyncSocket acceptOnPort:_localPort error:&error]) {
@@ -1041,6 +1091,8 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
         if (hasIBB) {
           _streamMethods |= XMPPFileTransferStreamMethodIBB;
         }
+
+        _pastRecipients[_recipientJID.full] = @(_streamMethods);
       }
   };
 
@@ -1533,21 +1585,57 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
                             userInfo:errInfo];
   }
 
-  if (_outgoingSocket) {
-    if (_outgoingSocket.isConnected) {
-      [_outgoingSocket disconnect];
-    }
-    _outgoingSocket = nil;
-  }
+  [self cleanUp];
+  [multicastDelegate xmppOutgoingFileTransfer:self didFailWithError:error];
+}
+
+/**
+* This method is called to clean up everything if the transfer succeeds.
+*/
+- (void)transferSuccess
+{
+
+  XMPPLogTrace();
+
+  dispatch_block_t block = ^{
+      @autoreleasepool {
+        _transferState = XMPPOFTStateFinished;
+        [multicastDelegate xmppOutgoingFileTransferDidSucceed:self];
+        [self cleanUp];
+      }
+  };
+
+  if (dispatch_get_specific(moduleQueueTag))
+    block();
+  else
+    dispatch_async(moduleQueue, block);
+}
+
+/**
+* This method is used to reset the system for receiving new files.
+*/
+- (void)cleanUp
+{
+  XMPPLogTrace();
 
   if (_asyncSocket) {
-    if (_asyncSocket.isConnected) {
-      [_asyncSocket disconnect];
-    }
+    [_asyncSocket setDelegate:nil];
+    [_asyncSocket disconnect];
     _asyncSocket = nil;
   }
 
-  [multicastDelegate xmppOutgoingFileTransfer:self didFailWithError:error];
+  if (_outgoingSocket) {
+    [_outgoingSocket setDelegate:nil];
+    [_outgoingSocket disconnect];
+    _outgoingSocket = nil;
+  }
+
+  _streamMethods &= 0;
+  _transferState = XMPPOFTStateNone;
+  _totalDataSize = 0;
+  _outgoingDataBlockSeq = 0;
+  _sentDataSize = 0;
+  _outgoingDataBase64 = nil;
 }
 
 
@@ -1627,8 +1715,7 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
       [_asyncSocket readDataToLength:5 withTimeout:TIMEOUT_READ tag:SOCKS_TAG_READ_PROXY_REPLY];
       break;
     case SOCKS_TAG_WRITE_DATA:
-      _transferState = XMPPOFTStateFinished;
-      [multicastDelegate xmppOutgoingFileTransferDidSucceed:self];
+      [self transferSuccess];
       break;
     default:
       break;
@@ -1667,7 +1754,7 @@ shouldTimeoutWriteWithTag:(long)tag
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
   XMPPLogVerbose(@"socket did disconnect with error: %@", err);
-  if (_transferState != XMPPOFTStateFinished) {
+  if (_transferState != XMPPOFTStateFinished && _transferState != XMPPOFTStateNone) {
     [self failWithReason:@"Socket disconnected before transfer completion." error:err];
   }
 }
