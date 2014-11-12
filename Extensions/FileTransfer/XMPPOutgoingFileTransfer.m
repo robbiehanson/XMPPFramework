@@ -9,14 +9,13 @@
 
 #import <ifaddrs.h>
 #import <net/if.h>
-#import <netinet6/in6.h>
 #import <netinet/in.h>
 #import <arpa/inet.h>
 #import "XMPPLogging.h"
 #import "XMPPOutgoingFileTransfer.h"
 #import "XMPPIDTracker.h"
 #import "idn-int.h"
-#import "XMPPNamespaces.h"
+#import "XMPPConstants.h"
 #import "NSNumber+XMPP.h"
 #import "NSData+XMPP.h"
 
@@ -1727,10 +1726,9 @@ shouldTimeoutReadWithTag:(long)tag
                  elapsed:(NSTimeInterval)elapsed
                bytesDone:(NSUInteger)length
 {
-  XMPPLogVerbose(@"%@: socket shouldTimeoutReadWithTag:%ld elapsed:%d bytesDone:%d", THIS_FILE, tag,
-                 elapsed, length);
+  XMPPLogVerbose(@"%@: socket shouldTimeoutReadWithTag:%ld elapsed:%f bytesDone:%lu", THIS_FILE, tag, elapsed, (unsigned long)length);
 
-  NSString *reason = [NSString stringWithFormat:@"Read timeout. %d bytes read.", length];
+  NSString *reason = [NSString stringWithFormat:@"Read timeout. %lu bytes read.", (unsigned long)length];
   [self failWithReason:reason error:nil];
 
   return 0;

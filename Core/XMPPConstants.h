@@ -1,8 +1,3 @@
-//
-// Created by Jonathon Staff on 10/22/14.
-// Copyright (c) 2014 nplexity, LLC. All rights reserved.
-//
-
 #import <Foundation/Foundation.h>
 
 /**
@@ -19,6 +14,3 @@ extern NSString *const XMPPBytestreamsNamespace;
 extern NSString *const XMPPIBBNamespace;
 extern NSString *const XMPPDiscoItemsNamespace;
 extern NSString *const XMPPDiscoInfoNamespace;
-
-@interface XMPPNamespaces : NSObject
-@end
