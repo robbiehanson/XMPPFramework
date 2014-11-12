@@ -8,7 +8,7 @@
 #endif
 
 #import "XMPPIncomingFileTransfer.h"
-#import "XMPPNamespaces.h"
+#import "XMPPConstants.h"
 #import "XMPPLogging.h"
 #import "idn-int.h"
 #import "NSNumber+XMPP.h"
