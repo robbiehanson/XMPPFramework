@@ -234,7 +234,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
     NSString *savedPhotoHash = [_moduleStorage photoHashForJID:jid xmppStream:xmppStream];
 
 	// check the hash
-	if (![photoHash isEqualToString:[_moduleStorage photoHashForJID:jid xmppStream:xmppStream]]
+    if ([photoHash caseInsensitiveCompare:savedPhotoHash] != NSOrderedSame
         && !([photoHash length] == 0 && [savedPhotoHash length] == 0)) {
 		[_xmppvCardTempModule fetchvCardTempForJID:jid ignoreStorage:YES];
 	}

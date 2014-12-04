@@ -6,6 +6,7 @@ XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), al
 **[Overview of the XMPP Framework](https://github.com/robbiehanson/XMPPFramework/wiki/IntroToFramework)**<br/>
 **[Getting started using XMPPFramework on Mac OS X](https://github.com/robbiehanson/XMPPFramework/wiki/GettingStarted_Mac)**<br/>
 **[Getting started using XMPPFramework on iOS](https://github.com/robbiehanson/XMPPFramework/wiki/GettingStarted_iOS)**<br/>
+**[XEPs supported by the XMPPFramework](https://github.com/robbiehanson/XMPPFramework/wiki/XEPs)**<br/>
 **[Learn more about XMPPFramework](https://github.com/robbiehanson/XMPPFramework/wiki)**<br/>
 
 <br/>

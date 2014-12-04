@@ -236,12 +236,10 @@
 
 - (NSDate *)parseDateString: (NSString *)dateString withFormat: (NSString *)format {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    NSDate *result = nil;
-    
+    [dateFormatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
     [dateFormatter setDateFormat: format];
     
-    result = [dateFormatter dateFromString: dateString];
-    
+    NSDate *result = [dateFormatter dateFromString: dateString];
     
     return result;
 }

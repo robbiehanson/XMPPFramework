@@ -31,7 +31,7 @@
  * 
  * All other aspects of capabilities handling (such as JID's, lookup failures, etc) are kept separate between streams.
 **/
-+ (XMPPCapabilitiesCoreDataStorage *)sharedInstance;
++ (instancetype)sharedInstance;
 
 
 /* Inherited from XMPPCoreDataStorage

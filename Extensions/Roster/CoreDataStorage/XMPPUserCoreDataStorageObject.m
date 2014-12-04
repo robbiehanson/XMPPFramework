@@ -4,11 +4,18 @@
 #import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPGroupCoreDataStorageObject.h"
 #import "NSNumber+XMPP.h"
+#import "XMPPLogging.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+// Log levels: off, error, warn, info, verbose
+#if DEBUG
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
+#else
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
 
 @interface XMPPUserCoreDataStorageObject ()
 
@@ -189,7 +196,7 @@
 {
 	if (jid == nil)
 	{
-		NSLog(@"XMPPUserCoreDataStorageObject: invalid jid (nil)");
+		XMPPLogVerbose(@"XMPPUserCoreDataStorageObject: invalid jid (nil)");
 		return nil;
 	}
 	
@@ -216,7 +223,7 @@
 	
 	if (jid == nil)
 	{
-		NSLog(@"XMPPUserCoreDataStorageObject: invalid item (missing or invalid jid): %@", item);
+		XMPPLogVerbose(@"XMPPUserCoreDataStorageObject: invalid item (missing or invalid jid): %@", item);
 		return nil;
 	}
 	
@@ -262,14 +269,14 @@
 	
 	if (jid == nil)
 	{
-		NSLog(@"XMPPUserCoreDataStorageObject: invalid item (missing or invalid jid): %@", item);
+		XMPPLogVerbose(@"XMPPUserCoreDataStorageObject: invalid item (missing or invalid jid): %@", item);
 		return;
 	}
 	
 	self.jid = jid;
 	self.nickname = [item attributeStringValueForName:@"name"];
 	
-	self.displayName = (self.nickname != nil) ? self.nickname : jidStr;
+	self.displayName = self.nickname ? : jidStr;
 	
 	self.subscription = [item attributeStringValueForName:@"subscription"];
 	self.ask = [item attributeStringValueForName:@"ask"];

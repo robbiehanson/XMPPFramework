@@ -19,17 +19,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (XMPPStream *)xmppStream
 {
-	return [[NSApp delegate] xmppStream];
+	return [(AppDelegate *)[NSApp delegate] xmppStream];
 }
 
 - (XMPPRoster *)xmppRoster
 {
-	return [[NSApp delegate] xmppRoster];
+	return [(AppDelegate *)[NSApp delegate] xmppRoster];
 }
 
 - (XMPPRosterMemoryStorage *)xmppRosterStorage
 {
-	return [[NSApp delegate] xmppRosterStorage];
+	return [(AppDelegate *)[NSApp delegate] xmppRosterStorage];
 }
 
 - (void)awakeFromNib
@@ -54,8 +54,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[serverField              setObjectValue:[dflts objectForKey:@"Account.Server"]];
 	[portField                setObjectValue:[dflts objectForKey:@"Account.Port"]];
 	[sslButton                setObjectValue:[dflts objectForKey:@"Account.UseSSL"]];
-	[selfSignedButton         setObjectValue:[dflts objectForKey:@"Account.AllowSelfSignedCert"]];
-	[mismatchButton           setObjectValue:[dflts objectForKey:@"Account.AllowSSLHostNameMismatch"]];
+	[customCertEvalButton     setObjectValue:[dflts objectForKey:@"Account.CustomCertEvaluation"]];
 	[jidField                 setObjectValue:[dflts objectForKey:@"Account.JID"]];
 	[rememberPasswordCheckbox setObjectValue:[dflts objectForKey:@"Account.RememberPassword"]];
 	[resourceField            setObjectValue:[dflts objectForKey:@"Account.Resource"]];
@@ -158,8 +157,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[portField setEnabled:enabled];
 	
 	[sslButton setEnabled:enabled];
-	[selfSignedButton setEnabled:enabled];
-	[mismatchButton setEnabled:enabled];
+	[customCertEvalButton setEnabled:enabled];
 	
 	[jidField setEnabled:enabled];
 	[passwordField setEnabled:enabled];
@@ -189,9 +187,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	int port = [portField intValue];
 	self.xmppStream.hostPort = port;
 	
-	useSSL                      = ([sslButton state] == NSOnState);
-	allowSelfSignedCertificates = ([selfSignedButton state] == NSOnState);
-	allowSSLHostNameMismatch    = ([mismatchButton state] == NSOnState);
+	useSSL               = ([sslButton state] == NSOnState);
+	customCertEvaluation = ([customCertEvalButton state] == NSOnState);
 	
 	NSString *resource = [resourceField stringValue];
 	if ([resource length] == 0)
@@ -217,9 +214,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	[dflts setObject:[resourceField stringValue]
 			  forKey:@"Account.Resource"];
 	
-	[dflts setBool:useSSL                      forKey:@"Account.UseSSL"];
-	[dflts setBool:allowSelfSignedCertificates forKey:@"Account.AllowSelfSignedCert"];
-	[dflts setBool:allowSSLHostNameMismatch    forKey:@"Account.AllowSSLHostNameMismatch"];
+	[dflts setBool:useSSL               forKey:@"Account.UseSSL"];
+	[dflts setBool:customCertEvaluation forKey:@"Account.CustomCertEvaluation"];
 	
 	if ([rememberPasswordCheckbox state] == NSOnState)
 	{
@@ -393,7 +389,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		id <XMPPUser> user = [roster objectAtIndex:selectedRow];
 		id <XMPPResource> resource = [user primaryResource];
 		
-		[[NSApp delegate] connectViaXEP65:[resource jid]];
+		[(AppDelegate *)[NSApp delegate] connectViaXEP65:[resource jid]];
 	}
 }
 
@@ -528,45 +524,76 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	if (allowSelfSignedCertificates)
+	NSString *expectedCertName = [sender.myJID domain];
+	if (expectedCertName)
 	{
-		[settings setObject:[NSNumber numberWithBool:YES] forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
-	}
-	
-	if (allowSSLHostNameMismatch)
-	{
-		[settings setObject:[NSNull null] forKey:(NSString *)kCFStreamSSLPeerName];
-	}
-	else
-	{
-		// Google does things incorrectly (does not conform to RFC).
-		// Because so many people ask questions about this (assume xmpp framework is broken),
-		// I've explicitly added code that shows how other xmpp clients "do the right thing"
-		// when connecting to a google server (gmail, or google apps for domains).
-		
-		NSString *expectedCertName = nil;
-		
-		NSString *serverHostName = [sender hostName];
-		NSString *virtualHostName = [[sender myJID] domain];
-		
-		if ([serverHostName isEqualToString:@"talk.google.com"])
-		{
-			if ([virtualHostName isEqualToString:@"gmail.com"])
-			{
-				expectedCertName = virtualHostName;
-			}
-			else
-			{
-				expectedCertName = serverHostName;
-			}
-		}
-		else
-		{
-			expectedCertName = serverHostName;
-		}
-		
 		[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
 	}
+	
+	if (customCertEvaluation)
+	{
+		[settings setObject:@(YES) forKey:GCDAsyncSocketManuallyEvaluateTrust];
+	}
+}
+
+/**
+ * Allows a delegate to hook into the TLS handshake and manually validate the peer it's connecting to.
+ *
+ * This is only called if the stream is secured with settings that include:
+ * - GCDAsyncSocketManuallyEvaluateTrust == YES
+ * That is, if a delegate implements xmppStream:willSecureWithSettings:, and plugs in that key/value pair.
+ *
+ * Thus this delegate method is forwarding the TLS evaluation callback from the underlying GCDAsyncSocket.
+ *
+ * Typically the delegate will use SecTrustEvaluate (and related functions) to properly validate the peer.
+ *
+ * Note from Apple's documentation:
+ *   Because [SecTrustEvaluate] might look on the network for certificates in the certificate chain,
+ *   [it] might block while attempting network access. You should never call it from your main thread;
+ *   call it only from within a function running on a dispatch queue or on a separate thread.
+ *
+ * This is why this method uses a completionHandler block rather than a normal return value.
+ * The idea is that you should be performing SecTrustEvaluate on a background thread.
+ * The completionHandler block is thread-safe, and may be invoked from a background queue/thread.
+ * It is safe to invoke the completionHandler block even if the socket has been closed.
+ * 
+ * Keep in mind that you can do all kinds of cool stuff here.
+ * For example:
+ * 
+ * If your development server is using a self-signed certificate,
+ * then you could embed info about the self-signed cert within your app, and use this callback to ensure that
+ * you're actually connecting to the expected dev server.
+ * 
+ * Also, you could present certificates that don't pass SecTrustEvaluate to the client.
+ * That is, if SecTrustEvaluate comes back with problems, you could invoke the completionHandler with NO,
+ * and then ask the client if the cert can be trusted. This is similar to how most browsers act.
+ * 
+ * Generally, only one delegate should implement this method.
+ * However, if multiple delegates implement this method, then the first to invoke the completionHandler "wins".
+ * And subsequent invocations of the completionHandler are ignored.
+**/
+- (void)xmppStream:(XMPPStream *)sender didReceiveTrust:(SecTrustRef)trust
+                                      completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	// The delegate method should likely have code similar to this,
+	// but will presumably perform some extra security code stuff.
+	// For example, allowing a specific self-signed certificate that is known to the app.
+	
+	dispatch_queue_t bgQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+	dispatch_async(bgQueue, ^{
+		
+		SecTrustResultType result = kSecTrustResultDeny;
+		OSStatus status = SecTrustEvaluate(trust, &result);
+		
+		if (status == noErr && (result == kSecTrustResultProceed || result == kSecTrustResultUnspecified)) {
+			completionHandler(YES);
+		}
+		else {
+			completionHandler(NO);
+		}
+	});
 }
 
 - (void)xmppStreamDidSecure:(XMPPStream *)sender

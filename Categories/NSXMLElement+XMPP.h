@@ -8,6 +8,16 @@
 @interface NSXMLElement (XMPP)
 
 /**
+ * Convenience methods for Creating elements.
+**/
+
++ (NSXMLElement *)elementWithName:(NSString *)name numberValue:(NSNumber *)number;
+- (id)initWithName:(NSString *)name numberValue:(NSNumber *)number;
+
++ (NSXMLElement *)elementWithName:(NSString *)name objectValue:(id)objectValue;
+- (id)initWithName:(NSString *)name objectValue:(id)objectValue;
+
+/**
  * Creating elements with explicit xmlns values.
  * 
  * Use these instead of [NSXMLElement initWithName:URI:].
@@ -69,9 +79,10 @@
 - (void)addAttributeWithName:(NSString *)name floatValue:(float)floatValue;
 - (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue;
 - (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue;
-- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue;
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSUInteger)unsignedIntegerValue;
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
 - (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number;
+- (void)addAttributeWithName:(NSString *)name objectValue:(id)objectValue;
 
 /**
  * Convenience methods for extracting attribute values in different formats.
@@ -105,6 +116,12 @@
 - (BOOL)attributeBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
 - (float)attributeFloatValueForName:(NSString *)name withDefaultValue:(float)defaultValue;
 - (double)attributeDoubleValueForName:(NSString *)name withDefaultValue:(double)defaultValue;
+- (int32_t)attributeInt32ValueForName:(NSString *)name withDefaultValue:(int32_t)defaultValue;
+- (uint32_t)attributeUInt32ValueForName:(NSString *)name withDefaultValue:(uint32_t)defaultValue;
+- (int64_t)attributeInt64ValueForName:(NSString *)name withDefaultValue:(int64_t)defaultValue;
+- (uint64_t)attributeUInt64ValueForName:(NSString *)name withDefaultValue:(uint64_t)defaultValue;
+- (NSInteger)attributeIntegerValueForName:(NSString *)name withDefaultValue:(NSInteger)defaultValue;
+- (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name withDefaultValue:(NSUInteger)defaultValue;
 - (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue;
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;

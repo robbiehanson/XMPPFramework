@@ -8,6 +8,60 @@
 @implementation NSXMLElement (XMPP)
 
 /**
+ * Convenience methods for Creating elements.
+**/
+
++ (NSXMLElement *)elementWithName:(NSString *)name numberValue:(NSNumber *)number
+{
+    return [self elementWithName:name stringValue:[number stringValue]];
+}
+
+- (id)initWithName:(NSString *)name numberValue:(NSNumber *)number
+{
+    return [self initWithName:name stringValue:[number stringValue]];
+}
+
++ (NSXMLElement *)elementWithName:(NSString *)name objectValue:(id)objectValue
+{
+    if([objectValue isKindOfClass:[NSString class]])
+    {
+        return [self elementWithName:name stringValue:objectValue];
+    }
+    else if([objectValue isKindOfClass:[NSNumber class]])
+    {
+        return [self elementWithName:name numberValue:objectValue];
+    }
+    else if([objectValue respondsToSelector:@selector(stringValue)])
+    {
+        return [self elementWithName:name stringValue:[objectValue stringValue]];
+    }
+    else
+    {
+        return [self elementWithName:name];
+    }
+}
+
+- (id)initWithName:(NSString *)name objectValue:(id)objectValue
+{
+    if([objectValue isKindOfClass:[NSString class]])
+    {
+        return [self initWithName:name stringValue:objectValue];
+    }
+    else if([objectValue isKindOfClass:[NSNumber class]])
+    {
+        return [self initWithName:name numberValue:objectValue];
+    }
+    else if([objectValue respondsToSelector:@selector(stringValue)])
+    {
+        return [self initWithName:name stringValue:[objectValue stringValue]];
+    }
+    else
+    {
+        return [self initWithName:name];
+    }
+}
+
+/**
  * Quick method to create an element
 **/
 + (NSXMLElement *)elementWithName:(NSString *)name xmlns:(NSString *)ns
@@ -258,7 +312,7 @@
     [self addAttributeWithName:name numberValue:[NSNumber numberWithInteger:integerValue]];
 }
 
-- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSInteger)unsignedIntegerValue
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSUInteger)unsignedIntegerValue
 {
     [self addAttributeWithName:name numberValue:[NSNumber numberWithUnsignedInteger:unsignedIntegerValue]];
 }
@@ -271,6 +325,22 @@
 - (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number
 {
     [self addAttributeWithName:name stringValue:[number stringValue]];
+}
+
+- (void)addAttributeWithName:(NSString *)name objectValue:(id)objectValue
+{
+    if([objectValue isKindOfClass:[NSString class]])
+    {
+        [self addAttributeWithName:name stringValue:objectValue];
+    }
+    else if([objectValue isKindOfClass:[NSNumber class]])
+    {
+        [self addAttributeWithName:name numberValue:objectValue];
+    }
+    else if([objectValue respondsToSelector:@selector(stringValue)])
+    {
+        [self addAttributeWithName:name stringValue:[objectValue stringValue]];
+    }
 }
 
 /**
@@ -417,6 +487,54 @@
 {
 	NSXMLNode *attr = [self attributeForName:name];
 	return (attr) ? [[attr stringValue] doubleValue] : defaultValue;
+}
+- (int32_t)attributeInt32ValueForName:(NSString *)name withDefaultValue:(int32_t)defaultValue
+{
+	int32_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt32:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (uint32_t)attributeUInt32ValueForName:(NSString *)name withDefaultValue:(uint32_t)defaultValue
+{
+	uint32_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt32:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (int64_t)attributeInt64ValueForName:(NSString *)name withDefaultValue:(int64_t)defaultValue
+{
+	int64_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt64:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (uint64_t)attributeUInt64ValueForName:(NSString *)name withDefaultValue:(uint64_t)defaultValue
+{
+	uint64_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt64:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (NSInteger)attributeIntegerValueForName:(NSString *)name withDefaultValue:(NSInteger)defaultValue
+{
+	NSInteger result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSInteger:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name withDefaultValue:(NSUInteger)defaultValue
+{
+	NSUInteger result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSUInteger:&result])
+		return result;
+	else
+		return defaultValue;
 }
 - (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue
 {

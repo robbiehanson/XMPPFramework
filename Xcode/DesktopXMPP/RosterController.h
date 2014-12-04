@@ -4,8 +4,7 @@
 @interface RosterController : NSObject <NSTableViewDelegate>
 {
 	BOOL useSSL;
-	BOOL allowSelfSignedCertificates;
-	BOOL allowSSLHostNameMismatch;
+	BOOL customCertEvaluation;
 	
 	BOOL isOpen;
 	BOOL isRegistering;
@@ -19,8 +18,7 @@
 	IBOutlet NSTextField * serverField;
 	IBOutlet NSTextField * portField;
 	IBOutlet NSButton    * sslButton;
-	IBOutlet NSButton    * selfSignedButton;
-	IBOutlet NSButton    * mismatchButton;
+	IBOutlet NSButton    * customCertEvalButton;
 	IBOutlet NSTextField * jidField;
     IBOutlet NSTextField * passwordField;
 	IBOutlet NSButton    * rememberPasswordCheckbox;
