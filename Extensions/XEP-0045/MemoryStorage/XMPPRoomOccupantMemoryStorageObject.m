@@ -38,8 +38,17 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			presence = [coder decodeObjectForKey:@"presence"];
-			jid      = [coder decodeObjectForKey:@"jid"];
+            if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+               [coder requiresSecureCoding])
+            {
+                presence = [coder decodeObjectOfClass:[XMPPPresence class] forKey:@"presence"];
+                jid      = [coder decodeObjectOfClass:[XMPPJID class] forKey:@"jid"];
+            }
+            else
+            {
+                presence = [coder decodeObjectForKey:@"presence"];
+                jid      = [coder decodeObjectForKey:@"jid"];
+            }
 		}
 		else
 		{
@@ -62,6 +71,11 @@
 		[coder encodeObject:presence];
 		[coder encodeObject:jid];
 	}
+}
+
++ (BOOL) supportsSecureCoding
+{
+    return YES;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

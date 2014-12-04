@@ -101,15 +101,31 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			jid             = [coder decodeObjectForKey:@"jid"];
-			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
-		#if TARGET_OS_IPHONE
-			photo           = [[UIImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
-		#else
-			photo           = [[NSImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
-		#endif
-			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
-			primaryResource = [coder decodeObjectForKey:@"primaryResource"];
+            if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+               [coder requiresSecureCoding])
+            {
+                jid             = [coder decodeObjectOfClass:[XMPPJID class] forKey:@"jid"];
+                itemAttributes  = [[coder decodeObjectOfClass:[NSDictionary class] forKey:@"itemAttributes"] mutableCopy];
+#if TARGET_OS_IPHONE
+                photo           = [[UIImage alloc] initWithData:[coder decodeObjectOfClass:[NSData class] forKey:@"photo"]];
+#else
+                photo           = [[NSImage alloc] initWithData:[coder decodeObjectOfClass:[NSData class] forKey:@"photo"]];
+#endif
+                resources       = [[coder decodeObjectOfClass:[NSDictionary class] forKey:@"resources"] mutableCopy];
+                primaryResource = [coder decodeObjectOfClass:[XMPPResourceMemoryStorageObject class] forKey:@"primaryResource"];
+            }
+            else
+            {
+                jid             = [coder decodeObjectForKey:@"jid"];
+                itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
+#if TARGET_OS_IPHONE
+                photo           = [[UIImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
+#else
+                photo           = [[NSImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
+#endif
+                resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
+                primaryResource = [coder decodeObjectForKey:@"primaryResource"];
+            }
 		}
 		else
 		{
@@ -153,6 +169,11 @@
 		[coder encodeObject:resources];
 		[coder encodeObject:primaryResource];
 	}
+}
+
++ (BOOL) supportsSecureCoding
+{
+    return YES;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
