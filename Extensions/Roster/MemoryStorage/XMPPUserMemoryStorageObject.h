@@ -9,7 +9,7 @@
 @class XMPPResourceMemoryStorageObject;
 
 
-@interface XMPPUserMemoryStorageObject : NSObject <XMPPUser, NSCopying, NSCoding>
+@interface XMPPUserMemoryStorageObject : NSObject <XMPPUser, NSCopying, NSSecureCoding>
 {
 	XMPPJID *jid;
 	NSMutableDictionary *itemAttributes;

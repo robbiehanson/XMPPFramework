@@ -15,7 +15,7 @@
  * On the iPhone, the KissXML library provides a drop-in replacement for Apple's NSXML classes.
 **/
 
-@interface XMPPElement : NSXMLElement <NSCoding, NSCopying>
+@interface XMPPElement : NSXMLElement <NSSecureCoding, NSCopying>
 
 #pragma mark Common Jabber Methods
 
