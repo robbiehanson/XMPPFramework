@@ -46,7 +46,7 @@
  * multiple instances of this class instead (using different database filenames), as this way you can have
  * concurrent writes to multiple databases.
 **/
-+ (XMPPRoomHybridStorage *)sharedInstance;
++ (instancetype)sharedInstance;
 
 /* Inherited from XMPPCoreDataStorage
  * Please see the XMPPCoreDataStorage header file for extensive documentation.

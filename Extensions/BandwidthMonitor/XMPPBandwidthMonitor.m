@@ -59,8 +59,10 @@
 
 - (void)updateBandwidth
 {
-	uint64_t currentNumberOfBytesSent = xmppStream.numberOfBytesSent;
-	uint64_t currentNumberOfBytesReceived = xmppStream.numberOfBytesReceived;
+	uint64_t currentNumberOfBytesSent = 0;
+	uint64_t currentNumberOfBytesReceived = 0;
+	
+	[xmppStream getNumberOfBytesSent:&currentNumberOfBytesSent numberOfBytesReceived:&currentNumberOfBytesReceived];
 	
 	double currentOutgoingBandwidth = currentNumberOfBytesSent - lastNumberOfBytesSent;         // Bytes per second
 	double currentIncomingBandwidth = currentNumberOfBytesReceived - lastNumberOfBytesReceived; // Bytes per second
@@ -97,8 +99,13 @@
 {
 	if (timer == NULL)
 	{
-		lastNumberOfBytesSent = xmppStream.numberOfBytesSent;
-		lastNumberOfBytesReceived = xmppStream.numberOfBytesReceived;
+		uint64_t numberOfBytesSent = 0;
+		uint64_t numberOfBytesReceived = 0;
+		
+		[xmppStream getNumberOfBytesSent:&numberOfBytesSent numberOfBytesReceived:&numberOfBytesReceived];
+		
+		lastNumberOfBytesSent = numberOfBytesSent;
+		lastNumberOfBytesReceived = numberOfBytesReceived;
 		
 		smoothedAverageOutgoingBandwidth = 0.0;
 		smoothedAverageIncomingBandwidth = 0.0;
@@ -167,7 +174,11 @@
 		dispatch_sync(moduleQueue, block);
 }
 
-- (void)xmppStreamDidConnect:(XMPPStream *)sender
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPStream Delegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)xmppStreamDidStartNegotiation:(XMPPStream *)sender;
 {
 	[self startTimer];
 }

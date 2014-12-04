@@ -32,7 +32,7 @@
 
 static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
-+ (XMPPMessageArchivingCoreDataStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
@@ -179,7 +179,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	NSError *error = nil;
 	NSArray *results = [moc executeFetchRequest:fetchRequest error:&error];
 	
-	if (results == nil)
+	if (results == nil || error)
 	{
 		XMPPLogError(@"%@: %@ - Error executing fetchRequest: %@", THIS_FILE, THIS_METHOD, fetchRequest);
 	}

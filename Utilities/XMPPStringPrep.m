@@ -49,4 +49,19 @@
 	return [NSString stringWithUTF8String:buf];
 }
 
++ (NSString *)prepPassword:(NSString *)password
+{
+	if(password == nil) return nil;
+	
+	// Each allowable portion of a JID MUST NOT be more than 1023 bytes in length.
+	// We make the buffer just big enough to hold a null-terminated string of this length.
+	char buf[1024];
+	
+	strncpy(buf, [password UTF8String], sizeof(buf));
+	
+	if(stringprep(buf, sizeof(buf), 0, stringprep_saslprep) != 0) return nil;
+	
+	return [NSString stringWithUTF8String:buf];
+}
+
 @end

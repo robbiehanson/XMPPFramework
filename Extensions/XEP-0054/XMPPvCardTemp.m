@@ -31,6 +31,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 @implementation XMPPvCardTemp
 
+#if DEBUG
 
 + (void)initialize {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
@@ -54,6 +55,8 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 		exit(15);
 	}
 }
+
+#endif
 
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTemp class]);
@@ -87,7 +90,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid {
-  XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID]];
+  XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID] elementID:[XMPPStream generateUUID]];
   NSXMLElement *vCardElem = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
   
   [iq addChild:vCardElem];
@@ -816,12 +819,12 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-- (NSString *)description {
+- (NSString *)desc {
 	return [[self elementForName:@"DESC"] stringValue];
 }
 
 
-- (void)setDescription:(NSString *)desc {
+- (void)setDesc:(NSString *)desc {
 	XMPP_VCARD_SET_STRING_CHILD(desc, @"DESC");
 }
 

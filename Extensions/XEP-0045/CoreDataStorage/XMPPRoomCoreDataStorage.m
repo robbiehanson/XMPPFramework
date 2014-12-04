@@ -60,7 +60,7 @@
 
 static XMPPRoomCoreDataStorage *sharedInstance;
 
-+ (XMPPRoomCoreDataStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
@@ -808,7 +808,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSManagedObjectContext *moc = inMoc ? inMoc : [self managedObjectContext];
+		NSManagedObjectContext *moc = inMoc ? : [self managedObjectContext];
 		
 		NSEntityDescription *entity = [self messageEntity:moc];
 		

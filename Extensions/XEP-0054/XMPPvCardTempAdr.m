@@ -26,6 +26,7 @@
 
 @implementation XMPPvCardTempAdr
 
+#if DEBUG
 
 + (void)initialize
 {
@@ -51,6 +52,7 @@
 	}
 }
 
+#endif
 
 + (XMPPvCardTempAdr *)vCardAdrFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTempAdr class]);

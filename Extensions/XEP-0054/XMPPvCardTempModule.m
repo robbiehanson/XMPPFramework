@@ -84,7 +84,7 @@
 	{
 		// Custom code goes here (if needed)
 		
-        _myvCardTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
+        _myvCardTracker = [[XMPPIDTracker alloc] initWithStream:xmppStream dispatchQueue:moduleQueue];
 
 		return YES;
 	}
@@ -185,16 +185,14 @@
     dispatch_block_t block = ^{ @autoreleasepool {
 
         XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
-
-        NSString *myvCardElementID = [xmppStream generateUUID];
         
-        XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:myvCardElementID child:newvCardTemp];
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:[xmppStream generateUUID] child:newvCardTemp];
         [xmppStream sendElement:iq];
         
-        [_myvCardTracker addID:myvCardElementID
-                       target:self
-                     selector:@selector(handleMyvcard:withInfo:)
-                      timeout:600];
+        [_myvCardTracker addElement:iq
+                             target:self
+                           selector:@selector(handleMyvcard:withInfo:)
+                            timeout:600];
         
         [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
         
@@ -261,7 +259,7 @@
 {
 	// This method is invoked on the moduleQueue.
 	
-    [_myvCardTracker invokeForID:[iq elementID] withObject:iq];
+    [_myvCardTracker invokeForElement:iq withObject:iq];
     
 	// Remember XML heirarchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.

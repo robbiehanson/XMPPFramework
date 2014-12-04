@@ -3,6 +3,7 @@
 #import "BonjourClient.h"
 #import "StreamController.h"
 #import "XMPPJID.h"
+#import "XMPPLogging.h"
 #import "DDLog.h"
 #import "DDTTYLogger.h"
 
@@ -22,23 +23,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #pragma mark App Delegate Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application
-{
+- (BOOL) application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 	// Configure logging
 	
-	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+    [DDLog addLogger:[DDTTYLogger sharedInstance] withLogLevel:XMPP_LOG_FLAG_SEND_RECV];
 	
 	// Configure UI
 	
 	RootViewController *rootViewController = (RootViewController *)[navigationController topViewController];
 	rootViewController.managedObjectContext = self.managedObjectContext;
 	
-	[window addSubview:[navigationController view]];
+	window.rootViewController = navigationController;
     [window makeKeyAndVisible];
 	
 	// Configure everything else
 	
-	NSString *jidStr = [NSString stringWithFormat:@"demo@%@", [[UIDevice currentDevice] name]];
+	NSString *jidStr = [NSString stringWithFormat:@"demo@%@", [[[UIDevice currentDevice] name] stringByReplacingOccurrencesOfString:@" " withString:@""]];
 	self.myJID = [XMPPJID jidWithString:jidStr];
 	
 	BonjourClient *bonjourClient = [BonjourClient sharedInstance];
@@ -48,6 +48,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	[bonjourClient startBrowsing];
 	[bonjourClient publishServiceOnPort:[streamController listeningPort]];
+    
+    return YES;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
