@@ -45,10 +45,21 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			presence      = [coder decodeObjectForKey:@"presence"];
-			jid           = [coder decodeObjectForKey:@"jid"];
-			createdAt     = [coder decodeObjectForKey:@"createdAt"];
-			streamFullJid = [coder decodeObjectForKey:@"streamFullJid"];
+            if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+               [coder requiresSecureCoding])
+            {
+                presence      = [coder decodeObjectOfClass:[XMPPPresence class] forKey:@"presence"];
+                jid           = [coder decodeObjectOfClass:[XMPPJID class] forKey:@"jid"];
+                createdAt     = [coder decodeObjectOfClass:[NSDate class] forKey:@"createdAt"];
+                streamFullJid = [coder decodeObjectOfClass:[XMPPJID class] forKey:@"streamFullJid"];
+            }
+            else
+            {
+                presence      = [coder decodeObjectForKey:@"presence"];
+                jid           = [coder decodeObjectForKey:@"jid"];
+                createdAt     = [coder decodeObjectForKey:@"createdAt"];
+                streamFullJid = [coder decodeObjectForKey:@"streamFullJid"];
+            }
 		}
 		else
 		{
@@ -77,6 +88,11 @@
 		[coder encodeObject:createdAt];
 		[coder encodeObject:streamFullJid];
 	}
+}
+
++ (BOOL) supportsSecureCoding
+{
+    return YES;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

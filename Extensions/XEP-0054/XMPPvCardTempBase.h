@@ -62,7 +62,7 @@
 	}
 
 
-@interface XMPPvCardTempBase : NSXMLElement <NSCoding, NSCopying> {
+@interface XMPPvCardTempBase : NSXMLElement <NSSecureCoding, NSCopying> {
 
 }
 
