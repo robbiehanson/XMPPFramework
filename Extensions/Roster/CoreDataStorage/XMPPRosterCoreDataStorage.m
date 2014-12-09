@@ -379,7 +379,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 		
-		if (user == nil && [parent allowRosterlessOperation])
+		if (user == nil)
 		{
 			// This may happen if the roster is in rosterlessOperation mode.
 			
