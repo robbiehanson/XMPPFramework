@@ -370,6 +370,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 {
 	XMPPLogTrace();
 	
+    BOOL allowRosterlessOperation = [parent allowRosterlessOperation];
+    
 	[self scheduleBlock:^{
 		
 		XMPPJID *jid = [presence from];
@@ -379,7 +381,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 		
-		if (user == nil)
+		if (user == nil && allowRosterlessOperation)
 		{
 			// This may happen if the roster is in rosterlessOperation mode.
 			
