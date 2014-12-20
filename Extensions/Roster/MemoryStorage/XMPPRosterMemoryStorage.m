@@ -819,4 +819,42 @@
     return results;
 }
 
+- (void)getSubscription:(NSString **)subscription
+					ask:(NSString **)ask
+			   nickname:(NSString **)nickname
+				 groups:(NSArray **)groups
+				 forJID:(XMPPJID *)jid
+			 xmppStream:(XMPPStream *)stream
+{
+
+	XMPPLogTrace();
+	AssertParentQueue();
+
+	XMPPJID *jidKey = [jid bareJID];
+	XMPPUserMemoryStorageObject *rosterUser = [roster objectForKey:jidKey];
+
+	if(rosterUser)
+	{
+		if(subscription)
+		{
+			*subscription = rosterUser.subscription;
+		}
+
+		if(ask)
+		{
+			*ask = rosterUser.ask;
+		}
+
+		if(nickname)
+		{
+			*nickname = rosterUser.nickname;
+		}
+		
+		if(groups)
+		{
+			*groups = rosterUser.groups;
+		}
+	}
+}
+
 @end
