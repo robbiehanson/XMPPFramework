@@ -333,6 +333,13 @@
 
 - (NSArray *)jidsForXMPPStream:(XMPPStream *)stream;
 
+- (void)getSubscription:(NSString **)subscription
+                    ask:(NSString **)ask
+               nickname:(NSString **)nickname
+                 groups:(NSArray **)groups
+                 forJID:(XMPPJID *)jid
+             xmppStream:(XMPPStream *)stream;
+
 @optional
 
 /**
