@@ -2,7 +2,7 @@
 #import "XMPPRoomMessage.h"
 
 
-@interface XMPPRoomMessageMemoryStorageObject : NSObject <XMPPRoomMessage, NSCopying, NSCoding>
+@interface XMPPRoomMessageMemoryStorageObject : NSObject <XMPPRoomMessage, NSCopying, NSSecureCoding>
 
 - (id)initWithIncomingMessage:(XMPPMessage *)message;
 - (id)initWithOutgoingMessage:(XMPPMessage *)message  jid:(XMPPJID *)myRoomJID;

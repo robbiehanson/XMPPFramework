@@ -33,6 +33,8 @@
 		
 		itemAttributes = [[NSMutableDictionary alloc] initWithCapacity:0];
 		
+		groups = [[NSMutableArray alloc] initWithCapacity:0];
+		
 		[self commonInit];
 	}
 	return self;
@@ -46,6 +48,19 @@
 		jid = [[XMPPJID jidWithString:jidStr] bareJID];
 		
 		itemAttributes = [item attributesAsDictionary];
+		
+		groups = [[NSMutableArray alloc] initWithCapacity:0];
+		
+		NSArray *groupElements = [item elementsForName:@"group"];
+		
+		for (NSXMLElement *groupElement in groupElements) {
+			NSString *groupName = [groupElement stringValue];
+		
+			if ([groupName length])
+			{
+				[groups addObject:groupName];
+			}
+		}
 		
 		[self commonInit];
 	}
@@ -65,6 +80,7 @@
 	
 	deepCopy->jid = [jid copy];
 	deepCopy->itemAttributes = [itemAttributes mutableCopy];
+	deepCopy->groups = [groups mutableCopy];
 	
 	deepCopy->resources = [[NSMutableDictionary alloc] initWithCapacity:[resources count]];
 	
@@ -101,20 +117,39 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			jid             = [coder decodeObjectForKey:@"jid"];
-			itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
-		#if TARGET_OS_IPHONE
-			photo           = [[UIImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
-		#else
-			photo           = [[NSImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
-		#endif
-			resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
-			primaryResource = [coder decodeObjectForKey:@"primaryResource"];
+            if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+               [coder requiresSecureCoding])
+            {
+                jid             = [coder decodeObjectOfClass:[XMPPJID class] forKey:@"jid"];
+                itemAttributes  = [[coder decodeObjectOfClass:[NSDictionary class] forKey:@"itemAttributes"] mutableCopy];
+                groups          = [[coder decodeObjectOfClass:[NSArray class] forKey:@"groups"] mutableCopy];
+#if TARGET_OS_IPHONE
+                photo           = [[UIImage alloc] initWithData:[coder decodeObjectOfClass:[NSData class] forKey:@"photo"]];
+#else
+                photo           = [[NSImage alloc] initWithData:[coder decodeObjectOfClass:[NSData class] forKey:@"photo"]];
+#endif
+                resources       = [[coder decodeObjectOfClass:[NSDictionary class] forKey:@"resources"] mutableCopy];
+                primaryResource = [coder decodeObjectOfClass:[XMPPResourceMemoryStorageObject class] forKey:@"primaryResource"];
+            }
+            else
+            {
+                jid             = [coder decodeObjectForKey:@"jid"];
+                itemAttributes  = [[coder decodeObjectForKey:@"itemAttributes"] mutableCopy];
+                groups          = [[coder decodeObjectForKey:@"groups"] mutableCopy];
+#if TARGET_OS_IPHONE
+                photo           = [[UIImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
+#else
+                photo           = [[NSImage alloc] initWithData:[coder decodeObjectForKey:@"photo"]];
+#endif
+                resources       = [[coder decodeObjectForKey:@"resources"] mutableCopy];
+                primaryResource = [coder decodeObjectForKey:@"primaryResource"];
+            }
 		}
 		else
 		{
 			jid             = [coder decodeObject];
 			itemAttributes  = [[coder decodeObject] mutableCopy];
+			groups          = [[coder decodeObject] mutableCopy];
 		#if TARGET_OS_IPHONE
 			photo           = [[UIImage alloc] initWithData:[coder decodeObject]];
 		#else
@@ -133,6 +168,7 @@
 	{
 		[coder encodeObject:jid forKey:@"jid"];
 		[coder encodeObject:itemAttributes forKey:@"itemAttributes"];
+		[coder encodeObject:groups forKey:@"groups"];
 	#if TARGET_OS_IPHONE
 		[coder encodeObject:UIImagePNGRepresentation(photo) forKey:@"photo"];
 	#else
@@ -145,6 +181,7 @@
 	{
 		[coder encodeObject:jid];
 		[coder encodeObject:itemAttributes];
+		[coder encodeObject:groups];
 	#if TARGET_OS_IPHONE
 		[coder encodeObject:UIImagePNGRepresentation(photo)];
 	#else
@@ -153,6 +190,11 @@
 		[coder encodeObject:resources];
 		[coder encodeObject:primaryResource];
 	}
+}
+
++ (BOOL) supportsSecureCoding
+{
+    return YES;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,6 +213,16 @@
 	return (NSString *)[itemAttributes objectForKey:@"name"];
 }
 
+- (NSString *)subscription
+{
+	return (NSString *)[itemAttributes objectForKey:@"subscription"];
+}
+
+- (NSString *)ask
+{
+	return (NSString *)[itemAttributes objectForKey:@"ask"];
+}
+
 - (NSString *)displayName
 {
 	NSString *nickname = [self nickname];
@@ -178,6 +230,11 @@
 		return nickname;
 	else
 		return [jid bare];
+}
+
+- (NSArray *)groups
+{
+	return [groups copy];
 }
 
 - (BOOL)isOnline
@@ -287,6 +344,19 @@
 		NSString *value = [node stringValue];
 		
 		[itemAttributes setObject:value forKey:key];
+	}
+	
+	[groups removeAllObjects];
+	
+	NSArray *groupElements = [item elementsForName:@"group"];
+	
+	for (NSXMLElement *groupElement in groupElements) {
+		NSString *groupName = [groupElement stringValue];
+		
+		if ([groupName length])
+		{
+			[groups addObject:groupName];
+		}
 	}
 }
 

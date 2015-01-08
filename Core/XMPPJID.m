@@ -215,9 +215,19 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			user     = [[coder decodeObjectForKey:@"user"] copy];
-			domain   = [[coder decodeObjectForKey:@"domain"] copy];
-			resource = [[coder decodeObjectForKey:@"resource"] copy];
+            if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+               [coder requiresSecureCoding])
+            {
+                user     = [[coder decodeObjectOfClass:[NSString class] forKey:@"user"] copy];
+                domain   = [[coder decodeObjectOfClass:[NSString class] forKey:@"domain"] copy];
+                resource = [[coder decodeObjectOfClass:[NSString class] forKey:@"resource"] copy];
+            }
+            else
+            {
+                user     = [[coder decodeObjectForKey:@"user"] copy];
+                domain   = [[coder decodeObjectForKey:@"domain"] copy];
+                resource = [[coder decodeObjectForKey:@"resource"] copy];
+            }
 		}
 		else
 		{
@@ -243,6 +253,11 @@
 		[coder encodeObject:domain];
 		[coder encodeObject:resource];
 	}
+}
+
++ (BOOL) supportsSecureCoding
+{
+    return YES;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

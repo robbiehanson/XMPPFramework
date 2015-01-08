@@ -9,10 +9,11 @@
 @class XMPPResourceMemoryStorageObject;
 
 
-@interface XMPPUserMemoryStorageObject : NSObject <XMPPUser, NSCopying, NSCoding>
+@interface XMPPUserMemoryStorageObject : NSObject <XMPPUser, NSCopying, NSSecureCoding>
 {
 	XMPPJID *jid;
 	NSMutableDictionary *itemAttributes;
+	NSMutableArray *groups;
 	
 	NSMutableDictionary *resources;
 	XMPPResourceMemoryStorageObject *primaryResource;
@@ -39,12 +40,21 @@
 
 */
 
+- (NSString *)subscription;
+
+- (NSString *)ask;
+
 /**
  * Simple convenience method.
  * If a nickname exists for the user, the nickname is returned.
  * Otherwise the jid is returned (as a string).
 **/
 - (NSString *)displayName;
+
+/**
+ * An array of Group Names.
+**/
+- (NSArray *)groups;
 
 /**
  * If XMPPvCardAvatarModule is included in the framework, the XMPPRoster will automatically integrate with it,
