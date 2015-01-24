@@ -162,7 +162,7 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
 
         NSString *type = [iq type];
 
-        if ([type isEqualToString:@"result"] && iq.childCount == 0) {
+        if ([type isEqualToString:@"result"]) {
           [multicastDelegate passwordChangeSuccessful:self];
         } else {
           // this should be impossible to reach, but just for safety's sake...
@@ -203,7 +203,7 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
 
         NSString *type = [iq type];
 
-        if ([type isEqualToString:@"result"] && iq.childCount == 0) {
+        if ([type isEqualToString:@"result"]) {
           [multicastDelegate cancelRegistrationSuccessful:self];
         } else {
           // this should be impossible to reach, but just for safety's sake...
@@ -228,7 +228,6 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
   NSString *type = [iq type];
 
   if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"]) {
-    NSLog(@"invoking with iq: %@", iq);
     return [xmppIDTracker invokeForElement:iq withObject:iq];
   }
 
