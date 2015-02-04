@@ -78,7 +78,7 @@ static NSString *const XMPPGoogleTalkHostName = @"talk.google.com";
     if (!accessToken)
 	{
 		NSString *errMsg = @"Missing facebook accessToken.";
-		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+		NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 		
 		NSError *err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
 		
@@ -158,7 +158,7 @@ static NSString *const XMPPGoogleTalkHostName = @"talk.google.com";
 		else
 		{
 			NSString *errMsg = @"The server does not support X-OATH2-GOOGLE authentication.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 			
 			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
 			

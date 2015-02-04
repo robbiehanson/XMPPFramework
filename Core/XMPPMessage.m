@@ -255,7 +255,7 @@
     NSXMLElement *error = [self elementForName:@"error"];
     return [NSError errorWithDomain:@"urn:ietf:params:xml:ns:xmpp-stanzas"
                                code:[error attributeIntValueForName:@"code"]
-                           userInfo:[NSDictionary dictionaryWithObject:[error compactXMLString] forKey:NSLocalizedDescriptionKey]];
+                           userInfo:@{NSLocalizedDescriptionKey : [error compactXMLString]}];
     
 }
 
