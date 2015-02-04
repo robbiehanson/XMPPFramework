@@ -563,7 +563,7 @@
 		
 		for (uint32_t i = 0; i < diff; i++)
 		{
-			XMPPStreamManagementOutgoingStanza *outgoingStanza = [prev_unackedByServer objectAtIndex:(NSUInteger)i];
+			XMPPStreamManagementOutgoingStanza *outgoingStanza = prev_unackedByServer[(NSUInteger) i];
 			
 			if (outgoingStanza.stanzaId) {
 				[stanzaIds addObject:outgoingStanza.stanzaId];
@@ -947,7 +947,7 @@
 				
 				while ([unprocessedReceivedAcks count] > 0)
 				{
-					NSXMLElement *ack = [unprocessedReceivedAcks objectAtIndex:0];
+					NSXMLElement *ack = unprocessedReceivedAcks[0];
 					
 					if ([self processReceivedAck:ack])
 					{
@@ -1029,7 +1029,7 @@
 	
 	for (uint32_t i = 0; i < diff; i++)
 	{
-		XMPPStreamManagementOutgoingStanza *outgoingStanza = [unackedByServer objectAtIndex:(NSUInteger)i];
+		XMPPStreamManagementOutgoingStanza *outgoingStanza = unackedByServer[(NSUInteger) i];
 		
 		if ([outgoingStanza awaitingStanzaId])
 		{
