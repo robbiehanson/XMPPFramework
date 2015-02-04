@@ -92,7 +92,7 @@ static NSMutableArray *proxyCandidates;
 		initialized = YES;
 		
 		existingTurnSockets = [[NSMutableDictionary alloc] init];
-		proxyCandidates = [[NSMutableArray alloc] initWithObjects:@"jabber.org", nil];
+		proxyCandidates = [@[@"jabber.org"] mutableCopy];
 	}
 }
 
@@ -140,7 +140,7 @@ static NSMutableArray *proxyCandidates;
 		
 		@synchronized(existingTurnSockets)
 		{
-			if ([existingTurnSockets objectForKey:uuid])
+			if (existingTurnSockets[uuid])
 				return NO;
 			else
 				return YES;
@@ -266,7 +266,7 @@ static NSMutableArray *proxyCandidates;
 	
 	@synchronized(existingTurnSockets)
 	{
-		[existingTurnSockets setObject:self forKey:uuid];
+		existingTurnSockets[uuid] = self;
 	}
 }
 
@@ -441,7 +441,7 @@ static NSMutableArray *proxyCandidates;
 	NSUInteger i;
 	for(i = 0; i < [streamhosts count]; i++)
 	{
-		[query addChild:[streamhosts objectAtIndex:i]];
+    [query addChild:streamhosts[i]];
 	}
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:jid elementID:uuid child:query];
@@ -603,7 +603,7 @@ static NSMutableArray *proxyCandidates;
 	NSUInteger i;
 	for(i = 0; i < [items count]; i++)
 	{
-		NSString *itemJidStr = [[[items objectAtIndex:i] attributeForName:@"jid"] stringValue];
+		NSString *itemJidStr = [[items[i] attributeForName:@"jid"] stringValue];
 		XMPPJID *itemJid = [XMPPJID jidWithString:itemJidStr];
 		
 		if(itemJid)
@@ -636,7 +636,7 @@ static NSMutableArray *proxyCandidates;
 	NSUInteger i;
 	for(i = 0; i < [identities count] && !found; i++)
 	{
-		NSXMLElement *identity = [identities objectAtIndex:i];
+		NSXMLElement *identity = identities[i];
 		
 		NSString *category = [[identity attributeForName:@"category"] stringValue];
 		NSString *type = [[identity attributeForName:@"type"] stringValue];
@@ -663,7 +663,7 @@ static NSMutableArray *proxyCandidates;
 		// We could ignore the 404 error, and try to connect anyways,
 		// but this would be useless because we'd be unable to activate the stream later.
 		
-		XMPPJID *candidateJID = [candidateJIDs objectAtIndex:candidateJIDIndex];
+		XMPPJID *candidateJID = candidateJIDs[candidateJIDIndex];
 		
 		// So the service was not a useable proxy service, or will not allow us to use its proxy.
 		// 
@@ -731,7 +731,7 @@ static NSMutableArray *proxyCandidates;
 	NSUInteger i;
 	for(i = 0; i < [streamhosts count] && !found; i++)
 	{
-		NSXMLElement *streamhost = [streamhosts objectAtIndex:i];
+		NSXMLElement *streamhost = streamhosts[i];
 		
 		NSString *streamhostJID = [[streamhost attributeForName:@"jid"] stringValue];
 		
@@ -839,7 +839,7 @@ static NSMutableArray *proxyCandidates;
 	{
 		while ((proxyCandidateJID == nil) && (++proxyCandidateIndex < [proxyCandidates count]))
 		{
-			NSString *proxyCandidate = [proxyCandidates objectAtIndex:proxyCandidateIndex];
+			NSString *proxyCandidate = proxyCandidates[proxyCandidateIndex];
 			proxyCandidateJID = [XMPPJID jidWithString:proxyCandidate];
 			
 			if (proxyCandidateJID == nil)
@@ -896,7 +896,7 @@ static NSMutableArray *proxyCandidates;
 	NSUInteger i;
 	for (i = 0; i < [candidateJIDs count]; i++)
 	{
-		XMPPJID *candidateJID = [candidateJIDs objectAtIndex:i];
+		XMPPJID *candidateJID = candidateJIDs[i];
 		
 		NSRange proxyRange = [[candidateJID domain] rangeOfString:@"proxy" options:NSCaseInsensitiveSearch];
 		
@@ -930,7 +930,7 @@ static NSMutableArray *proxyCandidates;
 	{
 		[self updateDiscoUUID];
 		
-		XMPPJID *candidateJID = [candidateJIDs objectAtIndex:candidateJIDIndex];
+		XMPPJID *candidateJID = candidateJIDs[candidateJIDIndex];
 		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/disco#info"];
 		
@@ -960,7 +960,7 @@ static NSMutableArray *proxyCandidates;
 	
 	[self updateDiscoUUID];
 	
-	XMPPJID *candidateJID = [candidateJIDs objectAtIndex:candidateJIDIndex];
+	XMPPJID *candidateJID = candidateJIDs[candidateJIDIndex];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 	
@@ -994,7 +994,7 @@ static NSMutableArray *proxyCandidates;
 	streamhostIndex++;
 	if(streamhostIndex < [streamhosts count])
 	{
-		NSXMLElement *streamhost = [streamhosts objectAtIndex:streamhostIndex];
+		NSXMLElement *streamhost = streamhosts[streamhostIndex];
 		
 		
 		proxyJID = [XMPPJID jidWithString:[[streamhost attributeForName:@"jid"] stringValue]];

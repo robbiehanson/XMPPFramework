@@ -111,9 +111,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
     [numberFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
     
-    self.combinedNonce = [auth objectForKey:@"r"];
-    self.salt = [auth objectForKey:@"s"];
-    self.count = [numberFormatter numberFromString:[auth objectForKey:@"i"]];
+    self.combinedNonce = auth[@"r"];
+    self.salt = auth[@"s"];
+    self.count = [numberFormatter numberFromString:auth[@"i"]];
     
     //We have all the necessary information to calculate client proof and server signature
     if ([self calculateProofs]) {
@@ -137,7 +137,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     NSDictionary *auth = [self dictionaryFromChallenge:authResponse];
     
     if ([[authResponse name] isEqual:@"success"]) {
-        NSString *receivedServerSignature = [auth objectForKey:@"v"];
+        NSString *receivedServerSignature = auth[@"v"];
         
         if([self.serverSignatureData isEqualToData:[[receivedServerSignature dataUsingEncoding:NSUTF8StringEncoding] xmpp_base64Decoded]]){
             return XMPP_AUTH_SUCCESS;
@@ -307,7 +307,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 			
             if(key && value)
             {
-                [auth setObject:value forKey:key];
+                auth[key] = value;
             }
 		}
 	}

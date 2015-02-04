@@ -119,44 +119,44 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 		status = [status substringToIndex:_statusMessageMaxLength];
 	
 	// If the show has changed update it.
-	if(![show isEqualToString:[sharedStatusUpdate objectForKey:XMPPGoogleSharedStatusShow]]) {
+	if(![show isEqualToString:sharedStatusUpdate[XMPPGoogleSharedStatusShow]]) {
 		[sharedStatusUpdate removeObjectForKey:XMPPGoogleSharedStatusShow];
-		[sharedStatusUpdate setObject:show forKey:XMPPGoogleSharedStatusShow];
+		sharedStatusUpdate[XMPPGoogleSharedStatusShow] = show;
 	}
 	
 	// Get the current show value, and whether the status should update for it.
 	BOOL displayShow = ([show isEqualToString:XMPPGoogleSharedStatusShowAvailable] ||
 						[show isEqualToString:XMPPGoogleSharedStatusShowBusy]);
-	NSString *currentShow = [self.sharedStatus objectForKey:XMPPGoogleSharedStatusShow];
+	NSString *currentShow = self.sharedStatus[XMPPGoogleSharedStatusShow];
 	
 	// Since we can't show an away status, only change the status it has
 	// changed and is not showing idle.
-	if(![status isEqualToString:[sharedStatusUpdate objectForKey:XMPPGoogleSharedStatusStatus]] && displayShow) {
+	if(![status isEqualToString:sharedStatusUpdate[XMPPGoogleSharedStatusStatus]] && displayShow) {
 		[sharedStatusUpdate removeObjectForKey:XMPPGoogleSharedStatusStatus];
-		[sharedStatusUpdate setObject:status forKey:XMPPGoogleSharedStatusStatus];
+		sharedStatusUpdate[XMPPGoogleSharedStatusStatus] = status;
 		
 		// Update the appropriate status list by adding the new status.
 		// If the list max count was reached, truncate its earliest status.
-		NSMutableArray *statusList = [[sharedStatusUpdate objectForKey:currentShow] mutableCopy];
+		NSMutableArray *statusList = [sharedStatusUpdate[currentShow] mutableCopy];
 		[statusList insertObject:status atIndex:0];
 		if(statusList.count > _statusListMaxCount)
 			[statusList removeObjectAtIndex:statusList.count-1];
 		
 		// Remove any blank statuses.
 		for(int i = 0; i < statusList.count; i++) {
-			NSString *status = [statusList objectAtIndex:i];
+			NSString *status = statusList[i];
 			if([status isEqualToString:@""])
 				[statusList removeObjectAtIndex:i];
 		}
 		
 		// Update the status list for this status.
 		[sharedStatusUpdate removeObjectForKey:currentShow];
-		[sharedStatusUpdate setObject:statusList forKey:currentShow];
+		sharedStatusUpdate[currentShow] = statusList;
 	}
 	
 	// Update the invisibility for this shared status.
 	[sharedStatusUpdate removeObjectForKey:XMPPGoogleSharedStatusInvisible];
-	[sharedStatusUpdate setObject:[NSNumber numberWithBool:invisible] forKey:XMPPGoogleSharedStatusInvisible];
+	sharedStatusUpdate[XMPPGoogleSharedStatusInvisible] = @(invisible);
 	
 	// Wrap it in an XMPPIQ "set" and send it to the server.
 	XMPPIQ *statusIQ = [XMPPIQ iqWithType:@"set" to:self.xmppStream.myJID.bareJID];
@@ -211,12 +211,12 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 // information attributes as well, so save those.
 // If we received a discovery IQ, determine shared status support.
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {
-	XMPPElement *query = (XMPPElement *)[[iq children] objectAtIndex:0];
+	XMPPElement *query = (XMPPElement *) [iq children][0];
 	if([query.xmlns isEqualToString:GOOGLE_SHARED_STATUS] && self.sharedStatusSupported) {
 		self.sharedStatus = [self unpackSharedStatus:query];
-		_show = [self.sharedStatus objectForKey:XMPPGoogleSharedStatusShow];
-		_status = [self.sharedStatus objectForKey:XMPPGoogleSharedStatusStatus];
-		_invisible = [[self.sharedStatus objectForKey:XMPPGoogleSharedStatusInvisible] boolValue];
+		_show = self.sharedStatus[XMPPGoogleSharedStatusShow];
+		_status = self.sharedStatus[XMPPGoogleSharedStatusStatus];
+		_invisible = [self.sharedStatus[XMPPGoogleSharedStatusInvisible] boolValue];
 		[multicastDelegate xmppGoogleSharedStatus:self didReceiveUpdatedStatus:self.sharedStatus];
 		
 		if([query attributeForName:@"status-max"])
@@ -247,14 +247,13 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 				NSMutableArray *array = [NSMutableArray array];
 				for(XMPPElement *status in element.children)
 					[array addObject:[status stringValue]];
-				[dict setObject:array forKey:[[element attributeForName:XMPPGoogleSharedStatusShow] stringValue]];
+				dict[[[element attributeForName:XMPPGoogleSharedStatusShow] stringValue]] = array;
 			} else if([element.name isEqualToString:XMPPGoogleSharedStatusStatus]) {
-				[dict setObject:[element stringValue] forKey:element.name];
+				dict[element.name] = [element stringValue];
 			} else if([element.name isEqualToString:XMPPGoogleSharedStatusShow]) {
-				[dict setObject:[element stringValue] forKey:element.name];
+				dict[element.name] = [element stringValue];
 			} else if([element.name isEqualToString:XMPPGoogleSharedStatusInvisible]) {
-				[dict setObject:[NSNumber numberWithBool:[[[element attributeForName:@"value"] stringValue] boolValue]]
-						 forKey:element.name];
+				dict[element.name] = @([[[element attributeForName:@"value"] stringValue] boolValue]);
 			} else {
 				NSLog(@"Missed element: %@", element);
 			}
@@ -273,15 +272,15 @@ NSString *const XMPPGoogleSharedStatusShowIdle = @"away";
 	[element addAttributeWithName:@"version" stringValue:@"2"];
 	
 	[element addChild:[XMPPElement elementWithName:XMPPGoogleSharedStatusStatus
-									   stringValue:[sharedStatus objectForKey:XMPPGoogleSharedStatusStatus]]];
+                                     stringValue:sharedStatus[XMPPGoogleSharedStatusStatus]]];
 	[element addChild:[XMPPElement elementWithName:XMPPGoogleSharedStatusShow
-									   stringValue:[sharedStatus objectForKey:XMPPGoogleSharedStatusShow]]];
+                                     stringValue:sharedStatus[XMPPGoogleSharedStatusShow]]];
 	
 	for(NSString *key in sharedStatus.allKeys.reverseObjectEnumerator) {
 		if([key isEqualToString:XMPPGoogleSharedStatusShowAvailable] ||
 		   [key isEqualToString:XMPPGoogleSharedStatusShowBusy]) {
 			
-			NSArray *statusList = [sharedStatus objectForKey:key];
+			NSArray *statusList = sharedStatus[key];
 			XMPPElement *statusElement = [XMPPElement elementWithName:@"status-list"];
 			[statusElement addAttributeWithName:@"show" stringValue:key];
 			
