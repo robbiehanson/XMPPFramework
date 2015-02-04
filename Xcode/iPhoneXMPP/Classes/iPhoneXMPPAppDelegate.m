@@ -395,12 +395,12 @@
 	NSString *expectedCertName = [xmppStream.myJID domain];
 	if (expectedCertName)
 	{
-		[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
+		settings[(NSString *) kCFStreamSSLPeerName] = expectedCertName;
 	}
 	
 	if (customCertEvaluation)
 	{
-		[settings setObject:@(YES) forKey:GCDAsyncSocketManuallyEvaluateTrust];
+		settings[GCDAsyncSocketManuallyEvaluateTrust] = @(YES);
 	}
 }
 

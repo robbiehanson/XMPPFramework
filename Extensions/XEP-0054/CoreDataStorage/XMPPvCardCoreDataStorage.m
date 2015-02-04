@@ -170,7 +170,7 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
 		                                          inManagedObjectContext:[self managedObjectContext]];
 		
-		vCard.waitingForFetch = [NSNumber numberWithBool:NO];
+		vCard.waitingForFetch = @NO;
 		vCard.vCardTemp = vCardTemp;
 		
 		// Update photo and photo hash
@@ -210,7 +210,7 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 		}
         else if (!waitingForFetch)
 		{
-			vCard.waitingForFetch = [NSNumber numberWithBool:YES];
+			vCard.waitingForFetch = @YES;
 			vCard.lastUpdated = [NSDate date];
 			
 			result = YES;

@@ -109,7 +109,7 @@
 		else
 		{
 			NSString *errMsg = @"The server does not support anonymous authentication.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 			
 			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
 			
