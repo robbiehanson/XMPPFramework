@@ -236,10 +236,10 @@ typedef enum XMPPBlockingQueryInfoType {
 {
     XMPPLogTrace();
     
-    id value = [blockingDict objectForKey:[xmppJID full]];
+    id value = blockingDict[[xmppJID full]];
     if (value == nil)
     {
-        [blockingDict setObject:[NSNull null] forKey:[xmppJID full]];
+        blockingDict[[xmppJID full]] = [NSNull null];
     }
     
     // <iq from='juliet@capulet.com/chamber' type='set' id='block1'>
@@ -268,7 +268,7 @@ typedef enum XMPPBlockingQueryInfoType {
 {
     XMPPLogTrace();
     
-    id value = [blockingDict objectForKey:[xmppJID full]];
+    id value = blockingDict[[xmppJID full]];
     if (value != nil)
     {
         [blockingDict removeObjectForKey:[xmppJID full]];
@@ -297,7 +297,7 @@ typedef enum XMPPBlockingQueryInfoType {
 
 - (BOOL)containsJID:(XMPPJID*)xmppJID
 {
-    if ([blockingDict objectForKey:[xmppJID full]])
+    if (blockingDict[[xmppJID full]])
     {
         return true;
     }
@@ -349,7 +349,7 @@ typedef enum XMPPBlockingQueryInfoType {
 	queryInfo.timer = timer;
 	
 	// Add to dictionary
-	[pendingQueries setObject:queryInfo forKey:uuid];
+	pendingQueries[uuid] = queryInfo;
 }
 
 - (void)removeQueryInfo:(XMPPBlockingQueryInfo *)queryInfo withKey:(NSString *)uuid
@@ -385,7 +385,7 @@ typedef enum XMPPBlockingQueryInfoType {
 
 - (void)queryTimeout:(NSString *)uuid
 {
-	XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:uuid];
+	XMPPBlockingQueryInfo *queryInfo = pendingQueries[uuid];
 	if (queryInfo)
 	{
 		[self processQuery:queryInfo withFailureCode:XMPPBlockingQueryTimeout];
@@ -417,10 +417,10 @@ typedef enum XMPPBlockingQueryInfoType {
 				NSString *name = [listItem attributeStringValueForName:@"jid"];
 				if (name)
 				{
-					id value = [blockingDict objectForKey:name];
+					id value = blockingDict[name];
 					if (value == nil)
 					{
-						[blockingDict setObject:[NSNull null] forKey:name];
+						blockingDict[name] = [NSNull null];
 					}
 				}
 			}
@@ -459,12 +459,12 @@ typedef enum XMPPBlockingQueryInfoType {
         }
         else
         {
-            XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:[iq elementID]];
+            XMPPBlockingQueryInfo *queryInfo = pendingQueries[[iq elementID]];
             
-            id value = [blockingDict objectForKey:[queryInfo.blockingXMPPJID full]];
+            id value = blockingDict[[queryInfo.blockingXMPPJID full]];
             if (value == nil)
             {
-                [blockingDict setObject:[NSNull null] forKey:[queryInfo.blockingXMPPJID full]];
+                blockingDict[[queryInfo.blockingXMPPJID full]] = [NSNull null];
             }
             
             [multicastDelegate xmppBlocking:self didNotBlockJID:queryInfo.blockingXMPPJID error:iq];
@@ -481,12 +481,12 @@ typedef enum XMPPBlockingQueryInfoType {
         }
         else
         {
-            XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:[iq elementID]];
+            XMPPBlockingQueryInfo *queryInfo = pendingQueries[[iq elementID]];
             
-            id value = [blockingDict objectForKey:[queryInfo.blockingXMPPJID full]];
+            id value = blockingDict[[queryInfo.blockingXMPPJID full]];
             if (value == nil)
             {
-                [blockingDict setObject:[NSNull null] forKey:queryInfo.blockingXMPPJID];
+                blockingDict[queryInfo.blockingXMPPJID] = [NSNull null];
             }
             
             [multicastDelegate xmppBlocking:self didNotUnblockAllDueToError:iq];
@@ -547,7 +547,7 @@ typedef enum XMPPBlockingQueryInfoType {
 	{
 		// This may be a response to a query we sent
 		
-		XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:[iq elementID]];
+		XMPPBlockingQueryInfo *queryInfo = pendingQueries[[iq elementID]];
 
         
 		if (queryInfo)
@@ -568,7 +568,7 @@ typedef enum XMPPBlockingQueryInfoType {
 	
 	for (NSString *uuid in pendingQueries)
 	{
-		XMPPBlockingQueryInfo *queryInfo = [pendingQueries objectForKey:uuid];
+		XMPPBlockingQueryInfo *queryInfo = pendingQueries[uuid];
 		
 		[self processQuery:queryInfo withFailureCode:XMPPBlockingDisconnect];
 	}

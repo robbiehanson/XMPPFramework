@@ -607,24 +607,24 @@ static XMPPRoomHybridStorage *sharedInstance;
 	XMPPJID *streamFullJid = [self myJIDForXMPPStream:xmppStream];
 	XMPPJID *roomJid = room.roomJID;
 	
-	NSMutableDictionary *occupantsRoomsDict = [occupantsGlobalDict objectForKey:streamFullJid];
+	NSMutableDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
 	if (occupantsRoomsDict == nil)
 	{
 		occupantsRoomsDict = [[NSMutableDictionary alloc] init];
-		[occupantsGlobalDict setObject:occupantsRoomsDict forKey:streamFullJid];
+		occupantsGlobalDict[streamFullJid] = occupantsRoomsDict;
 	}
 	
-	NSMutableDictionary *occupantsRoomDict = [occupantsRoomsDict objectForKey:roomJid];
+	NSMutableDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 	if (occupantsRoomDict == nil)
 	{
 		occupantsRoomDict = [[NSMutableDictionary alloc] init];
-		[occupantsRoomsDict setObject:occupantsRoomDict forKey:roomJid];
+		occupantsRoomsDict[roomJid] = occupantsRoomDict;
 	}
 	
 	XMPPRoomOccupantHybridMemoryStorageObject *occupant = (XMPPRoomOccupantHybridMemoryStorageObject *)
 	    [[self.occupantClass alloc] initWithPresence:presence streamFullJid:streamFullJid];
 	
-	[occupantsRoomDict setObject:occupant forKey:occupant.jid];
+	occupantsRoomDict[occupant.jid] = occupant;
 	
 	return occupant;
 }
@@ -656,8 +656,8 @@ static XMPPRoomHybridStorage *sharedInstance;
 	XMPPJID *streamFullJid = [self myJIDForXMPPStream:stream];
 	XMPPJID *roomJid = occupant.roomJID;
 	
-	NSMutableDictionary *occupantsRoomsDict = [occupantsGlobalDict objectForKey:streamFullJid];
-	NSMutableDictionary *occupantsRoomDict = [occupantsRoomsDict objectForKey:roomJid];
+	NSMutableDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+	NSMutableDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 	
 	[occupantsRoomDict removeObjectForKey:occupant.jid]; // Remove occupant
 	if ([occupantsRoomDict count] == 0)
@@ -715,7 +715,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		}
 		
 		NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"localTimestamp" ascending:NO];
-		NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+		NSArray *sortDescriptors = @[sortDescriptor];
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
@@ -759,19 +759,19 @@ static XMPPRoomHybridStorage *sharedInstance;
 		{
 			XMPPJID *streamFullJid = [self myJIDForXMPPStream:xmppStream];
 			
-			NSDictionary *occupantsRoomsDict = [occupantsGlobalDict objectForKey:streamFullJid];
-			NSDictionary *occupantsRoomDict = [occupantsRoomsDict objectForKey:roomJid];
+			NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+			NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 			
-			occupant = [occupantsRoomDict objectForKey:occupantJid];
+			occupant = occupantsRoomDict[occupantJid];
 		}
 		else
 		{
 			for (XMPPJID *streamFullJid in occupantsGlobalDict)
 			{
-				NSDictionary *occupantsRoomsDict = [occupantsGlobalDict objectForKey:streamFullJid];
-				NSDictionary *occupantsRoomDict = [occupantsRoomsDict objectForKey:roomJid];
+				NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+				NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 								
-				occupant = [occupantsRoomDict objectForKey:occupantJid];
+				occupant = occupantsRoomDict[occupantJid];
 				if (occupant) break;
 			}
 		}
@@ -802,8 +802,8 @@ static XMPPRoomHybridStorage *sharedInstance;
 		{
 			XMPPJID *streamFullJid = [self myJIDForXMPPStream:xmppStream];
 			
-			NSDictionary *occupantsRoomsDict = [occupantsGlobalDict objectForKey:streamFullJid];
-			NSDictionary *occupantsRoomDict = [occupantsRoomsDict objectForKey:roomJid];
+			NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+			NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 			
 			results = [occupantsRoomDict allValues];
 		}
@@ -811,8 +811,8 @@ static XMPPRoomHybridStorage *sharedInstance;
 		{
 			for (XMPPJID *streamFullJid in occupantsGlobalDict)
 			{
-				NSDictionary *occupantsRoomsDict = [occupantsGlobalDict objectForKey:streamFullJid];
-				NSDictionary *occupantsRoomDict = [occupantsRoomsDict objectForKey:roomJid];
+				NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+				NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 				
 				if (occupantsRoomDict)
 				{
@@ -981,7 +981,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		
 		XMPPJID *streamFullJid = [self myJIDForXMPPStream:xmppStream];
 		
-		NSMutableDictionary *occupantsRoomsDict = [occupantsGlobalDict objectForKey:streamFullJid];
+		NSMutableDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
 		
 		[occupantsRoomsDict removeObjectForKey:roomJid]; // Remove room (and all associated occupants)
 	}];
