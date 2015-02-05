@@ -78,7 +78,7 @@ static char facebookAppIdKey;
 	if (!appId || !accessToken)
 	{
 		NSString *errMsg = @"Missing facebook appId and/or accessToken.";
-		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+		NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 		
 		NSError *err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
 		
@@ -113,8 +113,8 @@ static char facebookAppIdKey;
 	
 	NSDictionary *auth = [self dictionaryFromChallenge:authResponse];
 	
-	nonce  = [auth objectForKey:@"nonce"];
-	method = [auth objectForKey:@"method"];
+	nonce  = auth[@"nonce"];
+	method = auth[@"method"];
 	
 	// Create and send challenge response element
 	
@@ -188,7 +188,7 @@ static char facebookAppIdKey;
 				value = [value substringWithRange:NSMakeRange(1,([value length]-2))];
 			}
 			
-			[auth setObject:value forKey:key];
+			auth[key] = value;
 		}
 	}
 	
@@ -305,7 +305,7 @@ static char facebookAppIdKey;
 		else
 		{
 			NSString *errMsg = @"The server does not support X-FACEBOOK-PLATFORM authentication.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 			
 			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
 			

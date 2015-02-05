@@ -156,7 +156,7 @@
 	NSString *elementID = [iq elementID];
 	NSString *node = nil;
 	
-	if ((node = [subscribeDict objectForKey:elementID]))
+	if ((node = subscribeDict[elementID]))
 	{
 		// Example subscription success response:
 		//
@@ -199,7 +199,7 @@
 		[subscribeDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = [unsubscribeDict objectForKey:elementID]))
+	else if ((node = unsubscribeDict[elementID]))
 	{
 		// Example unsubscribe success response:
 		//
@@ -230,7 +230,7 @@
 		[unsubscribeDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = [retrieveDict objectForKey:elementID]))
+	else if ((node = retrieveDict[elementID]))
 	{
 		// Example retrieve success response:
 		//
@@ -273,7 +273,7 @@
 		[retrieveDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = [configSubDict objectForKey:elementID]))
+	else if ((node = configSubDict[elementID]))
 	{
 		// Example configure subscription success response:
 		//
@@ -296,7 +296,7 @@
 		[configSubDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = [publishDict objectForKey:elementID]))
+	else if ((node = publishDict[elementID]))
 	{
 		// Example publish success response:
 		//
@@ -324,7 +324,7 @@
 		[publishDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = [createDict objectForKey:elementID]))
+	else if ((node = createDict[elementID]))
 	{
 		// Example create success response:
 		//
@@ -347,7 +347,7 @@
 		[createDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = [deleteDict objectForKey:elementID]))
+	else if ((node = deleteDict[elementID]))
 	{
 		// Example delete success response:
 		//
@@ -369,7 +369,7 @@
 		[deleteDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = [configNodeDict objectForKey:elementID]))
+	else if ((node = configNodeDict[elementID]))
 	{
 		// Example configure node success response:
 		//
@@ -521,7 +521,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		[subscribeDict setObject:node forKey:uuid];
+		subscribeDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.1.1:
@@ -597,7 +597,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		[unsubscribeDict setObject:node forKey:uuid];
+		unsubscribeDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.2.1:
@@ -640,9 +640,9 @@
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
 		if (node)
-			[retrieveDict setObject:node forKey:uuid];
+			retrieveDict[uuid] = node;
 		else
-			[retrieveDict setObject:[NSNull null] forKey:uuid];
+			retrieveDict[uuid] = [NSNull null];
 	});
 	
 	// Get subscriptions for all nodes:
@@ -693,7 +693,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		[configSubDict setObject:node forKey:uuid];
+		configSubDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.3.5:
@@ -758,7 +758,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		[createDict setObject:node forKey:uuid];
+		createDict[uuid] = node;
 	});
 	
 	// <iq type='set' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='create1'>
@@ -818,7 +818,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		[deleteDict setObject:node forKey:uuid];
+		deleteDict[uuid] = node;
 	});
 	
 	// Example XEP-0060 section 8.4.1:
@@ -857,7 +857,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		[configNodeDict setObject:node forKey:uuid];
+		configNodeDict[uuid] = node;
 	});
 	
 	// <iq type='get' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='config1'>
@@ -962,7 +962,7 @@
 	[xmppStream sendElement:iq];
 	
 	dispatch_async(moduleQueue, ^{
-		[publishDict setObject:node forKey:uuid];
+		publishDict[uuid] = node;
 	});
 	return uuid;
 }

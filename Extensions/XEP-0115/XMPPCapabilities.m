@@ -409,12 +409,12 @@ static NSString* extractFormTypeValue(NSXMLElement *form)
 			{
 				if ([values count] > 1)
 				{
-					NSString *baseValue = [[values objectAtIndex:0] stringValue];
+					NSString *baseValue = [values[0] stringValue];
 					
 					NSUInteger i;
 					for (i = 1; i < [values count]; i++)
 					{
-						NSString *value = [[values objectAtIndex:i] stringValue];
+						NSString *value = [values[i] stringValue];
 						
 						if (![value isEqualToString:baseValue])
 						{
@@ -931,7 +931,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			// However, there is still a disco request that concerns the jid.
 			
 			key = [self keyFromHash:hash algorithm:hashAlg];
-			NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+			NSMutableArray *jids = discoRequestHashDict[key];
 			
 			if (jids)
 			{
@@ -947,10 +947,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			// The first object in the jids array is the index of the last jid that we've sent a disco request to.
 			// This is used in case the jid does not respond.
 			
-			NSNumber *requestIndexNum = [NSNumber numberWithUnsignedInteger:1];
-			jids = [NSMutableArray arrayWithObjects:requestIndexNum, jid, nil];
+			NSNumber *requestIndexNum = @1;
+			jids = [@[requestIndexNum, jid] mutableCopy];
 			
-			[discoRequestHashDict setObject:jids forKey:key];
+			discoRequestHashDict[key] = jids;
 			[discoRequestJidSet addObject:jid];
 		}
 		else
@@ -1057,7 +1057,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// Are we already fetching the capabilities?
 	
 	NSString *key = [self keyFromHash:ver algorithm:hash];
-	NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+	NSMutableArray *jids = discoRequestHashDict[key];
 	
 	if (jids)
 	{
@@ -1098,10 +1098,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// So how do we know what the next jid in the list is?
 	// Via the requestIndexNum of course.
 	
-	NSNumber *requestIndexNum = [NSNumber numberWithUnsignedInteger:1];
-	jids = [NSMutableArray arrayWithObjects:requestIndexNum, jid, nil];
+	NSNumber *requestIndexNum = @1;
+	jids = [@[requestIndexNum, jid] mutableCopy];
 	
-	[discoRequestHashDict setObject:jids forKey:key];
+	discoRequestHashDict[key] = jids;
 	[discoRequestJidSet addObject:jid];
 	
 	// Send disco#info query
@@ -1268,12 +1268,12 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			[xmppCapabilitiesStorage setCapabilities:query forHash:hash algorithm:hashAlg];
 			
 			// Remove the jid(s) from the discoRequest variables
-			NSArray *jids = [discoRequestHashDict objectForKey:key];
+			NSArray *jids = discoRequestHashDict[key];
 			
 			NSUInteger i;
 			for (i = 1; i < [jids count]; i++)
 			{
-				XMPPJID *currentJid = [jids objectAtIndex:i];
+				XMPPJID *currentJid = jids[i];
 				
 				[discoRequestJidSet removeObject:currentJid];
 				
@@ -1366,7 +1366,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	// Get the list of jids that have the same capabilities hash
 	
-	NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+	NSMutableArray *jids = discoRequestHashDict[key];
 	if (jids == nil)
 	{
 		XMPPLogWarn(@"%@: %@ - Key doesn't exist in discoRequestHashDict", THIS_FILE, THIS_METHOD);
@@ -1376,8 +1376,8 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	// Get the index and jid of the fetch that just failed
 	
-	NSUInteger requestIndex = [[jids objectAtIndex:0] unsignedIntegerValue];
-	XMPPJID *jid = [jids objectAtIndex:requestIndex];
+	NSUInteger requestIndex = [jids[0] unsignedIntegerValue];
+	XMPPJID *jid = jids[requestIndex];
 	
 	// Release the associated timer
 	[self cancelTimeoutForDiscoRequestFromJID:jid];
@@ -1395,7 +1395,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// Increment request index (and update object in jids array),
 	
 		requestIndex++;
-		[jids replaceObjectAtIndex:0 withObject:[NSNumber numberWithUnsignedInteger:requestIndex]];
+		jids[0] = @(requestIndex);
 	}
 	
 	// Do we have another jid that we can query?
@@ -1403,7 +1403,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	if (requestIndex < [jids count])
 	{
-		jid = [jids objectAtIndex:requestIndex];
+		jid = jids[requestIndex];
 		
 		NSString *node = nil;
 		NSString *ver  = nil;
@@ -1440,7 +1440,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		NSUInteger i;
 		for (i = 1; i < [jids count]; i++)
 		{
-			jid = [jids objectAtIndex:i];
+			jid = jids[i];
 			
 			[discoRequestJidSet removeObject:jid];
 			[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
@@ -1656,7 +1656,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
 	
-	[discoTimerJidDict setObject:timerWrapper forKey:jid];
+	discoTimerJidDict[jid] = timerWrapper;
 }
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid withHashKey:(NSString *)key
@@ -1692,7 +1692,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
 	
-	[discoTimerJidDict setObject:timerWrapper forKey:jid];
+	discoTimerJidDict[jid] = timerWrapper;
 }
 
 - (void)cancelTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
@@ -1702,7 +1702,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	XMPPLogTrace();
 	
-	GCDTimerWrapper *timerWrapper = [discoTimerJidDict objectForKey:jid];
+	GCDTimerWrapper *timerWrapper = discoTimerJidDict[jid];
 	if (timerWrapper)
 	{
 		[timerWrapper cancel];

@@ -375,13 +375,13 @@ static NSMutableSet *databaseFileNames;
 		
 		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
 		
-		result = (XMPPJID *)[myJidCache objectForKey:key];
+		result = (XMPPJID *) myJidCache[key];
 		if (!result)
 		{
 			result = [stream myJID];
 			if (result)
 			{
-				[myJidCache setObject:result forKey:key];
+				myJidCache[key] = result;
 			}
 		}
 	}};
@@ -411,7 +411,7 @@ static NSMutableSet *databaseFileNames;
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
-		XMPPJID *cachedJID = [myJidCache objectForKey:key];
+		XMPPJID *cachedJID = myJidCache[key];
 		
 		if (cachedJID)
 		{
@@ -421,7 +421,7 @@ static NSMutableSet *databaseFileNames;
 			{
 				if (![cachedJID isEqualToJID:newJID])
 				{
-					[myJidCache setObject:newJID forKey:key];
+					myJidCache[key] = newJID;
 					[self didChangeCachedMyJID:newJID forXMPPStream:stream];
 				}
 			}
@@ -446,7 +446,7 @@ static NSMutableSet *databaseFileNames;
 - (NSString *)persistentStoreDirectory
 {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
+    NSString *basePath = ([paths count] > 0) ? paths[0] : NSTemporaryDirectory();
 	
 	// Attempt to find a name for this application
 	NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
@@ -749,7 +749,7 @@ static NSMutableSet *databaseFileNames;
 		dispatch_async(dispatch_get_main_queue(), ^{
             
             // http://stackoverflow.com/questions/3923826/nsfetchedresultscontroller-with-predicate-ignores-changes-merged-from-different
-            for (NSManagedObject *object in [[notification userInfo] objectForKey:NSUpdatedObjectsKey]) {
+            for (NSManagedObject *object in [notification userInfo][NSUpdatedObjectsKey]) {
                 [[mainThreadManagedObjectContext objectWithID:[object objectID]] willAccessValueForKey:nil];
             }
 			
