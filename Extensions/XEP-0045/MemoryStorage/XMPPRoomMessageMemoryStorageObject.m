@@ -110,7 +110,7 @@
 		[coder encodeObject:jid];
 		[coder encodeObject:localTimestamp];
 		[coder encodeObject:remoteTimestamp];
-		[coder encodeObject:[NSNumber numberWithBool:isFromMe]];
+    [coder encodeObject:@(isFromMe)];
 	}
 }
 

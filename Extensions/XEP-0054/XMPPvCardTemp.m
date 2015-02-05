@@ -858,7 +858,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	}
 	
 	if (elem != nil) {
-		for (NSString *cls in [NSArray arrayWithObjects:@"PUBLIC", @"PRIVATE", @"CONFIDENTIAL", nil]) {
+		for (NSString *cls in @[@"PUBLIC", @"PRIVATE", @"CONFIDENTIAL"]) {
 			NSXMLElement *priv = [elem elementForName:cls];
 			if (priv != nil) {
 				[elem removeChildAtIndex:[[elem children] indexOfObject:priv]];

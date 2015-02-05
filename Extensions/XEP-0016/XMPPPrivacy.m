@@ -296,7 +296,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 {
 	NSArray* (^block)() = ^ NSArray* () {
 		
-		id result = [privacyDict objectForKey:privacyListName];
+		id result = privacyDict[privacyListName];
 		
 		if (result == [NSNull null]) // Not fetched yet
 			return nil;
@@ -482,7 +482,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 	queryInfo.timer = timer;
 	
 	// Add to dictionary
-	[pendingQueries setObject:queryInfo forKey:uuid];
+	pendingQueries[uuid] = queryInfo;
 }
 
 - (void)removeQueryInfo:(XMPPPrivacyQueryInfo *)queryInfo withKey:(NSString *)uuid
@@ -522,7 +522,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 
 - (void)queryTimeout:(NSString *)uuid
 {
-	XMPPPrivacyQueryInfo *queryInfo = [privacyDict objectForKey:uuid];
+	XMPPPrivacyQueryInfo *queryInfo = privacyDict[uuid];
 	if (queryInfo)
 	{
 		[self processQuery:queryInfo withFailureCode:XMPPPrivacyQueryTimeout];
@@ -615,10 +615,10 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 				NSString *name = [listName attributeStringValueForName:@"name"];
 				if (name)
 				{
-					id value = [privacyDict objectForKey:name];
+					id value = privacyDict[name];
 					if (value == nil)
 					{
-						[privacyDict setObject:[NSNull null] forKey:name];
+						privacyDict[name] = [NSNull null];
 					}
 				}
 			}
@@ -670,7 +670,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 				items = [NSArray array];
 			}
 			
-			[privacyDict setObject:items forKey:queryInfo.privacyListName];
+			privacyDict[queryInfo.privacyListName] = items;
 			
 			[multicastDelegate xmppPrivacy:self didReceiveListWithName:queryInfo.privacyListName items:items];
 		}
@@ -696,7 +696,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 				items = [NSArray array];
 			}
 			
-			[privacyDict setObject:items forKey:queryInfo.privacyListName];
+			privacyDict[queryInfo.privacyListName] = items;
 			
 			[multicastDelegate xmppPrivacy:self didSetListWithName:queryInfo.privacyListName];
 		}
@@ -832,7 +832,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	{
 		// This may be a response to a query we sent
 		
-		XMPPPrivacyQueryInfo *queryInfo = [pendingQueries objectForKey:[iq elementID]];
+		XMPPPrivacyQueryInfo *queryInfo = pendingQueries[[iq elementID]];
 		if (queryInfo)
 		{
 			[self processQueryResponse:iq withInfo:queryInfo];
@@ -841,7 +841,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 			{
 				for (NSString *privacyListName in privacyDict)
 				{
-					id privacyListItems = [privacyDict objectForKey:privacyListName];
+					id privacyListItems = privacyDict[privacyListName];
 					
 					if (privacyListItems == [NSNull null])
 					{
@@ -864,7 +864,7 @@ NSInteger sortItems(id itemOne, id itemTwo, void *context)
 	
 	for (NSString *uuid in pendingQueries)
 	{
-		XMPPPrivacyQueryInfo *queryInfo = [privacyDict objectForKey:uuid];
+		XMPPPrivacyQueryInfo *queryInfo = privacyDict[uuid];
 		
 		[self processQuery:queryInfo withFailureCode:XMPPPrivacyDisconnect];
 	}

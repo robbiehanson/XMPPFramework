@@ -110,9 +110,9 @@
 	
 	NSDictionary *auth = [self dictionaryFromChallenge:authResponse];
 	
-	realm   = [auth objectForKey:@"realm"];
-	nonce   = [auth objectForKey:@"nonce"];
-	qop     = [auth objectForKey:@"qop"];
+	realm   = auth[@"realm"];
+	nonce   = auth[@"nonce"];
+	qop     = auth[@"qop"];
 	
 	// Fill out all the other variables
 	// 
@@ -160,7 +160,7 @@
 	if ([[authResponse name] isEqualToString:@"challenge"])
 	{
 		NSDictionary *auth = [self dictionaryFromChallenge:authResponse];
-		NSString *rspauth = [auth objectForKey:@"rspauth"];
+		NSString *rspauth = auth[@"rspauth"];
 		
 		if (rspauth == nil)
 		{
@@ -244,7 +244,7 @@
 			
             if(key && value)
             {
-                [auth setObject:value forKey:key];
+                auth[key] = value;
             }
 		}
 	}
