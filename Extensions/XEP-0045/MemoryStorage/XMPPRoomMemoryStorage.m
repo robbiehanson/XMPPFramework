@@ -202,7 +202,7 @@
 	while (YES)
 	{
 		mid = (min + max) / 2;
-		XMPPRoomMessageMemoryStorageObject *currentMessage = [messages objectAtIndex:mid];
+		XMPPRoomMessageMemoryStorageObject *currentMessage = messages[mid];
 		
 		NSComparisonResult cmp = [minLocalTimestamp compare:[currentMessage localTimestamp]];
 		if (cmp == NSOrderedAscending)
@@ -240,7 +240,7 @@
 	NSInteger index;
 	for (index = mid; index < [messages count]; index++)
 	{
-		XMPPRoomMessageMemoryStorageObject *currentMessage = [messages objectAtIndex:index];
+		XMPPRoomMessageMemoryStorageObject *currentMessage = messages[index];
 		
 		NSComparisonResult cmp = [maxLocalTimestamp compare:[currentMessage localTimestamp]];
 		if (cmp != NSOrderedAscending)
@@ -296,7 +296,7 @@
 	
 	// Shortcut - Most (if not all) messages are inserted at the end
 	
-	XMPPRoomMessageMemoryStorageObject *lastMessage = [messages objectAtIndex:(count - 1)];
+	XMPPRoomMessageMemoryStorageObject *lastMessage = messages[count - 1];
 	if ([message compare:lastMessage] != NSOrderedAscending)
 	{
 		[messages addObject:message];
@@ -313,7 +313,7 @@
 	while (YES)
 	{
 		mid = (min + max) / 2;
-		XMPPRoomMessageMemoryStorageObject *currentMessage = [messages objectAtIndex:mid];
+		XMPPRoomMessageMemoryStorageObject *currentMessage = messages[mid];
 		
 		NSComparisonResult cmp = [message compare:currentMessage];
 		if (cmp == NSOrderedAscending)
@@ -369,7 +369,7 @@
 {
 	NSUInteger index = [self insertMessage:roomMsg];
 	
-	XMPPRoomOccupantMemoryStorageObject *occupant = [occupantsDict objectForKey:[roomMsg jid]];
+	XMPPRoomOccupantMemoryStorageObject *occupant = occupantsDict[[roomMsg jid]];
 	
 	XMPPRoomMessageMemoryStorageObject *roomMsgCopy = [roomMsg copy];
 	XMPPRoomOccupantMemoryStorageObject *occupantCopy = [occupant copy];
@@ -401,7 +401,7 @@
 	while (YES)
 	{
 		mid = (min + max) / 2;
-		XMPPRoomOccupantMemoryStorageObject *currentOccupant = [occupantsArray objectAtIndex:mid];
+		XMPPRoomOccupantMemoryStorageObject *currentOccupant = occupantsArray[mid];
 		
 		NSComparisonResult cmp = [occupant compare:currentOccupant];
 		if (cmp == NSOrderedAscending)
@@ -447,7 +447,7 @@
 	
 	if (dispatch_get_specific(parentQueueTag))
 	{
-		return [occupantsDict objectForKey:jid];
+		return occupantsDict[jid];
 	}
 	else
 	{
@@ -455,7 +455,7 @@
 		
 		dispatch_sync(parentQueue, ^{ @autoreleasepool {
 			
-			occupant = [[occupantsDict objectForKey:jid] copy];
+			occupant = [occupantsDict[jid] copy];
 		}});
 		
 		return occupant;
@@ -587,7 +587,7 @@
 	
 	if ([[presence type] isEqualToString:@"unavailable"])
 	{
-		XMPPRoomOccupantMemoryStorageObject *occupant = [occupantsDict objectForKey:from];
+		XMPPRoomOccupantMemoryStorageObject *occupant = occupantsDict[from];
 		if (occupant)
 		{
 			// Occupant did leave - remove
@@ -610,7 +610,7 @@
 	}
 	else
 	{
-		XMPPRoomOccupantMemoryStorageObject *occupant = [occupantsDict objectForKey:from];
+		XMPPRoomOccupantMemoryStorageObject *occupant = occupantsDict[from];
 		if (occupant == nil)
 		{
 			// Occupant did join - add
@@ -618,7 +618,7 @@
 			occupant = [[self.occupantClass alloc] initWithPresence:presence];
 			
 			NSUInteger index = [self insertOccupant:occupant];
-			[occupantsDict setObject:occupant forKey:from];
+			occupantsDict[from] = occupant;
 			
 			// Notify delegate(s)
 			

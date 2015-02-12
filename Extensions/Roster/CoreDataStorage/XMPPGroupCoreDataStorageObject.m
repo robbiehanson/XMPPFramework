@@ -73,7 +73,7 @@
 	
   
   if ([results count] > 0) {
-    return [results objectAtIndex:0];
+    return results[0];
   }
   
   return [self insertGroupName:groupName inManagedObjectContext:moc];

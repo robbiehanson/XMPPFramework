@@ -826,7 +826,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		}
 		
 		NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"localTimestamp" ascending:NO];
-		NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+		NSArray *sortDescriptors = @[sortDescriptor];
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];

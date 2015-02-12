@@ -129,7 +129,7 @@
 	NSArray *elements = [self elementsForName:name];
 	if ([elements count] > 0)
 	{
-		return [elements objectAtIndex:0];
+		return elements[0];
 	}
 	else
 	{
@@ -165,7 +165,7 @@
 	NSArray *elements = [self elementsForLocalName:name URI:xmlns];
 	if ([elements count] > 0)
 	{
-		return [elements objectAtIndex:0];
+		return elements[0];
 	}
 	else
 	{
@@ -289,32 +289,32 @@
 
 - (void)addAttributeWithName:(NSString *)name intValue:(int)intValue
 {
-    [self addAttributeWithName:name numberValue:[NSNumber numberWithInt:intValue]];
+  [self addAttributeWithName:name numberValue:@(intValue)];
 }
 
 - (void)addAttributeWithName:(NSString *)name boolValue:(BOOL)boolValue
 {
-    [self addAttributeWithName:name numberValue:[NSNumber numberWithBool:boolValue]];
+  [self addAttributeWithName:name numberValue:@(boolValue)];
 }
 
 - (void)addAttributeWithName:(NSString *)name floatValue:(float)floatValue
 {
-    [self addAttributeWithName:name numberValue:[NSNumber numberWithFloat:floatValue]];
+  [self addAttributeWithName:name numberValue:@(floatValue)];
 }
 
 - (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue
 {
-    [self addAttributeWithName:name numberValue:[NSNumber numberWithDouble:doubleValue]];
+  [self addAttributeWithName:name numberValue:@(doubleValue)];
 }
 
 - (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue
 {
-    [self addAttributeWithName:name numberValue:[NSNumber numberWithInteger:integerValue]];
+  [self addAttributeWithName:name numberValue:@(integerValue)];
 }
 
 - (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSUInteger)unsignedIntegerValue
 {
-    [self addAttributeWithName:name numberValue:[NSNumber numberWithUnsignedInteger:unsignedIntegerValue]];
+  [self addAttributeWithName:name numberValue:@(unsignedIntegerValue)];
 }
 
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string
@@ -424,43 +424,43 @@
 }
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name
 {
-	return [NSNumber numberWithInt:[self attributeIntValueForName:name]];
+	return @([self attributeIntValueForName:name]);
 }
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name
 {
-	return [NSNumber numberWithBool:[self attributeBoolValueForName:name]];
+	return @([self attributeBoolValueForName:name]);
 }
 - (NSNumber *)attributeNumberFloatValueForName:(NSString *)name
 {
-	return [NSNumber numberWithFloat:[self attributeFloatValueForName:name]];
+	return @([self attributeFloatValueForName:name]);
 }
 - (NSNumber *)attributeNumberDoubleValueForName:(NSString *)name
 {
-	return [NSNumber numberWithDouble:[self attributeDoubleValueForName:name]];
+	return @([self attributeDoubleValueForName:name]);
 }
 - (NSNumber *)attributeNumberInt32ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithInt:[self attributeInt32ValueForName:name]];
+	return @([self attributeInt32ValueForName:name]);
 }
 - (NSNumber *)attributeNumberUInt32ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithUnsignedInt:[self attributeUInt32ValueForName:name]];
+	return @([self attributeUInt32ValueForName:name]);
 }
 - (NSNumber *)attributeNumberInt64ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithLongLong:[self attributeInt64ValueForName:name]];
+	return @([self attributeInt64ValueForName:name]);
 }
 - (NSNumber *)attributeNumberUInt64ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithUnsignedLongLong:[self attributeUInt64ValueForName:name]];
+	return @([self attributeUInt64ValueForName:name]);
 }
 - (NSNumber *)attributeNumberIntegerValueForName:(NSString *)name
 {
-	return [NSNumber numberWithInteger:[self attributeIntegerValueForName:name]];
+	return @([self attributeIntegerValueForName:name]);
 }
 - (NSNumber *)attributeNumberUnsignedIntegerValueForName:(NSString *)name
 {
-	return [NSNumber numberWithUnsignedInteger:[self attributeUnsignedIntegerValueForName:name]];
+	return @([self attributeUnsignedIntegerValueForName:name]);
 }
 
 /**
@@ -543,11 +543,11 @@
 }
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue
 {
-	return [NSNumber numberWithInt:[self attributeIntValueForName:name withDefaultValue:defaultValue]];
+	return @([self attributeIntValueForName:name withDefaultValue:defaultValue]);
 }
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue
 {
-	return [NSNumber numberWithBool:[self attributeBoolValueForName:name withDefaultValue:defaultValue]];
+	return @([self attributeBoolValueForName:name withDefaultValue:defaultValue]);
 }
 
 /**
@@ -561,9 +561,9 @@
 	NSUInteger i;
 	for(i = 0; i < [attributes count]; i++)
 	{
-		NSXMLNode *node = [attributes objectAtIndex:i];
+		NSXMLNode *node = attributes[i];
 		
-		[result setObject:[node stringValue] forKey:[node name]];
+		result[[node name]] = [node stringValue];
 	}
 	return result;
 }

@@ -214,7 +214,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 	
 	RPCID *rpcID = [[RPCID alloc] initWithRpcID:elementID timer:timer];
 	
-	[rpcIDs setObject:rpcID forKey:elementID];
+	rpcIDs[elementID] = rpcID;
 	
 	[xmppStream sendElement:iq];
 	
@@ -225,16 +225,15 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 {
 	XMPPLogTrace();
 	
-	RPCID *rpcID = [rpcIDs objectForKey:elementID];
+	RPCID *rpcID = rpcIDs[elementID];
 	if (rpcID)
 	{
 		[rpcID cancelTimer];
 		[rpcIDs removeObjectForKey:elementID];
 		
 		NSError *error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain
-		                                     code:1400
-		                                 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-		                                          @"Request timed out", @"error",nil]];
+                                         code:1400
+                                     userInfo:@{@"error" : @"Request timed out"}];
 		
 		[multicastDelegate jabberRPC:self elementID:elementID didReceiveError:error];
 	}
@@ -262,7 +261,7 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 			// we could check the query element, but we should be able to do a lookup based on the unique elementID
 			// because we send an ID, we should get one back
 			
-			RPCID *rpcID =  [rpcIDs objectForKey:elementID];
+			RPCID *rpcID = rpcIDs[elementID];
 			if (rpcID == nil)
 			{
 				return NO;
@@ -290,13 +289,12 @@ NSString *const XMPPJabberRPCErrorDomain = @"XMPPJabberRPCErrorDomain";
 				// TODO: implement error parsing
 				// not much specified in XEP, only 403 forbidden error
 				NSXMLElement *errorElement = [iq childErrorElement];
-				NSError *error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain 
-													 code:[errorElement attributeIntValueForName:@"code"] 
-												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:	
-														   [errorElement attributesAsDictionary],@"error",
-														   [[errorElement childAtIndex:0] name], @"condition",
-														   iq,@"iq",
-														   nil]];
+				NSError *error = [NSError errorWithDomain:XMPPJabberRPCErrorDomain
+                                             code:[errorElement attributeIntValueForName:@"code"]
+                                         userInfo:@{
+                                                                                      @"error" : [errorElement attributesAsDictionary],
+                                                                                      @"condition" : [[errorElement childAtIndex:0] name],
+                                                                                      @"iq" : iq}];
 				
 				[multicastDelegate jabberRPC:self elementID:elementID didReceiveError:error];
 			}
