@@ -1,7 +1,7 @@
 // 
 // Core classes
 // 
-
+#import <UIKit/UIKit.h>
 #import "XMPPJID.h"
 #import "XMPPStream.h"
 #import "XMPPElement.h"
