@@ -26,8 +26,6 @@
 
 @implementation XMPPvCardTempEmail
 
-#if DEBUG
-
 + (void)initialize {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
 	// The size of the two classes is expected to be the same.
@@ -50,8 +48,6 @@
 		exit(15);
 	}
 }
-
-#endif
 
 + (XMPPvCardTempEmail *)vCardEmailFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTempEmail class]);
