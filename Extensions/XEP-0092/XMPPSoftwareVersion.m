@@ -6,7 +6,7 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-#define XMLNS_URN_XMPP_VERSION @"urn:xmpp:jabber:iq:version"
+#define XMLNS_URN_XMPP_VERSION @"jabber:iq:version"
 
 @implementation XMPPSoftwareVersion
 
