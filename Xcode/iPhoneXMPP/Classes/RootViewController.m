@@ -191,6 +191,31 @@
 	return cell;
 }
 
+- (NSArray *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewRowAction *invite = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault
+                                                                      title:@"Invite"
+                                                                    handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+                                                                        
+                                                                    }];
+    
+    
+    return @[invite];
+    
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    
+    
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Actions
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
