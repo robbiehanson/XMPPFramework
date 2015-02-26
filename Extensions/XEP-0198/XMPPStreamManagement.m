@@ -588,6 +588,10 @@
 		       lastHandledByServer:lastHandledByServer
 		    pendingOutgoingStanzas:nil
 		                 forStream:xmppStream];
+		
+		// Notify delegate
+		
+		[multicastDelegate xmppStreamManagement:self didReceiveAckForStanzaIds:stanzaIds];
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
