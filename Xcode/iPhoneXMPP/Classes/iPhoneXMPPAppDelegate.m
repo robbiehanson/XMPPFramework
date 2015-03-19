@@ -216,8 +216,8 @@
 	// 
 	// If you don't specify a hostPort, then the default (5222) will be used.
 	
-//	[xmppStream setHostName:@"talk.google.com"];
-//	[xmppStream setHostPort:5222];	
+	[xmppStream setHostName:@"www.baseva.com"];
+	[xmppStream setHostPort:5222];
 	
 
 	// You may need to alter these settings depending on the server you're connecting to
