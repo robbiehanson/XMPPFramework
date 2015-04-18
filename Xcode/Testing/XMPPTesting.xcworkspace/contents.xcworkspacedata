@@ -23,7 +23,10 @@
       location = "group:FacebookTest/FacebookTest.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:MulticastDelegateTest/MulticastDelegateTest.xcodeproj">
+      location = "group:MulticastDelegateTest/Desktop/MulticastDelegateTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:MulticastDelegateTest/Mobile/MulticastDelegateTest.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:MUCTesting/MUCTesting.xcodeproj">
