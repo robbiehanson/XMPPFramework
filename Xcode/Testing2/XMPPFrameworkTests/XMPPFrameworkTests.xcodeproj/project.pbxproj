@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		90F596D50A8AB2CD874C400D /* libPods-XMPPFrameworkTestsTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E12FE78966D1CF605B0A4F20 /* libPods-XMPPFrameworkTestsTests.a */; };
 		9EF4C5A71AE2C2C50019F001 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C5A61AE2C2C50019F001 /* main.m */; };
 		9EF4C5AA1AE2C2C50019F001 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C5A91AE2C2C50019F001 /* AppDelegate.m */; };
 		9EF4C5AD1AE2C2C50019F001 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C5AC1AE2C2C50019F001 /* ViewController.m */; };
@@ -59,6 +60,7 @@
 		9EF4C7CC1AE2C43F0019F001 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EF4C7CB1AE2C43F0019F001 /* libidn.a */; };
 		9EF4C7CE1AE2C4480019F001 /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EF4C7CD1AE2C4480019F001 /* libresolv.dylib */; };
 		9EF4C7D31AE2C4CC0019F001 /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C7D21AE2C4CC0019F001 /* EncodeDecodeTest.m */; };
+		9EF4C7D51AE2C6100019F001 /* MulticastDelegateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C7D41AE2C6100019F001 /* MulticastDelegateTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +74,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		76C6AF82FDDA755AC643FD84 /* Pods-XMPPFrameworkTestsTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTestsTests.release.xcconfig"; path = "../Pods/Target Support Files/Pods-XMPPFrameworkTestsTests/Pods-XMPPFrameworkTestsTests.release.xcconfig"; sourceTree = "<group>"; };
+		9508FAAF7823E030E62A713C /* Pods-XMPPFrameworkTestsTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTestsTests.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-XMPPFrameworkTestsTests/Pods-XMPPFrameworkTestsTests.debug.xcconfig"; sourceTree = "<group>"; };
 		9EF4C5A11AE2C2C50019F001 /* XMPPFrameworkTests.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XMPPFrameworkTests.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EF4C5A51AE2C2C50019F001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9EF4C5A61AE2C2C50019F001 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -180,6 +184,8 @@
 		9EF4C7CB1AE2C43F0019F001 /* libidn.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libidn.a; path = ../../../Vendor/libidn/libidn.a; sourceTree = "<group>"; };
 		9EF4C7CD1AE2C4480019F001 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		9EF4C7D21AE2C4CC0019F001 /* EncodeDecodeTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EncodeDecodeTest.m; sourceTree = "<group>"; };
+		9EF4C7D41AE2C6100019F001 /* MulticastDelegateTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MulticastDelegateTest.m; sourceTree = "<group>"; };
+		E12FE78966D1CF605B0A4F20 /* libPods-XMPPFrameworkTestsTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-XMPPFrameworkTestsTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -198,12 +204,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				90F596D50A8AB2CD874C400D /* libPods-XMPPFrameworkTestsTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2447A4F5551AFAD7B375B8C9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9508FAAF7823E030E62A713C /* Pods-XMPPFrameworkTestsTests.debug.xcconfig */,
+				76C6AF82FDDA755AC643FD84 /* Pods-XMPPFrameworkTestsTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		808D2D5B3A8FC3353BC1C1AD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E12FE78966D1CF605B0A4F20 /* libPods-XMPPFrameworkTestsTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		9EF4C5981AE2C2C50019F001 = {
 			isa = PBXGroup;
 			children = (
@@ -215,6 +239,8 @@
 				9EF4C5A31AE2C2C50019F001 /* XMPPFrameworkTests */,
 				9EF4C5BD1AE2C2C50019F001 /* XMPPFrameworkTestsTests */,
 				9EF4C5A21AE2C2C50019F001 /* Products */,
+				2447A4F5551AFAD7B375B8C9 /* Pods */,
+				808D2D5B3A8FC3353BC1C1AD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -255,6 +281,7 @@
 			isa = PBXGroup;
 			children = (
 				9EF4C7D21AE2C4CC0019F001 /* EncodeDecodeTest.m */,
+				9EF4C7D41AE2C6100019F001 /* MulticastDelegateTest.m */,
 				9EF4C5BE1AE2C2C50019F001 /* Supporting Files */,
 			);
 			path = XMPPFrameworkTestsTests;
@@ -551,9 +578,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9EF4C5C71AE2C2C50019F001 /* Build configuration list for PBXNativeTarget "XMPPFrameworkTestsTests" */;
 			buildPhases = (
+				3A08A7ECFE07257C15BCB6B1 /* Check Pods Manifest.lock */,
 				9EF4C5B61AE2C2C50019F001 /* Sources */,
 				9EF4C5B71AE2C2C50019F001 /* Frameworks */,
 				9EF4C5B81AE2C2C50019F001 /* Resources */,
+				4AFD9EB379BB30AFE2AA08DE /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -623,6 +652,39 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		3A08A7ECFE07257C15BCB6B1 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		4AFD9EB379BB30AFE2AA08DE /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-XMPPFrameworkTestsTests/Pods-XMPPFrameworkTestsTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		9EF4C59D1AE2C2C50019F001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -679,6 +741,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9EF4C7D31AE2C4CC0019F001 /* EncodeDecodeTest.m in Sources */,
+				9EF4C7D51AE2C6100019F001 /* MulticastDelegateTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -830,6 +893,7 @@
 		};
 		9EF4C5C81AE2C2C50019F001 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9508FAAF7823E030E62A713C /* Pods-XMPPFrameworkTestsTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -849,6 +913,7 @@
 		};
 		9EF4C5C91AE2C2C50019F001 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 76C6AF82FDDA755AC643FD84 /* Pods-XMPPFrameworkTestsTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -881,6 +946,7 @@
 				9EF4C5C61AE2C2C50019F001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9EF4C5C71AE2C2C50019F001 /* Build configuration list for PBXNativeTarget "XMPPFrameworkTestsTests" */ = {
 			isa = XCConfigurationList;
@@ -889,6 +955,7 @@
 				9EF4C5C91AE2C2C50019F001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
