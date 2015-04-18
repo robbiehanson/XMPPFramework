@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E8E5BC81AE2AF9B00BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8E5BC71AE2AF9B00BE3E34 /* XMPPSCRAMSHA1Authentication.m */; };
 		DC30E328153DFD3E001B9E6D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC30E327153DFD3E001B9E6D /* Security.framework */; };
 		DC30E7FB153E0AA8001B9E6D /* XMPPAnonymousAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E7EA153E0AA8001B9E6D /* XMPPAnonymousAuthentication.m */; };
 		DC30E7FC153E0AA8001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E7ED153E0AA8001B9E6D /* XMPPDeprecatedDigestAuthentication.m */; };
@@ -61,6 +62,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9E8E5BC41AE2AF9B00BE3E34 /* XMPPCustomBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCustomBinding.h; sourceTree = "<group>"; };
+		9E8E5BC61AE2AF9B00BE3E34 /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
+		9E8E5BC71AE2AF9B00BE3E34 /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
 		DC30E327153DFD3E001B9E6D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC30E7E9153E0AA8001B9E6D /* XMPPAnonymousAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAnonymousAuthentication.h; sourceTree = "<group>"; };
 		DC30E7EA153E0AA8001B9E6D /* XMPPAnonymousAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAnonymousAuthentication.m; sourceTree = "<group>"; };
@@ -115,7 +119,7 @@
 		DC598113141033210050774C /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		DC598114141033210050774C /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		DC598115141033210050774C /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		DC598116141033210050774C /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
+		DC598116141033210050774C /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		DC598117141033210050774C /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DC59816C141033210050774C /* NSDate+XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+XMPPDateTimeProfiles.h"; sourceTree = "<group>"; };
 		DC59816D141033210050774C /* NSDate+XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+XMPPDateTimeProfiles.m"; sourceTree = "<group>"; };
@@ -184,6 +188,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9E8E5BC51AE2AF9B00BE3E34 /* SCRAM-SHA-1 */ = {
+			isa = PBXGroup;
+			children = (
+				9E8E5BC61AE2AF9B00BE3E34 /* XMPPSCRAMSHA1Authentication.h */,
+				9E8E5BC71AE2AF9B00BE3E34 /* XMPPSCRAMSHA1Authentication.m */,
+			);
+			path = "SCRAM-SHA-1";
+			sourceTree = "<group>";
+		};
 		DC30E7E7153E0AA8001B9E6D /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
@@ -192,7 +205,9 @@
 				DC30E7EE153E0AA8001B9E6D /* Deprecated-Plain */,
 				DC30E7F1153E0AA8001B9E6D /* Digest-MD5 */,
 				DC30E7F4153E0AA8001B9E6D /* Plain */,
+				9E8E5BC51AE2AF9B00BE3E34 /* SCRAM-SHA-1 */,
 				DC30E7F7153E0AA8001B9E6D /* X-Facebook-Platform */,
+				9E8E5BC41AE2AF9B00BE3E34 /* XMPPCustomBinding.h */,
 				DC30E7FA153E0AA8001B9E6D /* XMPPSASLAuthentication.h */,
 			);
 			name = Authentication;
@@ -578,6 +593,7 @@
 				DC5981E8141033210050774C /* NSDate+XMPPDateTimeProfiles.m in Sources */,
 				DC5981E9141033210050774C /* XMPPDateTimeProfiles.m in Sources */,
 				DC5981F1141033210050774C /* XMPPAutoPing.m in Sources */,
+				9E8E5BC81AE2AF9B00BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				DC5981F2141033210050774C /* XMPPPing.m in Sources */,
 				DC5981F6141033210050774C /* DDList.m in Sources */,
 				DC5981F7141033210050774C /* GCDMulticastDelegate.m in Sources */,
@@ -654,7 +670,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -672,7 +688,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
