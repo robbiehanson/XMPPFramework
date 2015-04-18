@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		56F8345214C7733800AF62B3 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 56F8345114C7733800AF62B3 /* libiconv.dylib */; };
+		9E8E5BCD1AE2B1C800BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8E5BCC1AE2B1C800BE3E34 /* XMPPSCRAMSHA1Authentication.m */; };
 		DC30E332153DFDF5001B9E6D /* AutoTimeTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E32D153DFDF5001B9E6D /* AutoTimeTestAppDelegate.m */; };
 		DC30E333153DFDF5001B9E6D /* AutoTimeTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E32F153DFDF5001B9E6D /* AutoTimeTestViewController.m */; };
 		DC30E334153DFDF5001B9E6D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E330153DFDF5001B9E6D /* main.m */; };
@@ -37,8 +38,8 @@
 		DC30E408153DFE52001B9E6D /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E379153DFE52001B9E6D /* DDFileLogger.m */; };
 		DC30E409153DFE52001B9E6D /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E37B153DFE52001B9E6D /* DDLog.m */; };
 		DC30E40A153DFE52001B9E6D /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E37D153DFE52001B9E6D /* DDTTYLogger.m */; };
-		DC30E40B153DFE52001B9E6D /* ContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E380153DFE52001B9E6D /* ContextFilterLogFormatter.m */; };
-		DC30E40C153DFE52001B9E6D /* DispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E382153DFE52001B9E6D /* DispatchQueueLogFormatter.m */; };
+		DC30E40B153DFE52001B9E6D /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E380153DFE52001B9E6D /* DDContextFilterLogFormatter.m */; };
+		DC30E40C153DFE52001B9E6D /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E382153DFE52001B9E6D /* DDDispatchQueueLogFormatter.m */; };
 		DC30E433153DFE52001B9E6D /* NSString+DDXML.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E3D8153DFE52001B9E6D /* NSString+DDXML.m */; };
 		DC30E434153DFE52001B9E6D /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E3DB153DFE52001B9E6D /* DDXMLDocument.m */; };
 		DC30E435153DFE52001B9E6D /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E3DD153DFE52001B9E6D /* DDXMLElement.m */; };
@@ -65,6 +66,9 @@
 
 /* Begin PBXFileReference section */
 		56F8345114C7733800AF62B3 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
+		9E8E5BC91AE2B1C800BE3E34 /* XMPPCustomBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCustomBinding.h; sourceTree = "<group>"; };
+		9E8E5BCB1AE2B1C800BE3E34 /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
+		9E8E5BCC1AE2B1C800BE3E34 /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
 		DC30E32A153DFDF5001B9E6D /* AutoTimeTest-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AutoTimeTest-Info.plist"; sourceTree = "<group>"; };
 		DC30E32B153DFDF5001B9E6D /* AutoTimeTest-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AutoTimeTest-Prefix.pch"; sourceTree = "<group>"; };
 		DC30E32C153DFDF5001B9E6D /* AutoTimeTestAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoTimeTestAppDelegate.h; sourceTree = "<group>"; };
@@ -98,7 +102,7 @@
 		DC30E358153DFE52001B9E6D /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		DC30E359153DFE52001B9E6D /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		DC30E35A153DFE52001B9E6D /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		DC30E35B153DFE52001B9E6D /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
+		DC30E35B153DFE52001B9E6D /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		DC30E35C153DFE52001B9E6D /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DC30E35E153DFE52001B9E6D /* DDList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDList.h; sourceTree = "<group>"; };
 		DC30E35F153DFE52001B9E6D /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDList.m; sourceTree = "<group>"; };
@@ -124,10 +128,10 @@
 		DC30E37B153DFE52001B9E6D /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		DC30E37C153DFE52001B9E6D /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
 		DC30E37D153DFE52001B9E6D /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
-		DC30E37F153DFE52001B9E6D /* ContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextFilterLogFormatter.h; sourceTree = "<group>"; };
-		DC30E380153DFE52001B9E6D /* ContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContextFilterLogFormatter.m; sourceTree = "<group>"; };
-		DC30E381153DFE52001B9E6D /* DispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DispatchQueueLogFormatter.h; sourceTree = "<group>"; };
-		DC30E382153DFE52001B9E6D /* DispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DispatchQueueLogFormatter.m; sourceTree = "<group>"; };
+		DC30E37F153DFE52001B9E6D /* DDContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDContextFilterLogFormatter.h; sourceTree = "<group>"; };
+		DC30E380153DFE52001B9E6D /* DDContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDContextFilterLogFormatter.m; sourceTree = "<group>"; };
+		DC30E381153DFE52001B9E6D /* DDDispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDDispatchQueueLogFormatter.h; sourceTree = "<group>"; };
+		DC30E382153DFE52001B9E6D /* DDDispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDDispatchQueueLogFormatter.m; sourceTree = "<group>"; };
 		DC30E383153DFE52001B9E6D /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		DC30E3D7153DFE52001B9E6D /* NSString+DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+DDXML.h"; sourceTree = "<group>"; };
 		DC30E3D8153DFE52001B9E6D /* NSString+DDXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+DDXML.m"; sourceTree = "<group>"; };
@@ -194,6 +198,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9E8E5BCA1AE2B1C800BE3E34 /* SCRAM-SHA-1 */ = {
+			isa = PBXGroup;
+			children = (
+				9E8E5BCB1AE2B1C800BE3E34 /* XMPPSCRAMSHA1Authentication.h */,
+				9E8E5BCC1AE2B1C800BE3E34 /* XMPPSCRAMSHA1Authentication.m */,
+			);
+			path = "SCRAM-SHA-1";
+			sourceTree = "<group>";
+		};
 		DC30E335153DFE09001B9E6D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -308,10 +321,10 @@
 		DC30E37E153DFE52001B9E6D /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				DC30E37F153DFE52001B9E6D /* ContextFilterLogFormatter.h */,
-				DC30E380153DFE52001B9E6D /* ContextFilterLogFormatter.m */,
-				DC30E381153DFE52001B9E6D /* DispatchQueueLogFormatter.h */,
-				DC30E382153DFE52001B9E6D /* DispatchQueueLogFormatter.m */,
+				DC30E37F153DFE52001B9E6D /* DDContextFilterLogFormatter.h */,
+				DC30E380153DFE52001B9E6D /* DDContextFilterLogFormatter.m */,
+				DC30E381153DFE52001B9E6D /* DDDispatchQueueLogFormatter.h */,
+				DC30E382153DFE52001B9E6D /* DDDispatchQueueLogFormatter.m */,
 				DC30E383153DFE52001B9E6D /* README.txt */,
 			);
 			path = Extensions;
@@ -415,7 +428,9 @@
 				DC30E824153E0AF0001B9E6D /* Deprecated-Plain */,
 				DC30E827153E0AF0001B9E6D /* Digest-MD5 */,
 				DC30E82A153E0AF0001B9E6D /* Plain */,
+				9E8E5BCA1AE2B1C800BE3E34 /* SCRAM-SHA-1 */,
 				DC30E82D153E0AF0001B9E6D /* X-Facebook-Platform */,
+				9E8E5BC91AE2B1C800BE3E34 /* XMPPCustomBinding.h */,
 				DC30E830153E0AF0001B9E6D /* XMPPSASLAuthentication.h */,
 			);
 			name = Authentication;
@@ -603,6 +618,7 @@
 				DC30E3FD153DFE52001B9E6D /* DDList.m in Sources */,
 				DC30E3FE153DFE52001B9E6D /* GCDMulticastDelegate.m in Sources */,
 				DC30E3FF153DFE52001B9E6D /* XMPPStringPrep.m in Sources */,
+				9E8E5BCD1AE2B1C800BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				DC30E400153DFE52001B9E6D /* RFImageToDataTransformer.m in Sources */,
 				DC30E402153DFE52001B9E6D /* XMPPIDTracker.m in Sources */,
 				DC30E403153DFE52001B9E6D /* XMPPSRVResolver.m in Sources */,
@@ -612,8 +628,8 @@
 				DC30E408153DFE52001B9E6D /* DDFileLogger.m in Sources */,
 				DC30E409153DFE52001B9E6D /* DDLog.m in Sources */,
 				DC30E40A153DFE52001B9E6D /* DDTTYLogger.m in Sources */,
-				DC30E40B153DFE52001B9E6D /* ContextFilterLogFormatter.m in Sources */,
-				DC30E40C153DFE52001B9E6D /* DispatchQueueLogFormatter.m in Sources */,
+				DC30E40B153DFE52001B9E6D /* DDContextFilterLogFormatter.m in Sources */,
+				DC30E40C153DFE52001B9E6D /* DDDispatchQueueLogFormatter.m in Sources */,
 				DC30E433153DFE52001B9E6D /* NSString+DDXML.m in Sources */,
 				DC30E434153DFE52001B9E6D /* DDXMLDocument.m in Sources */,
 				DC30E435153DFE52001B9E6D /* DDXMLElement.m in Sources */,
@@ -681,7 +697,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -699,7 +715,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		56F8388914C79AEB00AF62B3 /* XMPPAutoTime.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8388614C79AEB00AF62B3 /* XMPPAutoTime.m */; };
 		56F8388A14C79AEB00AF62B3 /* XMPPTime.m in Sources */ = {isa = PBXBuildFile; fileRef = 56F8388814C79AEB00AF62B3 /* XMPPTime.m */; };
+		9E8E5BBD1AE2ADD600BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8E5BBC1AE2ADD600BE3E34 /* XMPPSCRAMSHA1Authentication.m */; };
 		DC17CD3E1355ED29007A32CC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC17CD3D1355ED29007A32CC /* Cocoa.framework */; };
 		DC17CD481355ED29007A32CC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DC17CD461355ED29007A32CC /* InfoPlist.strings */; };
 		DC17CD4B1355ED29007A32CC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DC17CD4A1355ED29007A32CC /* main.m */; };
@@ -60,6 +61,9 @@
 		56F8388614C79AEB00AF62B3 /* XMPPAutoTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAutoTime.m; sourceTree = "<group>"; };
 		56F8388714C79AEB00AF62B3 /* XMPPTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPTime.h; sourceTree = "<group>"; };
 		56F8388814C79AEB00AF62B3 /* XMPPTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPTime.m; sourceTree = "<group>"; };
+		9E8E5BB91AE2ADA900BE3E34 /* XMPPCustomBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCustomBinding.h; sourceTree = "<group>"; };
+		9E8E5BBB1AE2ADD600BE3E34 /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
+		9E8E5BBC1AE2ADD600BE3E34 /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
 		DC17CD391355ED29007A32CC /* AutoPingTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutoPingTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC17CD3D1355ED29007A32CC /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		DC17CD401355ED29007A32CC /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -114,7 +118,7 @@
 		DC597EB114101FBF0050774C /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		DC597EB214101FBF0050774C /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		DC597EB314101FBF0050774C /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		DC597EB414101FBF0050774C /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
+		DC597EB414101FBF0050774C /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		DC597EB514101FBF0050774C /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DC597F0A14101FBF0050774C /* NSDate+XMPPDateTimeProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+XMPPDateTimeProfiles.h"; sourceTree = "<group>"; };
 		DC597F0B14101FBF0050774C /* NSDate+XMPPDateTimeProfiles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+XMPPDateTimeProfiles.m"; sourceTree = "<group>"; };
@@ -179,6 +183,15 @@
 				56F8388814C79AEB00AF62B3 /* XMPPTime.m */,
 			);
 			path = "XEP-0202";
+			sourceTree = "<group>";
+		};
+		9E8E5BBA1AE2ADD600BE3E34 /* SCRAM-SHA-1 */ = {
+			isa = PBXGroup;
+			children = (
+				9E8E5BBB1AE2ADD600BE3E34 /* XMPPSCRAMSHA1Authentication.h */,
+				9E8E5BBC1AE2ADD600BE3E34 /* XMPPSCRAMSHA1Authentication.m */,
+			);
+			path = "SCRAM-SHA-1";
 			sourceTree = "<group>";
 		};
 		DC17CD2E1355ED29007A32CC = {
@@ -267,7 +280,9 @@
 				DC30E7D3153E0A88001B9E6D /* Deprecated-Plain */,
 				DC30E7D6153E0A88001B9E6D /* Digest-MD5 */,
 				DC30E7D9153E0A88001B9E6D /* Plain */,
+				9E8E5BBA1AE2ADD600BE3E34 /* SCRAM-SHA-1 */,
 				DC30E7DC153E0A88001B9E6D /* X-Facebook-Platform */,
+				9E8E5BB91AE2ADA900BE3E34 /* XMPPCustomBinding.h */,
 				DC30E7DF153E0A88001B9E6D /* XMPPSASLAuthentication.h */,
 			);
 			name = Authentication;
@@ -562,6 +577,7 @@
 				DC597F9E14101FBF0050774C /* DDLog.m in Sources */,
 				DC597F9F14101FBF0050774C /* DDTTYLogger.m in Sources */,
 				56F8388914C79AEB00AF62B3 /* XMPPAutoTime.m in Sources */,
+				9E8E5BBD1AE2ADD600BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				56F8388A14C79AEB00AF62B3 /* XMPPTime.m in Sources */,
 				DC30E7E0153E0A88001B9E6D /* XMPPAnonymousAuthentication.m in Sources */,
 				DC30E7E1153E0A88001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */,
@@ -615,7 +631,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -631,7 +647,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				SDKROOT = macosx;
 			};
 			name = Release;
