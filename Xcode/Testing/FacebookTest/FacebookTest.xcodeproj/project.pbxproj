@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4AB0D3B31746851500B4034A /* libfacebook_ios_sdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AB0D3B01746850500B4034A /* libfacebook_ios_sdk.a */; };
+		9E8E5BC21AE2AF2900BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8E5BC11AE2AF2900BE3E34 /* XMPPSCRAMSHA1Authentication.m */; };
+		9E8E5BD51AE2B54200BE3E34 /* XMPPIDTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8E5BD31AE2B54200BE3E34 /* XMPPIDTracker.m */; };
 		DC30E5D3153E0204001B9E6D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC30E5D2153E0204001B9E6D /* Security.framework */; };
 		DC30E84D153E0B72001B9E6D /* XMPPAnonymousAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E83C153E0B72001B9E6D /* XMPPAnonymousAuthentication.m */; };
 		DC30E84E153E0B72001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E83F153E0B72001B9E6D /* XMPPDeprecatedDigestAuthentication.m */; };
@@ -70,24 +72,15 @@
 			remoteGlobalIDString = D2AAC07D0554694100DB518D;
 			remoteInfo = "facebook-ios-sdk";
 		};
-		DC49313D17F8E0FA00402F77 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4AB0D3AB1746850500B4034A /* facebook-ios-sdk.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = B9CBC519152537270036AA71;
-			remoteInfo = FacebookSDKTests;
-		};
-		DC49313F17F8E0FA00402F77 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4AB0D3AB1746850500B4034A /* facebook-ios-sdk.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 85A44B9F16A8CE05007BE80E;
-			remoteInfo = FacebookSDKIntegrationTests;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		4AB0D3AB1746850500B4034A /* facebook-ios-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "facebook-ios-sdk.xcodeproj"; path = "facebook-ios-sdk/src/facebook-ios-sdk.xcodeproj"; sourceTree = "<group>"; };
+		9E8E5BBE1AE2AF2200BE3E34 /* XMPPCustomBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCustomBinding.h; sourceTree = "<group>"; };
+		9E8E5BC01AE2AF2900BE3E34 /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
+		9E8E5BC11AE2AF2900BE3E34 /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
+		9E8E5BD31AE2B54200BE3E34 /* XMPPIDTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIDTracker.m; sourceTree = "<group>"; };
+		9E8E5BD41AE2B54200BE3E34 /* XMPPIDTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIDTracker.h; sourceTree = "<group>"; };
 		DC0AC2A913490B3F00D053E3 /* XMPPInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPInternal.h; sourceTree = "<group>"; };
 		DC30E5D2153E0204001B9E6D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DC30E83B153E0B72001B9E6D /* XMPPAnonymousAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAnonymousAuthentication.h; sourceTree = "<group>"; };
@@ -210,10 +203,17 @@
 			isa = PBXGroup;
 			children = (
 				4AB0D3B01746850500B4034A /* libfacebook_ios_sdk.a */,
-				DC49313E17F8E0FA00402F77 /* FacebookSDKTests.octest */,
-				DC49314017F8E0FA00402F77 /* FacebookSDKIntegrationTests.octest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9E8E5BBF1AE2AF2900BE3E34 /* SCRAM-SHA-1 */ = {
+			isa = PBXGroup;
+			children = (
+				9E8E5BC01AE2AF2900BE3E34 /* XMPPSCRAMSHA1Authentication.h */,
+				9E8E5BC11AE2AF2900BE3E34 /* XMPPSCRAMSHA1Authentication.m */,
+			);
+			path = "SCRAM-SHA-1";
 			sourceTree = "<group>";
 		};
 		DC30E839153E0B72001B9E6D /* Authentication */ = {
@@ -224,7 +224,9 @@
 				DC30E840153E0B72001B9E6D /* Deprecated-Plain */,
 				DC30E843153E0B72001B9E6D /* Digest-MD5 */,
 				DC30E846153E0B72001B9E6D /* Plain */,
+				9E8E5BBF1AE2AF2900BE3E34 /* SCRAM-SHA-1 */,
 				DC30E849153E0B72001B9E6D /* X-Facebook-Platform */,
+				9E8E5BBE1AE2AF2200BE3E34 /* XMPPCustomBinding.h */,
 				DC30E84C153E0B72001B9E6D /* XMPPSASLAuthentication.h */,
 			);
 			name = Authentication;
@@ -343,6 +345,8 @@
 			children = (
 				DCC494CD1333043200F3C8F6 /* GCDMulticastDelegate.h */,
 				DCC494CE1333043200F3C8F6 /* GCDMulticastDelegate.m */,
+				9E8E5BD31AE2B54200BE3E34 /* XMPPIDTracker.m */,
+				9E8E5BD41AE2B54200BE3E34 /* XMPPIDTracker.h */,
 				DCC494CF1333043200F3C8F6 /* XMPPStringPrep.h */,
 				DCC494D01333043200F3C8F6 /* XMPPStringPrep.m */,
 				DCF3C1371367276900111BA3 /* XMPPSRVResolver.h */,
@@ -558,20 +562,6 @@
 			remoteRef = 4AB0D3AF1746850500B4034A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		DC49313E17F8E0FA00402F77 /* FacebookSDKTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = FacebookSDKTests.octest;
-			remoteRef = DC49313D17F8E0FA00402F77 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		DC49314017F8E0FA00402F77 /* FacebookSDKIntegrationTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = FacebookSDKIntegrationTests.octest;
-			remoteRef = DC49313F17F8E0FA00402F77 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -602,6 +592,7 @@
 				DCC494F61333043200F3C8F6 /* XMPPMessage.m in Sources */,
 				DCC494F71333043200F3C8F6 /* XMPPModule.m in Sources */,
 				DCC494F81333043200F3C8F6 /* XMPPParser.m in Sources */,
+				9E8E5BD51AE2B54200BE3E34 /* XMPPIDTracker.m in Sources */,
 				DCC494F91333043200F3C8F6 /* XMPPPresence.m in Sources */,
 				DCC494FB1333043200F3C8F6 /* XMPPStream.m in Sources */,
 				DCC494FC1333043200F3C8F6 /* DDList.m in Sources */,
@@ -623,6 +614,7 @@
 				DC30E84D153E0B72001B9E6D /* XMPPAnonymousAuthentication.m in Sources */,
 				DC30E84E153E0B72001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */,
 				DC30E84F153E0B72001B9E6D /* XMPPDeprecatedPlainAuthentication.m in Sources */,
+				9E8E5BC21AE2AF2900BE3E34 /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				DC30E850153E0B72001B9E6D /* XMPPDigestMD5Authentication.m in Sources */,
 				DC30E851153E0B72001B9E6D /* XMPPPlainAuthentication.m in Sources */,
 				DC30E852153E0B72001B9E6D /* XMPPXFacebookPlatformAuthentication.m in Sources */,
@@ -680,7 +672,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				OTHER_LDFLAGS = "-lxml2";
 				SDKROOT = iphoneos;
 			};
@@ -696,7 +688,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /usr/include/libxml2;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = "-lxml2";
 				SDKROOT = iphoneos;
