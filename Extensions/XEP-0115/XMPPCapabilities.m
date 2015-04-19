@@ -496,7 +496,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	return [str1 compare:str2 options:NSLiteralSearch];
 }
 
-- (NSString *)hashCapabilitiesFromQuery:(NSXMLElement *)query
++ (NSString *)hashCapabilitiesFromQuery:(NSXMLElement *)query
 {
 	if (query == nil) return nil;
 	
@@ -796,7 +796,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	XMPPLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
 				   [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 	
-	NSString *hash = [self hashCapabilitiesFromQuery:query];
+	NSString *hash = [self.class hashCapabilitiesFromQuery:query];
 	
 	if (hash == nil)
 	{
@@ -1258,7 +1258,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		
 		NSString *key = [self keyFromHash:hash algorithm:hashAlg];
 		
-		NSString *calculatedHash = [self hashCapabilitiesFromQuery:query];
+		NSString *calculatedHash = [self.class hashCapabilitiesFromQuery:query];
 		
 		if ([calculatedHash isEqualToString:hash])
 		{

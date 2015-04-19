@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9EF4C5291AE2BC2F0019F001 /* XMPPSCRAMSHA1Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C5281AE2BC2F0019F001 /* XMPPSCRAMSHA1Authentication.m */; };
 		DC30E8B9153E0C42001B9E6D /* XMPPAnonymousAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E8A8153E0C42001B9E6D /* XMPPAnonymousAuthentication.m */; };
 		DC30E8BA153E0C42001B9E6D /* XMPPDeprecatedDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E8AB153E0C42001B9E6D /* XMPPDeprecatedDigestAuthentication.m */; };
 		DC30E8BB153E0C42001B9E6D /* XMPPDeprecatedPlainAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = DC30E8AE153E0C42001B9E6D /* XMPPDeprecatedPlainAuthentication.m */; };
@@ -49,6 +50,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9EF4C5251AE2BC2F0019F001 /* XMPPCustomBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCustomBinding.h; sourceTree = "<group>"; };
+		9EF4C5271AE2BC2F0019F001 /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
+		9EF4C5281AE2BC2F0019F001 /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
 		DC30E8A7153E0C42001B9E6D /* XMPPAnonymousAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAnonymousAuthentication.h; sourceTree = "<group>"; };
 		DC30E8A8153E0C42001B9E6D /* XMPPAnonymousAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAnonymousAuthentication.m; sourceTree = "<group>"; };
 		DC30E8AA153E0C42001B9E6D /* XMPPDeprecatedDigestAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPDeprecatedDigestAuthentication.h; sourceTree = "<group>"; };
@@ -98,7 +102,7 @@
 		DCC890BE13EBF90C00CDAB56 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		DCC890BF13EBF90C00CDAB56 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		DCC890C013EBF90C00CDAB56 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		DCC890C113EBF90C00CDAB56 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; };
+		DCC890C113EBF90C00CDAB56 /* XMPPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPStream.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		DCC890C213EBF90C00CDAB56 /* XMPPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStream.m; sourceTree = "<group>"; };
 		DCC890C413EBF90C00CDAB56 /* DDList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDList.h; sourceTree = "<group>"; };
 		DCC890C513EBF90C00CDAB56 /* DDList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDList.m; sourceTree = "<group>"; };
@@ -148,6 +152,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9EF4C5261AE2BC2F0019F001 /* SCRAM-SHA-1 */ = {
+			isa = PBXGroup;
+			children = (
+				9EF4C5271AE2BC2F0019F001 /* XMPPSCRAMSHA1Authentication.h */,
+				9EF4C5281AE2BC2F0019F001 /* XMPPSCRAMSHA1Authentication.m */,
+			);
+			path = "SCRAM-SHA-1";
+			sourceTree = "<group>";
+		};
 		DC30E8A5153E0C42001B9E6D /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
@@ -156,7 +169,9 @@
 				DC30E8AC153E0C42001B9E6D /* Deprecated-Plain */,
 				DC30E8AF153E0C42001B9E6D /* Digest-MD5 */,
 				DC30E8B2153E0C42001B9E6D /* Plain */,
+				9EF4C5261AE2BC2F0019F001 /* SCRAM-SHA-1 */,
 				DC30E8B5153E0C42001B9E6D /* X-Facebook-Platform */,
+				9EF4C5251AE2BC2F0019F001 /* XMPPCustomBinding.h */,
 				DC30E8B8153E0C42001B9E6D /* XMPPSASLAuthentication.h */,
 			);
 			name = Authentication;
@@ -463,6 +478,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EF4C5291AE2BC2F0019F001 /* XMPPSCRAMSHA1Authentication.m in Sources */,
 				DCC8909713EBF8EC00CDAB56 /* main.m in Sources */,
 				DCC8909E13EBF8EC00CDAB56 /* TestElementReceiptAppDelegate.m in Sources */,
 				DCC890F113EBF90C00CDAB56 /* NSData+XMPP.m in Sources */,
