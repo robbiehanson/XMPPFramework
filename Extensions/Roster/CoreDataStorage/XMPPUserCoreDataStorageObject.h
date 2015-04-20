@@ -1,8 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-#if !TARGET_OS_IPHONE
-  #import <Cocoa/Cocoa.h>
+#if TARGET_OS_IPHONE
+    #import <UIKit/UIKit.h>
+#else
+    #import <Cocoa/Cocoa.h>
 #endif
 
 #import "XMPPUser.h"

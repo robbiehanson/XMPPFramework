@@ -1,3 +1,11 @@
+#import <Foundation/Foundation.h>
+
+#if TARGET_OS_IPHONE
+    #import <UIKit/UIKit.h>
+#else
+    #import <Cocoa/Cocoa.h>
+#endif
+
 #import "XMPPModule.h"
 
 @interface XMPPSoftwareVersion : XMPPModule
