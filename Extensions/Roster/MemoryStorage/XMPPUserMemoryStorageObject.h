@@ -2,8 +2,10 @@
 #import "XMPPUser.h"
 #import "XMPP.h"
 
-#if !TARGET_OS_IPHONE
-  #import <Cocoa/Cocoa.h>
+#if TARGET_OS_IPHONE
+    #import <UIKit/UIKit.h>
+#else
+    #import <Cocoa/Cocoa.h>
 #endif
 
 @class XMPPResourceMemoryStorageObject;
