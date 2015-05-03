@@ -262,6 +262,8 @@
 		808D2D5B3A8FC3353BC1C1AD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9EF4C7CB1AE2C43F0019F001 /* libidn.a */,
+				9EF4C7C91AE2C4320019F001 /* Security.framework */,
 				9E56CB5E1AE2F844008CE1D5 /* CoreData.framework */,
 				E12FE78966D1CF605B0A4F20 /* libPods-XMPPFrameworkTestsTests.a */,
 			);
@@ -332,8 +334,6 @@
 			isa = PBXGroup;
 			children = (
 				9EF4C7CD1AE2C4480019F001 /* libresolv.dylib */,
-				9EF4C7CB1AE2C43F0019F001 /* libidn.a */,
-				9EF4C7C91AE2C4320019F001 /* Security.framework */,
 				9EF4C7C71AE2C3B70019F001 /* libxml2.dylib */,
 				9EF4C5CA1AE2C2D60019F001 /* XMPPFramework */,
 				9EF4C5A31AE2C2C50019F001 /* XMPPFrameworkTests */,
@@ -1001,7 +1001,6 @@
 					"$(inherited)",
 					"/usr/include/libxml2/**",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1042,7 +1041,6 @@
 					"$(inherited)",
 					"/usr/include/libxml2/**",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -1057,7 +1055,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/pnm/code/XMPPFramework/Vendor/libidn,
+					"$(SRCROOT)/../../../Vendor/libidn",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1071,7 +1069,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/pnm/code/XMPPFramework/Vendor/libidn,
+					"$(SRCROOT)/../../../Vendor/libidn",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1123,6 +1121,7 @@
 				9E56CB401AE2F7E9008CE1D5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9EF4C59C1AE2C2C50019F001 /* Build configuration list for PBXProject "XMPPFrameworkTests" */ = {
 			isa = XCConfigurationList;
