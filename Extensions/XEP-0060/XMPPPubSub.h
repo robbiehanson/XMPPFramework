@@ -307,6 +307,33 @@
 **/
 - (NSString *)configureNode:(NSString *)node withOptions:(NSDictionary *)options;
 
+/**
+ * Retrieves items from given node.
+ *
+ * @param node
+ *
+ *     The name of the node to retrieve items from.
+ *     This should be the same node name you used when you created it.
+ *
+ * @param withItemIDs
+ *
+ *     This corresponds to a list of unique ids of previously published items.
+ *     The server will return the previously published items for those that exists.
+ *     If none of the items exists, an empty items list will be returned.
+ *     If you don't pass any itemIDs, the server will retrieve all items on the given node
+ *
+ * @return uuid
+ *
+ *     The return value is the unique elementID of the IQ stanza that was sent.
+ *
+ * The server's response to the request will be reported via the appropriate delegate methods.
+ *
+ * @see xmppPubSub:didRetrieveItems:fromNode:
+ * @see xmppPubSub:didNotRetrieveItems:fromNode:
+ **/
+- (NSString *)retrieveItemsFromNode:(NSString *)node;
+- (NSString *)retrieveItemsFromNode:(NSString *)node withItemIDs:(NSArray *)itemIds;
+
 @end
 
 @protocol XMPPPubSubDelegate
@@ -338,6 +365,9 @@
 
 - (void)xmppPubSub:(XMPPPubSub *)sender didConfigureNode:(NSString *)node withResult:(XMPPIQ *)iq;
 - (void)xmppPubSub:(XMPPPubSub *)sender didNotConfigureNode:(NSString *)node withError:(XMPPIQ *)iq;
+
+- (void)xmppPubSub:(XMPPPubSub *)sender didRetrieveItems:(XMPPIQ *)iq fromNode:(NSString *)node;
+- (void)xmppPubSub:(XMPPPubSub *)sender didNotRetrieveItems:(XMPPIQ *)iq fromNode:(NSString *)node;
 
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveMessage:(XMPPMessage *)message;
 

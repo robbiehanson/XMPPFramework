@@ -21,12 +21,13 @@
 	
 	NSMutableDictionary *subscribeDict;
 	NSMutableDictionary *unsubscribeDict;
-	NSMutableDictionary *retrieveDict;
+	NSMutableDictionary *retrieveSubsDict;
 	NSMutableDictionary *configSubDict;
 	NSMutableDictionary *createDict;
 	NSMutableDictionary *deleteDict;
 	NSMutableDictionary *configNodeDict;
 	NSMutableDictionary *publishDict;
+	NSMutableDictionary *retrieveItemsDict;
 }
 
 + (BOOL)isPubSubMessage:(XMPPMessage *)message
@@ -67,14 +68,15 @@
 	{
 		serviceJID = [aServiceJID copy];
 		
-		subscribeDict   = [[NSMutableDictionary alloc] init];
-		unsubscribeDict = [[NSMutableDictionary alloc] init];
-		retrieveDict    = [[NSMutableDictionary alloc] init];
-		configSubDict   = [[NSMutableDictionary alloc] init];
-		createDict      = [[NSMutableDictionary alloc] init];
-		deleteDict      = [[NSMutableDictionary alloc] init];
-		configNodeDict  = [[NSMutableDictionary alloc] init];
-		publishDict     = [[NSMutableDictionary alloc] init];
+		subscribeDict       = [[NSMutableDictionary alloc] init];
+		unsubscribeDict     = [[NSMutableDictionary alloc] init];
+		retrieveSubsDict    = [[NSMutableDictionary alloc] init];
+		configSubDict       = [[NSMutableDictionary alloc] init];
+		createDict          = [[NSMutableDictionary alloc] init];
+		deleteDict          = [[NSMutableDictionary alloc] init];
+		configNodeDict      = [[NSMutableDictionary alloc] init];
+		publishDict         = [[NSMutableDictionary alloc] init];
+		retrieveItemsDict   = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
@@ -100,14 +102,15 @@
 
 - (void)deactivate
 {
-	[subscribeDict   removeAllObjects];
-	[unsubscribeDict removeAllObjects];
-	[retrieveDict    removeAllObjects];
-	[configSubDict   removeAllObjects];
-	[createDict      removeAllObjects];
-	[deleteDict      removeAllObjects];
-	[configNodeDict  removeAllObjects];
-	[publishDict     removeAllObjects];
+	[subscribeDict      removeAllObjects];
+	[unsubscribeDict    removeAllObjects];
+	[retrieveSubsDict   removeAllObjects];
+	[configSubDict      removeAllObjects];
+	[createDict         removeAllObjects];
+	[deleteDict         removeAllObjects];
+	[configNodeDict     removeAllObjects];
+	[publishDict        removeAllObjects];
+	[retrieveItemsDict  removeAllObjects];
 	
 	if (serviceJID == nil) {
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:XMPPStreamDidChangeMyJIDNotification object:nil];
@@ -230,7 +233,7 @@
 		[unsubscribeDict removeObjectForKey:elementID];
 		return YES;
 	}
-	else if ((node = retrieveDict[elementID]))
+	else if ((node = retrieveSubsDict[elementID]))
 	{
 		// Example retrieve success response:
 		//
@@ -270,7 +273,7 @@
 				[multicastDelegate xmppPubSub:self didNotRetrieveSubscriptions:iq forNode:node];
 		}
 		
-		[retrieveDict removeObjectForKey:elementID];
+		[retrieveSubsDict removeObjectForKey:elementID];
 		return YES;
 	}
 	else if ((node = configSubDict[elementID]))
@@ -391,7 +394,37 @@
 		[configNodeDict removeObjectForKey:elementID];
 		return YES;
 	}
-	
+    else if ((node = retrieveItemsDict[elementID]))
+    {
+        // Example retrieve from node success response:
+        //
+        // <iq type='result' from='pubsub.shakespeare.lit' to='francisco@denmark.lit/barracks' id='items2'>
+        //   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+        //     <items node='princely_musings'>
+        //       <item id='4e30f35051b7b8b42abe083742187228'>
+        //         ...
+        //       </item>
+        //     </items>
+        //   </pubsub>
+        // </iq>
+        //
+        // Example delete error response:
+        //
+        // <iq type='error' from='pubsub.shakespeare.lit' to='hamlet@denmark.lit/elsinore' id='items2'>
+        //   <error type='modify'>
+        //     <bad-request xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+        //     <subid-required xmlns='http://jabber.org/protocol/pubsub#errors'/>
+        //   </error>
+        // </iq>
+        
+        if ([[iq type] isEqualToString:@"result"])
+            [multicastDelegate xmppPubSub:self didRetrieveItems:iq fromNode:node];
+        else
+            [multicastDelegate xmppPubSub:self didNotRetrieveItems:iq fromNode:node];
+        
+        [retrieveItemsDict removeObjectForKey:elementID];
+        return YES;
+    }
 	return NO;
 }
 
@@ -427,14 +460,15 @@
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	[subscribeDict   removeAllObjects];
-	[unsubscribeDict removeAllObjects];
-	[retrieveDict    removeAllObjects];
-	[configSubDict   removeAllObjects];
-	[createDict      removeAllObjects];
-	[deleteDict      removeAllObjects];
-	[configNodeDict  removeAllObjects];
-	[publishDict     removeAllObjects];
+	[subscribeDict      removeAllObjects];
+	[unsubscribeDict    removeAllObjects];
+	[retrieveSubsDict   removeAllObjects];
+	[configSubDict      removeAllObjects];
+	[createDict         removeAllObjects];
+	[deleteDict         removeAllObjects];
+	[configNodeDict     removeAllObjects];
+	[publishDict        removeAllObjects];
+	[retrieveItemsDict  removeAllObjects];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -640,9 +674,9 @@
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
 		if (node)
-			retrieveDict[uuid] = node;
+			retrieveSubsDict[uuid] = node;
 		else
-			retrieveDict[uuid] = [NSNull null];
+			retrieveSubsDict[uuid] = [NSNull null];
 	});
 	
 	// Get subscriptions for all nodes:
@@ -965,6 +999,55 @@
 		publishDict[uuid] = node;
 	});
 	return uuid;
+}
+
+- (NSString *)retrieveItemsFromNode:(NSString *)node
+{
+    return [self retrieveItemsFromNode:node withItemIDs:nil];
+}
+
+- (NSString *)retrieveItemsFromNode:(NSString *)node withItemIDs:(NSArray *)itemIds
+{
+    if (node == nil) return nil;
+    
+    // <iq type='get'
+    //     from='francisco@denmark.lit/barracks'
+    //     to='pubsub.shakespeare.lit'
+    //     id='items3'>
+    //   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    //     <items node='princely_musings'>
+    //       <item id='368866411b877c30064a5f62b917cffe'/>
+    //       <item id='4e30f35051b7b8b42abe083742187228'/>
+    //     </items>
+    //   </pubsub>
+    // </iq>
+    
+    NSString *uuid = [xmppStream generateUUID];
+    
+    NSXMLElement *items = [NSXMLElement elementWithName:@"items"];
+    [items addAttributeWithName:@"node" stringValue:node];
+    
+    if (itemIds) {
+        for (id itemId in itemIds)
+        {
+            NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+            [item addAttributeWithName:@"id" stringValue:itemId];
+            [items addChild:item];
+        }
+    }
+    
+    NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+    [pubsub addChild:items];
+    
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:serviceJID elementID:uuid];
+    [iq addChild:pubsub];
+    
+    [xmppStream sendElement:iq];
+    
+    dispatch_async(moduleQueue, ^{
+        retrieveItemsDict[uuid] = node;
+    });
+    return uuid;
 }
 
 @end
