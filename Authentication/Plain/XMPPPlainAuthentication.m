@@ -34,6 +34,11 @@
 	return @"PLAIN";
 }
 
+- (id)initWithStream:(XMPPStream *)stream password:(NSString *)inPassword
+{
+	return [self initWithStream:stream username:nil password:inPassword];
+}
+
 - (id)initWithStream:(XMPPStream *)stream username:(NSString *)inUsername password:(NSString *)inPassword
 {
 	if ((self = [super init]))
@@ -43,11 +48,6 @@
 		password = inPassword;
 	}
 	return self;
-}
-
-- (id)initWithStream:(XMPPStream *)stream password:(NSString *)inPassword
-{
-	return [self initWithStream:stream username:nil password:inPassword];
 }
 
 - (BOOL)start:(NSError **)errPtr
