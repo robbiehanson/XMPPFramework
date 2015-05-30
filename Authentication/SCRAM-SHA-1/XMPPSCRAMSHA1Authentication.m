@@ -65,9 +65,21 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (id)initWithStream:(XMPPStream *)stream password:(NSString *)password
 {
+	return [self initWithStream:stream username:nil password:password];
+}
+
+- (id)initWithStream:(XMPPStream *)stream username:(NSString *)username password:(NSString *)password
+{
     if ((self = [super init])) {
         xmppStream = stream;
-        _username = [XMPPStringPrep prepNode:[xmppStream.myJID user]];
+        if (username)
+        {
+            _username = username;
+        }
+        else
+        {
+            _username = [XMPPStringPrep prepNode:[xmppStream.myJID user]];
+        }
         _password = [XMPPStringPrep prepPassword:password];
         _hashAlgorithm = kCCHmacAlgSHA1;
     }
