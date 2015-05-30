@@ -25,6 +25,7 @@
 	__unsafe_unretained XMPPStream *xmppStream;
   #endif
 	
+	NSString *username;
 	NSString *password;
 }
 
@@ -35,9 +36,15 @@
 
 - (id)initWithStream:(XMPPStream *)stream password:(NSString *)inPassword
 {
+	return [self initWithStream:stream username:nil password:inPassword];
+}
+
+- (id)initWithStream:(XMPPStream *)stream username:(NSString *)inUsername password:(NSString *)inPassword
+{
 	if ((self = [super init]))
 	{
 		xmppStream = stream;
+		username = inUsername;
 		password = inPassword;
 	}
 	return self;
@@ -54,9 +61,13 @@
 	// authcid: authentication identity (username)
 	// passwd : password for authcid
 	
-	NSString *username = [xmppStream.myJID user];
+	NSString *authUsername = username;
+	if (!authUsername)
+	{
+		authUsername = [xmppStream.myJID user];
+	}
 	
-	NSString *payload = [NSString stringWithFormat:@"\0%@\0%@", username, password];
+	NSString *payload = [NSString stringWithFormat:@"\0%@\0%@", authUsername, password];
 	NSString *base64 = [[payload dataUsingEncoding:NSUTF8StringEncoding] xmpp_base64Encoded];
 	
 	// <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">Base-64-Info</auth>
