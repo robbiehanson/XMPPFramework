@@ -445,30 +445,25 @@ static NSMutableSet *databaseFileNames;
 
 - (NSString *)persistentStoreDirectory
 {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *basePath = ([paths count] > 0) ? paths[0] : NSTemporaryDirectory();
-	
-	// Attempt to find a name for this application
-	NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-	if (appName == nil) {
-		appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];	
-	}
-	
-	if (appName == nil) {
-		appName = @"xmppframework";
-	}
-	
-	
-	NSString *result = [basePath stringByAppendingPathComponent:appName];
-	
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	
-	if (![fileManager fileExistsAtPath:result])
-	{
-		[fileManager createDirectoryAtPath:result withIntermediateDirectories:YES attributes:nil error:nil];
-	}
-	
-    return result;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // Previously the Peristent Story Directory was based on the Bundle Display Name but this can be Localized
+    // If Peristent Story Directory already exists we will use that
+    NSString *bundleDisplayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+    NSString *legacyPersistentStoreDirectory  = [basePath stringByAppendingPathComponent:bundleDisplayName];
+    if ([fileManager fileExistsAtPath:legacyPersistentStoreDirectory]) {
+        return legacyPersistentStoreDirectory;
+    }
+    
+    // Peristent Story Directory now uses the Bundle Identifier
+    NSString *bundleIdentifier = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"];
+    NSString *persistentStoreDirectory  = [basePath stringByAppendingPathComponent:bundleIdentifier];
+    if (![fileManager fileExistsAtPath:persistentStoreDirectory]) {
+        [fileManager createDirectoryAtPath:persistentStoreDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    return persistentStoreDirectory;
 }
 
 - (NSManagedObjectModel *)managedObjectModel
