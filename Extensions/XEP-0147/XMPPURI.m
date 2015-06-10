@@ -39,17 +39,34 @@
     if (self.queryAction) {
         [uriString appendFormat:@"?%@", self.queryAction];
     }
+    NSMutableCharacterSet *allowedCharacterSet = NSCharacterSet.URLQueryAllowedCharacterSet.mutableCopy;
+    [allowedCharacterSet removeCharactersInString:@"'"]; // what other characters should be removed?
     [self.queryParameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
-        [uriString appendFormat:@";%@=%@", key, [obj stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        NSString *value = [obj stringByAddingPercentEncodingWithAllowedCharacters:allowedCharacterSet];
+        [uriString appendFormat:@";%@=%@", key, value];
     }];
     return uriString;
 }
 
 - (void) parseURIString:(NSString*)uriString {
-    // Fix potentially malformed URIs
+    NSString *authority = nil;
+    // Parse authority component
     if ([uriString containsString:@"://"]) {
-        uriString = [uriString stringByReplacingOccurrencesOfString:@"://" withString:@":" options:0 range:NSMakeRange(0, uriString.length)];
+        NSRange fullRange = NSMakeRange(0, uriString.length);
+        NSRange startRange = [uriString rangeOfString:@"://"];
+        NSUInteger trailingLocation = startRange.location + startRange.length;
+        NSRange trailingRange = NSMakeRange(trailingLocation, uriString.length - trailingLocation);
+        NSRange endRange = [uriString rangeOfString:@"/" options:0 range:trailingRange];
+        NSUInteger authorityLocation = startRange.location + startRange.length;
+        NSRange authorityRange = NSMakeRange(authorityLocation, endRange.location - authorityLocation);
+        authority = [uriString substringWithRange:authorityRange];
+        NSString *stringToRemove = [NSString stringWithFormat:@"://%@/", authority];
+        uriString = [uriString stringByReplacingOccurrencesOfString:stringToRemove withString:@":" options:0 range:fullRange];
     }
+    if (authority) {
+        _accountJID = [XMPPJID jidWithString:authority];
+    }
+    
     NSArray *uriComponents = [uriString componentsSeparatedByString:@":"];
     NSString *scheme = nil;
     NSString *jidString = nil;

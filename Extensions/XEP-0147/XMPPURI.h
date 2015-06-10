@@ -16,7 +16,21 @@
  */
 @interface XMPPURI : NSObject
 
+/**
+ * User JID. e.g. romeo@montague.net
+ * Example: xmpp:romeo@montague.net
+ */
 @property (nonatomic, strong, readonly) XMPPJID *jid;
+
+/**
+ * Account JID. (Optional)
+ * Used to specify an account with which to perform an action.
+ * For example 'guest@example.com' would be the authority portion of
+ *    xmpp://guest@example.com/support@example.com?message
+ * so the application would show a dialog with an outgoing message
+ * to support@example.com from the user's account guest@example.com.
+ */
+@property (nonatomic, strong, readonly) XMPPJID *accountJID;
 
 /** 
  * XMPP query action. e.g. subscribe
