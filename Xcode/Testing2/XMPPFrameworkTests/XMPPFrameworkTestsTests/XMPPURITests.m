@@ -44,6 +44,37 @@
     XCTAssertEqualObjects(queryParameters, uriParsing.queryParameters);
 }
 
+- (void) testURIString {
+    NSString *uriString = @"xmpp:romeo@montague.net?message;subject=Test%20Message;body=Here%27s%20a%20test%20message";
+    XMPPURI *uri = [[XMPPURI alloc] initWithURIString:uriString];
+    NSString *outURIString = uri.uriString;
+    XCTAssertEqualObjects(uriString, outURIString);
+}
+
+- (void) testXMPPAuthority {
+    NSString *testString = @"xmpp://guest@example.com/support@example.com?message";
+    NSString *authority = @"guest@example.com";
+    NSString *user = @"support@example.com";
+    NSString *action = @"message";
+    NSString *uriString = [NSString stringWithFormat:@"xmpp://%@/%@?%@", authority, user, action];
+    XCTAssertEqualObjects(testString, uriString);
+    XMPPURI *uri = [[XMPPURI alloc] initWithURIString:uriString];
+    XCTAssertEqualObjects(uri.jid.bare, user);
+    XCTAssertEqualObjects(uri.accountJID.bare, authority);
+}
+
+- (void) testXMPPAuthorityWithResource {
+    NSString *testString = @"xmpp://guest@example.com/support@example.com/resource?message";
+    NSString *authority = @"guest@example.com";
+    NSString *user = @"support@example.com/resource";
+    NSString *action = @"message";
+    NSString *uriString = [NSString stringWithFormat:@"xmpp://%@/%@?%@", authority, user, action];
+    XCTAssertEqualObjects(testString, uriString);
+    XMPPURI *uri = [[XMPPURI alloc] initWithURIString:uriString];
+    XCTAssertEqualObjects(uri.jid.full, user);
+    XCTAssertEqualObjects(uri.accountJID.bare, authority);
+}
+
 - (void) testSubscribeWithOTR {
     XMPPJID *jid = [XMPPJID jidWithString:@"romeo@montague.net"];
     NSString *queryAction = @"subscribe";
