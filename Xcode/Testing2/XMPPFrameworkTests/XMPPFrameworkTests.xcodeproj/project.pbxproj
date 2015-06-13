@@ -69,6 +69,8 @@
 		9EF4C7CE1AE2C4480019F001 /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EF4C7CD1AE2C4480019F001 /* libresolv.dylib */; };
 		9EF4C7D31AE2C4CC0019F001 /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C7D21AE2C4CC0019F001 /* EncodeDecodeTest.m */; };
 		9EF4C7D51AE2C6100019F001 /* MulticastDelegateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4C7D41AE2C6100019F001 /* MulticastDelegateTest.m */; };
+		D9A3CB311B27F0C8000A50C6 /* XMPPURI.m in Sources */ = {isa = PBXBuildFile; fileRef = D9A3CB301B27F0C8000A50C6 /* XMPPURI.m */; };
+		D9A3CB331B27F0FD000A50C6 /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9A3CB321B27F0FD000A50C6 /* XMPPURITests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -216,6 +218,9 @@
 		9EF4C7CD1AE2C4480019F001 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		9EF4C7D21AE2C4CC0019F001 /* EncodeDecodeTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EncodeDecodeTest.m; sourceTree = "<group>"; };
 		9EF4C7D41AE2C6100019F001 /* MulticastDelegateTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MulticastDelegateTest.m; sourceTree = "<group>"; };
+		D9A3CB2F1B27F0C8000A50C6 /* XMPPURI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPURI.h; sourceTree = "<group>"; };
+		D9A3CB301B27F0C8000A50C6 /* XMPPURI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPURI.m; sourceTree = "<group>"; };
+		D9A3CB321B27F0FD000A50C6 /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPURITests.m; sourceTree = "<group>"; };
 		E12FE78966D1CF605B0A4F20 /* libPods-XMPPFrameworkTestsTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-XMPPFrameworkTestsTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -290,6 +295,7 @@
 		9E56CB421AE2F808008CE1D5 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				D9A3CB2E1B27F0C8000A50C6 /* XEP-0147 */,
 				9E56CB531AE2F81E008CE1D5 /* CoreDataStorage */,
 				9E56CB431AE2F817008CE1D5 /* XEP-0115 */,
 			);
@@ -382,6 +388,7 @@
 		9EF4C5BD1AE2C2C50019F001 /* XMPPFrameworkTestsTests */ = {
 			isa = PBXGroup;
 			children = (
+				D9A3CB321B27F0FD000A50C6 /* XMPPURITests.m */,
 				9EF4C7D21AE2C4CC0019F001 /* EncodeDecodeTest.m */,
 				9EF4C7D41AE2C6100019F001 /* MulticastDelegateTest.m */,
 				9EF4C5BE1AE2C2C50019F001 /* Supporting Files */,
@@ -657,6 +664,15 @@
 			path = Private;
 			sourceTree = "<group>";
 		};
+		D9A3CB2E1B27F0C8000A50C6 /* XEP-0147 */ = {
+			isa = PBXGroup;
+			children = (
+				D9A3CB2F1B27F0C8000A50C6 /* XMPPURI.h */,
+				D9A3CB301B27F0C8000A50C6 /* XMPPURI.m */,
+			);
+			path = "XEP-0147";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -888,6 +904,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				9EF4C7D31AE2C4CC0019F001 /* EncodeDecodeTest.m in Sources */,
+				D9A3CB331B27F0FD000A50C6 /* XMPPURITests.m in Sources */,
+				D9A3CB311B27F0C8000A50C6 /* XMPPURI.m in Sources */,
 				9EF4C7D51AE2C6100019F001 /* MulticastDelegateTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
