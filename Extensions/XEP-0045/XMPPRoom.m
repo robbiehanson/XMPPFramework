@@ -776,9 +776,9 @@ enum XMPPRoomState
 		[multicastDelegate xmppRoomDidDestroy:self didFailToDestroy:nil];
 	}
 	else
-    {
-        [multicastDelegate xmppRoomDidDestroy:self didFailToDestroy:iq];
-    }
+	{
+		[multicastDelegate xmppRoomDidDestroy:self didFailToDestroy:iq];
+	}
 }
 
 - (void)destroyRoom
