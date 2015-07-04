@@ -488,11 +488,11 @@ enum XMPPRoomState
 
 - (void)changeRoomSubject:(NSString *)newRoomSubject
 {
-    NSXMLElement *body = [NSXMLElement elementWithName:@"subject" stringValue:newRoomSubject];
+    NSXMLElement *subject = [NSXMLElement elementWithName:@"subject" stringValue:newRoomSubject];
     
     XMPPMessage *message = [XMPPMessage message];
     [message addAttributeWithName:@"from" stringValue:[myRoomJID full]];
-    [message addChild:body];
+    [message addChild:subject];
     
     [self sendMessage:message];
 }
@@ -773,11 +773,11 @@ enum XMPPRoomState
 	
 	if ([iq isResultIQ])
 	{
-		[multicastDelegate xmppRoomDidDestroy:self didFailToDestroy:nil];
+		[multicastDelegate xmppRoomDidDestroy:self];
 	}
 	else
 	{
-		[multicastDelegate xmppRoomDidDestroy:self didFailToDestroy:iq];
+		[multicastDelegate xmppRoom:self didFailToDestroy:iq];
 	}
 }
 
