@@ -488,7 +488,13 @@ enum XMPPRoomState
 
 - (void)changeRoomSubject:(NSString *)newRoomSubject
 {
-	// Todo
+    NSXMLElement *body = [NSXMLElement elementWithName:@"subject" stringValue:newRoomSubject];
+    
+    XMPPMessage *message = [XMPPMessage message];
+    [message addAttributeWithName:@"from" stringValue:[myRoomJID full]];
+    [message addChild:body];
+    
+    [self sendMessage:message];
 }
 
 - (void)handleFetchBanListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
@@ -765,13 +771,13 @@ enum XMPPRoomState
 {
 	XMPPLogTrace();
 	
-	if ([[iq type] isEqualToString:@"result"])
+	if ([iq isResultIQ])
 	{
-		[multicastDelegate xmppRoomDidDestroy:self];
+		[multicastDelegate xmppRoomDidDestroy:self didFailToDestroy:nil];
 	}
 	else
 	{
-		// Todo...
+		[multicastDelegate xmppRoomDidDestroy:self didFailToDestroy:iq];
 	}
 }
 
