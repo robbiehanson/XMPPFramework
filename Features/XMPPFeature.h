@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "XMPPStream.h"
+#import "XMPPModule.h"
 #import "NSXMLElement+XMPP.h"
 
 @protocol XMPPStreamPreprocessor <NSObject>
@@ -15,9 +16,13 @@
 
 @end
 
-@interface XMPPFeature : NSObject
+@interface XMPPFeature : NSObject <XMPPStreamDelegate>
+
+@property (readonly) dispatch_queue_t featureQueue;
+@property (readonly) void *featureQueueTag;
 @property (strong, readonly) XMPPStream * xmppStream;
-- (void)activate:(XMPPStream *)xmppStream;
+
+- (BOOL)activate:(XMPPStream *)xmppStream;
 - (void)deactivate;
 - (BOOL)handleFeatures:(NSXMLElement *)features;
 

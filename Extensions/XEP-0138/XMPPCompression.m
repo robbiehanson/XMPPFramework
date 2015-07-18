@@ -59,11 +59,16 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
     [self endCompression];
 }
 
-- (void)activate:(XMPPStream *)xmppStream
+- (BOOL)activate:(XMPPStream *)xmppStream
 {
-    [super activate:xmppStream];
-    [self.xmppStream addElementHandler:self];
-    [self.xmppStream addStreamPreprocessor:self];
+    BOOL result = NO;
+    result = [super activate:xmppStream];
+    if (result) {
+        [self.xmppStream addElementHandler:self];
+        [self.xmppStream addStreamPreprocessor:self];
+    }
+    return result;
+    
 }
 
 - (void)deactivate
@@ -191,6 +196,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
     
     memset(&_inflation_strm, 0, sizeof(z_stream));
     memset(&_deflation_strm, 0, sizeof(z_stream));
+    self.compressionState = XMPPCompressionStateNegotiating;
 }
 
 - (NSData *)processInputData:(NSData *)data
@@ -345,7 +351,15 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
 {
     NSString *termStr = @"</stream:stream>";
     NSData *termData = [termStr dataUsingEncoding:NSUTF8StringEncoding];
-    XMPPLogSend(@"SEND: %@", termStr);
+    XMPPLogSend(@"SEND (end compression stream): %@", termStr);
     [self.xmppStream writeData:termData withTimeout:TIMEOUT_XMPP_WRITE tag:TAG_XMPP_WRITE_STREAM];
+    [self endCompression];
 }
+
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+    XMPPLogInfo(@"Compression DidDisconnect (end compression stream)");
+    [self endCompression];
+}
+
 @end
