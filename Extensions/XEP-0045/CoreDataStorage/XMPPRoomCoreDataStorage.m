@@ -60,12 +60,12 @@
 
 static XMPPRoomCoreDataStorage *sharedInstance;
 
-+ (XMPPRoomCoreDataStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		
-		sharedInstance = [[XMPPRoomCoreDataStorage alloc] initWithDatabaseFilename:nil];
+		sharedInstance = [[XMPPRoomCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
 	});
 	
 	return sharedInstance;
@@ -808,7 +808,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSManagedObjectContext *moc = inMoc ? inMoc : [self managedObjectContext];
+		NSManagedObjectContext *moc = inMoc ? : [self managedObjectContext];
 		
 		NSEntityDescription *entity = [self messageEntity:moc];
 		
@@ -826,7 +826,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		}
 		
 		NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"localTimestamp" ascending:NO];
-		NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+		NSArray *sortDescriptors = @[sortDescriptor];
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];

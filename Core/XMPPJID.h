@@ -12,7 +12,7 @@ enum XMPPJIDCompareOptions
 typedef enum XMPPJIDCompareOptions XMPPJIDCompareOptions;
 
 
-@interface XMPPJID : NSObject <NSCoding, NSCopying>
+@interface XMPPJID : NSObject <NSSecureCoding, NSCopying>
 {
 	__strong NSString *user;
 	__strong NSString *domain;

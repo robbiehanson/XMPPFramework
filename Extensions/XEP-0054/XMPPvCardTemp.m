@@ -21,8 +21,6 @@
 
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
-#else
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 #endif
 
 NSString *const kXMPPNSvCardTemp = @"vcard-temp";
@@ -31,6 +29,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 @implementation XMPPvCardTemp
 
+#if DEBUG
 
 + (void)initialize {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
@@ -55,6 +54,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	}
 }
 
+#endif
 
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTemp class]);
@@ -62,6 +62,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	return (XMPPvCardTemp *)elem;
 }
 
++ (XMPPvCardTemp *)vCardTemp{
+    NSXMLElement *vCardTempElement = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+    return [XMPPvCardTemp vCardTempFromElement:vCardTempElement];
+}
 
 + (XMPPvCardTemp *)vCardTempSubElementFromIQ:(XMPPIQ *)iq
 {
@@ -84,7 +88,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid {
-  XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID]];
+  XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID] elementID:[XMPPStream generateUUID]];
   NSXMLElement *vCardElem = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
   
   [iq addChild:vCardElem];
@@ -140,21 +144,32 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 
 
 - (void)setPhoto:(NSData *)data {
-	NSXMLElement *photo = [self elementForName:@"PHOTO"];
-	
-	if (photo == nil) {
-		photo = [NSXMLElement elementWithName:@"PHOTO"];
-		[self addChild:photo];
-	}
-	
-	NSXMLElement *binval = [photo elementForName:@"BINVAL"];
-	
-	if (binval == nil) {
-		binval = [NSXMLElement elementWithName:@"BINVAL"];
-		[photo addChild:binval];
-	}
-	
-	[binval setStringValue:[data xmpp_base64Encoded]];
+    
+    NSXMLElement *photo = [self elementForName:@"PHOTO"];
+    
+    if(photo)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:photo]];
+    }
+    
+    if([data length])
+    {    
+        NSXMLElement *photo = [NSXMLElement elementWithName:@"PHOTO"];
+        [self addChild:photo];
+        
+        NSString *imageType = [data xmpp_imageType];
+        
+        if([imageType length])
+        {
+            NSXMLElement *type = [NSXMLElement elementWithName:@"TYPE"];
+            [photo addChild:type];
+            [type setStringValue:imageType];
+        }
+        
+        NSXMLElement *binval = [NSXMLElement elementWithName:@"BINVAL"];
+        [photo addChild:binval];
+        [binval setStringValue:[data xmpp_base64Encoded]];
+    }
 }
 
 
@@ -802,12 +817,12 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-- (NSString *)description {
+- (NSString *)desc {
 	return [[self elementForName:@"DESC"] stringValue];
 }
 
 
-- (void)setDescription:(NSString *)desc {
+- (void)setDesc:(NSString *)desc {
 	XMPP_VCARD_SET_STRING_CHILD(desc, @"DESC");
 }
 
@@ -841,7 +856,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	}
 	
 	if (elem != nil) {
-		for (NSString *cls in [NSArray arrayWithObjects:@"PUBLIC", @"PRIVATE", @"CONFIDENTIAL", nil]) {
+		for (NSString *cls in @[@"PUBLIC", @"PRIVATE", @"CONFIDENTIAL"]) {
 			NSXMLElement *priv = [elem elementForName:cls];
 			if (priv != nil) {
 				[elem removeChildAtIndex:[[elem children] indexOfObject:priv]];

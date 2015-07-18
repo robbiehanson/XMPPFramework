@@ -7,14 +7,6 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-// Log levels: off, error, warn, info, verbose
-// Log flags: trace
-#if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
-#else
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
-#endif
-
 NSString *const XMPPProcessOneSessionID = @"XMPPProcessOneSessionID";
 NSString *const XMPPProcessOneSessionJID = @"XMPPProcessOneSessionJID";
 NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
@@ -319,7 +311,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	if (!sessionID || !sessionJID)
 	{
 		NSString *errMsg = @"Missing sessionID and/or sessionJID.";
-		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+		NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 		
 		NSError *err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
 		

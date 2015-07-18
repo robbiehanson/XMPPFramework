@@ -40,7 +40,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Start connection process
 	
 	NSError *err = nil;
-	if (![xmppStream connect:&err])
+    if (![xmppStream connectWithTimeout: XMPPStreamTimeoutNone error:&err])
 	{
 		DDLogError(@"MUCTesting: Cannot connect: %@", err);
 	}

@@ -71,9 +71,15 @@
 
 - (id)initWithStream:(XMPPStream *)stream password:(NSString *)inPassword
 {
+	return [self initWithStream:stream username:nil password:inPassword];
+}
+
+- (id)initWithStream:(XMPPStream *)stream username:(NSString *)inUsername password:(NSString *)inPassword
+{
 	if ((self = [super init]))
 	{
 		xmppStream = stream;
+		username = inUsername;
 		password = inPassword;
 	}
 	return self;
@@ -110,9 +116,9 @@
 	
 	NSDictionary *auth = [self dictionaryFromChallenge:authResponse];
 	
-	realm   = [auth objectForKey:@"realm"];
-	nonce   = [auth objectForKey:@"nonce"];
-	qop     = [auth objectForKey:@"qop"];
+	realm   = auth[@"realm"];
+	nonce   = auth[@"nonce"];
+	qop     = auth[@"qop"];
 	
 	// Fill out all the other variables
 	// 
@@ -140,7 +146,10 @@
 	if (cnonce == nil)
 		cnonce = [XMPPStream generateUUID];
 	
-	username = [myJID user];
+	if (username == nil)
+	{
+		username = [myJID user];
+	}
 	
 	// Create and send challenge response element
 	
@@ -160,7 +169,7 @@
 	if ([[authResponse name] isEqualToString:@"challenge"])
 	{
 		NSDictionary *auth = [self dictionaryFromChallenge:authResponse];
-		NSString *rspauth = [auth objectForKey:@"rspauth"];
+		NSString *rspauth = auth[@"rspauth"];
 		
 		if (rspauth == nil)
 		{
@@ -244,7 +253,7 @@
 			
             if(key && value)
             {
-                [auth setObject:value forKey:key];
+                auth[key] = value;
             }
 		}
 	}

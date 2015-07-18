@@ -35,7 +35,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	
 	NSError *error = nil;
 	
-	if (![xmppStream connect:&error])
+    if (![xmppStream connectWithTimeout: XMPPStreamTimeoutNone error:&error])
 	{
 		DDLogError(@"%@: Error connecting: %@", [self class], error);
 	}

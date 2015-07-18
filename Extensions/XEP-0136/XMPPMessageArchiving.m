@@ -10,7 +10,7 @@
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE; // | XMPP_LOG_FLAG_TRACE;
+  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #else
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
@@ -96,6 +96,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Properties
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (id <XMPPMessageArchivingStorage>)xmppMessageArchivingStorage
+{
+    // Note: The xmppMessageArchivingStorage variable is read-only (set in the init method)
+    
+    return xmppMessageArchivingStorage;
+}
 
 - (BOOL)clientSideMessageArchivingOnly
 {

@@ -19,6 +19,8 @@
 @interface XMPPCapabilities : XMPPModule
 {
 	__strong id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
+    
+    NSString *myCapabilitiesNode;
 	
 	NSXMLElement *myCapabilitiesQuery; // Full list of capabilites <query/>
 	NSXMLElement *myCapabilitiesC;     // Hashed element <c/>
@@ -41,6 +43,20 @@
 - (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 @property (nonatomic, strong, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
+
+/**
+ * Defines the node attribute in a <c/> element qualified by the 'http://jabber.org/protocol/caps' namespace.
+ *
+ * It is RECOMMENDED for the value of the 'node' attribute to be an HTTP URL
+ * at which a user could find further information about the software product, 
+ * such as "http://github.com/robbiehanson/XMPPFramework"
+ *
+ * This MUST NOT be nil
+ *
+ * The default value is http://github.com/robbiehanson/XMPPFramework
+**/
+
+@property (nonatomic, copy) NSString *myCapabilitiesNode;
 
 /**
  * Defines fetching behavior for entities using the XEP-0115 standard.

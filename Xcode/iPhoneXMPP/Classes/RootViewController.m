@@ -33,11 +33,10 @@
   
 	UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 400, 44)];
 	titleLabel.backgroundColor = [UIColor clearColor];
-	titleLabel.textColor = [UIColor whiteColor];
-	titleLabel.font = [UIFont boldSystemFontOfSize:20.0];
+	titleLabel.textColor = [UIColor darkTextColor];
+	titleLabel.font = [UIFont boldSystemFontOfSize:18.0];
 	titleLabel.numberOfLines = 1;
 	titleLabel.adjustsFontSizeToFitWidth = YES;
-	titleLabel.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.5];
 	titleLabel.textAlignment = NSTextAlignmentCenter;
 
 	if ([[self appDelegate] connect]) 
@@ -77,7 +76,7 @@
 		NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"sectionNum" ascending:YES];
 		NSSortDescriptor *sd2 = [[NSSortDescriptor alloc] initWithKey:@"displayName" ascending:YES];
 		
-		NSArray *sortDescriptors = [NSArray arrayWithObjects:sd1, sd2, nil];
+		NSArray *sortDescriptors = @[sd1, sd2];
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
@@ -146,7 +145,7 @@
 	
 	if (sectionIndex < [sections count])
 	{
-		id <NSFetchedResultsSectionInfo> sectionInfo = [sections objectAtIndex:sectionIndex];
+		id <NSFetchedResultsSectionInfo> sectionInfo = sections[sectionIndex];
         
 		int section = [sectionInfo.name intValue];
 		switch (section)
@@ -166,7 +165,7 @@
 	
 	if (sectionIndex < [sections count])
 	{
-		id <NSFetchedResultsSectionInfo> sectionInfo = [sections objectAtIndex:sectionIndex];
+		id <NSFetchedResultsSectionInfo> sectionInfo = sections[sectionIndex];
 		return sectionInfo.numberOfObjects;
 	}
 	

@@ -1,7 +1,9 @@
 #import <Foundation/Foundation.h>
 
-#if !TARGET_OS_IPHONE
-  #import <Cocoa/Cocoa.h>
+#if TARGET_OS_IPHONE
+    #import <UIKit/UIKit.h>
+#else
+    #import <Cocoa/Cocoa.h>
 #endif
 
 #import "XMPP.h"
@@ -12,6 +14,7 @@
 
 @protocol XMPPRosterStorage;
 @class DDList;
+@class XMPPIDTracker;
 
 /**
  * The XMPPRoster provides the scaffolding for a roster solution.
@@ -41,6 +44,8 @@
 	id multicastDelegate;
  */
 	__strong id <XMPPRosterStorage> xmppRosterStorage;
+    
+    XMPPIDTracker *xmppIDTracker;
 	
 	Byte config;
 	Byte flags;
@@ -76,6 +81,16 @@
  * The default value is YES.
 **/
 @property (assign) BOOL autoFetchRoster;
+
+/**
+ * Whether or not to automatically clear all Users and Resources when the stream disconnects.
+ * If you are using XMPPRosterCoreDataStorage you may want to set autoRemovePreviousDatabaseFile to NO.
+ *
+ * All Users and Resources will be cleared when the roster is next populated regardless of this property.
+ *
+ * The default value is YES.
+**/
+@property (assign) BOOL autoClearAllUsersAndResources;
 
 /**
  * In traditional IM applications, the "buddy" system is rather straightforward.
@@ -147,6 +162,10 @@
 **/
 @property (assign, getter = isPopulating, readonly) BOOL populating;
 
+/**
+ * The initial roster has been received by client and populated.
+**/
+@property (assign, readonly) BOOL hasRoster;
 
 /**
  * Manually fetch the roster from the server.
@@ -316,6 +335,13 @@
 
 - (NSArray *)jidsForXMPPStream:(XMPPStream *)stream;
 
+- (void)getSubscription:(NSString **)subscription
+                    ask:(NSString **)ask
+               nickname:(NSString **)nickname
+                 groups:(NSArray **)groups
+                 forJID:(XMPPJID *)jid
+             xmppStream:(XMPPStream *)stream;
+
 @optional
 
 /**
@@ -366,7 +392,7 @@
 - (void)xmppRosterDidEndPopulating:(XMPPRoster *)sender;
 
 /**
- * Sent when the roster recieves a roster item.
+ * Sent when the roster receives a roster item.
  *
  * Example:
  *
@@ -374,6 +400,6 @@
  *   <group>Friends</group>
  * </item>
 **/
-- (void)xmppRoster:(XMPPRoster *)sender didRecieveRosterItem:(NSXMLElement *)item;
+- (void)xmppRoster:(XMPPRoster *)sender didReceiveRosterItem:(NSXMLElement *)item;
 
 @end

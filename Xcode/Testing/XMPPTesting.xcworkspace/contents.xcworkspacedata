@@ -23,7 +23,10 @@
       location = "group:FacebookTest/FacebookTest.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:MulticastDelegateTest/MulticastDelegateTest.xcodeproj">
+      location = "group:MulticastDelegateTest/Desktop/MulticastDelegateTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:MulticastDelegateTest/Mobile/MulticastDelegateTest.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:MUCTesting/MUCTesting.xcodeproj">
@@ -41,6 +44,9 @@
       location = "group:TestCapabilitiesHashing/iPhone/TestCapabilitiesHashing/TestCapabilitiesHashing.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:TestDDList/TestDDList.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:TestElementReceipt/TestElementReceipt.xcodeproj">
    </FileRef>
    <FileRef
@@ -48,6 +54,12 @@
    </FileRef>
    <FileRef
       location = "group:TestSRVResolver/TestSRVResolver.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestJID/Mobile/TestJID.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestJID/Desktop/TestJID.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:TestXEP82/Mac/TestXEP82.xcodeproj">

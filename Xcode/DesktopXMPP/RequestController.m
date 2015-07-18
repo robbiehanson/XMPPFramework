@@ -17,12 +17,12 @@
 
 - (XMPPStream *)xmppStream
 {
-	return [[NSApp delegate] xmppStream];
+	return [(AppDelegate *)[NSApp delegate] xmppStream];
 }
 
 - (XMPPRoster *)xmppRoster
 {
-	return [[NSApp delegate] xmppRoster];
+	return [(AppDelegate *)[NSApp delegate] xmppRoster];
 }
 
 - (void)awakeFromNib

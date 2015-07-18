@@ -3,3 +3,7 @@
 *.mode2v3
 xcuserdata
 .DS_Store
+project.xcworkspace
+.idea
+Xcode/Testing2/Pods
+

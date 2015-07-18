@@ -1,8 +1,17 @@
 #import "XMPPIDTracker.h"
-#import "XMPPElement.h"
+#import "XMPP.h"
+#import "XMPPLogging.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
+// Log levels: off, error, warn, info, verbose
+// Log flags: trace
+#if DEBUG
+static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE; // | XMPP_LOG_FLAG_TRACE;
+#else
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
 #define AssertProperQueue() NSAssert(dispatch_get_specific(queueTag), @"Invoked on incorrect queue")
@@ -24,25 +33,31 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 
 - (id)init
 {
-	// You must use initWithDispatchQueue
-	
+	// You must use initWithDispatchQueue or initWithStream:dispatchQueue:
 	return nil;
 }
 
 - (id)initWithDispatchQueue:(dispatch_queue_t)aQueue
 {
-	NSParameterAssert(aQueue != NULL);
+	return [self initWithStream:nil dispatchQueue:aQueue];
+}
+
+- (id)initWithStream:(XMPPStream *)stream dispatchQueue:(dispatch_queue_t)aQueue
+{
+    NSParameterAssert(aQueue != NULL);
 	
 	if ((self = [super init]))
 	{
+        xmppStream = stream;
+        
 		queue = aQueue;
 		
 		queueTag = &queueTag;
 		dispatch_queue_set_specific(queue, queueTag, queueTag, NULL);
 		
-		#if !OS_OBJECT_USE_OBJC
+#if !OS_OBJECT_USE_OBJC
 		dispatch_retain(queue);
-		#endif
+#endif
 		
 		dict = [[NSMutableDictionary alloc] init];
 	}
@@ -113,7 +128,7 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 {
 	AssertProperQueue();
 	
-	[dict setObject:trackingInfo forKey:elementID];
+	dict[elementID] = trackingInfo;
 	
 	[trackingInfo setElementID:elementID];
 	[trackingInfo createTimerWithDispatchQueue:queue];
@@ -125,7 +140,7 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
     
     if([[element elementID] length] == 0) return;
 	
-	[dict setObject:trackingInfo forKey:[element elementID]];
+	dict[[element elementID]] = trackingInfo;
 	
 	[trackingInfo setElementID:[element elementID]];
     [trackingInfo setElement:element];
@@ -135,8 +150,11 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 - (BOOL)invokeForID:(NSString *)elementID withObject:(id)obj
 {
 	AssertProperQueue();
+    
+    if([elementID length] == 0) return NO;
 	
-	id <XMPPTrackingInfo> info = [dict objectForKey:elementID];
+	id <XMPPTrackingInfo> info = dict[elementID];
+    
 	if (info)
 	{
 		[info invokeWithObject:obj];
@@ -145,6 +163,47 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 		
 		return YES;
 	}
+	
+	return NO;
+}
+
+- (BOOL)invokeForElement:(XMPPElement *)element withObject:(id)obj
+{
+    AssertProperQueue();
+    
+	NSString *elementID = [element elementID];
+	
+	if ([elementID length] == 0) return NO;
+	
+	id <XMPPTrackingInfo> info = dict[elementID];
+	if(info)
+    {
+        BOOL valid = YES;
+            
+        if(xmppStream && [element isKindOfClass:[XMPPIQ class]] && [[info element] isKindOfClass:[XMPPIQ class]])
+        {
+            XMPPIQ *iq = (XMPPIQ *)element;
+            
+            if([iq isResultIQ] || [iq isErrorIQ])
+            {
+                valid = [xmppStream isValidResponseElement:iq forRequestElement:[info element]];
+            }
+        }
+        
+        if(!valid)
+        {
+            XMPPLogError(@"%s: Element with ID %@ cannot be validated.", __FILE__ , [element elementID]);
+        }
+        
+        if (valid)
+        {
+            [info invokeWithObject:obj];
+            [info cancelTimer];
+            [dict removeObjectForKey:[element elementID]];
+            
+            return YES;
+        }
+    }
 	
 	return NO;
 }
@@ -160,7 +219,7 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 {
 	AssertProperQueue();
 	
-	id <XMPPTrackingInfo> info = [dict objectForKey:elementID];
+	id <XMPPTrackingInfo> info = dict[elementID];
 	if (info)
 	{
 		[info cancelTimer];
@@ -200,8 +259,11 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 
 - (id)initWithTarget:(id)aTarget selector:(SEL)aSelector timeout:(NSTimeInterval)aTimeout
 {
-	NSParameterAssert(aTarget);
-	NSParameterAssert(aSelector);
+    if(target || selector)
+    {
+        NSParameterAssert(aTarget);
+        NSParameterAssert(aSelector);
+    }
 	
 	if ((self = [super init]))
 	{
@@ -244,7 +306,8 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 		dispatch_source_set_event_handler(timer, ^{ @autoreleasepool {
 			
 			[self invokeWithObject:nil];
-			
+            [self cancelTimer];
+            
 		}});
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
@@ -269,8 +332,10 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 - (void)invokeWithObject:(id)obj
 {
 	if (block)
+    {
 		block(obj, self);
-	else
+	}
+    else if(target && selector)
 	{
 		#pragma clang diagnostic push
 		#pragma clang diagnostic ignored "-Warc-performSelector-leaks"

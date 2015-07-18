@@ -20,12 +20,12 @@
 
 static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 
-+ (XMPPCapabilitiesCoreDataStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		
-		sharedInstance = [[XMPPCapabilitiesCoreDataStorage alloc] initWithDatabaseFilename:nil];
+		sharedInstance = [[XMPPCapabilitiesCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
 	});
 	
 	return sharedInstance;

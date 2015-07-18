@@ -11,6 +11,10 @@
 - (NSString *)xmpp_base64Encoded;
 - (NSData *)xmpp_base64Decoded;
 
+- (BOOL)xmpp_isJPEG;
+- (BOOL)xmpp_isPNG;
+- (NSString *)xmpp_imageType;
+
 @end
 
 #ifndef XMPP_EXCLUDE_DEPRECATED

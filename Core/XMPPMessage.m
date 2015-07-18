@@ -11,14 +11,16 @@
 
 @implementation XMPPMessage
 
+#if DEBUG
+
 + (void)initialize
 {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
 	// The size of the two classes is expected to be the same.
-	// 
+	//
 	// If a developer adds instance methods to this class, bad things happen at runtime that are very hard to debug.
 	// This check is here to aid future developers who may make this mistake.
-	// 
+	//
 	// For Fearless And Experienced Objective-C Developers:
 	// It may be possible to support adding instance variables to this class if you seriously need it.
 	// To do so, try realloc'ing self after altering the class, and then initialize your variables.
@@ -32,6 +34,8 @@
 		exit(15);
 	}
 }
+
+#endif
 
 + (XMPPMessage *)messageFromElement:(NSXMLElement *)element
 {
@@ -138,7 +142,7 @@
 {
 	if((self = [super initWithXMLString:string error:error])){
 		self = [XMPPMessage messageFromElement:self];
-	}	
+	}
 	return self;
 }
 
@@ -148,9 +152,43 @@
     return [XMPPMessage messageFromElement:element];
 }
 
+- (NSString *)type
+{
+    return [[self attributeForName:@"type"] stringValue];
+}
+
+- (NSString *)subject
+{
+	return [[self elementForName:@"subject"] stringValue];
+}
+
 - (NSString *)body
 {
 	return [[self elementForName:@"body"] stringValue];
+}
+
+- (NSString *)bodyForLanguage:(NSString *)language
+{
+    NSString *bodyForLanguage = nil;
+    
+    for (NSXMLElement *bodyElement in [self elementsForName:@"body"])
+    {
+        NSString *lang = [[bodyElement attributeForName:@"xml:lang"] stringValue];
+        
+        // Openfire strips off the xml prefix
+        if (lang == nil)
+        {
+            lang = [[bodyElement attributeForName:@"lang"] stringValue];
+        }
+        
+        if ([language isEqualToString:lang] || ([language length] == 0  && [lang length] == 0))
+        {
+            bodyForLanguage = [bodyElement stringValue];
+            break;
+        }
+    }
+    
+    return bodyForLanguage;
 }
 
 - (NSString *)thread
@@ -158,9 +196,27 @@
 	return [[self elementForName:@"thread"] stringValue];
 }
 
+- (void)addSubject:(NSString *)subject
+{
+    NSXMLElement *subjectElement = [NSXMLElement elementWithName:@"subject" stringValue:subject];
+    [self addChild:subjectElement];
+}
+
 - (void)addBody:(NSString *)body
 {
     NSXMLElement *bodyElement = [NSXMLElement elementWithName:@"body" stringValue:body];
+    [self addChild:bodyElement];
+}
+
+- (void)addBody:(NSString *)body withLanguage:(NSString *)language
+{
+    NSXMLElement *bodyElement = [NSXMLElement elementWithName:@"body" stringValue:body];
+    
+    if ([language length])
+    {
+        [bodyElement addAttributeWithName:@"xml:lang" stringValue:language];
+    }
+    
     [self addChild:bodyElement];
 }
 
@@ -197,10 +253,10 @@
     }
     
     NSXMLElement *error = [self elementForName:@"error"];
-    return [NSError errorWithDomain:@"urn:ietf:params:xml:ns:xmpp-stanzas" 
-                               code:[error attributeIntValueForName:@"code"] 
-                           userInfo:[NSDictionary dictionaryWithObject:[error compactXMLString] forKey:NSLocalizedDescriptionKey]];
-
+    return [NSError errorWithDomain:@"urn:ietf:params:xml:ns:xmpp-stanzas"
+                               code:[error attributeIntValueForName:@"code"]
+                           userInfo:@{NSLocalizedDescriptionKey : [error compactXMLString]}];
+    
 }
 
 - (BOOL)isMessageWithBody

@@ -31,13 +31,13 @@
  * 
  * All other aspects of capabilities handling (such as JID's, lookup failures, etc) are kept separate between streams.
 **/
-+ (XMPPCapabilitiesCoreDataStorage *)sharedInstance;
++ (instancetype)sharedInstance;
 
 
 /* Inherited from XMPPCoreDataStorage
  * Please see the XMPPCoreDataStorage header file for extensive documentation.
  
-- (id)initWithDatabaseFilename:(NSString *)databaseFileName;
+- (id)initWithDatabaseFilename:(NSString *)databaseFileName storeOptions:(NSDictionary *)storeOptions;
 - (id)initWithInMemoryStore;
 
 @property (readonly) NSString *databaseFileName;

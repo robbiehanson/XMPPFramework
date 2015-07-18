@@ -19,13 +19,12 @@
 
 #if DEBUG
   static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
-#else
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 #endif
 
 
 @implementation XMPPvCardTempEmail
 
+#if DEBUG
 
 + (void)initialize {
 	// We use the object_setClass method below to dynamically change the class from a standard NSXMLElement.
@@ -50,6 +49,7 @@
 	}
 }
 
+#endif
 
 + (XMPPvCardTempEmail *)vCardEmailFromElement:(NSXMLElement *)elem {
 	object_setClass(elem, [XMPPvCardTempEmail class]);

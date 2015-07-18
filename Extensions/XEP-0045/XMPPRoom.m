@@ -479,6 +479,7 @@ enum XMPPRoomState
 
 - (void)changeNickname:(NSString *)newNickname
 {
+	myOldNickname = [myNickname copy];
 	myNickname = [newNickname copy];
     myRoomJID = [XMPPJID jidWithUser:[roomJID user] domain:[roomJID domain] resource:myNickname];
     XMPPPresence *presence = [XMPPPresence presenceWithType:nil to:myRoomJID];
@@ -487,7 +488,13 @@ enum XMPPRoomState
 
 - (void)changeRoomSubject:(NSString *)newRoomSubject
 {
-	// Todo
+    NSXMLElement *subject = [NSXMLElement elementWithName:@"subject" stringValue:newRoomSubject];
+    
+    XMPPMessage *message = [XMPPMessage message];
+    [message addAttributeWithName:@"from" stringValue:[myRoomJID full]];
+    [message addChild:subject];
+    
+    [self sendMessage:message];
 }
 
 - (void)handleFetchBanListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
@@ -764,13 +771,13 @@ enum XMPPRoomState
 {
 	XMPPLogTrace();
 	
-	if ([[iq type] isEqualToString:@"result"])
+	if ([iq isResultIQ])
 	{
 		[multicastDelegate xmppRoomDidDestroy:self];
 	}
 	else
 	{
-		// Todo...
+		[multicastDelegate xmppRoom:self didFailToDestroy:iq];
 	}
 }
 
@@ -981,7 +988,7 @@ enum XMPPRoomState
 	// Server's don't always properly send the statusCodes in every situation.
 	// So we have some extra checks to ensure the boolean variables are correct.
 	
-	if (didCreateRoom || isNicknameChange)
+	if (didCreateRoom)
 	{
 		isMyPresence = YES;
 	}
@@ -989,6 +996,13 @@ enum XMPPRoomState
 	{
 		if ([[from resource] isEqualToString:myNickname])
 			isMyPresence = YES;
+	}
+	if (!isMyPresence && isNicknameChange && myOldNickname)
+	{
+		if ([[from resource] isEqualToString:myOldNickname]) {
+			isMyPresence = YES;
+			myOldNickname = nil;
+		}
 	}
 	
 	XMPPLogVerbose(@"%@[%@] - isMyPresence = %@", THIS_FILE, roomJID, (isMyPresence ? @"YES" : @"NO"));
@@ -1006,11 +1020,11 @@ enum XMPPRoomState
 	
 	if (isMyPresence)
 	{
-		myRoomJID = from;
-		myNickname = [from resource];
-		
 		if (isAvailable)
 		{
+			myRoomJID = from;
+			myNickname = [from resource];
+            
 			if (state & kXMPPRoomStateJoining)
 			{
 				state &= ~kXMPPRoomStateJoining;

@@ -168,7 +168,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 		
 		if (srvResultsCount == 1)
 		{
-			XMPPSRVRecord *srvRecord = [results objectAtIndex:0];
+			XMPPSRVRecord *srvRecord = results[0];
 			
 			[sortedResults addObject:srvRecord];
 			[results removeObjectAtIndex:0];
@@ -188,7 +188,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 			NSUInteger runningSum = 0;
 			NSMutableArray *samePriorityRecords = [NSMutableArray arrayWithCapacity:srvResultsCount];
 			
-			XMPPSRVRecord *srvRecord = [results objectAtIndex:0];
+			XMPPSRVRecord *srvRecord = results[0];
 			
 			NSUInteger initialPriority = srvRecord.priority;
 			NSUInteger index = 0;
@@ -216,7 +216,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 				
 				if (++index < srvResultsCount)
 				{
-					srvRecord = [results objectAtIndex:index];
+					srvRecord = results[index];
 				}
 				else
 				{
@@ -273,11 +273,11 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	
 	dispatch_async(delegateQueue, ^{ @autoreleasepool {
 		
-		SEL selector = @selector(srvResolver:didResolveRecords:);
+		SEL selector = @selector(xmppSRVResolver:didResolveRecords:);
 		
 		if ([theDelegate respondsToSelector:selector])
 		{
-			[theDelegate srvResolver:self didResolveRecords:records];
+			[theDelegate xmppSRVResolver:self didResolveRecords:records];
 		}
 		else
 		{
@@ -301,11 +301,11 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	{
 		dispatch_async(delegateQueue, ^{ @autoreleasepool {
 			
-			SEL selector = @selector(srvResolver:didNotResolveDueToError:);
+			SEL selector = @selector(xmppSRVResolver:didNotResolveDueToError:);
 			
 			if ([theDelegate respondsToSelector:selector])
 			{
-				[theDelegate srvResolver:self didNotResolveDueToError:error];
+				[theDelegate xmppSRVResolver:self didNotResolveDueToError:error];
 			}
 			else
 			{
@@ -540,7 +540,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 			dispatch_source_set_event_handler(timeoutTimer, ^{ @autoreleasepool {
 				
 				NSString *errMsg = @"Operation timed out";
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+				NSDictionary *userInfo = @{NSLocalizedDescriptionKey : errMsg};
 				
 				NSError *err = [NSError errorWithDomain:XMPPSRVResolverErrorDomain code:0 userInfo:userInfo];
 				

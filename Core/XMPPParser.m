@@ -11,12 +11,6 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-// Log levels: off, error, warn, info, verbose
-#if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_VERBOSE;
-#else
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
-#endif
 
 #define CHECK_FOR_NULL(value)                       \
     do {                                            \
@@ -432,7 +426,7 @@ static void xmpp_xmlAbortDueToMemoryShortage(xmlParserCtxt *ctxt)
 	if (parser->delegateQueue && [parser->delegate respondsToSelector:@selector(xmppParser:didFail:)])
 	{
 		NSString *errMsg = @"Unable to allocate memory in xmpp parser";
-		NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+		NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 		
 		NSError *error = [NSError errorWithDomain:@"libxmlErrorDomain" code:1001 userInfo:info];
 		
@@ -828,7 +822,7 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 				if (xmlErr->message)
 				{
 					NSString *errMsg = [NSString stringWithFormat:@"%s", xmlErr->message];
-					NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+					NSDictionary *info = @{NSLocalizedDescriptionKey : errMsg};
 					
 					error = [NSError errorWithDomain:@"libxmlErrorDomain" code:xmlErr->code userInfo:info];
 				}

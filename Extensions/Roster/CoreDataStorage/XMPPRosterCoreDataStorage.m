@@ -27,12 +27,12 @@
 
 static XMPPRosterCoreDataStorage *sharedInstance;
 
-+ (XMPPRosterCoreDataStorage *)sharedInstance
++ (instancetype)sharedInstance
 {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		
-		sharedInstance = [[XMPPRosterCoreDataStorage alloc] initWithDatabaseFilename:nil];
+		sharedInstance = [[XMPPRosterCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
 	});
 	
 	return sharedInstance;
@@ -48,7 +48,9 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	[super commonInit];
 	
 	// This method is invoked by all public init methods of the superclass
-	
+    autoRemovePreviousDatabaseFile = YES;
+	autoRecreateDatabaseFile = YES;
+    
 	rosterPopulationSet = [[NSMutableSet alloc] init];
 }
 
@@ -118,8 +120,10 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	for (XMPPResourceCoreDataStorageObject *resource in allResources)
 	{
+        XMPPUserCoreDataStorageObject *user = resource.user;
 		[moc deleteObject:resource];
-		
+        [user recalculatePrimaryResource];
+        
 		if (++unsavedCount >= saveThreshold)
 		{
 			[self save];
@@ -131,24 +135,6 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Overrides
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)willCreatePersistentStore:(NSString *)filePath
-{
-	// This method is overriden from the XMPPCoreDataStore superclass.
-	// From the documentation:
-	// 
-	// Override me, if needed, to provide customized behavior.
-	// 
-	// For example, if you are using the database for pure non-persistent data you may want to delete the database
-	// file if it already exists on disk.
-	// 
-	// The default implementation does nothing.
-	
-	if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
-	{
-		[[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
-	}
-}
 
 - (void)didCreateManagedObjectContext
 {
@@ -383,6 +369,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
+    
+    BOOL allowRosterlessOperation = [parent allowRosterlessOperation];
 	
 	[self scheduleBlock:^{
 		
@@ -393,7 +381,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 		
-		if (user == nil && [parent allowRosterlessOperation])
+		if (user == nil && allowRosterlessOperation)
 		{
 			// This may happen if the roster is in rosterlessOperation mode.
 			
@@ -536,5 +524,52 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     return results;
 }
 
+- (void)getSubscription:(NSString **)subscription
+                    ask:(NSString **)ask
+               nickname:(NSString **)nickname
+                 groups:(NSArray **)groups
+                 forJID:(XMPPJID *)jid
+             xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+        
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
+        
+        if(user)
+        {
+            if(subscription)
+            {
+                *subscription = user.subscription;
+            }
+            
+            if(ask)
+            {
+                *ask = user.ask;
+            }
+            
+            if(nickname)
+            {
+                *nickname = user.nickname;
+            }
+            
+            if(groups)
+            {
+                if([user.groups count])
+                {
+                    NSMutableArray *groupNames = [NSMutableArray array];
+                    
+                    for(XMPPGroupCoreDataStorageObject *group in user.groups){
+                        [groupNames addObject:group.name];
+                    }
+                    
+                    *groups = groupNames;
+                }
+            }
+        }
+    }];
+}
 
 @end

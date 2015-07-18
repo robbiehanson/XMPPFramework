@@ -1,0 +1,14 @@
+xcodeproj 'XMPPFrameworkTests/XMPPFrameworkTests.xcodeproj'
+
+# Uncomment this line to define a global platform for your project
+
+platform :ios, '6.0'
+
+target 'XMPPFrameworkTests' do
+	
+end
+
+target 'XMPPFrameworkTestsTests' do
+	pod 'OCMock', '~> 3.1'
+end
+

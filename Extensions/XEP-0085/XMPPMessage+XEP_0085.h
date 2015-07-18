@@ -8,11 +8,11 @@
 
 - (BOOL)hasChatState;
 
-- (BOOL)isActiveChatState;
-- (BOOL)isComposingChatState;
-- (BOOL)isPausedChatState;
-- (BOOL)isInactiveChatState;
-- (BOOL)isGoneChatState;
+- (BOOL)hasActiveChatState;
+- (BOOL)hasComposingChatState;
+- (BOOL)hasPausedChatState;
+- (BOOL)hasInactiveChatState;
+- (BOOL)hasGoneChatState;
 
 - (void)addActiveChatState;
 - (void)addComposingChatState;

@@ -4,6 +4,7 @@
 
 #import "GCDAsyncSocket.h"
 #import "XMPP.h"
+#import "XMPPLogging.h"
 #import "XMPPReconnect.h"
 #import "XMPPCapabilitiesCoreDataStorage.h"
 #import "XMPPRosterCoreDataStorage.h"
@@ -57,7 +58,7 @@
 {
 	// Configure logging framework
 	
-	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+	[DDLog addLogger:[DDTTYLogger sharedInstance] withLogLevel:XMPP_LOG_FLAG_SEND_RECV];
 
   // Setup the XMPP stream
   
@@ -221,8 +222,7 @@
 	
 
 	// You may need to alter these settings depending on the server you're connecting to
-	allowSelfSignedCertificates = NO;
-	allowSSLHostNameMismatch = NO;
+	customCertEvaluation = YES;
 }
 
 - (void)teardownStream
@@ -259,11 +259,23 @@
 // No problem - we use the KissXML library as a drop in replacement.
 // 
 // For more information on working with XML elements, see the Wiki article:
-// http://code.google.com/p/xmppframework/wiki/WorkingWithElements
+// https://github.com/robbiehanson/XMPPFramework/wiki/WorkingWithElements
 
 - (void)goOnline
 {
 	XMPPPresence *presence = [XMPPPresence presence]; // type="available" is implicit
+    
+    NSString *domain = [xmppStream.myJID domain];
+    
+    //Google set their presence priority to 24, so we do the same to be compatible.
+    
+    if([domain isEqualToString:@"gmail.com"]
+       || [domain isEqualToString:@"gtalk.com"]
+       || [domain isEqualToString:@"talk.google.com"])
+    {
+        NSXMLElement *priority = [NSXMLElement elementWithName:@"priority" stringValue:@"24"];
+        [presence addChild:priority];
+    }
 	
 	[[self xmppStream] sendElement:presence];
 }
@@ -362,6 +374,13 @@
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 }
 
+- (void)applicationWillTerminate:(UIApplication *)application
+{
+    DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+
+    [self teardownStream];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,52 +394,76 @@
 {
 	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
 	
-	if (allowSelfSignedCertificates)
+	NSString *expectedCertName = [xmppStream.myJID domain];
+	if (expectedCertName)
 	{
-		[settings setObject:[NSNumber numberWithBool:YES] forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
+		settings[(NSString *) kCFStreamSSLPeerName] = expectedCertName;
 	}
 	
-	if (allowSSLHostNameMismatch)
+	if (customCertEvaluation)
 	{
-		[settings setObject:[NSNull null] forKey:(NSString *)kCFStreamSSLPeerName];
+		settings[GCDAsyncSocketManuallyEvaluateTrust] = @(YES);
 	}
-	else
-	{
-		// Google does things incorrectly (does not conform to RFC).
-		// Because so many people ask questions about this (assume xmpp framework is broken),
-		// I've explicitly added code that shows how other xmpp clients "do the right thing"
-		// when connecting to a google server (gmail, or google apps for domains).
+}
+
+/**
+ * Allows a delegate to hook into the TLS handshake and manually validate the peer it's connecting to.
+ *
+ * This is only called if the stream is secured with settings that include:
+ * - GCDAsyncSocketManuallyEvaluateTrust == YES
+ * That is, if a delegate implements xmppStream:willSecureWithSettings:, and plugs in that key/value pair.
+ *
+ * Thus this delegate method is forwarding the TLS evaluation callback from the underlying GCDAsyncSocket.
+ *
+ * Typically the delegate will use SecTrustEvaluate (and related functions) to properly validate the peer.
+ *
+ * Note from Apple's documentation:
+ *   Because [SecTrustEvaluate] might look on the network for certificates in the certificate chain,
+ *   [it] might block while attempting network access. You should never call it from your main thread;
+ *   call it only from within a function running on a dispatch queue or on a separate thread.
+ *
+ * This is why this method uses a completionHandler block rather than a normal return value.
+ * The idea is that you should be performing SecTrustEvaluate on a background thread.
+ * The completionHandler block is thread-safe, and may be invoked from a background queue/thread.
+ * It is safe to invoke the completionHandler block even if the socket has been closed.
+ * 
+ * Keep in mind that you can do all kinds of cool stuff here.
+ * For example:
+ * 
+ * If your development server is using a self-signed certificate,
+ * then you could embed info about the self-signed cert within your app, and use this callback to ensure that
+ * you're actually connecting to the expected dev server.
+ * 
+ * Also, you could present certificates that don't pass SecTrustEvaluate to the client.
+ * That is, if SecTrustEvaluate comes back with problems, you could invoke the completionHandler with NO,
+ * and then ask the client if the cert can be trusted. This is similar to how most browsers act.
+ * 
+ * Generally, only one delegate should implement this method.
+ * However, if multiple delegates implement this method, then the first to invoke the completionHandler "wins".
+ * And subsequent invocations of the completionHandler are ignored.
+**/
+- (void)xmppStream:(XMPPStream *)sender didReceiveTrust:(SecTrustRef)trust
+                                      completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	// The delegate method should likely have code similar to this,
+	// but will presumably perform some extra security code stuff.
+	// For example, allowing a specific self-signed certificate that is known to the app.
+	
+	dispatch_queue_t bgQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+	dispatch_async(bgQueue, ^{
 		
-		NSString *expectedCertName = nil;
+		SecTrustResultType result = kSecTrustResultDeny;
+		OSStatus status = SecTrustEvaluate(trust, &result);
 		
-		NSString *serverDomain = xmppStream.hostName;
-		NSString *virtualDomain = [xmppStream.myJID domain];
-		
-		if ([serverDomain isEqualToString:@"talk.google.com"])
-		{
-			if ([virtualDomain isEqualToString:@"gmail.com"])
-			{
-				expectedCertName = virtualDomain;
-			}
-			else
-			{
-				expectedCertName = serverDomain;
-			}
+		if (status == noErr && (result == kSecTrustResultProceed || result == kSecTrustResultUnspecified)) {
+			completionHandler(YES);
 		}
-		else if (serverDomain == nil)
-		{
-			expectedCertName = virtualDomain;
+		else {
+			completionHandler(NO);
 		}
-		else
-		{
-			expectedCertName = serverDomain;
-		}
-		
-		if (expectedCertName)
-		{
-			[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
-		}
-	}
+	});
 }
 
 - (void)xmppStreamDidSecure:(XMPPStream *)sender

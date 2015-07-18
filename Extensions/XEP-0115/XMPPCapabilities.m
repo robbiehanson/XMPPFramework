@@ -43,7 +43,7 @@
  * According to the XEP it is RECOMMENDED for the value of the 'node' attribute to be an HTTP URL.
 **/
 #ifndef DISCO_NODE
-	#define DISCO_NODE @"http://code.google.com/p/xmppframework"
+	#define DISCO_NODE @"https://github.com/robbiehanson/XMPPFramework"
 #endif
 
 @interface GCDTimerWrapper : NSObject
@@ -118,6 +118,8 @@
 		{
 			XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
 		}
+        
+        myCapabilitiesNode = DISCO_NODE;
 		
 		// discoRequestJidSet:
 		// 
@@ -165,6 +167,38 @@
 - (id <XMPPCapabilitiesStorage>)xmppCapabilitiesStorage
 {
 	return xmppCapabilitiesStorage;
+}
+
+- (NSString *)myCapabilitiesNode
+{
+	if (dispatch_get_specific(moduleQueueTag))
+	{
+		return myCapabilitiesNode;
+	}
+	else
+	{
+		__block NSString *result;
+		
+		dispatch_sync(moduleQueue, ^{
+			result = myCapabilitiesNode;
+		});
+		
+		return result;
+	}
+}
+
+- (void)setMyCapabilitiesNode:(NSString *)flag
+{
+    NSAssert([flag length], @"myCapabilitiesNode MUST NOT be nil");
+
+	dispatch_block_t block = ^{
+		myCapabilitiesNode = flag;
+	};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)autoFetchHashedCapabilities
@@ -375,12 +409,12 @@ static NSString* extractFormTypeValue(NSXMLElement *form)
 			{
 				if ([values count] > 1)
 				{
-					NSString *baseValue = [[values objectAtIndex:0] stringValue];
+					NSString *baseValue = [values[0] stringValue];
 					
 					NSUInteger i;
 					for (i = 1; i < [values count]; i++)
 					{
-						NSString *value = [[values objectAtIndex:i] stringValue];
+						NSString *value = [values[i] stringValue];
 						
 						if (![value isEqualToString:baseValue])
 						{
@@ -462,7 +496,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	return [str1 compare:str2 options:NSLiteralSearch];
 }
 
-- (NSString *)hashCapabilitiesFromQuery:(NSXMLElement *)query
++ (NSString *)hashCapabilitiesFromQuery:(NSXMLElement *)query
 {
 	if (query == nil) return nil;
 	
@@ -762,7 +796,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	XMPPLogVerbose(@"%@: My capabilities:\n%@", THIS_FILE,
 				   [query XMLStringWithOptions:(NSXMLNodeCompactEmptyElement | NSXMLNodePrettyPrint)]);
 	
-	NSString *hash = [self hashCapabilitiesFromQuery:query];
+	NSString *hash = [self.class hashCapabilitiesFromQuery:query];
 	
 	if (hash == nil)
 	{
@@ -782,12 +816,12 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// 
 	// <c xmlns="http://jabber.org/protocol/caps"
 	//     hash="sha-1"
-	//     node="http://code.google.com/p/xmppframework"
+	//     node="https://github.com/robbiehanson/XMPPFramework"
 	//     ver="QgayPKawpkPSDYmwT/WM94uA1u0="/>
 	
 	myCapabilitiesC = [[NSXMLElement alloc] initWithName:@"c" xmlns:XMLNS_CAPS];
 	[myCapabilitiesC addAttributeWithName:@"hash" stringValue:hashAlg];
-	[myCapabilitiesC addAttributeWithName:@"node" stringValue:DISCO_NODE];
+	[myCapabilitiesC addAttributeWithName:@"node" stringValue:myCapabilitiesNode];
 	[myCapabilitiesC addAttributeWithName:@"ver"  stringValue:hash];
 	
 	// If the collection process started when the stream was connected,
@@ -897,7 +931,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			// However, there is still a disco request that concerns the jid.
 			
 			key = [self keyFromHash:hash algorithm:hashAlg];
-			NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+			NSMutableArray *jids = discoRequestHashDict[key];
 			
 			if (jids)
 			{
@@ -913,10 +947,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			// The first object in the jids array is the index of the last jid that we've sent a disco request to.
 			// This is used in case the jid does not respond.
 			
-			NSNumber *requestIndexNum = [NSNumber numberWithUnsignedInteger:1];
-			jids = [NSMutableArray arrayWithObjects:requestIndexNum, jid, nil];
+			NSNumber *requestIndexNum = @1;
+			jids = [@[requestIndexNum, jid] mutableCopy];
 			
-			[discoRequestHashDict setObject:jids forKey:key];
+			discoRequestHashDict[key] = jids;
 			[discoRequestJidSet addObject:jid];
 		}
 		else
@@ -1023,7 +1057,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// Are we already fetching the capabilities?
 	
 	NSString *key = [self keyFromHash:ver algorithm:hash];
-	NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+	NSMutableArray *jids = discoRequestHashDict[key];
 	
 	if (jids)
 	{
@@ -1064,10 +1098,10 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// So how do we know what the next jid in the list is?
 	// Via the requestIndexNum of course.
 	
-	NSNumber *requestIndexNum = [NSNumber numberWithUnsignedInteger:1];
-	jids = [NSMutableArray arrayWithObjects:requestIndexNum, jid, nil];
+	NSNumber *requestIndexNum = @1;
+	jids = [@[requestIndexNum, jid] mutableCopy];
 	
-	[discoRequestHashDict setObject:jids forKey:key];
+	discoRequestHashDict[key] = jids;
 	[discoRequestJidSet addObject:jid];
 	
 	// Send disco#info query
@@ -1224,7 +1258,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		
 		NSString *key = [self keyFromHash:hash algorithm:hashAlg];
 		
-		NSString *calculatedHash = [self hashCapabilitiesFromQuery:query];
+		NSString *calculatedHash = [self.class hashCapabilitiesFromQuery:query];
 		
 		if ([calculatedHash isEqualToString:hash])
 		{
@@ -1234,12 +1268,12 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 			[xmppCapabilitiesStorage setCapabilities:query forHash:hash algorithm:hashAlg];
 			
 			// Remove the jid(s) from the discoRequest variables
-			NSArray *jids = [discoRequestHashDict objectForKey:key];
+			NSArray *jids = discoRequestHashDict[key];
 			
 			NSUInteger i;
 			for (i = 1; i < [jids count]; i++)
 			{
-				XMPPJID *currentJid = [jids objectAtIndex:i];
+				XMPPJID *currentJid = jids[i];
 				
 				[discoRequestJidSet removeObject:currentJid];
 				
@@ -1332,7 +1366,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	// Get the list of jids that have the same capabilities hash
 	
-	NSMutableArray *jids = [discoRequestHashDict objectForKey:key];
+	NSMutableArray *jids = discoRequestHashDict[key];
 	if (jids == nil)
 	{
 		XMPPLogWarn(@"%@: %@ - Key doesn't exist in discoRequestHashDict", THIS_FILE, THIS_METHOD);
@@ -1342,8 +1376,8 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	// Get the index and jid of the fetch that just failed
 	
-	NSUInteger requestIndex = [[jids objectAtIndex:0] unsignedIntegerValue];
-	XMPPJID *jid = [jids objectAtIndex:requestIndex];
+	NSUInteger requestIndex = [jids[0] unsignedIntegerValue];
+	XMPPJID *jid = jids[requestIndex];
 	
 	// Release the associated timer
 	[self cancelTimeoutForDiscoRequestFromJID:jid];
@@ -1361,7 +1395,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		// Increment request index (and update object in jids array),
 	
 		requestIndex++;
-		[jids replaceObjectAtIndex:0 withObject:[NSNumber numberWithUnsignedInteger:requestIndex]];
+		jids[0] = @(requestIndex);
 	}
 	
 	// Do we have another jid that we can query?
@@ -1369,7 +1403,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	if (requestIndex < [jids count])
 	{
-		jid = [jids objectAtIndex:requestIndex];
+		jid = jids[requestIndex];
 		
 		NSString *node = nil;
 		NSString *ver  = nil;
@@ -1406,7 +1440,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 		NSUInteger i;
 		for (i = 1; i < [jids count]; i++)
 		{
-			jid = [jids objectAtIndex:i];
+			jid = jids[i];
 			
 			[discoRequestJidSet removeObject:jid];
 			[xmppCapabilitiesStorage setCapabilitiesFetchFailedForJID:jid xmppStream:xmppStream];
@@ -1522,7 +1556,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	{
 		NSString *node = [query attributeStringValueForName:@"node"];
 		
-		if (node == nil || [node hasPrefix:DISCO_NODE])
+		if (node == nil || [node hasPrefix:myCapabilitiesNode])
 		{
 			[self handleDiscoRequest:iq];
 		}
@@ -1622,7 +1656,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
 	
-	[discoTimerJidDict setObject:timerWrapper forKey:jid];
+	discoTimerJidDict[jid] = timerWrapper;
 }
 
 - (void)setupTimeoutForDiscoRequestFromJID:(XMPPJID *)jid withHashKey:(NSString *)key
@@ -1658,7 +1692,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	GCDTimerWrapper *timerWrapper = [[GCDTimerWrapper alloc] initWithDispatchTimer:timer];
 	
-	[discoTimerJidDict setObject:timerWrapper forKey:jid];
+	discoTimerJidDict[jid] = timerWrapper;
 }
 
 - (void)cancelTimeoutForDiscoRequestFromJID:(XMPPJID *)jid
@@ -1668,7 +1702,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	
 	XMPPLogTrace();
 	
-	GCDTimerWrapper *timerWrapper = [discoTimerJidDict objectForKey:jid];
+	GCDTimerWrapper *timerWrapper = discoTimerJidDict[jid];
 	if (timerWrapper)
 	{
 		[timerWrapper cancel];

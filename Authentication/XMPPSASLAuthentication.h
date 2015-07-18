@@ -6,8 +6,8 @@
 @class XMPPStream;
 
 
-enum XMPPHandleAuthResponse
-{
+typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
+	
 	XMPP_AUTH_FAIL,     // Authentication failed.
 	                    // The delegate will be informed via xmppStream:didNotAuthenticate:
 	
@@ -15,9 +15,7 @@ enum XMPPHandleAuthResponse
 	                    // The delegate will be informed via xmppStreamDidAuthenticate:
 	
 	XMPP_AUTH_CONTINUE, // The authentication process is still ongoing.
-	
 };
-typedef enum XMPPHandleAuthResponse XMPPHandleAuthResponse;
 
 
 @protocol XMPPSASLAuthentication <NSObject>
@@ -60,6 +58,7 @@ typedef enum XMPPHandleAuthResponse XMPPHandleAuthResponse;
 **/
 - (id)initWithStream:(XMPPStream *)stream password:(NSString *)password;
 
+
 /**
  * Attempts to start the authentication process.
  * The auth mechanism should send whatever stanzas are needed to begin the authentication process.
@@ -80,12 +79,19 @@ typedef enum XMPPHandleAuthResponse XMPPHandleAuthResponse;
  * If the authentication is not yet complete, it should return XMPP_AUTH_CONTINUE,
  * meaning the xmpp stream will continue to forward all incoming xmpp stanzas to this method.
  * 
- * This method is called by automatically XMPPStream (via the authenticate: method).
+ * This method is called automatically by XMPPStream (via the authenticate: method).
  * You should NOT invoke this method manually.
 **/
 - (XMPPHandleAuthResponse)handleAuth:(NSXMLElement *)auth;
 
 @optional
+
+/**
+ * Use this init method if the username used for authentication does not match the user part of the JID.
+ * If username is nil, the user part of the JID will be used.
+ * The standard init method uses this init method, passing nil for the username.
+ **/
+- (id)initWithStream:(XMPPStream *)stream username:(NSString *)username password:(NSString *)password;
 
 /**
  * Optionally implement this method to override the default behavior.

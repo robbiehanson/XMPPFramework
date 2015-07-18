@@ -8,6 +8,60 @@
 @implementation NSXMLElement (XMPP)
 
 /**
+ * Convenience methods for Creating elements.
+**/
+
++ (NSXMLElement *)elementWithName:(NSString *)name numberValue:(NSNumber *)number
+{
+    return [self elementWithName:name stringValue:[number stringValue]];
+}
+
+- (id)initWithName:(NSString *)name numberValue:(NSNumber *)number
+{
+    return [self initWithName:name stringValue:[number stringValue]];
+}
+
++ (NSXMLElement *)elementWithName:(NSString *)name objectValue:(id)objectValue
+{
+    if([objectValue isKindOfClass:[NSString class]])
+    {
+        return [self elementWithName:name stringValue:objectValue];
+    }
+    else if([objectValue isKindOfClass:[NSNumber class]])
+    {
+        return [self elementWithName:name numberValue:objectValue];
+    }
+    else if([objectValue respondsToSelector:@selector(stringValue)])
+    {
+        return [self elementWithName:name stringValue:[objectValue stringValue]];
+    }
+    else
+    {
+        return [self elementWithName:name];
+    }
+}
+
+- (id)initWithName:(NSString *)name objectValue:(id)objectValue
+{
+    if([objectValue isKindOfClass:[NSString class]])
+    {
+        return [self initWithName:name stringValue:objectValue];
+    }
+    else if([objectValue isKindOfClass:[NSNumber class]])
+    {
+        return [self initWithName:name numberValue:objectValue];
+    }
+    else if([objectValue respondsToSelector:@selector(stringValue)])
+    {
+        return [self initWithName:name stringValue:[objectValue stringValue]];
+    }
+    else
+    {
+        return [self initWithName:name];
+    }
+}
+
+/**
  * Quick method to create an element
 **/
 + (NSXMLElement *)elementWithName:(NSString *)name xmlns:(NSString *)ns
@@ -75,7 +129,7 @@
 	NSArray *elements = [self elementsForName:name];
 	if ([elements count] > 0)
 	{
-		return [elements objectAtIndex:0];
+		return elements[0];
 	}
 	else
 	{
@@ -111,7 +165,7 @@
 	NSArray *elements = [self elementsForLocalName:name URI:xmlns];
 	if ([elements count] > 0)
 	{
-		return [elements objectAtIndex:0];
+		return elements[0];
 	}
 	else
 	{
@@ -138,6 +192,62 @@
 	}
 	
 	return result;
+}
+
+/**
+ * This method removes the first child element for the given name.
+ * If no child elements exist for the given name, this method does nothing.
+**/
+- (void)removeElementForName:(NSString *)name
+{
+    NSXMLElement *element = [self elementForName:name];
+
+    if(element)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
+}
+
+/**
+ * This method removes the all child elements for the given name.
+ * If no child elements exist for the given name, this method does nothing.
+**/
+- (void)removeElementsForName:(NSString *)name
+{
+    NSArray *elements = [self elementsForName:name];
+    
+    for(NSXMLElement *element in elements)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
+}
+
+/**
+ * This method removes the first child element for the given name and given xmlns.
+ * If no child elements exist for the given name and given xmlns, this method does nothing.
+**/
+- (void)removeElementForName:(NSString *)name xmlns:(NSString *)xmlns
+{
+    NSXMLElement *element = [self elementForName:name xmlns:xmlns];
+    
+    if(element)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
+}
+
+/**
+ * This method removes the first child element for the given name and given xmlns prefix.
+ * If no child elements exist for the given name and given xmlns prefix, this method does nothing.
+**/
+- (void)removeElementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix
+{
+    NSXMLElement *element = [self elementForName:name xmlnsPrefix:xmlnsPrefix];
+    
+    if(element)
+    {
+        [self removeChildAtIndex:[[self children] indexOfObject:element]];
+    }
 }
 
 /**
@@ -176,9 +286,61 @@
 /**
  *	Shortcut to avoid having to use NSXMLNode everytime
 **/
+
+- (void)addAttributeWithName:(NSString *)name intValue:(int)intValue
+{
+  [self addAttributeWithName:name numberValue:@(intValue)];
+}
+
+- (void)addAttributeWithName:(NSString *)name boolValue:(BOOL)boolValue
+{
+  [self addAttributeWithName:name numberValue:@(boolValue)];
+}
+
+- (void)addAttributeWithName:(NSString *)name floatValue:(float)floatValue
+{
+  [self addAttributeWithName:name numberValue:@(floatValue)];
+}
+
+- (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue
+{
+  [self addAttributeWithName:name numberValue:@(doubleValue)];
+}
+
+- (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue
+{
+  [self addAttributeWithName:name numberValue:@(integerValue)];
+}
+
+- (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSUInteger)unsignedIntegerValue
+{
+  [self addAttributeWithName:name numberValue:@(unsignedIntegerValue)];
+}
+
 - (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string
 {
 	[self addAttribute:[NSXMLNode attributeWithName:name stringValue:string]];
+}
+
+- (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number
+{
+    [self addAttributeWithName:name stringValue:[number stringValue]];
+}
+
+- (void)addAttributeWithName:(NSString *)name objectValue:(id)objectValue
+{
+    if([objectValue isKindOfClass:[NSString class]])
+    {
+        [self addAttributeWithName:name stringValue:objectValue];
+    }
+    else if([objectValue isKindOfClass:[NSNumber class]])
+    {
+        [self addAttributeWithName:name numberValue:objectValue];
+    }
+    else if([objectValue respondsToSelector:@selector(stringValue)])
+    {
+        [self addAttributeWithName:name stringValue:[objectValue stringValue]];
+    }
 }
 
 /**
@@ -191,7 +353,26 @@
 }
 - (BOOL)attributeBoolValueForName:(NSString *)name
 {
-	return [[self attributeStringValueForName:name] boolValue];
+    NSString *attributeStringValueForName = [self attributeStringValueForName:name];
+    
+    BOOL result = NO;
+    
+    // An XML boolean datatype can have the following legal literals: true, false, 1, 0
+    
+    if ([attributeStringValueForName isEqualToString:@"true"] || [attributeStringValueForName isEqualToString:@"1"])
+    {
+        result = YES;
+    }
+    else if([attributeStringValueForName isEqualToString:@"false"] || [attributeStringValueForName isEqualToString:@"0"])
+    {
+        result = NO;
+    }
+    else
+    {
+        result = [attributeStringValueForName boolValue];
+    }
+    
+    return result;
 }
 - (float)attributeFloatValueForName:(NSString *)name
 {
@@ -243,43 +424,43 @@
 }
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name
 {
-	return [NSNumber numberWithInt:[self attributeIntValueForName:name]];
+	return @([self attributeIntValueForName:name]);
 }
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name
 {
-	return [NSNumber numberWithBool:[self attributeBoolValueForName:name]];
+	return @([self attributeBoolValueForName:name]);
 }
 - (NSNumber *)attributeNumberFloatValueForName:(NSString *)name
 {
-	return [NSNumber numberWithFloat:[self attributeFloatValueForName:name]];
+	return @([self attributeFloatValueForName:name]);
 }
 - (NSNumber *)attributeNumberDoubleValueForName:(NSString *)name
 {
-	return [NSNumber numberWithDouble:[self attributeDoubleValueForName:name]];
+	return @([self attributeDoubleValueForName:name]);
 }
 - (NSNumber *)attributeNumberInt32ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithInt:[self attributeInt32ValueForName:name]];
+	return @([self attributeInt32ValueForName:name]);
 }
 - (NSNumber *)attributeNumberUInt32ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithUnsignedInt:[self attributeUInt32ValueForName:name]];
+	return @([self attributeUInt32ValueForName:name]);
 }
 - (NSNumber *)attributeNumberInt64ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithLongLong:[self attributeInt64ValueForName:name]];
+	return @([self attributeInt64ValueForName:name]);
 }
 - (NSNumber *)attributeNumberUInt64ValueForName:(NSString *)name
 {
-	return [NSNumber numberWithUnsignedLongLong:[self attributeUInt64ValueForName:name]];
+	return @([self attributeUInt64ValueForName:name]);
 }
 - (NSNumber *)attributeNumberIntegerValueForName:(NSString *)name
 {
-	return [NSNumber numberWithInteger:[self attributeIntegerValueForName:name]];
+	return @([self attributeIntegerValueForName:name]);
 }
 - (NSNumber *)attributeNumberUnsignedIntegerValueForName:(NSString *)name
 {
-	return [NSNumber numberWithUnsignedInteger:[self attributeUnsignedIntegerValueForName:name]];
+	return @([self attributeUnsignedIntegerValueForName:name]);
 }
 
 /**
@@ -307,6 +488,54 @@
 	NSXMLNode *attr = [self attributeForName:name];
 	return (attr) ? [[attr stringValue] doubleValue] : defaultValue;
 }
+- (int32_t)attributeInt32ValueForName:(NSString *)name withDefaultValue:(int32_t)defaultValue
+{
+	int32_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt32:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (uint32_t)attributeUInt32ValueForName:(NSString *)name withDefaultValue:(uint32_t)defaultValue
+{
+	uint32_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt32:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (int64_t)attributeInt64ValueForName:(NSString *)name withDefaultValue:(int64_t)defaultValue
+{
+	int64_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoInt64:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (uint64_t)attributeUInt64ValueForName:(NSString *)name withDefaultValue:(uint64_t)defaultValue
+{
+	uint64_t result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoUInt64:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (NSInteger)attributeIntegerValueForName:(NSString *)name withDefaultValue:(NSInteger)defaultValue
+{
+	NSInteger result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSInteger:&result])
+		return result;
+	else
+		return defaultValue;
+}
+- (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name withDefaultValue:(NSUInteger)defaultValue
+{
+	NSUInteger result = 0;
+	if ([NSNumber xmpp_parseString:[self attributeStringValueForName:name] intoNSUInteger:&result])
+		return result;
+	else
+		return defaultValue;
+}
 - (NSString *)attributeStringValueForName:(NSString *)name withDefaultValue:(NSString *)defaultValue
 {
     NSXMLNode *attr = [self attributeForName:name];
@@ -314,11 +543,11 @@
 }
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue
 {
-	return [NSNumber numberWithInt:[self attributeIntValueForName:name withDefaultValue:defaultValue]];
+	return @([self attributeIntValueForName:name withDefaultValue:defaultValue]);
 }
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue
 {
-	return [NSNumber numberWithBool:[self attributeBoolValueForName:name withDefaultValue:defaultValue]];
+	return @([self attributeBoolValueForName:name withDefaultValue:defaultValue]);
 }
 
 /**
@@ -332,9 +561,9 @@
 	NSUInteger i;
 	for(i = 0; i < [attributes count]; i++)
 	{
-		NSXMLNode *node = [attributes objectAtIndex:i];
+		NSXMLNode *node = attributes[i];
 		
-		[result setObject:[node stringValue] forKey:[node name]];
+		result[[node name]] = [node stringValue];
 	}
 	return result;
 }

@@ -95,14 +95,32 @@ static NSMutableSet *databaseFileNames;
 {
 	// Override me, if needed, to provide customized behavior.
 	// 
-	// This method is queried if the initWithDatabaseFileName method is invoked with a nil parameter.
+	// This method is queried if the initWithDatabaseFileName:storeOptions: method is invoked with a nil parameter for databaseFileName.
 	// 
 	// You are encouraged to use the sqlite file extension.
 	
 	return [NSString stringWithFormat:@"%@.sqlite", [self managedObjectModelName]];
 }
 
-- (void)willCreatePersistentStoreWithPath:(NSString *)storePath
+- (NSDictionary *)defaultStoreOptions
+{
+    
+    // Override me, if needed, to provide customized behavior.
+	//
+	// This method is queried if the initWithDatabaseFileName:storeOptions: method is invoked with a nil parameter for defaultStoreOptions.
+    
+    NSDictionary *defaultStoreOptions = nil;
+    
+    if(databaseFileName)
+    {
+        defaultStoreOptions = @{ NSMigratePersistentStoresAutomaticallyOption: @(YES),
+                                 NSInferMappingModelAutomaticallyOption : @(YES) };
+    }
+    
+    return defaultStoreOptions;
+}
+
+- (void)willCreatePersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)theStoreOptions
 {
 	// Override me, if needed, to provide customized behavior.
 	// 
@@ -113,7 +131,7 @@ static NSMutableSet *databaseFileNames;
 	// If this instance was created via initWithInMemoryStore, then the storePath parameter will be nil.
 }
 
-- (BOOL)addPersistentStoreWithPath:(NSString *)storePath error:(NSError **)errorPtr
+- (BOOL)addPersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)theStoreOptions error:(NSError **)errorPtr
 {
 	// Override me, if needed, to completely customize the persistent store.
 	// 
@@ -131,16 +149,10 @@ static NSMutableSet *databaseFileNames;
 		
 		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
 		
-		// Default support for automatic lightweight migrations
-		NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
-		                         [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
-		                         [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, 
-		                         nil];
-		
 		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
 		                                                           configuration:nil
 		                                                                     URL:storeUrl
-		                                                                 options:options
+		                                                                 options:storeOptions
 		                                                                   error:errorPtr];
 	}
 	else
@@ -157,7 +169,7 @@ static NSMutableSet *databaseFileNames;
     return persistentStore != nil;
 }
 
-- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath error:(NSError *)error
+- (void)didNotAddPersistentStoreWithPath:(NSString *)storePath options:(NSDictionary *)theStoreOptions error:(NSError *)error
 {
     // Override me, if needed, to provide customized behavior.
 	// 
@@ -225,6 +237,7 @@ static NSMutableSet *databaseFileNames;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @synthesize databaseFileName;
+@synthesize storeOptions;
 
 - (void)commonInit
 {
@@ -236,6 +249,9 @@ static NSMutableSet *databaseFileNames;
 	dispatch_queue_set_specific(storageQueue, storageQueueTag, storageQueueTag, NULL);
 	
 	myJidCache = [[NSMutableDictionary alloc] init];
+    
+    willSaveManagedObjectContextBlocks = [[NSMutableArray alloc] init];
+    didSaveManagedObjectContextBlocks = [[NSMutableArray alloc] init];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 	                                         selector:@selector(updateJidCache:)
@@ -245,10 +261,10 @@ static NSMutableSet *databaseFileNames;
 
 - (id)init
 {
-    return [self initWithDatabaseFilename:nil];
+    return [self initWithDatabaseFilename:nil storeOptions:nil];
 }
 
-- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName
+- (id)initWithDatabaseFilename:(NSString *)aDatabaseFileName storeOptions:(NSDictionary *)theStoreOptions
 {
 	if ((self = [super init]))
 	{
@@ -256,6 +272,11 @@ static NSMutableSet *databaseFileNames;
 			databaseFileName = [aDatabaseFileName copy];
 		else
 			databaseFileName = [[self defaultDatabaseFileName] copy];
+        
+        if(theStoreOptions)
+            storeOptions = theStoreOptions;
+        else
+            storeOptions = [self defaultStoreOptions];
 		
 		if (![[self class] registerDatabaseFileName:databaseFileName])
 		{
@@ -354,13 +375,13 @@ static NSMutableSet *databaseFileNames;
 		
 		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
 		
-		result = (XMPPJID *)[myJidCache objectForKey:key];
+		result = (XMPPJID *) myJidCache[key];
 		if (!result)
 		{
 			result = [stream myJID];
 			if (result)
 			{
-				[myJidCache setObject:result forKey:key];
+				myJidCache[key] = result;
 			}
 		}
 	}};
@@ -390,7 +411,7 @@ static NSMutableSet *databaseFileNames;
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
-		XMPPJID *cachedJID = [myJidCache objectForKey:key];
+		XMPPJID *cachedJID = myJidCache[key];
 		
 		if (cachedJID)
 		{
@@ -400,7 +421,7 @@ static NSMutableSet *databaseFileNames;
 			{
 				if (![cachedJID isEqualToJID:newJID])
 				{
-					[myJidCache setObject:newJID forKey:key];
+					myJidCache[key] = newJID;
 					[self didChangeCachedMyJID:newJID forXMPPStream:stream];
 				}
 			}
@@ -424,30 +445,25 @@ static NSMutableSet *databaseFileNames;
 
 - (NSString *)persistentStoreDirectory
 {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
-	
-	// Attempt to find a name for this application
-	NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-	if (appName == nil) {
-		appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];	
-	}
-	
-	if (appName == nil) {
-		appName = @"xmppframework";
-	}
-	
-	
-	NSString *result = [basePath stringByAppendingPathComponent:appName];
-	
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	
-	if (![fileManager fileExistsAtPath:result])
-	{
-		[fileManager createDirectoryAtPath:result withIntermediateDirectories:YES attributes:nil error:nil];
-	}
-	
-    return result;
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    NSString *basePath = ([paths count] > 0) ? paths[0] : NSTemporaryDirectory();
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // Previously the Peristent Story Directory was based on the Bundle Display Name but this can be Localized
+    // If Peristent Story Directory already exists we will use that
+    NSString *bundleDisplayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+    NSString *legacyPersistentStoreDirectory  = [basePath stringByAppendingPathComponent:bundleDisplayName];
+    if ([fileManager fileExistsAtPath:legacyPersistentStoreDirectory]) {
+        return legacyPersistentStoreDirectory;
+    }
+    
+    // Peristent Story Directory now uses the Bundle Identifier
+    NSString *bundleIdentifier = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"];
+    NSString *persistentStoreDirectory  = [basePath stringByAppendingPathComponent:bundleIdentifier];
+    if (![fileManager fileExistsAtPath:persistentStoreDirectory]) {
+        [fileManager createDirectoryAtPath:persistentStoreDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    return persistentStoreDirectory;
 }
 
 - (NSManagedObjectModel *)managedObjectModel
@@ -558,23 +574,31 @@ static NSMutableSet *databaseFileNames;
 			if (storePath)
 			{
 				// If storePath is nil, then NSURL will throw an exception
+                
+                if(autoRemovePreviousDatabaseFile)
+                {
+                    if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
+                    {
+                        [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
+                    }
+                }
 				
-				[self willCreatePersistentStoreWithPath:storePath];
+				[self willCreatePersistentStoreWithPath:storePath options:storeOptions];
 				
 				NSError *error = nil;
 				
-				BOOL didAddPersistentStore = [self addPersistentStoreWithPath:storePath error:&error];
+				BOOL didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:storeOptions error:&error];
 				
 				if(autoRecreateDatabaseFile && !didAddPersistentStore)
 				{
 					[[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
 					
-					didAddPersistentStore = [self addPersistentStoreWithPath:storePath error:&error];
+					didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:storeOptions error:&error];
 				}
 				
 				if (!didAddPersistentStore)
 				{
-					[self didNotAddPersistentStoreWithPath:storePath error:error];
+					[self didNotAddPersistentStoreWithPath:storePath options:storeOptions error:error];
 				}
 			}
 			else
@@ -587,12 +611,12 @@ static NSMutableSet *databaseFileNames;
 		{
 			// In-Memory persistent store
 			
-			[self willCreatePersistentStoreWithPath:nil];
+			[self willCreatePersistentStoreWithPath:nil options:storeOptions];
 			
 			NSError *error = nil;
-			if (![self addPersistentStoreWithPath:nil error:&error])
+			if (![self addPersistentStoreWithPath:nil options:storeOptions error:&error])
 			{
-				[self didNotAddPersistentStoreWithPath:nil error:error];
+				[self didNotAddPersistentStoreWithPath:nil options:storeOptions error:error];
 			}
 		}
 		
@@ -718,11 +742,44 @@ static NSMutableSet *databaseFileNames;
 		XMPPLogVerbose(@"%@: %@ - Merging changes into mainThreadManagedObjectContext", THIS_FILE, THIS_METHOD);
 		
 		dispatch_async(dispatch_get_main_queue(), ^{
+            
+            // http://stackoverflow.com/questions/3923826/nsfetchedresultscontroller-with-predicate-ignores-changes-merged-from-different
+            for (NSManagedObject *object in [notification userInfo][NSUpdatedObjectsKey]) {
+                [[mainThreadManagedObjectContext objectWithID:[object objectID]] willAccessValueForKey:nil];
+            }
 			
 			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
 			[self mainThreadManagedObjectContextDidMergeChanges];
 		});
     }
+}
+
+- (BOOL)autoRemovePreviousDatabaseFile
+{
+	__block BOOL result = NO;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		result = autoRemovePreviousDatabaseFile;
+	}};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+	
+	return result;
+}
+
+- (void)setAutoRemovePreviousDatabaseFile:(BOOL)flag
+{
+	dispatch_block_t block = ^{
+		autoRemovePreviousDatabaseFile = flag;
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
 }
 
 - (BOOL)autoRecreateDatabaseFile
@@ -803,20 +860,31 @@ static NSMutableSet *databaseFileNames;
 	// internally checks to see if it has anything to save before it actually does anthing.
 	// So there's no need for us to do it here, especially since this method is usually
 	// called from maybeSave below, which already does this check.
-	
-	[self willSaveManagedObjectContext];
-	
+    
+    for(void (^block)(void) in willSaveManagedObjectContextBlocks) {
+        block();
+    }
+    
+    [willSaveManagedObjectContextBlocks removeAllObjects];
+    
 	NSError *error = nil;
 	if ([[self managedObjectContext] save:&error])
 	{
 		saveCount++;
-		[self didSaveManagedObjectContext];
+        
+        for(void (^block)(void) in didSaveManagedObjectContextBlocks) {
+            block();
+        }
+        
+        [didSaveManagedObjectContextBlocks removeAllObjects];
 	}
 	else
 	{
 		XMPPLogWarn(@"%@: Error saving - %@ %@", [self class], error, [error userInfo]);
 		
 		[[self managedObjectContext] rollback];
+        
+        [didSaveManagedObjectContextBlocks removeAllObjects];
 	}
 }
 
@@ -903,6 +971,30 @@ static NSMutableSet *databaseFileNames;
 		block();
 		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
 	}});
+}
+
+- (void)addWillSaveManagedObjectContextBlock:(void (^)(void))willSaveBlock
+{
+    dispatch_block_t block = ^{
+		[willSaveManagedObjectContextBlocks addObject:[willSaveBlock copy]];
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+}
+
+- (void)addDidSaveManagedObjectContextBlock:(void (^)(void))didSaveBlock
+{
+    dispatch_block_t block = ^{
+		[didSaveManagedObjectContextBlocks addObject:[didSaveBlock copy]];
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
