@@ -177,7 +177,9 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
 
 - (void)prepareCompression
 {
-    [self endCompression];
+    memset(&_inflation_strm, 0, sizeof(z_stream));
+    memset(&_deflation_strm, 0, sizeof(z_stream));
+    
     inflateInit(&_inflation_strm);
     deflateInit(&_deflation_strm, Z_BEST_COMPRESSION);
 }
@@ -207,6 +209,8 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
         while (offset < data.length) {
             int flush = Z_NO_FLUSH;
             uLongf blockSz = 256;
+            
+            uLong old_total_in = _inflation_strm.total_in;
             
             Bytef * buf = (Bytef *)data.bytes + offset;
             if (offset + blockSz >= data.length ) {
@@ -238,13 +242,12 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
                 }
             }
             else {
-                _inflation_strm.total_out = 0;
                 XMPPLogError(@"Inflation failed: %d(%s)", ret, _inflation_strm.msg);
                 newData = [NSData data];
                 [self sendStreamError];
                 break;
             }
-            offset += blockSz;
+            offset += _inflation_strm.total_in - old_total_in;
         }
         if (!newData) {
             if (newMutableData) {
@@ -333,6 +336,7 @@ static NSString * const XMPPCompressionProtocolNS = @"http://jabber.org/protocol
 - (void)startStream
 {
     //This will reset parser, restart stream
+    XMPPLogSend(@"SEND (start a compressing stream)");
     [self.xmppStream sendOpeningNegotiation];
     [self.xmppStream readDataWithTimeout:TIMEOUT_XMPP_READ_START tag:TAG_XMPP_READ_START];
 }
