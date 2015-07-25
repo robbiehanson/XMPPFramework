@@ -157,7 +157,7 @@
 
 /**
  * The initial roster has been received by client and is currently being populated.
- * @see xmppRosterDidBeginPopulating:
+ * @see xmppRosterDidBeginPopulating:withVersion:
  * @see xmppRosterDidEndPopulating:
 **/
 @property (assign, getter = isPopulating, readonly) BOOL populating;
