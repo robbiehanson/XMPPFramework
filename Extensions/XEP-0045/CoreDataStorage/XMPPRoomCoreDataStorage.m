@@ -818,11 +818,11 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 			NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
 			
 			NSString *predicateFormat = @"roomJIDStr == %@ AND streamBareJidStr == %@";
-			predicate = [NSPredicate predicateWithFormat:predicateFormat, roomJID, streamBareJidStr];
+			predicate = [NSPredicate predicateWithFormat:predicateFormat, roomJID.bare, streamBareJidStr];
 		}
 		else
 		{
-			predicate = [NSPredicate predicateWithFormat:@"roomJIDStr == %@", roomJID];
+			predicate = [NSPredicate predicateWithFormat:@"roomJIDStr == %@", roomJID.bare];
 		}
 		
 		NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"localTimestamp" ascending:NO];
