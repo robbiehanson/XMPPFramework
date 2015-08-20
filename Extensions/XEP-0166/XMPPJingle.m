@@ -2,7 +2,7 @@
 //  XMPPJingle.m
 //  xfinity-webrtc-sdk
 //
-//  Created by Ganvir, Manish (Contractor) on 2/5/15.
+//  Created by Ganvir, Manish  on 2/5/15.
 //
 
 /* The purpose of this extension is to use jingle protocol as described in
