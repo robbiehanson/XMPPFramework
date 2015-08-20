@@ -1,6 +1,5 @@
 //
 //  XMPPJingleSDP.m
-//  xfinity-webrtc-sdk
 //
 //  Created by Ganvir, Manish  on 2/6/15.
 //

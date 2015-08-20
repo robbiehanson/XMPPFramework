@@ -1,12 +1,11 @@
 //
 //  XMPPJingle.h
-//  xfinity-webrtc-sdk
 //
 //  Created by Ganvir, Manish  on 2/5/15.
 //
 
-#ifndef xfinity_webrtc_sdk_XMPPJingle_h
-#define xfinity_webrtc_sdk_XMPPJingle_h
+#ifndef XMPPJingle_h
+#define XMPPJingle_h
 #import <Foundation/Foundation.h>
 #import "XMPPModule.h"
 
