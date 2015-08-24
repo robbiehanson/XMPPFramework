@@ -193,7 +193,11 @@
 	// 
 	// 2. 'otr' and 'expire' value are taken from the <item> element that matches the contact, if present,
 	//    else from the default element.
-	
+    
+    if ([[message type] isEqualToString:@"groupchat"]) {    // chat should not deal with groupchat message
+        return NO;
+    }
+
 	NSXMLElement *match = nil;
 	
 	NSString *messageThread = [[message elementForName:@"thread"] stringValue];
