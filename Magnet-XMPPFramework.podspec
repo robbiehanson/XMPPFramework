@@ -10,7 +10,8 @@ Pod::Spec.new do |s|
   s.author = { 'Robbie Hanson' => 'robbiehanson@deusty.com' }
   s.source = { :git => 'https://github.com/magnetsystems/XMPPFramework.git', :branch => 'swift_compatibility'}
   s.resources = [ '**/*.{xcdatamodel,xcdatamodeld}']
-
+  s.module_map   = 'modulemappath/module.modulemap’
+  
   s.description = 'XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), along with
   the tools needed to read & write XML. It comes with multiple popular extensions (XEPs),
   all built atop a modular architecture, allowing you to plug-in any code needed for the job.
