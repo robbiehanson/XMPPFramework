@@ -6,7 +6,7 @@
 #endif
 
 #define NAME_OUT_OF_BAND @"x"
-#define XMLNS_OUT_OF_BAND @"jabber:iq:oob"
+#define XMLNS_OUT_OF_BAND @"jabber:x:oob"
 
 @implementation XMPPMessage (XEP_0066)
 
