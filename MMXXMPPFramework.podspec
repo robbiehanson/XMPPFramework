@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
   END
 
   s.subspec 'Core' do |core|
-    core.source_files = ['XMPPFramework.h', 'Core/**/*.{h,m}','Vendor/libidn/*.h', 'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}', 'Utilities/**/*.{h,m}', 'Vendor/KissXML/**/*.{h,m}']
+    core.source_files = ['MMXXMPPFramework-umbrella.h', 'XMPPFramework.h', 'Core/**/*.{h,m}','Vendor/libidn/*.h', 'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}', 'Utilities/**/*.{h,m}', 'Vendor/KissXML/**/*.{h,m}']
     core.vendored_libraries = 'Vendor/libidn/libidn.a'
     core.libraries = 'xml2','resolv','iconv'
     core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv $(SDKROOT)/usr/include/libiconv',
