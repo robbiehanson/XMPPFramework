@@ -1,5 +1,5 @@
 framework module Magnet_XMPPFramework {
-  umbrella header "Magnet-XMPPFramework-umbrella.h"
+  umbrella header "Magnet_XMPPFramework-umbrella.h"
 
   export *
   module * { export * }
