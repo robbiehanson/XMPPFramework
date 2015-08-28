@@ -1,4 +1,4 @@
-framework module Magnet-XMPPFramework {
+framework module Magnet_XMPPFramework {
   umbrella header "Magnet-XMPPFramework-umbrella.h"
 
   export *
