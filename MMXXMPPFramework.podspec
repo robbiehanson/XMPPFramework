@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name = 'Magnet-XMPPFramework'
+  s.name = 'MMXXMPPFramework'
   s.version = '3.6.11'
   # s.platform = :ios, '6.0'
   s.ios.deployment_target = '6.0'
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.author = { 'Robbie Hanson' => 'robbiehanson@deusty.com' }
   s.source = { :git => 'https://github.com/magnetsystems/XMPPFramework.git', :tag => '3.6.11'}
   s.resources = [ '**/*.{xcdatamodel,xcdatamodeld}']
-  s.module_map   = 'modulemappath/module.modulemap'
+  s.module_map = 'modulemappath/module.modulemap'
   
   s.description = 'XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), along with
   the tools needed to read & write XML. It comes with multiple popular extensions (XEPs),
@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
     core.vendored_libraries = 'Vendor/libidn/libidn.a'
     core.libraries = 'xml2','resolv','iconv'
     core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv $(SDKROOT)/usr/include/libiconv',
-      'LIBRARY_SEARCH_PATHS' => '"$(PODS_ROOT)/Magnet-XMPPFramework/Vendor/libidn"'}
+      'LIBRARY_SEARCH_PATHS' => '"$(PODS_ROOT)/MMXXMPPFramework/Vendor/libidn"'}
 
       core.dependency 'CocoaLumberjack','~>1.9'
       core.dependency 'CocoaAsyncSocket','~>7.4.1'
@@ -46,7 +46,7 @@ Pod::Spec.new do |s|
     def s.xmpp_extension(name)
       subspec name do |ss|
         ss.source_files = "Extensions/#{name}/**/*.{h,m}"
-        ss.dependency 'Magnet-XMPPFramework/Core'
+        ss.dependency 'MMXXMPPFramework/Core'
         ss.prefix_header_contents = "#define HAVE_XMPP_SUBSPEC_#{name.upcase.sub('-', '_')}"
         yield ss if block_given?
       end
@@ -56,14 +56,14 @@ Pod::Spec.new do |s|
       cds.framework = 'CoreData'
     end
     s.xmpp_extension 'Roster' do |r|
-      r.dependency 'Magnet-XMPPFramework/CoreDataStorage'
-      r.dependency 'Magnet-XMPPFramework/XEP-0203'
+      r.dependency 'MMXXMPPFramework/CoreDataStorage'
+      r.dependency 'MMXXMPPFramework/XEP-0203'
     end
     s.xmpp_extension 'Reconnect'
     s.xmpp_extension 'XEP-0060'
     s.xmpp_extension 'XEP-0082'
     s.xmpp_extension 'XEP-0106'
     s.xmpp_extension 'XEP-0203' do |x|
-      x.dependency 'Magnet-XMPPFramework/XEP-0082'
+      x.dependency 'MMXXMPPFramework/XEP-0082'
     end
   end
