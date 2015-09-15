@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #import "XMPPSASLAuthentication.h"
 #import "XMPPCustomBinding.h"
-#import "GCDAsyncSocket.h"
 #import "GCDMulticastDelegate.h"
+#import "CocoaAsyncSocket/GCDAsyncSocket.h"
 
 #if TARGET_OS_IPHONE
   #import "DDXML.h"
