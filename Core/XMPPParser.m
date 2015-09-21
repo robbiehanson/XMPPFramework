@@ -632,6 +632,7 @@ static void	xmpp_xmlStartElement(void *ctx, const xmlChar  *nodeName,
 				CHECK_FOR_NULL(attrNs);
 				
 				xmlAttrPtr newAttr = xmlNewNsProp(newNode, attrNs, attrName, value);
+				xmlFree(attrNs);
 				CHECK_FOR_NULL(newAttr);
 			}
 		}
