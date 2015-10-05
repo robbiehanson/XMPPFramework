@@ -113,6 +113,7 @@
 @optional
 
 - (void)xmppAutoTime:(XMPPAutoTime *)sender didUpdateTimeDifference:(NSTimeInterval)timeDifference;
+- (void)xmppAutoTimeDidNotReceiveResponseDueToTimeout:(XMPPAutoTime *)sender;
 
 @end
 

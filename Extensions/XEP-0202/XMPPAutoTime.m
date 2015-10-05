@@ -400,11 +400,11 @@
 
 - (void)xmppTime:(XMPPTime *)sender didNotReceiveResponse:(NSString *)queryID dueToTimeout:(NSTimeInterval)timeout
 {
-	XMPPLogTrace();
-	
-	awaitingQueryResponse = NO;
-	
-	// Nothing to do here really. Most likely the server doesn't support XEP-0202.
+    XMPPLogTrace();
+    
+    awaitingQueryResponse = NO;
+    
+    [multicastDelegate xmppAutoTimeDidNotReceiveResponseDueToTimeout:self];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
