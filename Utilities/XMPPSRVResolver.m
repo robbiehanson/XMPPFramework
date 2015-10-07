@@ -227,7 +227,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 					srvRecord = nil;
 				}
 				
-			} while(srvRecord && (srvRecord.priority == initialPriority));
+			} while(srvRecord && (srvRecord.priority >= initialPriority));
 			
 			/* Then choose a uniform random number between 0 and the sum computed
 			 * (inclusive), and select the RR whose running sum value is the
