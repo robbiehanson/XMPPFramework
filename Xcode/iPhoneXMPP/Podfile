@@ -1,0 +1,18 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+platform :ios, '7.0'
+
+xcodeproj 'iPhoneXMPP'
+
+pod 'XMPPFramework/Reconnect'
+pod 'XMPPFramework/XEP-0045'
+pod 'XMPPFramework/XEP-0054'
+pod 'XMPPFramework/XEP-0082'
+pod 'XMPPFramework/XEP-0085'
+pod 'XMPPFramework/XEP-0115'
+pod 'XMPPFramework/XEP-0153'
+pod 'XMPPFramework/XEP-0184'
+pod 'XMPPFramework/XEP-0198'
+pod 'XMPPFramework/XEP-0199'
+pod 'XMPPFramework/XEP-0202'
+pod 'XMPPFramework/XEP-0203'
