@@ -11,15 +11,15 @@
 	
 	// \ should only be escaped to \5c if it could be misinterpreted as an escape sequence, so we do this first.
 	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\5c" withString:@"\\5c5c"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\20" withString:@"\\5c\\20"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\40" withString:@"\\5c\\40"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\3e" withString:@"\\5c\\3e"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\3c" withString:@"\\5c\\3c"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\3a" withString:@"\\5c\\3a"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\2f" withString:@"\\5c\\2f"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\27" withString:@"\\5c\\27"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\26" withString:@"\\5c\\26"];
-	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\22" withString:@"\\5c\\22"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\20" withString:@"\\5c20"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\40" withString:@"\\5c40"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\3e" withString:@"\\5c3e"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\3c" withString:@"\\5c3c"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\3a" withString:@"\\5c3a"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\2f" withString:@"\\5c2f"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\27" withString:@"\\5c27"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\26" withString:@"\\5c26"];
+	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@"\\22" withString:@"\\5c22"];
 	
 	// Escape the charachters
 	jidEscapedString = [jidEscapedString stringByReplacingOccurrencesOfString:@" " withString:@"\\20"];
