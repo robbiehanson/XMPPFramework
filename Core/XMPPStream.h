@@ -121,6 +121,11 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 @property (readwrite, assign) XMPPStreamStartTLSPolicy startTLSPolicy;
 
 /**
+ * The connected servers hostname. The last attempted hostname before the socket actually connects to an IP address
+**/
+@property (nonatomic,readonly) NSString *connectedHostName;
+
+/**
  * The JID of the user.
  * 
  * This value is required, and is used in many parts of the underlying implementation.
