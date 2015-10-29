@@ -39,7 +39,7 @@ grep '#define _XMPP_' -r /Extensions \
 | perl -pe 's/Extensions\/([A-z0-9_]*)\/([A-z]*.h).*/\n#ifdef HAVE_XMPP_SUBSPEC_\U\1\n\E#import "\2"\n#endif/' \
 >> XMPPFramework.h
 END
-
+
 s.preserve_path = 'module/module.modulemap'
 #s.module_map = 'module/module.modulemap'
 
