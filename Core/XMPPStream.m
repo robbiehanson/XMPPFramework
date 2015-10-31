@@ -1036,6 +1036,8 @@ enum XMPPStreamConfig
 	
 	XMPPLogTrace();
 	
+	_connectedHostName = [host copy];
+	
 	BOOL result = [asyncSocket connectToHost:host onPort:port error:errPtr];
 	
 	if (result && [self resetByteCountPerConnection])
@@ -4307,6 +4309,7 @@ enum XMPPStreamConfig
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
 	// This method is invoked on the xmppQueue.
+	_connectedHostName = nil;
 	
 	XMPPLogTrace();
     
