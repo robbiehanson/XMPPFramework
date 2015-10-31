@@ -47,9 +47,9 @@ s.subspec 'Core' do |core|
 core.source_files = ['XMPPFramework.h', 'Core/**/*.{h,m}', 'Vendor/libidn/*.h', 'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}', 'Utilities/**/*.{h,m}']
 core.vendored_libraries = 'Vendor/libidn/libidn.a'
 core.libraries = 'xml2', 'resolv'
-core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/XMPPFramework/module $(SDKROOT)/usr/include/libresolv',
+core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv $(PODS_ROOT)/XMPPFramework/module',
 'LIBRARY_SEARCH_PATHS' => '"$(PODS_ROOT)/XMPPFramework/Vendor/libidn"',
-'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES', 'OTHER_LDFLAGS' => '"$(inherited)" "-lxml2"', 'ENABLE_BITCODE' => 'NO'
+'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES', 'OTHER_LDFLAGS' => '"$(inherited)" "-lxml2" "-objc"', 'ENABLE_BITCODE' => 'NO'
 }
 core.dependency 'CocoaLumberjack','~>1.9'
 core.dependency 'CocoaAsyncSocket','~>7.4.1'
