@@ -41,10 +41,13 @@ enum XMPPRosterFlags
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation XMPPRoster
+@implementation XMPPRoster{
+    Boolean inEnumerating;
+}
 
 - (id)init
 {
+    inEnumerating = NO;
 	return [self initWithRosterStorage:nil dispatchQueue:NULL];
 }
 
@@ -768,12 +771,12 @@ enum XMPPRosterFlags
 			[xmppRosterStorage endRosterPopulationForXMPPStream:xmppStream];
 			
 			// Process any premature presence elements we received.
-			
+            inEnumerating =  YES;
 			for (XMPPPresence *presence in earlyPresenceElements)
 			{
 				[self xmppStream:xmppStream didReceivePresence:presence];
 			}
-            
+            inEnumerating = NO;
 			[earlyPresenceElements removeAllObjects];
 		}
         
@@ -930,8 +933,8 @@ enum XMPPRosterFlags
 		// So there's no need to refetch the roster.
 		
 		[xmppRosterStorage clearAllResourcesForXMPPStream:xmppStream];
-		
-		[earlyPresenceElements removeAllObjects];
+		if(inEnumerating == NO)
+            [earlyPresenceElements removeAllObjects];
 	}
 }
 
@@ -952,8 +955,8 @@ enum XMPPRosterFlags
 	
 	[self _setRequestedRoster:NO];
 	[self _setHasRoster:NO];
-	
-	[earlyPresenceElements removeAllObjects];
+	if(inEnumerating == NO)
+        [earlyPresenceElements removeAllObjects];
 }
 
 #ifdef _XMPP_MUC_H
