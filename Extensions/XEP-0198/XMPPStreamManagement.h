@@ -299,6 +299,15 @@
 - (void)xmppStreamManagement:(XMPPStreamManagement *)sender wasEnabled:(NSXMLElement *)enabled;
 - (void)xmppStreamManagement:(XMPPStreamManagement *)sender wasNotEnabled:(NSXMLElement *)failed;
 
+
+/**
+ *  Resend the stanzaIds not acked by the server
+ *
+ *  @param stanzaIds Includes all "stanzaIds" of sent elements that were not acked by the server.
+ */
+- (void)xmppStreamManagement:(XMPPStreamManagement *)sender shouldResendStanzaIds:(NSArray *)stanzaIds;
+
+
 /**
  * Notifies delegates that a request <r/> for an ack from the server was sent.
 **/
