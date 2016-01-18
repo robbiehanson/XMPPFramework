@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-#import "XMPPvcardTemp.h"
+#import "XMPPvCardTemp.h"
 
 @class XMPPvCardCoreDataStorageObject;
 
