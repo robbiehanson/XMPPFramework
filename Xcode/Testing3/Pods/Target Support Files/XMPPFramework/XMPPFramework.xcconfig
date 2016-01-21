@@ -1,0 +1,8 @@
+CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES
+ENABLE_BITCODE = NO
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+HEADER_SEARCH_PATHS = "${PODS_ROOT}/Headers/Private" "${PODS_ROOT}/Headers/Private/XMPPFramework" "${PODS_ROOT}/Headers/Public" $(inherited) $(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/XMPPFramework/module $(SDKROOT)/usr/include/libresolv
+LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../../Vendor/libidn" "$(PODS_ROOT)/XMPPFramework/Vendor/libidn"
+OTHER_LDFLAGS = -l"idn" -l"resolv" -l"xml2" -framework "CoreData" -framework "CoreLocation" -framework "Foundation" -framework "SystemConfiguration" -framework "UIKit"
+PODS_ROOT = ${SRCROOT}
+SKIP_INSTALL = YES
