@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		533E30E1F3875E9E77F8B3A5 /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C23E1F52CFC47B8B42254BAB /* Pods_XMPPFrameworkTests.framework */; };
+		634D058B1C51B84E00384254 /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 634D058A1C51B84E00384254 /* XMPPURITests.m */; };
 		63C474B81C506285009262C4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C474B71C506285009262C4 /* main.m */; };
 		63C474BB1C506285009262C4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C474BA1C506285009262C4 /* AppDelegate.m */; };
 		63C474BE1C506285009262C4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C474BD1C506285009262C4 /* ViewController.m */; };
@@ -32,6 +33,7 @@
 		0F2C34BA02B0D5002F32FBAF /* Pods-XMPPFrameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1D4F2FBA2F4988EC89DD5834 /* Pods-XMPPFramework.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFramework.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFramework/Pods-XMPPFramework.release.xcconfig"; sourceTree = "<group>"; };
 		596BDF1156054499B58DE613 /* Pods-XMPPFramework.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFramework.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFramework/Pods-XMPPFramework.debug.xcconfig"; sourceTree = "<group>"; };
+		634D058A1C51B84E00384254 /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPURITests.m; sourceTree = "<group>"; };
 		63C474B31C506285009262C4 /* XMPPFramework.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XMPPFramework.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C474B71C506285009262C4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		63C474B91C506285009262C4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				63C474D01C506286009262C4 /* XMPPFrameworkTests.m */,
+				634D058A1C51B84E00384254 /* XMPPURITests.m */,
 				63C474D21C506286009262C4 /* Info.plist */,
 			);
 			path = XMPPFrameworkTests;
@@ -353,6 +356,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				63C474D11C506286009262C4 /* XMPPFrameworkTests.m in Sources */,
+				634D058B1C51B84E00384254 /* XMPPURITests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

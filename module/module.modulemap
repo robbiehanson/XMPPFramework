@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 module libxml [system] {
 	header "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/include/libxml2/libxml/tree.h"
 	export *
@@ -8,6 +9,8 @@ module libxmlSimu [system] {
 	export *
 }
 
+=======
+>>>>>>> fcb6daa... Progress on updating podspec and tests
 module dnssd [system] {
 	header "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/include/dns_sd.h"
 	export *
@@ -16,4 +19,8 @@ module dnssd [system] {
 module dnssdSimu [system] {
 	header "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/include/dns_sd.h"
 	export *
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> fcb6daa... Progress on updating podspec and tests
