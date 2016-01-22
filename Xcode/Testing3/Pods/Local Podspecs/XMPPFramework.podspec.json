@@ -31,6 +31,7 @@
   ],
   "description": "XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), along with\nthe tools needed to read & write XML. It comes with multiple popular extensions (XEPs),\nall built atop a modular architecture, allowing you to plug-in any code needed for the job.\nAdditionally the framework is massively parallel and thread-safe. Structured using GCD,\nthis framework performs    well regardless of whether it's being run on an old iPhone, or\non a 12-core Mac Pro. (And it won't block the main thread... at all).",
   "requires_arc": true,
+  "default_subspecs": "All",
   "prepare_command": "echo '#import \"XMPP.h\"' > XMPPFramework.h\ngrep '#define _XMPP_' -r /Extensions \\\n| tr '-' '_' \\\n| perl -pe 's/Extensions\\/([A-z0-9_]*)\\/([A-z]*.h).*/\\n#ifdef HAVE_XMPP_SUBSPEC_\\U\\1\\n\\E#import \"\\2\"\\n#endif/' \\\n>> XMPPFramework.h",
   "preserve_paths": "module/module.modulemap",
   "subspecs": [
@@ -54,7 +55,8 @@
         "LIBRARY_SEARCH_PATHS": "\"$(PODS_ROOT)/XMPPFramework/Vendor/libidn\"",
         "CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES": "YES",
         "OTHER_LDFLAGS": "\"-lxml2\"",
-        "ENABLE_BITCODE": "NO"
+        "ENABLE_BITCODE": "NO",
+        "OTHER_CFLAGS": "$(inherited) -DDDXML_NS_DECLARATIONS_ENABLED=1"
       },
       "dependencies": {
         "CocoaLumberjack": [
@@ -64,31 +66,7 @@
           "~>7.4.1"
         ],
         "KissXML": [
-          "~> 5.0"
-        ]
-      }
-    },
-    {
-      "name": "Authentication",
-      "dependencies": {
-        "XMPPFramework/Core": [
-
-        ]
-      }
-    },
-    {
-      "name": "Categories",
-      "dependencies": {
-        "XMPPFramework/Core": [
-
-        ]
-      }
-    },
-    {
-      "name": "Utilities",
-      "dependencies": {
-        "XMPPFramework/Core": [
-
+          "~> 5.0.1"
         ]
       }
     },
@@ -115,6 +93,16 @@
       },
       "prefix_header_contents": "#define HAVE_XMPP_SUBSPEC_POD",
       "frameworks": "CoreData"
+    },
+    {
+      "name": "FileTransfer",
+      "source_files": "Extensions/FileTransfer/*.{h,m}",
+      "dependencies": {
+        "XMPPFramework/Core": [
+
+        ]
+      },
+      "prefix_header_contents": "#define HAVE_XMPP_SUBSPEC_POD"
     },
     {
       "name": "GoogleSharedStatus",
@@ -279,6 +267,16 @@
       "prefix_header_contents": "#define HAVE_XMPP_SUBSPEC_POD"
     },
     {
+      "name": "XEP-0077",
+      "source_files": "Extensions/XEP-0077/*.{h,m}",
+      "dependencies": {
+        "XMPPFramework/Core": [
+
+        ]
+      },
+      "prefix_header_contents": "#define HAVE_XMPP_SUBSPEC_POD"
+    },
+    {
       "name": "XEP-0082",
       "source_files": "Extensions/XEP-0082/**/*.{h,m}",
       "dependencies": {
@@ -352,6 +350,16 @@
 
         ],
         "XMPPFramework/XEP-0085": [
+
+        ]
+      },
+      "prefix_header_contents": "#define HAVE_XMPP_SUBSPEC_POD"
+    },
+    {
+      "name": "XEP-0147",
+      "source_files": "Extensions/XEP-0147/**/*.{h,m}",
+      "dependencies": {
+        "XMPPFramework/Core": [
 
         ]
       },
@@ -527,6 +535,151 @@
         ]
       },
       "prefix_header_contents": "#define HAVE_XMPP_SUBSPEC_POD"
+    },
+    {
+      "name": "XEP-0352",
+      "source_files": "Extensions/XEP-0352/*.{h,m}",
+      "dependencies": {
+        "XMPPFramework/Core": [
+
+        ]
+      },
+      "prefix_header_contents": "#define HAVE_XMPP_SUBSPEC_POD"
+    },
+    {
+      "name": "All",
+      "dependencies": {
+        "XMPPFramework/BandwidthMonitor": [
+
+        ],
+        "XMPPFramework/CoreDataStorage": [
+
+        ],
+        "XMPPFramework/FileTransfer": [
+
+        ],
+        "XMPPFramework/GoogleSharedStatus": [
+
+        ],
+        "XMPPFramework/ProcessOne": [
+
+        ],
+        "XMPPFramework/Reconnect": [
+
+        ],
+        "XMPPFramework/Roster": [
+
+        ],
+        "XMPPFramework/XEP-0009": [
+
+        ],
+        "XMPPFramework/XEP-0012": [
+
+        ],
+        "XMPPFramework/XEP-0016": [
+
+        ],
+        "XMPPFramework/XEP-0045": [
+
+        ],
+        "XMPPFramework/XEP-0054": [
+
+        ],
+        "XMPPFramework/XEP-0059": [
+
+        ],
+        "XMPPFramework/XEP-0060": [
+
+        ],
+        "XMPPFramework/XEP-0065": [
+
+        ],
+        "XMPPFramework/XEP-0066": [
+
+        ],
+        "XMPPFramework/XEP-0077": [
+
+        ],
+        "XMPPFramework/XEP-0082": [
+
+        ],
+        "XMPPFramework/XEP-0085": [
+
+        ],
+        "XMPPFramework/XEP-0092": [
+
+        ],
+        "XMPPFramework/XEP-0100": [
+
+        ],
+        "XMPPFramework/XEP-0106": [
+
+        ],
+        "XMPPFramework/XEP-0115": [
+
+        ],
+        "XMPPFramework/XEP-0136": [
+
+        ],
+        "XMPPFramework/XEP-0147": [
+
+        ],
+        "XMPPFramework/XEP-0153": [
+
+        ],
+        "XMPPFramework/XEP-0172": [
+
+        ],
+        "XMPPFramework/XEP-0184": [
+
+        ],
+        "XMPPFramework/XEP-0191": [
+
+        ],
+        "XMPPFramework/XEP-0198": [
+
+        ],
+        "XMPPFramework/XEP-0199": [
+
+        ],
+        "XMPPFramework/XEP-0202": [
+
+        ],
+        "XMPPFramework/XEP-0203": [
+
+        ],
+        "XMPPFramework/XEP-0223": [
+
+        ],
+        "XMPPFramework/XEP-0224": [
+
+        ],
+        "XMPPFramework/XEP-0280": [
+
+        ],
+        "XMPPFramework/XEP-0297": [
+
+        ],
+        "XMPPFramework/XEP-0308": [
+
+        ],
+        "XMPPFramework/XEP-0333": [
+
+        ],
+        "XMPPFramework/XEP-0335": [
+
+        ],
+        "XMPPFramework/XEP-0352": [
+
+        ]
+      },
+      "osx": {
+        "dependencies": {
+          "XMPPFramework/SystemInputActivityMonitor": [
+
+          ]
+        }
+      }
     }
   ]
 }

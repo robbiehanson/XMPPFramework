@@ -21,8 +21,11 @@
 #import "DDXMLDocument.h"
 
 
+#ifndef DDXML_NS_DECLARATIONS_ENABLED
+#define DDXML_NS_DECLARATIONS_ENABLED 0  // Disabled by default
+#endif
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE && DDXML_NS_DECLARATIONS_ENABLED
 
 // Since KissXML is a drop in replacement for NSXML,
 // it may be desireable (when writing cross-platform code to be used on both Mac OS X and iOS)

@@ -39,6 +39,9 @@
 #import "XMPPCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "NSXMLElement+XEP_0203.h"
+#import "XMPPFileTransfer.h"
+#import "XMPPIncomingFileTransfer.h"
+#import "XMPPOutgoingFileTransfer.h"
 #import "XMPPGoogleSharedStatus.h"
 #import "XMPPProcessOne.h"
 #import "XMPPReconnect.h"
@@ -54,8 +57,6 @@
 #import "XMPPRoster.h"
 #import "XMPPRosterPrivate.h"
 #import "XMPPUser.h"
-#import "XMPPSystemInputActivityMonitor.h"
-#import "GCDMulticastDelegate.h"
 #import "XMPPIQ+JabberRPC.h"
 #import "XMPPIQ+JabberRPCResonse.h"
 #import "XMPPJabberRPCModule.h"
@@ -100,6 +101,7 @@
 #import "TURNSocket.h"
 #import "XMPPIQ+XEP_0066.h"
 #import "XMPPMessage+XEP_0066.h"
+#import "XMPPRegistration.h"
 #import "NSDate+XMPPDateTimeProfiles.h"
 #import "XMPPDateTimeProfiles.h"
 #import "XMPPMessage+XEP_0085.h"
@@ -114,6 +116,7 @@
 #import "XMPPMessageArchiving_Message_CoreDataObject.h"
 #import "XMPPMessageArchivingCoreDataStorage.h"
 #import "XMPPMessageArchiving.h"
+#import "XMPPURI.h"
 #import "XMPPvCardAvatarModule.h"
 #import "NSDate+XMPPDateTimeProfiles.h"
 #import "XMPPMessage+XEP_0172.h"
@@ -140,6 +143,7 @@
 #import "XMPPMessage+XEP_0308.h"
 #import "XMPPMessage+XEP_0333.h"
 #import "NSXMLElement+XEP_0335.h"
+#import "NSXMLElement+XEP_0352.h"
 
 FOUNDATION_EXPORT double XMPPFrameworkVersionNumber;
 FOUNDATION_EXPORT const unsigned char XMPPFrameworkVersionString[];

@@ -1,5 +1,7 @@
+CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = "${PODS_ROOT}/Headers/Private" "${PODS_ROOT}/Headers/Private/KissXML" "${PODS_ROOT}/Headers/Public" "$(SDKROOT)/usr/include/libxml2"
+HEADER_SEARCH_PATHS = "${PODS_ROOT}/Headers/Private" "${PODS_ROOT}/Headers/Private/KissXML" "${PODS_ROOT}/Headers/Public" $(SDKROOT)/usr/include/libxml2
+OTHER_CFLAGS = $(inherited) -DDDXML_NS_DECLARATIONS_ENABLED=1
 OTHER_LDFLAGS = -l"xml2"
 PODS_ROOT = ${SRCROOT}
 SKIP_INSTALL = YES
