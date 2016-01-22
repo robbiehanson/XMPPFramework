@@ -205,6 +205,7 @@
 		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = RootViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4C6D31891C3BE57F007520E9 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		631C7B7418E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPSCRAMSHA1Authentication.h; sourceTree = "<group>"; };
 		631C7B7518E0E7C70015DBDF /* XMPPSCRAMSHA1Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPSCRAMSHA1Authentication.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* iPhoneXMPP-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhoneXMPP-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
@@ -614,6 +615,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		4C6D31881C3BE57F007520E9 /* module */ = {
+			isa = PBXGroup;
+			children = (
+				4C6D31891C3BE57F007520E9 /* module.modulemap */,
+			);
+			path = module;
+			sourceTree = "<group>";
+		};
 		631C7B7318E0E7C70015DBDF /* SCRAM-SHA-1 */ = {
 			isa = PBXGroup;
 			children = (
@@ -669,6 +678,7 @@
 		DC1F98001152CAF300138A8F /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				4C6D31881C3BE57F007520E9 /* module */,
 				DCE11268140C5798007A2A46 /* XMPPFramework.h */,
 				DC30E6B8153E09D2001B9E6D /* Authentication */,
 				DC1F98011152CAFD00138A8F /* Categories */,
@@ -1174,7 +1184,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = XMPP;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = XMPPFramework;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "iPhoneXMPP" */;
@@ -1339,6 +1349,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1351,6 +1362,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.deusty.oss.xmppframework.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = iPhoneXMPP;
 			};
 			name = Debug;
@@ -1359,6 +1371,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1369,6 +1382,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.deusty.oss.xmppframework.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = iPhoneXMPP;
 			};
 			name = Release;
@@ -1376,15 +1390,20 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(SDKROOT)/usr/include/libxml2";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MODULEMAP_FILE = "";
+				MODULEMAP_PRIVATE_FILE = "";
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				USER_HEADER_SEARCH_PATHS = "$SRCROOT/../../module $SRCROOT/../../Vendor/**";
 				WARNING_CFLAGS = "-Wno-arc-performSelector-leaks";
 			};
 			name = Debug;
@@ -1392,13 +1411,17 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(SDKROOT)/usr/include/libxml2";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MODULEMAP_FILE = "";
+				MODULEMAP_PRIVATE_FILE = "";
 				SDKROOT = iphoneos;
+				USER_HEADER_SEARCH_PATHS = "$SRCROOT/../../module $SRCROOT/../../Vendor/**";
 				WARNING_CFLAGS = "-Wno-arc-performSelector-leaks";
 			};
 			name = Release;
