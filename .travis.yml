@@ -10,4 +10,5 @@ before_install:
 install:
 - gem install xcpretty --no-rdoc --no-ri --no-document --quiet
 script:
-- set -o pipefail && xcodebuild test -workspace Xcode/Testing2/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 6,OS=8.1' | xcpretty -c
+# - set -o pipefail && xcodebuild test -workspace  -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 6,OS=8.1' | xcpretty -c
+- xctool -workspace Xcode/Testing2/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -arch i386 test
