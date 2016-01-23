@@ -1,7 +1,21 @@
 #import <UIKit/UIKit.h>
 #import <CoreData/CoreData.h>
 
-#import "XMPPFramework.h"
+#import <XMPPFramework/XMPPFramework.h>
+#import <XMPPFramework/XMPPRoster.h>
+#import <XMPPFramework/XMPPRosterCoreDataStorage.h>
+
+#import <XMPPFramework/XMPPvCardTempModule.h>
+#import <XMPPFramework/XMPPvCardAvatarModule.h>
+#import <XMPPFramework/XMPPvCardCoreDataStorage.h>
+
+#import <XMPPFramework/XMPPCapabilities.h>
+#import <XMPPFramework/XMPPCapabilitiesCoreDataStorage.h>
+
+#import <XMPPFramework/XMPPMUC.h>
+#import <XMPPFramework/XMPPRoomCoreDataStorage.h>
+
+#import <XMPPFramework/XMPPReconnect.h>
 
 @class SettingsViewController;
 
