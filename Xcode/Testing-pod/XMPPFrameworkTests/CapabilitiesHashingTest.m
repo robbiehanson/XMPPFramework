@@ -6,11 +6,8 @@
 //  Copyright (c) 2015 Paul Melnikow. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
-#import "NSData+XMPP.h"
-#import "NSXMLElement+XMPP.h"
-#import "XMPPCapabilitiesCoreDataStorage.h"
+@import XMPPFramework;
 
 @interface XMPPCapabilities (Private)
 + (NSString *)hashCapabilitiesFromQuery:(NSXMLElement *)query;
