@@ -6,13 +6,8 @@
 //  Copyright (c) 2015 Paul Melnikow. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
-#import "XMPPJID.h"
-#import "XMPPElement.h"
-#import "XMPPIQ.h"
-#import "XMPPMessage.h"
-#import "XMPPPresence.h"
+@import XMPPFramework;
 
 @interface EncodeDecodeTest : XCTestCase
 
