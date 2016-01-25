@@ -1,9 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "XMPPModule.h"
 
-#if TARGET_OS_IPHONE
-#import "DDXML.h"
-#endif
+@import KissXML;
 
 #define _XMPP_BLOCKING_H
 
