@@ -1,8 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
-    #import "DDXML.h"
-#endif
+@import KissXML;
 
 /**
  * The XMPPResultSet class represents an <set xmlns='http://jabber.org/protocol/rsm'> element form XEP-0059.
