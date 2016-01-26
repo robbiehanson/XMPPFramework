@@ -6,12 +6,7 @@
 //  
 
 #import <Foundation/Foundation.h>
-
-#if !(TARGET_IPHONE_SIMULATOR)
-@import dnssd;
-#else
-@import dnssdSimu;
-#endif
+#import <dns_sd.h>
 
 extern NSString *const XMPPSRVResolverErrorDomain;
 
