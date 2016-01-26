@@ -39,7 +39,7 @@ grep '#define _XMPP_' -r /Extensions \
 | perl -pe 's/Extensions\/([A-z0-9_]*)\/([A-z]*.h).*/\n#ifdef HAVE_XMPP_SUBSPEC_\U\1\n\E#import "\2"\n#endif/' \
 >> XMPPFramework.h
 END
-
+
 s.preserve_path = 'module/module.modulemap'
 #s.module_map = 'module/module.modulemap'
 
@@ -52,7 +52,7 @@ core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/
 }
 core.dependency 'CocoaLumberjack','~>1.9'
 core.dependency 'CocoaAsyncSocket','~>7.4.1'
-core.ios.dependency 'XMPPFramework/KissXML'
+core.dependency 'KissXML', '~> 5.0'
 end
 
 s.subspec 'Authentication' do |ss|
@@ -65,14 +65,6 @@ end
 
 s.subspec 'Utilities' do |ss|
 ss.dependency 'XMPPFramework/Core'
-end
-
-s.subspec 'KissXML' do |ss|
-ss.source_files = ['Vendor/KissXML/**/*.{h,m}', 'module/module.modulemap']
-ss.libraries = 'xml2','resolv'
-ss.xcconfig = {
-'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/XMPPFramework/module $(SDKROOT)/usr/include/libresolv'
-}
 end
 
 s.subspec 'BandwidthMonitor' do |ss|
