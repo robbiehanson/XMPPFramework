@@ -38,22 +38,23 @@ echo '#import "XMPP.h"' > XMPPFramework.h
 grep '#define _XMPP_' -r /Extensions \
 | tr '-' '_' \
 | perl -pe 's/Extensions\/([A-z0-9_]*)\/([A-z]*.h).*/\n#ifdef HAVE_XMPP_SUBSPEC_\U\1\n\E#import "\2"\n#endif/' \
->> XMPPFramework.h
+>> XMPPFramework.h  
 END
-
-s.preserve_path = 'module/module.modulemap'
-#s.module_map = 'module/module.modulemap'
 
 s.subspec 'Core' do |core|
   core.source_files = ['XMPPFramework.h', 'Core/**/*.{h,m}', 'Vendor/libidn/*.h', 'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}', 'Utilities/**/*.{h,m}']
   core.vendored_libraries = 'Vendor/libidn/libidn.a'
   core.libraries = 'xml2', 'resolv'
-  core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/XMPPFramework/module $(SDKROOT)/usr/include/libresolv',
-'LIBRARY_SEARCH_PATHS' => '"$(PODS_ROOT)/XMPPFramework/Vendor/libidn"', 'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES', 'OTHER_LDFLAGS' => '"-lxml2"', 'ENABLE_BITCODE' => 'NO','OTHER_CFLAGS' => "$(inherited) -DDDXML_NS_DECLARATIONS_ENABLED=1"
+  core.xcconfig = {
+    'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/KissXML/libxml $(SDKROOT)/usr/include/libresolv',
+    'LIBRARY_SEARCH_PATHS' => '"$(PODS_ROOT)/XMPPFramework/Vendor/libidn"',
+    'OTHER_LDFLAGS' => '"-lxml2"', 'ENABLE_BITCODE' => 'NO',
+    'OTHER_CFLAGS' => "$(inherited) -DDDXML_LIBXML_MODULE_ENABLED=1",
+    'OTHER_SWIFT_FLAGS' => "$(inherited) -DDDXML_LIBXML_MODULE_ENABLED"
 }
   core.dependency 'CocoaLumberjack','~>1.9'
   core.dependency 'CocoaAsyncSocket','~>7.4.1'
-  core.dependency 'KissXML', '~> 5.0.1'
+  core.dependency 'KissXML/libxml_module', '~> 5.0.3'
 end
 
 s.subspec 'BandwidthMonitor' do |ss|
@@ -323,6 +324,7 @@ s.subspec 'XEP-0352' do |ss|
 end
 
 s.subspec 'All' do |ss|
+  ss.dependency 'XMPPFramework/Core'
   ss.dependency 'XMPPFramework/BandwidthMonitor'
   ss.dependency 'XMPPFramework/CoreDataStorage'
   ss.dependency 'XMPPFramework/FileTransfer'

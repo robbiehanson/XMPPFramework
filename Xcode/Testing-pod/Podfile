@@ -3,12 +3,6 @@ platform :ios, '8.0'
 # Uncomment this line if you're using Swift
 use_frameworks!
 
-target 'XMPPFramework' do
-
-  pod "XMPPFramework", :path => "../../"
-
-end
-
 target 'XMPPFrameworkTests' do
 
   pod "XMPPFramework", :path => "../../"
