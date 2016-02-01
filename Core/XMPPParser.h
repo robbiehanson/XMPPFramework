@@ -1,9 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
-  #import "DDXML.h"
-#endif
-
+@import KissXML;
 
 @interface XMPPParser : NSObject
 

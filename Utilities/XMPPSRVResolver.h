@@ -7,35 +7,10 @@
 
 #import <Foundation/Foundation.h>
 
-#if !(TARGET_IPHONE_SIMULATOR)
-@import dnssd;
-#else
-@import dnssdSimu;
-#endif
-
 extern NSString *const XMPPSRVResolverErrorDomain;
 
 
 @interface XMPPSRVResolver : NSObject
-{
-	__unsafe_unretained id delegate;
-	dispatch_queue_t delegateQueue;
-	
-	dispatch_queue_t resolverQueue;
-	void *resolverQueueTag;
-	
-	__strong NSString *srvName;
-	NSTimeInterval timeout;
-	
-    BOOL resolveInProgress;
-	
-    NSMutableArray *results;
-    DNSServiceRef sdRef;
-	
-	int sdFd;
-	dispatch_source_t sdReadSource;
-	dispatch_source_t timeoutTimer;
-}
 
 /**
  * The delegate & delegateQueue are mandatory.
