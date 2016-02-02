@@ -38,7 +38,7 @@ echo '#import "XMPP.h"' > XMPPFramework.h
 grep '#define _XMPP_' -r /Extensions \
 | tr '-' '_' \
 | perl -pe 's/Extensions\/([A-z0-9_]*)\/([A-z]*.h).*/\n#ifdef HAVE_XMPP_SUBSPEC_\U\1\n\E#import "\2"\n#endif/' \
->> XMPPFramework.h  
+>> XMPPFramework.h
 END
 
 s.subspec 'Core' do |core|
@@ -52,7 +52,7 @@ s.subspec 'Core' do |core|
     'OTHER_CFLAGS' => "$(inherited) -DDDXML_LIBXML_MODULE_ENABLED=1",
     'OTHER_SWIFT_FLAGS' => "$(inherited) -DDDXML_LIBXML_MODULE_ENABLED"
 }
-  core.dependency 'CocoaLumberjack','~>1.9'
+  core.dependency 'CocoaLumberjack','~>2.0'
   core.dependency 'CocoaAsyncSocket','~>7.4.1'
   core.dependency 'KissXML/libxml_module', '~> 5.0.3'
 end
