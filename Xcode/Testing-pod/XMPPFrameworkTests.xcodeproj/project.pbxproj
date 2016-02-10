@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		637AE2E91C6AC0D50051BF1F /* XMPPPushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637AE2E81C6AC0D50051BF1F /* XMPPPushTests.swift */; };
 		63F50D9E1C6020A100CA0201 /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F50D9B1C6020A100CA0201 /* CapabilitiesHashingTest.m */; };
 		63F50D9F1C6020A100CA0201 /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F50D9C1C6020A100CA0201 /* EncodeDecodeTest.m */; };
 		63F50DA01C6020A100CA0201 /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F50D9D1C6020A100CA0201 /* XMPPURITests.m */; };
@@ -15,6 +16,7 @@
 
 /* Begin PBXFileReference section */
 		16B6474F735EF4CB50F33A27 /* Pods-XMPPFrameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
+		637AE2E81C6AC0D50051BF1F /* XMPPPushTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMPPPushTests.swift; sourceTree = "<group>"; };
 		63F50D921C60208200CA0201 /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63F50D971C60208200CA0201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		63F50D9B1C6020A100CA0201 /* CapabilitiesHashingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CapabilitiesHashingTest.m; sourceTree = "<group>"; };
@@ -67,6 +69,7 @@
 				63F50D9B1C6020A100CA0201 /* CapabilitiesHashingTest.m */,
 				63F50D9C1C6020A100CA0201 /* EncodeDecodeTest.m */,
 				63F50D9D1C6020A100CA0201 /* XMPPURITests.m */,
+				637AE2E81C6AC0D50051BF1F /* XMPPPushTests.swift */,
 				63F50D971C60208200CA0201 /* Info.plist */,
 			);
 			path = XMPPFrameworkTests;
@@ -200,6 +203,7 @@
 			files = (
 				63F50D9E1C6020A100CA0201 /* CapabilitiesHashingTest.m in Sources */,
 				63F50D9F1C6020A100CA0201 /* EncodeDecodeTest.m in Sources */,
+				637AE2E91C6AC0D50051BF1F /* XMPPPushTests.swift in Sources */,
 				63F50DA01C6020A100CA0201 /* XMPPURITests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -252,6 +256,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davidchiles.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
