@@ -712,8 +712,11 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * UUIDs (Universally Unique Identifiers) may also be known as GUIDs (Globally Unique Identifiers).
  * 
  * The UUID is generated using the CFUUID library, which generates a unique 128 bit value.
- * The uuid is then translated into a string using the standard format for UUIDs:
- * "68753A44-4D6F-1226-9C60-0050E4C00067"
+ * It is then translated into a 22 character string using its URL friendly
+ * base64 encoded format: without padding (=) and replacing the following characters
+ * ('+' -> '-') and ('/' -> '_')
+ *
+ * e.g. "GHpy_-yfSf--It29T31fhw"   (from base64 form: GHpy/+yfSf++It29T31fhw==)
  * 
  * This method is most commonly used to generate a unique id value for an xmpp element.
 **/

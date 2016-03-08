@@ -5001,15 +5001,28 @@ enum XMPPStreamConfig
 
 + (NSString *)generateUUID
 {
-	NSString *result = nil;
-	
-	CFUUIDRef uuid = CFUUIDCreate(NULL);
-	if (uuid)
-	{
-		result = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
-		CFRelease(uuid);
-	}
-	
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    if (!uuid) return nil;
+    
+    CFUUIDBytes bytes = CFUUIDGetUUIDBytes(uuid);
+    CFRelease((CFTypeRef)uuid);
+    
+    NSData *data = [NSData dataWithBytes:&bytes length:sizeof(bytes)];
+    NSString *base64;
+    
+    if ([data respondsToSelector:@selector(base64EncodedStringWithOptions:)])
+    {
+        base64 = [data base64EncodedStringWithOptions:0]; // iOS 7+
+    }
+    else
+    {
+        base64 = [data base64Encoding]; // pre iOS7
+    }
+    
+    NSString *result = [[[base64
+                           stringByReplacingOccurrencesOfString:@"/" withString:@"_"]
+                          stringByReplacingOccurrencesOfString:@"+" withString:@"-"]
+                         stringByReplacingOccurrencesOfString:@"=" withString:@""];
 	return result;
 }
 
