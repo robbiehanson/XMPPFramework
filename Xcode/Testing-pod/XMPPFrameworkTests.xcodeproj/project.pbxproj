@@ -11,6 +11,7 @@
 		63F50D9E1C6020A100CA0201 /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F50D9B1C6020A100CA0201 /* CapabilitiesHashingTest.m */; };
 		63F50D9F1C6020A100CA0201 /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F50D9C1C6020A100CA0201 /* EncodeDecodeTest.m */; };
 		63F50DA01C6020A100CA0201 /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F50D9D1C6020A100CA0201 /* XMPPURITests.m */; };
+		D92C57A41CC2E0820032DE59 /* XMPPStorageHintTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D92C57A31CC2E0820032DE59 /* XMPPStorageHintTests.m */; };
 		FEFBAD9863F9EB01B6BFB0D6 /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B02E767684F690CBF1C43DDA /* Pods_XMPPFrameworkTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +24,7 @@
 		63F50D9C1C6020A100CA0201 /* EncodeDecodeTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EncodeDecodeTest.m; sourceTree = "<group>"; };
 		63F50D9D1C6020A100CA0201 /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPURITests.m; sourceTree = "<group>"; };
 		B02E767684F690CBF1C43DDA /* Pods_XMPPFrameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D92C57A31CC2E0820032DE59 /* XMPPStorageHintTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStorageHintTests.m; sourceTree = "<group>"; };
 		F2F59A67580A9623E48523DD /* Pods-XMPPFrameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -66,6 +68,7 @@
 		63F50D941C60208200CA0201 /* XMPPFrameworkTests */ = {
 			isa = PBXGroup;
 			children = (
+				D92C57A31CC2E0820032DE59 /* XMPPStorageHintTests.m */,
 				63F50D9B1C6020A100CA0201 /* CapabilitiesHashingTest.m */,
 				63F50D9C1C6020A100CA0201 /* EncodeDecodeTest.m */,
 				63F50D9D1C6020A100CA0201 /* XMPPURITests.m */,
@@ -114,7 +117,7 @@
 		63F55A531C60204300438CE2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0730;
 				TargetAttributes = {
 					63F50D911C60208100CA0201 = {
 						CreatedOnToolsVersion = 7.2;
@@ -205,6 +208,7 @@
 				63F50D9F1C6020A100CA0201 /* EncodeDecodeTest.m in Sources */,
 				637AE2E91C6AC0D50051BF1F /* XMPPPushTests.swift in Sources */,
 				63F50DA01C6020A100CA0201 /* XMPPURITests.m in Sources */,
+				D92C57A41CC2E0820032DE59 /* XMPPStorageHintTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +309,8 @@
 		63F55A571C60204300438CE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
 		};
