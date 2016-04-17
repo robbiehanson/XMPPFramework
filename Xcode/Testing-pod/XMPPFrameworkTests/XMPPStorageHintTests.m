@@ -29,11 +29,30 @@
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct results.
     XMPPMessage *message = [[XMPPMessage alloc] init];
-    XMPPMessageStorage storage = [message storageHint];
-    XCTAssertTrue(storage == XMPPMessageStorageUndefined);
-    [message setStorageHint:XMPPMessageStorageStore];
-    storage = [message storageHint];
-    XCTAssertTrue(storage == XMPPMessageStorageStore);
+    NSArray<NSValue*>* storageHints = [message storageHints];
+    XCTAssertNotNil(storageHints);
+    XCTAssertTrue(storageHints.count == 0);
+    
+    [message addStorageHint:XMPPMessageStorageNoCopy];
+    [message addStorageHint:XMPPMessageStorageNoPermanentStore];
+    [message addStorageHint:XMPPMessageStorageNoStore];
+    [message addStorageHint:XMPPMessageStorageStore];
+    // Should not be added
+    [message addStorageHint:XMPPMessageStorageUnknown];
+    storageHints = [message storageHints];
+    XCTAssertNotNil(storageHints);
+    XCTAssertTrue(storageHints.count == 4);
+    
+    BOOL result = [storageHints containsObject:@(XMPPMessageStorageNoCopy)];
+    XCTAssertTrue(result);
+    result = [storageHints containsObject:@(XMPPMessageStorageNoPermanentStore)];
+    XCTAssertTrue(result);
+    result = [storageHints containsObject:@(XMPPMessageStorageNoStore)];
+    XCTAssertTrue(result);
+    result = [storageHints containsObject:@(XMPPMessageStorageStore)];
+    XCTAssertTrue(result);
+    result = [storageHints containsObject:@(XMPPMessageStorageUnknown)];
+    XCTAssertFalse(result);
 }
 
 @end

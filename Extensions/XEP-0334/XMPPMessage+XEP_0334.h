@@ -9,8 +9,10 @@
 #import <XMPPFramework/XMPPFramework.h>
 
 typedef NS_ENUM(NSInteger, XMPPMessageStorage) {
-    /** No storage hints present */
-    XMPPMessageStorageUndefined,
+    /** 
+     Unknown storage hint. Attempting to add this is a no-op. 
+     */
+    XMPPMessageStorageUnknown,
     /**
       The <no-permanent-store/> hint informs entities that they shouldn't store the message in any permanent or semi-permanent public or private archive (such as described in Message Archiving (XEP-0136) [5] and Message Archive Management (XEP-0313) [6]) or in logs (such as chatroom logs).
      */
@@ -43,7 +45,10 @@ typedef NS_ENUM(NSInteger, XMPPMessageStorage) {
  */
 @interface XMPPMessage (XEP_0334)
 
--(void) setStorageHint:(XMPPMessageStorage)storageHint;
-- (XMPPMessageStorage)storageHint;
+/** add a storage hint to message element */
+-(void) addStorageHint:(XMPPMessageStorage)storageHint;
+
+/** Contains array of boxed XMPPMessageStorage values present in the message element. Empty array if none found. */
+- (nonnull NSArray<NSValue*>*)storageHints;
 
 @end

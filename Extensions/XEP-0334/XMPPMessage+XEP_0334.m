@@ -18,7 +18,7 @@ static NSString * const kMessageNoPermanentStore = @"no-permanent-store";
 
 @implementation XMPPMessage (XEP_0334)
 
--(void) setStorageHint:(XMPPMessageStorage)storageHint {
+-(void) addStorageHint:(XMPPMessageStorage)storageHint {
     NSString *storageName = [self nameForStorageHint:storageHint];
     if (!storageName.length) {
         return;
@@ -41,6 +41,7 @@ static NSString * const kMessageNoPermanentStore = @"no-permanent-store";
             break;
         case XMPPMessageStorageNoPermanentStore:
             storage = kMessageNoPermanentStore;
+            break;
         default:
             storage = @"";
             break;
@@ -48,27 +49,24 @@ static NSString * const kMessageNoPermanentStore = @"no-permanent-store";
     return storage;
 }
 
-- (XMPPMessageStorage) storageHint {
+- (nonnull NSArray<NSValue*>*)storageHints {
     NSArray <NSXMLElement*> *elements = [self elementsForXmlns:XMLNS_STORAGE_HINTS];
-    NSXMLElement *storageElement = elements.firstObject;
-    if (!storageElement) {
-        return XMPPMessageStorageUndefined;
-    }
-    NSString *storageName = [storageElement name];
-    if (!storageName) {
-        return XMPPMessageStorageUndefined;
-    }
-    XMPPMessageStorage storageHint = XMPPMessageStorageUndefined;
-    if ([storageName isEqualToString:kMessageStore]) {
-        storageHint = XMPPMessageStorageStore;
-    } else if ([storageName isEqualToString:kMessageNoCopy]) {
-        storageHint = XMPPMessageStorageNoCopy;
-    } else if ([storageName isEqualToString:kMessageNoStore]) {
-        storageHint = XMPPMessageStorageNoStore;
-    } else if ([storageName isEqualToString:kMessageNoPermanentStore]) {
-        storageHint = XMPPMessageStorageNoPermanentStore;
-    }
-    return storageHint;
+    NSMutableArray <NSValue*> *boxedHints = [NSMutableArray arrayWithCapacity:elements.count];
+    [elements enumerateObjectsUsingBlock:^(NSXMLElement * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        XMPPMessageStorage storageHint = XMPPMessageStorageUnknown;
+        NSString *storageName = [obj name];
+        if ([storageName isEqualToString:kMessageStore]) {
+            storageHint = XMPPMessageStorageStore;
+        } else if ([storageName isEqualToString:kMessageNoCopy]) {
+            storageHint = XMPPMessageStorageNoCopy;
+        } else if ([storageName isEqualToString:kMessageNoStore]) {
+            storageHint = XMPPMessageStorageNoStore;
+        } else if ([storageName isEqualToString:kMessageNoPermanentStore]) {
+            storageHint = XMPPMessageStorageNoPermanentStore;
+        }
+        [boxedHints addObject:@(storageHint)];
+    }];
+    return boxedHints;
 }
 
 
