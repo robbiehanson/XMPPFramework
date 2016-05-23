@@ -124,7 +124,7 @@
 		[expectation fulfill];
 	};
 	
-	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] init];
+	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] initWithServiceName:@"upload.montague.tld"];
 	[xmppFileUpload activate:streamTest];
 	[xmppFileUpload requestSlotForFile:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
 
@@ -141,7 +141,7 @@
 	self.slotResponseExpectation = [self expectationWithDescription:@"Slot Response"];
 
 	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
-	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] init];
+	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] initWithServiceName:@"upload.montague.tld"];
 	[xmppFileUpload activate:streamTest];
 	[xmppFileUpload addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
@@ -165,7 +165,7 @@
 	self.slotResponseExpectation = [self expectationWithDescription:@"Slot Response"];
 	
 	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
-	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] init];
+	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] initWithServiceName:@"upload.montague.tld"];
 	[xmppFileUpload activate:streamTest];
 	[xmppFileUpload addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	

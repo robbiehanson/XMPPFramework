@@ -10,6 +10,33 @@
 
 @implementation XMPPHTTPFileUpload
 
+
+- (id)init
+{
+	// This will cause a crash - it's designed to.
+	return [self initWithServiceName:nil dispatchQueue:nil];
+}
+
+- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+{
+	// This will cause a crash - it's designed to.
+	return [self initWithServiceName:nil dispatchQueue:queue];
+}
+
+- (id)initWithServiceName:(NSString *)serviceName {
+	return [self initWithServiceName:serviceName dispatchQueue:nil];
+}
+
+- (id)initWithServiceName:(NSString *)serviceName dispatchQueue:(dispatch_queue_t)queue {
+	NSParameterAssert(serviceName != nil);
+	
+	if ((self = [super initWithDispatchQueue:queue])){
+		_serviceName = serviceName;
+	}
+	
+	return self;
+}
+
 - (BOOL)activate:(XMPPStream *)aXmppStream {
 	
 	if ([super activate:aXmppStream]) {
@@ -40,6 +67,8 @@
 
 - (void)requestSlotForFile:(NSString *) filename size:(NSInteger) size contentType:(NSString*) contentType {
 
+	
+	
 	dispatch_block_t block = ^{ @autoreleasepool {
 
 		//	<iq from='romeo@montague.tld/garden' id='step_03'
@@ -52,7 +81,7 @@
 		//	</iq>
 
 		NSString *iqID = [XMPPStream generateUUID];
-		XMPPJID *uploadService = [XMPPJID jidWithString:@"upload.montague.tld"];
+		XMPPJID *uploadService = [XMPPJID jidWithString:self.serviceName];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:uploadService elementID:iqID];
 
 		XMPPElement *request = [XMPPElement elementWithName:@"request"];
