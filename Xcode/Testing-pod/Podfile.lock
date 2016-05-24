@@ -59,6 +59,7 @@ PODS:
     - XMPPFramework/XEP-0280
     - XMPPFramework/XEP-0297
     - XMPPFramework/XEP-0308
+    - XMPPFramework/XEP-0313
     - XMPPFramework/XEP-0333
     - XMPPFramework/XEP-0334
     - XMPPFramework/XEP-0335
@@ -156,6 +157,9 @@ PODS:
     - XMPPFramework/XEP-0203
   - XMPPFramework/XEP-0308 (3.6.7):
     - XMPPFramework/Core
+  - XMPPFramework/XEP-0313 (3.6.7):
+    - XMPPFramework/Core
+    - XMPPFramework/XEP-0059
   - XMPPFramework/XEP-0333 (3.6.7):
     - XMPPFramework/Core
   - XMPPFramework/XEP-0334 (3.6.7):
