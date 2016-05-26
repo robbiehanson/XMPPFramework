@@ -65,7 +65,7 @@
 }
 
 
-- (void)requestSlotForFile:(NSString *) filename size:(NSInteger) size contentType:(NSString*) contentType {
+- (void)requestSlotForFilename:(NSString *) filename size:(NSInteger) size contentType:(NSString*) contentType {
 
 	
 	
