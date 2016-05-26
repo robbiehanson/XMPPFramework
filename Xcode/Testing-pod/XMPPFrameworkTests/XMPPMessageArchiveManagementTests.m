@@ -188,6 +188,34 @@
 	[self.delegateExpectation fulfill];
 }
 
+- (void)testDelegateDidReceiveError {
+	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
+	
+	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	
+	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
+	[messageArchiveManagement activate:streamTest];
+	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	
+	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSString *elementID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *fakeIQResponse = [self fakeErrorIQWithID:elementID];
+		[weakStreamTest fakeIQResponse:fakeIQResponse];
+	};
+	
+	[messageArchiveManagement retrieveMessageArchiveWithFields:nil withResultSet:nil];
+	
+	[self waitForExpectationsWithTimeout:1 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didReceiveError:(DDXMLElement *)error {
+	[self.delegateExpectation fulfill];
+}
 
 - (XMPPMessage *) fakeMessage{
 	NSMutableString *s = [NSMutableString string];
@@ -224,6 +252,17 @@
 	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
 	[iq addAttributeWithName:@"id" stringValue:elementID];
 
+	return iq;
+}
+
+- (XMPPIQ *) fakeErrorIQWithID:(NSString *) elementID{
+	NSString *s = @"<iq type='error' id='juliet2'></iq>";
+	
+	NSError *error;
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
+	[iq addAttributeWithName:@"id" stringValue:elementID];
+	
 	return iq;
 }
 

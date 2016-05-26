@@ -54,7 +54,20 @@
 	} else {
 		dispatch_sync(moduleQueue, block);
 	}
+}
+
+- (void)enableMessageArchiveIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {
 	
+	if ([[iq type] isEqualToString:@"result"]) {
+		
+		DDXMLElement *finElement = [iq elementForName:@"fin" xmlns:XMLNS_XMPP_MAM];
+		DDXMLElement *setElement = [finElement elementForName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
+		
+		XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:setElement];
+		[multicastDelegate xmppMessageArchiveManagement:self didFinishReceivingMessagesWithSet:resultSet];
+	} else {
+		[multicastDelegate xmppMessageArchiveManagement:self didReceiveError:iq];
+	}
 }
 
 + (DDXMLElement *)fieldWithVar:(NSString *)var type:(NSString *)type andValue:(NSString *)value {
@@ -71,6 +84,30 @@
 	[field addChild:elementValue];
 	
 	return field;
+}
+
+- (void)retrieveFormFields {
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get"];
+	[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
+	
+	DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
+	[iq addChild:queryElement];
+	
+	[xmppIDTracker addElement:iq
+					   target:self
+					 selector:@selector(handleFormFieldsIQ:withInfo:)
+					  timeout:60];
+
+	[xmppStream sendElement:iq];
+}
+
+- (void)handleFormFieldsIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {
+	
+	if ([[iq type] isEqualToString:@"result"]) {
+		[multicastDelegate xmppMessageArchiveManagement:self didReceiveFormFields:iq];
+	} else {
+		[multicastDelegate xmppMessageArchiveManagement:self didFailToReceiveFormFields:iq];
+	}
 }
 
 - (BOOL)activate:(XMPPStream *)aXmppStream {
@@ -111,20 +148,6 @@
 	}
 	
 	return NO;
-}
-
-- (void)enableMessageArchiveIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {
-	
-	if ([[iq type] isEqualToString:@"result"]) {
-		
-		DDXMLElement *finElement = [iq elementForName:@"fin" xmlns:XMLNS_XMPP_MAM];
-		DDXMLElement *setElement = [finElement elementForName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
-		
-		XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:setElement];
-		[multicastDelegate xmppMessageArchiveManagement:self didFinishReceivingMessagesWithSet:resultSet];
-	} else {
-		[multicastDelegate xmppMessageArchiveManagement:self didReceiveError:iq];
-	}
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
