@@ -10,34 +10,7 @@
 #import "XMPPFramework/XMPPSlot.h"
 #import "XMPPFramework/XMPPHTTPFileUpload.h"
 #import "XMPPFramework/XMPPStream.h"
-
-
-@interface XMPPStreamTest : XMPPStream <XMPPHTPPFileUploadDelegate>
-
-- (void)fakeIQResponse:(XMPPIQ *) iq;
-@property (nonatomic, copy) void (^elementReceived)(NSXMLElement *element);
-@property (nonatomic, strong) XMPPHTTPFileUpload *delegate;
-
-@end
-
-@implementation XMPPStreamTest
-
-- (void)fakeIQResponse:(XMPPIQ *) iq {
-	[((id<XMPPStreamDelegate>)self.delegate) xmppStream:self didReceiveIQ:iq];
-}
-
-- (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue{
-	[super addDelegate:delegate delegateQueue:delegateQueue];
-	self.delegate = delegate;
-}
-
-- (void)sendElement:(NSXMLElement *)element {
-	if(self.elementReceived) {
-		self.elementReceived(element);
-	}
-}
-
-@end
+#import "XMPPMockStream.h"
 
 @interface XMPPHTTPFileUploadTests: XCTestCase
 @property (nonatomic, strong) XCTestExpectation *slotResponseExpectation;
@@ -100,7 +73,7 @@
 	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
 	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
 	
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		XMPPIQ *sentIQ = [XMPPIQ iqFromElement:element];
 		
@@ -140,12 +113,12 @@
 - (void) testResponseSlot {
 	self.slotResponseExpectation = [self expectationWithDescription:@"Slot Response"];
 
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] initWithServiceName:@"upload.montague.tld"];
 	[xmppFileUpload activate:streamTest];
 	[xmppFileUpload addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		NSString *elementID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *iq = [self responseSuccessIQWithID:elementID];
@@ -164,12 +137,12 @@
 - (void) testResponseSlotWithError {
 	self.slotResponseExpectation = [self expectationWithDescription:@"Slot Response"];
 	
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] initWithServiceName:@"upload.montague.tld"];
 	[xmppFileUpload activate:streamTest];
 	[xmppFileUpload addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		NSString *elementID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *iq = [self responseErrorIQWithID:elementID];
