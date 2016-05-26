@@ -75,7 +75,7 @@
 
 - (void) testSlotInit {
 	
-	XMPPSlot *slot = [[XMPPSlot alloc] initWithGet:@"http://put.com" andGet:@"http://get.com"];
+	XMPPSlot *slot = [[XMPPSlot alloc] initWithPut:@"http://put.com" andGet:@"http://get.com"];
 
 	XCTAssertEqualObjects(slot.get, @"http://get.com");
 	XCTAssertEqualObjects(slot.put, @"http://put.com");
@@ -126,7 +126,7 @@
 	
 	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] initWithServiceName:@"upload.montague.tld"];
 	[xmppFileUpload activate:streamTest];
-	[xmppFileUpload requestSlotForFile:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
+	[xmppFileUpload requestSlotForFilename:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
 
 	[self waitForExpectationsWithTimeout:1 handler:^(NSError * _Nullable error) {
 		if(error){
@@ -152,7 +152,7 @@
 		[weakStreamTest fakeIQResponse:iq];
 	};
 
-	[xmppFileUpload requestSlotForFile:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
+	[xmppFileUpload requestSlotForFilename:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
 	
 	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
 		if(error){
@@ -176,7 +176,7 @@
 		[weakStreamTest fakeIQResponse:iq];
 	};
 	
-	[xmppFileUpload requestSlotForFile:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
+	[xmppFileUpload requestSlotForFilename:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
 	
 	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
 		if(error){

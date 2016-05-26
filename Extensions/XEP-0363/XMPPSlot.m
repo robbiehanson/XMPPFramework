@@ -10,7 +10,7 @@
 
 @implementation XMPPSlot
 
-- (id)initWithGet:(NSString *)put andGet:(NSString *)get {
+- (id)initWithPut:(NSString *)put andGet:(NSString *)get {
 
 	self = [super init];
 	if(self) {

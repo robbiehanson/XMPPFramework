@@ -14,7 +14,7 @@
 
 @interface XMPPSlot: NSObject
 
-- (id)initWithGet:(NSString *)put andGet:(NSString *)get;
+- (id)initWithPut:(NSString *)put andGet:(NSString *)get;
 - (id)initWithIQ:(XMPPIQ *)iq;
 
 @property (nonatomic, copy, readonly) NSString *put;
