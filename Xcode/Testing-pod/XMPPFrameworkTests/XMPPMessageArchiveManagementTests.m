@@ -102,7 +102,8 @@
 	
 	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
-		XMPPMessage *fakeMessage = [self fakeMessage];
+		NSString * queryID = [[element elementForName:@"query"] attributeStringValueForName:@"queryid"];
+		XMPPMessage *fakeMessage = [self fakeMessageWithQueryID:queryID];
 		[weakStreamTest fakeMessageResponse:fakeMessage];
 	};
 	
@@ -244,10 +245,13 @@
 	[self.delegateExpectation fulfill];
 }
 
-- (XMPPMessage *)fakeMessage{
+- (XMPPMessage *)fakeMessageWithQueryID:(NSString *)queryID{
+	
+	NSString *resultOpenXML = [NSString stringWithFormat:@"<result xmlns='urn:xmpp:mam:1' queryid='%@' id='28482-98726-73623'>",queryID];
+	
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<message id='aeb213' to='juliet@capulet.lit/chamber'>"];
-	[s appendString: @"   <result xmlns='urn:xmpp:mam:1' queryid='f27' id='28482-98726-73623'>"];
+	[s appendString: resultOpenXML];
 	[s appendString: @"      <forwarded xmlns='urn:xmpp:forward:0'>"];
 	[s appendString: @"         <delay xmlns='urn:xmpp:delay' stamp='2010-07-10T23:08:25Z'/>"];
 	[s appendString: @"         <message xmlns='jabber:client' from='witch@shakespeare.lit' to='macbeth@shakespeare.lit'>"];

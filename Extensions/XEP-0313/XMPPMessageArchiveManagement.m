@@ -12,6 +12,10 @@
 
 #define XMLNS_XMPP_MAM @"urn:xmpp:mam:1"
 
+@interface XMPPMessageArchiveManagement()
+@property (strong, nonatomic) NSString *queryID;
+@end
+
 @implementation XMPPMessageArchiveManagement
 
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
@@ -20,8 +24,10 @@
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
 		[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
 
+		self.queryID = [XMPPStream generateUUID];
+		
 		DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
-		[queryElement addAttributeWithName:@"queryId" stringValue:[XMPPStream generateUUID]];
+		[queryElement addAttributeWithName:@"queryid" stringValue:self.queryID];
 		[iq addChild:queryElement];
 
 		DDXMLElement *xElement = [DDXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
@@ -162,7 +168,9 @@
 	DDXMLElement *result = [message elementForName:@"result" xmlns:XMLNS_XMPP_MAM];
 	DDXMLElement *forwarded = [result elementForName:@"forwarded"];
 	
-	if (forwarded) {
+	NSString *queryID = [result attributeForName:@"queryid"].stringValue;
+	
+	if (forwarded && [queryID isEqualToString:self.queryID]) {
 		[multicastDelegate xmppMessageArchiveManagement:self didReceiveMAMMessage:message];
 	}
 }
