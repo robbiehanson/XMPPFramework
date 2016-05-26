@@ -42,7 +42,7 @@
 
 			[xmppIDTracker addElement:iq
 							   target:self
-							 selector:@selector(enableMessageArchiveIQ:withInfo:)
+							 selector:@selector(handleMessageArchiveIQ:withInfo:)
 							  timeout:60];
 			
 			[xmppStream sendElement:iq];
@@ -56,7 +56,7 @@
 	}
 }
 
-- (void)enableMessageArchiveIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {
+- (void)handleMessageArchiveIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {
 	
 	if ([[iq type] isEqualToString:@"result"]) {
 		
@@ -66,7 +66,7 @@
 		XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:setElement];
 		[multicastDelegate xmppMessageArchiveManagement:self didFinishReceivingMessagesWithSet:resultSet];
 	} else {
-		[multicastDelegate xmppMessageArchiveManagement:self didReceiveError:iq];
+		[multicastDelegate xmppMessageArchiveManagement:self didFailToReceiveMessages:iq];
 	}
 }
 
