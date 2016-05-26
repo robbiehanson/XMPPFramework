@@ -184,6 +184,6 @@ SPEC CHECKSUMS:
   CocoaAsyncSocket: a18c75dca4b08723628a0bacca6e94803d90be91
   CocoaLumberjack: 97fab7ee5f507fe54445cca7ea80f926729cfd15
   KissXML: d19dd6dc65e0dc721ba92b3077b8ebdd240f1c1e
-  XMPPFramework: abb902b5af8b09199bc9c888b6eb0b4568a6d8d2
+  XMPPFramework: 231fe0cf84271a0bdf675254653e5747c6ae7f5a
 
 COCOAPODS: 0.39.0

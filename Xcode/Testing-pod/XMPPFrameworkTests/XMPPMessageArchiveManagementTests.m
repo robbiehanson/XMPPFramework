@@ -9,7 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "XMPPFramework/XMPPMessageArchiveManagement.h"
 
-@interface XMPPStreamTest : XMPPStream
+@interface XMPPStreamTestMAM : XMPPStream
 
 - (void)fakeIQResponse:(XMPPIQ *) iq;
 - (void)fakeMessageResponse:(XMPPMessage *) message;
@@ -19,7 +19,7 @@
 
 @end
 
-@implementation XMPPStreamTest
+@implementation XMPPStreamTestMAM
 
 - (void)fakeMessageResponse:(XMPPMessage *) message {
 	[((id<XMPPStreamDelegate>)self.delegate) xmppStream:self didReceiveMessage:message];
@@ -73,7 +73,7 @@
 - (void)testRetriveMessageArchiveWithFields {
 	XCTestExpectation *expectation = [self expectationWithDescription:@"Handler IQ"];
 	
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPStreamTestMAM *streamTest = [[XMPPStreamTestMAM alloc] init];
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		XMPPIQ *iq = [XMPPIQ iqFromElement:element];
 		XCTAssertEqualObjects(@"set", [iq type]);
@@ -126,13 +126,13 @@
 - (void)testDelegateDidReceiveMAMMessage {
 	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
 	
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPStreamTestMAM *streamTest = [[XMPPStreamTestMAM alloc] init];
 	
 	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
 	[messageArchiveManagement activate:streamTest];
 	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	__weak typeof(XMPPStreamTestMAM) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		XMPPMessage *fakeMessage = [self fakeMessage];
 		[weakStreamTest fakeMessageResponse:fakeMessage];
@@ -156,13 +156,13 @@
 - (void)testDelegateDidReceiveIQ {
 	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
 	
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPStreamTestMAM *streamTest = [[XMPPStreamTestMAM alloc] init];
 	
 	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
 	[messageArchiveManagement activate:streamTest];
 	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	__weak typeof(XMPPStreamTestMAM) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		NSString *elementID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *fakeIQResponse = [self fakeIQWithID:elementID];
@@ -191,13 +191,13 @@
 - (void)testDelegateDidReceiveError {
 	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
 	
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPStreamTestMAM *streamTest = [[XMPPStreamTestMAM alloc] init];
 	
 	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
 	[messageArchiveManagement activate:streamTest];
 	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	
-	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	__weak typeof(XMPPStreamTestMAM) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		NSString *elementID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *fakeIQResponse = [self fakeErrorIQWithID:elementID];
@@ -221,13 +221,13 @@
 - (void)testRetrievingFormFields {
 	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
 
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPStreamTestMAM *streamTest = [[XMPPStreamTestMAM alloc] init];
 
 	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
 	[messageArchiveManagement activate:streamTest];
 	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
 
-	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	__weak typeof(XMPPStreamTestMAM) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		NSString *elementID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *fakeIQResponse = [self fakeFormFieldsMessageWithID:elementID];
@@ -250,13 +250,13 @@
 - (void)testFailToRetrievingFormFields {
 	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
 
-	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+	XMPPStreamTestMAM *streamTest = [[XMPPStreamTestMAM alloc] init];
 
 	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
 	[messageArchiveManagement activate:streamTest];
 	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
 
-	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	__weak typeof(XMPPStreamTestMAM) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
 		NSString *elementID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *fakeIQResponse = [self fakeErrorIQWithID:elementID];
