@@ -16,37 +16,35 @@
 
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
 	dispatch_block_t block = ^{
-		
-		if ([xmppIDTracker numberOfIDs] == 0) {
-			
-			XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
-			[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
-			
-			DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
-			[queryElement addAttributeWithName:@"queryId" stringValue:[XMPPStream generateUUID]];
-			[iq addChild:queryElement];
-			
-			DDXMLElement *xElement = [DDXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
-			[xElement addAttributeWithName:@"type" stringValue:@"submit"];
-			[xElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:@"urn:xmpp:mam:1"]];
-			
-			for (DDXMLElement *field in fields) {
-				[xElement addChild:field];
-			}
-			
-			[queryElement addChild:xElement];
-			
-			if (resultSet) {
-				[queryElement addChild:resultSet];
-			}
 
-			[xmppIDTracker addElement:iq
-							   target:self
-							 selector:@selector(handleMessageArchiveIQ:withInfo:)
-							  timeout:60];
-			
-			[xmppStream sendElement:iq];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+		[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
+
+		DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
+		[queryElement addAttributeWithName:@"queryId" stringValue:[XMPPStream generateUUID]];
+		[iq addChild:queryElement];
+
+		DDXMLElement *xElement = [DDXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
+		[xElement addAttributeWithName:@"type" stringValue:@"submit"];
+		[xElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:@"urn:xmpp:mam:1"]];
+
+		for (DDXMLElement *field in fields) {
+			[xElement addChild:field];
 		}
+
+		[queryElement addChild:xElement];
+
+		if (resultSet) {
+			[queryElement addChild:resultSet];
+		}
+
+		[xmppIDTracker addElement:iq
+						   target:self
+						 selector:@selector(handleMessageArchiveIQ:withInfo:)
+						  timeout:60];
+
+		[xmppStream sendElement:iq];
+
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag)) {
@@ -87,18 +85,28 @@
 }
 
 - (void)retrieveFormFields {
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get"];
-	[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
-	
-	DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
-	[iq addChild:queryElement];
-	
-	[xmppIDTracker addElement:iq
-					   target:self
-					 selector:@selector(handleFormFieldsIQ:withInfo:)
-					  timeout:60];
 
-	[xmppStream sendElement:iq];
+	dispatch_block_t block = ^{
+
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get"];
+		[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
+
+		DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
+		[iq addChild:queryElement];
+
+		[xmppIDTracker addElement:iq
+						   target:self
+						 selector:@selector(handleFormFieldsIQ:withInfo:)
+						  timeout:60];
+
+		[xmppStream sendElement:iq];
+	};
+
+	if (dispatch_get_specific(moduleQueueTag)) {
+		block();
+	} else {
+		dispatch_sync(moduleQueue, block);
+	}
 }
 
 - (void)handleFormFieldsIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {

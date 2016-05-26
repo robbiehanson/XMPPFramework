@@ -1,8 +1,7 @@
 //
 //  XMPPMessageArchiveManagement.h
-//  Mangosta
 //
-//  Created by Tom Ryan on 4/8/16.
+//  Created by Andres Canal on 4/8/16.
 //  Copyright © 2016 Inaka. All rights reserved.
 //
 
@@ -17,6 +16,7 @@
 }
 
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet;
+- (void)retrieveFormFields;
 + (DDXMLElement *)fieldWithVar:(NSString *)var type:(NSString *)type andValue:(NSString *)value;
 
 @end

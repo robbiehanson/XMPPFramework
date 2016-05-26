@@ -217,7 +217,66 @@
 	[self.delegateExpectation fulfill];
 }
 
-- (XMPPMessage *) fakeMessage{
+
+- (void)testRetrievingFormFields {
+	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
+
+	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+
+	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
+	[messageArchiveManagement activate:streamTest];
+	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSString *elementID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *fakeIQResponse = [self fakeFormFieldsMessageWithID:elementID];
+		[weakStreamTest fakeIQResponse:fakeIQResponse];
+	};
+
+	[messageArchiveManagement retrieveFormFields];
+
+	[self waitForExpectationsWithTimeout:1 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didReceiveFormFields:(XMPPIQ *)iq {
+	[self.delegateExpectation fulfill];
+}
+
+- (void)testFailToRetrievingFormFields {
+	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
+
+	XMPPStreamTest *streamTest = [[XMPPStreamTest alloc] init];
+
+	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
+	[messageArchiveManagement activate:streamTest];
+	[messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPStreamTest) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSString *elementID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *fakeIQResponse = [self fakeErrorIQWithID:elementID];
+		[weakStreamTest fakeIQResponse:fakeIQResponse];
+	};
+
+	[messageArchiveManagement retrieveFormFields];
+
+	[self waitForExpectationsWithTimeout:1 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFailToReceiveFormFields:(XMPPIQ *)iq {
+	[self.delegateExpectation fulfill];
+}
+
+- (XMPPMessage *)fakeMessage{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<message id='aeb213' to='juliet@capulet.lit/chamber'>"];
 	[s appendString: @"   <result xmlns='urn:xmpp:mam:1' queryid='f27' id='28482-98726-73623'>"];
@@ -235,7 +294,7 @@
 	return [XMPPMessage messageFromElement:[doc rootElement]];
 }
 
-- (XMPPIQ *) fakeIQWithID:(NSString *) elementID{
+- (XMPPIQ *)fakeIQWithID:(NSString *) elementID{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<iq type='result' id='q29302'>"];
 	[s appendString: @"   <fin xmlns='urn:xmpp:mam:1'>"];
@@ -255,7 +314,7 @@
 	return iq;
 }
 
-- (XMPPIQ *) fakeErrorIQWithID:(NSString *) elementID{
+- (XMPPIQ *)fakeErrorIQWithID:(NSString *) elementID{
 	NSString *s = @"<iq type='error' id='juliet2'></iq>";
 	
 	NSError *error;
@@ -263,6 +322,31 @@
 	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
 	[iq addAttributeWithName:@"id" stringValue:elementID];
 	
+	return iq;
+}
+
+- (XMPPIQ *)fakeFormFieldsMessageWithID:(NSString *) elementID{
+	NSMutableString *s = [NSMutableString string];
+	[s appendString: @"<iq type='result' id='form1'>"];
+	[s appendString: @"  <query xmlns='urn:xmpp:mam:1'>"];
+	[s appendString: @"    <x xmlns='jabber:x:data' type='form'>"];
+	[s appendString: @"      <field type='hidden' var='FORM_TYPE'>"];
+	[s appendString: @"        <value>urn:xmpp:mam:1</value>"];
+	[s appendString: @"      </field>"];
+	[s appendString: @"      <field type='jid-single' var='with'/>"];
+	[s appendString: @"      <field type='text-single' var='start'/>"];
+	[s appendString: @"      <field type='text-single' var='end'/>"];
+	[s appendString: @"      <field type='text-single' var='urn:example:xmpp:free-text-search'/>"];
+	[s appendString: @"      <field type='text-single' var='urn:example:xmpp:stanza-content'/>"];
+	[s appendString: @"    </x>"];
+	[s appendString: @"  </query>"];
+	[s appendString: @"</iq>"];
+
+	NSError *error;
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
+	[iq addAttributeWithName:@"id" stringValue:elementID];
+
 	return iq;
 }
 
