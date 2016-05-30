@@ -13,9 +13,9 @@
 #import "XMPPMUCLight.h"
 #import "XMPPRoomLight.h"
 
-NSString *const XMPPDiscoverItemsNamespace = @"http://jabber.org/protocol/disco#items";
+NSString *const XMPPMUCLightDiscoItemsNamespace = @"http://jabber.org/protocol/disco#items";
 NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
-NSString *const XMPPMUCErrorDomain = @"XMPPMUCErrorDomain";
+NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 
 @implementation XMPPMUCLight
 
@@ -71,7 +71,7 @@ NSString *const XMPPMUCErrorDomain = @"XMPPMUCErrorDomain";
 	dispatch_block_t block = ^{ @autoreleasepool {
 
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query"
-													  xmlns:XMPPDiscoverItemsNamespace];
+													  xmlns:XMPPMUCLightDiscoItemsNamespace];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get"
 									 to:[XMPPJID jidWithString:serviceName]
 							  elementID:[xmppStream generateUUID]
@@ -103,7 +103,7 @@ NSString *const XMPPMUCErrorDomain = @"XMPPMUCErrorDomain";
 			NSString *errMsg = [errorElem.children componentsJoinedByString:@", "];
 			NSInteger errorCode = [errorElem attributeIntegerValueForName:@"code" withDefaultValue:0];
 			NSDictionary *dict = @{NSLocalizedDescriptionKey : errMsg};
-			NSError *error = [NSError errorWithDomain:XMPPMUCErrorDomain
+			NSError *error = [NSError errorWithDomain:XMPPMUCLightErrorDomain
 												 code:errorCode
 											 userInfo:dict];
 			
@@ -112,7 +112,7 @@ NSString *const XMPPMUCErrorDomain = @"XMPPMUCErrorDomain";
 		}
 		
 		NSXMLElement *query = [iq elementForName:@"query"
-										   xmlns:XMPPDiscoverItemsNamespace];
+										   xmlns:XMPPMUCLightDiscoItemsNamespace];
 		
 		NSArray *items = [query elementsForName:@"item"];
 

@@ -7,6 +7,7 @@
 //
 
 #import <XMPPFramework/XMPPFramework.h>
+#import "XMPPJID.h"
 
 @interface XMPPMUCLight : XMPPModule {
 	XMPPIDTracker *xmppIDTracker;
@@ -18,9 +19,10 @@
 @end
 
 @protocol XMPPMUCLightDelegate
+@optional
 
 - (void)xmppMUCLight:(XMPPMUCLight *)sender didDiscoverRooms:(NSArray *)rooms forServiceNamed:(NSString *)serviceName;
 - (void)xmppMUCLight:(XMPPMUCLight *)sender failedToDiscoverRoomsForServiceNamed:(NSString *)serviceName withError:(NSError *)error;
-- (void)xmppMUCLight:(XMPPMUCLight *)sender changedAffiliation:(NSString *)affiliation roomJID:(XMPPJID)roomJID;
+- (void)xmppMUCLight:(XMPPMUCLight *)sender changedAffiliation:(NSString *)affiliation roomJID:(XMPPJID *)roomJID;
 
 @end
