@@ -1,8 +1,16 @@
+//
+//  XMPPMAM.m
+//  XEP-0313 Message Archive Management
+//
+//  Created by Arslan Pervaiz on 03/6/16.
+//  Copyright 2016 Vopium A/S. All rights reserved.
+//
+
 #import "XMPPLogging.h"
 #import "XMPPFramework.h"
 #import "NSDate+XMPPDateTimeProfiles.h"
 #import "NSNumber+XMPP.h"
-#import "UtilityClass.h"
+
 
 #import "XMPPMAM.h"
 
@@ -43,7 +51,7 @@
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
             
-            [query addAttributeWithName:@"queryid" stringValue:[UtilityClass generateUniqueID]];
+            [query addAttributeWithName:@"queryid" stringValue:[XMPPStream generateUUID]];
             
             if(jid != nil || startTime != nil || endTime != nil)
             {

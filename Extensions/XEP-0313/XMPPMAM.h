@@ -1,3 +1,11 @@
+//
+//  XMPPMAM.h
+//  XEP-0313 Message Archive Management
+//
+//  Created by Arslan Pervaiz on 03/6/16.
+//  Copyright 2016 Vopium A/S. All rights reserved.
+//
+
 #import "XMPP.h"
 #import "XMPPFramework.h"
 #import "XMPPResultSet.h"

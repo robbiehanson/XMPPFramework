@@ -1,3 +1,11 @@
+//
+//  XMPPMessage+XEP_0313.m
+//  XEP-0313 Message Archive Management
+//
+//  Created by Arslan Pervaiz on 03/6/16.
+//  Copyright 2016 Vopium A/S. All rights reserved.
+//
+
 #import "XMPPMessage+XEP_0313.h"
 
 @implementation XMPPMessage (XEP_0313)
