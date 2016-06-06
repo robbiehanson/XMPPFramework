@@ -19,6 +19,10 @@ enum XMPPRoomLightState
 
 @implementation XMPPRoomLight
 
+- (id)init{
+	NSAssert(false, @"All rooms need to have a _roomJID.");
+}
+
 - (id)initWithJID:(XMPPJID *)jid roomname:(NSString *) roomname {
 	if ((self = [super initWithDispatchQueue:nil]))
 	{

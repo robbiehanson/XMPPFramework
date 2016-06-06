@@ -31,7 +31,7 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue
 {
 	if ((self = [super initWithDispatchQueue:queue])) {
-		rooms = [[NSMutableSet alloc] init];
+		_rooms = [[NSMutableSet alloc] init];
 	}
 	return self;
 }
@@ -159,7 +159,7 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 		
 		XMPPJID *roomJID = [(XMPPRoomLight *)module roomJID];
 		
-		[rooms addObject:roomJID];
+		[_rooms addObject:roomJID];
 	}
 }
 
@@ -178,7 +178,7 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 		double delayInSeconds = 30.0;
 		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
 		dispatch_after(popTime, moduleQueue, ^{ @autoreleasepool {
-			[rooms removeObject:roomJID];
+			[_rooms removeObject:roomJID];
 		}});
 	}
 }

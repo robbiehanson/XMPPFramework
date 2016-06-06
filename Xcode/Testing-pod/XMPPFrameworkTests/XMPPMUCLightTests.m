@@ -9,10 +9,12 @@
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
 #import "XMPPMUCLight.h"
+#import "XMPPRoomLight.h"
 
 @interface XMPPMUCLightTests: XCTestCase <XMPPMUCLightDelegate>
 
 @property (nonatomic, strong) XCTestExpectation *delegateResponseExpectation;
+@property (nonatomic, strong) XCTestExpectation *roomsCountExpectation;
 
 @end
 
@@ -25,6 +27,59 @@
 - (void)tearDown {
 	[super tearDown];
 }
+
+- (void)testRoomsCountRemoval {
+	self.roomsCountExpectation = [self expectationWithDescription:@"Count"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPMUCLight *mucLight = [[XMPPMUCLight alloc] init];
+
+	[mucLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[mucLight activate:streamTest];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:[XMPPJID jidWithString:@"test@test.com"] roomname:@"test name"];
+	[roomLight activate:streamTest];
+
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		[roomLight deactivate];
+	});
+
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(38 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		XCTAssertTrue([[mucLight.rooms allObjects] count] == 0);
+		[self.roomsCountExpectation fulfill];
+	});
+
+	[self waitForExpectationsWithTimeout:60 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)testRoomsCountAddition {
+	self.roomsCountExpectation = [self expectationWithDescription:@"Count"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPMUCLight *mucLight = [[XMPPMUCLight alloc] init];
+
+	[mucLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[mucLight activate:streamTest];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:[XMPPJID jidWithString:@"test@test.com"] roomname:@"test name"];
+	[roomLight activate:streamTest];
+
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		XCTAssertTrue([mucLight.rooms containsObject:roomLight.roomJID]);
+		[self.roomsCountExpectation fulfill];
+	});
+
+	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
 
 - (void)testDiscoverRoomsForServiceNamed {
 	self.delegateResponseExpectation = [self expectationWithDescription:@"Slot Response"];

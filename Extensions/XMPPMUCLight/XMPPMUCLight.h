@@ -11,9 +11,9 @@
 
 @interface XMPPMUCLight : XMPPModule {
 	XMPPIDTracker *xmppIDTracker;
-	NSMutableSet *rooms;
 }
 
+@property(nonatomic, strong, readonly) NSMutableSet *rooms;
 - (BOOL)discoverRoomsForServiceNamed:(NSString *)serviceName;
 
 @end
