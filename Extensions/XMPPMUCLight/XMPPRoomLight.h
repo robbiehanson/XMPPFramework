@@ -23,7 +23,7 @@
 
 - (id)initWithDomain:(NSString *)domain;
 - (id)initWithJID:(XMPPJID *)jid roomname:(NSString *) roomname;
-- (void)createRoomLight:(NSString *)roomName members:(NSArray *) members;
+- (void)createRoomLightWithRoomName:(NSString *)roomName membersJID:(NSArray *) members;
 - (void)leaveRoomLight;
 - (void)addUsers:(NSArray *)users;
 - (void)fetchMembersList;

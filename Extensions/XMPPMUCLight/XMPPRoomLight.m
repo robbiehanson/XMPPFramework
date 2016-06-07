@@ -21,6 +21,7 @@ enum XMPPRoomLightState
 
 - (id)init{
 	NSAssert(false, @"All rooms need to have a _roomJID.");
+	return nil;
 }
 
 - (id)initWithJID:(XMPPJID *)jid roomname:(NSString *) roomname {
@@ -71,7 +72,7 @@ enum XMPPRoomLightState
 	[super deactivate];
 }
 
-- (void)createRoomLight:(NSString *)roomName members:(NSArray *) members {
+- (void)createRoomLightWithRoomName:(NSString *)roomName membersJID:(NSArray *) members {
 	
 	//		<iq from='crone1@shakespeare.lit/desktop'
 	//			      id='create1'
@@ -92,6 +93,7 @@ enum XMPPRoomLightState
 		_roomJID = [XMPPJID jidWithUser:[XMPPStream generateUUID]
 									 domain:self.domain
 								   resource:nil];
+		_roomname = roomName;
 		
 		NSString *iqID = [XMPPStream generateUUID];
 		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -144,7 +146,7 @@ enum XMPPRoomLightState
 	//				id='member2'
 	//				to='coven@chat.shakespeare.lit'
 	//				type='set'>
-	//			<query xmlns='http://jabber.org/protocol/muc#admin'>
+	//			<query xmlns="urn:xmpp:muclight:0#affiliations">
 	//				<item affiliation='none' jid='hag66@shakespeare.lit'/>
 	//			</query>
 	//		</iq>
@@ -189,7 +191,6 @@ enum XMPPRoomLightState
 	}
 }
 
-
 - (void)addUsers:(NSArray *)users{
 	
 	//    <iq from="crone1@shakespeare.lit/desktop"
@@ -209,22 +210,22 @@ enum XMPPRoomLightState
 		[iq addAttributeWithName:@"to" stringValue:self.roomJID.full];
 		[iq addAttributeWithName:@"type" stringValue:@"set"];
 		
-		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"urn:xmpp:muclight:0#affiliations"];
 		for (XMPPJID *userJID in users) {
-			NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"urn:xmpp:muclight:0#affiliations"];
 			NSXMLElement *user = [NSXMLElement elementWithName:@"user"];
 			[user addAttributeWithName:@"affiliation" stringValue:@"member"];
 			user.stringValue = userJID.full;
 			
 			[query addChild:user];
-			[iq addChild:query];
 		}
+		[iq addChild:query];
 		
-		[xmppStream sendElement:iq];
 		[responseTracker addID:iqID
 						target:self
 					  selector:@selector(handleAddUsers:withInfo:)
 					   timeout:60.0];
+		[xmppStream sendElement:iq];
+
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag)){
@@ -258,11 +259,12 @@ enum XMPPRoomLightState
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
 		[iq addChild:query];
 		
-		[xmppStream sendElement:iq];
 		[responseTracker addID:iqID
 						target:self
 					  selector:@selector(handleFetchMembersListResponse:withInfo:)
 					   timeout:60.0];
+
+		[xmppStream sendElement:iq];
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
