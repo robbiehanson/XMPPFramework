@@ -6,7 +6,9 @@
 //  Copyright © 2016 Inaka. All rights reserved.
 //
 
+#import "XMPPFramework/XMPPMessage+XEP0045.h"
 #import "XMPPRoomLight.h"
+
 static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
 
 enum XMPPRoomLightState
@@ -20,29 +22,26 @@ enum XMPPRoomLightState
 @implementation XMPPRoomLight
 
 - (id)init{
-	NSAssert(false, @"All rooms need to have a _roomJID.");
-	return nil;
+	return [self initWithRoomLightStorage:nil jid:nil roomname:nil dispatchQueue:nil];
 }
 
-- (id)initWithJID:(XMPPJID *)jid roomname:(NSString *) roomname {
-	if ((self = [super initWithDispatchQueue:nil]))
-	{
-		_domain = jid.domain;
+- (id)initWithJID:(XMPPJID *) jid roomname:(NSString *) roomname {
+	return [self initWithRoomLightStorage:nil jid:jid roomname:roomname dispatchQueue:nil];
+}
+
+- (id)initWithRoomLightStorage:(id <XMPPRoomLightStorage>)storage jid:(XMPPJID *)aRoomJID roomname:(NSString *)roomname dispatchQueue:(dispatch_queue_t)queue{
+
+	NSParameterAssert(aRoomJID != nil);
+	
+	if ((self = [super initWithDispatchQueue:queue])){
+		xmppRoomLightStorage = storage;
+		_domain = aRoomJID.domain;
 		_roomname = roomname;
-		_roomJID = jid;
+		_roomJID = aRoomJID;
 		state = kXMPPRoomLightStateNone;
 	}
 	return self;
-}
-
-- (id)initWithDomain:(NSString *)domain {
-
-	if ((self = [super initWithDispatchQueue:nil]))
-	{
-		_domain = domain;
-		state = kXMPPRoomLightStateNone;
-	}
-	return self;
+	
 }
 
 - (BOOL)activate:(XMPPStream *)aXmppStream
@@ -72,7 +71,7 @@ enum XMPPRoomLightState
 	[super deactivate];
 }
 
-- (void)createRoomLightWithRoomName:(NSString *)roomName membersJID:(NSArray *) members {
+- (void)createRoomLightWithMembersJID:(NSArray *) members {
 	
 	//		<iq from='crone1@shakespeare.lit/desktop'
 	//			      id='create1'
@@ -93,7 +92,6 @@ enum XMPPRoomLightState
 		_roomJID = [XMPPJID jidWithUser:[XMPPStream generateUUID]
 									 domain:self.domain
 								   resource:nil];
-		_roomname = roomName;
 		
 		NSString *iqID = [XMPPStream generateUUID];
 		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -103,7 +101,7 @@ enum XMPPRoomLightState
 		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"urn:xmpp:muclight:0#create"];
 		NSXMLElement *configuration = [NSXMLElement elementWithName:@"configuration"];
-		[configuration addChild:[NSXMLElement elementWithName:@"roomname" stringValue:roomName]];
+		[configuration addChild:[NSXMLElement elementWithName:@"roomname" stringValue:self.roomname]];
 		
 		NSXMLElement *ocupants = [NSXMLElement elementWithName:@"ocupants"];
 		for (XMPPJID *jid in members){
@@ -322,6 +320,45 @@ enum XMPPRoomLightState
 	}
 	
 	return NO;
+}
+
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message{
+
+	XMPPJID *from = [message from];
+
+	if (![self.roomJID isEqualToJID:from options:XMPPJIDCompareBare]){
+		return; // Stanza isn't for our room
+	}
+
+	// Is this a message we need to store (a chat message)?
+	//
+	// We store messages that from is full room-id@domain/user-who-sends-message
+	// and that have something in the body
+
+	if ([from isFull] && [message isGroupChatMessageWithBody]) {
+		[xmppRoomLightStorage handleIncomingMessage:message room:self];
+		[multicastDelegate xmppRoomLight:self didReceiveMessage:message];
+	}else{
+		// Todo... Handle other types of messages.
+	}
+}
+
+- (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message
+{
+	XMPPJID *to = [message to];
+
+	if (![self.roomJID isEqualToJID:to options:XMPPJIDCompareBare]){
+		return; // Stanza isn't for our room
+	}
+
+	// Is this a message we need to store (a chat message)?
+	//
+	// A message to all recipients MUST be of type groupchat.
+	// A message to an individual recipient would have a <body/>.
+
+	if ([message isGroupChatMessageWithBody]){
+		[xmppRoomLightStorage handleOutgoingMessage:message room:self];
+	}
 }
 
 @end

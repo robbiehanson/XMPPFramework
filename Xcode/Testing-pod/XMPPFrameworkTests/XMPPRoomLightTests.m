@@ -19,11 +19,6 @@
 
 @implementation XMPPRoomLightTests
 
-- (void)testInitWithDomain {
-	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithDomain:@"test-domain.com"];
-	XCTAssertEqualObjects(roomLight.domain, @"test-domain.com");
-}
-
 - (void)testInitWithJIDAndRoomname {
 	XMPPJID *jid = [XMPPJID jidWithUser:@"user" domain:@"domain.com" resource:@"resource"];
 	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:jid roomname:@"room"];
@@ -37,7 +32,8 @@
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	XMPPJID *memberJID = [XMPPJID jidWithString:@"first-user@domain.com"];
 
-	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithDomain:@"domain.com"];
+	XMPPJID *jid = [XMPPJID jidWithString:@"domain.com"];
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:jid roomname:@"test"];
 	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	[roomLight activate:streamTest];
 
@@ -51,7 +47,7 @@
 		[weakStreamTest fakeIQResponse:iq];
 	};
 
-	[roomLight createRoomLightWithRoomName:@"test" membersJID:@[memberJID]];
+	[roomLight createRoomLightWithMembersJID:@[memberJID]];
 
 	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
 		if(error){
@@ -73,7 +69,8 @@
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	XMPPJID *memberJID = [XMPPJID jidWithString:@"first-user@domain.com"];
 
-	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithDomain:@"domain.com"];
+	XMPPJID *jid = [XMPPJID jidWithString:@"domain.com"];
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:jid roomname:@"test"];
 	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	[roomLight activate:streamTest];
 
@@ -87,7 +84,7 @@
 		[weakStreamTest fakeIQResponse:iq];
 	};
 
-	[roomLight createRoomLightWithRoomName:@"test" membersJID:@[memberJID]];
+	[roomLight createRoomLightWithMembersJID:@[memberJID]];
 
 	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
 		if(error){

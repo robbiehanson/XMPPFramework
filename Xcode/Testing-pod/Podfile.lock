@@ -175,6 +175,8 @@ PODS:
     - XMPPFramework/Core
   - XMPPFramework/XMPPMUCLight (3.6.7):
     - XMPPFramework/Core
+    - XMPPFramework/CoreDataStorage
+    - XMPPFramework/XEP-0203
 
 DEPENDENCIES:
   - XMPPFramework (from `../../`)
@@ -187,6 +189,6 @@ SPEC CHECKSUMS:
   CocoaAsyncSocket: a18c75dca4b08723628a0bacca6e94803d90be91
   CocoaLumberjack: 97fab7ee5f507fe54445cca7ea80f926729cfd15
   KissXML: d19dd6dc65e0dc721ba92b3077b8ebdd240f1c1e
-  XMPPFramework: ca293c2fd22e0fefc16be4362cb2c843d761d045
+  XMPPFramework: dfac20782e429ef786ef36fc24382405f24cd956
 
 COCOAPODS: 0.39.0

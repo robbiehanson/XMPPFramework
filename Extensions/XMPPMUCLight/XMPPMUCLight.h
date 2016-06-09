@@ -7,7 +7,7 @@
 //
 
 #import <XMPPFramework/XMPPFramework.h>
-#import "XMPPJID.h"
+#import "XMPPFramework/XMPPJID.h"
 
 @interface XMPPMUCLight : XMPPModule {
 	XMPPIDTracker *xmppIDTracker;

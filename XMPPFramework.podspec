@@ -349,8 +349,10 @@ s.subspec 'XEP-0363' do |ss|
 end
 
 s.subspec 'XMPPMUCLight' do |ss|
-  ss.source_files = 'Extensions/XMPPMUCLight/*.{h,m}'
+  ss.source_files = 'Extensions/XMPPMUCLight/**/*.{h,m}'
   ss.dependency 'XMPPFramework/Core'
+  ss.dependency 'XMPPFramework/CoreDataStorage'
+  ss.dependency 'XMPPFramework/XEP-0203'
   ss.prefix_header_contents = "#define HAVE_XMPP_SUBSPEC_#{name.upcase.sub('-', '_')}"
 end
 
