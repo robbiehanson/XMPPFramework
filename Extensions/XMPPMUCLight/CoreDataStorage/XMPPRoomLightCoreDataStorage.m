@@ -10,7 +10,6 @@
 #import "XMPPCoreDataStorageProtected.h"
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPRoomLightMessageCoreDataStorageObject.h"
-#import "XMPPRoomLightOccupantCoreDataStorageObject.h"
 
 @implementation XMPPRoomLightCoreDataStorage{
 	NSString *messageEntityName;

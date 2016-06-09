@@ -11,14 +11,6 @@
 
 static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
 
-enum XMPPRoomLightState
-{
-	kXMPPRoomLightStateNone        = 0,
-	kXMPPRoomLightStateCreated     = 1 << 1,
-	kXMPPRoomStateLeaving          = 1 << 2,
-	kXMPPRoomStateLeft             = 1 << 3
-};
-
 @implementation XMPPRoomLight
 
 - (id)init{
@@ -38,7 +30,6 @@ enum XMPPRoomLightState
 		_domain = aRoomJID.domain;
 		_roomname = roomname;
 		_roomJID = aRoomJID;
-		state = kXMPPRoomLightStateNone;
 	}
 	return self;
 	
@@ -131,7 +122,6 @@ enum XMPPRoomLightState
 
 - (void)handleCreateRoomLight:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
 	if ([[iq type] isEqualToString:@"result"]){
-		state = kXMPPRoomLightStateCreated;
 		[multicastDelegate xmppRoomLight:self didCreatRoomLight:iq];
 	}else{
 		[multicastDelegate xmppRoomLight:self didFailToCreateRoomLight:iq];
@@ -150,7 +140,6 @@ enum XMPPRoomLightState
 	//		</iq>
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
-		state = kXMPPRoomStateLeaving;
 		
 		NSString *iqID = [XMPPStream generateUUID];
 		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -182,7 +171,6 @@ enum XMPPRoomLightState
 
 - (void)handleLeaveRoomLight:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
 	if ([[iq type] isEqualToString:@"result"]){
-		state = kXMPPRoomStateLeft;
 		[multicastDelegate xmppRoomLight:self didLeaveRoomLight:iq];
 	}else{
 		[multicastDelegate xmppRoomLight:self didFailToLeaveRoomLight:iq];

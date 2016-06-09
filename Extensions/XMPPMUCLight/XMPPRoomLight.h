@@ -16,7 +16,6 @@
 
 	__strong id <XMPPRoomLightStorage> xmppRoomLightStorage;
 	XMPPIDTracker *responseTracker;
-	uint16_t state;
 
 }
 
