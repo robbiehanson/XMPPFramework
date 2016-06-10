@@ -56,7 +56,7 @@
 	}];
 }
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didCreatRoomLight:(XMPPIQ *)iq {
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didCreateRoomLight:(XMPPIQ *)iq {
 	XCTAssertEqualObjects(@"test", sender.roomname);
 	XCTAssertNotNil(sender.roomJID);
 

@@ -122,7 +122,7 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 
 - (void)handleCreateRoomLight:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
 	if ([[iq type] isEqualToString:@"result"]){
-		[multicastDelegate xmppRoomLight:self didCreatRoomLight:iq];
+		[multicastDelegate xmppRoomLight:self didCreateRoomLight:iq];
 	}else{
 		[multicastDelegate xmppRoomLight:self didFailToCreateRoomLight:iq];
 	}

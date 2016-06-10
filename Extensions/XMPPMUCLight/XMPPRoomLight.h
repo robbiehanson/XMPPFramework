@@ -48,7 +48,7 @@
 
 - (void)xmppRoomLight:(XMPPRoomLight *)sender didReceiveMessage:(XMPPMessage *)message;
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didCreatRoomLight:(XMPPIQ *)iq;
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didCreateRoomLight:(XMPPIQ *)iq;
 - (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToCreateRoomLight:(XMPPIQ *)iq;
 
 - (void)xmppRoomLight:(XMPPRoomLight *)sender didLeaveRoomLight:(XMPPIQ *)iq;
