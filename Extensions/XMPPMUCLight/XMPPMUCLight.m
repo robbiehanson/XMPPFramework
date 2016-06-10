@@ -28,7 +28,7 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 	return self;
 }
 
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
+- (instancetype)initWithDispatchQueue:(dispatch_queue_t)queue
 {
 	if ((self = [super initWithDispatchQueue:queue])) {
 		_rooms = [[NSMutableSet alloc] init];
@@ -63,7 +63,7 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 	[super deactivate];
 }
 
-- (BOOL)discoverRoomsForServiceNamed:(NSString *)serviceName {
+- (BOOL)discoverRoomsForServiceNamed:(nonnull NSString *)serviceName {
 	
 	if (serviceName.length < 2)
 		return NO;

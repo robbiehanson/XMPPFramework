@@ -13,18 +13,18 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 
 @implementation XMPPRoomLight
 
-- (id)init{
+- (instancetype)init{
 	return [self initWithRoomLightStorage:nil jid:nil roomname:nil dispatchQueue:nil];
 }
 
-- (id)initWithJID:(XMPPJID *) jid roomname:(NSString *) roomname {
-	return [self initWithRoomLightStorage:nil jid:jid roomname:roomname dispatchQueue:nil];
+- (nonnull instancetype)initWithJID:(nonnull XMPPJID *)roomJID roomname:(nonnull NSString *) roomname{
+	return [self initWithRoomLightStorage:nil jid:roomJID roomname:roomname dispatchQueue:nil];
 }
 
-- (id)initWithRoomLightStorage:(id <XMPPRoomLightStorage>)storage jid:(XMPPJID *)aRoomJID roomname:(NSString *)roomname dispatchQueue:(dispatch_queue_t)queue{
+- (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)roomname dispatchQueue:(nullable dispatch_queue_t)queue{
 
 	NSParameterAssert(aRoomJID != nil);
-	
+
 	if ((self = [super initWithDispatchQueue:queue])){
 		xmppRoomLightStorage = storage;
 		_domain = aRoomJID.domain;
@@ -32,7 +32,7 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 		_roomJID = aRoomJID;
 	}
 	return self;
-	
+
 }
 
 - (BOOL)activate:(XMPPStream *)aXmppStream
@@ -62,7 +62,7 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 	[super deactivate];
 }
 
-- (void)createRoomLightWithMembersJID:(NSArray *) members {
+- (void)createRoomLightWithMembersJID:(nullable NSArray<XMPPJID *> *) members{
 	
 	//		<iq from='crone1@shakespeare.lit/desktop'
 	//			      id='create1'
@@ -177,7 +177,7 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 	}
 }
 
-- (void)addUsers:(NSArray *)users{
+- (void)addUsers:(nonnull NSArray<XMPPJID *> *)users{
 	
 	//    <iq from="crone1@shakespeare.lit/desktop"
 	//          id="member1"
@@ -271,15 +271,15 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 	}
 }
 
-- (void)sendMessage:(XMPPMessage *)message
-{
+- (void)sendMessage:(nonnull XMPPMessage *)message{
+
 	dispatch_block_t block = ^{ @autoreleasepool {
 
 		[message addAttributeWithName:@"to" stringValue:[_roomJID full]];
 		[message addAttributeWithName:@"type" stringValue:@"groupchat"];
 
 		[xmppStream sendElement:message];
-		
+
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -288,7 +288,7 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)sendMessageWithBody:(NSString *)messageBody{
+- (void)sendMessageWithBody:(nonnull NSString *)messageBody{
 	if ([messageBody length] == 0) return;
 	
 	NSXMLElement *body = [NSXMLElement elementWithName:@"body" stringValue:messageBody];

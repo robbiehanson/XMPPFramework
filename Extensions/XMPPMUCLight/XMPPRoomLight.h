@@ -19,46 +19,46 @@
 
 }
 
-@property (readonly, nonatomic, strong) XMPPJID *roomJID;
-@property (readonly, nonatomic, strong) NSString *domain;
-@property (readonly, nonatomic, strong) NSString *roomname;
+@property (readonly, nonatomic, strong, nonnull) XMPPJID *roomJID;
+@property (readonly, nonatomic, strong, nonnull) NSString *domain;
+@property (readonly, nonatomic, strong, nonnull) NSString *roomname;
 
 
-- (id)initWithJID:(XMPPJID *)jid roomname:(NSString *) roomname;
-- (id)initWithRoomLightStorage:(id <XMPPRoomLightStorage>)storage jid:(XMPPJID *)aRoomJID roomname:(NSString *)roomname dispatchQueue:(dispatch_queue_t)queue;
-- (void)createRoomLightWithMembersJID:(NSArray *) members;
+- (nonnull instancetype)initWithJID:(nonnull XMPPJID *)roomJID roomname:(nonnull NSString *) roomname;
+- (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)roomname dispatchQueue:(nullable dispatch_queue_t)queue;
+- (void)createRoomLightWithMembersJID:(nullable NSArray<XMPPJID *> *) members;
 - (void)leaveRoomLight;
-- (void)addUsers:(NSArray *)users;
+- (void)addUsers:(nonnull NSArray<XMPPJID *> *)users;
 - (void)fetchMembersList;
-- (void)sendMessage:(XMPPMessage *)message;
-- (void)sendMessageWithBody:(NSString *)messageBody;
+- (void)sendMessage:(nonnull XMPPMessage *)message;
+- (void)sendMessageWithBody:(nonnull NSString *)messageBody;
 
 @end
 
 @protocol XMPPRoomLightStorage <NSObject>
 @required
 
-- (void)handleIncomingMessage:(XMPPMessage *)message room:(XMPPRoomLight *)room;
-- (void)handleOutgoingMessage:(XMPPMessage *)message room:(XMPPRoomLight *)room;
+- (void)handleIncomingMessage:(nonnull XMPPMessage *)message room:(nonnull XMPPRoomLight *)room;
+- (void)handleOutgoingMessage:(nonnull XMPPMessage *)message room:(nonnull XMPPRoomLight *)room;
 
 @end
 
 @protocol XMPPRoomLightDelegate
 @optional
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didReceiveMessage:(XMPPMessage *)message;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didReceiveMessage:(nonnull XMPPMessage *)message;
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didCreateRoomLight:(XMPPIQ *)iq;
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToCreateRoomLight:(XMPPIQ *)iq;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didCreateRoomLight:(nonnull XMPPIQ *)iq;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToCreateRoomLight:(nonnull XMPPIQ *)iq;
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didLeaveRoomLight:(XMPPIQ *)iq;
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToLeaveRoomLight:(XMPPIQ *)iq;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didLeaveRoomLight:(nonnull XMPPIQ *)iq;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToLeaveRoomLight:(nonnull XMPPIQ *)iq;
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didAddUsers:(XMPPIQ*) iqResult;
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToAddUsers:(XMPPIQ*)iq;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didAddUsers:(nonnull XMPPIQ*) iqResult;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToAddUsers:(nonnull XMPPIQ*)iq;
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didFetchMembersList:(NSArray *)items;
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToFetchMembersList:(XMPPIQ *)iq;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFetchMembersList:(nonnull NSArray<NSXMLElement*> *)items;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToFetchMembersList:(nonnull XMPPIQ *)iq;
 
 @end
 
