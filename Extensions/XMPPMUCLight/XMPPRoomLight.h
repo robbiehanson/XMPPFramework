@@ -32,6 +32,7 @@
 - (void)fetchMembersList;
 - (void)sendMessage:(nonnull XMPPMessage *)message;
 - (void)sendMessageWithBody:(nonnull NSString *)messageBody;
+- (void)changeRoomSubject:(nonnull NSString *)roomSubject;
 
 @end
 
@@ -59,6 +60,9 @@
 
 - (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFetchMembersList:(nonnull NSArray<NSXMLElement*> *)items;
 - (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToFetchMembersList:(nonnull XMPPIQ *)iq;
+
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didChangeRoomSubject:(nonnull XMPPIQ*) iqResult;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToChangeroomSubject:(nonnull XMPPIQ*)iq;
 
 @end
 

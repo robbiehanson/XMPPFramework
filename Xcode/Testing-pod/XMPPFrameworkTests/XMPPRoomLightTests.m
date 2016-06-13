@@ -384,6 +384,72 @@
 	}];
 }
 
+- (void)testChangeSubject{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"change subject"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSXMLElement *query = [element elementForName:@"query"];
+		NSXMLElement *subject = [query elementForName:@"subject"];
+
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#configuration");
+		XCTAssertEqualObjects(subject.stringValue, @"new subject");
+
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"result"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[roomLight changeRoomSubject:@"new subject"];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didChangeRoomSubject:(XMPPIQ *)iqResult {
+	[self.delegateResponseExpectation fulfill];
+}
+
+- (void)testFailToChangeSubject{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"change subject"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"error"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[roomLight changeRoomSubject:@"new subject"];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToChangeroomSubject:(nonnull XMPPIQ *)iq {
+	[self.delegateResponseExpectation fulfill];
+}
+
 - (XMPPIQ *)fakeIQUserListWithID:(NSString *) elementID{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<iq from='coven@muclight.shakespeare.lit'"];
