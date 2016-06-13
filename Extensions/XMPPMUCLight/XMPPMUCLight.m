@@ -17,30 +17,27 @@ NSString *const XMPPMUCLightDiscoItemsNamespace = @"http://jabber.org/protocol/d
 NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
 NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 
+@interface XMPPMUCLight() {
+	NSMutableSet *rooms;
+}
+@end
+
 @implementation XMPPMUCLight
 
-- (instancetype)init
-{
-	self = [self initWithDispatchQueue:nil];
-	if (self) {
-
-	}
-	return self;
+- (instancetype)init {
+	return [self initWithDispatchQueue:nil];
 }
 
-- (instancetype)initWithDispatchQueue:(dispatch_queue_t)queue
-{
+- (instancetype)initWithDispatchQueue:(dispatch_queue_t)queue {
 	if ((self = [super initWithDispatchQueue:queue])) {
-		_rooms = [[NSMutableSet alloc] init];
+		rooms = [[NSMutableSet alloc] init];
 	}
 	return self;
 }
 
 
-- (BOOL)activate:(XMPPStream *)aXmppStream
-{
-	if ([super activate:aXmppStream])
-	{
+- (BOOL)activate:(XMPPStream *)aXmppStream {
+	if ([super activate:aXmppStream]) {
 		xmppIDTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
 		return YES;
 	}
@@ -48,8 +45,7 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 	return NO;
 }
 
-- (void)deactivate
-{
+- (void)deactivate {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		[xmppIDTracker removeAllIDs];
 		xmppIDTracker = nil;
@@ -61,6 +57,12 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 		dispatch_sync(moduleQueue, block);
 	
 	[super deactivate];
+}
+
+- (nonnull NSSet *)rooms{
+	@synchronized(rooms) {
+		return [rooms copy];
+	}
 }
 
 - (BOOL)discoverRoomsForServiceNamed:(nonnull NSString *)serviceName {
@@ -93,8 +95,7 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 	return YES;
 }
 
-- (void)handleDiscoverRoomsQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)info
-{
+- (void)handleDiscoverRoomsQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)info {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		NSXMLElement *errorElem = [iq elementForName:@"error"];
 		NSString *serviceName = [iq attributeStringValueForName:@"from" withDefaultValue:@""];
@@ -155,32 +156,45 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 
 - (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module {
 	
-	if ([module isKindOfClass:[XMPPRoomLight class]]){
-		
-		XMPPJID *roomJID = [(XMPPRoomLight *)module roomJID];
-		
-		[_rooms addObject:roomJID];
-	}
+	dispatch_block_t block = ^{ @autoreleasepool {
+		if ([module isKindOfClass:[XMPPRoomLight class]]){
+
+			XMPPJID *roomJID = [(XMPPRoomLight *)module roomJID];
+
+			[rooms addObject:roomJID];
+		}
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 - (void)xmppStream:(XMPPStream *)sender willUnregisterModule:(id)module {
-	
-	if ([module isKindOfClass:[XMPPRoomLight class]]){
-		
-		XMPPJID *roomJID = [(XMPPRoomLight *)module roomJID];
-		
-		// It's common for the room to get deactivated and deallocated before
-		// we've received the goodbye presence from the server.
-		// So we're going to postpone for a bit removing the roomJID from the list.
-		// This way the isMUCRoomElement will still remain accurate
-		// for presence elements that may arrive momentarily.
-		
-		double delayInSeconds = 30.0;
-		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-		dispatch_after(popTime, moduleQueue, ^{ @autoreleasepool {
-			[_rooms removeObject:roomJID];
-		}});
-	}
+	dispatch_block_t block = ^{ @autoreleasepool {
+		if ([module isKindOfClass:[XMPPRoomLight class]]){
+
+			XMPPJID *roomJID = [(XMPPRoomLight *)module roomJID];
+
+			// It's common for the room to get deactivated and deallocated before
+			// we've received the goodbye presence from the server.
+			// So we're going to postpone for a bit removing the roomJID from the list.
+			// This way the isMUCRoomElement will still remain accurate
+			// for presence elements that may arrive momentarily.
+
+			double delayInSeconds = 30.0;
+			dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+			dispatch_after(popTime, moduleQueue, ^{ @autoreleasepool {
+				[rooms removeObject:roomJID];
+			}});
+		}
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {
@@ -192,6 +206,5 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 
 	return NO;
 }
-
 
 @end

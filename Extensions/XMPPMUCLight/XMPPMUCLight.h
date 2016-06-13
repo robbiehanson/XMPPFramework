@@ -24,17 +24,23 @@
  *  - It listens for MUCLigh room affiliation changes sent from other users.
  *
  * Server suport:
- *    - MongooseIM 2.0.0+ (https://github.com/esl/MongooseIM/)
+ *  - MongooseIM 2.0.0+ (https://github.com/esl/MongooseIM/)
  *
+ * MUC Light: It's more suitable for mobile devices, where your connection might
+ * go up and down often, but you don't want that to affect the fact that you're "in"
+ * the room.
  *
- *
+ * Hightlights:
+ *  - Lack of presences: there is no need to rejoin every room on reconnection.
+ *  - Room version allows cheap checks whether room member list/configuration has
+ *    changes. To be implemented in XMPPRoom
  **/
 
 @interface XMPPMUCLight : XMPPModule {
 	XMPPIDTracker *xmppIDTracker;
 }
 
-@property(nonatomic, strong, readonly, nonnull) NSMutableSet *rooms;
+- (nonnull NSSet *)rooms;
 - (BOOL)discoverRoomsForServiceNamed:(nonnull NSString *)serviceName;
 
 @end
