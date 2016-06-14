@@ -15,7 +15,7 @@
 
 @property (nonatomic, strong) XCTestExpectation *delegateResponseExpectation;
 @property BOOL receivedDestroyMessage;
-
+@property BOOL receivedConfigurationChangedMessage;
 @end
 
 @implementation XMPPRoomLightTests
@@ -386,9 +386,11 @@
 }
 
 - (void)testChangeSubject{
+	self.receivedConfigurationChangedMessage = false;
 	self.delegateResponseExpectation = [self expectationWithDescription:@"change subject"];
 
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	streamTest.myJID = [XMPPJID jidWithString:@"andres@domain.com"];
 	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
 
 	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
@@ -402,6 +404,8 @@
 
 		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#configuration");
 		XCTAssertEqualObjects(subject.stringValue, @"new subject");
+
+		[weakStreamTest fakeMessageResponse: [self fakeMessageChangeSubject]];
 
 		NSString *iqID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"result"];
@@ -417,7 +421,12 @@
 	}];
 }
 
+- (void)xmppRoomLight:(XMPPRoomLight *)sender configurationChanged:(XMPPMessage *)message{
+	self.receivedConfigurationChangedMessage = YES;
+}
+
 - (void)xmppRoomLight:(XMPPRoomLight *)sender didChangeRoomSubject:(XMPPIQ *)iqResult {
+	XCTAssertTrue(self.receivedConfigurationChangedMessage);
 	[self.delegateResponseExpectation fulfill];
 }
 
@@ -610,6 +619,146 @@
 	[self.delegateResponseExpectation fulfill];
 }
 
+- (void)testGetConfiguration{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"get configuration"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		XCTAssertEqualObjects([element attributeForName:@"type"].stringValue,@"get");
+		NSXMLElement *query = [element elementForName:@"query"];
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#configuration");
+
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"result"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[roomLight getConfiguration];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didGetConfiguration:(XMPPIQ *)iqResult{
+	[self.delegateResponseExpectation fulfill];
+}
+
+- (void)testFailToGetConfiguration{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"get configuration"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"error"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[roomLight getConfiguration];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToGetConfiguration:(nonnull XMPPIQ *)iq{
+	[self.delegateResponseExpectation fulfill];
+}
+
+- (void)testSetConfiguration{
+	self.receivedConfigurationChangedMessage = NO;
+	self.delegateResponseExpectation = [self expectationWithDescription:@"get configuration"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	streamTest.myJID = [XMPPJID jidWithString:@"andres@domain.com"];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSXMLElement *query = [element elementForName:@"query"];
+		XCTAssertEqualObjects([element attributeForName:@"type"].stringValue,@"set");
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#configuration");
+
+		NSXMLElement *config = [query children].firstObject;
+		XCTAssertEqualObjects(config.stringValue,@"tester");
+		XCTAssertEqualObjects(config.name,@"roomname");
+
+		[weakStreamTest fakeMessageResponse:[self fakeMessageConfigurationChange]];
+
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"result"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	NSXMLElement *config = [NSXMLElement elementWithName:@"roomname" stringValue:@"tester"];
+	[roomLight setConfiguration:@[config]];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didSetConfiguration:(XMPPIQ *)iqResult{
+	XCTAssertTrue(self.receivedConfigurationChangedMessage);
+	[self.delegateResponseExpectation fulfill];
+}
+
+- (void)testFailToSetConfiguration{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"get configuration"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	streamTest.myJID = [XMPPJID jidWithString:@"andres@domain.com"];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"error"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	NSXMLElement *config = [NSXMLElement elementWithName:@"roomname" stringValue:@"tester"];
+	[roomLight setConfiguration:@[config]];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToSetConfiguration:(nonnull XMPPIQ *)iq{
+	[self.delegateResponseExpectation fulfill];
+}
+
 - (XMPPIQ *)fakeIQUserListWithID:(NSString *) elementID{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<iq from='coven@muclight.shakespeare.lit'"];
@@ -657,6 +806,40 @@
 	[s appendString: @"	<x xmlns='urn:xmpp:muclight:0#destroy' />"];
 	[s appendString: @"	<body /> "];
 	[s appendString: @"</message>"];
+
+	NSError *error;
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+	XMPPMessage *message = [XMPPMessage messageFromElement:[doc rootElement]];
+	return message;
+}
+
+- (XMPPMessage *)fakeMessageChangeSubject{
+	NSMutableString *s = [NSMutableString string];
+	[s appendString:@"<message from='room-id@domain.com' to='andres@domain.com' type='groupchat'>"];
+	[s appendString:@"	<x xmlns='urn:xmpp:muclight:0#configuration'>"];
+	[s appendString:@"		<prev-version>asdfghj000</prev-version> "];
+	[s appendString:@"		<version>asdfghj</version>"];
+	[s appendString:@"		<subject>To be or not to be?</subject>"];
+	[s appendString:@"	</x>"];
+	[s appendString:@"	<body />"];
+	[s appendString:@"</message>"];
+
+	NSError *error;
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+	XMPPMessage *message = [XMPPMessage messageFromElement:[doc rootElement]];
+	return message;
+}
+
+- (XMPPMessage *)fakeMessageConfigurationChange{
+	NSMutableString *s = [NSMutableString string];
+	[s appendString:@"<message from='room-id@domain.com' to='andres@domain.com' type='groupchat'>"];
+	[s appendString:@"	<x xmlns='urn:xmpp:muclight:0#configuration'>"];
+	[s appendString:@"		<prev-version>zaqwsx</prev-version>"];
+	[s appendString:@"		<version>zxcvbnm</version>"];
+	[s appendString:@"		<roomname>A Darker Cave</roomname>"];
+	[s appendString:@"	</x>"];
+	[s appendString:@"	<body />"];
+	[s appendString:@"</message>"];
 
 	NSError *error;
 	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
