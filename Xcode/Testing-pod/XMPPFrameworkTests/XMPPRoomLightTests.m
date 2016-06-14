@@ -14,6 +14,7 @@
 @interface XMPPRoomLightTests : XCTestCase <XMPPRoomLightDelegate>
 
 @property (nonatomic, strong) XCTestExpectation *delegateResponseExpectation;
+@property BOOL receivedDestroyMessage;
 
 @end
 
@@ -450,6 +451,78 @@
 	[self.delegateResponseExpectation fulfill];
 }
 
+- (void)testDestroyRoom{
+	self.receivedDestroyMessage = NO;
+	self.delegateResponseExpectation = [self expectationWithDescription:@"delete room"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSXMLElement *query = [element elementForName:@"query"];
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#destroy");
+
+		[weakStreamTest fakeMessageResponse: [self fakeMessageDestroy]];
+
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"result"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[roomLight destroyRoom];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender roomDestroyed:(XMPPMessage *)message {
+	self.receivedDestroyMessage = YES;
+}
+
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didDestroyRoomLight:(nonnull XMPPIQ*) iqResult {
+	XCTAssertTrue(self.receivedDestroyMessage);
+	[self.delegateResponseExpectation fulfill];
+}
+
+- (void)testFailToDestroyRoom{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"delete room"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	streamTest.myJID = [XMPPJID jidWithString:@"andres@domain.com"];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"error"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[roomLight destroyRoom];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didFailToDestroyRoomLight:(XMPPIQ *)iq{
+	[self.delegateResponseExpectation fulfill];
+}
+
 - (XMPPIQ *)fakeIQUserListWithID:(NSString *) elementID{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<iq from='coven@muclight.shakespeare.lit'"];
@@ -486,6 +559,22 @@
 	[iq addAttributeWithName:@"type" stringValue:type];
 
 	return iq;
+}
+
+- (XMPPMessage *)fakeMessageDestroy{
+	NSMutableString *s = [NSMutableString string];
+	[s appendString: @"<message from='room-id@domain.com' to='andres@domain.com' type='groupchat' id='destroynotif'>"];
+	[s appendString: @"	<x xmlns='urn:xmpp:muclight:0#affiliations'>"];
+	[s appendString: @"		<user affiliation='none'>andres@domain.com</user>"];
+	[s appendString: @"	</x>"];
+	[s appendString: @"	<x xmlns='urn:xmpp:muclight:0#destroy' />"];
+	[s appendString: @"	<body /> "];
+	[s appendString: @"</message>"];
+
+	NSError *error;
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+	XMPPMessage *message = [XMPPMessage messageFromElement:[doc rootElement]];
+	return message;
 }
 
 @end

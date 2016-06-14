@@ -11,6 +11,7 @@
 
 static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
 static NSString *const XMPPRoomLightConfiguration = @"urn:xmpp:muclight:0#configuration";
+static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 @implementation XMPPRoomLight
 
@@ -272,6 +273,43 @@ static NSString *const XMPPRoomLightConfiguration = @"urn:xmpp:muclight:0#config
 	}
 }
 
+- (void)destroyRoom {
+	dispatch_block_t block = ^{ @autoreleasepool {
+
+		//  <iq from='crone1@shakespeare.lit/desktop'
+		//	    id='destroy1'
+		//	    to='coven@muclight.shakespeare.lit'
+		//	  type='set'>
+		//	  <query xmlns='urn:xmpp:muclight:0#destroy' />
+		//  </iq>
+
+		NSString *iqID = [XMPPStream generateUUID];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:_roomJID elementID:iqID];
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightDestroy];
+		[iq addChild:query];
+
+		[responseTracker addID:iqID
+						target:self
+					  selector:@selector(handleDestroyRoom:withInfo:)
+					   timeout:60.0];
+
+		[xmppStream sendElement:iq];
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)handleDestroyRoom:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
+	if ([[iq type] isEqualToString:@"result"]){
+		[multicastDelegate xmppRoomLight:self didDestroyRoomLight:iq];
+	} else {
+		[multicastDelegate xmppRoomLight:self didFailToDestroyRoomLight:iq];
+	}
+}
+
 - (void)sendMessage:(nonnull XMPPMessage *)message{
 
 	dispatch_block_t block = ^{ @autoreleasepool {
@@ -363,6 +401,13 @@ static NSString *const XMPPRoomLightConfiguration = @"urn:xmpp:muclight:0#config
 		return; // Stanza isn't for our room
 	}
 
+	BOOL destroyRoom = false;
+	NSXMLElement *xElements = [message elementsForName:@"x"];
+	for (NSXMLElement *x in xElements) {
+		if ([x.xmlns isEqualToString:XMPPRoomLightDestroy]) {
+			destroyRoom = true;
+		}
+	}
 	// Is this a message we need to store (a chat message)?
 	//
 	// We store messages that from is full room-id@domain/user-who-sends-message
@@ -371,6 +416,8 @@ static NSString *const XMPPRoomLightConfiguration = @"urn:xmpp:muclight:0#config
 	if ([from isFull] && [message isGroupChatMessageWithBody]) {
 		[xmppRoomLightStorage handleIncomingMessage:message room:self];
 		[multicastDelegate xmppRoomLight:self didReceiveMessage:message];
+	}else if(destroyRoom){
+		[multicastDelegate xmppRoomLight:self roomDestroyed:message];
 	}else{
 		// Todo... Handle other types of messages.
 	}
