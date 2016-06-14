@@ -149,7 +149,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		[iq addAttributeWithName:@"to" stringValue:self.roomJID.full];
 		[iq addAttributeWithName:@"type" stringValue:@"set"];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"urn:xmpp:muclight:0#affiliations"];
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
 		NSXMLElement *user = [NSXMLElement elementWithName:@"user"];
 		[user addAttributeWithName:@"affiliation" stringValue:@"none"];
 		user.stringValue = xmppStream.myJID.bare;
@@ -198,7 +198,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		[iq addAttributeWithName:@"to" stringValue:self.roomJID.full];
 		[iq addAttributeWithName:@"type" stringValue:@"set"];
 		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"urn:xmpp:muclight:0#affiliations"];
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
 		for (XMPPJID *userJID in users) {
 			NSXMLElement *user = [NSXMLElement elementWithName:@"user"];
 			[user addAttributeWithName:@"affiliation" stringValue:@"member"];
@@ -379,6 +379,52 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		[multicastDelegate xmppRoomLight:self didChangeRoomSubject:iq];
 	}else{
 		[multicastDelegate xmppRoomLight:self didFailToChangeroomSubject:iq];
+	}
+}
+
+- (void)changeAffiliations:(nonnull NSArray<NSXMLElement *> *)members{
+	dispatch_block_t block = ^{ @autoreleasepool {
+
+		// <iq from='crone1@shakespeare.lit/desktop'
+		//       id='member1'
+		//       to='coven@muclight.shakespeare.lit'
+		//     type='set'>
+		// 	<query xmlns='urn:xmpp:muclight:0#affiliations'>
+		// 		<user affiliation='member'>hag66@shakespeare.lit</user>
+		// 		<user affiliation='owner'>hag77@shakespeare.lit</user>
+		// 		<user affiliation='none'>hag88@shakespeare.lit</user>
+		// 	</query>
+		// </iq>
+
+		NSString *iqID = [XMPPStream generateUUID];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:_roomJID elementID:iqID];
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
+
+		for (NSXMLElement *element in members){
+			[query addChild:element];
+		}
+
+		[iq addChild:query];
+
+		[responseTracker addID:iqID
+						target:self
+					  selector:@selector(handleChangeAffiliations:withInfo:)
+					   timeout:60.0];
+
+		[xmppStream sendElement:iq];
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)handleChangeAffiliations:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
+	if ([[iq type] isEqualToString:@"result"]) {
+		[multicastDelegate xmppRoomLight:self didChangeAffiliations:iq];
+	}else{
+		[multicastDelegate xmppRoomLight:self didFailToChangeAffiliations:iq];
 	}
 }
 

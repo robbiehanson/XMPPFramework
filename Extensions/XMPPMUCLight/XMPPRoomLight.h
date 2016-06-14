@@ -34,6 +34,7 @@
 - (void)sendMessageWithBody:(nonnull NSString *)messageBody;
 - (void)changeRoomSubject:(nonnull NSString *)roomSubject;
 - (void)destroyRoom;
+- (void)changeAffiliations:(nonnull NSArray<NSXMLElement *> *)members;
 
 @end
 
@@ -67,6 +68,9 @@
 
 - (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didDestroyRoomLight:(nonnull XMPPIQ*) iqResult;
 - (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToDestroyRoomLight:(nonnull XMPPIQ*)iq;
+
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didChangeAffiliations:(nonnull XMPPIQ*) iqResult;
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToChangeAffiliations:(nonnull XMPPIQ*)iq;
 
 - (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender roomDestroyed:(nonnull XMPPMessage *)message;
 

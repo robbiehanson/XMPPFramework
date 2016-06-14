@@ -523,6 +523,93 @@
 	[self.delegateResponseExpectation fulfill];
 }
 
+- (void)testChangeAffiliations{
+	self.receivedDestroyMessage = NO;
+	self.delegateResponseExpectation = [self expectationWithDescription:@"change affiliation"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSXMLElement *query = [element elementForName:@"query"];
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#affiliations");
+
+		NSArray *users = [query elementsForName:@"user"];
+		XCTAssertEqualObjects([((NSXMLElement *)[users objectAtIndex:0]) attributeForName:@"affiliation"].stringValue,@"owner");
+		XCTAssertEqualObjects([((NSXMLElement *)[users objectAtIndex:1]) attributeForName:@"affiliation"].stringValue,@"member");
+		XCTAssertEqualObjects([((NSXMLElement *)[users objectAtIndex:2]) attributeForName:@"affiliation"].stringValue,@"none");
+
+		XCTAssertEqualObjects(((NSXMLElement *)[users objectAtIndex:0]).stringValue,@"user1@domain.com");
+		XCTAssertEqualObjects(((NSXMLElement *)[users objectAtIndex:1]).stringValue,@"user2@domain.com");
+		XCTAssertEqualObjects(((NSXMLElement *)[users objectAtIndex:2]).stringValue,@"user3@domain.com");
+
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"result"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	NSXMLElement *user1 = [NSXMLElement elementWithName:@"user" stringValue:@"user1@domain.com"];
+	NSXMLElement *user2 = [NSXMLElement elementWithName:@"user" stringValue:@"user2@domain.com"];
+	NSXMLElement *user3 = [NSXMLElement elementWithName:@"user" stringValue:@"user3@domain.com"];
+
+	[user1 addAttributeWithName:@"affiliation" stringValue:@"owner"];
+	[user2 addAttributeWithName:@"affiliation" stringValue:@"member"];
+	[user3 addAttributeWithName:@"affiliation" stringValue:@"none"];
+
+	[roomLight changeAffiliations:@[user1,user2,user3]];
+
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didChangeAffiliations:(nonnull XMPPIQ*) iqResult{
+	[self.delegateResponseExpectation fulfill];
+}
+
+- (void)testFailToChangeAffiliations{
+	self.receivedDestroyMessage = NO;
+	self.delegateResponseExpectation = [self expectationWithDescription:@"change affiliation"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPJID *roomJID = [XMPPJID jidWithString:@"room-id@domain.com"];
+
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:roomJID roomname:@"roomName"];
+	[roomLight activate:streamTest];
+	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSXMLElement *query = [element elementForName:@"query"];
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#affiliations");
+
+		NSString *iqID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"error"];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	NSXMLElement *user1 = [NSXMLElement elementWithName:@"user" stringValue:@"user1@domain.com"];
+	[user1 addAttributeWithName:@"affiliation" stringValue:@"owner"];
+
+	[roomLight changeAffiliations:@[user1]];
+	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppRoomLight:(nonnull XMPPRoomLight *)sender didFailToChangeAffiliations:(nonnull XMPPIQ*) iqResult{
+	[self.delegateResponseExpectation fulfill];
+}
+
 - (XMPPIQ *)fakeIQUserListWithID:(NSString *) elementID{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<iq from='coven@muclight.shakespeare.lit'"];
