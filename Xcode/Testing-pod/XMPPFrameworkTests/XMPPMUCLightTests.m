@@ -80,6 +80,72 @@
 	}];
 }
 
+- (void)testRequestBlockingList{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"Block List"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPMUCLight *mucLight = [[XMPPMUCLight alloc] init];
+
+	[mucLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[mucLight activate:streamTest];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSXMLElement *query = [element elementForName:@"query"];
+		XCTAssertNotNil([element elementForName:@"query"]);
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#blocking");
+		XCTAssertEqualObjects([element attributeForName:@"type"].stringValue, @"get");
+		XCTAssertEqualObjects([element attributeForName:@"to"].stringValue, @"muclight.test.com");
+
+
+		NSString *elementID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeSuccessBlockListIQWithID:elementID];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[mucLight requestBlockingList:@"muclight.test.com"];
+	
+	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void) xmppMUCLight:(XMPPMUCLight *)sender didRequestBlockingList:(NSArray<DDXMLElement *> *)items forServiceNamed:(NSString *)serviceName{
+	XCTAssertEqual(items.count, 2);
+	XCTAssertEqualObjects(serviceName, @"muclight.test.com");
+	[self.delegateResponseExpectation fulfill];
+}
+
+- (void)testFailToRequestBlockingList{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"Block List"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPMUCLight *mucLight = [[XMPPMUCLight alloc] init];
+
+	[mucLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[mucLight activate:streamTest];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		XMPPIQ *iq = [self fakeErrorIQWithID:[element attributeForName:@"id"].stringValue];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	[mucLight requestBlockingList:@"muclight.test.com"];
+
+	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void)xmppMUCLight:(XMPPMUCLight *)sender failedToRequestBlockingList:(NSString *)serviceName withError:(NSError *)error{
+	XCTAssertEqualObjects(serviceName, @"muclight.test.com");
+	[self.delegateResponseExpectation fulfill];
+}
 
 - (void)testDiscoverRoomsForServiceNamed {
 	self.delegateResponseExpectation = [self expectationWithDescription:@"Slot Response"];
@@ -183,6 +249,49 @@
 	[self.delegateResponseExpectation fulfill];
 }
 
+- (void)testPerformActionOnElements{
+	self.delegateResponseExpectation = [self expectationWithDescription:@"Perform Action"];
+
+	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+	XMPPMUCLight *mucLight = [[XMPPMUCLight alloc] init];
+
+	[mucLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[mucLight activate:streamTest];
+
+	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
+	streamTest.elementReceived = ^void(NSXMLElement *element) {
+		NSXMLElement *query = [element elementForName:@"query"];
+		XCTAssertEqualObjects([element attributeForName:@"type"].stringValue, @"set");
+		XCTAssertEqualObjects([element attributeForName:@"to"].stringValue, @"muclight.test.com");
+		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#blocking");
+
+		NSXMLElement *itemElement = [[query children] firstObject];
+		XCTAssertEqualObjects(itemElement.stringValue, @"user@test.com");
+		XCTAssertEqualObjects(itemElement.name, @"user");
+		XCTAssertEqualObjects([itemElement attributeStringValueForName:@"action"], @"deny");
+
+		NSString *elementID = [element attributeForName:@"id"].stringValue;
+		XMPPIQ *iq = [self fakeSuccessIQWithID:elementID];
+		[weakStreamTest fakeIQResponse:iq];
+	};
+
+	NSXMLElement *element = [NSXMLElement elementWithName:@"user" stringValue:@"user@test.com"];
+	[element addAttributeWithName:@"action" stringValue:@"deny"];
+
+	NSArray *elements = @[element];
+	[mucLight performActionOnElements:elements forServiceNamed:@"muclight.test.com"];
+
+	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
+		if(error){
+			XCTFail(@"Expectation Failed with error: %@", error);
+		}
+	}];
+}
+
+- (void) xmppMUCLight:(XMPPMUCLight *)sender didPerformAction:(XMPPIQ *)serviceName{
+	[self.delegateResponseExpectation fulfill];
+}
+
 - (XMPPMessage *)fakeMessageChangeAffiliation {
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<message from='coven@muclight.shakespeare.lit'"];
@@ -244,5 +353,26 @@
 
 	return iq;
 }
+
+- (XMPPIQ *)fakeSuccessBlockListIQWithID:(NSString *) elementID{
+	NSMutableString *s = [NSMutableString string];
+	[s appendString: @"<iq from='muclight.test.com'"];
+	[s appendString: @"    id='zb8q41f4'"];
+	[s appendString: @"    to='hag66@shakespeare.lit/pda'"];
+	[s appendString: @"    type='result'>"];
+	[s appendString: @"    <query xmlns='urn:xmpp:muclight:0#blocking'>"];
+	[s appendString: @"        <room action='deny'>coven@muclight.shakespeare.lit</room>"];
+	[s appendString: @"        <user action='deny'>hag77@shakespeare.lit</user>"];
+	[s appendString: @"    </query>"];
+	[s appendString: @"</iq>"];
+
+	NSError *error;
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
+	[iq addAttributeWithName:@"id" stringValue:elementID];
+
+	return iq;
+}
+
 
 @end

@@ -16,6 +16,7 @@
 NSString *const XMPPMUCLightDiscoItemsNamespace = @"http://jabber.org/protocol/disco#items";
 NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
 NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
+NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 
 @interface XMPPMUCLight() {
 	NSMutableSet *rooms;
@@ -127,6 +128,98 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 		dispatch_async(moduleQueue, block);
 }
 
+- (BOOL)requestBlockingList:(nonnull NSString *)serviceName{
+	if (serviceName.length < 2)
+		return NO;
+
+	// <iq from='crone1@shakespeare.lit/desktop' id='getblock1' to='muclight.shakespeare.lit' type='get'>
+	//		<query xmlns='urn:xmpp:muclight:0#blocking'> </query>
+	// </iq>
+
+	dispatch_block_t block = ^{ @autoreleasepool {
+
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query"
+													  xmlns:XMPPMUCLightBlocking];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get"
+									 to:[XMPPJID jidWithString:serviceName]
+							  elementID:[xmppStream generateUUID]
+								  child:query];
+
+		[xmppIDTracker addElement:iq
+						   target:self
+						 selector:@selector(handleRequestBlockingList:withInfo:)
+						  timeout:60];
+
+		[xmppStream sendElement:iq];
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+
+	return YES;
+}
+
+- (void)handleRequestBlockingList:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)info {
+	NSString *serviceName = [iq attributeStringValueForName:@"from" withDefaultValue:@""];
+	if ([[iq type] isEqualToString:@"result"]) {
+		NSXMLElement *query = [iq elementForName:@"query"];
+		[multicastDelegate xmppMUCLight:self didRequestBlockingList:[query children] forServiceNamed:serviceName];
+	}else{
+		[multicastDelegate xmppMUCLight:self failedToRequestBlockingList:serviceName withError:iq];
+	}
+}
+
+- (BOOL)performActionOnElements:(nonnull NSArray<NSXMLElement *> *)elements forServiceNamed:(nonnull NSString *)serviceName{
+	if (serviceName.length < 2)
+		return NO;
+
+	//	<iq from='crone1@shakespeare.lit/desktop' id='block2' to='muclight.shakespeare.lit' type='set'>
+	//		<query xmlns='urn:xmpp:muclight:0#blocking'>
+	//			<user action='deny'>hag66@shakespeare.lit</room>
+	//			<user action='deny'>hag77@shakespeare.lit</room>
+	//		</query>
+	//	</iq>
+
+	dispatch_block_t block = ^{ @autoreleasepool {
+
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query"
+													  xmlns:XMPPMUCLightBlocking];
+		for (NSXMLElement *element in elements) {
+			[query addChild:element];
+		}
+
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"
+									 to:[XMPPJID jidWithString:serviceName]
+							  elementID:[xmppStream generateUUID]
+								  child:query];
+
+		[xmppIDTracker addElement:iq
+						   target:self
+						 selector:@selector(handlePerformAction:withInfo:)
+						  timeout:60];
+
+		[xmppStream sendElement:iq];
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+	return YES;
+}
+
+- (void)handlePerformAction:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)info {
+	NSString *serviceName = [iq attributeStringValueForName:@"from" withDefaultValue:@""];
+	if ([[iq type] isEqualToString:@"result"]) {
+		NSXMLElement *query = [iq elementForName:@"query"];
+		[multicastDelegate xmppMUCLight:self didPerformAction:iq];
+	}else{
+		[multicastDelegate xmppMUCLight:self failedToPerformAction:iq];
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,14 +241,14 @@ NSString *const XMPPMUCLightErrorDomain = @"XMPPMUCErrorDomain";
 	NSXMLElement *x = [message elementForName:@"x" xmlns:XMPPRoomLightAffiliations];
 	NSXMLElement *user  = [x elementForName:@"user"];
 	NSString *affiliation = [user attributeForName:@"affiliation"].stringValue;
-	
+
 	if (affiliation) {
 		[multicastDelegate xmppMUCLight:self changedAffiliation:affiliation roomJID:from];
 	}
 }
 
 - (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module {
-	
+
 	dispatch_block_t block = ^{ @autoreleasepool {
 		if ([module isKindOfClass:[XMPPRoomLight class]]){
 

@@ -22,6 +22,8 @@
  *  - It discovers rooms for a service.
  *  - It monitors active XMPPRoomLight instances on the xmppStream.
  *  - It listens for MUCLigh room affiliation changes sent from other users.
+ *  - It allows to block/unblock users/rooms
+ *  - It lists the list of blocked users/rooms
  *
  * Server suport:
  *  - MongooseIM 2.0.0+ (https://github.com/esl/MongooseIM/)
@@ -42,7 +44,8 @@
 
 - (nonnull NSSet *)rooms;
 - (BOOL)discoverRoomsForServiceNamed:(nonnull NSString *)serviceName;
-
+- (BOOL)requestBlockingList:(nonnull NSString *)serviceName;
+- (BOOL)performActionOnElements:(nonnull NSArray<NSXMLElement *> *)elements forServiceNamed:(nonnull NSString *)serviceName;
 @end
 
 @protocol XMPPMUCLightDelegate
@@ -51,5 +54,11 @@
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender didDiscoverRooms:(nonnull NSArray<NSXMLElement*>*)rooms forServiceNamed:(nonnull NSString *)serviceName;
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender failedToDiscoverRoomsForServiceNamed:(nonnull NSString *)serviceName withError:(nonnull NSError *)error;
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender changedAffiliation:(nonnull NSString *)affiliation roomJID:(nonnull XMPPJID *)roomJID;
+
+- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender didRequestBlockingList:(nonnull NSArray<NSXMLElement*>*)items forServiceNamed:(nonnull NSString *)serviceName;
+- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender failedToRequestBlockingList:(nonnull NSString *)serviceName withError:(nonnull XMPPIQ *)iq;
+
+- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender didPerformAction:(nonnull XMPPIQ *)serviceName;
+- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender failedToPerformAction:(nonnull XMPPIQ *)iq;
 
 @end
