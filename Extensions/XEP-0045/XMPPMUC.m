@@ -192,7 +192,7 @@ NSString *const XMPPMUCErrorDomain = @"XMPPMUCErrorDomain";
     [xmppStream sendElement:iq];
     hasRequestedRooms = YES;
   }};
-
+	
   if (dispatch_get_specific(moduleQueueTag))
     block();
   else

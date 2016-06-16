@@ -16,6 +16,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 @interface XMPPRoomLight() {
 	NSString *roomname;
 	NSString *subject;
+	NSString *version;
 }
 @end
 
@@ -82,6 +83,12 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	}
 }
 
+- (nonnull NSString *)version {
+	@synchronized(subject) {
+		return [version copy];
+	}
+}
+
 - (void)handleConfigElements:(NSArray<NSXMLElement*> *)configElements{
 	for (NSXMLElement *element in configElements) {
 		if([element.name isEqualToString:@"subject"]){
@@ -106,6 +113,17 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 - (void)setSubject:(NSString *)aSubject{
 	dispatch_block_t block = ^{ @autoreleasepool {
 		subject = aSubject;
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)setVersion:(NSString *)aVersion{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		version = aVersion;
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -295,6 +313,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		NSString *iqID = [XMPPStream generateUUID];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
+		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.version]];
 		[iq addChild:query];
 		
 		[responseTracker addID:iqID
@@ -455,7 +474,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		NSString *iqID = [XMPPStream generateUUID];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightConfiguration];
-
+		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.version]];
 		[iq addChild:query];
 
 		[responseTracker addID:iqID
@@ -527,12 +546,17 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq{
 	NSString *type = [iq type];
-	
-	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
-	{
+
+	NSXMLElement *query = [iq elementForName:@"query"];
+	NSXMLElement *version = [query elementForName:@"version"];
+	if(version){
+		[self setVersion:version.stringValue];
+	}
+
+	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"]){
 		return [responseTracker invokeForID:[iq elementID] withObject:iq];
 	}
-	
+
 	return NO;
 }
 
