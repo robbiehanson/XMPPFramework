@@ -13,6 +13,12 @@ static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affilia
 static NSString *const XMPPRoomLightConfiguration = @"urn:xmpp:muclight:0#configuration";
 static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
+@interface XMPPRoomLight() {
+	NSString *roomname;
+	NSString *subject;
+}
+@end
+
 @implementation XMPPRoomLight
 
 - (instancetype)init{
@@ -23,15 +29,15 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	return [self initWithRoomLightStorage:nil jid:roomJID roomname:roomname dispatchQueue:nil];
 }
 
-- (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)roomname dispatchQueue:(nullable dispatch_queue_t)queue{
+- (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)aRoomname dispatchQueue:(nullable dispatch_queue_t)queue{
 
 	NSParameterAssert(aRoomJID != nil);
 
 	if ((self = [super initWithDispatchQueue:queue])){
 		xmppRoomLightStorage = storage;
 		_domain = aRoomJID.domain;
-		_roomname = roomname;
 		_roomJID = aRoomJID;
+		roomname = aRoomname;
 	}
 	return self;
 
@@ -64,6 +70,50 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	[super deactivate];
 }
 
+- (nonnull NSString *)roomname {
+	@synchronized(roomname) {
+		return [roomname copy];
+	}
+}
+
+- (nonnull NSString *)subject {
+	@synchronized(subject) {
+		return [subject copy];
+	}
+}
+
+- (void)handleConfigElements:(NSArray<NSXMLElement*> *)configElements{
+	for (NSXMLElement *element in configElements) {
+		if([element.name isEqualToString:@"subject"]){
+			[self setSubject:element.stringValue];
+		} else if([element.name isEqualToString:@"roomname"]) {
+			[self setRoomname:element.stringValue];
+		}
+	}
+}
+
+- (void)setRoomname:(NSString *)aRoomname{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		roomname = aRoomname;
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)setSubject:(NSString *)aSubject{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		subject = aSubject;
+	}};
+
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
 - (void)createRoomLightWithMembersJID:(nullable NSArray<XMPPJID *> *) members{
 	
 	//		<iq from='crone1@shakespeare.lit/desktop'
@@ -94,7 +144,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"urn:xmpp:muclight:0#create"];
 		NSXMLElement *configuration = [NSXMLElement elementWithName:@"configuration"];
-		[configuration addChild:[NSXMLElement elementWithName:@"roomname" stringValue:self.roomname]];
+		[configuration addChild:[NSXMLElement elementWithName:@"roomname" stringValue:roomname]];
 		
 		NSXMLElement *ocupants = [NSXMLElement elementWithName:@"ocupants"];
 		for (XMPPJID *jid in members){
@@ -424,6 +474,9 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)handleGetConfiguration:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
 	if ([[iq type] isEqualToString:@"result"]) {
+		NSArray *configElements = [iq elementForName:@"query"].children;
+		[self handleConfigElements:configElements];
+
 		[multicastDelegate xmppRoomLight:self didGetConfiguration:iq];
 	}else{
 		[multicastDelegate xmppRoomLight:self didFailToGetConfiguration:iq];
@@ -512,6 +565,9 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	}else if(destroyRoom){
 		[multicastDelegate xmppRoomLight:self roomDestroyed:message];
 	}else if(changeConfiguration){
+		NSArray *configElements = [message elementForName:@"x"].children;
+		[self handleConfigElements:configElements];
+
 		[multicastDelegate xmppRoomLight:self configurationChanged:message];
 	}else{
 		// Todo... Handle other types of messages.

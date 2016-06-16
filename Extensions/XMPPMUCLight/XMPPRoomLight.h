@@ -21,11 +21,12 @@
 
 @property (readonly, nonatomic, strong, nonnull) XMPPJID *roomJID;
 @property (readonly, nonatomic, strong, nonnull) NSString *domain;
-@property (readonly, nonatomic, strong, nonnull) NSString *roomname;
 
+- (nonnull NSString *)roomname;
+- (nonnull NSString *)subject;
 
 - (nonnull instancetype)initWithJID:(nonnull XMPPJID *)roomJID roomname:(nonnull NSString *) roomname;
-- (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)roomname dispatchQueue:(nullable dispatch_queue_t)queue;
+- (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)aRoomname dispatchQueue:(nullable dispatch_queue_t)queue;
 - (void)createRoomLightWithMembersJID:(nullable NSArray<XMPPJID *> *) members;
 - (void)leaveRoomLight;
 - (void)addUsers:(nonnull NSArray<XMPPJID *> *)users;

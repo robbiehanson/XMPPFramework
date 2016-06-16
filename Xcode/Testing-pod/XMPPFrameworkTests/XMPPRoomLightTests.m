@@ -601,7 +601,7 @@
 		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#configuration");
 
 		NSString *iqID = [element attributeForName:@"id"].stringValue;
-		XMPPIQ *iq = [self fakeIQWithID:iqID  andType:@"result"];
+		XMPPIQ *iq = [self fakeIQConfigurationMessageWithID:iqID];
 		[weakStreamTest fakeIQResponse:iq];
 	};
 
@@ -611,6 +611,8 @@
 		if(error){
 			XCTFail(@"Expectation Failed with error: %@", error);
 		}
+		XCTAssertEqualObjects(roomLight.roomname, @"Roomname");
+		XCTAssertEqualObjects(roomLight.subject, @"Subject");
 	}];
 }
 
@@ -667,7 +669,7 @@
 		XCTAssertEqualObjects(query.xmlns, @"urn:xmpp:muclight:0#configuration");
 
 		NSXMLElement *config = [query children].firstObject;
-		XCTAssertEqualObjects(config.stringValue,@"tester");
+		XCTAssertEqualObjects(config.stringValue,@"A Darker Cave");
 		XCTAssertEqualObjects(config.name,@"roomname");
 
 		[weakStreamTest fakeMessageResponse:[self fakeMessageConfigurationChange]];
@@ -677,13 +679,14 @@
 		[weakStreamTest fakeIQResponse:iq];
 	};
 
-	NSXMLElement *config = [NSXMLElement elementWithName:@"roomname" stringValue:@"tester"];
+	NSXMLElement *config = [NSXMLElement elementWithName:@"roomname" stringValue:@"A Darker Cave"];
 	[roomLight setConfiguration:@[config]];
 
 	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
 		if(error){
 			XCTFail(@"Expectation Failed with error: %@", error);
 		}
+		XCTAssertEqualObjects(roomLight.roomname, @"A Darker Cave");
 	}];
 }
 
@@ -758,6 +761,23 @@
 	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
 	[iq addAttributeWithName:@"id" stringValue:elementID];
 	[iq addAttributeWithName:@"type" stringValue:type];
+
+	return iq;
+}
+
+- (XMPPIQ *)fakeIQConfigurationMessageWithID:(NSString *) elementID {
+	NSMutableString *s = [NSMutableString string];
+	[s appendString:@"<iq xmlns='jabber:client' from='testtesttest@muclight.erlang-solutions.com' to='ramabit@erlang-solutions.com/Andress-MacBook-Air' id='config0' type='result'>"];
+	[s appendString:@"	<query xmlns='urn:xmpp:muclight:0#configuration'>"];
+	[s appendString:@"		<roomname>Roomname</roomname>"];
+	[s appendString:@"		<subject>Subject</subject>"];
+	[s appendString:@"	</query>"];
+	[s appendString:@"</iq>"];
+
+	NSError *error;
+	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
+	[iq addAttributeWithName:@"id" stringValue:elementID];
 
 	return iq;
 }
