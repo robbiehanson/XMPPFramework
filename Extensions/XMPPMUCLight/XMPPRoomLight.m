@@ -339,47 +339,9 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 }
 
 - (void)changeRoomSubject:(nonnull NSString *)roomSubject{
-	dispatch_block_t block = ^{ @autoreleasepool {
 
-		//	<iq from='hag66@shakespeare.lit/pda'
-		//		  id='subject1'
-		//		  to='coven@muclight.shakespeare.lit'
-		//		type='set'>
-		//		<query xmlns='urn:xmpp:muclight:0#configuration'>
-		//			<subject>To be or not to be?</subject>
-		//		</query>
-		//	</iq>
+	[self setConfiguration:@[[NSXMLElement elementWithName:@"subject" stringValue:roomSubject]]];
 
-		NSString *iqID = [XMPPStream generateUUID];
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:_roomJID elementID:iqID];
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightConfiguration];
-		[iq addChild:query];
-
-		XMPPElement *subject = [NSXMLElement elementWithName:@"subject"];
-		subject.stringValue = roomSubject;
-
-		[query addChild:subject];
-
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleChangeRoomSubjectResponse:withInfo:)
-					   timeout:60.0];
-
-		[xmppStream sendElement:iq];
-	}};
-
-	if (dispatch_get_specific(moduleQueueTag))
-		block();
-	else
-		dispatch_async(moduleQueue, block);
-}
-
-- (void)handleChangeRoomSubjectResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
-	if ([[iq type] isEqualToString:@"result"]) {
-		[multicastDelegate xmppRoomLight:self didChangeRoomSubject:iq];
-	}else{
-		[multicastDelegate xmppRoomLight:self didFailToChangeroomSubject:iq];
-	}
 }
 
 - (void)changeAffiliations:(nonnull NSArray<NSXMLElement *> *)members{
