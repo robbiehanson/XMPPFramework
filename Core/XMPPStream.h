@@ -271,6 +271,26 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 #endif
 
+/**
+ * By default, IPv6 is now preferred over IPv4 to satisfy Apple's June 2016
+ * DNS64/NAT64 requirements for app approval. Disabling this option may cause
+ * issues during app approval.
+ *
+ * https://developer.apple.com/library/ios/documentation/NetworkingInternetWeb/Conceptual/NetworkingOverview/UnderstandingandPreparingfortheIPv6Transition/UnderstandingandPreparingfortheIPv6Transition.html
+ *
+ * This new default may cause connectivity issues for misconfigured servers that have
+ * both A and AAAA DNS records but don't respond to IPv6. A proper solution to this
+ * is to fix your XMPP server and/or DNS entries. However, when Happy Eyeballs
+ * (RFC 6555) is implemented upstream in GCDAsyncSocket it should resolve the issue 
+ * of misconfigured servers because it will try both the preferred protocol (IPv6) and
+ * and fallback protocol (IPv4) after a 300ms delay.
+ *
+ * Any changes to this option MUST be done before calling connect.
+ *
+ * The default value is YES.
+ **/
+@property (assign, readwrite) BOOL preferIPv6;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark State
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
