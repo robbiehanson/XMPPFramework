@@ -233,8 +233,20 @@
 
 - (void)_fetchvCardTempForJID:(XMPPJID *)jid{
     if(!jid) return;
+    
+    // A user retrieves his or her own vCard by sending an IQ-get with no 'to' address and containing a <vCard/> child element qualified by the 'vcard-temp' namespace.
+    if ([jid isEqualToJID:[xmppStream myJID] options:XMPPJIDCompareBare]) {
+        jid = nil;
+    }
 
-    [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:jid]];
+    XMPPIQ *iq = [XMPPvCardTemp iqvCardRequestForJID:jid];
+    
+    [_myvCardTracker addElement:iq
+                         target:self
+                       selector:@selector(handleFetchvCard:withInfo:)
+                        timeout:600];
+    
+    [xmppStream sendElement:iq];
 }
 
 - (void)handleMyvcard:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo{
@@ -247,8 +259,25 @@
     {
         NSXMLElement *errorElement = [iq elementForName:@"error"];
         [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToUpdateMyvCard:errorElement];
-    }        
+    }
+}
 
+- (void)handleFetchvCard:(XMPPIQ*)iq withInfo:(XMPPBasicTrackingInfo*)trackerInfo {
+    XMPPJID *jid = trackerInfo.element.to;
+    // If JID was omitted from request, you were fetching your own vCard
+    if (!jid) {
+        jid = xmppStream.myJID;
+    }
+    if([iq isErrorIQ])
+    {
+        NSXMLElement *errorElement = [iq elementForName:@"error"];
+        [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToFetchvCardForJID:jid error:errorElement];
+    } else if([iq isResultIQ]) {
+        NSXMLElement *vCard = [iq elementForName:@"vCard"];
+        if (vCard.childCount == 0) {
+            [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToFetchvCardForJID:jid error:nil];
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

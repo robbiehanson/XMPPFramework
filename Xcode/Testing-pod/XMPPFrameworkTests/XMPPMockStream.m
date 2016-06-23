@@ -7,23 +7,31 @@
 //
 
 #import "XMPPMockStream.h"
+#import "XMPPInternal.h"
 
 @implementation XMPPMockStream
 
+- (id) init {
+    if (self = [super init]) {
+        [super setValue:@(STATE_XMPP_CONNECTED) forKey:@"state"];
+    }
+    return self;
+}
+
+- (BOOL) isAuthenticated {
+    return YES;
+}
+
 - (void)fakeMessageResponse:(XMPPMessage *) message {
-	[((id<XMPPStreamDelegate>)self.delegate) xmppStream:self didReceiveMessage:message];
+    [self injectElement:message];
 }
 
 - (void)fakeIQResponse:(XMPPIQ *) iq {
-	[((id<XMPPStreamDelegate>)self.delegate) xmppStream:self didReceiveIQ:iq];
-}
-
-- (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue{
-	[super addDelegate:delegate delegateQueue:delegateQueue];
-	self.delegate = delegate;
+    [self injectElement:iq];
 }
 
 - (void)sendElement:(NSXMLElement *)element {
+    [super sendElement:element];
 	if(self.elementReceived) {
 		self.elementReceived(element);
 	}

@@ -14,6 +14,5 @@
 - (void)fakeMessageResponse:(XMPPMessage *) message;
 
 @property (nonatomic, copy) void (^elementReceived)(NSXMLElement *element);
-@property (nonatomic, strong) id delegate;
 
 @end
