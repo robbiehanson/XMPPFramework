@@ -234,10 +234,6 @@
 - (void)_fetchvCardTempForJID:(XMPPJID *)jid{
     if(!jid) return;
     
-    // A user retrieves his or her own vCard by sending an IQ-get with no 'to' address and containing a <vCard/> child element qualified by the 'vcard-temp' namespace.
-    if ([jid isEqualToJID:[xmppStream myJID] options:XMPPJIDCompareBare]) {
-        jid = nil;
-    }
 
     XMPPIQ *iq = [XMPPvCardTemp iqvCardRequestForJID:jid];
     
@@ -273,9 +269,14 @@
         NSXMLElement *errorElement = [iq elementForName:@"error"];
         [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToFetchvCardForJID:jid error:errorElement];
     } else if([iq isResultIQ]) {
-        NSXMLElement *vCard = [iq elementForName:@"vCard"];
+        NSXMLElement *vCard = [[iq elementForName:@"vCard"] copy];
         if (vCard.childCount == 0) {
             [(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self failedToFetchvCardForJID:jid error:nil];
+        } else if (![iq from]) {
+            // If there's no fromJID, it means the vCard was already within didReceiveIQ, and this is
+            // the vCard for yourself
+            XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempFromElement:vCard];
+            [self _updatevCardTemp:vCardTemp forJID:jid];
         }
     }
 }
@@ -288,7 +289,12 @@
 {
 	// This method is invoked on the moduleQueue.
 	
-    [_myvCardTracker invokeForElement:iq withObject:iq];
+    if (!iq.from) {
+        // Some error responses for self or contacts don't have a "from"
+        [_myvCardTracker invokeForID:iq.elementID withObject:iq];
+    } else {
+        [_myvCardTracker invokeForElement:iq withObject:iq];
+    }
     
 	// Remember XML heirarchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
