@@ -11,7 +11,9 @@ XMPPFramework provides a core implementation of RFC-3920 (the XMPP standard), al
 
 ### Install
 
-The easiest way to install the `XMPPFramework` is using CocoaPods:
+The minimum deployment target is iOS 8.0 / macOS 10.
+
+The easiest way to install `XMPPFramework` is using CocoaPods. Remember to add to the top of your `Podfile` the `use_frameworks!` line (even if you are not using swift):
 
 - This will install the whole framework with all the avaiable extensions:
 
@@ -31,7 +33,7 @@ After `pod install` open the `.xcworkspace` and import:
 
 ```
 import XMPPFramework      // swift
-#import <XMPPFramework.h> //objective-c 
+@import XMPPFramework;   //objective-c
 ```
 
 ### Wiki:
