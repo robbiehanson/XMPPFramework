@@ -746,7 +746,14 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 	if (phonetic != nil) {
 		[elem setStringValue:phonetic];
 	} else if (sound != nil) {
-		[self removeChildAtIndex:[[self children] indexOfObject:phonetic]];
+        // The old code never actually did anything
+        // because the phonetic object is a NSString but
+        // the children are DDXMLNodes.
+        //
+        // [self removeChildAtIndex:[[self children] indexOfObject:phonetic]];
+        
+        // Maybe this is what was intended? I'm not sure.
+        [self removeChildAtIndex:[[self children] indexOfObject:sound]];
 	}
 }
 

@@ -45,12 +45,11 @@ s.source = { :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branc
     core.libraries = 'xml2', 'resolv'
     core.xcconfig = {
       'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv',
-      'LIBRARY_SEARCH_PATHS' => '"$(PODS_ROOT)/XMPPFramework/Vendor/libidn"',
-      'OTHER_LDFLAGS' => '"-lxml2"', 'ENABLE_BITCODE' => 'NO'
+      'ENABLE_BITCODE' => 'NO'
     }
     core.dependency 'CocoaLumberjack', '~> 2.0'
     core.dependency 'CocoaAsyncSocket', '~> 7.5.0'
-    core.dependency 'KissXML', '~> 5.1.1'
+    core.dependency 'KissXML', '~> 5.1.2'
   end
 
   s.subspec 'BandwidthMonitor' do |ss|

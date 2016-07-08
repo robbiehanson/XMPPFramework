@@ -794,7 +794,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 {
 	roomJid = [roomJid bareJID]; // Just in case a full jid is accidentally passed
 	
-	__block NSArray *results = nil;
+	__block NSArray *results = @[];
 	
 	void (^block)(BOOL) = ^(BOOL shouldCopy){ @autoreleasepool {
 		
