@@ -1,7 +1,8 @@
-# references:
-# * http://www.objc.io/issue-6/travis-ci.html
 osx_image: xcode7.3
 language: objective-c
+
+install:
+  - gem install cocoapods -v 1.0.1 --no-rdoc --no-ri 
 
 script:
   - pod install --project-directory=Xcode/Testing-iOS

@@ -1,9 +1,12 @@
-*.pbxuser
-*.mode1v3
-*.mode2v3
-xcuserdata
 .DS_Store
+build
+*.mode1v3
+*.pbxuser
 project.xcworkspace
-.idea
+xcuserdata
+.svn
+DerivedData
+*.orig
+*.xccheckout
 
 Pods/

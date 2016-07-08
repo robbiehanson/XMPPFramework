@@ -6,6 +6,6 @@ use_frameworks!
 target 'XMPPFrameworkTests' do
 
   pod "XMPPFramework", :path => "../../"
-  pod 'KissXML/SwiftNSXML', :git => 'https://github.com/robbiehanson/KissXML.git', :commit => '749f4392dae83bc8feb12f402735513eb4fd7139'
+  pod 'KissXML/SwiftNSXML', '~> 5.1.2'
 
 end

@@ -10,10 +10,10 @@ PODS:
     - CocoaLumberjack/Core
   - CocoaLumberjack/Extensions (2.3.0):
     - CocoaLumberjack/Default
-  - KissXML (5.1.1):
-    - KissXML/Core (= 5.1.1)
-  - KissXML/Core (5.1.1)
-  - KissXML/SwiftNSXML (5.1.1):
+  - KissXML (5.1.2):
+    - KissXML/Core (= 5.1.2)
+  - KissXML/Core (5.1.2)
+  - KissXML/SwiftNSXML (5.1.2):
     - KissXML/Core
   - XMPPFramework (3.7.0):
     - XMPPFramework/All (= 3.7.0)
@@ -178,27 +178,19 @@ PODS:
     - XMPPFramework/XEP-0203
 
 DEPENDENCIES:
-  - KissXML/SwiftNSXML (from `https://github.com/robbiehanson/KissXML.git`, commit `749f4392dae83bc8feb12f402735513eb4fd7139`)
+  - KissXML/SwiftNSXML (~> 5.1.2)
   - XMPPFramework (from `../../`)
 
 EXTERNAL SOURCES:
-  KissXML:
-    :commit: 749f4392dae83bc8feb12f402735513eb4fd7139
-    :git: https://github.com/robbiehanson/KissXML.git
   XMPPFramework:
     :path: "../../"
-
-CHECKOUT OPTIONS:
-  KissXML:
-    :commit: 749f4392dae83bc8feb12f402735513eb4fd7139
-    :git: https://github.com/robbiehanson/KissXML.git
 
 SPEC CHECKSUMS:
   CocoaAsyncSocket: 3baeb1ddd969f81cf9fca81053ae49ef2d1cbbfa
   CocoaLumberjack: 97fab7ee5f507fe54445cca7ea80f926729cfd15
-  KissXML: 399becf3fd59b126ff35749acf3ad2b4c5d13c40
+  KissXML: 246c842586bb77110e04fb88e19376d96245c856
   XMPPFramework: a16a3bb700a518ac5d7fb6bd3385c64e8eb77df1
 
-PODFILE CHECKSUM: 599d9f3903b0ec6efec7caeecac3a15b3da6ce3c
+PODFILE CHECKSUM: e6ff7a103c19c3a47fe625656baf8e2a6388550b
 
 COCOAPODS: 1.0.1

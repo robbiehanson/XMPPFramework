@@ -11,10 +11,10 @@
             buildForRunning = "YES"
             buildForProfiling = "NO"
             buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
+            buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "63F50D911C60208100CA0201"
+               BlueprintIdentifier = "D973A08D1D2F1EB10096F3ED"
                BuildableName = "XMPPFrameworkTests.xctest"
                BlueprintName = "XMPPFrameworkTests"
                ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
@@ -32,13 +32,22 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "63F50D911C60208100CA0201"
+               BlueprintIdentifier = "D973A08D1D2F1EB10096F3ED"
                BuildableName = "XMPPFrameworkTests.xctest"
                BlueprintName = "XMPPFrameworkTests"
                ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "D973A08D1D2F1EB10096F3ED"
+            BuildableName = "XMPPFrameworkTests.xctest"
+            BlueprintName = "XMPPFrameworkTests"
+            ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -55,7 +64,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "63F50D911C60208100CA0201"
+            BlueprintIdentifier = "D973A08D1D2F1EB10096F3ED"
             BuildableName = "XMPPFrameworkTests.xctest"
             BlueprintName = "XMPPFrameworkTests"
             ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
@@ -70,15 +79,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "63F50D911C60208100CA0201"
-            BuildableName = "XMPPFrameworkTests.xctest"
-            BlueprintName = "XMPPFrameworkTests"
-            ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
