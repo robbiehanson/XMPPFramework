@@ -3,7 +3,7 @@ language: objective-c
 
 install:
   - gem install cocoapods -v 1.0.1 --no-rdoc --no-ri
-  - pod repo update
+  - pod repo update --silent
 
 script:
   - pod install --project-directory=Xcode/Testing-iOS
