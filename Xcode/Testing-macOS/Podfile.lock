@@ -10,9 +10,9 @@ PODS:
     - CocoaLumberjack/Core
   - CocoaLumberjack/Extensions (2.3.0):
     - CocoaLumberjack/Default
-  - KissXML (5.1.1):
-    - KissXML/Core (= 5.1.1)
-  - KissXML/Core (5.1.1)
+  - KissXML (5.1.2):
+    - KissXML/Core (= 5.1.2)
+  - KissXML/Core (5.1.2)
   - XMPPFramework (3.7.0):
     - XMPPFramework/All (= 3.7.0)
   - XMPPFramework/All (3.7.0):
@@ -69,7 +69,7 @@ PODS:
   - XMPPFramework/Core (3.7.0):
     - CocoaAsyncSocket (~> 7.5.0)
     - CocoaLumberjack (~> 2.0)
-    - KissXML (~> 5.1.1)
+    - KissXML (~> 5.1.2)
   - XMPPFramework/CoreDataStorage (3.7.0):
     - XMPPFramework/Core
   - XMPPFramework/FileTransfer (3.7.0):
@@ -187,8 +187,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   CocoaAsyncSocket: 3baeb1ddd969f81cf9fca81053ae49ef2d1cbbfa
   CocoaLumberjack: 97fab7ee5f507fe54445cca7ea80f926729cfd15
-  KissXML: 399becf3fd59b126ff35749acf3ad2b4c5d13c40
-  XMPPFramework: a16a3bb700a518ac5d7fb6bd3385c64e8eb77df1
+  KissXML: 246c842586bb77110e04fb88e19376d96245c856
+  XMPPFramework: 977eef5d00c20fe9fb19c30d84a89c2d5564252d
 
 PODFILE CHECKSUM: 60ef7b61dbefcbfc0e925de93e38b044e0b7ffb6
 
