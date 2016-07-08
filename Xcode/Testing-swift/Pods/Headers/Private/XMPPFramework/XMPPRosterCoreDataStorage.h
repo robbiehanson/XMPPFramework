@@ -1,1 +1,0 @@
-../../../../../../Extensions/Roster/CoreDataStorage/XMPPRosterCoreDataStorage.h

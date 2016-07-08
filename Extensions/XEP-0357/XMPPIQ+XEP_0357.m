@@ -8,6 +8,7 @@
 
 #import "XMPPIQ+XEP_0357.h"
 #import "XMPPJID.h"
+#import "NSXMLElement+XMPP.h"
 
 NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
 

@@ -23,11 +23,12 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 @implementation XMPPRoomLight
 
 - (instancetype)init{
-	return [self initWithRoomLightStorage:nil jid:nil roomname:nil dispatchQueue:nil];
+    NSAssert(NO, @"Cannot be instantiated with init!");
+    return nil;
 }
 
-- (nonnull instancetype)initWithJID:(nonnull XMPPJID *)roomJID roomname:(nonnull NSString *) roomname{
-	return [self initWithRoomLightStorage:nil jid:roomJID roomname:roomname dispatchQueue:nil];
+- (nonnull instancetype)initWithJID:(nonnull XMPPJID *)roomJID roomname:(nonnull NSString *)_roomname{
+	return [self initWithRoomLightStorage:nil jid:roomJID roomname:_roomname dispatchQueue:nil];
 }
 
 - (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)aRoomname dispatchQueue:(nullable dispatch_queue_t)queue{
@@ -493,7 +494,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)handleGetConfiguration:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
 	if ([[iq type] isEqualToString:@"result"]) {
-		NSArray *configElements = [iq elementForName:@"query"].children;
+		NSArray *configElements = [[iq elementsForLocalName:@"query" URI:XMPPRoomLightConfiguration] firstObject].children;
 		[self handleConfigElements:configElements];
 
 		[multicastDelegate xmppRoomLight:self didGetConfiguration:iq];
@@ -546,11 +547,11 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq{
 	NSString *type = [iq type];
-
-	NSXMLElement *query = [iq elementForName:@"query"];
-	NSXMLElement *version = [query elementForName:@"version"];
-	if(version){
-		[self setVersion:version.stringValue];
+    
+	NSXMLElement *query = [[iq elementsForLocalName:@"query" URI:XMPPRoomLightConfiguration] firstObject];
+	NSXMLElement *inVersion = [query elementForName:@"version"];
+	if(inVersion){
+		[self setVersion:inVersion.stringValue];
 	}
 
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"]){
@@ -570,7 +571,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 	BOOL destroyRoom = false;
 	BOOL changeConfiguration = false;
-	NSXMLElement *xElements = [message elementsForName:@"x"];
+	NSArray <NSXMLElement*> *xElements = [message elementsForName:@"x"];
 	for (NSXMLElement *x in xElements) {
 		if ([x.xmlns isEqualToString:XMPPRoomLightDestroy]) {
 			destroyRoom = true;

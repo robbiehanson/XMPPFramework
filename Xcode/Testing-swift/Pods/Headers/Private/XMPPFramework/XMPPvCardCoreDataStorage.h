@@ -1,1 +1,0 @@
-../../../../../../Extensions/XEP-0054/CoreDataStorage/XMPPvCardCoreDataStorage.h

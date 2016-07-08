@@ -1,9 +1,0 @@
-ENABLE_BITCODE = NO
-GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = "${PODS_ROOT}/Headers/Private" "${PODS_ROOT}/Headers/Private/XMPPFramework" "${PODS_ROOT}/Headers/Public" $(inherited) $(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/KissXML/libxml $(SDKROOT)/usr/include/libresolv
-LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../../Vendor/libidn" "$(PODS_ROOT)/XMPPFramework/Vendor/libidn"
-OTHER_CFLAGS = $(inherited) -DDDXML_LIBXML_MODULE_ENABLED=1
-OTHER_LDFLAGS = -l"idn" -l"resolv" -l"xml2" -framework "CoreData" -framework "CoreLocation" -framework "Foundation" -framework "SystemConfiguration" -framework "UIKit"
-OTHER_SWIFT_FLAGS = $(inherited) -DDDXML_LIBXML_MODULE_ENABLED
-PODS_ROOT = ${SRCROOT}
-SKIP_INSTALL = YES

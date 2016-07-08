@@ -7,6 +7,7 @@
 //
 
 #import "XMPPSlot.h"
+#import "NSXMLElement+XMPP.h"
 
 @implementation XMPPSlot
 

@@ -42,16 +42,16 @@
 	XMPPIDTracker *xmppIDTracker;
 }
 
-- (nonnull NSSet *)rooms;
+- (nonnull NSSet<XMPPJID*>*)rooms;
 - (BOOL)discoverRoomsForServiceNamed:(nonnull NSString *)serviceName;
 - (BOOL)requestBlockingList:(nonnull NSString *)serviceName;
-- (BOOL)performActionOnElements:(nonnull NSArray<NSXMLElement *> *)elements forServiceNamed:(nonnull NSString *)serviceName;
+- (BOOL)performActionOnElements:(nonnull NSArray<__kindof NSXMLElement *> *)elements forServiceNamed:(nonnull NSString *)serviceName;
 @end
 
 @protocol XMPPMUCLightDelegate
 @optional
 
-- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender didDiscoverRooms:(nonnull NSArray<NSXMLElement*>*)rooms forServiceNamed:(nonnull NSString *)serviceName;
+- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender didDiscoverRooms:(nonnull NSArray<__kindof NSXMLElement*>*)rooms forServiceNamed:(nonnull NSString *)serviceName;
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender failedToDiscoverRoomsForServiceNamed:(nonnull NSString *)serviceName withError:(nonnull NSError *)error;
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender changedAffiliation:(nonnull NSString *)affiliation roomJID:(nonnull XMPPJID *)roomJID;
 

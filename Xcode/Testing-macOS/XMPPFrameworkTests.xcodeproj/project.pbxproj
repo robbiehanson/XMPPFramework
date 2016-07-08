@@ -1,0 +1,374 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4A6D92D0C7C1950CBA77BE55 /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */; };
+		D973A0A41D2F1EF60096F3ED /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */; };
+		D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */; };
+		D973A0A61D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0981D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m */; };
+		D973A0A71D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0991D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m */; };
+		D973A0A81D2F1EF60096F3ED /* XMPPMockStream.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A09B1D2F1EF60096F3ED /* XMPPMockStream.m */; };
+		D973A0A91D2F1EF60096F3ED /* XMPPMUCLightTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A09C1D2F1EF60096F3ED /* XMPPMUCLightTests.m */; };
+		D973A0AA1D2F1EF60096F3ED /* XMPPPushTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D973A09D1D2F1EF60096F3ED /* XMPPPushTests.swift */; };
+		D973A0AB1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A09E1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m */; };
+		D973A0AC1D2F1EF60096F3ED /* XMPPRoomLightTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A09F1D2F1EF60096F3ED /* XMPPRoomLightTests.m */; };
+		D973A0AD1D2F1EF60096F3ED /* XMPPStorageHintTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A01D2F1EF60096F3ED /* XMPPStorageHintTests.m */; };
+		D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */; };
+		D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */; };
+		D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1FFB10AE98925E51A8604C49 /* Pods-XMPPFrameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.release.xcconfig"; sourceTree = "<group>"; };
+		23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
+		D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D973A0921D2F1EB10096F3ED /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CapabilitiesHashingTest.m; path = "../../Testing-Shared/CapabilitiesHashingTest.m"; sourceTree = "<group>"; };
+		D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EncodeDecodeTest.m; path = "../../Testing-Shared/EncodeDecodeTest.m"; sourceTree = "<group>"; };
+		D973A0981D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPHTTPFileUploadTests.m; path = "../../Testing-Shared/XMPPHTTPFileUploadTests.m"; sourceTree = "<group>"; };
+		D973A0991D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMessageArchiveManagementTests.m; path = "../../Testing-Shared/XMPPMessageArchiveManagementTests.m"; sourceTree = "<group>"; };
+		D973A09A1D2F1EF60096F3ED /* XMPPMockStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPMockStream.h; path = "../../Testing-Shared/XMPPMockStream.h"; sourceTree = "<group>"; };
+		D973A09B1D2F1EF60096F3ED /* XMPPMockStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMockStream.m; path = "../../Testing-Shared/XMPPMockStream.m"; sourceTree = "<group>"; };
+		D973A09C1D2F1EF60096F3ED /* XMPPMUCLightTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMUCLightTests.m; path = "../../Testing-Shared/XMPPMUCLightTests.m"; sourceTree = "<group>"; };
+		D973A09D1D2F1EF60096F3ED /* XMPPPushTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPPushTests.swift; path = "../../Testing-Shared/XMPPPushTests.swift"; sourceTree = "<group>"; };
+		D973A09E1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomLightCoreDataStorageTests.m; path = "../../Testing-Shared/XMPPRoomLightCoreDataStorageTests.m"; sourceTree = "<group>"; };
+		D973A09F1D2F1EF60096F3ED /* XMPPRoomLightTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPRoomLightTests.m; path = "../../Testing-Shared/XMPPRoomLightTests.m"; sourceTree = "<group>"; };
+		D973A0A01D2F1EF60096F3ED /* XMPPStorageHintTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPStorageHintTests.m; path = "../../Testing-Shared/XMPPStorageHintTests.m"; sourceTree = "<group>"; };
+		D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPSwift.swift; path = "../../Testing-Shared/XMPPSwift.swift"; sourceTree = "<group>"; };
+		D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPURITests.m; path = "../../Testing-Shared/XMPPURITests.m"; sourceTree = "<group>"; };
+		D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D973A08B1D2F1EB10096F3ED /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A6D92D0C7C1950CBA77BE55 /* Pods_XMPPFrameworkTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		51C1BDB24D30F80CABBEF1DC /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */,
+				1FFB10AE98925E51A8604C49 /* Pods-XMPPFrameworkTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		63F55A521C60204300438CE2 = {
+			isa = PBXGroup;
+			children = (
+				D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */,
+				D973A08F1D2F1EB10096F3ED /* XMPPFrameworkTests */,
+				51C1BDB24D30F80CABBEF1DC /* Pods */,
+				EAAA3F63141413653179C632 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		D973A08F1D2F1EB10096F3ED /* XMPPFrameworkTests */ = {
+			isa = PBXGroup;
+			children = (
+				D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */,
+				D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */,
+				D973A0981D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m */,
+				D973A0991D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m */,
+				D973A09A1D2F1EF60096F3ED /* XMPPMockStream.h */,
+				D973A09B1D2F1EF60096F3ED /* XMPPMockStream.m */,
+				D973A09C1D2F1EF60096F3ED /* XMPPMUCLightTests.m */,
+				D973A09D1D2F1EF60096F3ED /* XMPPPushTests.swift */,
+				D973A09E1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m */,
+				D973A09F1D2F1EF60096F3ED /* XMPPRoomLightTests.m */,
+				D973A0A01D2F1EF60096F3ED /* XMPPStorageHintTests.m */,
+				D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */,
+				D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */,
+				D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */,
+				D973A0921D2F1EB10096F3ED /* Info.plist */,
+			);
+			path = XMPPFrameworkTests;
+			sourceTree = "<group>";
+		};
+		EAAA3F63141413653179C632 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D973A08D1D2F1EB10096F3ED /* XMPPFrameworkTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D973A0931D2F1EB10096F3ED /* Build configuration list for PBXNativeTarget "XMPPFrameworkTests" */;
+			buildPhases = (
+				363412D993A683505AF253DE /* [CP] Check Pods Manifest.lock */,
+				D973A08A1D2F1EB10096F3ED /* Sources */,
+				D973A08B1D2F1EB10096F3ED /* Frameworks */,
+				D973A08C1D2F1EB10096F3ED /* Resources */,
+				2EA6C37B1D758323ECB52066 /* [CP] Embed Pods Frameworks */,
+				641866745039D77DBEB0D018 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = XMPPFrameworkTests;
+			productName = XMPPFrameworkTests;
+			productReference = D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		63F55A531C60204300438CE2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				TargetAttributes = {
+					D973A08D1D2F1EB10096F3ED = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 63F55A561C60204300438CE2 /* Build configuration list for PBXProject "XMPPFrameworkTests" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 63F55A521C60204300438CE2;
+			productRefGroup = 63F55A521C60204300438CE2;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D973A08D1D2F1EB10096F3ED /* XMPPFrameworkTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D973A08C1D2F1EB10096F3ED /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2EA6C37B1D758323ECB52066 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		363412D993A683505AF253DE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		641866745039D77DBEB0D018 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D973A08A1D2F1EB10096F3ED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D973A0A41D2F1EF60096F3ED /* CapabilitiesHashingTest.m in Sources */,
+				D973A0A91D2F1EF60096F3ED /* XMPPMUCLightTests.m in Sources */,
+				D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */,
+				D973A0AB1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
+				D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */,
+				D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */,
+				D973A0A81D2F1EF60096F3ED /* XMPPMockStream.m in Sources */,
+				D973A0AC1D2F1EF60096F3ED /* XMPPRoomLightTests.m in Sources */,
+				D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */,
+				D973A0A71D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m in Sources */,
+				D973A0A61D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m in Sources */,
+				D973A0AA1D2F1EF60096F3ED /* XMPPPushTests.swift in Sources */,
+				D973A0AD1D2F1EF60096F3ED /* XMPPStorageHintTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		63F55A571C60204300438CE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				ONLY_ACTIVE_ARCH = YES;
+			};
+			name = Debug;
+		};
+		63F55A581C60204300438CE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		D973A0941D2F1EB10096F3ED /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = XMPPFrameworkTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.xmppframework.XMPPFrameworkTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D973A0951D2F1EB10096F3ED /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFB10AE98925E51A8604C49 /* Pods-XMPPFrameworkTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = XMPPFrameworkTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = org.xmppframework.XMPPFrameworkTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		63F55A561C60204300438CE2 /* Build configuration list for PBXProject "XMPPFrameworkTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				63F55A571C60204300438CE2 /* Debug */,
+				63F55A581C60204300438CE2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D973A0931D2F1EB10096F3ED /* Build configuration list for PBXNativeTarget "XMPPFrameworkTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D973A0941D2F1EB10096F3ED /* Debug */,
+				D973A0951D2F1EB10096F3ED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 63F55A531C60204300438CE2 /* Project object */;
+}

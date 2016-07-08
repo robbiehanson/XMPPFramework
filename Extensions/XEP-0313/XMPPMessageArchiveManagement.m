@@ -9,6 +9,7 @@
 #import "XMPPFramework.h"
 #import "XMPPLogging.h"
 #import "XMPPIDTracker.h"
+#import "NSXMLElement+XEP_0297.h"
 
 #define XMLNS_XMPP_MAM @"urn:xmpp:mam:1"
 
@@ -26,15 +27,15 @@
 
 		self.queryID = [XMPPStream generateUUID];
 		
-		DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
+		NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
 		[queryElement addAttributeWithName:@"queryid" stringValue:self.queryID];
 		[iq addChild:queryElement];
 
-		DDXMLElement *xElement = [DDXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
+		NSXMLElement *xElement = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
 		[xElement addAttributeWithName:@"type" stringValue:@"submit"];
 		[xElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:@"urn:xmpp:mam:1"]];
 
-		for (DDXMLElement *field in fields) {
+		for (NSXMLElement *field in fields) {
 			[xElement addChild:field];
 		}
 
@@ -43,7 +44,7 @@
 		if (resultSet) {
 			[queryElement addChild:resultSet];
 		}
-
+        
 		[xmppIDTracker addElement:iq
 						   target:self
 						 selector:@selector(handleMessageArchiveIQ:withInfo:)
@@ -64,8 +65,8 @@
 	
 	if ([[iq type] isEqualToString:@"result"]) {
 		
-		DDXMLElement *finElement = [iq elementForName:@"fin" xmlns:XMLNS_XMPP_MAM];
-		DDXMLElement *setElement = [finElement elementForName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
+		NSXMLElement *finElement = [iq elementForName:@"fin" xmlns:XMLNS_XMPP_MAM];
+		NSXMLElement *setElement = [finElement elementForName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
 		
 		XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:setElement];
 		[multicastDelegate xmppMessageArchiveManagement:self didFinishReceivingMessagesWithSet:resultSet];
@@ -74,15 +75,15 @@
 	}
 }
 
-+ (DDXMLElement *)fieldWithVar:(NSString *)var type:(NSString *)type andValue:(NSString *)value {
-	DDXMLElement *field = [DDXMLElement elementWithName:@"field"];
++ (NSXMLElement *)fieldWithVar:(NSString *)var type:(NSString *)type andValue:(NSString *)value {
+	NSXMLElement *field = [NSXMLElement elementWithName:@"field"];
 	[field addAttributeWithName:@"var" stringValue:var];
 	
 	if(type){
 		[field addAttributeWithName:@"type" stringValue:type];
 	}
 	
-	DDXMLElement *elementValue = [DDXMLElement elementWithName:@"value"];
+	NSXMLElement *elementValue = [NSXMLElement elementWithName:@"value"];
 	elementValue.stringValue = value;
 	
 	[field addChild:elementValue];
@@ -97,7 +98,7 @@
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get"];
 		[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
 
-		DDXMLElement *queryElement = [DDXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
+		NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
 		[iq addChild:queryElement];
 
 		[xmppIDTracker addElement:iq
@@ -165,8 +166,8 @@
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
-	DDXMLElement *result = [message elementForName:@"result" xmlns:XMLNS_XMPP_MAM];
-	DDXMLElement *forwarded = [result elementForName:@"forwarded"];
+	NSXMLElement *result = [message elementForName:@"result" xmlns:XMLNS_XMPP_MAM];
+	BOOL forwarded = [result hasForwardedStanza];
 	
 	NSString *queryID = [result attributeForName:@"queryid"].stringValue;
 	

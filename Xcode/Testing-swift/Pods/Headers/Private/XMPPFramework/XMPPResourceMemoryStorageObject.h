@@ -1,1 +1,0 @@
-../../../../../../Extensions/Roster/MemoryStorage/XMPPResourceMemoryStorageObject.h

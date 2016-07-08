@@ -256,7 +256,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-- (NSString *)prefix {
+- (NSString *)vPrefix {
 	NSString *result = nil;
 	NSXMLElement *name = [self elementForName:@"N"];
 	
@@ -272,7 +272,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 
-- (void)setPrefix:(NSString *)prefix {
+- (void)setVPrefix:(NSString *)prefix {
 	XMPP_VCARD_SET_N_CHILD(prefix, @"PREFIX");
 }
 

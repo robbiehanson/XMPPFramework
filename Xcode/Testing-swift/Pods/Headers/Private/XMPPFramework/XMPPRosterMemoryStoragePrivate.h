@@ -1,1 +1,0 @@
-../../../../../../Extensions/Roster/MemoryStorage/XMPPRosterMemoryStoragePrivate.h

@@ -49,7 +49,8 @@ extern NSString *const kXMPPvCardTempElement;
 @property (nonatomic, strong) NSString *familyName;
 @property (nonatomic, strong) NSString *givenName;
 @property (nonatomic, strong) NSString *middleName;
-@property (nonatomic, strong) NSString *prefix;
+/** This property used to collide with the NSXMLNode prefix */
+@property (nonatomic, strong) NSString *vPrefix;
 @property (nonatomic, strong) NSString *suffix;
 
 @property (nonatomic, strong) NSArray *addresses;

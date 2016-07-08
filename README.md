@@ -2,7 +2,8 @@
 ![XMPPFramework](xmppframework.png)
 
 ## XMPPFramework
-[![Build Status](https://travis-ci.org/robbiehanson/XMPPFramework.svg?branch=master)](https://travis-ci.org/robbiehanson/XMPPFramework) [![codecov.io](https://img.shields.io/badge/pod-v3.6.7-brightgreen.svg)](https://github.com/robbiehanson/XMPPFramework)
+[![Build Status](https://travis-ci.org/robbiehanson/XMPPFramework.svg?branch=master)](https://travis-ci.org/robbiehanson/XMPPFramework) [![Version Status](https://img.shields.io/cocoapods/v/XMPPFramework.svg?style=flat)](https://github.com/robbiehanson/XMPPFramework) [![Platform](https://img.shields.io/cocoapods/p/XMPPFramework.svg?style=flat)](https://cocoapods.org/?q=XMPPFramework) [![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-orange.svg?style=flat)](http://opensource.org/licenses/BSD-3-Clause)
+
 
 An XMPP Framework in Objective-C for the Mac and iOS development community.
 
@@ -11,7 +12,7 @@ XMPPFramework provides a core implementation of RFC-3920 (the XMPP standard), al
 
 ### Install
 
-The minimum deployment target is iOS 8.0 / macOS 10.
+The minimum deployment target is iOS 8.0 / macOS 10.8.
 
 The easiest way to install `XMPPFramework` is using CocoaPods. Remember to add to the top of your `Podfile` the `use_frameworks!` line (even if you are not using swift):
 
