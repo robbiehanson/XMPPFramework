@@ -51,5 +51,6 @@ Can't find the answer to your question in any of the [wiki](https://github.com/r
 
 Love the project? Wanna buy me a ☕️? (or a 🍺 😀):
 
-[![donation](https://www.paypal.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CV6XGZTPQU9HY)
+[![donation-bitcoin](https://bitpay.com/img/donate-sm.png)](https://onename.com/robbiehanson)
+[![donation-paypal](https://www.paypal.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CV6XGZTPQU9HY)
 
