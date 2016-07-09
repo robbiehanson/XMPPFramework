@@ -34,4 +34,9 @@ class XMPPSwift: XCTestCase {
         XCTAssertNotNil(stream)
     }
     
+    func testCreateParser() {
+        let parser = XMPPParser()
+        XCTAssertNotNil(parser)
+    }
+    
 }

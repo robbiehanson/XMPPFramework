@@ -4,7 +4,22 @@
 #import <libxml/parserInternals.h>
 
 #if TARGET_OS_IPHONE
-  #import "DDXMLPrivate.h"
+
+// These internal functions are ripped out of DDXMLPrivate.h
+// If the function signatures of these methods ever change in KissXML
+// we won't know until there are runtime crashes. Not great.
+
+// This change is needed because DDXMLPrivate.h was made private in the latest
+// release of KissXML to avoid Swift issues with non-modular includes.
+
+@interface DDXMLElement (PrivateAPI)
++ (instancetype)nodeWithElementPrimitive:(xmlNodePtr)node owner:(DDXMLNode *)owner;
+@end
+
+@interface DDXMLNode (PrivateAPI)
++ (void)detachChild:(xmlNodePtr)child andClean:(BOOL)clean andFixNamespaces:(BOOL)fixNamespaces;
+@end
+
 #endif
 
 #if ! __has_feature(objc_arc)
