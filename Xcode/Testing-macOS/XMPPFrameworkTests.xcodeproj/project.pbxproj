@@ -22,6 +22,7 @@
 		D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */; };
 		D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */; };
 		E0B1B8191D34033D00B7E608 /* XMPP0030Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B1B8181D34033D00B7E608 /* XMPP0030Tests.m */; };
+		E0B3E9231D340AA300EAD41B /* XMPPServiceDiscoveryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B3E9221D340AA300EAD41B /* XMPPServiceDiscoveryTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPURITests.m; path = "../../Testing-Shared/XMPPURITests.m"; sourceTree = "<group>"; };
 		D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
 		E0B1B8181D34033D00B7E608 /* XMPP0030Tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPP0030Tests.m; path = "../../Testing-Shared/XMPP0030Tests.m"; sourceTree = "<group>"; };
+		E0B3E9221D340AA300EAD41B /* XMPPServiceDiscoveryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPServiceDiscoveryTests.m; path = "../../Testing-Shared/XMPPServiceDiscoveryTests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +83,9 @@
 		D973A08F1D2F1EB10096F3ED /* XMPPFrameworkTests */ = {
 			isa = PBXGroup;
 			children = (
+				D973A0921D2F1EB10096F3ED /* Info.plist */,
+				D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */,
+				D973A09D1D2F1EF60096F3ED /* XMPPPushTests.swift */,
 				D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */,
 				D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */,
 				D973A0981D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m */,
@@ -88,15 +93,13 @@
 				D973A09A1D2F1EF60096F3ED /* XMPPMockStream.h */,
 				D973A09B1D2F1EF60096F3ED /* XMPPMockStream.m */,
 				D973A09C1D2F1EF60096F3ED /* XMPPMUCLightTests.m */,
-				D973A09D1D2F1EF60096F3ED /* XMPPPushTests.swift */,
 				D973A09E1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m */,
 				D973A09F1D2F1EF60096F3ED /* XMPPRoomLightTests.m */,
 				D973A0A01D2F1EF60096F3ED /* XMPPStorageHintTests.m */,
-				D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */,
 				D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */,
 				D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */,
 				E0B1B8181D34033D00B7E608 /* XMPP0030Tests.m */,
-				D973A0921D2F1EB10096F3ED /* Info.plist */,
+				E0B3E9221D340AA300EAD41B /* XMPPServiceDiscoveryTests.m */,
 			);
 			path = XMPPFrameworkTests;
 			sourceTree = "<group>";
@@ -252,6 +255,7 @@
 				D973A0AC1D2F1EF60096F3ED /* XMPPRoomLightTests.m in Sources */,
 				D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */,
 				D973A0A71D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m in Sources */,
+				E0B3E9231D340AA300EAD41B /* XMPPServiceDiscoveryTests.m in Sources */,
 				D973A0A61D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m in Sources */,
 				D973A0AA1D2F1EF60096F3ED /* XMPPPushTests.swift in Sources */,
 				D973A0AD1D2F1EF60096F3ED /* XMPPStorageHintTests.m in Sources */,

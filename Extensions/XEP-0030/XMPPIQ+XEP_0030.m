@@ -80,7 +80,7 @@
 
 	NSXMLElement *query = [iq elementForName:@"query" xmlns: XMPPDiscoInfoNamespace];
 	if(query) {
-		return [query children];
+		return [query children] ? [query children] : ((NSArray <NSXMLElement *> *)[[NSArray alloc] init]);
 	}
 
 	return nil;
