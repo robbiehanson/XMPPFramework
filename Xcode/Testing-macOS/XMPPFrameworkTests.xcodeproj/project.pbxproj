@@ -21,6 +21,7 @@
 		D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */; };
 		D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */; };
 		D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */; };
+		E0B1B8191D34033D00B7E608 /* XMPP0030Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B1B8181D34033D00B7E608 /* XMPP0030Tests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPSwift.swift; path = "../../Testing-Shared/XMPPSwift.swift"; sourceTree = "<group>"; };
 		D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPURITests.m; path = "../../Testing-Shared/XMPPURITests.m"; sourceTree = "<group>"; };
 		D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
+		E0B1B8181D34033D00B7E608 /* XMPP0030Tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPP0030Tests.m; path = "../../Testing-Shared/XMPP0030Tests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +95,7 @@
 				D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */,
 				D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */,
 				D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */,
+				E0B1B8181D34033D00B7E608 /* XMPP0030Tests.m */,
 				D973A0921D2F1EB10096F3ED /* Info.plist */,
 			);
 			path = XMPPFrameworkTests;
@@ -119,6 +122,7 @@
 				D973A08C1D2F1EB10096F3ED /* Resources */,
 				2EA6C37B1D758323ECB52066 /* [CP] Embed Pods Frameworks */,
 				641866745039D77DBEB0D018 /* [CP] Copy Pods Resources */,
+				77063CE993D33E4CBF4CD6AD /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -215,6 +219,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		77063CE993D33E4CBF4CD6AD /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -227,6 +246,7 @@
 				D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */,
 				D973A0AB1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
 				D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */,
+				E0B1B8191D34033D00B7E608 /* XMPP0030Tests.m in Sources */,
 				D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */,
 				D973A0A81D2F1EF60096F3ED /* XMPPMockStream.m in Sources */,
 				D973A0AC1D2F1EF60096F3ED /* XMPPRoomLightTests.m in Sources */,
