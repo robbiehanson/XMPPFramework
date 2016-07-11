@@ -20,6 +20,8 @@
 		D973A0861D2F18040096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A07A1D2F18040096F3ED /* XMPPURITests.m */; };
 		D973A0871D2F18040096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A07B1D2F18040096F3ED /* XMPPvCardTests.m */; };
 		D973A0891D2F18310096F3ED /* XMPPSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D973A0881D2F18310096F3ED /* XMPPSwift.swift */; };
+		E0B3E9261D341EA200EAD41B /* XMPPTBRAuthenticationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B3E9241D341EA200EAD41B /* XMPPTBRAuthenticationTests.m */; };
+		E0B3E9271D341EA200EAD41B /* XMPPTBReconnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B3E9251D341EA200EAD41B /* XMPPTBReconnectionTests.m */; };
 		FDD2AB232C05507F2045FFFC /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CD0B17267211A912DE2098E /* Pods_XMPPFrameworkTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +46,8 @@
 		D973A07A1D2F18040096F3ED /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPURITests.m; path = "../../Testing-Shared/XMPPURITests.m"; sourceTree = "<group>"; };
 		D973A07B1D2F18040096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
 		D973A0881D2F18310096F3ED /* XMPPSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPSwift.swift; path = "../../Testing-Shared/XMPPSwift.swift"; sourceTree = "<group>"; };
+		E0B3E9241D341EA200EAD41B /* XMPPTBRAuthenticationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPTBRAuthenticationTests.m; path = "../../Testing-Shared/XMPPTBRAuthenticationTests.m"; sourceTree = "<group>"; };
+		E0B3E9251D341EA200EAD41B /* XMPPTBReconnectionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPTBReconnectionTests.m; path = "../../Testing-Shared/XMPPTBReconnectionTests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +95,8 @@
 				D973A0791D2F18040096F3ED /* XMPPStorageHintTests.m */,
 				D973A07A1D2F18040096F3ED /* XMPPURITests.m */,
 				D973A07B1D2F18040096F3ED /* XMPPvCardTests.m */,
+				E0B3E9241D341EA200EAD41B /* XMPPTBRAuthenticationTests.m */,
+				E0B3E9251D341EA200EAD41B /* XMPPTBReconnectionTests.m */,
 				63F50D971C60208200CA0201 /* Info.plist */,
 				D973A06E1D2F18030096F3ED /* XMPPFrameworkTests-Bridging-Header.h */,
 			);
@@ -129,6 +135,7 @@
 				63F50D901C60208100CA0201 /* Resources */,
 				CCA1BE22B534ECFCFCF57023 /* [CP] Embed Pods Frameworks */,
 				72947C0BCD2C8A092200B05D /* [CP] Copy Pods Resources */,
+				3D7644AE01223CFF7A270CB5 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -195,6 +202,21 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
+		3D7644AE01223CFF7A270CB5 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		72947C0BCD2C8A092200B05D /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -232,6 +254,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0B3E9271D341EA200EAD41B /* XMPPTBReconnectionTests.m in Sources */,
 				D973A07C1D2F18040096F3ED /* CapabilitiesHashingTest.m in Sources */,
 				D973A0811D2F18040096F3ED /* XMPPMUCLightTests.m in Sources */,
 				D973A07D1D2F18040096F3ED /* EncodeDecodeTest.m in Sources */,
@@ -241,6 +264,7 @@
 				D973A0861D2F18040096F3ED /* XMPPURITests.m in Sources */,
 				D973A07F1D2F18040096F3ED /* XMPPMessageArchiveManagementTests.m in Sources */,
 				D973A07E1D2F18040096F3ED /* XMPPHTTPFileUploadTests.m in Sources */,
+				E0B3E9261D341EA200EAD41B /* XMPPTBRAuthenticationTests.m in Sources */,
 				D973A0821D2F18040096F3ED /* XMPPPushTests.swift in Sources */,
 				D973A0851D2F18040096F3ED /* XMPPStorageHintTests.m in Sources */,
 				D973A0891D2F18310096F3ED /* XMPPSwift.swift in Sources */,

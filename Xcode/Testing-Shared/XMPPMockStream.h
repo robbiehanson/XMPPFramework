@@ -13,6 +13,6 @@
 - (void)fakeIQResponse:(XMPPIQ *) iq;
 - (void)fakeMessageResponse:(XMPPMessage *) message;
 
+@property BOOL supportsTBR;
 @property (nonatomic, copy) void (^elementReceived)(XMPPElement *element);
-
 @end
