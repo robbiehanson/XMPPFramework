@@ -278,7 +278,7 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 			// This way the isMUCRoomElement will still remain accurate
 			// for presence elements that may arrive momentarily.
 
-			double delayInSeconds = 30.0;
+			double delayInSeconds = [self delayInSeconds];
 			dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
 			dispatch_after(popTime, moduleQueue, ^{ @autoreleasepool {
 				[rooms removeObject:roomJID];
@@ -300,6 +300,10 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 	}
 
 	return NO;
+}
+
+- (double) delayInSeconds {
+	return 30.0;
 }
 
 @end
