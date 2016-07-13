@@ -173,7 +173,7 @@
 }
 
 - (void)didInsertMessage:(XMPPRoomLightMessageCoreDataStorageObject *)message{
-	// Override me if you're extending the XMPPRoomMessageCoreDataStorageObject class to add additional properties.
+	// Override me if you're extending the XMPPRoomLightMessageCoreDataStorageObject class to add additional properties.
 	// You can update your additional properties here.
 	//
 	// At this point the standard properties have already been set.
