@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="10171" systemVersion="15E65" minimumToolsVersion="Xcode 7.0">
-    <entity name="XMPPRoomLightMessageCoreDataStorageObject" representedClassName="XMPPRoomMessageCoreDataStorageObject" syncable="YES">
+    <entity name="XMPPRoomLightMessageCoreDataStorageObject" representedClassName="XMPPRoomLightMessageCoreDataStorageObject" syncable="YES">
         <attribute name="body" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="fromMe" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="jid" optional="YES" transient="YES" syncable="YES"/>
