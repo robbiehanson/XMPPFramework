@@ -16,7 +16,8 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 @interface XMPPRoomLight() {
 	NSString *roomname;
 	NSString *subject;
-	NSString *version;
+	NSString *configVersion;
+	NSString *memberListVersion;
 }
 @end
 
@@ -40,6 +41,8 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		_domain = aRoomJID.domain;
 		_roomJID = aRoomJID;
 		roomname = aRoomname;
+		configVersion = @"";
+		memberListVersion = @"";
 	}
 	return self;
 
@@ -84,9 +87,15 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	}
 }
 
-- (nonnull NSString *)version {
+- (nonnull NSString *)configVersion {
 	@synchronized(subject) {
-		return [version copy];
+		return [configVersion copy];
+	}
+}
+
+- (nonnull NSString *)memberListVersion {
+	@synchronized(subject) {
+		return [memberListVersion copy];
 	}
 }
 
@@ -122,15 +131,31 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)setVersion:(NSString *)aVersion{
+- (void)setMemberListVersion:(NSString *)aVersion{
 	dispatch_block_t block = ^{ @autoreleasepool {
-		version = aVersion;
+		memberListVersion = aVersion;
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
+}
+
+- (void)setConfigVersion:(NSString *)aVersion{
+	dispatch_block_t block = ^{ @autoreleasepool {
+		configVersion = aVersion;
+	}};
+	
+	if (dispatch_get_specific(moduleQueueTag))
+		block();
+	else
+		dispatch_async(moduleQueue, block);
+}
+
+- (void)flushVersion{
+	[self setConfigVersion:@""];
+	[self setMemberListVersion:@""];
 }
 
 - (void)createRoomLightWithMembersJID:(nullable NSArray<XMPPJID *> *) members{
@@ -314,7 +339,8 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		NSString *iqID = [XMPPStream generateUUID];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
-		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.version]];
+
+		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.memberListVersion]];
 		[iq addChild:query];
 		
 		[responseTracker addID:iqID
@@ -335,8 +361,15 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	if ([[iq type] isEqualToString:@"result"]){
 		NSXMLElement *query = [iq elementForName:@"query"
 										   xmlns:XMPPRoomLightAffiliations];
-		NSArray *items = [query elementsForName:@"user"];
+
+		NSXMLElement *inVersion = [query elementForName:@"version"];
+		if(inVersion){
+			[self setMemberListVersion:inVersion.stringValue];
+		}
 		
+		NSArray *items = [query elementsForName:@"user"];
+		if (!items) { items = @[]; }
+
 		[multicastDelegate xmppRoomLight:self didFetchMembersList:items];
 	}else{
 		[multicastDelegate xmppRoomLight:self didFailToFetchMembersList:iq];
@@ -475,7 +508,8 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		NSString *iqID = [XMPPStream generateUUID];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightConfiguration];
-		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.version]];
+
+		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.configVersion]];
 		[iq addChild:query];
 
 		[responseTracker addID:iqID
@@ -494,6 +528,13 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)handleGetConfiguration:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info{
 	if ([[iq type] isEqualToString:@"result"]) {
+
+		NSXMLElement *query = [[iq elementsForLocalName:@"query" URI:XMPPRoomLightConfiguration] firstObject];
+		NSXMLElement *inVersion = [query elementForName:@"version"];
+		if(inVersion){
+			[self setConfigVersion:inVersion.stringValue];
+		}
+
 		NSArray *configElements = [[iq elementsForLocalName:@"query" URI:XMPPRoomLightConfiguration] firstObject].children;
 		[self handleConfigElements:configElements];
 
@@ -547,13 +588,6 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq{
 	NSString *type = [iq type];
-    
-	NSXMLElement *query = [[iq elementsForLocalName:@"query" URI:XMPPRoomLightConfiguration] firstObject];
-	NSXMLElement *inVersion = [query elementForName:@"version"];
-	if(inVersion){
-		[self setVersion:inVersion.stringValue];
-	}
-
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"]){
 		return [responseTracker invokeForID:[iq elementID] withObject:iq];
 	}
