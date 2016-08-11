@@ -18,9 +18,10 @@ The easiest way to install `XMPPFramework` is using CocoaPods. Remember to add t
 
 - This will install the whole framework with all the avaiable extensions:
 
-```
-pod 'XMPPFramework'
-
+```ruby
+# The version pushed to CocoaPods is very out of date, use master branch for now
+pod 'XMPPFramework', :git => "https://github.com/robbiehanson/XMPPFramework.git", :branch => 'master'
+# pod 'XMPPFramework'
 ```
 
 - If you want to pick what extensions to install:
