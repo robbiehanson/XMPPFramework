@@ -38,7 +38,7 @@
 - (void)changeAffiliations:(nonnull NSArray<NSXMLElement *> *)members;
 - (void)getConfiguration;
 - (void)setConfiguration:(nonnull NSArray<NSXMLElement *> *)configs;
-
+- (void)flushVersion;
 @end
 
 @protocol XMPPRoomLightStorage <NSObject>

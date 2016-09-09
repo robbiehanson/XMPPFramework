@@ -11,6 +11,11 @@
 #import "XMPPRoomLight.h"
 #import "XMPPJID.h"
 
+@interface XMPPRoomLight()
+- (nonnull NSString *)memberListVersion;
+- (nonnull NSString *)configVersion;
+@end
+
 @interface XMPPRoomLightTests : XCTestCase <XMPPRoomLightDelegate>
 
 @property (nonatomic, strong) XCTestExpectation *delegateResponseExpectation;
@@ -19,6 +24,13 @@
 @end
 
 @implementation XMPPRoomLightTests
+
+- (void)testInitVersionsShouldBeEmpty {
+	XMPPJID *jid = [XMPPJID jidWithUser:@"user" domain:@"domain.com" resource:@"resource"];
+	XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithJID:jid roomname:@"room"];
+	XCTAssertEqualObjects(roomLight.memberListVersion, @"");
+	XCTAssertEqualObjects(roomLight.configVersion, @"");
+}
 
 - (void)testInitWithJIDAndRoomname {
 	XMPPJID *jid = [XMPPJID jidWithUser:@"user" domain:@"domain.com" resource:@"resource"];
@@ -292,6 +304,7 @@
 	XCTAssertEqualObjects([user3 attributeForName:@"affiliation"].stringValue, @"member");
 	XCTAssertEqualObjects(user3.stringValue, @"user3@shakespeare.lit");
 
+	XCTAssertEqualObjects(sender.memberListVersion, @"123456");
 	[self.delegateResponseExpectation fulfill];
 }
 
@@ -617,6 +630,7 @@
 }
 
 - (void)xmppRoomLight:(XMPPRoomLight *)sender didGetConfiguration:(XMPPIQ *)iqResult{
+	XCTAssertEqualObjects(sender.configVersion, @"123456");
 	[self.delegateResponseExpectation fulfill];
 }
 
@@ -769,6 +783,7 @@
 	NSMutableString *s = [NSMutableString string];
 	[s appendString:@"<iq xmlns='jabber:client' from='testtesttest@muclight.erlang-solutions.com' to='ramabit@erlang-solutions.com/Andress-MacBook-Air' id='config0' type='result'>"];
 	[s appendString:@"	<query xmlns='urn:xmpp:muclight:0#configuration'>"];
+	[s appendString:@"		<version>123456</version>"];
 	[s appendString:@"		<roomname>Roomname</roomname>"];
 	[s appendString:@"		<subject>Subject</subject>"];
 	[s appendString:@"	</query>"];
