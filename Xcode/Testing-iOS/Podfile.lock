@@ -23,6 +23,7 @@ PODS:
     - XMPPFramework/CoreDataStorage
     - XMPPFramework/FileTransfer
     - XMPPFramework/GoogleSharedStatus
+    - XMPPFramework/OMEMO
     - XMPPFramework/ProcessOne
     - XMPPFramework/Reconnect
     - XMPPFramework/Roster
@@ -78,6 +79,10 @@ PODS:
     - XMPPFramework/Core
   - XMPPFramework/GoogleSharedStatus (3.7.0):
     - XMPPFramework/Core
+  - XMPPFramework/OMEMO (3.7.0):
+    - XMPPFramework/Core
+    - XMPPFramework/XEP-0060
+    - XMPPFramework/XEP-0334
   - XMPPFramework/ProcessOne (3.7.0):
     - XMPPFramework/Core
   - XMPPFramework/Reconnect (3.7.0):
@@ -189,7 +194,7 @@ SPEC CHECKSUMS:
   CocoaAsyncSocket: 3baeb1ddd969f81cf9fca81053ae49ef2d1cbbfa
   CocoaLumberjack: 97fab7ee5f507fe54445cca7ea80f926729cfd15
   KissXML: 246c842586bb77110e04fb88e19376d96245c856
-  XMPPFramework: 977eef5d00c20fe9fb19c30d84a89c2d5564252d
+  XMPPFramework: b7b6b8ef3856c3e9f04874f7f457e1e5c39faf84
 
 PODFILE CHECKSUM: e6ff7a103c19c3a47fe625656baf8e2a6388550b
 

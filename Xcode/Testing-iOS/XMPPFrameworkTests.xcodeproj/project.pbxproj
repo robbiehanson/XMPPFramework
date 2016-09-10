@@ -20,6 +20,7 @@
 		D973A0861D2F18040096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A07A1D2F18040096F3ED /* XMPPURITests.m */; };
 		D973A0871D2F18040096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A07B1D2F18040096F3ED /* XMPPvCardTests.m */; };
 		D973A0891D2F18310096F3ED /* XMPPSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D973A0881D2F18310096F3ED /* XMPPSwift.swift */; };
+		D9F20CFF1D835FE5002A8D6F /* OMEMOTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F20CFE1D835FE5002A8D6F /* OMEMOTests.m */; };
 		FDD2AB232C05507F2045FFFC /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CD0B17267211A912DE2098E /* Pods_XMPPFrameworkTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +45,7 @@
 		D973A07A1D2F18040096F3ED /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPURITests.m; path = "../../Testing-Shared/XMPPURITests.m"; sourceTree = "<group>"; };
 		D973A07B1D2F18040096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
 		D973A0881D2F18310096F3ED /* XMPPSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPSwift.swift; path = "../../Testing-Shared/XMPPSwift.swift"; sourceTree = "<group>"; };
+		D9F20CFE1D835FE5002A8D6F /* OMEMOTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOTests.m; path = "../../Testing-Shared/OMEMOTests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 		63F50D941C60208200CA0201 /* XMPPFrameworkTests */ = {
 			isa = PBXGroup;
 			children = (
+				D9F20CFE1D835FE5002A8D6F /* OMEMOTests.m */,
 				D973A0881D2F18310096F3ED /* XMPPSwift.swift */,
 				D973A06F1D2F18040096F3ED /* CapabilitiesHashingTest.m */,
 				D973A0701D2F18040096F3ED /* EncodeDecodeTest.m */,
@@ -233,6 +236,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D973A07C1D2F18040096F3ED /* CapabilitiesHashingTest.m in Sources */,
+				D9F20CFF1D835FE5002A8D6F /* OMEMOTests.m in Sources */,
 				D973A0811D2F18040096F3ED /* XMPPMUCLightTests.m in Sources */,
 				D973A07D1D2F18040096F3ED /* EncodeDecodeTest.m in Sources */,
 				D973A0831D2F18040096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
