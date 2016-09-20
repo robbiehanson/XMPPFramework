@@ -10,6 +10,11 @@
 
 @implementation OMEMOPreKey
 
+- (instancetype) init {
+    NSAssert(NO, @"Use designated initializer.");
+    return nil;
+}
+
 - (instancetype) initWithPreKeyId:(uint32_t)preKeyId
                         publicKey:(NSData*)publicKey {
     if (self = [super init]) {

@@ -17,5 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype) initWithPreKeyId:(uint32_t)preKeyId
                         publicKey:(NSData*)publicKey NS_DESIGNATED_INITIALIZER;
 
+/** Not available, use designated initializer */
+- (instancetype) init NS_UNAVAILABLE;
+
 @end
 NS_ASSUME_NONNULL_END

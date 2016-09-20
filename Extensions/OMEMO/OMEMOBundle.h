@@ -25,5 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
                      signedPreKey:(OMEMOSignedPreKey*)signedPreKey
                           preKeys:(NSArray<OMEMOPreKey*>*)preKeys NS_DESIGNATED_INITIALIZER;
 
+/** Not available, use designated initializer */
+- (instancetype) init NS_UNAVAILABLE;
+
 @end
 NS_ASSUME_NONNULL_END

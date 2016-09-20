@@ -10,6 +10,11 @@
 
 @implementation OMEMOBundle
 
+- (instancetype) init {
+    NSAssert(NO, @"Use designated initializer.");
+    return nil;
+}
+
 - (instancetype) initWithDeviceId:(uint32_t)deviceId
                       identityKey:(NSData*)identityKey
                      signedPreKey:(OMEMOSignedPreKey*)signedPreKey
