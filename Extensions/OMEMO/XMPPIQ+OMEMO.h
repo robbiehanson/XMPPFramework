@@ -22,12 +22,13 @@ NS_ASSUME_NONNULL_BEGIN
                  elementId:(nullable NSString*)elementId;
 
 /** iq stanza for fetching remote bundle */
-+ (XMPPIQ*) omemo_iqfetchBundleForDevice:(NSNumber*)deviceId
-                                     jid:(XMPPJID*)jid;
++ (XMPPIQ*) omemo_iqFetchBundleForDeviceId:(uint32_t)deviceId
+                                       jid:(XMPPJID*)jid
+                                 elementId:(nullable NSString*)elementId;
 
-/** iq stanza for feetching devices */
-+ (XMPPIQ*) omemo_iqfetchDevices:(XMPPJID *)jid;
-
+/** iq stanza for fetching devices. This should be handled automatically by PEP.
++ (XMPPIQ*) omemo_iqFetchDevices:(XMPPJID *)jid;
+*/
 
 @end
 NS_ASSUME_NONNULL_END

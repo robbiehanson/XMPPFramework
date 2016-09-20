@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (XMPPMessage*) omemo_messageToJID:(XMPPJID*)jid
                           elementID:(NSString*)eid
                            deviceId:(NSNumber*)deviceId
-                 receivingDeviceIds:(NSDictionary<NSNumber*,NSString*>*)receivingDeviceIds
+                            keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
                                  iv:(NSString*)iv
                             payload:(nullable NSString*)payload;
 

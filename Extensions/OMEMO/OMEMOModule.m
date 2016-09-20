@@ -17,12 +17,18 @@
 
 @implementation OMEMOModule
 
+- (instancetype) init {
+    NSAssert(NO, @"Use designated initializer.");
+    return nil;
+}
+
 - (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage {
-    return [self initWithOMEMOStorage:omemoStorage dispatchQueue:NULL];
+    return [self initWithOMEMOStorage:omemoStorage dispatchQueue:self.moduleQueue];
 }
 
 - (instancetype) initWithDispatchQueue:(dispatch_queue_t)queue {
-    return [self initWithOMEMOStorage:nil dispatchQueue:queue];
+    NSAssert(NO, @"Use designated initializer.");
+    return nil;
 }
 
 - (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage dispatchQueue:(nullable dispatch_queue_t)queue {
@@ -51,11 +57,32 @@
 }
 
 
-- (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds {
-    XMPPIQ *iq = [XMPPIQ omemo_iqForDeviceIds:deviceIds elementId:nil];
+- (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(nullable NSString*)elementId {
+    if (!elementId.length) {
+        elementId = [[NSUUID UUID] UUIDString];
+    }
+    XMPPIQ *iq = [XMPPIQ omemo_iqForDeviceIds:deviceIds elementId:elementId];
     [xmppStream sendElement:iq];
 }
 
+- (void) publishBundle:(OMEMOBundle*)bundle
+             elementId:(nullable NSString*)elementId {
+    if (!elementId.length) {
+        elementId = [[NSUUID UUID] UUIDString];
+    }
+    XMPPIQ *iq = [XMPPIQ omemo_iqBundle:bundle elementId:elementId];
+    [xmppStream sendElement:iq];
+}
+
+- (void) fetchBundleForDeviceId:(uint32_t)deviceId
+                            jid:(XMPPJID*)jid
+                      elementId:(nullable NSString*)elementId {
+    if (!elementId.length) {
+        elementId = [[NSUUID UUID] UUIDString];
+    }
+    XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:deviceId jid:jid elementId:elementId];
+    [xmppStream sendElement:iq];
+}
 
 /**
  * Check for devicelist update

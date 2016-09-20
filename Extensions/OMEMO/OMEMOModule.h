@@ -31,8 +31,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) id<OMEMOStorageDelegate> omemoStorage;
 
 - (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage;
-- (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage dispatchQueue:(nullable dispatch_queue_t)queue;
+- (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
+/** Not available, use designated initializer */
+- (instancetype) init NS_UNAVAILABLE;
+/** Not available, use designated initializer */
+- (instancetype) initWithDispatchQueue:(dispatch_queue_t)queue NS_UNAVAILABLE;
 
 /** 
  * In order for other devices to be able to initiate a session with a given device, it first has to announce itself by adding its device ID to the devicelist PEP node.
@@ -40,8 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
  * Devices MUST check that their own device ID is contained in the list whenever they receive a PEP update from their own account. If they have been removed, they MUST reannounce themselves.
  *
  * @param deviceIds The Device ID is a randomly generated integer between 1 and 2^31 - 1 wrapped in an NSNumber.
+ * @param elementId XMPP element id. If nil a random UUID will be used.
  */
-- (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds;
+- (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds
+                elementId:(nullable NSString*)elementId;
 
 /** For fetching. This should be handled automatically by PEP.
 - (void) fetchDeviceIdsForJID:(XMPPJID*)jid;
@@ -51,17 +57,21 @@ NS_ASSUME_NONNULL_BEGIN
  * A device MUST announce it's IdentityKey, a signed PreKey, and a list of PreKeys in a separate, per-device PEP node. The list SHOULD contain 100 PreKeys, but MUST contain no less than 20.
  * 
  * @param bundle your device bundle
+ * @param elementId XMPP element id. If nil a random UUID will be used.
  */
-- (void) publishBundle:(OMEMOBundle*)bundle;
+- (void) publishBundle:(OMEMOBundle*)bundle
+             elementId:(nullable NSString*)elementId;
 
 /**
  *  Fetches device bundle for a remote JID.
  *
  * @param deviceId remote deviceId
  * @param jid remote JID
+ * @param elementId XMPP element id. If nil a random UUID will be used.
  */
-- (void) fetchBundleForDeviceId:(NSNumber*)deviceId
-                            jid:(XMPPJID*)jid;
+- (void) fetchBundleForDeviceId:(uint32_t)deviceId
+                            jid:(XMPPJID*)jid
+                      elementId:(nullable NSString*)elementId;
 
 /**
  In order to send a chat message, its <body> first has to be encrypted. The client MUST use fresh, randomly generated key/IV pairs with AES-128 in Galois/Counter Mode (GCM). For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a MessageElement.
@@ -136,13 +146,13 @@ parentElement:(XMPPElement*)parentElement;
 
 //- (void) storeBundle:(OMEMOBundle*)bundle forJID:(XMPPJID*)jid;
 
-- (OMEMOBundle*)fetchBundleForJID:(XMPPJID*)jid deviceId:(NSNumber*)deviceId;
+- (OMEMOBundle*)fetchBundleForJID:(XMPPJID*)jid deviceId:(uint32_t)deviceId;
 
-- (NSNumber*) myDeviceId;
+- (uint32_t) myDeviceId;
 
-- (NSDictionary<NSNumber*,NSData*>*) generatePrekeysWithCount:(NSUInteger)count;
+- (NSArray<OMEMOPreKey*>*) generatePreKeysWithCount:(NSUInteger)count;
 
-- (BOOL) isSessionValid:(XMPPJID*)jid deviceId:(NSNumber*)deviceId;
+- (BOOL) isSessionValid:(XMPPJID*)jid deviceId:(uint32_t)deviceId;
 
 @end
 NS_ASSUME_NONNULL_END

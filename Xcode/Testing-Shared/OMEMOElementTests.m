@@ -98,8 +98,37 @@
     OMEMOSignedPreKey *signedPreKey = [[OMEMOSignedPreKey alloc] initWithPreKeyId:1 publicKey:signedPreKeyPublicData signature:signedPreKeySignatureData];
     OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:31415 identityKey:identityKeyData signedPreKey:signedPreKey preKeys:preKeys];
     XMPPIQ *iq = [XMPPIQ omemo_iqBundle:bundle elementId:@"announce2"];
-    // Test is failing because prekeys dict enumeration is out of order compared to example string
     XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:DDXMLNodePrettyPrint]);
+}
+
+/**
+ * iq stanza for fetching remote bundle
+ 
+ <iq type='get'
+    to='juliet@capulet.lit'
+    id='fetch1'>
+  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    <items node='urn:xmpp:omemo:0:bundles:31415'/>
+  </pubsub>
+</iq>
+ 
+ */
+- (void) testFetchBundleForDeviceId {
+    NSString *expected = @" \
+    <iq type='get' \
+    to='juliet@capulet.lit' \
+    id='fetch1'> \
+    <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
+    <items node='urn:xmpp:omemo:0:bundles:31415'/> \
+    </pubsub> \
+    </iq> \
+    ";
+    NSError *error = nil;
+    NSXMLElement *expectedElement = [[NSXMLElement alloc] initWithXMLString:expected error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(expectedElement);
+    XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:31415 jid:[XMPPJID jidWithString:@"juliet@capulet.lit"] elementId:@"fetch1"];
+    XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedElement XMLStringWithOptions:DDXMLNodePrettyPrint]);
 }
 
 

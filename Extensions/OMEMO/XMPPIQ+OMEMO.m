@@ -135,8 +135,8 @@
 }
 
 
-+ (XMPPIQ *) omemo_iqFetchNode:(NSString *)node to:(XMPPJID *)toJID {
-    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:toJID];
++ (XMPPIQ *) omemo_iqFetchNode:(NSString *)node to:(XMPPJID *)toJID elementId:(nullable NSString*)elementId {
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:toJID elementID:elementId];
     NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
     NSXMLElement *itemsElement = [NSXMLElement elementWithName:@"items"];
     [itemsElement addAttributeWithName:@"node" stringValue:node];
@@ -160,14 +160,15 @@
 </iq>
  
  */
-+ (XMPPIQ*) omemo_iqfetchBundleForDevice:(NSNumber*)deviceId
-                                     jid:(XMPPJID*)jid {
-    NSString *nodeName = [NSString stringWithFormat:@"%@:%@",XMLNS_OMEMO_BUNDLES,deviceId.stringValue];
-    return [self omemo_iqFetchNode:nodeName to:jid];
++ (XMPPIQ*) omemo_iqFetchBundleForDeviceId:(uint32_t)deviceId
+                                       jid:(XMPPJID*)jid
+                                 elementId:(nullable NSString*)elementId {
+    NSString *nodeName = [NSString stringWithFormat:@"%@:%d",XMLNS_OMEMO_BUNDLES,(int)deviceId];
+    return [self omemo_iqFetchNode:nodeName to:jid elementId:elementId];
 }
 
 /** 
- * iq stanza for feetching devices
+ * iq stanza for fetching devices
  
  <iq type='get'
     from='romeo@montague.lit'
@@ -178,11 +179,12 @@
  </pubsub>
  </iq>
  
- */
-+ (XMPPIQ*) omemo_iqfetchDevices:(XMPPJID *)jid
+ this should be handled automatically by PEP
++ (XMPPIQ*) omemo_iqFetchDevices:(XMPPJID *)jid
 {
     NSString *nodeName = XMLNS_OMEMO_DEVICELIST;
     return [self omemo_iqFetchNode:nodeName to:jid];
 }
+ */
 
 @end
