@@ -52,7 +52,7 @@
 
 
 - (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds {
-    XMPPIQ *iq = [XMPPIQ omemo_iqForDeviceIds:deviceIds];
+    XMPPIQ *iq = [XMPPIQ omemo_iqForDeviceIds:deviceIds elementId:nil];
     [xmppStream sendElement:iq];
 }
 

@@ -21,6 +21,7 @@
 		D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */; };
 		D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */; };
 		D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */; };
+		D9E35E6E1D90B2C5002E7CF7 /* OMEMOElementTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E35E6D1D90B2C5002E7CF7 /* OMEMOElementTests.m */; };
 		D9F20D011D836080002A8D6F /* OMEMOTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F20D001D836080002A8D6F /* OMEMOTests.m */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +45,7 @@
 		D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPSwift.swift; path = "../../Testing-Shared/XMPPSwift.swift"; sourceTree = "<group>"; };
 		D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPURITests.m; path = "../../Testing-Shared/XMPPURITests.m"; sourceTree = "<group>"; };
 		D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
+		D9E35E6D1D90B2C5002E7CF7 /* OMEMOElementTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOElementTests.m; path = "../../Testing-Shared/OMEMOElementTests.m"; sourceTree = "<group>"; };
 		D9F20D001D836080002A8D6F /* OMEMOTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOTests.m; path = "../../Testing-Shared/OMEMOTests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				D9F20D001D836080002A8D6F /* OMEMOTests.m */,
+				D9E35E6D1D90B2C5002E7CF7 /* OMEMOElementTests.m */,
 				D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */,
 				D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */,
 				D973A0981D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m */,
@@ -138,10 +141,11 @@
 		63F55A531C60204300438CE2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				TargetAttributes = {
 					D973A08D1D2F1EB10096F3ED = {
 						CreatedOnToolsVersion = 7.3.1;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -236,6 +240,7 @@
 				D973A0AC1D2F1EF60096F3ED /* XMPPRoomLightTests.m in Sources */,
 				D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */,
 				D973A0A71D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m in Sources */,
+				D9E35E6E1D90B2C5002E7CF7 /* OMEMOElementTests.m in Sources */,
 				D973A0A61D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m in Sources */,
 				D973A0AA1D2F1EF60096F3ED /* XMPPPushTests.swift in Sources */,
 				D973A0AD1D2F1EF60096F3ED /* XMPPStorageHintTests.m in Sources */,
@@ -248,7 +253,24 @@
 		63F55A571C60204300438CE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
@@ -256,6 +278,24 @@
 		63F55A581C60204300438CE2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};
@@ -305,6 +345,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -348,6 +389,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.xmppframework.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};

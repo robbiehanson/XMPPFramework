@@ -27,7 +27,7 @@
       </pubsub>
     </iq>
  */
-+ (XMPPIQ*) omemo_iqForDeviceIds:(NSArray<NSNumber*>*)deviceIds {
++ (XMPPIQ*) omemo_iqForDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(nullable NSString*)elementId {
     NSXMLElement *listElement = [NSXMLElement elementWithName:@"list" xmlns:XMLNS_OMEMO];
     [deviceIds enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSXMLElement *device = [NSXMLElement elementWithName:@"device"];
@@ -45,7 +45,7 @@
     NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
     [pubsub addChild:publish];
     
-    XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:elementId];
     [iq addChild:pubsub];
     
     return iq;
@@ -86,24 +86,20 @@
 </iq>
  
  */
-+ (XMPPIQ*) omemo_iqBundleForDevice:(NSNumber*)deviceId
-                        identityKey:(NSString*)identityKey
-                       signedPreKey:(NSString*)signedPreKey
-                     signedPreKeyId:(NSNumber*)signedPreKeyId
-              signedPreKeySignature:(NSString*)signedPreKeySignature
-                            preKeys:(NSDictionary<NSNumber*,NSString*>*)preKeys {
++ (XMPPIQ*) omemo_iqBundle:(OMEMOBundle*)bundle
+                 elementId:(nullable NSString*)elementId {
     NSXMLElement *signedPreKeyElement = nil;
-    if (signedPreKeyId && signedPreKey) {
-        signedPreKeyElement = [NSXMLElement elementWithName:@"signedPreKeyPublic" stringValue:signedPreKey];
-        [signedPreKeyElement addAttributeWithName:@"signedPreKeyId" numberValue:deviceId];
+    if (bundle.signedPreKeyId && bundle.signedPreKey) {
+        signedPreKeyElement = [NSXMLElement elementWithName:@"signedPreKeyPublic" stringValue:[bundle.signedPreKey base64EncodedStringWithOptions:0]];
+        [signedPreKeyElement addAttributeWithName:@"signedPreKeyId" numberValue:bundle.signedPreKeyId];
     }
     NSXMLElement *signedPreKeySignatureElement = nil;
-    if (signedPreKeySignature) {
-        signedPreKeySignatureElement = [NSXMLElement elementWithName:@"signedPreKeySignature" stringValue:signedPreKeySignature];
+    if (bundle.signedPreKeySignature) {
+        signedPreKeySignatureElement = [NSXMLElement elementWithName:@"signedPreKeySignature" stringValue:[bundle.signedPreKeySignature base64EncodedStringWithOptions:0]];
     }
     NSXMLElement *preKeysElement = [NSXMLElement elementWithName:@"prekeys"];
-    [preKeys enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull preKeyId, NSString * _Nonnull preKey, BOOL * _Nonnull stop) {
-        NSXMLElement *preKeyElement = [NSXMLElement elementWithName:@"preKeyPublic" stringValue:preKey];
+    [bundle.preKeys enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull preKeyId, NSData * _Nonnull preKey, BOOL * _Nonnull stop) {
+        NSXMLElement *preKeyElement = [NSXMLElement elementWithName:@"preKeyPublic" stringValue:[preKey base64EncodedStringWithOptions:0]];
         [preKeyElement addAttributeWithName:@"preKeyId" numberValue:preKeyId];
         [preKeysElement addChild:preKeyElement];
     }];
@@ -119,14 +115,14 @@
     [itemElement addChild:bundleElement];
     
     NSXMLElement *publish = [NSXMLElement elementWithName:@"publish"];
-    NSString *nodeName = [NSString stringWithFormat:@"%@:%@",XMLNS_OMEMO_BUNDLES,deviceId.stringValue];
+    NSString *nodeName = [NSString stringWithFormat:@"%@:%@",XMLNS_OMEMO_BUNDLES,bundle.deviceId.stringValue];
     [publish addAttributeWithName:@"node" stringValue:nodeName];
     [publish addChild:itemElement];
     
     NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
     [pubsub addChild:publish];
     
-    XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:elementId];
     [iq addChild:pubsub];
     return iq;
 }

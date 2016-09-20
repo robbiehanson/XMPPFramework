@@ -38,40 +38,58 @@ NS_ASSUME_NONNULL_BEGIN
  * In order for other devices to be able to initiate a session with a given device, it first has to announce itself by adding its device ID to the devicelist PEP node.
  *
  * Devices MUST check that their own device ID is contained in the list whenever they receive a PEP update from their own account. If they have been removed, they MUST reannounce themselves.
- * 
- * The Device ID is a randomly generated integer between 1 and 2^31 - 1 wrapped in an NSNumber.
+ *
+ * @param deviceIds The Device ID is a randomly generated integer between 1 and 2^31 - 1 wrapped in an NSNumber.
  */
 - (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds;
 
-/** For fetching
+/** For fetching. This should be handled automatically by PEP.
 - (void) fetchDeviceIdsForJID:(XMPPJID*)jid;
+*/
 
 /**
  * A device MUST announce it's IdentityKey, a signed PreKey, and a list of PreKeys in a separate, per-device PEP node. The list SHOULD contain 100 PreKeys, but MUST contain no less than 20.
  * 
- * @param device is this device's deviceId
- * @param identityKey base64 encoded public key
- * @param signedPreKey base64 encoded signed public prekey
- * @param signedPreKeyId identifier for signedPreKey
- * @param signedPreKeySignature signature of signedPreKey, signed by identityKey
- * @param preKeys base64 preKey values keyed to unique integer preKeyIds
+ * @param bundle your device bundle
  */
 - (void) publishBundle:(OMEMOBundle*)bundle;
 
 /**
  *  Fetches device bundle for a remote JID.
+ *
+ * @param deviceId remote deviceId
+ * @param jid remote JID
  */
 - (void) fetchBundleForDeviceId:(NSNumber*)deviceId
                             jid:(XMPPJID*)jid;
 
 /**
  In order to send a chat message, its <body> first has to be encrypted. The client MUST use fresh, randomly generated key/IV pairs with AES-128 in Galois/Counter Mode (GCM). For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a MessageElement.
+ *
+ * @param payload data encrypted with fresh AES-128 GCM key/iv pair. If nil this is equivalent to a KeyTransportElement.
+ * @param jid recipient JID
+ * @param elementID XMPP element id
+ * @param keyData payload's AES key encrypted to each recipient deviceId's Axolotl session
+ * @param iv the IV used for encryption of payload
  */
-- (void) sendPayload:(NSString*)payload
+- (void) sendPayload:(nullable NSData*)payload
                toJID:(XMPPJID*)jid
-           elementID:(NSString*)eid
-  receivingDeviceIds:(NSDictionary<NSNumber*,NSString*>*)receivingDeviceIds
-                  iv:(NSString*)iv;
+           elementID:(NSString*)elementID
+             keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+                  iv:(NSData*)iv;
+
+/**
+ The client may wish to transmit keying material to the contact. This first has to be generated. The client MUST generate a fresh, randomly generated key/IV pair. For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a KeyTransportElement, omitting the <payload> as follows:
+ *
+ * @param jid recipient JID
+ * @param elementID XMPP element id
+ * @param keyData payload's AES key encrypted to each recipient deviceId's Axolotl session
+ * @param iv the IV used for encryption of payload
+ */
+- (void) sendKeyToJID:(XMPPJID*)jid
+            elementID:(NSString*)eid
+              keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+                   iv:(NSData*)iv;
 
 @end
 
@@ -82,25 +100,48 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID message:(XMPPMessage*)message;
 
+/** 
+ * Process the incoming OMEMO bundle somewhere in your application
+ */
 - (void)omemo:(OMEMOModule*)omemo
 receivedBundle:(OMEMOBundle*)bundle
       fromJID:(XMPPJID*)fromJID
            iq:(XMPPIQ*)iq;
+
+/**
+ * Incoming MessageElement payload, keyData, and IV */
+- (void)omemo:(OMEMOModule*)omemo
+receivedPayload:(NSData*)payload
+      keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+           iv:(NSData*)iv
+      message:(XMPPMessage*)message;
+
+/** Incoming KeyTransportElement keyData and IV */
+- (void)omemo:(OMEMOModule*)omemo
+      receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+           iv:(NSData*)iv
+parentElement:(XMPPElement*)parentElement;
 
 @end
 
 @protocol OMEMOStorageDelegate <NSObject>
 @required;
 
+
 - (BOOL)configureWithParent:(OMEMOModule *)aParent queue:(dispatch_queue_t)queue;
+
 - (void)storeDeviceIds:(NSArray<NSNumber*>*)deviceIds forJID:(XMPPJID*)jid;
+
 - (NSArray<NSNumber*>*)fetchDeviceIdsForJID:(XMPPJID*)jid;
 
 //- (void) storeBundle:(OMEMOBundle*)bundle forJID:(XMPPJID*)jid;
+
 - (OMEMOBundle*)fetchBundleForJID:(XMPPJID*)jid deviceId:(NSNumber*)deviceId;
 
 - (NSNumber*) myDeviceId;
+
 - (NSDictionary<NSNumber*,NSData*>*) generatePrekeysWithCount:(NSUInteger)count;
+
 - (BOOL) isSessionValid:(XMPPJID*)jid deviceId:(NSNumber*)deviceId;
 
 @end
