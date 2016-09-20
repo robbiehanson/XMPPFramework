@@ -91,11 +91,12 @@
     NSData *preKeyData1 = [preKey1 dataUsingEncoding:NSUTF8StringEncoding];
     NSData *preKeyData2 = [preKey2 dataUsingEncoding:NSUTF8StringEncoding];
     NSData *preKeyData3 = [preKey3 dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *preKeys = @{@(1): preKeyData1,
-                              @(2): preKeyData2,
-                              @(3): preKeyData3
-                              };
-    OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:@(31415) identityKey:identityKeyData signedPreKey:signedPreKeyPublicData signedPreKeyId:@(1) signedPreKeySignature:signedPreKeySignatureData preKeys:preKeys];
+    NSArray <OMEMOPreKey*> *preKeys = @[[[OMEMOPreKey alloc] initWithPreKeyId:1 publicKey:preKeyData1],
+                         [[OMEMOPreKey alloc] initWithPreKeyId:2 publicKey:preKeyData2],
+                         [[OMEMOPreKey alloc] initWithPreKeyId:3 publicKey:preKeyData3]
+                        ];
+    OMEMOSignedPreKey *signedPreKey = [[OMEMOSignedPreKey alloc] initWithPreKeyId:1 publicKey:signedPreKeyPublicData signature:signedPreKeySignatureData];
+    OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:31415 identityKey:identityKeyData signedPreKey:signedPreKey preKeys:preKeys];
     XMPPIQ *iq = [XMPPIQ omemo_iqBundle:bundle elementId:@"announce2"];
     // Test is failing because prekeys dict enumeration is out of order compared to example string
     XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:DDXMLNodePrettyPrint]);

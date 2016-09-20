@@ -7,23 +7,23 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "OMEMOPreKey.h"
+#import "OMEMOSignedPreKey.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @interface OMEMOBundle : NSObject
 
-@property (nonatomic, strong, readonly) NSNumber *deviceId;
-@property (nonatomic, strong, readonly) NSData *identityKey;
-@property (nonatomic, strong, readonly) NSData *signedPreKey;
-@property (nonatomic, strong, readonly) NSNumber *signedPreKeyId;
-@property (nonatomic, strong, readonly) NSData *signedPreKeySignature;
-@property (nonatomic, strong, readonly) NSDictionary<NSNumber*,NSData*> *preKeys;
+/** The Device ID is a randomly generated integer between 1 and 2^31 - 1 */
+@property (nonatomic, readonly) uint32_t deviceId;
+/** public part of identity key */
+@property (nonatomic, copy, readonly) NSData *identityKey;
+@property (nonatomic, strong, readonly) OMEMOSignedPreKey *signedPreKey;
+@property (nonatomic, strong, readonly) NSArray<OMEMOPreKey*> *preKeys;
 
-- (instancetype) initWithDeviceId:(NSNumber*)deviceId
+- (instancetype) initWithDeviceId:(uint32_t)deviceId
                       identityKey:(NSData*)identityKey
-                     signedPreKey:(NSData*)signedPreKey
-                   signedPreKeyId:(NSNumber*)signedPreKeyId
-            signedPreKeySignature:(NSData*)signedPreKeySignature
-                          preKeys:(NSDictionary<NSNumber*,NSData*>*)preKeys;
+                     signedPreKey:(OMEMOSignedPreKey*)signedPreKey
+                          preKeys:(NSArray<OMEMOPreKey*>*)preKeys NS_DESIGNATED_INITIALIZER;
 
 @end
 NS_ASSUME_NONNULL_END

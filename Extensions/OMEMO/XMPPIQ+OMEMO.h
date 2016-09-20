@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface XMPPIQ (OMEMO)
 
-/** iq stanza for publishing your device ids */
+/** iq stanza for publishing your device ids. The Device IDs are integers between 1 and 2^31 - 1 */
 + (XMPPIQ*) omemo_iqForDeviceIds:(NSArray<NSNumber*>*)deviceIds
                        elementId:(nullable NSString*)elementId;
 

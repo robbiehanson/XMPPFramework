@@ -10,18 +10,14 @@
 
 @implementation OMEMOBundle
 
-- (instancetype) initWithDeviceId:(NSNumber*)deviceId
+- (instancetype) initWithDeviceId:(uint32_t)deviceId
                       identityKey:(NSData*)identityKey
-                     signedPreKey:(NSData*)signedPreKey
-                   signedPreKeyId:(NSNumber*)signedPreKeyId
-            signedPreKeySignature:(NSData*)signedPreKeySignature
-                          preKeys:(NSDictionary<NSNumber*,NSData*>*)preKeys {
+                     signedPreKey:(OMEMOSignedPreKey*)signedPreKey
+                          preKeys:(NSArray<OMEMOPreKey*>*)preKeys {
     if (self = [super init]) {
         _deviceId = deviceId;
-        _identityKey = identityKey;
+        _identityKey = [identityKey copy];
         _signedPreKey = signedPreKey;
-        _signedPreKeyId = signedPreKeyId;
-        _signedPreKeySignature = signedPreKeySignature;
         _preKeys = preKeys;
     }
     return self;

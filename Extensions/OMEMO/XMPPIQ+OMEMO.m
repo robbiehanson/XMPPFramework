@@ -89,18 +89,22 @@
 + (XMPPIQ*) omemo_iqBundle:(OMEMOBundle*)bundle
                  elementId:(nullable NSString*)elementId {
     NSXMLElement *signedPreKeyElement = nil;
-    if (bundle.signedPreKeyId && bundle.signedPreKey) {
-        signedPreKeyElement = [NSXMLElement elementWithName:@"signedPreKeyPublic" stringValue:[bundle.signedPreKey base64EncodedStringWithOptions:0]];
-        [signedPreKeyElement addAttributeWithName:@"signedPreKeyId" numberValue:bundle.signedPreKeyId];
+    if (bundle.signedPreKey.publicKey) {
+        signedPreKeyElement = [NSXMLElement elementWithName:@"signedPreKeyPublic" stringValue:[bundle.signedPreKey.publicKey base64EncodedStringWithOptions:0]];
+        [signedPreKeyElement addAttributeWithName:@"signedPreKeyId" unsignedIntegerValue:bundle.signedPreKey.preKeyId];
     }
     NSXMLElement *signedPreKeySignatureElement = nil;
-    if (bundle.signedPreKeySignature) {
-        signedPreKeySignatureElement = [NSXMLElement elementWithName:@"signedPreKeySignature" stringValue:[bundle.signedPreKeySignature base64EncodedStringWithOptions:0]];
+    if (bundle.signedPreKey.signature) {
+        signedPreKeySignatureElement = [NSXMLElement elementWithName:@"signedPreKeySignature" stringValue:[bundle.signedPreKey.signature base64EncodedStringWithOptions:0]];
+    }
+    NSXMLElement *identityKeyElement = nil;
+    if (bundle.identityKey) {
+        identityKeyElement = [NSXMLElement elementWithName:@"identityKey" stringValue:[bundle.identityKey base64EncodedStringWithOptions:0]];
     }
     NSXMLElement *preKeysElement = [NSXMLElement elementWithName:@"prekeys"];
-    [bundle.preKeys enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull preKeyId, NSData * _Nonnull preKey, BOOL * _Nonnull stop) {
-        NSXMLElement *preKeyElement = [NSXMLElement elementWithName:@"preKeyPublic" stringValue:[preKey base64EncodedStringWithOptions:0]];
-        [preKeyElement addAttributeWithName:@"preKeyId" numberValue:preKeyId];
+    [bundle.preKeys enumerateObjectsUsingBlock:^(OMEMOPreKey * _Nonnull preKey, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSXMLElement *preKeyElement = [NSXMLElement elementWithName:@"preKeyPublic" stringValue:[preKey.publicKey base64EncodedStringWithOptions:0]];
+        [preKeyElement addAttributeWithName:@"preKeyId" unsignedIntegerValue:preKey.preKeyId];
         [preKeysElement addChild:preKeyElement];
     }];
     NSXMLElement *bundleElement = [XMPPElement elementWithName:@"bundle" xmlns:XMLNS_OMEMO];
@@ -110,12 +114,15 @@
     if (signedPreKeySignatureElement) {
         [bundleElement addChild:signedPreKeySignatureElement];
     }
+    if (identityKeyElement) {
+        [bundleElement addChild:identityKeyElement];
+    }
     [bundleElement addChild:preKeysElement];
     NSXMLElement *itemElement = [NSXMLElement elementWithName:@"item"];
     [itemElement addChild:bundleElement];
     
     NSXMLElement *publish = [NSXMLElement elementWithName:@"publish"];
-    NSString *nodeName = [NSString stringWithFormat:@"%@:%@",XMLNS_OMEMO_BUNDLES,bundle.deviceId.stringValue];
+    NSString *nodeName = [NSString stringWithFormat:@"%@:%d",XMLNS_OMEMO_BUNDLES,(int)bundle.deviceId];
     [publish addAttributeWithName:@"node" stringValue:nodeName];
     [publish addChild:itemElement];
     
