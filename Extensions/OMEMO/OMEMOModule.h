@@ -78,15 +78,15 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param payload data encrypted with fresh AES-128 GCM key/iv pair. If nil this is equivalent to a KeyTransportElement.
  * @param jid recipient JID
- * @param elementID XMPP element id
  * @param keyData payload's AES key encrypted to each recipient deviceId's Axolotl session
  * @param iv the IV used for encryption of payload
+ * @param elementId XMPP element id. If nil a random UUID will be used.
  */
 - (void) sendPayload:(nullable NSData*)payload
                toJID:(XMPPJID*)jid
-           elementID:(NSString*)elementID
              keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-                  iv:(NSData*)iv;
+                  iv:(NSData*)iv
+           elementId:(nullable NSString*)elementId;
 
 /**
  The client may wish to transmit keying material to the contact. This first has to be generated. The client MUST generate a fresh, randomly generated key/IV pair. For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a KeyTransportElement, omitting the <payload> as follows:
@@ -97,9 +97,9 @@ NS_ASSUME_NONNULL_BEGIN
  * @param iv the IV used for encryption of payload
  */
 - (void) sendKeyToJID:(XMPPJID*)jid
-            elementID:(NSString*)eid
               keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-                   iv:(NSData*)iv;
+                   iv:(NSData*)iv
+            elementId:(nullable NSString*)elementId;
 
 @end
 
@@ -126,12 +126,6 @@ receivedPayload:(NSData*)payload
            iv:(NSData*)iv
       message:(XMPPMessage*)message;
 
-/** Incoming KeyTransportElement keyData and IV */
-- (void)omemo:(OMEMOModule*)omemo
-      receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-           iv:(NSData*)iv
-parentElement:(XMPPElement*)parentElement;
-
 @end
 
 @protocol OMEMOStorageDelegate <NSObject>
@@ -144,13 +138,9 @@ parentElement:(XMPPElement*)parentElement;
 
 - (NSArray<NSNumber*>*)fetchDeviceIdsForJID:(XMPPJID*)jid;
 
-//- (void) storeBundle:(OMEMOBundle*)bundle forJID:(XMPPJID*)jid;
+/** This should return your fully populated bundle with >= 100 prekeys */
+- (OMEMOBundle*)fetchMyBundle;
 
-- (OMEMOBundle*)fetchBundleForJID:(XMPPJID*)jid deviceId:(uint32_t)deviceId;
-
-- (uint32_t) myDeviceId;
-
-- (NSArray<OMEMOPreKey*>*) generatePreKeysWithCount:(NSUInteger)count;
 
 - (BOOL) isSessionValid:(XMPPJID*)jid deviceId:(uint32_t)deviceId;
 

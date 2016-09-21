@@ -187,4 +187,59 @@
 }
  */
 
+- (nullable OMEMOBundle*) omemo_bundle {
+    NSXMLElement *pubsub = [self elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
+    if (!pubsub) { return nil; }
+    NSXMLElement *publish = [pubsub elementForName:@"publish"];
+    if (!publish) { return nil; }
+    NSString *node = [publish attributeForName:@"node"].stringValue;
+    if (!node) { return nil; }
+    if (![node containsString:XMLNS_OMEMO_BUNDLES]) {
+        return nil;
+    }
+    NSString *separator = [XMLNS_OMEMO_BUNDLES stringByAppendingString:@":"];
+    NSArray<NSString*> *components = [node componentsSeparatedByString:separator];
+    NSString *deviceIdString = [components lastObject];
+    uint32_t deviceId = [deviceIdString integerValue];
+    
+    NSXMLElement *itemElement = [publish elementForName:@"item"];
+    if (!itemElement) { return nil; }
+    NSXMLElement *bundleElement = [itemElement elementForName:@"bundle" xmlns:XMLNS_OMEMO];
+    if (!bundleElement) { return nil; }
+    NSXMLElement *signedPreKeyElement = [bundleElement elementForName:@"signedPreKeyPublic"];
+    if (!signedPreKeyElement) { return nil; }
+    uint32_t signedPreKeyId = [signedPreKeyElement attributeUInt32ValueForName:@"signedPreKeyId"];
+    NSString *signedPreKeyPublicBase64 = [signedPreKeyElement stringValue];
+    if (!signedPreKeyPublicBase64) { return nil; }
+    NSData *signedPreKeyPublic = [[NSData alloc] initWithBase64Encoding:signedPreKeyPublicBase64];
+    if (!signedPreKeyPublic) { return nil; }
+    NSString *signedPreKeySignatureBase64 = [[bundleElement elementForName:@"signedPreKeySignature"] stringValue];
+    if (!signedPreKeySignatureBase64) { return nil; }
+    NSData *signedPreKeySignature = [[NSData alloc] initWithBase64Encoding:signedPreKeySignatureBase64];
+    if (!signedPreKeySignature) { return nil; }
+    NSString *identityKeyBase64 = [[bundleElement elementForName:@"identityKey"] stringValue];
+    if (!identityKeyBase64) { return nil; }
+    NSData *identityKey = [[NSData alloc] initWithBase64Encoding:identityKeyBase64];
+    if (!identityKey) { return nil; }
+    NSXMLElement *preKeysElement = [bundleElement elementForName:@"prekeys"];
+    if (!preKeysElement) { return nil; }
+    NSArray<NSXMLElement*> *preKeyElements = [preKeysElement elementsForName:@"preKeyPublic"];
+    NSMutableArray<OMEMOPreKey*> *preKeys = [NSMutableArray arrayWithCapacity:preKeyElements.count];
+    [preKeyElements enumerateObjectsUsingBlock:^(NSXMLElement * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        uint32_t preKeyId = [obj attributeUInt32ValueForName:@"preKeyId"];
+        NSString *b64 = [obj stringValue];
+        NSData *data = nil;
+        if (b64) {
+            data = [[NSData alloc] initWithBase64Encoding:b64];
+        }
+        if (data) {
+            OMEMOPreKey *preKey = [[OMEMOPreKey alloc] initWithPreKeyId:preKeyId publicKey:data];
+            [preKeys addObject:preKey];
+        }
+    }];
+    OMEMOSignedPreKey *signedPreKey = [[OMEMOSignedPreKey alloc] initWithPreKeyId:signedPreKeyId publicKey:signedPreKeyPublic signature:signedPreKeySignature];
+    OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:deviceId identityKey:identityKey signedPreKey:signedPreKey preKeys:preKeys];
+    return bundle;
+}
+
 @end

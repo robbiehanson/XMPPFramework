@@ -30,5 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (XMPPIQ*) omemo_iqFetchDevices:(XMPPJID *)jid;
 */
 
+- (nullable OMEMOBundle*) omemo_bundle;
+
 @end
 NS_ASSUME_NONNULL_END

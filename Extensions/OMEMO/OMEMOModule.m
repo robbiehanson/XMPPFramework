@@ -137,6 +137,13 @@
     
 }
 
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {
+    OMEMOBundle *bundle = [iq omemo_bundle];
+    if (bundle) {
+        
+    }
+}
+
 #pragma mark XMPPCapabilitiesDelegate methods
 
 - (NSArray<NSString*>*) myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender {

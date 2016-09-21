@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** public part of identity key */
 @property (nonatomic, copy, readonly) NSData *identityKey;
 @property (nonatomic, strong, readonly) OMEMOSignedPreKey *signedPreKey;
-@property (nonatomic, strong, readonly) NSArray<OMEMOPreKey*> *preKeys;
+@property (nonatomic, copy, readonly) NSArray<OMEMOPreKey*> *preKeys;
 
 - (instancetype) initWithDeviceId:(uint32_t)deviceId
                       identityKey:(NSData*)identityKey

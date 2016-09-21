@@ -23,7 +23,7 @@
         _deviceId = deviceId;
         _identityKey = [identityKey copy];
         _signedPreKey = signedPreKey;
-        _preKeys = preKeys;
+        _preKeys = [preKeys copy];
     }
     return self;
 }

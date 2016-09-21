@@ -6,8 +6,13 @@ install:
   - pod repo update --silent
 
 script:
-  - pod install --project-directory=Xcode/Testing-iOS
-  - pod install --project-directory=Xcode/Testing-macOS
   - set -o pipefail
+  - pod install --project-directory=Xcode/Testing-iOS
   - xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'name=iPhone 6' test | xcpretty -c
+  # CocoaPods is having some problems...
+  # - pod install --project-directory=Xcode/Testing-macOS
+  - cd Xcode/Testing-macOS
+  - bundle install
+  - bundle exec pod install
+  - cd ../../
   - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
