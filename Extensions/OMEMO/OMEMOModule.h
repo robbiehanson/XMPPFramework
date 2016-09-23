@@ -75,6 +75,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  In order to send a chat message, its <body> first has to be encrypted. The client MUST use fresh, randomly generated key/IV pairs with AES-128 in Galois/Counter Mode (GCM). For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a MessageElement.
+ 
+  The client may wish to transmit keying material to the contact. This first has to be generated. The client MUST generate a fresh, randomly generated key/IV pair. For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a KeyTransportElement, omitting the <payload> as follows:
  *
  * @param payload data encrypted with fresh AES-128 GCM key/iv pair. If nil this is equivalent to a KeyTransportElement.
  * @param jid recipient JID
@@ -82,24 +84,11 @@ NS_ASSUME_NONNULL_BEGIN
  * @param iv the IV used for encryption of payload
  * @param elementId XMPP element id. If nil a random UUID will be used.
  */
-- (void) sendPayload:(nullable NSData*)payload
-               toJID:(XMPPJID*)jid
-             keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+- (void) sendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+               toJID:(XMPPJID*)toJID
                   iv:(NSData*)iv
+             payload:(nullable NSData*)payload
            elementId:(nullable NSString*)elementId;
-
-/**
- The client may wish to transmit keying material to the contact. This first has to be generated. The client MUST generate a fresh, randomly generated key/IV pair. For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a KeyTransportElement, omitting the <payload> as follows:
- *
- * @param jid recipient JID
- * @param elementID XMPP element id
- * @param keyData payload's AES key encrypted to each recipient deviceId's Axolotl session
- * @param iv the IV used for encryption of payload
- */
-- (void) sendKeyToJID:(XMPPJID*)jid
-              keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-                   iv:(NSData*)iv
-            elementId:(nullable NSString*)elementId;
 
 @end
 
@@ -118,13 +107,18 @@ receivedBundle:(OMEMOBundle*)bundle
       fromJID:(XMPPJID*)fromJID
            iq:(XMPPIQ*)iq;
 
+/** Bundle fetch failed */
+- (void)omemo:(OMEMOBundle*)omemo
+failedToReceiveBundleWithError:(XMPPIQ*)iqError;
+
 /**
- * Incoming MessageElement payload, keyData, and IV */
+ * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement */
 - (void)omemo:(OMEMOModule*)omemo
-receivedPayload:(NSData*)payload
-      keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-           iv:(NSData*)iv
-      message:(XMPPMessage*)message;
+receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+      fromJID:(XMPPJID*)fromJID
+             iv:(NSData*)iv
+        payload:(nullable NSData*)payload
+        message:(XMPPMessage*)message;
 
 @end
 

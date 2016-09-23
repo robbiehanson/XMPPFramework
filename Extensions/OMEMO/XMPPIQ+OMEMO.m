@@ -200,7 +200,7 @@
     NSString *separator = [XMLNS_OMEMO_BUNDLES stringByAppendingString:@":"];
     NSArray<NSString*> *components = [node componentsSeparatedByString:separator];
     NSString *deviceIdString = [components lastObject];
-    uint32_t deviceId = [deviceIdString integerValue];
+    uint32_t deviceId = (uint32_t)[deviceIdString integerValue];
     
     NSXMLElement *itemElement = [publish elementForName:@"item"];
     if (!itemElement) { return nil; }
