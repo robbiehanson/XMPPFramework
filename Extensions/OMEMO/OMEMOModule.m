@@ -11,8 +11,10 @@
 #import "XMPPIQ+XEP_0060.h"
 #import "XMPPIQ+OMEMO.h"
 #import "XMPPMessage+OMEMO.h"
+#import "XMPPIDTracker.h"
 
 @interface OMEMOModule()
+@property (nonatomic, strong, readonly) XMPPIDTracker *tracker;
 @end
 
 @implementation OMEMOModule
@@ -44,7 +46,12 @@
 {
     if ([super activate:aXmppStream])
     {
-        [xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+        [self performBlock:^{
+            [xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+            _tracker = [[XMPPIDTracker alloc] initWithStream:aXmppStream dispatchQueue:moduleQueue];
+            OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
+            [self addMyDeviceIdToLocalDeviceList:myBundle];
+        }];
         return YES;
     }
     
@@ -52,7 +59,11 @@
 }
 
 - (void) deactivate {
-    [xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+    [self performBlock:^{
+        [_tracker removeAllIDs];
+        _tracker = nil;
+        [xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+    }];
     [super deactivate];
 }
 
@@ -84,63 +95,59 @@
     [xmppStream sendElement:iq];
 }
 
-/**
- * Check for devicelist update
-
-<message from='juliet@capulet.lit'
-         to='romeo@montague.lit'
-         type='headline'
-         id='update_01'>
-  <event xmlns='http://jabber.org/protocol/pubsub#event'>
-    <items node='urn:xmpp:omemo:0:devicelist'>
-      <item>
-        <list xmlns='urn:xmpp:omemo:0'>
-          <device id='12345' />
-          <device id='4223' />
-        </list>
-      </item>
-    </items>
-  </event>
-</message>
- */
-- (void) processIncomingDeviceListItems:(NSXMLElement*)items originalMessage:(XMPPMessage*)message {
-    NSXMLElement *item = [items elementForName:@"item"];
-    NSXMLElement *list = [item elementForName:@"list" xmlns:XMLNS_OMEMO];
-    NSArray<NSXMLElement*> *deviceElements = [list elementsForName:@"device"];
-    NSMutableArray *deviceIds = [NSMutableArray arrayWithCapacity:deviceElements.count];
-    [deviceElements enumerateObjectsUsingBlock:^(NSXMLElement *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSNumber *deviceId = [obj attributeNumberIntegerValueForName:@"id"];
-        NSParameterAssert(deviceId != nil);
-        if (deviceId) {
-            [deviceIds addObject:deviceId];
-        }
-    }];
-    if (deviceIds.count > 0) {
-        [multicastDelegate omemo:self deviceListUpdate:deviceIds fromJID:[message from] message:message];
-    }
+- (void) sendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+               toJID:(XMPPJID*)toJID
+                  iv:(NSData*)iv
+             payload:(nullable NSData*)payload
+           elementId:(nullable NSString*)elementId {
+    //XMPPMessage *message = [XMPPMessage omemo_m
 }
 
 #pragma mark XMPPStreamDelegate methods
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
     
-    // Incoming pubsub event, probably device list update
-    NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
-    if (event) {
-        NSXMLElement *items = [event elementForName:@"items" xmlns:XMLNS_OMEMO_DEVICELIST];
-        // Device List update
-        if (items) {
-            [self processIncomingDeviceListItems:items originalMessage:message];
+    // Check for incoming device list updates
+    NSArray<NSNumber *> *deviceIds = [message omemo_deviceList];
+    if (deviceIds.count > 0) {
+        // Notify delegates
+        [multicastDelegate omemo:self deviceListUpdate:deviceIds fromJID:[message from] message:message];
+        // This may temporarily remove your own deviceId until we can update (below)
+        [self.omemoStorage storeDeviceIds:deviceIds forJID:[[message from] bare]];
+        
+        // Check if your device is contained in the update
+        if ([[message from] isEqualToJID:xmppStream.myJID options:XMPPJIDCompareBare]) {
+            OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
+            if (!myBundle) {
+                return;
+            }
+            if([deviceIds containsObject:@(myBundle.deviceId)]) {
+                return;
+            }
+            // Republish deviceIds with your deviceId
+            NSArray *appended = [deviceIds arrayByAddingObject:@(myBundle.deviceId)];
+            [self.omemoStorage storeDeviceIds:deviceIds forJID:[[message from] bare]];
+            [self publishDeviceIds:appended elementId:[[NSUUID UUID] UUIDString]];
+        }
+        return;
+    }
+    NSXMLElement *omemo = [message omemo_encryptedElement];
+    if (omemo) {
+        uint32_t deviceId = [omemo omemo_senderDeviceId];
+        NSDictionary<NSNumber*,NSData*>* keyData = [omemo omemo_keyData];
+        NSData *iv = [omemo omemo_iv];
+        NSData *payload = [omemo omemo_payload];
+        if (deviceId > 0 && keyData.count > 0 && iv) {
+            [multicastDelegate omemo:self receivedKeyData:keyData fromJID:[message from] iv:iv payload:payload message:message];
         }
     }
-    
-    
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {
+    // Check for incoming bundles
     OMEMOBundle *bundle = [iq omemo_bundle];
     if (bundle) {
-        
+        [multicastDelegate omemo:self receivedBundle:bundle fromJID:[iq from] iq:iq];
     }
 }
 
@@ -150,5 +157,24 @@
     return @[XMLNS_OMEMO_DEVICELIST, XMLNS_OMEMO_DEVICELIST_NOTIFY];
 }
 
+#pragma mark Utility
+
+- (void) performBlock:(dispatch_block_t)block {
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+}
+
+- (void) addMyDeviceIdToLocalDeviceList:(OMEMOBundle*)myBundle {
+    if (!myBundle) { return; }
+    XMPPJID *myJID = xmppStream.myJID;
+    NSArray *devices = [self.omemoStorage fetchDeviceIdsForJID:xmppStream.myJID];
+    if(devices.count == 0 || [devices containsObject:@(myBundle.deviceId)]) {
+        return;
+    }
+    NSArray *appended = [devices arrayByAddingObject:@(myBundle.deviceId)];
+    [self.omemoStorage storeDeviceIds:appended forJID:myJID];
+}
 
 @end

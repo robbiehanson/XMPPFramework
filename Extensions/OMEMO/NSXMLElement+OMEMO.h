@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSDictionary<NSNumber*,NSData*>*) omemo_keyData;
 /** Only works within <encrypted> element. <payload>BASE64ENCODED</payload> */
 - (nullable NSData*) omemo_payload;
+/** Encryption IV. Only works within <encrypted> element. <iv>BASE64ENCODED</iv> */
+- (nullable NSData*) omemo_iv;
 
 
 /**
@@ -41,9 +43,9 @@ NS_ASSUME_NONNULL_BEGIN
  </encrypted>
  */
 
-+ (NSXMLElement*) omemo_keyTransportElementForDeviceId:(uint32_t)deviceId
-                                               keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-                                                    iv:(NSData*)iv;
++ (NSXMLElement*) omemo_keyTransportElementWithKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+                                                    iv:(NSData*)iv
+                                        senderDeviceId:(uint32_t)senderDeviceId;
 
 
 

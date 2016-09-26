@@ -85,8 +85,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @param elementId XMPP element id. If nil a random UUID will be used.
  */
 - (void) sendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-               toJID:(XMPPJID*)toJID
                   iv:(NSData*)iv
+               toJID:(XMPPJID*)toJID
              payload:(nullable NSData*)payload
            elementId:(nullable NSString*)elementId;
 
@@ -98,6 +98,16 @@ NS_ASSUME_NONNULL_BEGIN
  * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
  */
 - (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID message:(XMPPMessage*)message;
+
+/** Callback for when your bundle is successfully published */
+- (void)omemo:(OMEMOModule*)omemo
+publishedBundle:(OMEMOBundle*)bundle
+           iq:(XMPPIQ*)iq;
+
+/** Callback when publishing your bundle fails */
+- (void)omemo:(OMEMOModule*)omemo
+failedToPublishBundle:(OMEMOBundle*)bundle
+           iqError:(XMPPIQ*)iqError;
 
 /** 
  * Process the incoming OMEMO bundle somewhere in your application
@@ -115,7 +125,7 @@ failedToReceiveBundleWithError:(XMPPIQ*)iqError;
  * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement */
 - (void)omemo:(OMEMOModule*)omemo
 receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-      fromJID:(XMPPJID*)fromJID
+        fromJID:(XMPPJID*)fromJID
              iv:(NSData*)iv
         payload:(nullable NSData*)payload
         message:(XMPPMessage*)message;
@@ -123,19 +133,21 @@ receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
 @end
 
 @protocol OMEMOStorageDelegate <NSObject>
-@required;
+@required
 
-
+/** Return YES if successful. Optionally store a reference to parent module and moduleQueue */
 - (BOOL)configureWithParent:(OMEMOModule *)aParent queue:(dispatch_queue_t)queue;
 
+/** Store new deviceIds for a bare JID */
 - (void)storeDeviceIds:(NSArray<NSNumber*>*)deviceIds forJID:(XMPPJID*)jid;
 
+/** Fetch all deviceIds for a given bare JID. Return empty array if not found. */
 - (NSArray<NSNumber*>*)fetchDeviceIdsForJID:(XMPPJID*)jid;
 
-/** This should return your fully populated bundle with >= 100 prekeys */
-- (OMEMOBundle*)fetchMyBundle;
+/** This should return your fully populated bundle with >= 100 prekeys. Return nil if bundle is not found. */
+- (nullable OMEMOBundle*)fetchMyBundle;
 
-
+/** Return YES if SignalProtocol session has been established and is valid */
 - (BOOL) isSessionValid:(XMPPJID*)jid deviceId:(uint32_t)deviceId;
 
 @end

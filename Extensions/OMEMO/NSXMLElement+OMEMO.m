@@ -61,6 +61,13 @@
     return [[NSData alloc] initWithBase64Encoding:b64];
 }
 
+- (nullable NSData*) omemo_iv {
+    NSXMLElement *header = [self omemo_headerElement];
+    NSString *iv = [[header elementForName:@"iv"] stringValue];
+    if (!iv) { return nil; }
+    return [[NSData alloc] initWithBase64Encoding:iv];
+}
+
 
 /**
  * The client may wish to transmit keying material to the contact. This first has to be generated. The client MUST generate a fresh, randomly generated key/IV pair. For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a KeyTransportElement, omitting the <payload> as follows:
@@ -75,12 +82,12 @@
  </encrypted>
  */
 
-+ (NSXMLElement*) omemo_keyTransportElementForDeviceId:(uint32_t)deviceId
-                                               keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-                                                    iv:(NSData*)iv {
++ (NSXMLElement*) omemo_keyTransportElementWithKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+                                                    iv:(NSData*)iv
+                                        senderDeviceId:(uint32_t)senderDeviceId {
     NSXMLElement *keyTransportElement = [NSXMLElement elementWithName:@"encrypted" xmlns:XMLNS_OMEMO];
     NSXMLElement *headerElement = [NSXMLElement elementWithName:@"header"];
-    [headerElement addAttributeWithName:@"sid" unsignedIntegerValue:deviceId];
+    [headerElement addAttributeWithName:@"sid" unsignedIntegerValue:senderDeviceId];
     [keyData enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull key, NSData * _Nonnull obj, BOOL * _Nonnull stop) {
         NSXMLElement *keyElement = [NSXMLElement elementWithName:@"key" stringValue:[obj base64EncodedStringWithOptions:0]];
         [keyElement addAttributeWithName:@"rid" numberValue:key];

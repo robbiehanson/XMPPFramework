@@ -36,12 +36,12 @@ NS_ASSUME_NONNULL_BEGIN
  
  keyData is keyed to the receiving deviceIds
  */
-+ (XMPPMessage*) omemo_messageWithPayload:(nullable NSData*)payload
-                                    toJID:(XMPPJID*)jid
-                           deviceId:(uint32_t)deviceId
-                            keyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-                                 iv:(NSData*)iv
-                          elementId:(nullable NSString*)elementId;
++ (XMPPMessage*) omemo_messageWithKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+                                       iv:(NSData*)iv
+                           senderDeviceId:(uint32_t)senderDeviceId
+                                    toJID:(XMPPJID*)toJID
+                                  payload:(nullable NSData*)payload
+                                elementId:(nullable NSString*)elementId;
 
 @end
 NS_ASSUME_NONNULL_END

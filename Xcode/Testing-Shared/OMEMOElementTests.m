@@ -163,7 +163,7 @@
     NSDictionary *keyData = @{@(31415): keyData1,
                               @(12321): keyData2};
     uint32_t senderDeviceId = 27183;
-    NSXMLElement *testElement = [NSXMLElement omemo_keyTransportElementForDeviceId:senderDeviceId keyData:keyData iv:ivData];
+    NSXMLElement *testElement = [NSXMLElement omemo_keyTransportElementWithKeyData:keyData iv:ivData senderDeviceId:senderDeviceId];
     
     XCTAssertTrue([expectedElement omemo_isEncryptedElement]);
     XCTAssertTrue([testElement omemo_isEncryptedElement]);
@@ -176,6 +176,9 @@
     
     XCTAssertNil([expectedElement omemo_payload]);
     XCTAssertNil([testElement omemo_payload]);
+    
+    XCTAssertEqualObjects(ivData, [expectedElement omemo_iv]);
+    XCTAssertEqualObjects(ivData, [testElement omemo_iv]);
 }
 
 /*
