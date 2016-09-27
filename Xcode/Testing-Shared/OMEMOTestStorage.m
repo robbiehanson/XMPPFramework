@@ -7,6 +7,7 @@
 //
 
 #import "OMEMOTestStorage.h"
+#import <XMPPFramework/XMPPIQ+OMEMO.h>
 
 @interface OMEMOTestStorage()
 @property (nonatomic, strong, readonly) NSMutableDictionary <XMPPJID*,NSArray<NSNumber*>*> *deviceIdStorage;
@@ -57,6 +58,75 @@
     NSArray<NSNumber*> *deviceIds = [self.deviceIdStorage objectForKey:jid];
     return [deviceIds containsObject:@(deviceId)];
 }
+
+#pragma mark Utility
+
++ (XMPPIQ*) iq_SetBundleWithEid:(NSString*)eid {
+    NSXMLElement *inner = [self innerBundleElement];
+    XMPPIQ *setIq = [XMPPIQ iqWithType:@"set" elementID:eid child:inner];
+    return setIq;
+}
+
++ (XMPPIQ*) iq_resultBundleFromJID:(XMPPJID*)fromJID eid:(NSString*)eid {
+    NSXMLElement *inner = [self innerBundleElement];
+    XMPPIQ *iq = [self iq_testIQFromJID:fromJID eid:eid type:@"result"];
+    [iq addChild:inner];
+    return iq;
+}
+
++ (XMPPIQ*) iq_errorFromJID:(XMPPJID*)fromJID eid:(NSString*)eid {
+    return [self iq_testIQFromJID:fromJID eid:eid type:@"error"];
+}
+
++ (XMPPIQ*) iq_testIQFromJID:(XMPPJID*)fromJID eid:(NSString*)eid type:(NSString*)type {
+    NSString *expectedString = @" \
+    <iq> \
+    </iq> \
+    ";
+    NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:expectedString error:nil];
+    if (eid) {
+        [element addAttributeWithName:@"id" stringValue:eid];
+    }
+    if (type) {
+        [element addAttributeWithName:@"type" stringValue:type];
+    }
+    if (fromJID) {
+        [element addAttributeWithName:@"from" stringValue:[fromJID full]];
+    }
+    XMPPIQ *iq = [XMPPIQ iqFromElement:element];
+    return iq;
+}
+
++ (NSXMLElement*)innerBundleElement {
+    NSString *expectedString = @" \
+    <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
+    <publish node='urn:xmpp:omemo:0:bundles:31415'> \
+    <item> \
+    <bundle xmlns='urn:xmpp:omemo:0'> \
+    <signedPreKeyPublic signedPreKeyId='1'>c2lnbmVkUHJlS2V5UHVibGlj</signedPreKeyPublic> \
+    <signedPreKeySignature>c2lnbmVkUHJlS2V5U2lnbmF0dXJl</signedPreKeySignature> \
+    <identityKey>aWRlbnRpdHlLZXk=</identityKey> \
+    <prekeys> \
+    <preKeyPublic preKeyId='1'>cHJlS2V5MQ==</preKeyPublic> \
+    <preKeyPublic preKeyId='2'>cHJlS2V5Mg==</preKeyPublic> \
+    <preKeyPublic preKeyId='3'>cHJlS2V5Mw==</preKeyPublic> \
+    </prekeys> \
+    </bundle> \
+    </item> \
+    </publish> \
+    </pubsub> \
+    ";
+    NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:expectedString error:nil];
+    return element;
+}
+
++ (OMEMOBundle*) testBundle {
+    [self innerBundleElement];
+    OMEMOBundle *bundle = [[self iq_SetBundleWithEid:@"announce1"] omemo_bundle];
+    return bundle;
+}
+
+
 
 
 @end

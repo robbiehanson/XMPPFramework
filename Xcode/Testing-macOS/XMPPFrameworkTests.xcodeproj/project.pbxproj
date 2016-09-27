@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4A6D92D0C7C1950CBA77BE55 /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */; };
+		D9669B591D9B13FF0018533D /* OMEMOServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9669B581D9B13FF0018533D /* OMEMOServerTests.m */; };
 		D973A0A41D2F1EF60096F3ED /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */; };
 		D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */; };
 		D973A0A61D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0981D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m */; };
@@ -30,6 +31,7 @@
 		1FFB10AE98925E51A8604C49 /* Pods-XMPPFrameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.release.xcconfig"; sourceTree = "<group>"; };
 		23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
+		D9669B581D9B13FF0018533D /* OMEMOServerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOServerTests.m; path = "../../Testing-Shared/OMEMOServerTests.m"; sourceTree = "<group>"; };
 		D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D973A0921D2F1EB10096F3ED /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CapabilitiesHashingTest.m; path = "../../Testing-Shared/CapabilitiesHashingTest.m"; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 		D973A08F1D2F1EB10096F3ED /* XMPPFrameworkTests */ = {
 			isa = PBXGroup;
 			children = (
+				D9669B581D9B13FF0018533D /* OMEMOServerTests.m */,
 				D99C5E071D95EBA100FB068A /* OMEMOTestStorage.h */,
 				D99C5E081D95EBA100FB068A /* OMEMOTestStorage.m */,
 				D9F20D001D836080002A8D6F /* OMEMOModuleTests.m */,
@@ -240,6 +243,7 @@
 				D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */,
 				D973A0AB1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
 				D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */,
+				D9669B591D9B13FF0018533D /* OMEMOServerTests.m in Sources */,
 				D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */,
 				D973A0A81D2F1EF60096F3ED /* XMPPMockStream.m in Sources */,
 				D973A0AC1D2F1EF60096F3ED /* XMPPRoomLightTests.m in Sources */,

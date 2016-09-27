@@ -96,7 +96,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@protocol OMEMODelegate <NSObject>
+@protocol OMEMOModuleDelegate <NSObject>
 @optional
 
 /** Callback for when your device list is successfully published */

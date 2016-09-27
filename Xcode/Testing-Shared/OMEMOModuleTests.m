@@ -12,7 +12,7 @@
 #import "OMEMOTestStorage.h"
 #import "XMPPMockStream.h"
 
-@interface OMEMOModuleTests : XCTestCase <OMEMODelegate>
+@interface OMEMOModuleTests : XCTestCase <OMEMOModuleDelegate>
 @property (nonatomic, strong, readonly) OMEMOModule *omemoModule;
 @property (nonatomic, strong, readonly) XMPPMockStream *mockStream;
 @property (nonatomic, strong) XCTestExpectation *expectation;
