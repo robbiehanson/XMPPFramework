@@ -22,6 +22,10 @@
     return YES;
 }
 
+- (void)fakeResponse:(NSXMLElement*)element {
+    [self injectElement:element];
+}
+
 - (void)fakeMessageResponse:(XMPPMessage *) message {
     [self injectElement:message];
 }

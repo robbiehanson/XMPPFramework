@@ -12,12 +12,16 @@
 #import "XMPPIQ+OMEMO.h"
 #import "XMPPMessage+OMEMO.h"
 #import "XMPPIDTracker.h"
+#import "XMPPLogging.h"
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 @interface OMEMOModule()
 @property (nonatomic, strong, readonly) XMPPIDTracker *tracker;
 @end
 
 @implementation OMEMOModule
+
+#pragma mark Init
 
 - (instancetype) init {
     NSAssert(NO, @"Use designated initializer.");
@@ -67,40 +71,96 @@
     [super deactivate];
 }
 
+#pragma mark Public methods
+
 
 - (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(nullable NSString*)elementId {
-    if (!elementId.length) {
-        elementId = [[NSUUID UUID] UUIDString];
-    }
-    XMPPIQ *iq = [XMPPIQ omemo_iqForDeviceIds:deviceIds elementId:elementId];
-    [xmppStream sendElement:iq];
+    NSParameterAssert(deviceIds.count > 0);
+    if (!deviceIds.count) { return; }
+    [self performBlock:^{
+        NSString *eid = [self fixElementId:elementId];
+        XMPPIQ *iq = [XMPPIQ omemo_iqForDeviceIds:deviceIds elementId:eid];
+        [self.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
+            if (!responseIq || [responseIq isErrorIQ]) {
+                // timeout
+                XMPPLogWarn(@"publishDeviceIds error: %@ %@", iq, responseIq);
+                [multicastDelegate omemo:self failedToPublishDeviceIds:deviceIds errorIq:responseIq outgoingIq:iq];
+                return;
+            }
+            [multicastDelegate omemo:self publishedDeviceIds:deviceIds responseIq:responseIq outgoingIq:iq];
+        } timeout:30];
+        [xmppStream sendElement:iq];
+    }];
 }
 
 - (void) publishBundle:(OMEMOBundle*)bundle
              elementId:(nullable NSString*)elementId {
-    if (!elementId.length) {
-        elementId = [[NSUUID UUID] UUIDString];
-    }
-    XMPPIQ *iq = [XMPPIQ omemo_iqBundle:bundle elementId:elementId];
-    [xmppStream sendElement:iq];
+    NSParameterAssert(bundle);
+    if (!bundle) { return; }
+    [self performBlock:^{
+        NSString *eid = [self fixElementId:elementId];
+        XMPPIQ *iq = [XMPPIQ omemo_iqBundle:bundle elementId:eid];
+        [self.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
+            if (!responseIq || [responseIq isErrorIQ]) {
+                // timeout
+                XMPPLogWarn(@"publishBundle error: %@ %@", iq, responseIq);
+                [multicastDelegate omemo:self failedToPublishBundle:bundle errorIq:responseIq outgoingIq:iq];
+                return;
+            }
+            [multicastDelegate omemo:self publishedBundle:bundle responseIq:responseIq outgoingIq:iq];
+        } timeout:30];
+        [xmppStream sendElement:iq];
+    }];
 }
 
 - (void) fetchBundleForDeviceId:(uint32_t)deviceId
                             jid:(XMPPJID*)jid
                       elementId:(nullable NSString*)elementId {
-    if (!elementId.length) {
-        elementId = [[NSUUID UUID] UUIDString];
-    }
-    XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:deviceId jid:jid elementId:elementId];
-    [xmppStream sendElement:iq];
+    NSParameterAssert(jid);
+    if (!jid) { return; }
+    [self performBlock:^{
+        NSString *eid = [self fixElementId:elementId];
+        XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:deviceId jid:jid elementId:eid];
+        [self.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
+            if (!responseIq || [responseIq isErrorIQ]) {
+                // timeout
+                XMPPLogWarn(@"fetchBundleForDeviceId error: %@ %@", iq, responseIq);
+                [multicastDelegate omemo:self failedToFetchBundleForDeviceId:deviceId fromJID:jid errorIq:responseIq outgoingIq:iq];
+                return;
+            }
+            OMEMOBundle *bundle = [responseIq omemo_bundle];
+            if (bundle) {
+                [multicastDelegate omemo:self fetchedBundle:bundle fromJID:jid responseIq:responseIq outgoingIq:iq];
+            } else {
+                XMPPLogWarn(@"fetchBundleForDeviceId bundle parsing error: %@ %@", iq, responseIq);
+                [multicastDelegate omemo:self failedToFetchBundleForDeviceId:deviceId fromJID:jid errorIq:responseIq outgoingIq:iq];
+            }
+        } timeout:30];
+        [xmppStream sendElement:iq];
+    }];
 }
 
 - (void) sendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-               toJID:(XMPPJID*)toJID
                   iv:(NSData*)iv
+               toJID:(XMPPJID*)toJID
              payload:(nullable NSData*)payload
            elementId:(nullable NSString*)elementId {
-    //XMPPMessage *message = [XMPPMessage omemo_m
+    NSParameterAssert(keyData.count > 0);
+    NSParameterAssert(iv.length > 0);
+    NSParameterAssert(toJID != nil);
+    if (!keyData.count || !iv.length || !toJID) {
+        return;
+    }
+    [self performBlock:^{
+        OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
+        if (!myBundle) {
+            XMPPLogWarn(@"sendKeyData: could not fetch my bundle");
+            return;
+        }
+        NSString *eid = [self fixElementId:elementId];
+        XMPPMessage *message = [XMPPMessage omemo_messageWithKeyData:keyData iv:iv senderDeviceId:myBundle.deviceId toJID:toJID payload:payload elementId:eid];
+        [xmppStream sendElement:message];
+    }];
 }
 
 #pragma mark XMPPStreamDelegate methods
@@ -138,17 +198,13 @@
         NSData *iv = [omemo omemo_iv];
         NSData *payload = [omemo omemo_payload];
         if (deviceId > 0 && keyData.count > 0 && iv) {
-            [multicastDelegate omemo:self receivedKeyData:keyData fromJID:[message from] iv:iv payload:payload message:message];
+            [multicastDelegate omemo:self receivedKeyData:keyData iv:iv fromJID:[message from] payload:payload message:message];
         }
     }
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq {
-    // Check for incoming bundles
-    OMEMOBundle *bundle = [iq omemo_bundle];
-    if (bundle) {
-        [multicastDelegate omemo:self receivedBundle:bundle fromJID:[iq from] iq:iq];
-    }
+    return [self.tracker invokeForElement:iq withObject:iq];
 }
 
 #pragma mark XMPPCapabilitiesDelegate methods
@@ -159,11 +215,23 @@
 
 #pragma mark Utility
 
+/** Executes block on moduleQueue */
 - (void) performBlock:(dispatch_block_t)block {
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else
         dispatch_sync(moduleQueue, block);
+}
+
+/** Generate elementId UUID if needed */
+- (nonnull NSString*) fixElementId:(nullable NSString*)elementId {
+    NSString *eid = nil;
+    if (!elementId.length) {
+        eid = [[NSUUID UUID] UUIDString];
+    } else {
+        eid = [elementId copy];
+    }
+    return eid;
 }
 
 - (void) addMyDeviceIdToLocalDeviceList:(OMEMOBundle*)myBundle {

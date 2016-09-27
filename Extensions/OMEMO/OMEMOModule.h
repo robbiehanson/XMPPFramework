@@ -30,6 +30,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly) id<OMEMOStorageDelegate> omemoStorage;
 
+#pragma mark Init
+
 - (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage;
 - (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
@@ -37,6 +39,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype) init NS_UNAVAILABLE;
 /** Not available, use designated initializer */
 - (instancetype) initWithDispatchQueue:(dispatch_queue_t)queue NS_UNAVAILABLE;
+
+#pragma mark Public methods
 
 /** 
  * In order for other devices to be able to initiate a session with a given device, it first has to announce itself by adding its device ID to the devicelist PEP node.
@@ -93,6 +97,20 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @protocol OMEMODelegate <NSObject>
+@optional
+
+/** Callback for when your device list is successfully published */
+- (void)omemo:(OMEMOModule*)omemo
+publishedDeviceIds:(NSArray<NSNumber*>*)deviceIds
+   responseIq:(XMPPIQ*)responseIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
+
+/** Callback for when your device list update fails. If errorIq is nil there was a timeout. */
+- (void)omemo:(OMEMOModule*)omemo
+failedToPublishDeviceIds:(NSArray<NSNumber*>*)deviceIds
+      errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
+
 
 /**
  * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
@@ -101,34 +119,51 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Callback for when your bundle is successfully published */
 - (void)omemo:(OMEMOModule*)omemo
-publishedBundle:(OMEMOBundle*)bundle
-           iq:(XMPPIQ*)iq;
+    publishedBundle:(OMEMOBundle*)bundle
+    responseIq:(XMPPIQ*)responseIq
+    outgoingIq:(XMPPIQ*)outgoingIq;
 
 /** Callback when publishing your bundle fails */
 - (void)omemo:(OMEMOModule*)omemo
 failedToPublishBundle:(OMEMOBundle*)bundle
-           iqError:(XMPPIQ*)iqError;
+      errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
 
-/** 
+/**
  * Process the incoming OMEMO bundle somewhere in your application
  */
 - (void)omemo:(OMEMOModule*)omemo
-receivedBundle:(OMEMOBundle*)bundle
+fetchedBundle:(OMEMOBundle*)bundle
       fromJID:(XMPPJID*)fromJID
-           iq:(XMPPIQ*)iq;
+   responseIq:(XMPPIQ*)responseIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
 
 /** Bundle fetch failed */
 - (void)omemo:(OMEMOBundle*)omemo
-failedToReceiveBundleWithError:(XMPPIQ*)iqError;
+failedToFetchBundleForDeviceId:(uint32_t)deviceId
+      fromJID:(XMPPJID*)fromJID
+      errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
+
+/**
+ * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement
+- (void)omemo:(OMEMOModule*)omemo
+failedToSendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+           iv:(NSData*)iv
+      toJID:(XMPPJID*)toJID
+      payload:(nullable NSData*)payload
+ errorMessage:(nullable XMPPMessage*)errorMessage
+      outgoingMessage:(XMPPMessage*)outgoingMessage;
+ */
 
 /**
  * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement */
 - (void)omemo:(OMEMOModule*)omemo
 receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
-        fromJID:(XMPPJID*)fromJID
-             iv:(NSData*)iv
-        payload:(nullable NSData*)payload
-        message:(XMPPMessage*)message;
+           iv:(NSData*)iv
+      fromJID:(XMPPJID*)fromJID
+      payload:(nullable NSData*)payload
+      message:(XMPPMessage*)message;
 
 @end
 

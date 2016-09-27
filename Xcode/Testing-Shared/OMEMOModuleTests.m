@@ -12,9 +12,10 @@
 #import "OMEMOTestStorage.h"
 #import "XMPPMockStream.h"
 
-@interface OMEMOModuleTests : XCTestCase
-@property (nonatomic, strong) OMEMOModule *omemoModule;
-@property (nonatomic, strong) XMPPMockStream *mockStream;
+@interface OMEMOModuleTests : XCTestCase <OMEMODelegate>
+@property (nonatomic, strong, readonly) OMEMOModule *omemoModule;
+@property (nonatomic, strong, readonly) XMPPMockStream *mockStream;
+@property (nonatomic, strong) XCTestExpectation *expectation;
 @end
 
 @implementation OMEMOModuleTests
@@ -24,8 +25,8 @@
     OMEMOBundle *bundle = [self bundle];
     XMPPJID *myJID = [XMPPJID jidWithString:@"test@example.com"];
     OMEMOTestStorage *testStorage = [[OMEMOTestStorage alloc] initWithMyBundle:bundle];
-    self.omemoModule = [[OMEMOModule alloc] initWithOMEMOStorage:testStorage];
-    self.mockStream = [[XMPPMockStream alloc] init];
+    _omemoModule = [[OMEMOModule alloc] initWithOMEMOStorage:testStorage];
+    _mockStream = [[XMPPMockStream alloc] init];
     self.mockStream.myJID = myJID;
     [self.omemoModule activate:self.mockStream];
     [self.omemoModule addDelegate:self delegateQueue:dispatch_get_main_queue()];
@@ -35,23 +36,277 @@
     // Put teardown code here. This method is called after the invocation of each test method in the class.
     [self.omemoModule removeDelegate:self];
     [self.omemoModule deactivate];
-    self.omemoModule = nil;
-    self.mockStream = nil;
+    _omemoModule = nil;
+    _mockStream = nil;
     [super tearDown];
 }
 
 - (void)testPublishDeviceIds {
+    self.expectation = [self expectationWithDescription:@"testPublishDeviceIds"];
+    //__weak typeof(self) weakSelf = self;
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testPublishDeviceIds: %@", outgoingIq);
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"result" elementID:outgoingIq.elementID];
+        [weakStream fakeResponse:responseIq];
+    };
     
+    NSArray<NSNumber*> *deviceIds = @[@(12345), @(31415)];
+    [self.omemoModule publishDeviceIds:deviceIds elementId:nil];
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void) testPublishDeviceIdsFail {
+    self.expectation = [self expectationWithDescription:@"testPublishDeviceIdsFail"];
+    //__weak typeof(self) weakSelf = self;
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testPublishDeviceIdsError: %@", outgoingIq);
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"error" elementID:outgoingIq.elementID];
+        [weakStream fakeResponse:responseIq];
+    };
     
-    
+    NSArray<NSNumber*> *deviceIds = @[@(12345), @(31415)];
+    [self.omemoModule publishDeviceIds:deviceIds elementId:nil];
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
 }
 
 - (void)testPublishBundle {
+    self.expectation = [self expectationWithDescription:@"testPublishBundle"];
+    //__weak typeof(self) weakSelf = self;
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testPublishBundle: %@", outgoingIq);
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"result" elementID:outgoingIq.elementID];
+        [weakStream fakeResponse:responseIq];
+    };
     
+    OMEMOBundle *myBundle = [self.omemoModule.omemoStorage fetchMyBundle];
+    XCTAssertNotNil(myBundle);
+    [self.omemoModule publishBundle:myBundle elementId:nil];
+    
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
 }
 
-- (void)testFetchBundle {
+- (void)testPublishBundleFail {
+    self.expectation = [self expectationWithDescription:@"testPublishBundleFail"];
+    //__weak typeof(self) weakSelf = self;
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testPublishBundleFail: %@", outgoingIq);
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"error" elementID:outgoingIq.elementID];
+        [weakStream fakeResponse:responseIq];
+    };
     
+    OMEMOBundle *myBundle = [self.omemoModule.omemoStorage fetchMyBundle];
+    XCTAssertNotNil(myBundle);
+    [self.omemoModule publishBundle:myBundle elementId:nil];
+    
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void) testFetchBundle {
+    XMPPJID *remoteJID = [XMPPJID jidWithString:@"remote@jid.com"];
+    self.expectation = [self expectationWithDescription:@"testFetchBundle"];
+    __weak typeof(self) weakSelf = self;
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testFetchBundle: %@", outgoingIq);
+        XMPPIQ *iq = [weakSelf iq_resultBundleFromJID:remoteJID eid:outgoingIq.elementID];
+        [weakStream fakeResponse:iq];
+    };
+    
+    [self.omemoModule fetchBundleForDeviceId:31415 jid:remoteJID elementId:nil];
+    
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void) testFetchFail {
+    XMPPJID *remoteJID = [XMPPJID jidWithString:@"remote@jid.com"];
+    self.expectation = [self expectationWithDescription:@"testFetchFail"];
+    __weak typeof(self) weakSelf = self;
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testFetchFail: %@", outgoingIq);
+        XMPPIQ *responseIq = [weakSelf iq_errorFromJID:remoteJID eid:outgoingIq.elementID];
+        [weakStream fakeResponse:responseIq];
+    };
+    
+    [self.omemoModule fetchBundleForDeviceId:31415 jid:remoteJID elementId:nil];
+    
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void) testSendKeyData {
+    XMPPJID *remoteJID = [XMPPJID jidWithString:@"remote@jid.com"];
+    self.expectation = [self expectationWithDescription:@"testSendKeyData"];
+    __weak typeof(self) weakSelf = self;
+    //__weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPMessage *outgoingMessage) {
+        NSLog(@"testSendKeyData: %@", outgoingMessage);
+        [weakSelf.expectation fulfill];
+    };
+    
+    NSString *key1 = @"MzE0MTU=";
+    NSString *key2 = @"MTIzMjE=";
+    NSString *iv = @"aXY=";
+    NSString *payload = @"cGF5bG9hZA==";
+    NSData *keyData1 = [[NSData alloc] initWithBase64EncodedString:key1 options:0];
+    NSData *keyData2 = [[NSData alloc] initWithBase64EncodedString:key2 options:0];
+    NSData *ivData = [[NSData alloc] initWithBase64EncodedString:iv options:0];
+    NSData *payloadData = [[NSData alloc] initWithBase64EncodedString:payload options:0];
+    NSDictionary *keyData = @{@(31415): keyData1,
+                              @(12321): keyData2};
+    
+    [self.omemoModule sendKeyData:keyData iv:ivData toJID:remoteJID payload:payloadData elementId:nil];
+    
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void) testReceiveMessage {
+    NSString *incoming = @" \
+    <message to=\"remote@jid.com\" id=\"6441EEB7-89E6-4D02-8899-BB0E3E1C0EB2\"><store xmlns=\"urn:xmpp:hints\"></store><encrypted xmlns=\"urn:xmpp:omemo:0\"><header sid=\"31415\"><key rid=\"12321\">MTIzMjE=</key><key rid=\"31415\">MzE0MTU=</key><iv>aXY=</iv></header><payload>cGF5bG9hZA==</payload></encrypted></message> \
+    ";
+    
+    self.expectation = [self expectationWithDescription:@"testReceiveMessage"];
+    NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:incoming error:nil];
+    XCTAssertNotNil(element);
+    [self.mockStream fakeResponse:element];
+    
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void) testDeviceListUpdate {
+    NSString *incoming = @" \
+    <message from='juliet@capulet.lit' \
+    to='romeo@montague.lit' \
+    type='headline' \
+    id='update_01'> \
+    <event xmlns='http://jabber.org/protocol/pubsub#event'> \
+    <items node='urn:xmpp:omemo:0:devicelist'> \
+    <item> \
+    <list xmlns='urn:xmpp:omemo:0'> \
+    <device id='12345' /> \
+    <device id='4223' /> \
+    </list> \
+    </item> \
+    </items> \
+    </event> \
+    </message> \
+    ";
+    NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:incoming error:nil];
+    self.expectation = [self expectationWithDescription:@"testDeviceListUpdate"];
+    XCTAssertNotNil(element);
+    [self.mockStream fakeResponse:element];
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+#pragma mark OMEMODelegate
+
+/** Callback for when your device list is successfully published */
+- (void)omemo:(OMEMOModule*)omemo
+publishedDeviceIds:(NSArray<NSNumber*>*)deviceIds
+   responseIq:(XMPPIQ*)responseIq
+   outgoingIq:(XMPPIQ*)outgoingIq {
+    [self.expectation fulfill];
+}
+
+/** Callback for when your device list update fails. If errorIq is nil there was a timeout. */
+- (void)omemo:(OMEMOModule*)omemo
+failedToPublishDeviceIds:(NSArray<NSNumber*>*)deviceIds
+      errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq {
+    [self.expectation fulfill];
+}
+
+/** Callback for when your bundle is successfully published */
+- (void)omemo:(OMEMOModule*)omemo
+publishedBundle:(OMEMOBundle*)bundle
+   responseIq:(XMPPIQ*)responseIq
+   outgoingIq:(XMPPIQ*)outgoingIq {
+    [self.expectation fulfill];
+}
+
+/** Callback when publishing your bundle fails */
+- (void)omemo:(OMEMOModule*)omemo
+failedToPublishBundle:(OMEMOBundle*)bundle
+      errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq {
+    [self.expectation fulfill];
+}
+
+/**
+ * Process the incoming OMEMO bundle somewhere in your application
+ */
+- (void)omemo:(OMEMOModule*)omemo
+fetchedBundle:(OMEMOBundle*)bundle
+      fromJID:(XMPPJID*)fromJID
+   responseIq:(XMPPIQ*)responseIq
+   outgoingIq:(XMPPIQ*)outgoingIq {
+    [self.expectation fulfill];
+}
+
+/** Bundle fetch failed */
+- (void)omemo:(OMEMOBundle*)omemo
+failedToFetchBundleForDeviceId:(uint32_t)deviceId
+      fromJID:(XMPPJID*)fromJID
+      errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq {
+    [self.expectation fulfill];
+}
+
+/**
+ * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement */
+- (void)omemo:(OMEMOModule*)omemo
+receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+           iv:(NSData*)iv
+      fromJID:(XMPPJID*)fromJID
+      payload:(nullable NSData*)payload
+      message:(XMPPMessage*)message {
+    [self.expectation fulfill];
+}
+
+/**
+ * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
+ */
+- (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID message:(XMPPMessage*)message {
+    [self.expectation fulfill];
 }
 
 #pragma mark Utility
@@ -76,7 +331,7 @@
 
 - (XMPPIQ*) iq_testIQFromJID:(XMPPJID*)fromJID eid:(NSString*)eid type:(NSString*)type {
     NSString *expectedString = @" \
-    <iq'> \
+    <iq> \
     </iq> \
     ";
     NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:expectedString error:nil];
@@ -89,7 +344,10 @@
     if (fromJID) {
         [element addAttributeWithName:@"from" stringValue:[fromJID full]];
     }
-    return [XMPPIQ iqFromElement:element];
+    XCTAssertNotNil(element);
+    XMPPIQ *iq = [XMPPIQ iqFromElement:element];
+    XCTAssertNotNil(iq);
+    return iq;
 }
 
 - (NSXMLElement*)innerBundleElement {
@@ -121,8 +379,6 @@
     XCTAssertNotNil(bundle);
     return bundle;
 }
-
-#pragma mark OMEMODelegate
 
 
 @end
