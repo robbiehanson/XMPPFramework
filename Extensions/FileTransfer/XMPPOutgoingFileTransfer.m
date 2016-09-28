@@ -1148,10 +1148,10 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
         }
 
         NSXMLElement *si = iq.childElement;
-        NSXMLElement *feature = (DDXMLElement *) [si childAtIndex:0];
-        NSXMLElement *x = (DDXMLElement *) [feature childAtIndex:0];
-        NSXMLElement *field = (DDXMLElement *) [x childAtIndex:0];
-        NSXMLElement *value = (DDXMLElement *) [field childAtIndex:0];
+        NSXMLElement *feature = (NSXMLElement *) [si childAtIndex:0];
+        NSXMLElement *x = (NSXMLElement *) [feature childAtIndex:0];
+        NSXMLElement *field = (NSXMLElement *) [x childAtIndex:0];
+        NSXMLElement *value = (NSXMLElement *) [field childAtIndex:0];
 
         if ([[value stringValue] isEqualToString:XMPPBytestreamsNamespace]) {
           XMPPLogVerbose(@"The recipient has confirmed the use of SOCKS5. Starting transfer...");
