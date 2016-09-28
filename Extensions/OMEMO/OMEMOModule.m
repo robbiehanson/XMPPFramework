@@ -77,6 +77,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(nullable NSString*)elementId {
     NSParameterAssert(deviceIds.count > 0);
     if (!deviceIds.count) { return; }
+    __weak typeof(self) weakSelf = self;
+    __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
         NSString *eid = [self fixElementId:elementId];
         XMPPIQ *iq = [XMPPIQ omemo_iqPublishDeviceIds:deviceIds elementId:eid];
@@ -84,10 +86,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             if (!responseIq || [responseIq isErrorIQ]) {
                 // timeout
                 XMPPLogWarn(@"publishDeviceIds error: %@ %@", iq, responseIq);
-                [multicastDelegate omemo:self failedToPublishDeviceIds:deviceIds errorIq:responseIq outgoingIq:iq];
+                [weakMulticast omemo:weakSelf failedToPublishDeviceIds:deviceIds errorIq:responseIq outgoingIq:iq];
                 return;
             }
-            [multicastDelegate omemo:self publishedDeviceIds:deviceIds responseIq:responseIq outgoingIq:iq];
+            [weakMulticast omemo:weakSelf publishedDeviceIds:deviceIds responseIq:responseIq outgoingIq:iq];
         } timeout:30];
         [xmppStream sendElement:iq];
     }];
@@ -98,6 +100,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                     elementId:(nullable NSString*)elementId {
     NSParameterAssert(jid != nil);
     if (!jid) { return; }
+    __weak typeof(self) weakSelf = self;
+    __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
         NSString *eid = [self fixElementId:elementId];
         XMPPIQ *iq = [XMPPIQ omemo_iqFetchDeviceIdsForJID:jid elementId:eid];
@@ -105,7 +109,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             if (!responseIq || [responseIq isErrorIQ]) {
                 // timeout
                 XMPPLogWarn(@"fetchDeviceIdsForJID error: %@ %@", iq, responseIq);
-                [multicastDelegate omemo:self failedToFetchDeviceIdsForJID:jid errorIq:responseIq outgoingIq:iq];
+                [weakMulticast omemo:weakSelf failedToFetchDeviceIdsForJID:jid errorIq:responseIq outgoingIq:iq];
                 return;
             }
             /*
@@ -137,8 +141,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                 return;
             }
             XMPPJID *bareJID = [[responseIq from] bareJID];
-            [multicastDelegate omemo:self deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
-            [self processIncomingDeviceIds:devices fromJID:bareJID];
+            [weakMulticast omemo:weakSelf deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
+            [weakSelf processIncomingDeviceIds:devices fromJID:bareJID];
         } timeout:30];
         [xmppStream sendElement:iq];
     }];
@@ -148,6 +152,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
              elementId:(nullable NSString*)elementId {
     NSParameterAssert(bundle);
     if (!bundle) { return; }
+    __weak typeof(self) weakSelf = self;
+    __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
         NSString *eid = [self fixElementId:elementId];
         XMPPIQ *iq = [XMPPIQ omemo_iqPublishBundle:bundle elementId:eid];
@@ -155,10 +161,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             if (!responseIq || [responseIq isErrorIQ]) {
                 // timeout
                 XMPPLogWarn(@"publishBundle error: %@ %@", iq, responseIq);
-                [multicastDelegate omemo:self failedToPublishBundle:bundle errorIq:responseIq outgoingIq:iq];
+                [weakMulticast omemo:weakSelf failedToPublishBundle:bundle errorIq:responseIq outgoingIq:iq];
                 return;
             }
-            [multicastDelegate omemo:self publishedBundle:bundle responseIq:responseIq outgoingIq:iq];
+            [weakMulticast omemo:weakSelf publishedBundle:bundle responseIq:responseIq outgoingIq:iq];
         } timeout:30];
         [xmppStream sendElement:iq];
     }];
@@ -170,6 +176,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                       elementId:(nullable NSString*)elementId {
     NSParameterAssert(jid);
     if (!jid) { return; }
+    __weak typeof(self) weakSelf = self;
+    __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
         NSString *eid = [self fixElementId:elementId];
         XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:deviceId jid:jid elementId:eid];
@@ -177,15 +185,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             if (!responseIq || [responseIq isErrorIQ]) {
                 // timeout
                 XMPPLogWarn(@"fetchBundleForDeviceId error: %@ %@", iq, responseIq);
-                [multicastDelegate omemo:self failedToFetchBundleForDeviceId:deviceId fromJID:jid errorIq:responseIq outgoingIq:iq];
+                [weakMulticast omemo:weakSelf failedToFetchBundleForDeviceId:deviceId fromJID:jid errorIq:responseIq outgoingIq:iq];
                 return;
             }
             OMEMOBundle *bundle = [responseIq omemo_bundle];
             if (bundle) {
-                [multicastDelegate omemo:self fetchedBundle:bundle fromJID:jid responseIq:responseIq outgoingIq:iq];
+                [weakMulticast omemo:weakSelf fetchedBundle:bundle fromJID:jid responseIq:responseIq outgoingIq:iq];
             } else {
                 XMPPLogWarn(@"fetchBundleForDeviceId bundle parsing error: %@ %@", iq, responseIq);
-                [multicastDelegate omemo:self failedToFetchBundleForDeviceId:deviceId fromJID:jid errorIq:responseIq outgoingIq:iq];
+                [weakMulticast omemo:weakSelf failedToFetchBundleForDeviceId:deviceId fromJID:jid errorIq:responseIq outgoingIq:iq];
             }
         } timeout:30];
         [xmppStream sendElement:iq];

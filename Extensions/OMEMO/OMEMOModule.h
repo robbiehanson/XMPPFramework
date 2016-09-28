@@ -152,7 +152,7 @@ fetchedBundle:(OMEMOBundle*)bundle
    outgoingIq:(XMPPIQ*)outgoingIq;
 
 /** Bundle fetch failed */
-- (void)omemo:(OMEMOBundle*)omemo
+- (void)omemo:(OMEMOModule*)omemo
 failedToFetchBundleForDeviceId:(uint32_t)deviceId
       fromJID:(XMPPJID*)fromJID
       errorIq:(nullable XMPPIQ*)errorIq
