@@ -7,10 +7,12 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "XMPPIQ+OMEMO.h"
-#import "XMPPMessage+OMEMO.h"
-#import "OMEMOBundle.h"
-#import "OMEMOModule.h"
+#import <XMPPFramework/XMPPIQ+OMEMO.h>
+#import <XMPPFramework/XMPPMessage+OMEMO.h>
+#import <XMPPFramework/OMEMOBundle.h>
+#import <XMPPFramework/OMEMOModule.h>
+#import <XMPPFramework/XMPPIQ+XEP_0060.h>
+
 
 @interface OMEMOElementTests : XCTestCase
 
@@ -284,7 +286,13 @@
     XCTAssertNotNil(expXml);
     XMPPJID *jid = [XMPPJID jidWithString:@"juliet@capulet.lit"];
     XMPPIQ *iq = [XMPPIQ omemo_iqFetchDeviceIdsForJID:jid elementId:@"fetch1"];
-    XCTAssertEqualObjects(expXml, iq);
+    XMPPIQ *expIq = [XMPPIQ iqFromElement:expXml];
+    XCTAssertEqualObjects([expIq type], [iq type]);
+    XCTAssertEqualObjects([expIq to], [iq to]);
+    XCTAssertEqualObjects([expIq elementID], [iq elementID]);
+    NSXMLElement *pubsub = [iq elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
+    NSXMLElement *expPubsub = [expIq elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
+    XCTAssertEqualObjects(pubsub.prettyXMLString, expPubsub.prettyXMLString);
 }
 
 @end

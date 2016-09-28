@@ -49,7 +49,7 @@
                                 elementId:(nullable NSString*)elementId {
     NSXMLElement *encryptedElement = [NSXMLElement omemo_keyTransportElementWithKeyData:keyData iv:iv senderDeviceId:senderDeviceId];
     if (payload) {
-        NSString *b64 = [payload base64Encoding];
+        NSString *b64 = [payload base64EncodedStringWithOptions:0];
         NSXMLElement *payloadElement = [NSXMLElement elementWithName:@"payload" stringValue:b64];
         [encryptedElement addChild:payloadElement];
     }

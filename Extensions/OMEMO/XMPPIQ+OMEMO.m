@@ -216,15 +216,15 @@
     uint32_t signedPreKeyId = [signedPreKeyElement attributeUInt32ValueForName:@"signedPreKeyId"];
     NSString *signedPreKeyPublicBase64 = [signedPreKeyElement stringValue];
     if (!signedPreKeyPublicBase64) { return nil; }
-    NSData *signedPreKeyPublic = [[NSData alloc] initWithBase64Encoding:signedPreKeyPublicBase64];
+    NSData *signedPreKeyPublic = [[NSData alloc] initWithBase64EncodedString:signedPreKeyPublicBase64 options:0];
     if (!signedPreKeyPublic) { return nil; }
     NSString *signedPreKeySignatureBase64 = [[bundleElement elementForName:@"signedPreKeySignature"] stringValue];
     if (!signedPreKeySignatureBase64) { return nil; }
-    NSData *signedPreKeySignature = [[NSData alloc] initWithBase64Encoding:signedPreKeySignatureBase64];
+    NSData *signedPreKeySignature = [[NSData alloc] initWithBase64EncodedString:signedPreKeySignatureBase64 options:0];
     if (!signedPreKeySignature) { return nil; }
     NSString *identityKeyBase64 = [[bundleElement elementForName:@"identityKey"] stringValue];
     if (!identityKeyBase64) { return nil; }
-    NSData *identityKey = [[NSData alloc] initWithBase64Encoding:identityKeyBase64];
+    NSData *identityKey = [[NSData alloc] initWithBase64EncodedString:identityKeyBase64 options:0];
     if (!identityKey) { return nil; }
     NSXMLElement *preKeysElement = [bundleElement elementForName:@"prekeys"];
     if (!preKeysElement) { return nil; }
@@ -235,7 +235,7 @@
         NSString *b64 = [obj stringValue];
         NSData *data = nil;
         if (b64) {
-            data = [[NSData alloc] initWithBase64Encoding:b64];
+            data = [[NSData alloc] initWithBase64EncodedString:b64 options:0];
         }
         if (data) {
             OMEMOPreKey *preKey = [[OMEMOPreKey alloc] initWithPreKeyId:preKeyId publicKey:data];

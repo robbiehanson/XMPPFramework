@@ -74,7 +74,7 @@
     __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
     self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
         NSLog(@"testFetchDeviceIds: %@", outgoingIq);
-        XMPPIQ *responseIq = [[XMPPIQ iqWithType:@"result" elementID:outgoingIq.elementID child:pubsub] copy];
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"result" elementID:outgoingIq.elementID child:[pubsub copy]];
         [responseIq addAttributeWithName:@"from" stringValue:[testJID bare]];
         [weakStream fakeResponse:responseIq];
     };

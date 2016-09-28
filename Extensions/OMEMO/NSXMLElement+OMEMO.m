@@ -45,7 +45,7 @@
         NSString *b64 = [obj stringValue];
         NSData *data = nil;
         if (b64) {
-            data = [[NSData alloc] initWithBase64Encoding:b64];
+            data = [[NSData alloc] initWithBase64EncodedString:b64 options:0];
         }
         if (rid > 0 && data) {
             
@@ -58,14 +58,14 @@
 - (nullable NSData*) omemo_payload {
     NSString *b64 = [[self elementForName:@"payload"] stringValue];
     if (!b64) { return nil; }
-    return [[NSData alloc] initWithBase64Encoding:b64];
+    return [[NSData alloc] initWithBase64EncodedString:b64 options:0];
 }
 
 - (nullable NSData*) omemo_iv {
     NSXMLElement *header = [self omemo_headerElement];
     NSString *iv = [[header elementForName:@"iv"] stringValue];
     if (!iv) { return nil; }
-    return [[NSData alloc] initWithBase64Encoding:iv];
+    return [[NSData alloc] initWithBase64EncodedString:iv options:0];
 }
 
 
