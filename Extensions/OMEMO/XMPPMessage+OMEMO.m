@@ -53,7 +53,7 @@
         NSXMLElement *payloadElement = [NSXMLElement elementWithName:@"payload" stringValue:b64];
         [encryptedElement addChild:payloadElement];
     }
-    XMPPMessage *messageElement = [XMPPMessage messageWithType:nil to:toJID elementID:elementId];
+    XMPPMessage *messageElement = [XMPPMessage messageWithType:@"chat" to:toJID elementID:elementId];
     [messageElement addStorageHint:XMPPMessageStorageStore];
     [messageElement addChild:encryptedElement];
     return messageElement;
