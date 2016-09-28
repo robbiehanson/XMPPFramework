@@ -11,10 +11,19 @@
 #import "XMPPCapabilities.h"
 #import "OMEMOBundle.h"
 
+#define CONVERSATIONS_OMEMO_XMLNS
+
+#ifdef CONVERSATIONS_OMEMO_XMLNS
+#define XMLNS_OMEMO @"eu.siacs.conversations.axolotl"
+#define XMLNS_OMEMO_DEVICELIST @"eu.siacs.conversations.axolotl.devicelist"
+#define XMLNS_OMEMO_DEVICELIST_NOTIFY @"eu.siacs.conversations.axolotl.devicelist+notify"
+#define XMLNS_OMEMO_BUNDLES @"eu.siacs.conversations.axolotl.bundles"
+#else
 #define XMLNS_OMEMO @"urn:xmpp:omemo:0"
 #define XMLNS_OMEMO_DEVICELIST @"urn:xmpp:omemo:0:devicelist"
 #define XMLNS_OMEMO_DEVICELIST_NOTIFY @"urn:xmpp:omemo:0:devicelist+notify"
 #define XMLNS_OMEMO_BUNDLES @"urn:xmpp:omemo:0:bundles"
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -53,9 +62,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds
                 elementId:(nullable NSString*)elementId;
 
-/** For fetching. This should be handled automatically by PEP.
-- (void) fetchDeviceIdsForJID:(XMPPJID*)jid;
-*/
+/** For manually fetching deviceIds list. This should be handled automatically by PEP if you send a <presence> update on login. */
+- (void) fetchDeviceIdsForJID:(XMPPJID*)jid
+                    elementId:(nullable NSString*)elementId;
 
 /**
  * A device MUST announce it's IdentityKey, a signed PreKey, and a list of PreKeys in a separate, per-device PEP node. The list SHOULD contain 100 PreKeys, but MUST contain no less than 20.
@@ -115,7 +124,11 @@ failedToPublishDeviceIds:(NSArray<NSNumber*>*)deviceIds
 /**
  * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
  */
-- (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID message:(XMPPMessage*)message;
+- (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID incomingElement:(NSXMLElement*)incomingElement;
+
+/** Failed to fetch deviceList */
+- (void)omemo:(OMEMOModule*)omemo failedToFetchDeviceIdsForJID:(XMPPJID*)fromJID errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
 
 /** Callback for when your bundle is successfully published */
 - (void)omemo:(OMEMOModule*)omemo

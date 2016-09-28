@@ -98,11 +98,11 @@
 }
 
 + (NSXMLElement*)innerBundleElement {
-    NSString *expectedString = @" \
+    NSString *expectedString = [NSString stringWithFormat:@" \
     <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
-    <publish node='urn:xmpp:omemo:0:bundles:31415'> \
+    <items node='%@:31415'> \
     <item> \
-    <bundle xmlns='urn:xmpp:omemo:0'> \
+    <bundle xmlns='%@'> \
     <signedPreKeyPublic signedPreKeyId='1'>c2lnbmVkUHJlS2V5UHVibGlj</signedPreKeyPublic> \
     <signedPreKeySignature>c2lnbmVkUHJlS2V5U2lnbmF0dXJl</signedPreKeySignature> \
     <identityKey>aWRlbnRpdHlLZXk=</identityKey> \
@@ -113,9 +113,10 @@
     </prekeys> \
     </bundle> \
     </item> \
-    </publish> \
+    </items> \
     </pubsub> \
-    ";
+    ", XMLNS_OMEMO_BUNDLES, XMLNS_OMEMO];
+
     NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:expectedString error:nil];
     return element;
 }

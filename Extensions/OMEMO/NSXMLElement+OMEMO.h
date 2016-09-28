@@ -48,6 +48,9 @@ NS_ASSUME_NONNULL_BEGIN
                                         senderDeviceId:(uint32_t)senderDeviceId;
 
 
+/** Extracts device list from PEP <items> element */
+- (nullable NSArray<NSNumber *>*)omemo_deviceListFromItems;
+
 
 @end
 NS_ASSUME_NONNULL_END

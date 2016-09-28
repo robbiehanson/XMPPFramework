@@ -13,6 +13,26 @@
 
 
 /**
+    <iq to='juliet@capulet.lit' type='get' id='fetch1'>
+      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+        <items node='urn:xmpp:omemo:0:devicelist'/>
+      </pubsub>
+    </iq>
+ */
++ (XMPPIQ*) omemo_iqFetchDeviceIdsForJID:(XMPPJID*)jid
+                               elementId:(nullable NSString*)elementId {
+    NSXMLElement *items = [NSXMLElement elementWithName:@"items"];
+    [items addAttributeWithName:@"node" stringValue:XMLNS_OMEMO_DEVICELIST];
+    NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+    [pubsub addChild:items];
+    
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:elementId];
+    [iq addChild:pubsub];
+    return iq;
+}
+
+
+/**
     <iq from='juliet@capulet.lit' type='set' id='announce1'>
       <pubsub xmlns='http://jabber.org/protocol/pubsub'>
         <publish node='urn:xmpp:omemo:0:devicelist'>
@@ -27,7 +47,7 @@
       </pubsub>
     </iq>
  */
-+ (XMPPIQ*) omemo_iqForDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(nullable NSString*)elementId {
++ (XMPPIQ*) omemo_iqPublishDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(nullable NSString*)elementId {
     NSXMLElement *listElement = [NSXMLElement elementWithName:@"list" xmlns:XMLNS_OMEMO];
     [deviceIds enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSXMLElement *device = [NSXMLElement elementWithName:@"device"];
@@ -86,7 +106,7 @@
 </iq>
  
  */
-+ (XMPPIQ*) omemo_iqBundle:(OMEMOBundle*)bundle
++ (XMPPIQ*) omemo_iqPublishBundle:(OMEMOBundle*)bundle
                  elementId:(nullable NSString*)elementId {
     NSXMLElement *signedPreKeyElement = nil;
     if (bundle.signedPreKey.publicKey) {
@@ -167,32 +187,17 @@
     return [self omemo_iqFetchNode:nodeName to:jid elementId:elementId];
 }
 
-/** 
- * iq stanza for fetching devices
- 
- <iq type='get'
-    from='romeo@montague.lit'
-    to='juliet@capulet.lit'
-    id='fetch1'>
- <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-    <items node='urn:xmpp:omemo:0:bundles:31415'/>
- </pubsub>
- </iq>
- 
- this should be handled automatically by PEP
-+ (XMPPIQ*) omemo_iqFetchDevices:(XMPPJID *)jid
-{
-    NSString *nodeName = XMLNS_OMEMO_DEVICELIST;
-    return [self omemo_iqFetchNode:nodeName to:jid];
-}
- */
 
 - (nullable OMEMOBundle*) omemo_bundle {
     NSXMLElement *pubsub = [self elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
     if (!pubsub) { return nil; }
-    NSXMLElement *publish = [pubsub elementForName:@"publish"];
-    if (!publish) { return nil; }
-    NSString *node = [publish attributeForName:@"node"].stringValue;
+    NSXMLElement *items = [pubsub elementForName:@"items"];
+    // If !items, this is a <publish> bundle and used for testing
+    if (!items) {
+        items = [pubsub elementForName:@"publish"];
+    }
+    if (!items) { return nil; }
+    NSString *node = [items attributeForName:@"node"].stringValue;
     if (!node) { return nil; }
     if (![node containsString:XMLNS_OMEMO_BUNDLES]) {
         return nil;
@@ -202,7 +207,7 @@
     NSString *deviceIdString = [components lastObject];
     uint32_t deviceId = (uint32_t)[deviceIdString integerValue];
     
-    NSXMLElement *itemElement = [publish elementForName:@"item"];
+    NSXMLElement *itemElement = [items elementForName:@"item"];
     if (!itemElement) { return nil; }
     NSXMLElement *bundleElement = [itemElement elementForName:@"bundle" xmlns:XMLNS_OMEMO];
     if (!bundleElement) { return nil; }

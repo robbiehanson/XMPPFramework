@@ -9,6 +9,10 @@
 #import <XCTest/XCTest.h>
 #import <XMPPFramework/OMEMOModule.h>
 #import <XMPPFramework/XMPPIQ+OMEMO.h>
+#import <XMPPFramework/XMPPIQ+XEP_0060.h>
+#import <XMPPFramework/XMPPLogging.h>
+#import <CocoaLumberjack/CocoaLumberjack.h>
+
 #import "OMEMOTestStorage.h"
 #import "XMPPMockStream.h"
 
@@ -22,6 +26,7 @@
 
 - (void)setUp {
     [super setUp];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
     OMEMOBundle *bundle = [self bundle];
     XMPPJID *myJID = [XMPPJID jidWithString:@"test@example.com"];
     OMEMOTestStorage *testStorage = [[OMEMOTestStorage alloc] initWithMyBundle:bundle];
@@ -38,7 +43,48 @@
     [self.omemoModule deactivate];
     _omemoModule = nil;
     _mockStream = nil;
+    [DDLog removeAllLoggers];
     [super tearDown];
+}
+
+- (void)testFetchDeviceIds {
+    self.expectation = [self expectationWithDescription:@"testFetchDeviceIds"];
+    
+    XMPPJID *testJID = [XMPPJID jidWithString:@"test@example.com"];
+    
+    NSString *items = [NSString stringWithFormat:@" \
+    <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
+    <items node='%@'> \
+    <item> \
+    <list xmlns='%@'> \
+    <device id='12345' /> \
+    <device id='4223' /> \
+    </list> \
+    </item> \
+    </items> \
+    </pubsub> \
+    ", XMLNS_OMEMO_DEVICELIST, XMLNS_OMEMO];
+    
+    NSError *error = nil;
+    NSXMLElement *pubsub = [[NSXMLElement alloc] initWithXMLString:items error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(pubsub);
+    
+    //__weak typeof(self) weakSelf = self;
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testFetchDeviceIds: %@", outgoingIq);
+        XMPPIQ *responseIq = [[XMPPIQ iqWithType:@"result" elementID:outgoingIq.elementID child:pubsub] copy];
+        [responseIq addAttributeWithName:@"from" stringValue:[testJID bare]];
+        [weakStream fakeResponse:responseIq];
+    };
+    
+    [self.omemoModule fetchDeviceIdsForJID:testJID elementId:nil];
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
 }
 
 - (void)testPublishDeviceIds {
@@ -141,7 +187,7 @@
     }];
 }
 
-- (void) testFetchFail {
+- (void) testFetchBundleFail {
     XMPPJID *remoteJID = [XMPPJID jidWithString:@"remote@jid.com"];
     self.expectation = [self expectationWithDescription:@"testFetchFail"];
     __weak typeof(self) weakSelf = self;
@@ -192,9 +238,9 @@
 }
 
 - (void) testReceiveMessage {
-    NSString *incoming = @" \
-    <message to=\"remote@jid.com\" id=\"6441EEB7-89E6-4D02-8899-BB0E3E1C0EB2\"><store xmlns=\"urn:xmpp:hints\"></store><encrypted xmlns=\"urn:xmpp:omemo:0\"><header sid=\"31415\"><key rid=\"12321\">MTIzMjE=</key><key rid=\"31415\">MzE0MTU=</key><iv>aXY=</iv></header><payload>cGF5bG9hZA==</payload></encrypted></message> \
-    ";
+    NSString *incoming = [NSString stringWithFormat:@" \
+    <message to=\"remote@jid.com\" id=\"6441EEB7-89E6-4D02-8899-BB0E3E1C0EB2\"><store xmlns=\"urn:xmpp:hints\"></store><encrypted xmlns=\"%@\"><header sid=\"31415\"><key rid=\"12321\">MTIzMjE=</key><key rid=\"31415\">MzE0MTU=</key><iv>aXY=</iv></header><payload>cGF5bG9hZA==</payload></encrypted></message> \
+    ", XMLNS_OMEMO];
     
     self.expectation = [self expectationWithDescription:@"testReceiveMessage"];
     NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:incoming error:nil];
@@ -209,15 +255,15 @@
 }
 
 - (void) testDeviceListUpdate {
-    NSString *incoming = @" \
+    NSString *incoming = [NSString stringWithFormat:@" \
     <message from='juliet@capulet.lit' \
     to='romeo@montague.lit' \
     type='headline' \
     id='update_01'> \
     <event xmlns='http://jabber.org/protocol/pubsub#event'> \
-    <items node='urn:xmpp:omemo:0:devicelist'> \
+    <items node='%@'> \
     <item> \
-    <list xmlns='urn:xmpp:omemo:0'> \
+    <list xmlns='%@'> \
     <device id='12345' /> \
     <device id='4223' /> \
     </list> \
@@ -225,7 +271,7 @@
     </items> \
     </event> \
     </message> \
-    ";
+    ", XMLNS_OMEMO_DEVICELIST, XMLNS_OMEMO];
     NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:incoming error:nil];
     self.expectation = [self expectationWithDescription:@"testDeviceListUpdate"];
     XCTAssertNotNil(element);
@@ -305,7 +351,7 @@ receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
 /**
  * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
  */
-- (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID message:(XMPPMessage*)message {
+- (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID incomingElement:(NSXMLElement*)incomingElement {
     [self.expectation fulfill];
 }
 
@@ -351,11 +397,11 @@ receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
 }
 
 - (NSXMLElement*)innerBundleElement {
-    NSString *expectedString = @" \
+    NSString *expectedString = [NSString stringWithFormat:@" \
     <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
-    <publish node='urn:xmpp:omemo:0:bundles:31415'> \
+    <publish node='%@:31415'> \
     <item> \
-    <bundle xmlns='urn:xmpp:omemo:0'> \
+    <bundle xmlns='%@'> \
     <signedPreKeyPublic signedPreKeyId='1'>c2lnbmVkUHJlS2V5UHVibGlj</signedPreKeyPublic> \
     <signedPreKeySignature>c2lnbmVkUHJlS2V5U2lnbmF0dXJl</signedPreKeySignature> \
     <identityKey>aWRlbnRpdHlLZXk=</identityKey> \
@@ -368,7 +414,7 @@ receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
     </item> \
     </publish> \
     </pubsub> \
-    ";
+    ", XMLNS_OMEMO_BUNDLES, XMLNS_OMEMO];
     NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:expectedString error:nil];
     XCTAssertNotNil(element);
     return element;

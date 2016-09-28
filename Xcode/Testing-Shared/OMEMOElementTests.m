@@ -10,6 +10,7 @@
 #import "XMPPIQ+OMEMO.h"
 #import "XMPPMessage+OMEMO.h"
 #import "OMEMOBundle.h"
+#import "OMEMOModule.h"
 
 @interface OMEMOElementTests : XCTestCase
 
@@ -29,14 +30,14 @@
 
 - (void)testDeviceIdSerialization {
     NSArray *deviceIds = @[@(12345), @(4223), @(31415)];
-    XMPPIQ *iq = [XMPPIQ omemo_iqForDeviceIds:deviceIds elementId:@"announce1"];
+    XMPPIQ *iq = [XMPPIQ omemo_iqPublishDeviceIds:deviceIds elementId:@"announce1"];
     NSString *iqString = [iq XMLString];
-    NSString *expectedString = @" \
+    NSString *expectedString = [NSString stringWithFormat:@" \
     <iq type='set' id='announce1'> \
     <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
-    <publish node='urn:xmpp:omemo:0:devicelist'> \
+    <publish node='%@'> \
     <item> \
-    <list xmlns='urn:xmpp:omemo:0'> \
+    <list xmlns='%@'> \
     <device id='12345' /> \
     <device id='4223' /> \
     <device id='31415' /> \
@@ -45,7 +46,7 @@
     </publish> \
     </pubsub> \
     </iq> \
-    ";
+    ", XMLNS_OMEMO_DEVICELIST, XMLNS_OMEMO];
     NSError *error = nil;
     NSXMLElement *outputIQ = [[NSXMLElement alloc] initWithXMLString:iqString error:&error];
     XCTAssertNil(error);
@@ -56,12 +57,12 @@
 }
 
 - (void) testPublishDeviceBundle {
-    NSString *expectedString = @" \
+    NSString *expectedString = [NSString stringWithFormat:@" \
     <iq type='set' id='announce2'> \
     <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
-    <publish node='urn:xmpp:omemo:0:bundles:31415'> \
+    <publish node='%@:31415'> \
     <item> \
-    <bundle xmlns='urn:xmpp:omemo:0'> \
+    <bundle xmlns='%@'> \
     <signedPreKeyPublic signedPreKeyId='1'>c2lnbmVkUHJlS2V5UHVibGlj</signedPreKeyPublic> \
     <signedPreKeySignature>c2lnbmVkUHJlS2V5U2lnbmF0dXJl</signedPreKeySignature> \
     <identityKey>aWRlbnRpdHlLZXk=</identityKey> \
@@ -75,7 +76,7 @@
     </publish> \
     </pubsub> \
     </iq> \
-    ";
+    ", XMLNS_OMEMO_BUNDLES, XMLNS_OMEMO];
     NSError *error = nil;
     NSXMLElement *expectedXML = [[NSXMLElement alloc] initWithXMLString:expectedString error:&error];
     XCTAssertNotNil(expectedXML);
@@ -98,7 +99,7 @@
                         ];
     OMEMOSignedPreKey *signedPreKey = [[OMEMOSignedPreKey alloc] initWithPreKeyId:1 publicKey:signedPreKeyPublicData signature:signedPreKeySignatureData];
     OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:31415 identityKey:identityKeyData signedPreKey:signedPreKey preKeys:preKeys];
-    XMPPIQ *iq = [XMPPIQ omemo_iqBundle:bundle elementId:@"announce2"];
+    XMPPIQ *iq = [XMPPIQ omemo_iqPublishBundle:bundle elementId:@"announce2"];
     XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:DDXMLNodePrettyPrint]);
 }
 
@@ -115,15 +116,15 @@
  
  */
 - (void) testFetchBundleForDeviceId {
-    NSString *expected = @" \
+    NSString *expected = [NSString stringWithFormat:@" \
     <iq type='get' \
     to='juliet@capulet.lit' \
     id='fetch1'> \
     <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
-    <items node='urn:xmpp:omemo:0:bundles:31415'/> \
+    <items node='%@:31415'/> \
     </pubsub> \
     </iq> \
-    ";
+    ", XMLNS_OMEMO_BUNDLES];
     NSError *error = nil;
     NSXMLElement *expectedElement = [[NSXMLElement alloc] initWithXMLString:expected error:&error];
     XCTAssertNil(error);
@@ -143,15 +144,15 @@
 </encrypted>
  */
 - (void) testKeyTransportElement {
-    NSString *expected = @" \
-    <encrypted xmlns='urn:xmpp:omemo:0'> \
+    NSString *expected = [NSString stringWithFormat:@" \
+    <encrypted xmlns='%@'> \
     <header sid='27183'> \
     <key rid='31415'>MzE0MTU=</key> \
     <key rid='12321'>MTIzMjE=</key> \
     <iv>aXY=</iv> \
     </header> \
     </encrypted> \
-    ";
+    ", XMLNS_OMEMO];
     NSXMLElement *expectedElement = [[NSXMLElement alloc] initWithXMLString:expected error:nil];
     XCTAssertNotNil(expectedElement);
     NSString *key1 = @"MzE0MTU=";
@@ -184,7 +185,7 @@
 /*
 <iq from='juliet@capulet.lit' type='set' id='announce2'>
   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-    <publish node='urn:xmpp:omemo:0:bundles:31415'>
+    <items node='urn:xmpp:omemo:0:bundles:31415'>
       <item>
         <bundle xmlns='urn:xmpp:omemo:0'>
           <signedPreKeyPublic signedPreKeyId='1'>
@@ -210,17 +211,17 @@
           </prekeys>
         </bundle>
       </item>
-    </publish>
+    </items>
   </pubsub>
 </iq>
  */
 - (void) testBundleParsing {
-    NSString *expectedString = @" \
+    NSString *expectedString = [NSString stringWithFormat:@" \
     <iq type='set' id='announce2'> \
     <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
-    <publish node='urn:xmpp:omemo:0:bundles:31415'> \
+    <publish node='%@:31415'> \
     <item> \
-    <bundle xmlns='urn:xmpp:omemo:0'> \
+    <bundle xmlns='%@'> \
     <signedPreKeyPublic signedPreKeyId='1'>c2lnbmVkUHJlS2V5UHVibGlj</signedPreKeyPublic> \
     <signedPreKeySignature>c2lnbmVkUHJlS2V5U2lnbmF0dXJl</signedPreKeySignature> \
     <identityKey>aWRlbnRpdHlLZXk=</identityKey> \
@@ -234,7 +235,7 @@
     </publish> \
     </pubsub> \
     </iq> \
-    ";
+    ",XMLNS_OMEMO_BUNDLES, XMLNS_OMEMO];
     NSError *error = nil;
     NSXMLElement *expectedXML = [[NSXMLElement alloc] initWithXMLString:expectedString error:&error];
     XCTAssertNotNil(expectedXML);
@@ -257,16 +258,33 @@
                                         ];
     OMEMOSignedPreKey *signedPreKey = [[OMEMOSignedPreKey alloc] initWithPreKeyId:1 publicKey:signedPreKeyPublicData signature:signedPreKeySignatureData];
     OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:31415 identityKey:identityKeyData signedPreKey:signedPreKey preKeys:preKeys];
-    XMPPIQ *iq = [XMPPIQ omemo_iqBundle:bundle elementId:@"announce2"];
+    XMPPIQ *iq = [XMPPIQ omemo_iqPublishBundle:bundle elementId:@"announce2"];
     XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:DDXMLNodePrettyPrint]);
     
     OMEMOBundle *expectedBundle = [[XMPPIQ iqFromElement:expectedXML] omemo_bundle];
     OMEMOBundle *bundle2 = [iq omemo_bundle];
     
-    XMPPIQ *expectedIQ = [XMPPIQ omemo_iqBundle:expectedBundle elementId:@"eid"];
-    XMPPIQ *bundle2iq = [XMPPIQ omemo_iqBundle:bundle2 elementId:@"eid"];
+    XMPPIQ *expectedIQ = [XMPPIQ omemo_iqPublishBundle:expectedBundle elementId:@"eid"];
+    XMPPIQ *bundle2iq = [XMPPIQ omemo_iqPublishBundle:bundle2 elementId:@"eid"];
     
     XCTAssertEqualObjects([expectedIQ XMLStringWithOptions:DDXMLNodePrettyPrint], [bundle2iq XMLStringWithOptions:DDXMLNodePrettyPrint]);
+}
+
+- (void) testFetchDeviceList {
+    NSString *expected = [NSString stringWithFormat:@" \
+    <iq to='juliet@capulet.lit' type='get' id='fetch1'> \
+    <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
+    <items node='%@'/> \
+    </pubsub> \
+    </iq> \
+    ",XMLNS_OMEMO_DEVICELIST];
+    NSError *error = nil;
+    NSXMLElement *expXml = [[NSXMLElement alloc] initWithXMLString:expected error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(expXml);
+    XMPPJID *jid = [XMPPJID jidWithString:@"juliet@capulet.lit"];
+    XMPPIQ *iq = [XMPPIQ omemo_iqFetchDeviceIdsForJID:jid elementId:@"fetch1"];
+    XCTAssertEqualObjects(expXml, iq);
 }
 
 @end

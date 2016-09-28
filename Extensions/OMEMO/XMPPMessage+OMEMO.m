@@ -15,27 +15,13 @@
 
 @implementation XMPPMessage (OMEMO)
 
-- (nullable NSArray<NSNumber *>*)omemo_deviceList
+- (nullable NSArray<NSNumber *>*)omemo_deviceListFromPEPUpdate
 {
-    NSXMLElement * itemsList = [[self elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT] elementForName:@"items"];
-    if ([[itemsList attributeStringValueForName:@"node"] isEqualToString:XMLNS_OMEMO_DEVICELIST]) {
-        NSXMLElement * devicesList = [[itemsList elementForName:@"item"] elementForName:@"list" xmlns:XMLNS_OMEMO];
-        if (devicesList) {
-            NSArray *children = [devicesList children];
-            NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:children.count];
-            [children enumerateObjectsUsingBlock:^(NSXMLElement * _Nonnull node, NSUInteger idx, BOOL * _Nonnull stop) {
-                if ([node.name isEqualToString:@"device"]) {
-                    NSNumber *number = [node attributeNumberUInt32ValueForName:@"id"];
-                    if (number){
-                        [result addObject:number];
-                    }
-                }
-            }];
-            return result;
-        }
-    }
-    
-    return nil;
+    NSXMLElement *event = [self elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
+    if (!event) { return nil; }
+    NSXMLElement * itemsList = [event elementForName:@"items"];
+    if (!itemsList) { return nil; }
+    return [itemsList omemo_deviceListFromItems];
 }
 
 /**

@@ -31,7 +31,11 @@
 //#define TEST_PASSWORD @"password"
 
 @interface OMEMOServerTests : XCTestCase <XMPPStreamDelegate, XMPPRosterDelegate, OMEMOModuleDelegate, XMPPCapabilitiesDelegate>
-@property (nonatomic, strong) XCTestExpectation *expectation;
+@property (nonatomic, strong) XCTestExpectation *publishDeviceIdsExpectation;
+@property (nonatomic, strong) XCTestExpectation *publishBundleExpectation;
+@property (nonatomic, strong) XCTestExpectation *fetchBundleExpectation;
+
+@property (nonatomic, strong, readonly) OMEMOBundle *myBundle;
 @property (nonatomic, strong, readonly) XMPPStream *stream;
 @property (nonatomic, strong, readonly) XMPPRoster *roster;
 @property (nonatomic, strong, readonly) OMEMOModule *omemoModule;
@@ -54,18 +58,18 @@
     [self.roster addDelegate:self delegateQueue:dispatch_get_main_queue()];
     [self.roster activate:self.stream];
     
-    OMEMOTestStorage *storage = [[OMEMOTestStorage alloc] initWithMyBundle:[OMEMOTestStorage testBundle]];
+    _myBundle = [OMEMOTestStorage testBundle];
+    OMEMOTestStorage *storage = [[OMEMOTestStorage alloc] initWithMyBundle:self.myBundle];
     _omemoModule = [[OMEMOModule alloc] initWithOMEMOStorage:storage];
     [self.omemoModule addDelegate:self delegateQueue:dispatch_get_main_queue()];
     [self.omemoModule activate:self.stream];
     
-    XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] initWithInMemoryStore];
+     XMPPCapabilitiesCoreDataStorage *xmppCapabilitiesStorage = [[XMPPCapabilitiesCoreDataStorage alloc] initWithInMemoryStore];
     _capabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
     self.capabilities.autoFetchNonHashedCapabilities = YES;
     self.capabilities.autoFetchMyServerCapabilities = YES;
     [self.capabilities addDelegate:self delegateQueue:dispatch_get_main_queue()];
     [self.capabilities activate:self.stream];
-    
     
 }
 
@@ -93,7 +97,9 @@
 }
 
 - (void)testOMEMOModule {
-    self.expectation = [self expectationWithDescription:@"testAuthentication"];
+    self.publishDeviceIdsExpectation = [self expectationWithDescription:@"publishDeviceIdsExpectation"];
+    self.publishBundleExpectation = [self expectationWithDescription:@"publishBundleExpectation"];
+    self.fetchBundleExpectation = [self expectationWithDescription:@"fetchBundleExpectation"];
     NSError *error = nil;
     BOOL success = [self.stream connectWithTimeout:XMPPStreamTimeoutNone error:&error];
     XCTAssertTrue(success);
@@ -130,8 +136,16 @@
     NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
     //[self.expectation fulfill];
     
-    [self.omemoModule publishDeviceIds:@[@(12345), @(31415)] elementId:nil];
+    [self.stream sendElement:[XMPPPresence presence]];
+    [self.omemoModule publishDeviceIds:@[@(31415)] elementId:nil];
+    [self.omemoModule publishBundle:self.myBundle elementId:nil];
 }
+
+- (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
+{
+    NSLog(@"%@: %@ - %@\nType: %@\nShow: %@\nStatus: %@", THIS_FILE, THIS_METHOD, [presence from], [presence type], [presence show],[presence status]);
+}
+
 
 #pragma mark XMPPRosterDelegate
 
@@ -141,7 +155,8 @@
     NSString *jidString = [item attributeStringValueForName:@"jid"];
     XMPPJID *jid = [XMPPJID jidWithString:jidString];
     XCTAssertNotNil(jid);
-    [self.capabilities fetchCapabilitiesForJID:jid];
+    //[self.capabilities fetchCapabilitiesForJID:jid];
+    //[self.omemoModule fetchDeviceIdsForJID:jid elementId:nil];
 }
 
 #pragma mark XMPPCapabilitiesDelegate
@@ -180,13 +195,20 @@
 
 #pragma mark OMEMOModuleDelegate
 
+/** Failed to fetch deviceList */
+- (void)omemo:(OMEMOModule*)omemo failedToFetchDeviceIdsForJID:(XMPPJID*)fromJID errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq {
+    NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+    //XCTFail(@"Failed.");
+}
+
 /** Callback for when your device list is successfully published */
 - (void)omemo:(OMEMOModule*)omemo
 publishedDeviceIds:(NSArray<NSNumber*>*)deviceIds
    responseIq:(XMPPIQ*)responseIq
    outgoingIq:(XMPPIQ*)outgoingIq {
     NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
-    [self.expectation fulfill];
+    [self.publishDeviceIdsExpectation fulfill];
 }
 
 /** Callback for when your device list update fails. If errorIq is nil there was a timeout. */
@@ -201,8 +223,11 @@ failedToPublishDeviceIds:(NSArray<NSNumber*>*)deviceIds
 /**
  * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
  */
-- (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID message:(XMPPMessage*)message {
-    NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+- (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID incomingElement:(NSXMLElement*)incomingElement {
+    NSLog(@"%@: %@ %@ %@", THIS_FILE, THIS_METHOD, deviceIds, fromJID);
+    [deviceIds enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self.omemoModule fetchBundleForDeviceId:(uint32_t)obj.unsignedIntegerValue jid:fromJID elementId:nil];
+    }];
 }
 
 /** Callback for when your bundle is successfully published */
@@ -211,6 +236,7 @@ publishedBundle:(OMEMOBundle*)bundle
    responseIq:(XMPPIQ*)responseIq
    outgoingIq:(XMPPIQ*)outgoingIq {
     NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+    [self.publishBundleExpectation fulfill];
 }
 
 /** Callback when publishing your bundle fails */
@@ -229,7 +255,15 @@ fetchedBundle:(OMEMOBundle*)bundle
       fromJID:(XMPPJID*)fromJID
    responseIq:(XMPPIQ*)responseIq
    outgoingIq:(XMPPIQ*)outgoingIq {
-    NSLog(@"%@: %@", THIS_FILE, THIS_METHOD);
+    NSLog(@"%@: %@ %@ %@ %@", THIS_FILE, THIS_METHOD, fromJID, bundle, responseIq.prettyXMLString);
+    XCTAssertNotNil(bundle);
+    XCTAssertNotNil(fromJID);
+    XCTAssertNotNil(responseIq);
+    XCTAssertNotNil(outgoingIq);
+    if (self.fetchBundleExpectation) {
+        [self.fetchBundleExpectation fulfill];
+        self.fetchBundleExpectation = nil;
+    }
 }
 
 /** Bundle fetch failed */
