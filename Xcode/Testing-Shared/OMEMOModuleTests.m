@@ -290,7 +290,12 @@
 publishedDeviceIds:(NSArray<NSNumber*>*)deviceIds
    responseIq:(XMPPIQ*)responseIq
    outgoingIq:(XMPPIQ*)outgoingIq {
-    [self.expectation fulfill];
+    // This can be called twice by testFetchDeviceIds because it will
+    // update the device list
+    if (self.expectation) {
+        [self.expectation fulfill];
+        self.expectation = nil;
+    }
 }
 
 /** Callback for when your device list update fails. If errorIq is nil there was a timeout. */
