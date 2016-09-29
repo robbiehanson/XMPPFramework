@@ -34,7 +34,13 @@ class XMPPPushTests: XCTestCase {
             <enable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo"></enable>
         </iq>
         */
-        XCTAssertTrue(enableStanza.XMLString == "<iq type=\"set\"><enable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"></enable></iq>","XML does not match \(enableStanza.XMLString)")
+        let expected = "<iq type=\"set\"><enable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"></enable></iq>"
+        var expXml = NSXMLElement()
+        do {
+            expXml = try NSXMLElement(XMLString: expected)
+        } catch {
+        }
+        XCTAssertEqual(expXml.XMLString, enableStanza.XMLString)
     }
 
     func testEnableStanzaWithOptions() {
@@ -68,6 +74,12 @@ class XMPPPushTests: XCTestCase {
             <disable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo"></disable>
         </iq>
         */
-        XCTAssertTrue(disableStanza.XMLString == "<iq type=\"set\"><disable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"></disable></iq>","XML does not match \(disableStanza.XMLString)")
+        let expected = "<iq type=\"set\"><disable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"></disable></iq>"
+        var expXml = NSXMLElement()
+        do {
+            expXml = try NSXMLElement(XMLString: expected)
+        } catch {
+        }
+        XCTAssertEqual(disableStanza.XMLString, expXml.XMLString)
     }
 }
