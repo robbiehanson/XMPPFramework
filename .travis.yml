@@ -2,17 +2,17 @@ osx_image: xcode8
 language: objective-c
 
 install:
-  - gem install cocoapods -v 1.1.0.rc.2 --no-rdoc --no-ri
-  - pod repo update --silent
-
-script:
-  - set -o pipefail
-  - pod install --project-directory=Xcode/Testing-iOS
-  - xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'name=iPhone 6' test | xcpretty -c
-  # CocoaPods is having some problems...
-  # - pod install --project-directory=Xcode/Testing-macOS
-  - cd Xcode/Testing-macOS
+  - cd Xcode/Testing-iOS
   - bundle install
+  - bundle exec pod repo update --silent
   - bundle exec pod install
   - cd ../../
-  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
+  - cd Xcode/Testing-macOS
+  - bundle install
+  - bundle exec pod repo update --silent
+  - bundle exec pod install
+  - cd ../../
+
+script:
+  - xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'name=iPhone 6' test
+  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test
