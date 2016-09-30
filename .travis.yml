@@ -13,6 +13,10 @@ install:
   - bundle exec pod install
   - cd ../../
 
+before_script:
+  # Travis is having issues launching the simulator? https://github.com/travis-ci/travis-ci/issues/4725
+  - xcrun instruments -w "iPhone 6 (10.0)" || true
+
 script:
   - xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'name=iPhone 6' test
   - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test
