@@ -290,7 +290,7 @@
 publishedDeviceIds:(NSArray<NSNumber*>*)deviceIds
    responseIq:(XMPPIQ*)responseIq
    outgoingIq:(XMPPIQ*)outgoingIq {
-    // This can be called twice by testFetchDeviceIds because it will
+    // This can be called by testFetchDeviceIds because it will
     // update the device list
     if (self.expectation) {
         [self.expectation fulfill];
@@ -357,7 +357,10 @@ receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
  * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
  */
 - (void)omemo:(OMEMOModule*)omemo deviceListUpdate:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID incomingElement:(NSXMLElement*)incomingElement {
-    [self.expectation fulfill];
+    if (self.expectation) {
+        [self.expectation fulfill];
+        self.expectation = nil;
+    }
 }
 
 #pragma mark Utility
