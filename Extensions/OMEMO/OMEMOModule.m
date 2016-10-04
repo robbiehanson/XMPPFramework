@@ -54,8 +54,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         [self performBlock:^{
             [xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
             _tracker = [[XMPPIDTracker alloc] initWithStream:aXmppStream dispatchQueue:moduleQueue];
-            OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
-            [self addMyDeviceIdToLocalDeviceList:myBundle];
         }];
         return YES;
     }
@@ -261,8 +259,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 #pragma mark XMPPStreamDelegate methods
 
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
+    OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
+    [self addMyDeviceIdToLocalDeviceList:myBundle];
+}
+
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
-    
     // Check for incoming device list updates
     NSArray<NSNumber *> *deviceIds = [message omemo_deviceListFromPEPUpdate:self.xmlNamespace];
     XMPPJID *bareJID = [[message from] bareJID];
@@ -325,6 +327,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void) addMyDeviceIdToLocalDeviceList:(OMEMOBundle*)myBundle {
     if (!myBundle) { return; }
     XMPPJID *myJID = xmppStream.myJID;
+    if (!myJID) { return; }
     NSArray *devices = [self.omemoStorage fetchDeviceIdsForJID:xmppStream.myJID];
     if(devices.count == 0 || [devices containsObject:@(myBundle.deviceId)]) {
         return;
