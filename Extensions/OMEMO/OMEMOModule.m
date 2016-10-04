@@ -240,7 +240,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     }
 }
 + (NSString*) xmlnsOMEMODeviceListNotify:(OMEMOModuleNamespace)ns {
-    return [NSString stringWithFormat:@"%@+notify", [self xmlnsOMEMODeviceListNotify:ns]];
+    return [NSString stringWithFormat:@"%@+notify", [self xmlnsOMEMODeviceList:ns]];
 }
 + (NSString*) xmlnsOMEMOBundles:(OMEMOModuleNamespace)ns {
     NSString *xmlns = [self xmlnsOMEMO:ns];
