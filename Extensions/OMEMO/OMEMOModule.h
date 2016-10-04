@@ -11,21 +11,14 @@
 #import "XMPPCapabilities.h"
 #import "OMEMOBundle.h"
 
-#define CONVERSATIONS_OMEMO_XMLNS
-
-#ifdef CONVERSATIONS_OMEMO_XMLNS
-#define XMLNS_OMEMO @"eu.siacs.conversations.axolotl"
-#define XMLNS_OMEMO_DEVICELIST @"eu.siacs.conversations.axolotl.devicelist"
-#define XMLNS_OMEMO_DEVICELIST_NOTIFY @"eu.siacs.conversations.axolotl.devicelist+notify"
-#define XMLNS_OMEMO_BUNDLES @"eu.siacs.conversations.axolotl.bundles"
-#else
-#define XMLNS_OMEMO @"urn:xmpp:omemo:0"
-#define XMLNS_OMEMO_DEVICELIST @"urn:xmpp:omemo:0:devicelist"
-#define XMLNS_OMEMO_DEVICELIST_NOTIFY @"urn:xmpp:omemo:0:devicelist+notify"
-#define XMLNS_OMEMO_BUNDLES @"urn:xmpp:omemo:0:bundles"
-#endif
-
 NS_ASSUME_NONNULL_BEGIN
+
+typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
+    /** Uses SignalProtocol and compatible with the latest Conversations versions as of October 1, 2016. */
+    OMEMOModuleNamespaceConversationsLegacy,
+    /** Crypto protocol still in discussion. Do not use in production yet! See https://github.com/xsf/xeps/pull/251 */
+    OMEMOModuleNamespaceOMEMO
+};
 
 @protocol OMEMOStorageDelegate;
 
@@ -37,12 +30,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface OMEMOModule : XMPPModule <XMPPStreamDelegate, XMPPCapabilitiesDelegate>
 
+@property (nonatomic, readonly) OMEMOModuleNamespace xmlNamespace;
 @property (nonatomic, strong, readonly) id<OMEMOStorageDelegate> omemoStorage;
 
 #pragma mark Init
 
-- (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage;
-- (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
+- (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage xmlNamespace:(OMEMOModuleNamespace)xmlNamespace;
+- (instancetype) initWithOMEMOStorage:(id<OMEMOStorageDelegate>)omemoStorage xmlNamespace:(OMEMOModuleNamespace)xmlNamespace dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
 /** Not available, use designated initializer */
 - (instancetype) init NS_UNAVAILABLE;
@@ -102,6 +96,14 @@ NS_ASSUME_NONNULL_BEGIN
                toJID:(XMPPJID*)toJID
              payload:(nullable NSData*)payload
            elementId:(nullable NSString*)elementId;
+
+#pragma mark Namespace methods
+
++ (NSString*) xmlnsOMEMO:(OMEMOModuleNamespace)ns;
++ (NSString*) xmlnsOMEMODeviceList:(OMEMOModuleNamespace)ns;
++ (NSString*) xmlnsOMEMODeviceListNotify:(OMEMOModuleNamespace)ns;
++ (NSString*) xmlnsOMEMOBundles:(OMEMOModuleNamespace)ns;
++ (NSString*) xmlnsOMEMOBundles:(OMEMOModuleNamespace)ns deviceId:(uint32_t)deviceId;
 
 @end
 
@@ -174,6 +176,7 @@ failedToSendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
 - (void)omemo:(OMEMOModule*)omemo
 receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
            iv:(NSData*)iv
+senderDeviceId:(uint32_t)senderDeviceId
       fromJID:(XMPPJID*)fromJID
       payload:(nullable NSData*)payload
       message:(XMPPMessage*)message;

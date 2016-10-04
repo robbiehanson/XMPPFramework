@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype) initWithMyBundle:(OMEMOBundle*)myBundle;
 
-+ (OMEMOBundle*) testBundle;
++ (OMEMOBundle*) testBundle:(OMEMOModuleNamespace)ns;
 
 @end
 NS_ASSUME_NONNULL_END

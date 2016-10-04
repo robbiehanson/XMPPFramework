@@ -61,14 +61,14 @@
 
 #pragma mark Utility
 
-+ (XMPPIQ*) iq_SetBundleWithEid:(NSString*)eid {
-    NSXMLElement *inner = [self innerBundleElement];
++ (XMPPIQ*) iq_SetBundleWithEid:(NSString*)eid xmlNamespace:(OMEMOModuleNamespace)xmlNamespace {
+    NSXMLElement *inner = [self innerBundleElement:xmlNamespace];
     XMPPIQ *setIq = [XMPPIQ iqWithType:@"set" elementID:eid child:inner];
     return setIq;
 }
 
-+ (XMPPIQ*) iq_resultBundleFromJID:(XMPPJID*)fromJID eid:(NSString*)eid {
-    NSXMLElement *inner = [self innerBundleElement];
++ (XMPPIQ*) iq_resultBundleFromJID:(XMPPJID*)fromJID eid:(NSString*)eid xmlNamespace:(OMEMOModuleNamespace)xmlNamespace {
+    NSXMLElement *inner = [self innerBundleElement:xmlNamespace];
     XMPPIQ *iq = [self iq_testIQFromJID:fromJID eid:eid type:@"result"];
     [iq addChild:inner];
     return iq;
@@ -97,7 +97,8 @@
     return iq;
 }
 
-+ (NSXMLElement*)innerBundleElement {
++ (NSXMLElement*)innerBundleElement:(OMEMOModuleNamespace)ns {
+
     NSString *expectedString = [NSString stringWithFormat:@" \
     <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
     <items node='%@:31415'> \
@@ -115,15 +116,15 @@
     </item> \
     </items> \
     </pubsub> \
-    ", XMLNS_OMEMO_BUNDLES, XMLNS_OMEMO];
+    ", [OMEMOModule xmlnsOMEMODeviceList:ns], [OMEMOModule xmlnsOMEMO:ns]];
 
     NSXMLElement *element = [[NSXMLElement alloc] initWithXMLString:expectedString error:nil];
     return element;
 }
 
-+ (OMEMOBundle*) testBundle {
-    [self innerBundleElement];
-    OMEMOBundle *bundle = [[self iq_SetBundleWithEid:@"announce1"] omemo_bundle];
++ (OMEMOBundle*) testBundle:(OMEMOModuleNamespace)ns {
+    [self innerBundleElement:ns];
+    OMEMOBundle *bundle = [[self iq_SetBundleWithEid:@"announce1" xmlNamespace:ns] omemo_bundle:ns];
     return bundle;
 }
 

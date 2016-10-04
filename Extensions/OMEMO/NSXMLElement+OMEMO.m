@@ -12,18 +12,18 @@
 @implementation NSXMLElement (OMEMO)
 
 /** If element contains <encrypted xmlns='urn:xmpp:omemo:0'> */
-- (BOOL) omemo_hasEncryptedElement {
-    return [self omemo_encryptedElement] != nil;
+- (BOOL) omemo_hasEncryptedElement:(OMEMOModuleNamespace)ns {
+    return [self omemo_encryptedElement:ns] != nil;
 }
 
 /** If element IS <encrypted xmlns='urn:xmpp:omemo:0'> */
-- (BOOL) omemo_isEncryptedElement {
-    return [[self name] isEqualToString:@"encrypted"] && [[self xmlns] isEqualToString:XMLNS_OMEMO];
+- (BOOL) omemo_isEncryptedElement:(OMEMOModuleNamespace)ns {
+    return [[self name] isEqualToString:@"encrypted"] && [[self xmlns] isEqualToString:[OMEMOModule xmlnsOMEMO:ns]];
 }
 
 /** Child element <encrypted xmlns='urn:xmpp:omemo:0'> */
-- (nullable NSXMLElement*) omemo_encryptedElement {
-    return [self elementForName:@"encrypted" xmlns:XMLNS_OMEMO];
+- (nullable NSXMLElement*) omemo_encryptedElement:(OMEMOModuleNamespace)ns {
+    return [self elementForName:@"encrypted" xmlns:[OMEMOModule xmlnsOMEMO:ns]];
 }
 
 - (NSXMLElement*) omemo_headerElement {
@@ -84,8 +84,8 @@
 
 + (NSXMLElement*) omemo_keyTransportElementWithKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
                                                     iv:(NSData*)iv
-                                        senderDeviceId:(uint32_t)senderDeviceId {
-    NSXMLElement *keyTransportElement = [NSXMLElement elementWithName:@"encrypted" xmlns:XMLNS_OMEMO];
+                                        senderDeviceId:(uint32_t)senderDeviceId xmlNamespace:(OMEMOModuleNamespace)xmlNamespace {
+    NSXMLElement *keyTransportElement = [NSXMLElement elementWithName:@"encrypted" xmlns:[OMEMOModule xmlnsOMEMO:xmlNamespace]];
     NSXMLElement *headerElement = [NSXMLElement elementWithName:@"header"];
     [headerElement addAttributeWithName:@"sid" unsignedIntegerValue:senderDeviceId];
     [keyData enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull key, NSData * _Nonnull obj, BOOL * _Nonnull stop) {
@@ -99,9 +99,9 @@
     return keyTransportElement;
 }
 
-- (nullable NSArray<NSNumber *>*)omemo_deviceListFromItems {
-    if ([[self attributeStringValueForName:@"node"] isEqualToString:XMLNS_OMEMO_DEVICELIST]) {
-        NSXMLElement * devicesList = [[self elementForName:@"item"] elementForName:@"list" xmlns:XMLNS_OMEMO];
+- (nullable NSArray<NSNumber *>*)omemo_deviceListFromItems:(OMEMOModuleNamespace)ns {
+    if ([[self attributeStringValueForName:@"node"] isEqualToString:[OMEMOModule xmlnsOMEMODeviceList:ns]]) {
+        NSXMLElement * devicesList = [[self elementForName:@"item"] elementForName:@"list" xmlns:[OMEMOModule xmlnsOMEMO:ns]];
         if (devicesList) {
             NSArray *children = [devicesList children];
             NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:children.count];

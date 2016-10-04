@@ -15,13 +15,13 @@
 
 @implementation XMPPMessage (OMEMO)
 
-- (nullable NSArray<NSNumber *>*)omemo_deviceListFromPEPUpdate
+- (nullable NSArray<NSNumber *>*)omemo_deviceListFromPEPUpdate:(OMEMOModuleNamespace)ns
 {
     NSXMLElement *event = [self elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
     if (!event) { return nil; }
     NSXMLElement * itemsList = [event elementForName:@"items"];
     if (!itemsList) { return nil; }
-    return [itemsList omemo_deviceListFromItems];
+    return [itemsList omemo_deviceListFromItems:ns];
 }
 
 /**
@@ -46,8 +46,9 @@
                            senderDeviceId:(uint32_t)senderDeviceId
                                     toJID:(XMPPJID*)toJID
                                   payload:(nullable NSData*)payload
-                                elementId:(nullable NSString*)elementId {
-    NSXMLElement *encryptedElement = [NSXMLElement omemo_keyTransportElementWithKeyData:keyData iv:iv senderDeviceId:senderDeviceId];
+                                elementId:(nullable NSString*)elementId
+                             xmlNamespace:(OMEMOModuleNamespace)xmlNamespace{
+    NSXMLElement *encryptedElement = [NSXMLElement omemo_keyTransportElementWithKeyData:keyData iv:iv senderDeviceId:senderDeviceId xmlNamespace:xmlNamespace];
     if (payload) {
         NSString *b64 = [payload base64EncodedStringWithOptions:0];
         NSXMLElement *payloadElement = [NSXMLElement elementWithName:@"payload" stringValue:b64];

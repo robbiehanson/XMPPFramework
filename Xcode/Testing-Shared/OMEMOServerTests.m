@@ -291,6 +291,7 @@ failedToFetchBundleForDeviceId:(uint32_t)deviceId
 - (void)omemo:(OMEMOModule*)omemo
 receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
            iv:(NSData*)iv
+senderDeviceId:(uint32_t)senderDeviceId
       fromJID:(XMPPJID*)fromJID
       payload:(nullable NSData*)payload
       message:(XMPPMessage*)message {
