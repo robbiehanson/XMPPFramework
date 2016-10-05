@@ -115,6 +115,7 @@
             }];
             return result;
         }
+        return @[];
     }
     return nil;
 }

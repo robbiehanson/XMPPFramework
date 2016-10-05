@@ -127,18 +127,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             NSXMLElement *pubsub = [responseIq elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
             if (!pubsub) {
                 XMPPLogWarn(@"Missing pubsub element: %@ %@", iq, responseIq);
-                return;
             }
             NSXMLElement *items = [pubsub elementForName:@"items"];
             if (!items) {
                 XMPPLogWarn(@"Missing items element: %@ %@", iq, responseIq);
-                return;
             }
             NSArray<NSNumber *> *devices = [items omemo_deviceListFromItems:self.xmlNamespace];
             if (!devices) {
+                devices = @[];
                 XMPPLogWarn(@"Missing devices from element: %@ %@", iq, responseIq);
-                return;
             }
+            
             XMPPJID *bareJID = [[responseIq from] bareJID];
             [weakMulticast omemo:weakSelf deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
             [weakSelf processIncomingDeviceIds:devices fromJID:bareJID];
@@ -261,14 +260,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
     OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
-    [self addMyDeviceIdToLocalDeviceList:myBundle];
+    [self fetchDeviceIdsForJID:sender.myJID elementId:nil];
+    [self publishBundle:myBundle elementId:nil];
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
     // Check for incoming device list updates
     NSArray<NSNumber *> *deviceIds = [message omemo_deviceListFromPEPUpdate:self.xmlNamespace];
     XMPPJID *bareJID = [[message from] bareJID];
-    if (deviceIds.count > 0) {
+    if (deviceIds) {
         [multicastDelegate omemo:self deviceListUpdate:deviceIds fromJID:bareJID incomingElement:message];
         [self processIncomingDeviceIds:deviceIds fromJID:bareJID];
         return;
@@ -324,22 +324,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return eid;
 }
 
-- (void) addMyDeviceIdToLocalDeviceList:(OMEMOBundle*)myBundle {
-    if (!myBundle) { return; }
-    XMPPJID *myJID = xmppStream.myJID;
-    if (!myJID) { return; }
-    NSArray *devices = [self.omemoStorage fetchDeviceIdsForJID:xmppStream.myJID];
-    if(devices.count == 0 || [devices containsObject:@(myBundle.deviceId)]) {
-        return;
-    }
-    NSArray *appended = [devices arrayByAddingObject:@(myBundle.deviceId)];
-    [self.omemoStorage storeDeviceIds:appended forJID:myJID];
-}
-
 - (void) processIncomingDeviceIds:(NSArray<NSNumber*>*)deviceIds fromJID:(XMPPJID*)fromJID {
     NSParameterAssert(fromJID != nil);
-    NSParameterAssert(deviceIds.count > 0);
-    if (!fromJID || !deviceIds.count) {
+    NSParameterAssert(deviceIds != nil);
+    if (!fromJID || !deviceIds) {
         return;
     }
     fromJID = [fromJID bareJID];
@@ -357,7 +345,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         }
         // Republish deviceIds with your deviceId
         NSArray *appended = [deviceIds arrayByAddingObject:@(myBundle.deviceId)];
-        [self.omemoStorage storeDeviceIds:deviceIds forJID:fromJID];
+        [self.omemoStorage storeDeviceIds:appended forJID:fromJID];
         [self publishDeviceIds:appended elementId:[[NSUUID UUID] UUIDString]];
     }
 
