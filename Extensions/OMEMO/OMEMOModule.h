@@ -10,6 +10,7 @@
 #import "XMPP.h"
 #import "XMPPCapabilities.h"
 #import "OMEMOBundle.h"
+#import "OMEMOKeyData.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -91,7 +92,7 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
  * @param iv the IV used for encryption of payload
  * @param elementId XMPP element id. If nil a random UUID will be used.
  */
-- (void) sendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+- (void) sendKeyData:(NSArray<OMEMOKeyData*>*)keyData
                   iv:(NSData*)iv
                toJID:(XMPPJID*)toJID
              payload:(nullable NSData*)payload
@@ -163,7 +164,7 @@ failedToFetchBundleForDeviceId:(uint32_t)deviceId
 /**
  * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement
 - (void)omemo:(OMEMOModule*)omemo
-failedToSendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+failedToSendKeyData:(NSArray<OMEMOKeyData*>*)keyData
            iv:(NSData*)iv
       toJID:(XMPPJID*)toJID
       payload:(nullable NSData*)payload
@@ -174,7 +175,7 @@ failedToSendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
 /**
  * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement */
 - (void)omemo:(OMEMOModule*)omemo
-receivedKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+receivedKeyData:(NSArray<OMEMOKeyData*>*)keyData
            iv:(NSData*)iv
 senderDeviceId:(uint32_t)senderDeviceId
       fromJID:(XMPPJID*)fromJID

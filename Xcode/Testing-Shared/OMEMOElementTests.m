@@ -171,8 +171,8 @@
     NSData *keyData1 = [[NSData alloc] initWithBase64EncodedString:key1 options:0];
     NSData *keyData2 = [[NSData alloc] initWithBase64EncodedString:key2 options:0];
     NSData *ivData = [[NSData alloc] initWithBase64EncodedString:iv options:0];
-    NSDictionary *keyData = @{@(31415): keyData1,
-                              @(12321): keyData2};
+    NSArray<OMEMOKeyData*> *keyData = @[[[OMEMOKeyData alloc] initWithDeviceId:31415 data:keyData1],
+                         [[OMEMOKeyData alloc] initWithDeviceId:12321 data:keyData2]];
     uint32_t senderDeviceId = 27183;
     NSXMLElement *testElement = [NSXMLElement omemo_keyTransportElementWithKeyData:keyData iv:ivData senderDeviceId:senderDeviceId xmlNamespace:self.ns];
     
@@ -182,9 +182,15 @@
     XCTAssertTrue(senderDeviceId == [expectedElement omemo_senderDeviceId]);
     XCTAssertTrue(senderDeviceId == [testElement omemo_senderDeviceId]);
     
-    XCTAssertEqualObjects(keyData, [expectedElement omemo_keyData]);
-    XCTAssertEqualObjects(keyData, [testElement omemo_keyData]);
-    
+    NSArray<OMEMOKeyData*> *expectedElementKeyData = [expectedElement omemo_keyData];
+    NSArray<OMEMOKeyData*> *testElementKeyData = [testElement omemo_keyData];
+    [keyData enumerateObjectsUsingBlock:^(OMEMOKeyData * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        XCTAssertEqualObjects(obj.data, expectedElementKeyData[idx].data);
+        XCTAssertEqual(obj.deviceId, expectedElementKeyData[idx].deviceId);
+        XCTAssertEqualObjects(obj.data, testElementKeyData[idx].data);
+        XCTAssertEqual(obj.deviceId, testElementKeyData[idx].deviceId);
+    }];
+
     XCTAssertNil([expectedElement omemo_payload]);
     XCTAssertNil([testElement omemo_payload]);
     

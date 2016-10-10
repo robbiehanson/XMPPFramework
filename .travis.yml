@@ -1,22 +1,19 @@
 osx_image: xcode8
 language: objective-c
 
+before_install:
+  - gem install cocoapods -v 1.1.0.rc.2 --no-rdoc --no-ri
+  - pod repo update --silent
+
 install:
-  - cd Xcode/Testing-iOS
-  - bundle install
-  - bundle exec pod repo update --silent
-  - bundle exec pod install
-  - cd ../../
-  - cd Xcode/Testing-macOS
-  - bundle install
-  - bundle exec pod repo update --silent
-  - bundle exec pod install
-  - cd ../../
+  - pod install --project-directory=Xcode/Testing-iOS
+  - pod install --project-directory=Xcode/Testing-macOS
 
 before_script:
   # Travis is having issues launching the simulator? https://github.com/travis-ci/travis-ci/issues/4725
-  - xcrun instruments -w "iPhone 6 (10.0)" || true
+  # - xcrun instruments -w "iPhone 6 (10.0)" || true
+  - set -o pipefail
 
 script:
-  - xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'name=iPhone 6' test
-  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test
+  - xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination 'name=iPhone 6' test | xcpretty -c
+  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c

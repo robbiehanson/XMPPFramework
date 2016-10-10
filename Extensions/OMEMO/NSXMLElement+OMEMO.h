@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** The Device ID is a randomly generated integer between 1 and 2^31 - 1. If zero it means the element was not found. Only works within <encrypted> element. <header sid='27183'> */
 - (uint32_t) omemo_senderDeviceId;
 /** key data is keyed to receiver deviceIds. Only works within <encrypted> element.  <key rid='31415'>BASE64ENCODED...</key> .. */
-- (nullable NSDictionary<NSNumber*,NSData*>*) omemo_keyData;
+- (nullable NSArray<OMEMOKeyData*>*) omemo_keyData;
 /** Only works within <encrypted> element. <payload>BASE64ENCODED</payload> */
 - (nullable NSData*) omemo_payload;
 /** Encryption IV. Only works within <encrypted> element. <iv>BASE64ENCODED</iv> */
@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
  </encrypted>
  */
 
-+ (NSXMLElement*) omemo_keyTransportElementWithKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
++ (NSXMLElement*) omemo_keyTransportElementWithKeyData:(NSArray<OMEMOKeyData*>*)keyData
                                                     iv:(NSData*)iv
                                         senderDeviceId:(uint32_t)senderDeviceId
                                           xmlNamespace:(OMEMOModuleNamespace)xmlNamespace;

@@ -36,10 +36,10 @@
 }
 
 /** key data is keyed to receiver deviceIds. Only works within <encrypted> element.  <key rid='31415'>BASE64ENCODED...</key> .. */
-- (nullable NSDictionary<NSNumber*,NSData*>*) omemo_keyData {
+- (nullable NSArray<OMEMOKeyData*>*) omemo_keyData {
     NSArray<NSXMLElement*> *keys = [[self omemo_headerElement] elementsForName:@"key"];
     if (!keys) { return nil; }
-    NSMutableDictionary *keyData = [[NSMutableDictionary alloc] initWithCapacity:keys.count];
+    NSMutableArray *keyDataArray = [[NSMutableArray alloc] initWithCapacity:keys.count];
     [keys enumerateObjectsUsingBlock:^(NSXMLElement * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         uint32_t rid = [obj attributeUInt32ValueForName:@"rid"];
         NSString *b64 = [obj stringValue];
@@ -48,11 +48,11 @@
             data = [[NSData alloc] initWithBase64EncodedString:b64 options:NSDataBase64DecodingIgnoreUnknownCharacters];
         }
         if (rid > 0 && data) {
-            
-            [keyData setObject:data forKey:@(rid)];
+            OMEMOKeyData *keyData = [[OMEMOKeyData alloc] initWithDeviceId:rid data:data];
+            [keyDataArray addObject:keyData];
         }
     }];
-    return [keyData copy];
+    return [keyDataArray copy];
 }
 /** Only works within <encrypted> element. <payload>BASE64ENCODED</payload> */
 - (nullable NSData*) omemo_payload {
@@ -82,15 +82,16 @@
  </encrypted>
  */
 
-+ (NSXMLElement*) omemo_keyTransportElementWithKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
++ (NSXMLElement*) omemo_keyTransportElementWithKeyData:(NSArray<OMEMOKeyData*>*)keyData
                                                     iv:(NSData*)iv
                                         senderDeviceId:(uint32_t)senderDeviceId xmlNamespace:(OMEMOModuleNamespace)xmlNamespace {
     NSXMLElement *keyTransportElement = [NSXMLElement elementWithName:@"encrypted" xmlns:[OMEMOModule xmlnsOMEMO:xmlNamespace]];
     NSXMLElement *headerElement = [NSXMLElement elementWithName:@"header"];
     [headerElement addAttributeWithName:@"sid" unsignedIntegerValue:senderDeviceId];
-    [keyData enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull key, NSData * _Nonnull obj, BOOL * _Nonnull stop) {
-        NSXMLElement *keyElement = [NSXMLElement elementWithName:@"key" stringValue:[obj base64EncodedStringWithOptions:0]];
-        [keyElement addAttributeWithName:@"rid" numberValue:key];
+
+    [keyData enumerateObjectsUsingBlock:^(OMEMOKeyData * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSXMLElement *keyElement = [NSXMLElement elementWithName:@"key" stringValue:[obj.data base64EncodedStringWithOptions:0]];
+        [keyElement addAttributeWithName:@"rid" unsignedIntegerValue:obj.deviceId];
         [headerElement addChild:keyElement];
     }];
     NSXMLElement *ivElement = [NSXMLElement elementWithName:@"iv" stringValue:[iv base64EncodedStringWithOptions:0]];

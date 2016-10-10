@@ -198,7 +198,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     }];
 }
 
-- (void) sendKeyData:(NSDictionary<NSNumber*,NSData*>*)keyData
+- (void) sendKeyData:(NSArray<OMEMOKeyData*>*)keyData
                   iv:(NSData*)iv
                toJID:(XMPPJID*)toJID
              payload:(nullable NSData*)payload
@@ -276,7 +276,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     NSXMLElement *omemo = [message omemo_encryptedElement:self.xmlNamespace];
     if (omemo) {
         uint32_t deviceId = [omemo omemo_senderDeviceId];
-        NSDictionary<NSNumber*,NSData*>* keyData = [omemo omemo_keyData];
+        NSArray<OMEMOKeyData*>* keyData = [omemo omemo_keyData];
         NSData *iv = [omemo omemo_iv];
         NSData *payload = [omemo omemo_payload];
         if (deviceId > 0 && keyData.count > 0 && iv) {
