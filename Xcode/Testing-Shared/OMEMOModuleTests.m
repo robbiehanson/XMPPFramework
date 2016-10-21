@@ -218,6 +218,40 @@
     }];
 }
 
+- (void)testRemoveBundle {
+    self.expectation = [self expectationWithDescription:@"testRemoveBundle"];
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testRemoveBundle: %@", outgoingIq);
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"result" elementID:outgoingIq.elementID];;
+        [weakStream fakeResponse:responseIq];
+    };
+    
+    [self.omemoModule removeBundleForDevice:123 elementId:nil];
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void)testRemoveBundleFail {
+    self.expectation = [self expectationWithDescription:@"testRemoveBundleFail"];
+    __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
+    self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        NSLog(@"testRemoveBundleFail: %@", outgoingIq);
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"error" elementID:outgoingIq.elementID];
+        [weakStream fakeResponse:responseIq];
+    };
+    
+    [self.omemoModule removeBundleForDevice:123 elementId:nil];
+    [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
 - (void) testSendKeyData {
     XMPPJID *remoteJID = [XMPPJID jidWithString:@"remote@jid.com"];
     self.expectation = [self expectationWithDescription:@"testSendKeyData"];
@@ -355,6 +389,21 @@ failedToFetchBundleForDeviceId:(uint32_t)deviceId
       fromJID:(XMPPJID*)fromJID
       errorIq:(nullable XMPPIQ*)errorIq
    outgoingIq:(XMPPIQ*)outgoingIq {
+    [self.expectation fulfill];
+}
+
+- (void)omemo:(OMEMOModule *)omem
+removedBundleId:(uint32_t)bundleId
+   responseIq:(XMPPIQ *)responseIq
+   outgoingIq:(XMPPIQ *)outgoingIq {
+    [self.expectation fulfill];
+}
+
+- (void)omemo:(OMEMOModule *)omemo
+failedToRemoveBundleId:(uint32_t)bundleId
+      errorIq:(XMPPIQ *)errorIq
+   outgoingIq:(XMPPIQ *)outgoingIq
+{
     [self.expectation fulfill];
 }
 

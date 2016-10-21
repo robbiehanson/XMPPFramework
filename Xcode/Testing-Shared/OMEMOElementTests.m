@@ -309,4 +309,20 @@
     XCTAssertEqualObjects(pubsub.prettyXMLString, expPubsub.prettyXMLString);
 }
 
+- (void) testRemoveDeviceBundle {
+    uint32_t deviceId = 123;
+    NSString *elementId = @"delete1";
+    NSString *expected = [NSString stringWithFormat:@"<iq type=\'set\' \
+                          id='%@'> \
+                          <pubsub xmlns='http://jabber.org/protocol/pubsub'> \
+                          <delete node='%@'/> \
+                          </pubsub> \
+                          </iq>",elementId,[OMEMOModule xmlnsOMEMOBundles:self.ns deviceId:deviceId]];
+    NSError *error = nil;
+    NSXMLElement *expXml = [[NSXMLElement alloc] initWithXMLString:expected error:&error];
+    XCTAssertNil(error);
+    XMPPIQ *iq = [XMPPIQ omemo_iqRemoveBundleForDeviceId:deviceId elementId:elementId xmlNamespace:self.ns];
+    XCTAssertEqualObjects(iq.prettyXMLString, expXml.prettyXMLString);
+}
+
 @end

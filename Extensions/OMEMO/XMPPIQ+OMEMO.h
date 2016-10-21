@@ -34,6 +34,10 @@ NS_ASSUME_NONNULL_BEGIN
                                  elementId:(nullable NSString*)elementId
                               xmlNamespace:(OMEMOModuleNamespace)xmlNamespace;
 
++ (XMPPIQ*) omemo_iqRemoveBundleForDeviceId:(uint32_t)deviceId
+                                  elementId:(nullable NSString*)elementId
+                               xmlNamespace:(OMEMOModuleNamespace)xmlNamespace;
+
 /** Serialize bundle from IQ */
 - (nullable OMEMOBundle*) omemo_bundle:(OMEMOModuleNamespace)ns;
 

@@ -198,6 +198,27 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     }];
 }
 
+
+- (void) removeBundleForDevice:(uint32_t)deviceId elementId:(NSString *)elementId {
+    __weak typeof(self) weakSelf = self;
+    __weak id weakMulticast = multicastDelegate;
+    [self performBlock:^{
+        NSString *eid = [weakSelf fixElementId:elementId];
+        XMPPIQ *iq = [XMPPIQ omemo_iqRemoveBundleForDeviceId:deviceId elementId:eid xmlNamespace:self.xmlNamespace];
+        [self.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
+            if (!responseIq || [responseIq isErrorIQ]) {
+                // timeout
+                XMPPLogWarn(@"removeBundleForDevice error: %@ %@", iq, responseIq);
+                [weakMulticast omemo:weakSelf failedToRemoveBundleId:deviceId errorIq:responseIq outgoingIq:iq];
+                return;
+            } else {
+                [weakMulticast omemo:weakSelf removedBundleId:deviceId responseIq:responseIq outgoingIq:iq];
+            }
+        } timeout:30];
+        [xmppStream sendElement:iq];
+    }];
+}
+
 - (void) sendKeyData:(NSArray<OMEMOKeyData*>*)keyData
                   iv:(NSData*)iv
                toJID:(XMPPJID*)toJID
@@ -220,6 +241,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         [xmppStream sendElement:message];
     }];
 }
+
+
 
 #pragma mark Namespace methods
 

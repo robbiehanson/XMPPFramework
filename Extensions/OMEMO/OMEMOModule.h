@@ -82,6 +82,15 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
                       elementId:(nullable NSString*)elementId;
 
 /**
+ * Removes the device bundle for a device id. If you're removing a device completely it's important to update the device list as well.
+ *
+ * @param deviceId remote deviceid
+ * @param elementId XMPP elementid. If nil a random UUID will be used.
+ */
+- (void) removeBundleForDevice:(uint32_t)deviceId
+                     elementId:(nullable NSString *)elementId;
+
+/**
  In order to send a chat message, its <body> first has to be encrypted. The client MUST use fresh, randomly generated key/IV pairs with AES-128 in Galois/Counter Mode (GCM). For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a MessageElement.
  
   The client may wish to transmit keying material to the contact. This first has to be generated. The client MUST generate a fresh, randomly generated key/IV pair. For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a KeyTransportElement, omitting the <payload> as follows:
@@ -158,6 +167,18 @@ fetchedBundle:(OMEMOBundle*)bundle
 - (void)omemo:(OMEMOModule*)omemo
 failedToFetchBundleForDeviceId:(uint32_t)deviceId
       fromJID:(XMPPJID*)fromJID
+      errorIq:(nullable XMPPIQ*)errorIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
+
+/** Removal succeeded*/
+- (void)omemo:(OMEMOModule*)omem
+removedBundleId:(uint32_t)bundleId
+   responseIq:(XMPPIQ*)responseIq
+   outgoingIq:(XMPPIQ*)outgoingIq;
+
+/** Bundle removal failed */
+- (void)omemo:(OMEMOModule*)omemo
+failedToRemoveBundleId:(uint32_t)bundleId
       errorIq:(nullable XMPPIQ*)errorIq
    outgoingIq:(XMPPIQ*)outgoingIq;
 

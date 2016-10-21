@@ -169,6 +169,17 @@
     return iq;
 }
 
++ (XMPPIQ *) omemo_iqDeleteNode:(NSString *)node elementId:(nullable NSString *)elementId {
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:elementId];
+    NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
+    NSXMLElement *deleteElement = [NSXMLElement elementWithName:@"delete"];
+    [deleteElement addAttributeWithName:@"node" stringValue:node];
+    
+    [pubsub addChild:deleteElement];
+    [iq addChild:pubsub];
+    
+    return iq;
+}
 /**
  * iq stanza for fetching remote bundle
  
@@ -188,6 +199,14 @@
                               xmlNamespace:(OMEMOModuleNamespace)xmlNamespace {
     NSString *nodeName = [OMEMOModule xmlnsOMEMOBundles:xmlNamespace deviceId:deviceId];
     return [self omemo_iqFetchNode:nodeName to:jid elementId:elementId];
+}
+
++ (XMPPIQ*) omemo_iqRemoveBundleForDeviceId:(uint32_t)deviceId
+                                  elementId:(nullable NSString*)elementId
+                               xmlNamespace:(OMEMOModuleNamespace)xmlNamespace
+{
+    NSString *nodeName = [OMEMOModule xmlnsOMEMOBundles:xmlNamespace deviceId:deviceId];
+    return [self omemo_iqDeleteNode:nodeName elementId:elementId];
 }
 
 
