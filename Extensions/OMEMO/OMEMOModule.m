@@ -74,8 +74,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 
 - (void) publishDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(nullable NSString*)elementId {
-    NSParameterAssert(deviceIds.count > 0);
-    if (!deviceIds.count) { return; }
     __weak typeof(self) weakSelf = self;
     __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
@@ -101,47 +99,35 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if (!jid) { return; }
     __weak typeof(self) weakSelf = self;
     __weak id weakMulticast = multicastDelegate;
+    [self fetchDeviceIdsForJID:jid elementId:elementId completion:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
+        if (!responseIq || [responseIq isErrorIQ]) {
+            // timeout
+            XMPPLogWarn(@"fetchDeviceIdsForJID error: %@ %@", info.element, responseIq);
+            [weakMulticast omemo:weakSelf failedToFetchDeviceIdsForJID:jid errorIq:responseIq outgoingIq:info.element];
+            return;
+        }
+        
+        NSArray<NSNumber *> *devices = [responseIq omemo_deviceListFromIqResponse:self.xmlNamespace];
+        if (!devices) {
+            devices = @[];
+            XMPPLogWarn(@"Missing devices from element: %@ %@", info.element, responseIq);
+        }
+        
+        XMPPJID *bareJID = [[responseIq from] bareJID];
+        [weakMulticast omemo:weakSelf deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
+        [weakSelf processIncomingDeviceIds:devices fromJID:bareJID];
+    }];
+}
+
+- (void) fetchDeviceIdsForJID:(nonnull XMPPJID*)jid
+                    elementId:(nullable NSString*)elementId
+                   completion:(void (^_Nonnull)(XMPPIQ *responseIq, id<XMPPTrackingInfo> info))completion {
+    __weak typeof(self) weakSelf = self;
+    __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
-        NSString *eid = [self fixElementId:elementId];
+        NSString *eid = [weakSelf fixElementId:elementId];
         XMPPIQ *iq = [XMPPIQ omemo_iqFetchDeviceIdsForJID:jid elementId:eid xmlNamespace:self.xmlNamespace];
-        [self.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
-            if (!responseIq || [responseIq isErrorIQ]) {
-                // timeout
-                XMPPLogWarn(@"fetchDeviceIdsForJID error: %@ %@", iq, responseIq);
-                [weakMulticast omemo:weakSelf failedToFetchDeviceIdsForJID:jid errorIq:responseIq outgoingIq:iq];
-                return;
-            }
-            /*
-<iq xmlns="jabber:client" id="AEA43C1D-DA7D-448F-8F41-268D1A14FF3F" type="result" to="test@example.com/b9038fb3-0575-47bf-b8bb-cd1073f972c6" from="conversations@example.com">
-<pubsub xmlns="http://jabber.org/protocol/pubsub">
-    <items node="eu.siacs.conversations.axolotl.devicelist">
-        <item id="1">
-            <list xmlns="eu.siacs.conversations.axolotl">
-                <device id="1259777401"/>
-            </list>
-        </item>
-    </items>
-</pubsub>
-</iq>
-             */
-            NSXMLElement *pubsub = [responseIq elementForName:@"pubsub" xmlns:XMLNS_PUBSUB];
-            if (!pubsub) {
-                XMPPLogWarn(@"Missing pubsub element: %@ %@", iq, responseIq);
-            }
-            NSXMLElement *items = [pubsub elementForName:@"items"];
-            if (!items) {
-                XMPPLogWarn(@"Missing items element: %@ %@", iq, responseIq);
-            }
-            NSArray<NSNumber *> *devices = [items omemo_deviceListFromItems:self.xmlNamespace];
-            if (!devices) {
-                devices = @[];
-                XMPPLogWarn(@"Missing devices from element: %@ %@", iq, responseIq);
-            }
-            
-            XMPPJID *bareJID = [[responseIq from] bareJID];
-            [weakMulticast omemo:weakSelf deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
-            [weakSelf processIncomingDeviceIds:devices fromJID:bareJID];
-        } timeout:30];
+        [weakSelf.tracker addElement:iq block:completion timeout:30];
         [xmppStream sendElement:iq];
     }];
 }
@@ -198,24 +184,45 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     }];
 }
 
-
-- (void) removeBundleForDevice:(uint32_t)deviceId elementId:(NSString *)elementId {
+//All the different delegates that can happend. And you can't remove your self unless change delegate callback on bundle
+- (void) removeDeviceIds:(NSArray<NSNumber*>*)deviceIds elementId:(NSString *)elementId {
     __weak typeof(self) weakSelf = self;
     __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
-        NSString *eid = [weakSelf fixElementId:elementId];
-        XMPPIQ *iq = [XMPPIQ omemo_iqRemoveBundleForDeviceId:deviceId elementId:eid xmlNamespace:self.xmlNamespace];
-        [self.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
+        
+        [deviceIds enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSString *eid = [weakSelf fixElementId:nil];
+            XMPPIQ *iq = [XMPPIQ omemo_iqRemoveBundleForDeviceId:obj elementId:eid xmlNamespace:self.xmlNamespace];
+            [weakSelf.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
+                if (!responseIq || [responseIq isErrorIQ]) {
+                    [weakMulticast omemo:weakSelf failedToRemoveBundleId:obj.unsignedIntValue errorIq:responseIq outgoingIq:iq elementId:elementId];
+                } else {
+                    [weakMulticast omemo:weakSelf removedBundleId:obj.unsignedIntValue responseIq:responseIq outgoingIq:iq elementId:elementId];
+                }
+            } timeout:30];
+            [xmppStream sendElement:iq];
+        }];
+        
+        //group notify all trackers are done from remove bundles
+        [weakSelf fetchDeviceIdsForJID:weakSelf.xmppStream.myJID elementId:nil completion:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
             if (!responseIq || [responseIq isErrorIQ]) {
                 // timeout
-                XMPPLogWarn(@"removeBundleForDevice error: %@ %@", iq, responseIq);
-                [weakMulticast omemo:weakSelf failedToRemoveBundleId:deviceId errorIq:responseIq outgoingIq:iq];
+                XMPPLogWarn(@"fetchDeviceIdsForJID error: %@ %@", info.element, responseIq);
+                //[weakMulticast omemo:weakSelf failedToFetchDeviceIdsForJID:weakSelf.xmppStream.myJID errorIq:responseIq outgoingIq:info.element];
+                [weakMulticast omemo:weakSelf failedToRemoveDeviceIds:deviceIds errorIq:responseIq elementId:elementId];
                 return;
-            } else {
-                [weakMulticast omemo:weakSelf removedBundleId:deviceId responseIq:responseIq outgoingIq:iq];
             }
-        } timeout:30];
-        [xmppStream sendElement:iq];
+            
+            NSArray<NSNumber *> *devices = [responseIq omemo_deviceListFromIqResponse:self.xmlNamespace];
+            NSIndexSet *indexSet = [devices indexesOfObjectsPassingTest:^BOOL(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                return [deviceIds containsObject:obj];
+            }];
+            NSMutableArray<NSNumber *> *mutableDevices = [devices mutableCopy];
+            // Remove devices
+            [mutableDevices removeObjectsAtIndexes:indexSet];
+            //publish new list of devices
+            [self publishDeviceIds:[mutableDevices copy] elementId:elementId];
+        }];
     }];
 }
 

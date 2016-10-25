@@ -52,6 +52,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Extracts device list from PEP <items> element */
 - (nullable NSArray<NSNumber *>*)omemo_deviceListFromItems:(OMEMOModuleNamespace)ns;
+/** Extracts device list from PEP iq respnse */
+- (nullable NSArray<NSNumber *>*)omemo_deviceListFromIqResponse:(OMEMOModuleNamespace)ns;
 
 
 @end

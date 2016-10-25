@@ -227,7 +227,7 @@
         [weakStream fakeResponse:responseIq];
     };
     
-    [self.omemoModule removeBundleForDevice:123 elementId:nil];
+    [self.omemoModule removeDeviceIds:@[@(123)] elementId:nil];
     [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
         if(error){
             XCTFail(@"Expectation Failed with error: %@", error);
@@ -244,7 +244,7 @@
         [weakStream fakeResponse:responseIq];
     };
     
-    [self.omemoModule removeBundleForDevice:123 elementId:nil];
+    [self.omemoModule removeDeviceIds:@[@(123)] elementId:nil];
     [self waitForExpectationsWithTimeout:30 handler:^(NSError * _Nullable error) {
         if(error){
             XCTFail(@"Expectation Failed with error: %@", error);
@@ -392,19 +392,19 @@ failedToFetchBundleForDeviceId:(uint32_t)deviceId
     [self.expectation fulfill];
 }
 
-- (void)omemo:(OMEMOModule *)omem
-removedBundleId:(uint32_t)bundleId
-   responseIq:(XMPPIQ *)responseIq
-   outgoingIq:(XMPPIQ *)outgoingIq {
-    [self.expectation fulfill];
+- (void)omemo:(OMEMOModule *)omem removedBundleId:(uint32_t)bundleId responseIq:(XMPPIQ *)responseIq outgoingIq:(XMPPIQ *)outgoingIq elementId:(NSString *)elementId {
+    if (self.expectation) {
+        [self.expectation fulfill];
+        self.expectation = nil;
+    }
 }
 
-- (void)omemo:(OMEMOModule *)omemo
-failedToRemoveBundleId:(uint32_t)bundleId
-      errorIq:(XMPPIQ *)errorIq
-   outgoingIq:(XMPPIQ *)outgoingIq
+- (void)omemo:(OMEMOModule *)omemo failedToRemoveBundleId:(uint32_t)bundleId errorIq:(nullable XMPPIQ *)errorIq outgoingIq:(nonnull XMPPIQ *)outgoingIq elementId:(nullable NSString *)elementId
 {
-    [self.expectation fulfill];
+    if (self.expectation) {
+        [self.expectation fulfill];
+        self.expectation = nil;
+    }
 }
 
 /**

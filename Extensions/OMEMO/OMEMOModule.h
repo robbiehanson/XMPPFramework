@@ -82,13 +82,20 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
                       elementId:(nullable NSString*)elementId;
 
 /**
- * Removes the device bundle for a device id. If you're removing a device completely it's important to update the device list as well.
+ * Remove a device from the remote XMPP server. Removes the bundle for each device. Fetches and removees the devices from the device list.
+ * The callbacks for removing a bundle (either success or failure) do not prevent the device list from being updated.
  *
- * @param deviceId remote deviceid
+ * Callbacks include:
+ * omemo:failedToRemoveDeviceIds:errorIq:elementId:
+ * omemo:removedBundleId:responseIq:outgoingIq:elementId:
+ * omemo:failedToRemoveBundleId:errorIq:outgoingIq:elementId:
+ * omemo:deviceListUpdate:fromJID:incomingElement:
+ *
+ * @param deviceIds remote deviceids
  * @param elementId XMPP elementid. If nil a random UUID will be used.
  */
-- (void) removeBundleForDevice:(uint32_t)deviceId
-                     elementId:(nullable NSString *)elementId;
+- (void) removeDeviceIds:(NSArray<NSNumber*>*)deviceIds
+               elementId:(nullable NSString *)elementId;
 
 /**
  In order to send a chat message, its <body> first has to be encrypted. The client MUST use fresh, randomly generated key/IV pairs with AES-128 in Galois/Counter Mode (GCM). For each intended recipient device, i.e. both own devices as well as devices associated with the contact, this key is encrypted using the corresponding long-standing axolotl session. Each encrypted payload key is tagged with the recipient device's ID. This is all serialized into a MessageElement.
@@ -132,6 +139,14 @@ failedToPublishDeviceIds:(NSArray<NSNumber*>*)deviceIds
       errorIq:(nullable XMPPIQ*)errorIq
    outgoingIq:(XMPPIQ*)outgoingIq;
 
+/** 
+ * Device removal failed. The element Id is not the true element id of the sent stanza. It's used to track against the elmeent Id passed in the remove device method.
+ */
+- (void)omemo:(OMEMOModule*)omemo
+failedToRemoveDeviceIds:(NSArray<NSNumber*>*)deviceIds
+      errorIq:(nullable XMPPIQ*)errorIq
+   elementId:(nullable NSString *)elementId;
+
 
 /**
  * In order to determine whether a given contact has devices that support OMEMO, the devicelist node in PEP is consulted. Devices MUST subscribe to 'urn:xmpp:omemo:0:devicelist' via PEP, so that they are informed whenever their contacts add a new device. They MUST cache the most up-to-date version of the devicelist.
@@ -170,17 +185,23 @@ failedToFetchBundleForDeviceId:(uint32_t)deviceId
       errorIq:(nullable XMPPIQ*)errorIq
    outgoingIq:(XMPPIQ*)outgoingIq;
 
-/** Removal succeeded*/
+/** 
+ * Removal succeeded. The element Id is not the true element id of the sent stanza. It's used to track against the elmeent Id passed in the remove device method.
+ */
 - (void)omemo:(OMEMOModule*)omem
 removedBundleId:(uint32_t)bundleId
-   responseIq:(XMPPIQ*)responseIq
-   outgoingIq:(XMPPIQ*)outgoingIq;
+   responseIq:(nullable XMPPIQ*)responseIq
+   outgoingIq:(XMPPIQ*)outgoingIq
+    elementId:(nullable NSString *)elementId;
 
-/** Bundle removal failed */
+/** 
+ * Bundle removal failed. The element Id is not the true element id of the sent stanza. It's used to track against the elmeent Id passed in the remove device method.
+ */
 - (void)omemo:(OMEMOModule*)omemo
 failedToRemoveBundleId:(uint32_t)bundleId
       errorIq:(nullable XMPPIQ*)errorIq
-   outgoingIq:(XMPPIQ*)outgoingIq;
+   outgoingIq:(XMPPIQ*)outgoingIq
+elementId:(nullable NSString *)elementId;
 
 /**
  * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement

@@ -8,5 +8,6 @@ xcuserdata
 DerivedData
 *.orig
 *.xccheckout
+*.xcscmblueprint
 
 Pods/
