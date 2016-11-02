@@ -81,12 +81,14 @@
     XCTAssertNil(error);
     XCTAssertNotNil(pubsub);
     
-    //__weak typeof(self) weakSelf = self;
+    __weak typeof(self) weakSelf = self;
     __weak typeof(XMPPMockStream) *weakStream = self.mockStream;
     self.mockStream.elementReceived = ^void(XMPPIQ *outgoingIq) {
+        //Fixes warning about retain cycle
+        typeof(self) self = weakSelf;
         NSLog(@"testFetchDeviceIds: %@", outgoingIq);
-        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"result" elementID:outgoingIq.elementID child:[pubsub copy]];
-        [responseIq addAttributeWithName:@"from" stringValue:[testJID bare]];
+        XCTAssertNil([[outgoingIq from] resource],"The to jid cannot have a resource. It needs to be a bare JID");
+        XMPPIQ *responseIq = [XMPPIQ iqWithType:@"result" to:[outgoingIq from] elementID:outgoingIq.elementID child:[pubsub copy]];
         [weakStream fakeResponse:responseIq];
     };
     

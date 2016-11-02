@@ -114,6 +114,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         }
         
         XMPPJID *bareJID = [[responseIq from] bareJID];
+        if (bareJID == nil) {
+            // Normal iq responses to have a from attribute. Getting the from attrirbute from the outgoing to attribute.
+            // Should always be the account bare jid.
+            bareJID = [[[info element] to] bareJID];
+        }
         [weakMulticast omemo:weakSelf deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
         [weakSelf processIncomingDeviceIds:devices fromJID:bareJID];
     }];
@@ -164,7 +169,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
         NSString *eid = [self fixElementId:elementId];
-        XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:deviceId jid:jid elementId:eid xmlNamespace:self.xmlNamespace];
+        XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:deviceId jid:jid.bareJID elementId:eid xmlNamespace:self.xmlNamespace];
         [self.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
             if (!responseIq || [responseIq isErrorIQ]) {
                 // timeout

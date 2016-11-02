@@ -27,7 +27,7 @@
     NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
     [pubsub addChild:items];
     
-    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid elementID:elementId];
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:jid.bareJID elementID:elementId];
     [iq addChild:pubsub];
     return iq;
 }
