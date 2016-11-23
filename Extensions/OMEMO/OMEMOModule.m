@@ -99,8 +99,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if (!jid) { return; }
     __weak typeof(self) weakSelf = self;
     __weak id weakMulticast = multicastDelegate;
+    __block BOOL isOurJID = [self.xmppStream.myJID isEqualToJID:jid options:XMPPJIDCompareBare];
     [self fetchDeviceIdsForJID:jid elementId:elementId completion:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
-        if (!responseIq || [responseIq isErrorIQ]) {
+        // If we get an error response and this is our jid then we should process as if it's an empty device list.
+        if ((!responseIq || [responseIq isErrorIQ]) && !isOurJID) {
             // timeout
             XMPPLogWarn(@"fetchDeviceIdsForJID error: %@ %@", info.element, responseIq);
             [weakMulticast omemo:weakSelf failedToFetchDeviceIdsForJID:jid errorIq:responseIq outgoingIq:info.element];
