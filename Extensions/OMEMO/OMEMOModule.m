@@ -197,20 +197,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     __weak id weakMulticast = multicastDelegate;
     [self performBlock:^{
         
-        [deviceIds enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *eid = [weakSelf fixElementId:nil];
-            XMPPIQ *iq = [XMPPIQ omemo_iqRemoveBundleForDeviceId:obj elementId:eid xmlNamespace:self.xmlNamespace];
-            [weakSelf.tracker addElement:iq block:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
-                if (!responseIq || [responseIq isErrorIQ]) {
-                    [weakMulticast omemo:weakSelf failedToRemoveBundleId:obj.unsignedIntValue errorIq:responseIq outgoingIq:iq elementId:elementId];
-                } else {
-                    [weakMulticast omemo:weakSelf removedBundleId:obj.unsignedIntValue responseIq:responseIq outgoingIq:iq elementId:elementId];
-                }
-            } timeout:30];
-            [xmppStream sendElement:iq];
-        }];
-        
-        //group notify all trackers are done from remove bundles
         [weakSelf fetchDeviceIdsForJID:weakSelf.xmppStream.myJID elementId:nil completion:^(XMPPIQ *responseIq, id<XMPPTrackingInfo> info) {
             if (!responseIq || [responseIq isErrorIQ]) {
                 // timeout

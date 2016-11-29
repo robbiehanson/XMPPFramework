@@ -185,24 +185,6 @@ failedToFetchBundleForDeviceId:(uint32_t)deviceId
       errorIq:(nullable XMPPIQ*)errorIq
    outgoingIq:(XMPPIQ*)outgoingIq;
 
-/** 
- * Removal succeeded. The element Id is not the true element id of the sent stanza. It's used to track against the elmeent Id passed in the remove device method.
- */
-- (void)omemo:(OMEMOModule*)omem
-removedBundleId:(uint32_t)bundleId
-   responseIq:(nullable XMPPIQ*)responseIq
-   outgoingIq:(XMPPIQ*)outgoingIq
-    elementId:(nullable NSString *)elementId;
-
-/** 
- * Bundle removal failed. The element Id is not the true element id of the sent stanza. It's used to track against the elmeent Id passed in the remove device method.
- */
-- (void)omemo:(OMEMOModule*)omemo
-failedToRemoveBundleId:(uint32_t)bundleId
-      errorIq:(nullable XMPPIQ*)errorIq
-   outgoingIq:(XMPPIQ*)outgoingIq
-elementId:(nullable NSString *)elementId;
-
 /**
  * Incoming MessageElement payload, keyData, and IV. If no payload it's a KeyTransportElement
 - (void)omemo:(OMEMOModule*)omemo
