@@ -1,3 +1,4 @@
+
 //
 //  OMEMOModule.m
 //  Pods
@@ -13,6 +14,8 @@
 #import "XMPPMessage+OMEMO.h"
 #import "XMPPIDTracker.h"
 #import "XMPPLogging.h"
+#import "XMPPMessage+XEP_0280.h"
+
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 @interface OMEMOModule()
@@ -296,7 +299,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         [self processIncomingDeviceIds:deviceIds fromJID:bareJID];
         return;
     }
-    NSXMLElement *omemo = [message omemo_encryptedElement:self.xmlNamespace];
+    
+    XMPPMessage *possibleOMEMOMessage = message;
+    if ([message isMessageCarbon]) {
+        possibleOMEMOMessage = [message messageCarbonForwardedMessage];
+    }
+    
+    NSXMLElement *omemo = [possibleOMEMOMessage omemo_encryptedElement:self.xmlNamespace];
     if (omemo) {
         uint32_t deviceId = [omemo omemo_senderDeviceId];
         NSArray<OMEMOKeyData*>* keyData = [omemo omemo_keyData];
