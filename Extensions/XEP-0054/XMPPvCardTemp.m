@@ -322,7 +322,17 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 - (void)clearTelecomsAddresses { }
 
 
-- (NSArray *)emailAddresses { return nil; }
+- (NSArray *)emailAddresses {
+    NSMutableArray *result = [NSMutableArray new];
+    NSArray *emails = [self elementsForName:@"EMAIL"];
+    for (NSXMLElement *email in emails) {
+        XMPPvCardTempEmail *vCardTempEmail = [XMPPvCardTempEmail vCardEmailFromElement:email];
+        [result addObject:vCardTempEmail];
+    }
+        
+    return result;
+}
+
 - (void)addEmailAddress:(XMPPvCardTempEmail *)email { }
 - (void)removeEmailAddress:(XMPPvCardTempEmail *)email { }
 - (void)setEmailAddresses:(NSArray *)emails { }
