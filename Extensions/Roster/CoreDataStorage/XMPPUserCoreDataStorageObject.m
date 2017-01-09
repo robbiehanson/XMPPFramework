@@ -297,17 +297,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		if ([resource priority] >= 0)
 		{
 			self.primaryResource = resource;
-			
-			if (resource.intShow >= 3)
-				self.section = 0;
-			else
-				self.section = 1;
+            self.section = resource.intShow;
 		}
 	}
 	
 	if (self.primaryResource == nil)
 	{
-		self.section = 2;
+		self.section = 4;
 	}
 }
 
