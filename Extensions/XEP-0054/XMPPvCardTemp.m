@@ -333,10 +333,31 @@ NSString *const kXMPPvCardTempElement = @"vCard";
     return result;
 }
 
-- (void)addEmailAddress:(XMPPvCardTempEmail *)email { }
-- (void)removeEmailAddress:(XMPPvCardTempEmail *)email { }
-- (void)setEmailAddresses:(NSArray *)emails { }
-- (void)clearEmailAddresses { }
+- (void)addEmailAddress:(XMPPvCardTempEmail *)email {
+    [self addChild:email];
+}
+
+- (void)removeEmailAddress:(XMPPvCardTempEmail *)email {
+    NSArray *emailElements = [self elementsForName:@"EMAIL"];
+    for (NSXMLElement *element in emailElements) {
+        XMPPvCardTempEmail *vCardTempEmail = [XMPPvCardTempEmail vCardEmailFromElement:[element copy]];
+        if ([vCardTempEmail.userid isEqualToString:email.userid]) {
+            NSUInteger index = [[self children] indexOfObject:element];
+            [self removeChildAtIndex:index];
+        }
+    }
+
+}
+
+- (void)setEmailAddresses:(NSArray *)emails {
+    for (XMPPvCardTempEmail *email in emails) {
+        [self addEmailAddress:email];
+    }
+}
+
+- (void)clearEmailAddresses {
+    [self removeElementsForName:@"EMAIL"];
+}
 
 
 - (XMPPJID *)jid {
