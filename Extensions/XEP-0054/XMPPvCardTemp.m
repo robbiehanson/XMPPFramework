@@ -350,6 +350,7 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 }
 
 - (void)setEmailAddresses:(NSArray *)emails {
+    [self clearEmailAddresses];
     for (XMPPvCardTempEmail *email in emails) {
         [self addEmailAddress:email];
     }
