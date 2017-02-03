@@ -1090,6 +1090,7 @@ enum XMPPRoomState
     else if ([message isGroupChatMessageWithSubject])
     {
         roomSubject = [message subject];
+        [multicastDelegate xmppRoomDidChangeSubject:self];
     }
 	else
 	{
