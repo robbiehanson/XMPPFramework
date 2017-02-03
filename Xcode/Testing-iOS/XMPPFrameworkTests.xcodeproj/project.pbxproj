@@ -274,7 +274,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0641E7F01A0D0D7EE9AA2ED6 /* Pods-XMPPFrameworkTests.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -326,7 +325,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AE993B61B8D33F0468A9B133 /* Pods-XMPPFrameworkTests.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
