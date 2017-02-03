@@ -211,8 +211,7 @@ enum XMPPStreamConfig
 		[self commonInit];
 		
 		// Initialize socket
-		asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
-        asyncSocket.IPv4PreferredOverIPv6 = !preferIPv6;
+        asyncSocket = [self newSocket];
 	}
 	return self;
 }
@@ -1282,8 +1281,7 @@ enum XMPPStreamConfig
 		state = STATE_XMPP_CONNECTING;
 		
 		// Initailize socket
-		asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
-        asyncSocket.IPv4PreferredOverIPv6 = !preferIPv6;
+        asyncSocket = [self newSocket];
 		
 		NSError *connectErr = nil;
 		result = [asyncSocket connectToAddress:remoteAddr error:&connectErr];
@@ -5044,6 +5042,13 @@ enum XMPPStreamConfig
 - (NSString *)generateUUID
 {
 	return [[self class] generateUUID];
+}
+
+/** Allocates and configures a new socket */
+- (GCDAsyncSocket*) newSocket {
+    GCDAsyncSocket *socket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
+    socket.IPv4PreferredOverIPv6 = !self.preferIPv6;
+    return socket;
 }
 
 @end
