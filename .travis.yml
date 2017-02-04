@@ -17,7 +17,6 @@ install:
   - bundle install
   - bundle exec pod install
   - cd ../../
-  - pod install --project-directory=Xcode/Testing-macOS
 
 before_script:
   - set -o pipefail
