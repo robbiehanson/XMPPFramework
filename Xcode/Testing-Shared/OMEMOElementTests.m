@@ -147,7 +147,7 @@
  <encrypted xmlns='urn:xmpp:omemo:0'>
   <header sid='27183'>
     <key rid='31415'>BASE64ENCODED...</key>
-    <key rid='12321'>BASE64ENCODED...</key>
+    <key prekey="true" rid='12321'>BASE64ENCODED...</key>
     <!-- ... -->
     <iv>BASE64ENCODED...</iv>
   </header>
@@ -158,7 +158,7 @@
     <encrypted xmlns='%@'> \
     <header sid='27183'> \
     <key rid='31415'>MzE0MTU=</key> \
-    <key rid='12321'>MTIzMjE=</key> \
+    <key prekey=\"true\" rid='12321'>MTIzMjE=</key> \
     <iv>aXY=</iv> \
     </header> \
     </encrypted> \
@@ -171,8 +171,8 @@
     NSData *keyData1 = [[NSData alloc] initWithBase64EncodedString:key1 options:0];
     NSData *keyData2 = [[NSData alloc] initWithBase64EncodedString:key2 options:0];
     NSData *ivData = [[NSData alloc] initWithBase64EncodedString:iv options:0];
-    NSArray<OMEMOKeyData*> *keyData = @[[[OMEMOKeyData alloc] initWithDeviceId:31415 data:keyData1],
-                         [[OMEMOKeyData alloc] initWithDeviceId:12321 data:keyData2]];
+    NSArray<OMEMOKeyData*> *keyData = @[[[OMEMOKeyData alloc] initWithDeviceId:31415 data:keyData1 isPreKey:NO],
+                         [[OMEMOKeyData alloc] initWithDeviceId:12321 data:keyData2 isPreKey:YES]];
     uint32_t senderDeviceId = 27183;
     NSXMLElement *testElement = [NSXMLElement omemo_keyTransportElementWithKeyData:keyData iv:ivData senderDeviceId:senderDeviceId xmlNamespace:self.ns];
     
@@ -187,8 +187,10 @@
     [keyData enumerateObjectsUsingBlock:^(OMEMOKeyData * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         XCTAssertEqualObjects(obj.data, expectedElementKeyData[idx].data);
         XCTAssertEqual(obj.deviceId, expectedElementKeyData[idx].deviceId);
+        XCTAssertEqual(obj.isPreKey, expectedElementKeyData[idx].isPreKey);
         XCTAssertEqualObjects(obj.data, testElementKeyData[idx].data);
         XCTAssertEqual(obj.deviceId, testElementKeyData[idx].deviceId);
+        XCTAssertEqual(obj.isPreKey, testElementKeyData[idx].isPreKey);
     }];
 
     XCTAssertNil([expectedElement omemo_payload]);

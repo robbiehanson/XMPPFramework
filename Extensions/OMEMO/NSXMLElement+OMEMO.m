@@ -48,8 +48,9 @@
         if (b64) {
             data = [[NSData alloc] initWithBase64EncodedString:b64 options:NSDataBase64DecodingIgnoreUnknownCharacters];
         }
+        BOOL isPreKey = [obj attributeBoolValueForName:@"prekey"];
         if (rid > 0 && data) {
-            OMEMOKeyData *keyData = [[OMEMOKeyData alloc] initWithDeviceId:rid data:data];
+            OMEMOKeyData *keyData = [[OMEMOKeyData alloc] initWithDeviceId:rid data:data isPreKey:isPreKey];
             [keyDataArray addObject:keyData];
         }
     }];
@@ -93,6 +94,9 @@
     [keyData enumerateObjectsUsingBlock:^(OMEMOKeyData * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSXMLElement *keyElement = [NSXMLElement elementWithName:@"key" stringValue:[obj.data base64EncodedStringWithOptions:0]];
         [keyElement addAttributeWithName:@"rid" unsignedIntegerValue:obj.deviceId];
+        if (obj.isPreKey) {
+            [keyElement addAttributeWithName:@"prekey" boolValue:YES];
+        }
         [headerElement addChild:keyElement];
     }];
     NSXMLElement *ivElement = [NSXMLElement elementWithName:@"iv" stringValue:[iv base64EncodedStringWithOptions:0]];

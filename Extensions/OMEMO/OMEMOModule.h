@@ -24,8 +24,8 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
 @protocol OMEMOStorageDelegate;
 
 /**
- *  XEP-xxxx OMEMO Encryption
- *  https://conversations.im/xeps/multi-end.html
+ *  XEP-0384 OMEMO Encryption
+ *  http://xmpp.org/extensions/xep-0384.html
  *
  *  This specification defines a protocol for end-to-end encryption in one-on-one chats that may have multiple clients per account.
  */

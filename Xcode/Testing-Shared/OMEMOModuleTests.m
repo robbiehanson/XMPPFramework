@@ -239,8 +239,8 @@
     NSData *ivData = [[NSData alloc] initWithBase64EncodedString:iv options:0];
     NSData *payloadData = [[NSData alloc] initWithBase64EncodedString:payload options:0];
     
-    NSArray *keyData = @[[[OMEMOKeyData alloc] initWithDeviceId:31415 data:keyData1],
-    [[OMEMOKeyData alloc] initWithDeviceId:12321 data:keyData2]];
+    NSArray *keyData = @[[[OMEMOKeyData alloc] initWithDeviceId:31415 data:keyData1 isPreKey:NO],
+    [[OMEMOKeyData alloc] initWithDeviceId:12321 data:keyData2 isPreKey:YES]];
     
     [self.omemoModule sendKeyData:keyData iv:ivData toJID:remoteJID payload:payloadData elementId:nil];
     

@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
   <encrypted xmlns='urn:xmpp:omemo:0'>
     <header sid='27183'>
       <key rid='31415'>BASE64ENCODED...</key>
-      <key rid='12321'>BASE64ENCODED...</key>
+      <key prekey="true" rid='12321'>BASE64ENCODED...</key>
       <!-- ... -->
       <iv>BASE64ENCODED...</iv>
     </header>

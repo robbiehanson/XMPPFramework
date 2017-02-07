@@ -16,12 +16,14 @@
 }
 
 - (instancetype) initWithDeviceId:(uint32_t)deviceId
-                             data:(NSData*)data {
+                             data:(NSData*)data
+                         isPreKey:(BOOL)isPreKey {
     NSParameterAssert(deviceId != 0);
     NSParameterAssert(data.length > 0);
     if (self = [super init]) {
         _deviceId = deviceId;
         _data = [data copy];
+        _isPreKey = isPreKey;
     }
     return self;
 }
