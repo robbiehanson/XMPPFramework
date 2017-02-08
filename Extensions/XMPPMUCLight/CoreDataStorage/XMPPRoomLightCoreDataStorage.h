@@ -6,8 +6,8 @@
 //  Copyright © 2016 Inaka. All rights reserved.
 //
 
-#import <XMPPFramework/XMPPFramework.h>
-#import <XMPPFramework/XMPPCoreDataStorage.h>
+#import "XMPP.h"
+#import "XMPPCoreDataStorage.h"
 #import "XMPPRoomLight.h"
 
 @interface XMPPRoomLightCoreDataStorage : XMPPCoreDataStorage <XMPPRoomLightStorage>
