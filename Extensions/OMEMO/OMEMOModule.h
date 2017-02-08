@@ -4,6 +4,20 @@
 //
 //  Created by Chris Ballinger on 4/21/16.
 //
+//  XEP-0384: OMEMO Encryption
+//  https://xmpp.org/extensions/xep-0384.html
+//
+//  This specification defines a protocol for end-to-end encryption
+//  in one-on-one chats that may have multiple clients per account.
+//
+//  To use this module, you must also hook up a library compatible with
+//  the Double Ratchet algorithm [1] and X3DH [2]. You can use the
+//  SignalProtocol-ObjC [3] library but beware that it is GPL so cannot
+//  be used in closed source apps.
+//
+//  1. https://en.wikipedia.org/wiki/Double_Ratchet_Algorithm
+//  2. https://whispersystems.org/docs/specifications/x3dh/
+//  3. https://github.com/ChatSecure/SignalProtocol-ObjC
 //
 
 #import <Foundation/Foundation.h>
@@ -15,9 +29,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
-    /** Uses SignalProtocol and compatible with the latest Conversations versions as of October 1, 2016. */
+    /** Uses "eu.siacs.conversations.axolotl" namespace and compatible with the latest Conversations and ChatSecure versions as of Feb 8, 2017.  */
     OMEMOModuleNamespaceConversationsLegacy,
-    /** Crypto protocol still in discussion. Do not use in production yet! See https://github.com/xsf/xeps/pull/251 */
+    /** Uses "urn:xmpp:omemo:0" namespace. XEP is still experimental. Do not use in production yet as it may change! See https://xmpp.org/extensions/xep-0384.html */
     OMEMOModuleNamespaceOMEMO
 };
 

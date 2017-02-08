@@ -1,10 +1,14 @@
 //
 //  OMEMOKeyData.h
-//  Pods
+//  XMPPFramework
 //
 //  Created by Chris Ballinger on 10/10/16.
 //
+//  XEP-0384: OMEMO Encryption
+//  https://xmpp.org/extensions/xep-0384.html
 //
+//  This specification defines a protocol for end-to-end encryption
+//  in one-on-one chats that may have multiple clients per account.
 
 #import <Foundation/Foundation.h>
 #import <stdint.h>
