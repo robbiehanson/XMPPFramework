@@ -417,7 +417,7 @@
 		XMPPLogVerbose(@"%@: Cannot resume stream: invalid lastDisconnect - appears to be in future", THIS_FILE);
 		return NO;
 	}
-	if ((uint32_t)elapsed > timeout) // too much time has elapsed
+	if (timeout > 0 && (uint32_t)elapsed > timeout) // too much time has elapsed
 	{
 		XMPPLogVerbose(@"%@: Cannot resume stream: elapsed(%u) > timeout(%u)", THIS_FILE, (uint32_t)elapsed, timeout);
 		return NO;
