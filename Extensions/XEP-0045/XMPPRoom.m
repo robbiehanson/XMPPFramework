@@ -821,7 +821,7 @@ enum XMPPRoomState
 #pragma mark Messages
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)inviteMessageStr
+- (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)invitationMessage
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
@@ -836,14 +836,8 @@ enum XMPPRoomState
 		//     </invite>
 		//   </x>
 		// </message>
-		
-		NSXMLElement *invite = [NSXMLElement elementWithName:@"invite"];
-		[invite addAttributeWithName:@"to" stringValue:[jid full]];
-		
-		if ([inviteMessageStr length] > 0)
-		{
-			[invite addChild:[NSXMLElement elementWithName:@"reason" stringValue:inviteMessageStr]];
-		}
+
+		DDXMLElement *invite = [self inviteElementWithJid:jid invitationMessage:invitationMessage];
 		
 		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
 		[x addChild:invite];
@@ -860,6 +854,58 @@ enum XMPPRoomState
 		block();
 	else
 		dispatch_async(moduleQueue, block);
+}
+
+- (void)inviteUsers:(NSArray<XMPPJID *> *)jids withMessage:(NSString *)invitationMessage
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        XMPPLogTrace();
+
+        // <message to='darkcave@chat.shakespeare.lit'>
+        //   <x xmlns='http://jabber.org/protocol/muc#user'>
+        //     <invite to='hecate@shakespeare.lit'>
+        //       <reason>
+        //         Invitation message
+        //       </reason>
+        //     </invite>
+		//     <invite to='<invite to='bard@shakespeare.lit'/>'>
+		//       <reason>
+		//         Invitation message
+		//       </reason>
+		//     </invite>
+        //   </x>
+        // </message>
+
+        NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
+        
+        for (XMPPJID *jid in jids) {
+			DDXMLElement *invite = [self inviteElementWithJid:jid invitationMessage:invitationMessage];
+			[x addChild:invite];
+        }
+        
+        XMPPMessage *message = [XMPPMessage message];
+        [message addAttributeWithName:@"to" stringValue:[roomJID full]];
+        [message addChild:x];
+        
+        [xmppStream sendElement:message];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (DDXMLElement *)inviteElementWithJid:(XMPPJID *)jid invitationMessage:(NSString *)invitationMessage {
+	NSXMLElement *invite = [NSXMLElement elementWithName:@"invite"];
+	[invite addAttributeWithName:@"to" stringValue:[jid full]];
+
+	if ([invitationMessage length] > 0) {
+		[invite addChild:[NSXMLElement elementWithName:@"reason" stringValue:invitationMessage]];
+	}
+	return invite;
 }
 
 - (void)sendMessage:(XMPPMessage *)message
