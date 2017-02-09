@@ -491,7 +491,7 @@ enum XMPPRoomState
     NSXMLElement *subject = [NSXMLElement elementWithName:@"subject" stringValue:newRoomSubject];
     
     XMPPMessage *message = [XMPPMessage message];
-    [message addAttributeWithName:@"from" stringValue:[myRoomJID full]];
+    [message addAttributeWithName:@"from" stringValue:[xmppStream.myJID full]];
     [message addChild:subject];
     
     [self sendMessage:message];
