@@ -869,11 +869,11 @@ enum XMPPRoomState
         //         Invitation message
         //       </reason>
         //     </invite>
-		//     <invite to='<invite to='bard@shakespeare.lit'/>'>
-		//       <reason>
-		//         Invitation message
-		//       </reason>
-		//     </invite>
+        //     <invite to='<invite to='bard@shakespeare.lit'/>'>
+        //       <reason>
+        //         Invitation message
+        //       </reason>
+        //     </invite>
         //   </x>
         // </message>
 
