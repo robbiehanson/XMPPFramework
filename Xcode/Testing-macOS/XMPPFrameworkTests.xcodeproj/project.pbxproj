@@ -21,6 +21,8 @@
 		D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */; };
 		D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */; };
 		D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */; };
+		E0B3E92E1D34219100EAD41B /* XMPPTBRAuthenticationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B3E92C1D34219100EAD41B /* XMPPTBRAuthenticationTests.m */; };
+		E0B3E92F1D34219100EAD41B /* XMPPTBReconnectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B3E92D1D34219100EAD41B /* XMPPTBReconnectionTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +45,8 @@
 		D973A0A11D2F1EF60096F3ED /* XMPPSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPSwift.swift; path = "../../Testing-Shared/XMPPSwift.swift"; sourceTree = "<group>"; };
 		D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPURITests.m; path = "../../Testing-Shared/XMPPURITests.m"; sourceTree = "<group>"; };
 		D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
+		E0B3E92C1D34219100EAD41B /* XMPPTBRAuthenticationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPTBRAuthenticationTests.m; path = "../../Testing-Shared/XMPPTBRAuthenticationTests.m"; sourceTree = "<group>"; };
+		E0B3E92D1D34219100EAD41B /* XMPPTBReconnectionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPTBReconnectionTests.m; path = "../../Testing-Shared/XMPPTBReconnectionTests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +83,8 @@
 		D973A08F1D2F1EB10096F3ED /* XMPPFrameworkTests */ = {
 			isa = PBXGroup;
 			children = (
+				E0B3E92C1D34219100EAD41B /* XMPPTBRAuthenticationTests.m */,
+				E0B3E92D1D34219100EAD41B /* XMPPTBReconnectionTests.m */,
 				D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */,
 				D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */,
 				D973A0981D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m */,
@@ -119,6 +125,7 @@
 				D973A08C1D2F1EB10096F3ED /* Resources */,
 				2EA6C37B1D758323ECB52066 /* [CP] Embed Pods Frameworks */,
 				641866745039D77DBEB0D018 /* [CP] Copy Pods Resources */,
+				85BCC75C994B829C73C56A4A /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -215,6 +222,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		85BCC75C994B829C73C56A4A /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -222,6 +244,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0B3E92F1D34219100EAD41B /* XMPPTBReconnectionTests.m in Sources */,
 				D973A0A41D2F1EF60096F3ED /* CapabilitiesHashingTest.m in Sources */,
 				D973A0A91D2F1EF60096F3ED /* XMPPMUCLightTests.m in Sources */,
 				D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */,
@@ -231,6 +254,7 @@
 				D973A0A81D2F1EF60096F3ED /* XMPPMockStream.m in Sources */,
 				D973A0AC1D2F1EF60096F3ED /* XMPPRoomLightTests.m in Sources */,
 				D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */,
+				E0B3E92E1D34219100EAD41B /* XMPPTBRAuthenticationTests.m in Sources */,
 				D973A0A71D2F1EF60096F3ED /* XMPPMessageArchiveManagementTests.m in Sources */,
 				D973A0A61D2F1EF60096F3ED /* XMPPHTTPFileUploadTests.m in Sources */,
 				D973A0AA1D2F1EF60096F3ED /* XMPPPushTests.swift in Sources */,

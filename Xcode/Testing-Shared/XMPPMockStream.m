@@ -22,6 +22,10 @@
     return YES;
 }
 
+- (BOOL)supportsTBRAuthentication{
+	return self.supportsTBR;
+}
+
 - (void)fakeMessageResponse:(XMPPMessage *) message {
     [self injectElement:message];
 }
@@ -32,6 +36,13 @@
 
 - (void)sendElement:(XMPPElement *)element {
     [super sendElement:element];
+	if(self.elementReceived) {
+		self.elementReceived(element);
+	}
+}
+
+- (void)sendAuthElement:(XMPPElement *)element {
+	[super sendAuthElement:element];
 	if(self.elementReceived) {
 		self.elementReceived(element);
 	}
