@@ -823,37 +823,7 @@ enum XMPPRoomState
 
 - (void)inviteUser:(XMPPJID *)jid withMessage:(NSString *)invitationMessage
 {
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		XMPPLogTrace();
-		
-		// <message to='darkcave@chat.shakespeare.lit'>
-		//   <x xmlns='http://jabber.org/protocol/muc#user'>
-		//     <invite to='hecate@shakespeare.lit'>
-		//       <reason>
-		//         Hey Hecate, this is the place for all good witches!
-		//       </reason>
-		//     </invite>
-		//   </x>
-		// </message>
-
-		DDXMLElement *invite = [self inviteElementWithJid:jid invitationMessage:invitationMessage];
-		
-		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
-		[x addChild:invite];
-		
-		XMPPMessage *message = [XMPPMessage message];
-		[message addAttributeWithName:@"to" stringValue:[roomJID full]];
-		[message addChild:x];
-		
-		[xmppStream sendElement:message];
-		
-	}};
-	
-	if (dispatch_get_specific(moduleQueueTag))
-		block();
-	else
-		dispatch_async(moduleQueue, block);
+    [self inviteUsers:@[jid] withMessage:invitationMessage];
 }
 
 - (void)inviteUsers:(NSArray<XMPPJID *> *)jids withMessage:(NSString *)invitationMessage
