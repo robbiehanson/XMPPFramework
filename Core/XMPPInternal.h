@@ -61,6 +61,13 @@ extern NSString *const XMPPStreamDidChangeMyJIDNotification;
 @property (nonatomic, readonly) dispatch_queue_t xmppQueue;
 @property (nonatomic, readonly) void *xmppQueueTag;
 
+/** 
+ * Returns the underlying socket for the stream.
+ * You shouldn't mess with this unless you really
+ * know what you're doing.
+ */
+@property (nonatomic, readonly) GCDAsyncSocket *asyncSocket;
+
 /**
  * Returns the current state of the xmppStream.
 **/

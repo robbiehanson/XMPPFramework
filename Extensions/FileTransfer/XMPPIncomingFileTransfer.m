@@ -377,10 +377,10 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
   NSXMLElement *si = iq.childElement;
   if (!si || ![si.xmlns isEqualToString:XMPPSINamespace]) return NO;
 
-  NSXMLElement *file = (DDXMLElement *) [si childAtIndex:0];
+  NSXMLElement *file = (NSXMLElement *) [si childAtIndex:0];
   if (!file || ![file.xmlns isEqualToString:XMPPSIProfileFileTransferNamespace]) return NO;
 
-  NSXMLElement *feature = (DDXMLElement *) [si childAtIndex:1];
+  NSXMLElement *feature = (NSXMLElement *) [si childAtIndex:1];
   return !(!feature || ![feature.xmlns isEqualToString:XMPPFeatureNegNamespace]);
 
   // Maybe there should be further verification, but I think this should be

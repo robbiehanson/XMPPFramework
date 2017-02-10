@@ -1,12 +1,26 @@
-osx_image: xcode7.3
+osx_image: xcode8.2
 language: objective-c
 
+before_install:
+  # Fix Travis  xcodebuild exited with 65 https://github.com/travis-ci/travis-ci/issues/6675#issuecomment-257964767
+  - export IOS_SIMULATOR_UDID=`instruments -s devices | grep -m 1 "iPhone 6 (10.2" | awk -F '[ ]' '{print $4}' | awk -F '[\[]' '{print $2}' | sed 's/.$//'`
+  - echo $IOS_SIMULATOR_UDID
+  - open -a "simulator" --args -CurrentDeviceUDID $IOS_SIMULATOR_UDID
+  - gem install cocoapods -v 1.1.0.rc.2 --no-rdoc --no-ri
+
 install:
-  - gem install cocoapods -v 1.0.1 --no-rdoc --no-ri
-  - pod repo update --silent
+  - cd Xcode/Testing-iOS
+  - bundle install
+  - bundle exec pod repo update --silent
+  - bundle exec pod install
+  - cd ../Testing-macOS
+  - bundle install
+  - bundle exec pod install
+  - cd ../../
+
+before_script:
+  - set -o pipefail
 
 script:
-  - pod install --project-directory=Xcode/Testing-iOS
-  - pod install --project-directory=Xcode/Testing-macOS
-  - xctool -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -arch x86_64 test
-  - xctool -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -arch x86_64 test
+  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
+  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c

@@ -19,7 +19,6 @@
 #import "XMPPDigestMD5Authentication.h"
 #import "XMPPSCRAMSHA1Authentication.h"
 #import "XMPPPlainAuthentication.h"
-#import "XMPPXFacebookPlatformAuthentication.h"
 #import "XMPPAnonymousAuthentication.h"
 #import "XMPPDeprecatedPlainAuthentication.h"
 #import "XMPPDeprecatedDigestAuthentication.h"
