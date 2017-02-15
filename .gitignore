@@ -11,3 +11,4 @@ DerivedData
 *.xcscmblueprint
 
 Pods/
+Carthage/
