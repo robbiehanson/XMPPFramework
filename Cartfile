@@ -1,3 +1,5 @@
 github "CocoaLumberjack/CocoaLumberjack" ~> 2.0
 github "robbiehanson/CocoaAsyncSocket" ~> 7.5.1
-github "robbiehanson/KissXML" ~> 5.1.2
+
+# github "robbiehanson/KissXML" ~> 5.1.2
+github "dodikk/KissXML" "6b142812532fb9fe7b6e0441f4df52df92549087"
