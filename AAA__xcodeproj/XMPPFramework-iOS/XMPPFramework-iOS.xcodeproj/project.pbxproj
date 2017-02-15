@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0D44BAEF1E537066000930E0 /* XMPPFramework-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D44BAED1E537066000930E0 /* XMPPFramework-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0D44BAEF1E537066000930E0 /* XMPPFramework.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D44BAED1E537066000930E0 /* XMPPFramework.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0D44BB0D1E5370ED000930E0 /* XMPP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D44BAF71E5370ED000930E0 /* XMPP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0D44BB0E1E5370ED000930E0 /* XMPPConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D44BAF81E5370ED000930E0 /* XMPPConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0D44BB0F1E5370ED000930E0 /* XMPPConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D44BAF91E5370ED000930E0 /* XMPPConstants.m */; };
@@ -69,8 +69,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0D44BAEA1E537066000930E0 /* XMPPFramework-iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "XMPPFramework-iOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0D44BAED1E537066000930E0 /* XMPPFramework-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPFramework-iOS.h"; sourceTree = "<group>"; };
+		0D44BAEA1E537066000930E0 /* XMPPFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XMPPFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D44BAED1E537066000930E0 /* XMPPFramework.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
 		0D44BAEE1E537066000930E0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D44BAF71E5370ED000930E0 /* XMPP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPP.h; sourceTree = "<group>"; };
 		0D44BAF81E5370ED000930E0 /* XMPPConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPConstants.h; sourceTree = "<group>"; };
@@ -155,7 +155,7 @@
 		0D44BAEB1E537066000930E0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0D44BAEA1E537066000930E0 /* XMPPFramework-iOS.framework */,
+				0D44BAEA1E537066000930E0 /* XMPPFramework.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -163,7 +163,7 @@
 		0D44BAEC1E537066000930E0 /* XMPPFramework-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				0D44BAED1E537066000930E0 /* XMPPFramework-iOS.h */,
+				0D44BAED1E537066000930E0 /* XMPPFramework.h */,
 				0D44BAEE1E537066000930E0 /* Info.plist */,
 			);
 			path = "XMPPFramework-iOS";
@@ -342,7 +342,7 @@
 				0D44BB521E537105000930E0 /* XMPPSCRAMSHA1Authentication.h in Headers */,
 				0D44BB6F1E537110000930E0 /* XMPPSRVResolver.h in Headers */,
 				0D44BB4A1E537105000930E0 /* XMPPDeprecatedDigestAuthentication.h in Headers */,
-				0D44BAEF1E537066000930E0 /* XMPPFramework-iOS.h in Headers */,
+				0D44BAEF1E537066000930E0 /* XMPPFramework.h in Headers */,
 				0D44BB121E5370ED000930E0 /* XMPPFramework.h in Headers */,
 				0D44BB4E1E537105000930E0 /* XMPPDigestMD5Authentication.h in Headers */,
 				0D44BB691E537110000930E0 /* GCDMulticastDelegate.h in Headers */,
@@ -387,7 +387,7 @@
 			);
 			name = "XMPPFramework-iOS";
 			productName = "XMPPFramework-iOS";
-			productReference = 0D44BAEA1E537066000930E0 /* XMPPFramework-iOS.framework */;
+			productReference = 0D44BAEA1E537066000930E0 /* XMPPFramework.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -582,7 +582,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.robbiehanson.XMPPFramework-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = XMPPFramework;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 3.0;
 			};
@@ -601,7 +601,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.robbiehanson.XMPPFramework-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = XMPPFramework;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 3.0;
 			};
