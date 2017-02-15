@@ -1,0 +1,3 @@
+github "CocoaLumberjack/CocoaLumberjack" ~> 2.0
+github "robbiehanson/CocoaAsyncSocket" ~> 7.5.1
+github "robbiehanson/KissXML" ~> 5.1.2
