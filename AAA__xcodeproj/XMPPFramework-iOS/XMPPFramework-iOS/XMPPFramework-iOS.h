@@ -16,4 +16,6 @@ FOUNDATION_EXPORT const unsigned char XMPPFramework_iOSVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <XMPPFramework_iOS/PublicHeader.h>
 
+#import <XMPPFramework_iOS/XMPP.h>
+
 
