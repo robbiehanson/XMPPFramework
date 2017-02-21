@@ -28,7 +28,10 @@ class XMPPPushTests: XCTestCase {
         let node = "yxs32uqsflafdk3iuqo"
         let enableStanza =  XMPPIQ.enableNotificationsElementWithJID(jid, node: node, options: nil)
         XCTAssertNotNil(enableStanza,"No Stanza")
-        
+
+        XCTAssertNotNil(enableStanza.attributeForName("id"), "No id attribute")
+        enableStanza.removeAttributeForName("id")
+
         /**
         <iq type="set">
             <enable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo"></enable>
@@ -43,7 +46,10 @@ class XMPPPushTests: XCTestCase {
         let options = ["secret":"eruio234vzxc2kla-91"]
         let enableStanza =  XMPPIQ.enableNotificationsElementWithJID(jid, node: node, options: options)
         XCTAssertNotNil(enableStanza,"No Stanza")
-        
+
+        XCTAssertNotNil(enableStanza.attributeForName("id"), "No id attribute")
+        enableStanza.removeAttributeForName("id")
+
         /**
         <iq type="set">
             <enable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo">
@@ -63,6 +69,10 @@ class XMPPPushTests: XCTestCase {
         let disableStanza = XMPPIQ.disableNotificationsElementWithJID(jid, node: node)
         XCTAssertNotNil(disableStanza)
         print("\(disableStanza.XMLString)")
+
+        XCTAssertNotNil(disableStanza.attributeForName("id"), "No id attribute")
+        disableStanza.removeAttributeForName("id")
+
         /**
         <iq type="set">
             <disable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo"></disable>
