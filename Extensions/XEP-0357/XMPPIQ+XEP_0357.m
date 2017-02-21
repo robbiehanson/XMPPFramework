@@ -9,6 +9,7 @@
 #import "XMPPIQ+XEP_0357.h"
 #import "XMPPJID.h"
 #import "NSXMLElement+XMPP.h"
+#import "XMPPStream.h"
 
 NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
 
@@ -38,7 +39,7 @@ NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
         [enableElement addChild:dataForm];
     }
     
-    return [self iqWithType:@"set" child:enableElement];
+    return [self iqWithType:@"set" elementID:[XMPPStream generateUUID] child:enableElement];
     
 }
 
@@ -49,7 +50,7 @@ NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
     if ([node length]) {
         [disableElement addAttributeWithName:@"node" stringValue:node];
     }
-    return [self iqWithType:@"set" child:disableElement];
+    return [self iqWithType:@"set" elementID:[XMPPStream generateUUID] child:disableElement];
 }
 
 @end
