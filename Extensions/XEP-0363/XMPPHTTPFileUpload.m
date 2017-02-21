@@ -7,6 +7,8 @@
 //
 
 #import "XMPPHTTPFileUpload.h"
+#import "XMPPStream.h"
+#import "NSXMLElement+XMPP.h"
 
 @implementation XMPPHTTPFileUpload
 

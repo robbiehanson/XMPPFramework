@@ -6,7 +6,7 @@
 //
 //
 
-#import <XMPPFramework/XMPPFramework.h>
+#import "XMPPMessage.h"
 
 typedef NS_ENUM(NSInteger, XMPPMessageStorage) {
     /** 

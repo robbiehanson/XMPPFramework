@@ -6,9 +6,9 @@
 //  Copyright © 2016 Inaka. All rights reserved.
 //
 
-#import <XMPPFramework/XMPPFramework.h>
 #import "XMPPSlot.h"
 #import "XMPPIDTracker.h"
+#import "XMPPModule.h"
 
 static NSString *const XMPPHTTPFileUploadNamespace = @"urn:xmpp:http:upload";
 
