@@ -24,13 +24,13 @@ class XMPPPushTests: XCTestCase {
     
     func testEnableStanzaWithoutOptions() {
         
-        let jid = XMPPJID.jidWithString("push-5.client.example")
+        let jid = XMPPJID(string: "push-5.client.example")
         let node = "yxs32uqsflafdk3iuqo"
-        let enableStanza =  XMPPIQ.enableNotificationsElementWithJID(jid, node: node, options: nil)
+        let enableStanza =  XMPPIQ.enableNotificationsElement(with: jid!, node: node, options: nil)
         XCTAssertNotNil(enableStanza,"No Stanza")
 
-        XCTAssertNotNil(enableStanza.attributeForName("id"), "No id attribute")
-        enableStanza.removeAttributeForName("id")
+        XCTAssertNotNil(enableStanza.attribute(forName: "id"), "No id attribute")
+        enableStanza.removeAttribute(forName: "id")
 
         /**
         <iq type="set">
@@ -38,23 +38,23 @@ class XMPPPushTests: XCTestCase {
         </iq>
         */
         let expected = "<iq type=\"set\"><enable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"></enable></iq>"
-        var expXml = NSXMLElement()
+        var expXml = XMLElement()
         do {
-            expXml = try NSXMLElement(XMLString: expected)
+            expXml = try XMLElement(xmlString: expected)
         } catch {
         }
-        XCTAssertEqual(expXml.XMLString, enableStanza.XMLString)
+        XCTAssertEqual(expXml.xmlString, enableStanza.xmlString)
     }
 
     func testEnableStanzaWithOptions() {
-        let jid = XMPPJID.jidWithString("push-5.client.example")
+        let jid = XMPPJID(string: "push-5.client.example")
         let node = "yxs32uqsflafdk3iuqo"
         let options = ["secret":"eruio234vzxc2kla-91"]
-        let enableStanza =  XMPPIQ.enableNotificationsElementWithJID(jid, node: node, options: options)
+        let enableStanza =  XMPPIQ.enableNotificationsElement(with: jid!, node: node, options: options)
         XCTAssertNotNil(enableStanza,"No Stanza")
 
-        XCTAssertNotNil(enableStanza.attributeForName("id"), "No id attribute")
-        enableStanza.removeAttributeForName("id")
+        XCTAssertNotNil(enableStanza.attribute(forName: "id"), "No id attribute")
+        enableStanza.removeAttribute(forName: "id")
 
         /**
         <iq type="set">
@@ -66,18 +66,18 @@ class XMPPPushTests: XCTestCase {
             </enable>
         </iq>
         */
-        XCTAssertTrue(enableStanza.XMLString == "<iq type=\"set\"><enable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"><x xmlns=\"jabber:x:data\"><field var=\"FORM_TYPE\"><value>http://jabber.org/protocol/pubsub#publish-options</value></field><field var=\"secret\"><value>eruio234vzxc2kla-91</value></field></x></enable></iq>","XML does not match \(enableStanza.XMLString)")
+        XCTAssertTrue(enableStanza.xmlString == "<iq type=\"set\"><enable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"><x xmlns=\"jabber:x:data\"><field var=\"FORM_TYPE\"><value>http://jabber.org/protocol/pubsub#publish-options</value></field><field var=\"secret\"><value>eruio234vzxc2kla-91</value></field></x></enable></iq>","XML does not match \(enableStanza.xmlString)")
     }
     
     func testDisableStanza() {
-        let jid = XMPPJID.jidWithString("push-5.client.example")
+        let jid = XMPPJID(string: "push-5.client.example")
         let node = "yxs32uqsflafdk3iuqo"
-        let disableStanza = XMPPIQ.disableNotificationsElementWithJID(jid, node: node)
+        let disableStanza = XMPPIQ.disableNotificationsElement(with: jid!, node: node)
         XCTAssertNotNil(disableStanza)
-        print("\(disableStanza.XMLString)")
+        print("\(disableStanza.xmlString)")
 
-        XCTAssertNotNil(disableStanza.attributeForName("id"), "No id attribute")
-        disableStanza.removeAttributeForName("id")
+        XCTAssertNotNil(disableStanza.attribute(forName: "id"), "No id attribute")
+        disableStanza.removeAttribute(forName: "id")
 
         /**
         <iq type="set">
@@ -85,11 +85,11 @@ class XMPPPushTests: XCTestCase {
         </iq>
         */
         let expected = "<iq type=\"set\"><disable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"></disable></iq>"
-        var expXml = NSXMLElement()
+        var expXml = XMLElement()
         do {
-            expXml = try NSXMLElement(XMLString: expected)
+            expXml = try XMLElement(xmlString: expected)
         } catch {
         }
-        XCTAssertEqual(disableStanza.XMLString, expXml.XMLString)
+        XCTAssertEqual(disableStanza.xmlString, expXml.xmlString)
     }
 }

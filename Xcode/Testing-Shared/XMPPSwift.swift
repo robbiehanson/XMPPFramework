@@ -23,7 +23,7 @@ class XMPPSwift: XCTestCase {
     }
     
     func testCreatingElement() {
-        let e = NSXMLElement()
+        let e = XMLElement()
         let element = XMPPElement()
         XCTAssertNotNil(e)
         XCTAssertNotNil(element)
