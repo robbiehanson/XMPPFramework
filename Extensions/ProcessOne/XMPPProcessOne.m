@@ -148,7 +148,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		
 		NSXMLElement *disable = [NSXMLElement elementWithName:@"disable" xmlns:@"p1:push"];
 		
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" child:disable];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[XMPPStream generateUUID] child:disable];
 		
 		[xmppStream sendElement:iq];
 		pushConfigurationSent = YES;
