@@ -135,7 +135,7 @@
 	}];
 }
 
-- (void) xmppMUCLight:(XMPPMUCLight *)sender didRequestBlockingList:(NSArray<DDXMLElement *> *)items forServiceNamed:(NSString *)serviceName{
+- (void) xmppMUCLight:(XMPPMUCLight *)sender didRequestBlockingList:(NSArray<NSXMLElement *> *)items forServiceNamed:(NSString *)serviceName{
 	XCTAssertEqual(items.count, 2);
 	XCTAssertEqualObjects(serviceName, @"muclight.test.com");
 	[self.delegateResponseExpectation fulfill];

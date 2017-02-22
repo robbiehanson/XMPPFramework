@@ -110,7 +110,7 @@
     OMEMOSignedPreKey *signedPreKey = [[OMEMOSignedPreKey alloc] initWithPreKeyId:1 publicKey:signedPreKeyPublicData signature:signedPreKeySignatureData];
     OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:31415 identityKey:identityKeyData signedPreKey:signedPreKey preKeys:preKeys];
     XMPPIQ *iq = [XMPPIQ omemo_iqPublishBundle:bundle elementId:@"announce2" xmlNamespace:self.ns];
-    XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    XCTAssertEqualObjects([iq XMLStringWithOptions:NSXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:NSXMLNodePrettyPrint]);
 }
 
 /**
@@ -140,7 +140,7 @@
     XCTAssertNil(error);
     XCTAssertNotNil(expectedElement);
     XMPPIQ *iq = [XMPPIQ omemo_iqFetchBundleForDeviceId:31415 jid:[XMPPJID jidWithString:@"juliet@capulet.lit"] elementId:@"fetch1" xmlNamespace:self.ns];
-    XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedElement XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    XCTAssertEqualObjects([iq XMLStringWithOptions:NSXMLNodePrettyPrint], [expectedElement XMLStringWithOptions:NSXMLNodePrettyPrint]);
 }
 
 /**
@@ -277,7 +277,7 @@
     OMEMOSignedPreKey *signedPreKey = [[OMEMOSignedPreKey alloc] initWithPreKeyId:1 publicKey:signedPreKeyPublicData signature:signedPreKeySignatureData];
     OMEMOBundle *bundle = [[OMEMOBundle alloc] initWithDeviceId:31415 identityKey:identityKeyData signedPreKey:signedPreKey preKeys:preKeys];
     XMPPIQ *iq = [XMPPIQ omemo_iqPublishBundle:bundle elementId:@"announce2" xmlNamespace:self.ns];
-    XCTAssertEqualObjects([iq XMLStringWithOptions:DDXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    XCTAssertEqualObjects([iq XMLStringWithOptions:NSXMLNodePrettyPrint], [expectedXML XMLStringWithOptions:NSXMLNodePrettyPrint]);
     
     OMEMOBundle *expectedBundle = [[XMPPIQ iqFromElement:expectedXML] omemo_bundle:self.ns];
     OMEMOBundle *bundle2 = [iq omemo_bundle:self.ns];
@@ -285,7 +285,7 @@
     XMPPIQ *expectedIQ = [XMPPIQ omemo_iqPublishBundle:expectedBundle elementId:@"eid" xmlNamespace:self.ns];
     XMPPIQ *bundle2iq = [XMPPIQ omemo_iqPublishBundle:bundle2 elementId:@"eid" xmlNamespace:self.ns];
     
-    XCTAssertEqualObjects([expectedIQ XMLStringWithOptions:DDXMLNodePrettyPrint], [bundle2iq XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    XCTAssertEqualObjects([expectedIQ XMLStringWithOptions:NSXMLNodePrettyPrint], [bundle2iq XMLStringWithOptions:NSXMLNodePrettyPrint]);
 }
 
 - (void) testFetchDeviceList {

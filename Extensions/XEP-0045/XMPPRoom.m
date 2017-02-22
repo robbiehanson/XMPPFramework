@@ -850,7 +850,7 @@ enum XMPPRoomState
         NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMPPMUCUserNamespace];
         
         for (XMPPJID *jid in jids) {
-			DDXMLElement *invite = [self inviteElementWithJid:jid invitationMessage:invitationMessage];
+			NSXMLElement *invite = [self inviteElementWithJid:jid invitationMessage:invitationMessage];
 			[x addChild:invite];
         }
         
@@ -868,7 +868,7 @@ enum XMPPRoomState
         dispatch_async(moduleQueue, block);
 }
 
-- (DDXMLElement *)inviteElementWithJid:(XMPPJID *)jid invitationMessage:(NSString *)invitationMessage {
+- (NSXMLElement *)inviteElementWithJid:(XMPPJID *)jid invitationMessage:(NSString *)invitationMessage {
 	NSXMLElement *invite = [NSXMLElement elementWithName:@"invite"];
 	[invite addAttributeWithName:@"to" stringValue:[jid full]];
 
