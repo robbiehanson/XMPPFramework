@@ -16,7 +16,7 @@
 	XMPPIDTracker *xmppIDTracker;
 }
 
-@property (strong, nonatomic) NSString *queryID;
+@property (readonly, nonatomic) NSString *queryID;
 
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet;
 - (void)retrieveFormFields;
