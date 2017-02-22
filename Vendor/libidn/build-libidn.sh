@@ -22,8 +22,8 @@
 ###########################################################################
 #  Choose your libidn version and your currently-installed iOS SDK version:
 #
-VERSION="1.25"
-SDKVERSION="6.0"
+VERSION="1.31"
+SDKVERSION=""
 #
 #
 ###########################################################################
@@ -34,7 +34,7 @@ SDKVERSION="6.0"
 
 # No need to change this since xcode build will only compile in the
 # necessary bits from the libraries we create
-ARCHS="i386 armv7 armv7s"
+ARCHS="i386 x86_64 armv7 armv7s arm64"
 
 DEVELOPER=`xcode-select -print-path`
 
@@ -68,7 +68,7 @@ if [ ! -e "${SRCDIR}/libidn-${VERSION}.tar.gz" ]; then
 	echo "Downloading libidn-${VERSION}.tar.gz"
     curl -LO http://ftp.gnu.org/gnu/libidn/libidn-${VERSION}.tar.gz
 else
-    
+
 	echo "Using libidn-${VERSION}.tar.gz"
 fi
 
@@ -88,22 +88,22 @@ set -e # back to regular "bail out on error" mode
 
 for ARCH in ${ARCHS}
 do
-	if [ "${ARCH}" == "i386" ];
+	if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]];
 	then
 		PLATFORM="iPhoneSimulator"
         EXTRA_CONFIG=""
-        EXTRA_CFLAGS=""
+        EXTRA_CFLAGS="-fembed-bitcode"
 	else
 		PLATFORM="iPhoneOS"
         EXTRA_CONFIG="--host=arm-apple-darwin10 --disable-asm"
-        EXTRA_CFLAGS="-DNO_ASM"
+        EXTRA_CFLAGS="-fembed-bitcode -DNO_ASM"
 	fi
 
 	mkdir -p "${INTERDIR}/${PLATFORM}${SDKVERSION}-${ARCH}.sdk"
 
 	./configure --disable-shared --enable-static ${EXTRA_CONFIG} \
     --prefix="${INTERDIR}/${PLATFORM}${SDKVERSION}-${ARCH}.sdk" \
-    CC="${CCACHE}${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/usr/bin/gcc -arch ${ARCH}" \
+    CC="${CCACHE}${DEVELOPER}/usr/bin/gcc -arch ${ARCH} -miphoneos-version-min=7.0" \
     LDFLAGS="$LDFLAGS -L${OUTPUTDIR}/lib" \
     CFLAGS="$CFLAGS ${EXTRA_CFLAGS} -I${OUTPUTDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk" \
     CPPFLAGS="$CPPFLAGS -I${OUTPUTDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
@@ -111,7 +111,7 @@ do
     # Build the application and install it to the fake SDK intermediary dir
     # we have set up. Make sure to clean up afterward because we will re-use
     # this source tree to cross-compile other targets.
-	make -j2
+	make -j8
 	make install
 	make clean
 done
@@ -125,7 +125,7 @@ OUTPUT_LIBS="libidn.a"
 for OUTPUT_LIB in ${OUTPUT_LIBS}; do
     INPUT_LIBS=""
     for ARCH in ${ARCHS}; do
-        if [ "${ARCH}" == "i386" ];
+        if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]];
         then
             PLATFORM="iPhoneSimulator"
         else
@@ -146,7 +146,7 @@ for OUTPUT_LIB in ${OUTPUT_LIBS}; do
 done
 
 for ARCH in ${ARCHS}; do
-    if [ "${ARCH}" == "i386" ];
+    if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]];
     then
         PLATFORM="iPhoneSimulator"
     else
@@ -161,7 +161,7 @@ for ARCH in ${ARCHS}; do
 done
 
 for ARCH in ${ARCHS}; do
-    if [ "${ARCH}" == "i386" ];
+    if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]];
     then
         PLATFORM="iPhoneSimulator"
     else

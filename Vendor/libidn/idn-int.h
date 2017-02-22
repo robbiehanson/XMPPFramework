@@ -1,5 +1,5 @@
 /* DO NOT EDIT! GENERATED AUTOMATICALLY! */
-/* Copyright (C) 2001-2002, 2004-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2002, 2004-2015 Free Software Foundation, Inc.
    Written by Paul Eggert, Bruno Haible, Sam Steingold, Peter Burwood.
    This file is part of gnulib.
 
@@ -39,8 +39,7 @@
    other system header files; just include the system's <stdint.h>.
    Ideally we should test __BIONIC__ here, but it is only defined after
    <sys/cdefs.h> has been included; hence test __ANDROID__ instead.  */
-#if defined __ANDROID__ \
-    && defined _SYS_TYPES_H_ && !defined _SSIZE_T_DEFINED_
+#if defined __ANDROID__ && defined _GL_INCLUDING_SYS_TYPES_H
 # include <stdint.h>
 #else
 
@@ -84,7 +83,7 @@
 /* <sys/types.h> defines some of the stdint.h types as well, on glibc,
    IRIX 6.5, and OpenBSD 3.8 (via <machine/types.h>).
    AIX 5.2 <sys/types.h> isn't needed and causes troubles.
-   MacOS X 10.4.6 <sys/types.h> includes <stdint.h> (which is us), but
+   Mac OS X 10.4.6 <sys/types.h> includes <stdint.h> (which is us), but
    relies on the system <stdint.h> definitions, so include
    <sys/types.h> after <stdint.h>.  */
 #if 1 && ! defined _AIX
