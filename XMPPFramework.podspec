@@ -36,7 +36,7 @@ Pod::Spec.new do |s|
     'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv',
     'ENABLE_BITCODE' => 'NO'
   }
-  s.dependency 'CocoaLumberjack', '~> 2.0'
+  s.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
   s.dependency 'CocoaAsyncSocket', '~> 7.5.1'
   s.dependency 'KissXML', '~> 5.2.0'
 end
