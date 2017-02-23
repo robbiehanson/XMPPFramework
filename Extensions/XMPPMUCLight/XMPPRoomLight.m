@@ -6,7 +6,7 @@
 //  Copyright © 2016 Inaka. All rights reserved.
 //
 
-#import "XMPPFramework/XMPPMessage+XEP0045.h"
+#import "XMPPMessage+XEP0045.h"
 #import "XMPPRoomLight.h"
 
 static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
