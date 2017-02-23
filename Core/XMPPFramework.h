@@ -13,8 +13,6 @@
 #import "XMPPParser.h"
 #import "XMPPPresence.h"
 #import "XMPPStream.h"
-#import "idn-int.h"
-#import "stringprep.h"
 #import "XMPPAnonymousAuthentication.h"
 #import "XMPPDeprecatedDigestAuthentication.h"
 #import "XMPPDeprecatedPlainAuthentication.h"

@@ -10,7 +10,6 @@
 #import "XMPPIncomingFileTransfer.h"
 #import "XMPPConstants.h"
 #import "XMPPLogging.h"
-#import "idn-int.h"
 #import "NSNumber+XMPP.h"
 #import "NSData+XMPP.h"
 
@@ -695,7 +694,7 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
 
         for (NSXMLElement *streamhost in streamhosts) {
           NSString *host = [streamhost attributeStringValueForName:@"host"];
-          uint16_t port = (gl_uint16_t) [streamhost attributeUInt32ValueForName:@"port"];
+          uint16_t port = [streamhost attributeUInt32ValueForName:@"port"];
 
           NSError *err;
           if (![_asyncSocket connectToHost:host onPort:port error:&err]) {
