@@ -1,3 +1,4 @@
+#include <unicode/utf8.h>
 #import <Foundation/Foundation.h>
 #import "XMPP.h"
 #import "XMPPRoomMessage.h"
@@ -316,4 +317,12 @@ static NSString *const XMPPMUCOwnerNamespace = @"http://jabber.org/protocol/muc#
 - (void)xmppRoom:(XMPPRoom *)sender didNotEditPrivileges:(XMPPIQ *)iqError;
 - (void)xmppRoomDidChangeSubject:(XMPPRoom *)sender;
 
+@end
+
+
+@interface NSString (EmojiExtension)
+/**
+ * Invoked before joining a room. It removes Emoji from desiredNickname.
+ **/
+- (NSString *)stringByRemovingEmoji;
 @end

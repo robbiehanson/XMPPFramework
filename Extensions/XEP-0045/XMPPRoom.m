@@ -270,7 +270,7 @@ enum XMPPRoomState
 		
 		// Check state and update variables
 		
-		if (![self preJoinWithNickname:desiredNickname])
+		if (![self preJoinWithNickname:[desiredNickname stringByRemovingEmoji]])
 		{
 			return;
 		}
@@ -1186,6 +1186,28 @@ enum XMPPRoomState
 		[item addAttributeWithName:@"jid" stringValue:[jid full]];
 	
 	return item;
+}
+
+@end
+
+
+@implementation NSString (EmojiExtension)
+
+- (NSString *)stringByRemovingEmoji {
+    NSData *d = [self dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
+    if(!d) return nil;
+    const char *buf = d.bytes;
+    unsigned int len = (unsigned int)[d length];
+    char *s = (char *)malloc(len);
+    unsigned int ii = 0, oi = 0; // in index, out index
+    UChar32 uc;
+    while (ii < len) {
+        U8_NEXT_UNSAFE(buf, ii, uc);
+        if(0x2100 <= uc && uc <= 0x26ff) continue;
+        if(0x1d000 <= uc && uc <= 0x1f77f) continue;
+        U8_APPEND_UNSAFE(s, oi, uc);
+    }
+    return [[NSString alloc] initWithBytesNoCopy:s length:oi encoding:NSUTF8StringEncoding freeWhenDone:YES];
 }
 
 @end
