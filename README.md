@@ -42,6 +42,27 @@ github "robbiehanson/XMPPFramework" ~> 3.7.0
 
 Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project.
 
+### Contributing
+
+Pull requests are welcome! If you are planning a larger feature, please open an issue first for community input. Please use modern Objective-C syntax, including nullability annotations and generics. Here's some tips to make the process go more smoothly:
+
+* Make sure to add any new files to the iOS, macOS, and tvOS targets for `XMPPFramework.framework` in `XMPPFramework.xcodeproj`, and ensure any applicable header files are set to public.
+* Please try to write your code in a way that's testable. Using `XMPPMockStream` makes testing pretty easy. Look at examples in `Testing-Shared` for inspiration.
+* You will need both CocoaPods and Carthage to work on tests. Run `carthage checkout` in the root of the repository, and `bundle install && bundle exec pod install` in the `Testing-iOS` and `Testing-macOS` folders.
+* Create your test files to the `Testing-Shared` folder, and then add them to the iOS, macOS, and tvOS targets in `Testing-Carthage/XMPPFrameworkTests.xcodeproj`, `Testing-macOS/XMPPFrameworkTests.xcworkspace` and `Testing-iOS/XMPPFrameworkTests.xcworkspace`.
+
+Looking to help but don't know where to start? 
+
+* A large portion of the framework is not yet annotated for nullability and generics. 
+* Adding more test coverage is always appreciated
+* Modernizing the old Examples projects
+
+#### Security Issues
+
+If you find a security problem, please do not open a public issue on GitHub. Instead, email one of the maintainers directly:
+
+* [chris@chatsecure.org](mailto:chris@chatsecure.org) [`GPG 50F7D255`](https://chatsecure.org/assets/pubkeys/50F7D255.asc)
+
 ### Wiki:
 For more info please take a look at the wiki.
 
