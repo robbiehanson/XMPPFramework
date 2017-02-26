@@ -2,7 +2,7 @@
 ![XMPPFramework](xmppframework.png)
 
 ## XMPPFramework
-[![Build Status](https://travis-ci.org/robbiehanson/XMPPFramework.svg?branch=master)](https://travis-ci.org/robbiehanson/XMPPFramework) [![Version Status](https://img.shields.io/cocoapods/v/XMPPFramework.svg?style=flat)](https://github.com/robbiehanson/XMPPFramework) [![Platform](https://img.shields.io/cocoapods/p/XMPPFramework.svg?style=flat)](https://cocoapods.org/?q=XMPPFramework) [![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-orange.svg?style=flat)](http://opensource.org/licenses/BSD-3-Clause)
+[![Build Status](https://travis-ci.org/robbiehanson/XMPPFramework.svg?branch=master)](https://travis-ci.org/robbiehanson/XMPPFramework) [![Version Status](https://img.shields.io/cocoapods/v/XMPPFramework.svg?style=flat)](https://github.com/robbiehanson/XMPPFramework) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Platform](https://img.shields.io/cocoapods/p/XMPPFramework.svg?style=flat)](https://cocoapods.org/?q=XMPPFramework) [![License (3-Clause BSD)](https://img.shields.io/badge/license-BSD%203--Clause-orange.svg?style=flat)](http://opensource.org/licenses/BSD-3-Clause)
 
 
 An XMPP Framework in Objective-C for the Mac and iOS development community.
@@ -37,7 +37,12 @@ import XMPPFramework      // swift
 To integrate XMPPFramework into your Xcode project using Carthage, specify it in your `Cartfile`:
 
 ```
-github "robbiehanson/XMPPFramework" ~> 3.7.0
+# ⚠️ Carthage support is currently experimental ⚠️
+# For now, use the master branch until a Carthage-compatible
+# tagged release is available.
+
+github "robbiehanson/XMPPFramework" "master"
+
 ```
 
 Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project.
