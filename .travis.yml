@@ -6,21 +6,22 @@ before_install:
   - export IOS_SIMULATOR_UDID=`instruments -s devices | grep -m 1 "iPhone 6 (10.2" | awk -F '[ ]' '{print $4}' | awk -F '[\[]' '{print $2}' | sed 's/.$//'`
   - echo $IOS_SIMULATOR_UDID
   - open -a "simulator" --args -CurrentDeviceUDID $IOS_SIMULATOR_UDID
-  - gem install cocoapods -v 1.1.0.rc.2 --no-rdoc --no-ri
 
 install:
-  - cd Xcode/Testing-iOS
+  - carthage checkout
+  - cd Xcode
   - bundle install
   - bundle exec pod repo update --silent
-  - bundle exec pod install
-  - cd ../Testing-macOS
-  - bundle install
-  - bundle exec pod install
-  - cd ../../
+  - bundle exec pod install --project-directory=Testing-iOS/
+  - bundle exec pod install --project-directory=Testing-macOS/
+  - cd ../
 
 before_script:
   - set -o pipefail
 
 script:
+  - xcodebuild -project XMPPFramework.xcodeproj -scheme "XMPPFramework (tvOS)" -sdk appletvsimulator -arch x86_64 build | xcpretty -c
+  - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
+  - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c
   - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
   - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c

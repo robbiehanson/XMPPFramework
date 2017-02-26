@@ -7,9 +7,6 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "XMPPSlot.h"
-#import "XMPPHTTPFileUpload.h"
-#import "XMPPStream.h"
 #import "XMPPMockStream.h"
 
 @interface XMPPHTTPFileUploadTests: XCTestCase

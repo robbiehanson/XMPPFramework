@@ -6,7 +6,7 @@
 //
 //
 
-#import <XMPPFramework/XMPPFramework.h>
+@import XMPPFramework;
 
 @interface XMPPMockStream : XMPPStream
 

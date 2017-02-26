@@ -8,8 +8,6 @@
 
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
-#import "XMPPvCardTempModule.h"
-#import "XMPPvCardCoreDataStorage.h"
 
 @interface XMPPvCardTests : XCTestCase
 @property (nonatomic, strong) XCTestExpectation *failureExpectation;

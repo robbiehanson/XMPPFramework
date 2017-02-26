@@ -7,7 +7,6 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "XMPPMessageArchiveManagement.h"
 #import "XMPPMockStream.h"
 
 @interface XMPPMessageArchiveManagementTests : XCTestCase <XMPPMessageArchiveManagementDelegate>

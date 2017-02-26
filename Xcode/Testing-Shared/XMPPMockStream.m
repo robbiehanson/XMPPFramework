@@ -7,7 +7,6 @@
 //
 
 #import "XMPPMockStream.h"
-#import "XMPPInternal.h"
 
 @implementation XMPPMockStream
 

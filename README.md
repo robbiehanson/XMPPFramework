@@ -12,7 +12,7 @@ XMPPFramework provides a core implementation of RFC-3920 (the XMPP standard), al
 
 ### Install
 
-The minimum deployment target is iOS 8.0 / macOS 10.9.
+The minimum deployment target is iOS 8.0 / macOS 10.9 / tvOS 9.0.
 
 #### CocoaPods
 
@@ -34,9 +34,13 @@ import XMPPFramework      // swift
 
 #### Carthage
 
-Carthage is currently not supported because it's blocking on the following dependencies:
+To integrate XMPPFramework into your Xcode project using Carthage, specify it in your `Cartfile`:
 
-* libidn: [Issue #3](https://github.com/chrisballinger/libidn-podspec/pull/3)
+```
+github "robbiehanson/XMPPFramework" ~> 3.7.0
+```
+
+Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project.
 
 ### Wiki:
 For more info please take a look at the wiki.

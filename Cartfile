@@ -1,8 +1,4 @@
 github "CocoaLumberjack/CocoaLumberjack" ~> 2.0
-github "robbiehanson/CocoaAsyncSocket" ~> 7.5.1
-
-# github "robbiehanson/KissXML" ~> 5.1.2
-# github "dodikk/KissXML" "6b142812532fb9fe7b6e0441f4df52df92549087"
-
-github "robbiehanson/KissXML" "d0d2c491488e952545bc44c89e63f24b2ecd09c4"
-github "chrisballinger/libidn-framework" "7fd825ccc768dac258a40a19049127adeced917e"
+github "robbiehanson/CocoaAsyncSocket" ~> 7.6.0
+github "robbiehanson/KissXML" ~> 5.2.0
+github "chrisballinger/libidn-framework" ~> 1.33.0
