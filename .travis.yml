@@ -8,7 +8,6 @@ before_install:
   - open -a "simulator" --args -CurrentDeviceUDID $IOS_SIMULATOR_UDID
 
 install:
-  - carthage checkout
   - cd Xcode
   - bundle install
   - bundle exec pod repo update --silent
@@ -20,10 +19,11 @@ before_script:
   - set -o pipefail
 
 script:
+  # Pods tests must be run first because Carthage breaks them for some reason: https://travis-ci.org/robbiehanson/XMPPFramework/builds/205417253#L2089
+  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
+  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c
+
+  - carthage checkout
   - xcodebuild -project XMPPFramework.xcodeproj -scheme "XMPPFramework (tvOS)" -sdk appletvsimulator -arch x86_64 build | xcpretty -c
   - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
   - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c
-  # WTF is going on here https://travis-ci.org/robbiehanson/XMPPFramework/builds/205417253#L2089
-  - rm -rf Carthage/
-  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
-  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" clean test | xcpretty -c
