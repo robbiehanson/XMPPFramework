@@ -8,10 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
-#import "XMPPRoomLight.h"
-#import "XMPPRoomLightCoreDataStorage.h"
-#import "XMPPRoomLightMessageCoreDataStorageObject.h"
-#import "XMPPJID.h"
+@import XMPPFramework;
 
 @interface XMPPRoomLightCoreDataStorageTests : XCTestCase <XMPPRoomLightDelegate>
 

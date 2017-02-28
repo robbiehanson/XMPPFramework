@@ -8,8 +8,6 @@
 
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
-#import "XMPPRoomLight.h"
-#import "XMPPJID.h"
 
 @interface XMPPRoomLight()
 - (nonnull NSString *)memberListVersion;

@@ -4,9 +4,7 @@ Pod::Spec.new do |s|
 
   s.osx.deployment_target = '10.9'
   s.ios.deployment_target = '8.0'
-
-#  tvOS support is blocked by libidn
-#  s.tvos.deployment_target = '9.0'
+  s.tvos.deployment_target = '9.0'
 
   s.license = { :type => 'BSD', :file => 'copying.txt' }
   s.summary = 'An XMPP Framework in Objective-C for the Mac / iOS development community.'
