@@ -26,12 +26,34 @@ extern NSString * __nonnull  const XMPPPushXMLNS;
 + (nonnull instancetype)enableNotificationsElementWithJID:(nonnull XMPPJID *)jid node:(nullable NSString *)node options:(nullable NSDictionary <NSString *,NSString *>*)options;
 
 /**
+ Creates an IQ stanza for enabling push notificiations. http://xmpp.org/extensions/xep-0357.html#enabling
+ 
+ @param jid The jid of the XMPP Push Service
+ @param node Optional node of the XMPP Push Service
+ @param options Optional values to passed to your XMPP service (this is likely some sort of secret or token to validate this user/device with teh app server)
+ @param elementId the XMPPElement id for tracking responses
+ @return An IQ stanza
+ */
++ (nonnull instancetype)enableNotificationsElementWithJID:(nonnull XMPPJID *)jid node:(nullable NSString *)node options:(nullable NSDictionary <NSString *,NSString *>*)options elementId:(nullable NSString*)elementId;
+
+/**
  Creates an IQ stanza for disable push notifications. http://xmpp.org/extensions/xep-0357.html#disabling
  
  @param jid the jid of the XMPP Push Service
  @param node the node of the XMPP push Service
  @return an IQ Stanza
  */
-+ (nonnull instancetype)disableNotificationsElementWithJID:(nonnull XMPPJID *)jid node:(nullable NSString *)node;
++ (nonnull instancetype)disableNotificationsElementWithJID:(nonnull XMPPJID *)jid node:(nullable NSString *)node
+;
+/**
+ Creates an IQ stanza for disable push notifications. http://xmpp.org/extensions/xep-0357.html#disabling
+ 
+ @param jid the jid of the XMPP Push Service
+ @param node the node of the XMPP push Service
+ @param elementId the XMPPElement id for tracking responses
+ @return an IQ Stanza
+ */
++ (nonnull instancetype)disableNotificationsElementWithJID:(nonnull XMPPJID *)jid node:(nullable NSString *)node elementId:(nullable NSString*)elementId;
+
 
 @end
