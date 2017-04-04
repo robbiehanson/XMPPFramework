@@ -11,27 +11,31 @@
 
 @implementation XMPPSlot
 
-- (id)initWithPut:(NSString *)put andGet:(NSString *)get {
-
-	self = [super init];
-	if(self) {
-		_get = get;
-		_put = put;
-	}
-	return self;
-
+- (instancetype) init {
+    NSAssert(NO, @"Use designated initializer.");
+    return nil;
 }
 
-- (id)initWithIQ:(XMPPIQ *)iq {
-
+- (instancetype)initWithPut:(NSString *)put andGet:(NSString *)get {
+    NSParameterAssert(put != nil);
+    NSParameterAssert(get != nil);
 	self = [super init];
 	if(self) {
-		NSXMLElement *slot = [iq elementForName:@"slot"];
-		_put = [[slot elementForName:@"put"].stringValue copy];
-		_get = [[slot elementForName:@"get"].stringValue copy];
+		_get = [get copy];
+		_put = [put copy];
 	}
 	return self;
+}
 
+- (nullable instancetype)initWithIQ:(XMPPIQ *)iq {
+    NSParameterAssert(iq != nil);
+    NSXMLElement *slot = [iq elementForName:@"slot"];
+    NSString *put = [slot elementForName:@"put"].stringValue;
+    NSString *get = [slot elementForName:@"get"].stringValue;
+    if (!put || !get) {
+        return nil;
+    }
+    return [self initWithPut:put andGet:get];
 }
 
 @end

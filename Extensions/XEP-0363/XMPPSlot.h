@@ -12,12 +12,19 @@
 
 @import KissXML;
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPSlot: NSObject
-
-- (id)initWithPut:(NSString *)put andGet:(NSString *)get;
-- (id)initWithIQ:(XMPPIQ *)iq;
 
 @property (nonatomic, copy, readonly) NSString *put;
 @property (nonatomic, copy, readonly) NSString *get;
 
+- (instancetype)initWithPut:(NSString *)put andGet:(NSString *)get NS_DESIGNATED_INITIALIZER;
+
+/** Will return nil if iq does not contain slot */
+- (nullable instancetype)initWithIQ:(XMPPIQ *)iq;
+
+/** Not available, use designated initializer */
+- (instancetype) init NS_UNAVAILABLE;
+
 @end
+NS_ASSUME_NONNULL_END
