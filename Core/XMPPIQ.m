@@ -44,44 +44,44 @@
 	return (XMPPIQ *)element;
 }
 
-+ (XMPPIQ *)iq
++ (instancetype)iq
 {
-	return [[XMPPIQ alloc] initWithType:nil to:nil elementID:nil child:nil];
+	return [[self alloc] initWithType:nil to:nil elementID:nil child:nil];
 }
 
-+ (XMPPIQ *)iqWithType:(NSString *)type
++ (instancetype)iqWithType:(NSString *)type
 {
-	return [[XMPPIQ alloc] initWithType:type to:nil elementID:nil child:nil];
+	return [[self alloc] initWithType:type to:nil elementID:nil child:nil];
 }
 
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid
++ (instancetype)iqWithType:(NSString *)type to:(XMPPJID *)jid
 {
-	return [[XMPPIQ alloc] initWithType:type to:jid elementID:nil child:nil];
+	return [[self alloc] initWithType:type to:jid elementID:nil child:nil];
 }
 
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
++ (instancetype)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
 {
-	return [[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:nil];
+	return [[self alloc] initWithType:type to:jid elementID:eid child:nil];
 }
 
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
++ (instancetype)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
 {
-	return [[XMPPIQ alloc] initWithType:type to:jid elementID:eid child:childElement];
+	return [[self alloc] initWithType:type to:jid elementID:eid child:childElement];
 }
 
-+ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid
++ (instancetype)iqWithType:(NSString *)type elementID:(NSString *)eid
 {
-	return [[XMPPIQ alloc] initWithType:type to:nil elementID:eid child:nil];
+	return [[self alloc] initWithType:type to:nil elementID:eid child:nil];
 }
 
-+ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement
++ (instancetype)iqWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement
 {
-	return [[XMPPIQ alloc] initWithType:type to:nil elementID:eid child:childElement];
+	return [[self alloc] initWithType:type to:nil elementID:eid child:childElement];
 }
 
-+ (XMPPIQ *)iqWithType:(NSString *)type child:(NSXMLElement *)childElement
++ (instancetype)iqWithType:(NSString *)type child:(NSXMLElement *)childElement
 {
-	return [[XMPPIQ alloc] initWithType:type to:nil elementID:nil child:childElement];
+	return [[self alloc] initWithType:type to:nil elementID:nil child:childElement];
 }
 
 - (id)init

@@ -44,19 +44,19 @@
 	return (XMPPPresence *)element;
 }
 
-+ (XMPPPresence *)presence
++ (instancetype)presence
 {
-	return [[XMPPPresence alloc] init];
+	return [self new];
 }
 
-+ (XMPPPresence *)presenceWithType:(NSString *)type
++ (instancetype)presenceWithType:(NSString *)type
 {
-	return [[XMPPPresence alloc] initWithType:type to:nil];
+	return [[self alloc] initWithType:type to:nil];
 }
 
-+ (XMPPPresence *)presenceWithType:(NSString *)type to:(XMPPJID *)to
++ (instancetype)presenceWithType:(NSString *)type to:(XMPPJID *)to
 {
-	return [[XMPPPresence alloc] initWithType:type to:to];
+	return [[self alloc] initWithType:type to:to];
 }
 
 - (id)init

@@ -22,14 +22,14 @@
  * Creates and returns a new autoreleased XMPPIQ element.
  * If the type or elementID parameters are nil, those attributes will not be added.
 **/
-+ (XMPPIQ *)iq;
-+ (XMPPIQ *)iqWithType:(NSString *)type;
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid;
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid;
-+ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPIQ *)iqWithType:(NSString *)type child:(NSXMLElement *)childElement;
++ (instancetype)iq;
++ (instancetype)iqWithType:(NSString *)type;
++ (instancetype)iqWithType:(NSString *)type to:(XMPPJID *)jid;
++ (instancetype)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
++ (instancetype)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (instancetype)iqWithType:(NSString *)type elementID:(NSString *)eid;
++ (instancetype)iqWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (instancetype)iqWithType:(NSString *)type child:(NSXMLElement *)childElement;
 
 /**
  * Creates and returns a new XMPPIQ element.

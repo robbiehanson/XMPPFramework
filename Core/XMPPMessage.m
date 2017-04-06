@@ -44,44 +44,44 @@
 	return (XMPPMessage *)element;
 }
 
-+ (XMPPMessage *)message
++ (instancetype)message
 {
-	return [[XMPPMessage alloc] init];
+	return [self new];
 }
 
-+ (XMPPMessage *)messageWithType:(NSString *)type
++ (instancetype)messageWithType:(NSString *)type
 {
-	return [[XMPPMessage alloc] initWithType:type to:nil];
+	return [[self alloc] initWithType:type to:nil];
 }
 
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)to
++ (instancetype)messageWithType:(NSString *)type to:(XMPPJID *)to
 {
-	return [[XMPPMessage alloc] initWithType:type to:to];
+	return [[self alloc] initWithType:type to:to];
 }
 
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
++ (instancetype)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid
 {
-	return [[XMPPMessage alloc] initWithType:type to:jid elementID:eid];
+	return [[self alloc] initWithType:type to:jid elementID:eid];
 }
 
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
++ (instancetype)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement
 {
-	return [[XMPPMessage alloc] initWithType:type to:jid elementID:eid child:childElement];
+	return [[self alloc] initWithType:type to:jid elementID:eid child:childElement];
 }
 
-+ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid
++ (instancetype)messageWithType:(NSString *)type elementID:(NSString *)eid
 {
-	return [[XMPPMessage alloc] initWithType:type elementID:eid];
+	return [[self alloc] initWithType:type elementID:eid];
 }
 
-+ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement
++ (instancetype)messageWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement
 {
-	return [[XMPPMessage alloc] initWithType:type elementID:eid child:childElement];
+	return [[self alloc] initWithType:type elementID:eid child:childElement];
 }
 
-+ (XMPPMessage *)messageWithType:(NSString *)type child:(NSXMLElement *)childElement
++ (instancetype)messageWithType:(NSString *)type child:(NSXMLElement *)childElement
 {
-	return [[XMPPMessage alloc] initWithType:type child:childElement];
+	return [[self alloc] initWithType:type child:childElement];
 }
 
 - (id)init
