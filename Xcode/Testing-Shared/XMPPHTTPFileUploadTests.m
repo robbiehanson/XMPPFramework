@@ -97,7 +97,7 @@
     XMPPJID *serviceJID = [XMPPJID jidWithString:@"upload.montague.tld"];
 	XMPPHTTPFileUpload *xmppFileUpload = [[XMPPHTTPFileUpload alloc] init];
 	[xmppFileUpload activate:streamTest];
-    [xmppFileUpload requestSlotFromService:serviceJID filename:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
+    [xmppFileUpload requestSlotFromService:serviceJID filename:@"my_juliet.png" size:23456 contentType:@"image/jpeg" tag:nil];
 
 	[self waitForExpectationsWithTimeout:1 handler:^(NSError * _Nullable error) {
 		if(error){
@@ -124,7 +124,7 @@
 		[weakStreamTest fakeIQResponse:iq];
 	};
 
-	[xmppFileUpload requestSlotFromService:serviceJID filename:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
+    [xmppFileUpload requestSlotFromService:serviceJID filename:@"my_juliet.png" size:23456 contentType:@"image/jpeg" tag:nil];
 	
 	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
 		if(error){
@@ -149,7 +149,7 @@
 		[weakStreamTest fakeIQResponse:iq];
 	};
 	
-    [xmppFileUpload requestSlotFromService:serviceJID filename:@"my_juliet.png" size:23456 contentType:@"image/jpeg"];
+    [xmppFileUpload requestSlotFromService:serviceJID filename:@"my_juliet.png" size:23456 contentType:@"image/jpeg" tag:nil];
 	
 	[self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
 		if(error){

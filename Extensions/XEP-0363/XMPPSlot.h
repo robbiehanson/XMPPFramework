@@ -15,16 +15,25 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface XMPPSlot: NSObject
 
-@property (nonatomic, copy, readonly) NSString *put;
-@property (nonatomic, copy, readonly) NSString *get;
+/** Convenience property for putURL + putHeaders */
+@property (nonatomic, readonly) NSURLRequest *putRequest;
 
-- (instancetype)initWithPut:(NSString *)put andGet:(NSString *)get NS_DESIGNATED_INITIALIZER;
+/** HTTP headers, for example Authorization. name=value */
+@property (nonatomic, readonly) NSDictionary<NSString*,NSString*> *putHeaders;
+@property (nonatomic, readonly) NSURL *putURL;
+@property (nonatomic, readonly) NSURL *getURL;
+
+- (instancetype)initWithPutURL:(NSURL *)putURL getURL:(NSURL *)getURL putHeaders:(NSDictionary<NSString*,NSString*>*)putHeaders NS_DESIGNATED_INITIALIZER;
 
 /** Will return nil if iq does not contain slot */
 - (nullable instancetype)initWithIQ:(XMPPIQ *)iq;
 
 /** Not available, use designated initializer */
 - (instancetype) init NS_UNAVAILABLE;
+
+@property (nonatomic, readonly) NSString *put DEPRECATED_MSG_ATTRIBUTE("Use putURL instead.");
+@property (nonatomic, readonly) NSString *get DEPRECATED_MSG_ATTRIBUTE("Use getURL instead.");
+- (nullable instancetype)initWithPut:(NSString *)put andGet:(NSString *)get DEPRECATED_MSG_ATTRIBUTE("Use initWithPutURL:getURL:putHeaders: instead.");
 
 @end
 NS_ASSUME_NONNULL_END

@@ -10,8 +10,33 @@
 #import "XMPPStream.h"
 #import "NSXMLElement+XMPP.h"
 #import "XMPPIDTracker.h"
+#import "XMPPLogging.h"
+
+// Log levels: off, error, warn, info, verbose
+#if DEBUG
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
+#else
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
 
 NSString *const XMPPHTTPFileUploadNamespace = @"urn:xmpp:http:upload";
+NSString *const XMPPHTTPFileUploadErrorDomain = @"XMPPHTTPFileUploadErrorDomain";
+
+NSString* StringForXMPPHTTPFileUploadErrorCode(XMPPHTTPFileUploadErrorCode errorCode) {
+    switch (errorCode) {
+        case XMPPHTTPFileUploadErrorCodeUnknown:
+            return @"Unknown Error";
+        case XMPPHTTPFileUploadErrorCodeNoResponse:
+            return @"No Response";
+        case XMPPHTTPFileUploadErrorCodeBadResponse:
+            return @"Bad Response";
+    }
+}
+
+static NSError *ErrorForCode(XMPPHTTPFileUploadErrorCode errorCode) {
+    NSString *description = StringForXMPPHTTPFileUploadErrorCode(errorCode);
+    return [NSError errorWithDomain:XMPPHTTPFileUploadErrorDomain code:errorCode userInfo:@{NSLocalizedDescriptionKey: description}];
+}
 
 @interface XMPPHTTPFileUpload()
 @property (nonatomic, strong, readonly) XMPPIDTracker *responseTracker;
@@ -49,12 +74,57 @@ NSString *const XMPPHTTPFileUploadNamespace = @"urn:xmpp:http:upload";
 - (void)requestSlotFromService:(XMPPJID*)serviceJID
                       filename:(NSString*)filename
                           size:(NSUInteger)size
-                   contentType:(NSString*)contentType {
+                   contentType:(NSString*)contentType
+                           tag:(nullable id)tag {
+    __weak typeof(self) weakSelf = self;
+    __weak id weakMulticast = multicastDelegate;
+    [self requestSlotFromService:serviceJID filename:filename size:size contentType:contentType completion:^(XMPPSlot * _Nullable slot, XMPPIQ * _Nullable resultIq, NSError * _Nullable error) {
+        __typeof__(self) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+        if (!slot) {
+            [weakMulticast xmppHTTPFileUpload:strongSelf service:serviceJID didFailToAssignSlotWithError:error response:resultIq tag:tag];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            [weakMulticast xmppHTTPFileUpload:strongSelf didFailToAssignSlotWithError:resultIq];
+#pragma clang diagnostic pop
+        } else {
+            [weakMulticast xmppHTTPFileUpload:strongSelf service:serviceJID didAssignSlot:slot response:resultIq tag:tag];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            [weakMulticast xmppHTTPFileUpload:strongSelf didAssignSlot:slot];
+#pragma clang diagnostic pop
+        }
+    }];
+}
+
+- (void)requestSlotFromService:(XMPPJID*)serviceJID
+                      filename:(NSString*)filename
+                          size:(NSUInteger)size
+                   contentType:(NSString*)contentType
+                    completion:(void (^_Nonnull)(XMPPSlot * _Nullable slot, XMPPIQ * _Nullable resultIq, NSError * _Nullable error))completion {
+    [self requestSlotFromService:serviceJID filename:filename size:size contentType:contentType completion:completion completionQueue:nil];
+}
+
+- (void)requestSlotFromService:(XMPPJID*)serviceJID
+                      filename:(NSString*)filename
+                          size:(NSUInteger)size
+                   contentType:(NSString*)contentType
+                    completion:(void (^_Nonnull)(XMPPSlot * _Nullable slot, XMPPIQ * _Nullable resultIq, NSError * _Nullable error))completion
+               completionQueue:(_Nullable dispatch_queue_t)completionQueue {
     NSParameterAssert(filename != nil);
     NSParameterAssert(contentType != nil);
     NSParameterAssert(size > 0);
     NSParameterAssert(serviceJID != nil);
-	
+    NSParameterAssert(completion != nil);
+    if (!completion) {
+        XMPPLogError(@"XMPPHTTPFileUpload: No completion block specified, aborting...");
+        return;
+    }
+    if (!completionQueue) {
+        completionQueue = moduleQueue;
+    }
 	dispatch_block_t block = ^{ @autoreleasepool {
 
 		//	<iq from='romeo@montague.tld/garden' id='step_03'
@@ -82,35 +152,30 @@ NSString *const XMPPHTTPFileUploadNamespace = @"urn:xmpp:http:upload";
 		[iq addChild:request];
         
         __weak typeof(self) weakSelf = self;
-        __weak id weakMulticast = multicastDelegate;
         [self.responseTracker addID:iqID block:^(id obj, id<XMPPTrackingInfo> info) {
             __typeof__(self) strongSelf = weakSelf;
             if (!strongSelf) { return; }
-            XMPPIQ *iq = obj;
-            if (![iq isKindOfClass:[XMPPIQ class]]) {
-                return;
-            }
-            dispatch_block_t failBlock = ^{
-                [weakMulticast xmppHTTPFileUpload:strongSelf service:serviceJID didFailToAssignSlotWithError:iq];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                [weakMulticast xmppHTTPFileUpload:strongSelf didFailToAssignSlotWithError:iq];
-#pragma clang diagnostic pop
-            };
-            if ([[iq type] isEqualToString:@"result"]){
-                XMPPSlot *slot = [[XMPPSlot alloc] initWithIQ:iq];
-                if (slot) {
-                    [weakMulticast xmppHTTPFileUpload:strongSelf service:serviceJID didAssignSlot:slot];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                    [weakMulticast xmppHTTPFileUpload:strongSelf didAssignSlot:slot];
-#pragma clang diagnostic pop
-                } else {
-                    failBlock();
+            NSError *error = nil;
+            XMPPIQ *responseIq = nil;
+            XMPPSlot *slot = nil;
+            if ([obj isKindOfClass:[XMPPIQ class]]) {
+                responseIq = obj;
+                if ([responseIq isResultIQ]) {
+                    slot = [[XMPPSlot alloc] initWithIQ:responseIq];
+                }
+                if (!slot) {
+                    error = ErrorForCode(XMPPHTTPFileUploadErrorCodeBadResponse);
                 }
             } else {
-                failBlock();
+                error = ErrorForCode(XMPPHTTPFileUploadErrorCodeNoResponse);
             }
+            if (!slot && !error) {
+                error = ErrorForCode(XMPPHTTPFileUploadErrorCodeUnknown);
+            }
+            
+            dispatch_async(completionQueue, ^{
+                completion(slot, responseIq, error);
+            });
         } timeout:60.0];
 		
 		[xmppStream sendElement:iq];
@@ -158,7 +223,7 @@ NSString *const XMPPHTTPFileUploadNamespace = @"urn:xmpp:http:upload";
     XMPPJID *uploadService = [XMPPJID jidWithString:self.serviceName];
     NSParameterAssert(uploadService != nil);
     if (!uploadService) { return; }
-    [self requestSlotFromService:uploadService filename:filename size:size contentType:contentType];
+    [self requestSlotFromService:uploadService filename:filename size:size contentType:contentType tag:nil];
 }
 
 @end
