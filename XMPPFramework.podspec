@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.author = { 'Robbie Hanson' => 'robbiehanson@deusty.com' }
   s.source = { :git => 'https://github.com/robbiehanson/XMPPFramework.git', :tag => s.version }
   # s.source = { :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master' }
-  s.resources = [ '{Core, Authentication, Categories, Utilities, Extensions}/**/*.{xcdatamodel,xcdatamodeld}']
+  s.resources = [ 'Extensions/**/*.{xcdatamodel,xcdatamodeld}']
 
   s.description = 'XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), along with
   the tools needed to read & write XML. It comes with multiple popular extensions (XEPs),
