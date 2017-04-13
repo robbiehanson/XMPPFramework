@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSURL *putURL;
 @property (nonatomic, readonly) NSURL *getURL;
 
-- (instancetype)initWithPutURL:(NSURL *)putURL getURL:(NSURL *)getURL putHeaders:(NSDictionary<NSString*,NSString*>*)putHeaders NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithPutURL:(NSURL *)putURL getURL:(NSURL *)getURL putHeaders:(nullable NSDictionary<NSString*,NSString*>*)putHeaders NS_DESIGNATED_INITIALIZER;
 
 /** Will return nil if iq does not contain slot */
 - (nullable instancetype)initWithIQ:(XMPPIQ *)iq;

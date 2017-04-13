@@ -9,6 +9,14 @@
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
 
+static NSURL  * _Nonnull GetURL() {
+    return [NSURL URLWithString:@"http://get.com"];
+}
+
+static NSURL * _Nonnull PutURL() {
+    return [NSURL URLWithString:@"http://put.com"];
+}
+
 @interface XMPPHTTPFileUploadTests: XCTestCase
 @property (nonatomic, strong) XCTestExpectation *slotResponseExpectation;
 @end
@@ -23,32 +31,66 @@
 	[super tearDown];
 }
 
+
 - (void) testSlotInitWithIQ {
 	NSMutableString *s = [NSMutableString string];
 	[s appendString:@"<iq from='upload.montague.tld' id='step_03' to='romeo@montague.tld/garden' type='result'>"];
 	[s appendString:@"  <slot xmlns='urn:xmpp:http:upload'>"];
-	[s appendString:@"    <put>http://put.com</put>"];
-	[s appendString:@"	  <get>http://get.com</get>"];
+	[s appendFormat:@"    <put>%@</put>", PutURL().absoluteString];
+	[s appendFormat:@"	  <get>%@</get>", GetURL().absoluteString];
 	[s appendString:@"  </slot>"];
 	[s appendString:@"</iq>"];
 	
-	NSError *error;
-	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
-	XMPPIQ *iq = [XMPPIQ iqFromElement:[doc rootElement]];
+	NSError *error = nil;
+    XMPPIQ *iq = [[XMPPIQ alloc] initWithXMLString:s error:&error];
 	
 	XMPPSlot *slot = [[XMPPSlot alloc] initWithIQ:iq];
 	
 	XCTAssertNil(error);
-	XCTAssertEqualObjects(slot.get, @"http://get.com");
-	XCTAssertEqualObjects(slot.put, @"http://put.com");
+	XCTAssertEqualObjects(slot.getURL, GetURL());
+	XCTAssertEqualObjects(slot.putURL, PutURL());
+}
+
+- (void) testSlotInitWithPutHeaders {
+    NSString *headerName1 = @"Authorization";
+    NSString *headerValue1 = @"Basic Base64String==";
+    NSString *headerName2 = @"Host";
+    NSString *headerValue2 = @"montague.tld";
+    NSString *xmlString = [NSString stringWithFormat:@" \
+    <iq from='upload.montague.tld' \
+        id='step_03' \
+        to='romeo@montague.tld/garden' \
+        type='result'> \
+      <slot xmlns='urn:xmpp:http:upload:0'> \
+        <put url='%@'> \
+          <header name='%@'>%@</header> \
+          <header name='%@'>%@</header> \
+        </put> \
+        <get url='%@' /> \
+      </slot> \
+    </iq> \
+    ", PutURL(), headerName1, headerValue1, headerName2, headerValue2, GetURL()];
+    NSError *error = nil;
+    XMPPIQ *iq = [[XMPPIQ alloc] initWithXMLString:xmlString error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(iq);
+    
+    XMPPSlot *slot = [[XMPPSlot alloc] initWithIQ:iq];
+    XCTAssertNotNil(slot);
+    
+    NSDictionary *expectedHeaders = @{headerName1: headerValue1,
+                                      headerName2: headerValue2};
+    XCTAssertEqualObjects(slot.putHeaders, expectedHeaders);
+    XCTAssertEqualObjects(slot.putURL, PutURL());
+    XCTAssertEqualObjects(slot.getURL, GetURL());
 }
 
 - (void) testSlotInit {
 	
-	XMPPSlot *slot = [[XMPPSlot alloc] initWithPut:@"http://put.com" andGet:@"http://get.com"];
+	XMPPSlot *slot = [[XMPPSlot alloc] initWithPutURL:PutURL() getURL:GetURL() putHeaders:nil];
 
-	XCTAssertEqualObjects(slot.get, @"http://get.com");
-	XCTAssertEqualObjects(slot.put, @"http://put.com");
+	XCTAssertEqualObjects(slot.getURL, GetURL());
+	XCTAssertEqualObjects(slot.putURL, PutURL());
 }
 
 - (void) testRequestSlot {
@@ -159,8 +201,8 @@
 }
 
 - (void)xmppHTTPFileUpload:(XMPPHTTPFileUpload *)sender didAssignSlot:(XMPPSlot *)slot {
-	XCTAssertEqualObjects(slot.get, @"http://get.com");
-	XCTAssertEqualObjects(slot.put, @"http://put.com");
+	XCTAssertEqualObjects(slot.getURL, GetURL());
+	XCTAssertEqualObjects(slot.putURL, PutURL());
 	
 	[self.slotResponseExpectation fulfill];
 }

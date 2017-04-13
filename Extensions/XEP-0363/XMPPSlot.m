@@ -16,14 +16,17 @@
     return nil;
 }
 
-- (instancetype)initWithPutURL:(NSURL *)putURL getURL:(NSURL *)getURL putHeaders:(nonnull NSDictionary<NSString *,NSString *> *)putHeaders {
+- (instancetype)initWithPutURL:(NSURL *)putURL getURL:(NSURL *)getURL putHeaders:(nullable NSDictionary<NSString *,NSString *> *)putHeaders {
     NSParameterAssert(putURL != nil);
     NSParameterAssert(getURL != nil);
-    NSParameterAssert(putHeaders != nil);
     if (self = [super init]) {
         _putURL = [putURL copy];
         _getURL = [getURL copy];
-        _putHeaders = [putHeaders copy];
+        if (putHeaders) {
+            _putHeaders = [putHeaders copy];
+        } else {
+            _putHeaders = @{};
+        }
     }
     return self;
 }
@@ -46,13 +49,24 @@
     NSParameterAssert(iq != nil);
     NSXMLElement *slot = [iq elementForName:@"slot"];
     NSXMLElement *putElement = [slot elementForName:@"put"];
-    NSString *put = putElement.stringValue;
-    NSString *get = [slot elementForName:@"get"].stringValue;
-    if (!put || !get) {
+    NSXMLElement *getElement = [slot elementForName:@"get"];
+    
+    // Early versions of the spec didn't support headers
+    // See https://xmpp.org/extensions/xep-0363.html
+    NSString *putURLString = [putElement attributeStringValueForName:@"url"];
+    if (!putURLString) {
+        putURLString = putElement.stringValue;
+    }
+    NSString *getURLString = [getElement attributeStringValueForName:@"url"];
+    if (!getURLString) {
+        getURLString = getElement.stringValue;
+    }
+    
+    if (!putURLString || !getURLString) {
         return nil;
     }
-    NSURL *putURL = [NSURL URLWithString:put];
-    NSURL *getURL = [NSURL URLWithString:get];
+    NSURL *putURL = [NSURL URLWithString:putURLString];
+    NSURL *getURL = [NSURL URLWithString:getURLString];
     if (!putURL || !getURL) {
         return nil;
     }
