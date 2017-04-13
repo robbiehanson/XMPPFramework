@@ -313,6 +313,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void)updateWithPresence:(XMPPPresence *)presence streamBareJidStr:(NSString *)streamBareJidStr
 {
+    if (!presence.from.isFull) {
+        return;
+    }
+    
 	XMPPResourceCoreDataStorageObject *resource =
 	    (XMPPResourceCoreDataStorageObject *)[self resourceForJID:[presence from]];
 	
