@@ -322,6 +322,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 		{
 			[self removeResourcesObject:resource];
 			[[self managedObjectContext] deleteObject:resource];
+			[[self managedObjectContext] save:nil];
+
 		}
 	}
 	else
