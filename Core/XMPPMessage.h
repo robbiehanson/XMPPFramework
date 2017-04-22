@@ -16,14 +16,14 @@
 // Converts an NSXMLElement to an XMPPMessage element in place (no memory allocations or copying)
 + (XMPPMessage *)messageFromElement:(NSXMLElement *)element;
 
-+ (XMPPMessage *)message;
-+ (XMPPMessage *)messageWithType:(NSString *)type;
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)to;
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid;
-+ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPMessage *)messageWithType:(NSString *)type child:(NSXMLElement *)childElement;
++ (instancetype)message;
++ (instancetype)messageWithType:(NSString *)type;
++ (instancetype)messageWithType:(NSString *)type to:(XMPPJID *)to;
++ (instancetype)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
++ (instancetype)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (instancetype)messageWithType:(NSString *)type elementID:(NSString *)eid;
++ (instancetype)messageWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
++ (instancetype)messageWithType:(NSString *)type child:(NSXMLElement *)childElement;
 
 - (id)init;
 - (id)initWithType:(NSString *)type;

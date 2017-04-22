@@ -16,9 +16,9 @@
 // Converts an NSXMLElement to an XMPPPresence element in place (no memory allocations or copying)
 + (XMPPPresence *)presenceFromElement:(NSXMLElement *)element;
 
-+ (XMPPPresence *)presence;
-+ (XMPPPresence *)presenceWithType:(NSString *)type;
-+ (XMPPPresence *)presenceWithType:(NSString *)type to:(XMPPJID *)to;
++ (instancetype)presence;
++ (instancetype)presenceWithType:(NSString *)type;
++ (instancetype)presenceWithType:(NSString *)type to:(XMPPJID *)to;
 
 - (id)init;
 - (id)initWithType:(NSString *)type;
