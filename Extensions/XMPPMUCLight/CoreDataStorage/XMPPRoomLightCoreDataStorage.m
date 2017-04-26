@@ -36,9 +36,7 @@
 	}
 
 	[self scheduleBlock:^{
-		if (![self existsMessage:message forRoom:room stream:xmppStream]){
-			[self insertMessage:message outgoing:false forRoom:room stream:xmppStream];
-		}
+		[self insertMessageIfNeeded:message outgoing:NO forRoom:room stream:xmppStream];
 	}];
 }
 
@@ -46,26 +44,17 @@
 	XMPPStream *xmppStream = room.xmppStream;
 
 	[self scheduleBlock:^{
-		[self insertMessage:message outgoing:YES forRoom:room stream:xmppStream];
+		[self insertMessageIfNeeded:message outgoing:YES forRoom:room stream:xmppStream];
 	}];
 }
 
-- (BOOL)existsMessage:(XMPPMessage *)message forRoom:(XMPPRoomLight *)room stream:(XMPPStream *)xmppStream{
-	NSDate *remoteTimestamp = [message delayedDeliveryDate];
-	
-	if (remoteTimestamp == nil){
-		// When the xmpp server sends us a room message, it will always timestamp delayed messages.
-		// For example, when retrieving the discussion history, all messages will include the original timestamp.
-		// If a message doesn't include such timestamp, then we know we're getting it in "real time".
-		
-		return NO;
-	}
+- (BOOL)containsMessageWithBody:(NSString *)body farEndJID:(XMPPJID *)farEndJID nearEndJID:(XMPPJID *)nearEndJID remoteTimestamp:(NSDate *)remoteTimestamp {
 	
 	// Does this message already exist in the database?
 	// How can we tell if two XMPPRoomMessages are the same?
 	//
-	// 1. Same streamBareJidStr
-	// 2. Same jid
+	// 1. Same bare nearEndJID
+	// 2. Same farEndJID
 	// 3. Same text
 	// 4. Approximately the same timestamps
 	//
@@ -85,11 +74,6 @@
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSEntityDescription *messageEntity = [self messageEntity:moc];
 	
-	NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
-	
-	XMPPJID *messageJID = [message from];
-	NSString *messageBody = [[message elementForName:@"body"] stringValue];
-	
 	NSDate *minLocalTimestamp = [remoteTimestamp dateByAddingTimeInterval:-60];
 	NSDate *maxLocalTimestamp = [remoteTimestamp dateByAddingTimeInterval: 60];
 	
@@ -103,7 +87,7 @@
 	@")";
 	
 	NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateFormat,
-							  messageBody, messageJID, streamBareJidStr,
+							  body, farEndJID, nearEndJID,
 							  remoteTimestamp, minLocalTimestamp, maxLocalTimestamp];
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -117,10 +101,10 @@
 	return ([results count] > 0);
 }
 
-- (void)insertMessage:(XMPPMessage *)message
-			 outgoing:(BOOL)isOutgoing
-			  forRoom:(XMPPRoomLight *)room
-			   stream:(XMPPStream *)xmppStream{
+- (void)insertMessageIfNeeded:(XMPPMessage *)message
+					 outgoing:(BOOL)isOutgoing
+					  forRoom:(XMPPRoomLight *)room
+					   stream:(XMPPStream *)xmppStream {
 	// Extract needed information
 	
 	XMPPJID *myRoomJID = [XMPPJID jidWithUser:room.roomJID.user
@@ -142,7 +126,15 @@
 	NSString *messageBody = [[message elementForName:@"body"] stringValue];
 	
 	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+	XMPPJID *streamJID = [self myJIDForXMPPStream:xmppStream];
+	
+	if (remoteTimestamp && [self containsMessageWithBody:messageBody farEndJID:messageJID nearEndJID:[streamJID bareJID] remoteTimestamp:remoteTimestamp]) {
+		// When the xmpp server sends us a room message, it will always timestamp delayed messages.
+		// For example, when retrieving the discussion history, all messages will include the original timestamp.
+		// If a message doesn't include such timestamp, then we know we're getting it in "real time".
+		// Otherwise, the message needs to be tested for uniqueness.
+		return;
+	}
 	
 	NSEntityDescription *messageEntity = [self messageEntity:moc];
 
@@ -157,7 +149,7 @@
 	roomMessage.localTimestamp = localTimestamp;
 	roomMessage.remoteTimestamp = remoteTimestamp;
 	roomMessage.isFromMe = isOutgoing;
-	roomMessage.streamBareJidStr = streamBareJidStr;
+	roomMessage.streamBareJidStr = [streamJID bare];
 	
 	[moc insertObject:roomMessage];
 	[self didInsertMessage:roomMessage];
