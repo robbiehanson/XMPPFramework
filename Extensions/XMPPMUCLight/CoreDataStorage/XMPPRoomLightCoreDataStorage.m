@@ -131,18 +131,12 @@
 	XMPPJID *messageJID = isOutgoing ? myRoomJID : [message from];
 	
 	NSDate *localTimestamp;
-	NSDate *remoteTimestamp;
+	NSDate *remoteTimestamp = [message delayedDeliveryDate];
 	
-	if (isOutgoing){
+	if (remoteTimestamp) {
+		localTimestamp = remoteTimestamp;
+	} else if (isOutgoing) {
 		localTimestamp = [[NSDate alloc] init];
-		remoteTimestamp = nil;
-	}else{
-		remoteTimestamp = [message delayedDeliveryDate];
-		if (remoteTimestamp) {
-			localTimestamp = remoteTimestamp;
-		}else{
-			localTimestamp = [[NSDate alloc] init];
-		}
 	}
 	
 	NSString *messageBody = [[message elementForName:@"body"] stringValue];
