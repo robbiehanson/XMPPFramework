@@ -1075,7 +1075,11 @@ enum XMPPRoomState
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
-	// This method is invoked on the moduleQueue.
+    if ([[message type] isEqualToString:@"chat"]) {     // Room should not deal with single chat message
+        return NO;
+    }
+
+    // This method is invoked on the moduleQueue.
 	
 	XMPPJID *from = [message from];
 	
@@ -1116,6 +1120,10 @@ enum XMPPRoomState
 
 - (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message
 {
+    if ([[message type] isEqualToString:@"chat"]) {     // Room should not deal with single chat message
+        return NO;
+    }
+
 	// This method is invoked on the moduleQueue.
 	
 	XMPPJID *to = [message to];
