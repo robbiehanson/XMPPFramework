@@ -263,41 +263,36 @@
 
 - (NSString *)response
 {
-	NSString *HA1str = [NSString stringWithFormat:@"%@:%@:%@", username, realm, password];
-	NSString *HA2str = [NSString stringWithFormat:@"AUTHENTICATE:%@", digestURI];
-	
-	XMPPLogVerbose(@"HA1str: %@", HA1str);
-	XMPPLogVerbose(@"HA2str: %@", HA2str);
-	
-	NSData *HA1dataA = [[HA1str dataUsingEncoding:NSUTF8StringEncoding] xmpp_md5Digest];
-	NSData *HA1dataB = [[NSString stringWithFormat:@":%@:%@", nonce, cnonce] dataUsingEncoding:NSUTF8StringEncoding];
-	
-	XMPPLogVerbose(@"HA1dataA: %@", HA1dataA);
-	XMPPLogVerbose(@"HA1dataB: %@", HA1dataB);
-	
-	NSMutableData *HA1data = [NSMutableData dataWithCapacity:([HA1dataA length] + [HA1dataB length])];
-	[HA1data appendData:HA1dataA];
-	[HA1data appendData:HA1dataB];
-	
-	XMPPLogVerbose(@"HA1data: %@", HA1data);
-	
-	NSString *HA1 = [[HA1data xmpp_md5Digest] xmpp_hexStringValue];
-	
-	NSString *HA2 = [[[HA2str dataUsingEncoding:NSUTF8StringEncoding] xmpp_md5Digest] xmpp_hexStringValue];
-	
-	XMPPLogVerbose(@"HA1: %@", HA1);
-	XMPPLogVerbose(@"HA2: %@", HA2);
-	
-	NSString *responseStr = [NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
-                           HA1, nonce, cnonce, HA2];
-	
-	XMPPLogVerbose(@"responseStr: %@", responseStr);
-	
-	NSString *response = [[[responseStr dataUsingEncoding:NSUTF8StringEncoding] xmpp_md5Digest] xmpp_hexStringValue];
-	
-	XMPPLogVerbose(@"response: %@", response);
-	
-	return response;
+    //See RFC 2831 2.1.2.1 Response-value https://tools.ietf.org/html/rfc2831#section-2.1.2.1
+    
+    NSString* x = [NSString stringWithFormat:@"%@:%@:%@", username, realm, password];
+    NSData* y = [[x dataUsingEncoding: NSUTF8StringEncoding] xmpp_md5Digest];
+    
+    XMPPLogVerbose(@"x: %@", x);
+    XMPPLogVerbose(@"y: %@", y);
+    
+    NSData* noncePlusCnonce = [[NSString stringWithFormat: @":%@:%@", nonce, cnonce] dataUsingEncoding: NSUTF8StringEncoding];
+    NSMutableData* a1 = [NSMutableData dataWithCapacity:([y length] + [noncePlusCnonce length])];
+    [a1 appendData: y];
+    [a1 appendData: noncePlusCnonce];
+    NSString* a2 = [NSString stringWithFormat:@"AUTHENTICATE:%@", digestURI];
+    
+    XMPPLogVerbose(@"a1: %@", a1);
+    XMPPLogVerbose(@"a2: %@", a2);
+    
+    NSData* ha1 = [[a1 xmpp_md5Digest] xmpp_hexStringValue];
+    NSData* ha2 = [[[a2 dataUsingEncoding: NSUTF8StringEncoding] xmpp_md5Digest] xmpp_hexStringValue];
+    
+    XMPPLogVerbose(@"ha1: %@", ha1);
+    XMPPLogVerbose(@"ha2: %@", ha2);
+    
+    NSString *kd = [NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@", ha1, nonce, cnonce, ha2];
+    NSString* z = [[[kd dataUsingEncoding: NSUTF8StringEncoding] xmpp_md5Digest] xmpp_hexStringValue];
+    
+    XMPPLogVerbose(@"kd: %@", kd);
+    XMPPLogVerbose(@"z: %@", z);
+    
+    return z;
 }
 
 - (NSString *)base64EncodedFullResponse
