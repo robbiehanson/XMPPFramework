@@ -28,4 +28,16 @@
     return self;
 }
 
+- (BOOL) isEqual:(id)object {
+    if ([object isKindOfClass:[OMEMOPreKey class]]) {
+        return [self isEqualToPreKey:object];
+    }
+    return NO;
+}
+
+- (BOOL) isEqualToPreKey:(OMEMOPreKey*)preKey {
+    return self.preKeyId == preKey.preKeyId &&
+    [self.publicKey isEqualToData:preKey.publicKey];
+}
+
 @end

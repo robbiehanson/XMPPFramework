@@ -24,5 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** Not available, use designated initializer */
 - (instancetype) init NS_UNAVAILABLE;
 
+- (BOOL) isEqualToPreKey:(OMEMOPreKey*)preKey;
+
 @end
 NS_ASSUME_NONNULL_END
