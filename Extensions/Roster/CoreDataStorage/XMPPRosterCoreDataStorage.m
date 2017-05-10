@@ -372,6 +372,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     
     BOOL allowRosterlessOperation = [parent allowRosterlessOperation];
 	
+    BOOL allowRosterlessOperation = [parent allowRosterlessOperation];
+    
 	[self scheduleBlock:^{
 		
 		XMPPJID *jid = [presence from];
