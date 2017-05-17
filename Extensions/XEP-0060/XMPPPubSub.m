@@ -466,9 +466,14 @@
         dispatch_queue_t dq;
         
         while (shouldReceiveForeignMessage && [delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:delegateSelector]) {
-            dispatch_sync(dq, ^{ @autoreleasepool {
+            dispatch_block_t delegateBlock = ^{ @autoreleasepool {
                 shouldReceiveForeignMessage = [del xmppPubSub:self shouldReceiveForeignMessage:message];
-            }});
+            }};
+            
+            if (dispatch_queue_get_specific(dq, moduleQueueTag))
+                delegateBlock();
+            else
+                dispatch_sync(dq, delegateBlock);
         }
         
         if (!shouldReceiveForeignMessage) return;
