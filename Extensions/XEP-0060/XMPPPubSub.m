@@ -434,11 +434,12 @@
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
 	// Check to see if message is from our PubSub/PEP service
+    BOOL isOurMessage;
 	if (serviceJID) {
-		if (![serviceJID isEqualToJID:[message from]]) return;
+		isOurMessage = [serviceJID isEqualToJID:[message from]];
 	}
 	else {
-		if ([myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+		isOurMessage = [myJID isEqualToJID:[message from] options:XMPPJIDCompareBare];
 	}
 	
 	// <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
@@ -452,10 +453,28 @@
 	// </message>
 	
 	NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
-	if (event)
-	{
-		[multicastDelegate xmppPubSub:self didReceiveMessage:message];
-	}
+    if (!event) return;
+    
+    SEL delegateSelector = @selector(xmppPubSub:shouldReceiveForeignMessage:);
+    
+    if (!isOurMessage) {
+        GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+        
+        __block BOOL shouldReceiveForeignMessage = [multicastDelegate hasDelegateThatRespondsToSelector:delegateSelector];
+        
+        id del;
+        dispatch_queue_t dq;
+        
+        while (shouldReceiveForeignMessage && [delegateEnumerator getNextDelegate:&del delegateQueue:&dq forSelector:delegateSelector]) {
+            dispatch_sync(dq, ^{ @autoreleasepool {
+                shouldReceiveForeignMessage = [del xmppPubSub:self shouldReceiveForeignMessage:message];
+            }});
+        }
+        
+        if (!shouldReceiveForeignMessage) return;
+    }
+    
+    [multicastDelegate xmppPubSub:self didReceiveMessage:message];
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error

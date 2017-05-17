@@ -369,6 +369,7 @@
 - (void)xmppPubSub:(XMPPPubSub *)sender didRetrieveItems:(XMPPIQ *)iq fromNode:(NSString *)node;
 - (void)xmppPubSub:(XMPPPubSub *)sender didNotRetrieveItems:(XMPPIQ *)iq fromNode:(NSString *)node;
 
+- (BOOL)xmppPubSub:(XMPPPubSub *)sender shouldReceiveForeignMessage:(XMPPMessage *)message;
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveMessage:(XMPPMessage *)message;
 
 @end
