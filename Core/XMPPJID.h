@@ -22,6 +22,7 @@ typedef enum XMPPJIDCompareOptions XMPPJIDCompareOptions;
 + (XMPPJID *)jidWithString:(NSString *)jidStr;
 + (XMPPJID *)jidWithString:(NSString *)jidStr resource:(NSString *)resource;
 + (XMPPJID *)jidWithUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource;
++ (XMPPJID *)jidWithUnescapedUser:(NSString *)user domain:(NSString *)domain resource:(NSString *)resource;
 
 @property (strong, readonly) NSString *user;
 @property (strong, readonly) NSString *domain;
