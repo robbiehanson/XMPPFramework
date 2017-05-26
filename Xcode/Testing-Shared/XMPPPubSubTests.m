@@ -1,4 +1,4 @@
-import <XCTest/XCTest.h>
+#import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
 
 @interface XMPPPubSubTests : XCTestCase <XMPPPubSubDelegate>
