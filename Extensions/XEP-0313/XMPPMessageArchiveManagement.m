@@ -19,11 +19,53 @@
 
 @implementation XMPPMessageArchiveManagement
 
+@synthesize resultAutomaticPagingPageSize=_resultAutomaticPagingPageSize;
+
+- (NSInteger)resultAutomaticPagingPageSize
+{
+    __block NSInteger result = NO;
+    
+    dispatch_block_t block = ^{
+        result = _resultAutomaticPagingPageSize;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setResultAutomaticPagingPageSize:(NSInteger)resultAutomaticPagingPageSize
+{
+    dispatch_block_t block = ^{
+        _resultAutomaticPagingPageSize = resultAutomaticPagingPageSize;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
 	[self retrieveMessageArchiveAt:nil withFields:fields withResultSet:resultSet];
 }
 
 - (void)retrieveMessageArchiveAt:(XMPPJID *)archiveJID withFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
+    NSXMLElement *formElement = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
+    [formElement addAttributeWithName:@"type" stringValue:@"submit"];
+    [formElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:@"urn:xmpp:mam:1"]];
+    
+    for (NSXMLElement *field in fields) {
+        [formElement addChild:field];
+    }
+
+    [self retrieveMessageArchiveAt:archiveJID withFormElement:formElement resultSet:resultSet];
+}
+
+- (void)retrieveMessageArchiveAt:(XMPPJID *)archiveJID withFormElement:(NSXMLElement *)formElement resultSet:(XMPPResultSet *)resultSet {
 	dispatch_block_t block = ^{
 
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
@@ -39,15 +81,7 @@
 		[queryElement addAttributeWithName:@"queryid" stringValue:self.queryID];
 		[iq addChild:queryElement];
 
-		NSXMLElement *xElement = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
-		[xElement addAttributeWithName:@"type" stringValue:@"submit"];
-		[xElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:@"urn:xmpp:mam:1"]];
-
-		for (NSXMLElement *field in fields) {
-			[xElement addChild:field];
-		}
-
-		[queryElement addChild:xElement];
+		[queryElement addChild:formElement];
 
 		if (resultSet) {
 			[queryElement addChild:resultSet];
@@ -76,8 +110,20 @@
 		NSXMLElement *finElement = [iq elementForName:@"fin" xmlns:XMLNS_XMPP_MAM];
 		NSXMLElement *setElement = [finElement elementForName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
 		
-		XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:setElement];
-		[multicastDelegate xmppMessageArchiveManagement:self didFinishReceivingMessagesWithSet:resultSet];
+        XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:setElement];
+        NSString *lastId = [resultSet elementForName:@"last"].stringValue;
+        
+        if (self.resultAutomaticPagingPageSize == 0 || [finElement attributeBoolValueForName:@"complete"] || !lastId) {
+            [multicastDelegate xmppMessageArchiveManagement:self didFinishReceivingMessagesWithSet:resultSet];
+            return;
+        }
+        
+        XMPPIQ *originalIq = [XMPPIQ iqFromElement:[trackerInfo element]];
+        XMPPJID *originalArchiveJID = [originalIq to];
+        NSXMLElement *originalFormElement = [[[originalIq elementForName:@"query"] elementForName:@"x"] copy];
+        XMPPResultSet *pagingResultSet = [[XMPPResultSet alloc] initWithMax:self.resultAutomaticPagingPageSize after:lastId];
+        
+        [self retrieveMessageArchiveAt:originalArchiveJID withFormElement:originalFormElement resultSet:pagingResultSet];
 	} else {
 		[multicastDelegate xmppMessageArchiveManagement:self didFailToReceiveMessages:iq];
 	}
