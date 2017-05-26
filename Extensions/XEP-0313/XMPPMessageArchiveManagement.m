@@ -20,10 +20,18 @@
 @implementation XMPPMessageArchiveManagement
 
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
+	[self retrieveMessageArchiveAt:nil withFields:fields withResultSet:resultSet];
+}
+
+- (void)retrieveMessageArchiveAt:(XMPPJID *)archiveJID withFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
 	dispatch_block_t block = ^{
 
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
 		[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
+		
+		if (archiveJID) {
+			[iq addAttributeWithName:@"to" stringValue:[archiveJID full]];
+		}
 
 		self.queryID = [XMPPStream generateUUID];
 		
