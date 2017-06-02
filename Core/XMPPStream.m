@@ -1401,8 +1401,42 @@ enum XMPPStreamConfig
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Disconnect
+#pragma mark Abort/Disconnect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)abortConnecting
+{
+    XMPPLogTrace();
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+    
+        [self endConnectTimeout];
+        
+        if (state != STATE_XMPP_DISCONNECTED && state != STATE_XMPP_CONNECTED)
+        {
+            [multicastDelegate xmppStreamWasToldToAbortConnect:self];
+            
+            if (state == STATE_XMPP_RESOLVING_SRV)
+            {
+                [srvResolver stop];
+                srvResolver = nil;
+                
+                state = STATE_XMPP_DISCONNECTED;
+            }
+            else
+            {
+                [asyncSocket disconnect];
+                
+                // Everthing will be handled in socketDidDisconnect:withError:
+            }
+        }
+    }};
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+}
 
 /**
  * Closes the connection to the remote host.
