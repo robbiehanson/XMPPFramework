@@ -92,6 +92,30 @@
 	}];
 }
 
+- (void)testRetrieveTargetedMessageArchive {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Handler IQ with \"to\""];
+    
+    XMPPJID *archiveJID = [XMPPJID jidWithString:@"test.archive@erlang-solutions.com"];
+    
+    XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+    streamTest.elementReceived = ^void(NSXMLElement *element) {
+        XMPPIQ *iq = [XMPPIQ iqFromElement:element];
+        XCTAssertEqualObjects([iq to], archiveJID);
+        
+        [expectation fulfill];
+    };
+    
+    XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
+    [messageArchiveManagement activate:streamTest];
+    [messageArchiveManagement retrieveMessageArchiveAt:archiveJID withFields:nil withResultSet:nil];
+    
+    [self waitForExpectationsWithTimeout:1 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
 - (void)testDelegateDidReceiveMAMMessage {
 	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
 	
