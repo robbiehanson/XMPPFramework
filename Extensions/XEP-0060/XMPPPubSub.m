@@ -18,6 +18,9 @@
 {
 	XMPPJID *serviceJID;
 	XMPPJID *myJID;
+    
+    NSArray<XMPPJID *> *pepPublisherJIDs;
+    NSArray<NSString *> *pepNodes;
 	
 	NSMutableDictionary *subscribeDict;
 	NSMutableDictionary *unsubscribeDict;
@@ -37,6 +40,66 @@
 }
 
 @synthesize serviceJID;
+
+- (NSArray<XMPPJID *> *)pepPublisherJIDs
+{
+    __block NSArray<XMPPJID *> *result;
+    
+    dispatch_block_t block = ^{
+        result = pepPublisherJIDs;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setPepPublisherJIDs:(NSArray<XMPPJID *> *)pepPublisherJIDs
+{
+    NSArray<XMPPJID *> *newValue = [pepPublisherJIDs copy];
+    
+    dispatch_block_t block = ^{
+        self->pepPublisherJIDs = newValue;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (NSArray<NSString *> *)pepNodes
+{
+    __block NSArray<NSString *> *result;
+    
+    dispatch_block_t block = ^{
+        result = pepNodes;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setPepNodes:(NSArray<NSString *> *)pepNodes
+{
+    NSArray<NSString *> *newValue = [pepNodes copy];
+    
+    dispatch_block_t block = ^{
+        self->pepNodes = newValue;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 
 - (id)init
 {
@@ -433,29 +496,52 @@
 **/
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
+    // <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
+    //   <event xmlns='http://jabber.org/protocol/pubsub#event'>
+    //     <items node='/pubsub.foo'>
+    //       <item id='5036AA52A152B'>
+    //         [... entry ...]
+    //       </item>
+    //     </items>
+    //   </event>
+    // </message>
+    
+    NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
+    if (!event) return;
+    
 	// Check to see if message is from our PubSub/PEP service
 	if (serviceJID) {
 		if (![serviceJID isEqualToJID:[message from]]) return;
 	}
 	else {
-		if ([myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+        if (self.pepPublisherJIDs) {
+            BOOL isFromPEPPublisher = NO;
+            for (XMPPJID *pepPublisherJID in self.pepPublisherJIDs) {
+                if ([pepPublisherJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) {
+                    isFromPEPPublisher = YES;
+                    break;
+                }
+            }
+            if (!isFromPEPPublisher) return;
+        }
+
+        if (self.pepNodes) {
+            for (NSString *eventType in @[@"collection", @"configuration", @"delete", @"items", @"purge", @"subscription"]) {
+                NSXMLElement *eventChildElement = [event elementForName:eventType];
+                if (!eventChildElement) continue;
+                
+                NSString *node = [eventChildElement attributeStringValueForName:@"node"];
+                if (!node || ![self.pepNodes containsObject:node]) return;
+                break;
+            }
+        }
+        
+        if (!self.pepPublisherJIDs && !self.pepNodes) {
+            if (![myJID isEqualToJID:[message from] options:XMPPJIDCompareBare]) return;
+        }
 	}
-	
-	// <message from='pubsub.foo.co.uk' to='admin@foo.co.uk'>
-	//   <event xmlns='http://jabber.org/protocol/pubsub#event'>
-	//     <items node='/pubsub.foo'>
-	//       <item id='5036AA52A152B'>
-	//         [... entry ...]
-	//       </item>
-	//     </items>
-	//   </event>
-	// </message>
-	
-	NSXMLElement *event = [message elementForName:@"event" xmlns:XMLNS_PUBSUB_EVENT];
-	if (event)
-	{
-		[multicastDelegate xmppPubSub:self didReceiveMessage:message];
-	}
+    
+    [multicastDelegate xmppPubSub:self didReceiveMessage:message];
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
