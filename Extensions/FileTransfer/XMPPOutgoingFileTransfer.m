@@ -1500,7 +1500,7 @@ NSString *const XMPPOutgoingFileTransferErrorDomain = @"XMPPOutgoingFileTransfer
     struct ifaddrs *curr;
 
     for (curr = interfaces; curr; curr = curr->ifa_next) {
-      if (!curr->ifa_flags & IFF_UP) {
+      if (!(curr->ifa_flags & IFF_UP)) {
         continue;
       }
 

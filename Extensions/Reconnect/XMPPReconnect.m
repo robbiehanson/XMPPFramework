@@ -601,7 +601,10 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
                         
                         if (self.usesOldSchoolSecureConnect)
                         {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                             [xmppStream oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:nil];
+#pragma clang diagnostic pop
                         }
                         else
                         {

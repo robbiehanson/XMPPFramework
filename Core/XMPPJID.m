@@ -7,6 +7,7 @@
 
 
 @implementation XMPPJID
+@synthesize user, domain, resource;
 
 + (BOOL)validateDomain:(NSString *)domain
 {

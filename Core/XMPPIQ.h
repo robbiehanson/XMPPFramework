@@ -11,6 +11,7 @@
  * Simply add your own category to XMPPIQ to extend it with your own custom methods.
 **/
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPIQ : XMPPElement
 
 /**
@@ -23,26 +24,26 @@
  * If the type or elementID parameters are nil, those attributes will not be added.
 **/
 + (XMPPIQ *)iq;
-+ (XMPPIQ *)iqWithType:(NSString *)type;
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid;
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
-+ (XMPPIQ *)iqWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid;
-+ (XMPPIQ *)iqWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPIQ *)iqWithType:(NSString *)type child:(NSXMLElement *)childElement;
++ (XMPPIQ *)iqWithType:(nullable NSString *)type;
++ (XMPPIQ *)iqWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid;
++ (XMPPIQ *)iqWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid;
++ (XMPPIQ *)iqWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
++ (XMPPIQ *)iqWithType:(nullable NSString *)type elementID:(nullable NSString *)eid;
++ (XMPPIQ *)iqWithType:(nullable NSString *)type elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
++ (XMPPIQ *)iqWithType:(nullable NSString *)type child:(nullable NSXMLElement *)childElement;
 
 /**
  * Creates and returns a new XMPPIQ element.
  * If the type or elementID parameters are nil, those attributes will not be added.
 **/
-- (id)init;
-- (id)initWithType:(NSString *)type;
-- (id)initWithType:(NSString *)type to:(XMPPJID *)jid;
-- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
-- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-- (id)initWithType:(NSString *)type elementID:(NSString *)eid;
-- (id)initWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-- (id)initWithType:(NSString *)type child:(NSXMLElement *)childElement;
+- (instancetype)init;
+- (instancetype)initWithType:(nullable NSString *)type;
+- (instancetype)initWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid;
+- (instancetype)initWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid;
+- (instancetype)initWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
+- (instancetype)initWithType:(nullable NSString *)type elementID:(nullable NSString *)eid;
+- (instancetype)initWithType:(nullable NSString *)type elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
+- (instancetype)initWithType:(nullable NSString *)type child:(nullable NSXMLElement *)childElement;
 
 /**
  * Returns the type attribute of the IQ.
@@ -51,20 +52,20 @@
  * This method converts the attribute to lowercase so
  * case-sensitive string comparisons are safe (regardless of server treatment).
 **/
-- (NSString *)type;
+@property (nonatomic, readonly, nullable) NSString *type;
 
 /**
  * Convenience methods for determining the IQ type.
 **/
-- (BOOL)isGetIQ;
-- (BOOL)isSetIQ;
-- (BOOL)isResultIQ;
-- (BOOL)isErrorIQ;
+@property (nonatomic, readonly) BOOL isGetIQ;
+@property (nonatomic, readonly) BOOL isSetIQ;
+@property (nonatomic, readonly) BOOL isResultIQ;
+@property (nonatomic, readonly) BOOL isErrorIQ;
 
 /**
  * Convenience method for determining if the IQ is of type 'get' or 'set'.
 **/
-- (BOOL)requiresResponse;
+@property (nonatomic, readonly) BOOL requiresResponse;
 
 /**
  * The XMPP RFC has various rules for the number of child elements an IQ is allowed to have:
@@ -77,7 +78,8 @@
  * The childElement returns the single non-error element, if one exists, or nil.
  * The childErrorElement returns the error element, if one exists, or nil.
 **/
-- (NSXMLElement *)childElement;
-- (NSXMLElement *)childErrorElement;
+@property (nonatomic, readonly, nullable) NSXMLElement *childElement;
+@property (nonatomic, readonly, nullable) NSXMLElement *childErrorElement;
 
 @end
+NS_ASSUME_NONNULL_END

@@ -1,19 +1,20 @@
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 @interface NSData (XMPP)
 
-- (NSData *)xmpp_md5Digest;
+@property (nonatomic, readonly) NSData *xmpp_md5Digest;
 
-- (NSData *)xmpp_sha1Digest;
+@property (nonatomic, readonly) NSData *xmpp_sha1Digest;
 
-- (NSString *)xmpp_hexStringValue;
+@property (nonatomic, readonly) NSString *xmpp_hexStringValue;
 
-- (NSString *)xmpp_base64Encoded;
-- (NSData *)xmpp_base64Decoded;
+@property (nonatomic, readonly) NSString *xmpp_base64Encoded;
+@property (nonatomic, readonly) NSData *xmpp_base64Decoded;
 
-- (BOOL)xmpp_isJPEG;
-- (BOOL)xmpp_isPNG;
-- (NSString *)xmpp_imageType;
+@property (nonatomic, readonly) BOOL xmpp_isJPEG;
+@property (nonatomic, readonly) BOOL xmpp_isPNG;
+@property (nonatomic, readonly, nullable) NSString *xmpp_imageType;
 
 @end
 
@@ -32,3 +33,4 @@
 #undef XMPP_DEPRECATED
 
 #endif
+NS_ASSUME_NONNULL_END

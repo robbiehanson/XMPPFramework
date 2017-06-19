@@ -4,6 +4,7 @@
 
 #import "XMPPStream.h"
 #import "XMPPModule.h"
+#import "XMPPParser.h"
 
 // Define the various states we'll use to track our progress
 typedef NS_ENUM(NSInteger, XMPPStreamState) {
@@ -35,7 +36,7 @@ typedef NS_ENUM(NSInteger, XMPPStreamState) {
 **/
 extern NSString *const XMPPStreamDidChangeMyJIDNotification;
 
-@interface XMPPStream (/* Internal */)
+@interface XMPPStream (/* Internal */) <XMPPParserDelegate>
 
 /**
  * XMPPStream maintains thread safety by dispatching  through the internal serial xmppQueue.

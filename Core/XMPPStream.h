@@ -7,9 +7,7 @@
 @import KissXML;
 @import CocoaAsyncSocket;
 
-//#import <KissXML/KissXML.h>
-//#import <CocoaAsyncSocket/GCDAsyncSocket.h>
-
+NS_ASSUME_NONNULL_BEGIN
 
 @class XMPPSRVResolver;
 @class XMPPParser;
@@ -57,13 +55,13 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * P2P streams using XEP-0174 are also supported.
  * See the P2P section below.
 **/
-- (id)init;
+- (instancetype)init;
 
 /**
  * Peer to Peer XMPP initialization.
  * The stream is a direct client to client connection as outlined in XEP-0174.
 **/
-- (id)initP2PFrom:(XMPPJID *)myJID;
+- (instancetype)initP2PFrom:(XMPPJID *)myJID;
 
 /**
  * XMPPStream uses a multicast delegate.
@@ -103,7 +101,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * That is, it first do an SRV lookup (as specified in the xmpp RFC).
  * If that fails, it will fall back to simply attempting to connect to the jid's domain.
 **/
-@property (readwrite, copy) NSString *hostName;
+@property (readwrite, copy, nullable) NSString *hostName;
 
 /**
  * The port the xmpp server is running on.
@@ -153,12 +151,12 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * For this reason, you may wish to check the myJID variable after the stream has been connected,
  * just in case the resource was changed by the server.
 **/
-@property (readwrite, copy) XMPPJID *myJID;
+@property (readwrite, copy, nullable) XMPPJID *myJID;
 
 /**
  * Only used in P2P streams.
 **/
-@property (strong, readonly) XMPPJID *remoteJID;
+@property (strong, readonly, nullable) XMPPJID *remoteJID;
 
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
@@ -202,7 +200,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * @see resendMyPresence
 **/
-@property (strong, readonly) XMPPPresence *myPresence;
+@property (strong, readonly, nullable) XMPPPresence *myPresence;
 
 /**
  * Returns the total number of bytes bytes sent/received by the xmpp stream.
@@ -236,7 +234,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * The tag property allows you to associate user defined information with the stream.
  * Tag values are not used internally, and should not be used by xmpp modules.
 **/
-@property (readwrite, strong) id tag;
+@property (readwrite, strong, nullable) id tag;
 
 /**
  * RFC 6121 states that starting a session is no longer required.
@@ -272,7 +270,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * The default value is NO.
 **/
-@property (readwrite, assign) BOOL enableBackgroundingOnSocket;
+@property (readwrite, assign) BOOL enableBackgroundingOnSocket DEPRECATED_MSG_ATTRIBUTE("Background sockets are no longer available on iOS 10. You must use PushKit and the XEP-0357 module instead.");
 
 #endif
 
@@ -304,12 +302,12 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Returns YES if the connection is closed, and thus no stream is open.
  * If the stream is neither disconnected, nor connected, then a connection is currently being established.
 **/
-- (BOOL)isDisconnected;
+@property (atomic, readonly) BOOL isDisconnected;
 
 /**
  * Returns YES is the connection is currently connecting
 **/
-- (BOOL)isConnecting;
+@property (atomic, readonly) BOOL isConnecting;
 
 /**
  * Returns YES if the connection is open, and the stream has been properly established.
@@ -317,7 +315,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * If this method returns YES, then it is ready for you to start sending and receiving elements.
 **/
-- (BOOL)isConnected;
+@property (atomic, readonly) BOOL isConnected;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Connect & Disconnect
@@ -340,7 +338,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  *
  * Note: Such servers generally use port 5223 for this, which you will need to set.
 **/
-- (BOOL)oldSchoolSecureConnectWithTimeout:(NSTimeInterval)timeout error:(NSError **)errPtr;
+- (BOOL)oldSchoolSecureConnectWithTimeout:(NSTimeInterval)timeout error:(NSError **)errPtr DEPRECATED_MSG_ATTRIBUTE("DO NOT USE. THIS IS DEPRECATED BY THE XMPP SPECIFICATION.");
 
 /**
  * Starts a P2P connection to the given user and given address.
@@ -404,7 +402,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * See also the xmppStream:willSecureWithSettings: delegate method.
 **/
-- (BOOL)isSecure;
+@property (atomic, readonly) BOOL isSecure;
 
 /**
  * Returns whether or not the server supports securing the connection via SSL/TLS.
@@ -414,7 +412,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * If the connection has already been secured, this method may return NO.
 **/
-- (BOOL)supportsStartTLS;
+@property (atomic, readonly) BOOL supportsStartTLS;
 
 /**
  * Attempts to secure the connection via SSL/TLS.
@@ -461,8 +459,8 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Security Note:
  * The password will be sent in the clear unless the stream has been secured.
 **/
-- (BOOL)supportsInBandRegistration;
-- (BOOL)registerWithElements:(NSArray *)elements error:(NSError **)errPtr;
+@property (atomic, readonly) BOOL supportsInBandRegistration;
+- (BOOL)registerWithElements:(NSArray<NSXMLElement*> *)elements error:(NSError **)errPtr;
 - (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -482,7 +480,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * Then this method would return [@"DIGEST-MD5", @"PLAIN"].
 **/
-- (NSArray *)supportedAuthenticationMechanisms;
+@property (atomic, readonly) NSArray<NSString*> *supportedAuthenticationMechanisms;
 
 /**
  * Returns whether or not the given authentication mechanism name was specified in the
@@ -539,17 +537,17 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 /**
  * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.
 **/
-- (BOOL)isAuthenticating;
+@property (atomic, readonly) BOOL isAuthenticating;
 
 /**
  * Returns whether or not the xmpp stream has successfully authenticated with the server.
 **/
-- (BOOL)isAuthenticated;
+@property (atomic, readonly) BOOL isAuthenticated;
 
 /**
  * Returns the date when the xmpp stream successfully authenticated with the server.
  **/
-- (NSDate *)authenticationDate;
+@property (atomic, readonly, nullable) NSDate *authenticationDate;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -570,7 +568,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  *
  * Then this method would return [@"zlib", @"lzw"].
  **/
-- (NSArray *)supportedCompressionMethods;
+@property (atomic, readonly) NSArray<NSString*> *supportedCompressionMethods;
 
 
 /**
@@ -597,7 +595,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * received during it's connection. This is done for performance reasons and for the obvious benefit
  * of being more memory efficient.
 **/
-- (NSXMLElement *)rootElement;
+@property (atomic, readonly, nullable) NSXMLElement *rootElement;
 
 /**
  * Returns the version attribute from the servers's <stream:stream/> element.
@@ -645,7 +643,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
-- (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt **)receiptPtr;
+- (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt * _Nullable * _Nullable)receiptPtr;
 
 /**
  * Fetches and resends the myPresence element (if available) in a single atomic operation.
@@ -749,8 +747,8 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * This method is most commonly used to generate a unique id value for an xmpp element.
 **/
-+ (NSString *)generateUUID;
-- (NSString *)generateUUID;
+@property (nonatomic, readonly) NSString *generateUUID;
+@property (nonatomic, class, readonly) NSString *generateUUID;
 
 @end
 
@@ -846,7 +844,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * you likely need to add GCDAsyncSocketManuallyEvaluateTrust=YES to the settings.
  * Then implement the xmppStream:didReceiveTrust:completionHandler: delegate method to perform custom validation.
 **/
-- (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings;
+- (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary<NSString*,NSObject*>*)settings;
 
 /**
  * Allows a delegate to hook into the TLS handshake and manually validate the peer it's connecting to.
@@ -935,7 +933,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * Return nil (or don't implement this method) if you wish to use the standard binding procedure.
 **/
-- (id <XMPPCustomBinding>)xmppStreamWillBind:(XMPPStream *)sender;
+- (nullable id <XMPPCustomBinding>)xmppStreamWillBind:(XMPPStream *)sender;
 
 /**
  * This method is called if the XMPP server doesn't allow our resource of choice
@@ -943,7 +941,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * Return an alternative resource or return nil to let the server automatically pick a resource for us.
 **/
-- (NSString *)xmppStream:(XMPPStream *)sender alternativeResourceForConflictingResource:(NSString *)conflictingResource;
+- (nullable NSString *)xmppStream:(XMPPStream *)sender alternativeResourceForConflictingResource:(NSString *)conflictingResource;
 
 /**
  * These methods are called before their respective XML elements are broadcast as received to the rest of the stack.
@@ -966,9 +964,9 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * @see xmppStream:didReceiveMessage:
  * @see xmppStream:didReceivePresence:
 **/
-- (XMPPIQ *)xmppStream:(XMPPStream *)sender willReceiveIQ:(XMPPIQ *)iq;
-- (XMPPMessage *)xmppStream:(XMPPStream *)sender willReceiveMessage:(XMPPMessage *)message;
-- (XMPPPresence *)xmppStream:(XMPPStream *)sender willReceivePresence:(XMPPPresence *)presence;
+- (nullable XMPPIQ *)xmppStream:(XMPPStream *)sender willReceiveIQ:(XMPPIQ *)iq;
+- (nullable XMPPMessage *)xmppStream:(XMPPStream *)sender willReceiveMessage:(XMPPMessage *)message;
+- (nullable XMPPPresence *)xmppStream:(XMPPStream *)sender willReceivePresence:(XMPPPresence *)presence;
 
 /**
  * This method is called if any of the xmppStream:willReceiveX: methods filter the incoming stanza.
@@ -1026,9 +1024,9 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * @see xmppStream:didSendMessage:
  * @see xmppStream:didSendPresence:
 **/
-- (XMPPIQ *)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
-- (XMPPMessage *)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
-- (XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence;
+- (nullable XMPPIQ *)xmppStream:(XMPPStream *)sender willSendIQ:(XMPPIQ *)iq;
+- (nullable XMPPMessage *)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message;
+- (nullable XMPPPresence *)xmppStream:(XMPPStream *)sender willSendPresence:(XMPPPresence *)presence;
 
 /**
  * These methods are called after their respective XML elements are sent over the stream.
@@ -1099,7 +1097,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * 
  * @see xmppStreamConnectDidTimeout:
 **/
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error;
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(nullable NSError *)error;
 
 /**
  * This method is only used in P2P mode when the connectTo:withAddress: method was used.
@@ -1144,3 +1142,5 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (void)xmppStream:(XMPPStream *)sender didReceiveCustomElement:(NSXMLElement *)element;
 
 @end
+
+NS_ASSUME_NONNULL_END

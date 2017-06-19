@@ -4218,7 +4218,10 @@ enum XMPPStreamConfig
 	
 	#if TARGET_OS_IPHONE
 	{
-		if (self.enableBackgroundingOnSocket)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        if (self.enableBackgroundingOnSocket)
+#pragma clang diagnostic pop
 		{
 			__block BOOL result;
 			
@@ -5062,16 +5065,7 @@ enum XMPPStreamConfig
 
 + (NSString *)generateUUID
 {
-	NSString *result = nil;
-	
-	CFUUIDRef uuid = CFUUIDCreate(NULL);
-	if (uuid)
-	{
-		result = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
-		CFRelease(uuid);
-	}
-	
-	return result;
+	return [NSUUID UUID].UUIDString;
 }
 
 - (NSString *)generateUUID

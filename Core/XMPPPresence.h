@@ -10,24 +10,24 @@
  * This class exists to provide developers an easy way to add functionality to presence processing.
  * Simply add your own category to XMPPPresence to extend it with your own custom methods.
 **/
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPPresence : XMPPElement
 
 // Converts an NSXMLElement to an XMPPPresence element in place (no memory allocations or copying)
 + (XMPPPresence *)presenceFromElement:(NSXMLElement *)element;
 
 + (XMPPPresence *)presence;
-+ (XMPPPresence *)presenceWithType:(NSString *)type;
-+ (XMPPPresence *)presenceWithType:(NSString *)type to:(XMPPJID *)to;
++ (XMPPPresence *)presenceWithType:(nullable NSString *)type;
++ (XMPPPresence *)presenceWithType:(nullable NSString *)type to:(nullable XMPPJID *)to;
 
-- (id)init;
-- (id)initWithType:(NSString *)type;
-- (id)initWithType:(NSString *)type to:(XMPPJID *)to;
+- (instancetype)init;
+- (instancetype)initWithType:(nullable NSString *)type;
+- (instancetype)initWithType:(nullable NSString *)type to:(nullable XMPPJID *)to;
 
-- (NSString *)type;
+@property (nonatomic, readonly, nullable) NSString *type;
 
-- (NSString *)show;
-- (NSString *)status;
+@property (nonatomic, readonly, nullable) NSString *show;
+@property (nonatomic, readonly, nullable) NSString *status;
 
 - (int)priority;
 
@@ -36,3 +36,4 @@
 - (BOOL)isErrorPresence;
 
 @end
+NS_ASSUME_NONNULL_END
