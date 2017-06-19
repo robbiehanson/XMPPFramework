@@ -365,6 +365,13 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 - (BOOL)connectP2PWithSocket:(GCDAsyncSocket *)acceptedSocket error:(NSError **)errPtr;
 
 /**
+ * Aborts any in-progress connection attempt. Has no effect if the stream is already connected or disconnected.
+ * 
+ * Will dispatch the xmppStreamWasToldToAbortConnect: delegate method.
+**/
+- (void)abortConnecting;
+
+/**
  * Disconnects from the remote host by closing the underlying TCP socket connection.
  * The terminating </stream:stream> element is not sent to the server.
  * 
@@ -1075,6 +1082,11 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * This method is called if the XMPP stream's connect times out.
 **/
 - (void)xmppStreamConnectDidTimeout:(XMPPStream *)sender;
+
+/**
+ * Invoked when -abortConnecting is called while a connection attempt was in progress.
+**/
+- (void)xmppStreamWasToldToAbortConnect:(XMPPStream *)sender;
 
 /**
  * This method is called after the stream is closed.

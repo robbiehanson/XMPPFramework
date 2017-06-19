@@ -30,6 +30,22 @@
 @property (nonatomic, strong, readonly) XMPPJID *serviceJID;
 
 /**
+ * An array of publisher JIDs whose event messages will be received by the module.
+ * Only effective for PEP modules (serviceJID == nil). If the value is nil (the default), publisher filter is not applied.
+ * This filter is applied together with the node-based one.
+ * If both this and pepNodes are nil, only own events will be received.
+**/
+@property (atomic, copy, readwrite) NSArray<XMPPJID *> *pepPublisherJIDs;
+
+/**
+ * An array of nodes whose event messages will be received by the module.
+ * Only effective for PEP modules (serviceJID == nil). If the value is nil (the default), node filter is not applied.
+ * This filter is applied together with the publisher-based one.
+ * If both this and pepPublisherJIDs are nil, only own events will be received.
+**/
+@property (atomic, copy, readwrite) NSArray<NSString *> *pepNodes;
+
+/**
  * Sends a subscription request for the given node name.
  *
  * @param node
