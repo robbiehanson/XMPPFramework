@@ -292,7 +292,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender {
     OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
     [self fetchDeviceIdsForJID:sender.myJID elementId:nil];
-    [self publishBundle:myBundle elementId:nil];
+    if (myBundle) {
+        [self publishBundle:myBundle elementId:nil];
+    }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
