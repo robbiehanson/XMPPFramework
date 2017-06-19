@@ -146,6 +146,7 @@
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPMessage+XEP_0308.h"
 #import "XMPPMessageArchiveManagement.h"
+#import "XMPPRoomLightCoreDataStorage+XEP_0313.h"
 #import "XMPPMessage+XEP_0333.h"
 #import "XMPPMessage+XEP_0334.h"
 #import "NSXMLElement+XEP_0335.h"
@@ -156,6 +157,7 @@
 #import "XMPPMUCLight.h"
 #import "XMPPRoomLight.h"
 #import "XMPPRoomLightCoreDataStorage.h"
+#import "XMPPRoomLightCoreDataStorageProtected.h"
 #import "XMPPRoomLightMessageCoreDataStorageObject.h"
 
 
