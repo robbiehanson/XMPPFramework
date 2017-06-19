@@ -56,7 +56,7 @@
 	
 	XMPPJID *myRoomJID = [XMPPJID jidWithUser:room.roomJID.user
 									   domain:room.roomJID.domain
-									 resource:xmppStream.myJID.full];
+									 resource:xmppStream.myJID.bare];
 	
 	XMPPJID *roomJID = room.roomJID;
 	XMPPJID *messageJID = isOutgoing ? myRoomJID : [message from];
