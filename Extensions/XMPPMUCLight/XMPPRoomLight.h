@@ -24,6 +24,7 @@
 
 - (nonnull NSString *)roomname;
 - (nonnull NSString *)subject;
+- (nonnull NSArray<NSXMLElement*> *)knownMembersList;
 
 - (nonnull instancetype)initWithJID:(nonnull XMPPJID *)roomJID roomname:(nonnull NSString *) roomname;
 - (nonnull instancetype)initWithRoomLightStorage:(nullable id <XMPPRoomLightStorage>)storage jid:(nonnull XMPPJID *)aRoomJID roomname:(nonnull NSString *)aRoomname dispatchQueue:(nullable dispatch_queue_t)queue;
