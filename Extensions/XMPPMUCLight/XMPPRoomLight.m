@@ -399,7 +399,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
             [self setKnownMembersList:items];
         }
 
-		[multicastDelegate xmppRoomLight:self didFetchMembersList:items];
+		[multicastDelegate xmppRoomLight:self didFetchMembersList:iq];
 	}else{
 		[multicastDelegate xmppRoomLight:self didFailToFetchMembersList:iq];
 	}

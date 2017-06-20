@@ -294,7 +294,7 @@
 	}];
 }
 
-- (void)xmppRoomLight:(XMPPRoomLight *)sender didFetchMembersList:(NSArray *)items {
+- (void)xmppRoomLight:(XMPPRoomLight *)sender didFetchMembersList:(XMPPIQ *)iqResult {
 	NSXMLElement *user1 = [[sender knownMembersList] firstObject];
 	NSXMLElement *user3 = [[sender knownMembersList] lastObject];
 	XCTAssertEqualObjects([user1 attributeForName:@"affiliation"].stringValue, @"owner");
