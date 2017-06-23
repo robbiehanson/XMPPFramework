@@ -545,9 +545,9 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 	
 	if (([self manuallyStarted]) || ([self autoReconnect] && [self shouldReconnect])) 
 	{
-		if (![xmppStream isConnected] && ([self queryingDelegates] == NO))
+		if ([xmppStream isDisconnected] && ([self queryingDelegates] == NO))
 		{
-			// The xmpp stream is not connected, otherwise any attempt in progress will be aborted
+			// The xmpp stream is disconnected, and is not attempting reconnection
 			
 			// Delegate rules:
 			// 
@@ -606,8 +606,6 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 						[self setShouldRestartReconnect:NO];
 						previousReachabilityFlags = reachabilityFlags;
 						
-                        [xmppStream abortConnecting];
-                        
                         if (self.usesOldSchoolSecureConnect)
                         {
                             [xmppStream oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:nil];
@@ -642,6 +640,10 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 		{
 			// The xmpp stream is already attempting a connection.
 			
+            if ([self shouldRestartReconnect])
+            {
+                [xmppStream abortConnecting];
+            }
 		}
 	}
 }
