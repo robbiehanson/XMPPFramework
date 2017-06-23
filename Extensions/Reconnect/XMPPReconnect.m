@@ -391,6 +391,10 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 		
 		dispatch_source_set_event_handler(reconnectTimer, ^{ @autoreleasepool {
 			
+            // It is likely that reconnectTimerInterval is shorter than socket's timeout value.
+            // In such case we want to abort the current connection attempt (if any) and start a new one.
+            [self setShouldRestartReconnect:YES];
+            
 			[self maybeAttemptReconnect];
 			
 		}});
