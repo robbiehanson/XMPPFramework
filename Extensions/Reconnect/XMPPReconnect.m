@@ -358,6 +358,15 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 	@autoreleasepool {
 	
 		XMPPReconnect *instance = (__bridge XMPPReconnect *)info;
+        
+        if (instance->previousReachabilityFlags != flags) {
+            // It's possible that the reachability of our xmpp host has changed in the middle of either
+            // a reconnection attempt or while querying our delegates for permission to attempt reconnect.
+            
+            // In such case it makes sense to abort the current reconnection attempt (if any) instead of waiting for it to time out.
+            [instance setShouldRestartReconnect:YES];
+        }
+        
 		[instance maybeAttemptReconnectWithReachabilityFlags:flags];
 	}
 }
@@ -633,19 +642,6 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 		{
 			// The xmpp stream is already attempting a connection.
 			
-			if (reachabilityFlags != previousReachabilityFlags)
-			{
-				// It seems that the reachability of our xmpp host has changed in the middle of either
-				// a reconnection attempt or while querying our delegates for permission to attempt reconnect.
-				// 
-				// This may mean that the current attempt will fail,
-				// but an another attempt after the failure will succeed.
-				// 
-				// We make a note of the multiple changes,
-				// and if the current attempt fails, we'll try again after a short delay.
-				
-				[self setMultipleReachabilityChanges:YES];
-			}
 		}
 	}
 }
