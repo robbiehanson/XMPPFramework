@@ -18,10 +18,10 @@
 
 enum XMPPReconnectFlags
 {
-	kShouldReconnect   = 1 << 0,  // If set, disconnection was accidental, and autoReconnect may be used
-	kMultipleChanges   = 1 << 1,  // If set, there have been reachability changes during a connection attempt
-	kManuallyStarted   = 1 << 2,  // If set, we were started manually via manualStart method
-	kQueryingDelegates = 1 << 3,  // If set, we are awaiting response(s) from the delegate(s)
+	kShouldReconnect        = 1 << 0,  // If set, disconnection was accidental, and autoReconnect may be used
+	kShouldRestartReconnect = 1 << 1,  // If set, another reconnection will be attempted after the current one fails
+	kManuallyStarted        = 1 << 2,  // If set, we were started manually via manualStart method
+	kQueryingDelegates      = 1 << 3,  // If set, we are awaiting response(s) from the delegate(s)
 };
 
 enum XMPPReconnectConfig
@@ -146,21 +146,21 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		flags &= ~kShouldReconnect;
 }
 
-- (BOOL)multipleReachabilityChanges
+- (BOOL)shouldRestartReconnect
 {
 	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
 	
-	return (flags & kMultipleChanges) ? YES : NO;
+	return (flags & kShouldRestartReconnect) ? YES : NO;
 }
 
-- (void)setMultipleReachabilityChanges:(BOOL)flag
+- (void)setShouldRestartReconnect:(BOOL)flag
 {
 	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked private method outside moduleQueue");
 	
 	if (flag)
-		flags |= kMultipleChanges;
+		flags |= kShouldRestartReconnect;
 	else
-		flags &= ~kMultipleChanges;
+		flags &= ~kShouldRestartReconnect;
 }
 
 - (BOOL)manuallyStarted
@@ -263,7 +263,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	// the stream opens but prior to authentication completing.
 	// If this happens we still want to abide by the previous shouldReconnect setting.
 	
-	[self setMultipleReachabilityChanges:NO];
+	[self setShouldRestartReconnect:NO];
 	[self setManuallyStarted:NO];
 	
 	reconnectTicket++;
@@ -330,7 +330,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		[multicastDelegate xmppReconnect:self didDetectAccidentalDisconnect:reachabilityFlags];
 	}
 	
-	if ([self multipleReachabilityChanges])
+	if ([self shouldRestartReconnect])
 	{
 		// While the previous connection attempt was in progress, the reachability of the xmpp host changed.
 		// This means that while the previous attempt failed, an attempt now might succeed.
@@ -594,7 +594,7 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 					
 					if (shouldAttemptReconnect)
 					{
-						[self setMultipleReachabilityChanges:NO];
+						[self setShouldRestartReconnect:NO];
 						previousReachabilityFlags = reachabilityFlags;
 						
                         [xmppStream abortConnecting];
@@ -608,9 +608,9 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
                             [xmppStream connectWithTimeout:XMPPStreamTimeoutNone error:nil];
                         }
 					}
-					else if ([self multipleReachabilityChanges])
+					else if ([self shouldRestartReconnect])
 					{
-						[self setMultipleReachabilityChanges:NO];
+						[self setShouldRestartReconnect:NO];
 						previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 						
 						[self maybeAttemptReconnect];
