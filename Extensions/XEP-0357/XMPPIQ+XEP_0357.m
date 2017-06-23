@@ -32,6 +32,7 @@ NSString *const XMPPPushXMLNS = @"urn:xmpp:push:0";
     
     if ([options count]) {
         NSXMLElement *dataForm = [self elementWithName:@"x" xmlns:@"jabber:x:data"];
+        [dataForm addAttributeWithName:@"type" stringValue:@"submit"];
         NSXMLElement *formTypeField = [NSXMLElement elementWithName:@"field"];
         [formTypeField addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
         [formTypeField addChild:[NSXMLElement elementWithName:@"value" stringValue:@"http://jabber.org/protocol/pubsub#publish-options"]];
