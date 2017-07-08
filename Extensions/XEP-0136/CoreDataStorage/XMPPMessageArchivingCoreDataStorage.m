@@ -20,6 +20,7 @@
 {
 	NSString *messageEntityName;
 	NSString *contactEntityName;
+    NSArray<NSString *> *relevantContentXPaths;
 }
 
 @end
@@ -57,6 +58,8 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	
 	messageEntityName = @"XMPPMessageArchiving_Message_CoreDataObject";
 	contactEntityName = @"XMPPMessageArchiving_Contact_CoreDataObject";
+    
+    relevantContentXPaths = @[@"./body"];
 }
 
 /**
@@ -192,6 +195,26 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	return result;
 }
 
+- (BOOL)messageContainsRelevantContent:(XMPPMessage *)message
+{
+    for (NSString *XPath in self.relevantContentXPaths) {
+        NSError *error;
+        NSArray *nodes = [message nodesForXPath:XPath error:&error];
+        if (!nodes) {
+            XMPPLogError(@"%@: %@ - Error querying XPath (%@): %@", THIS_FILE, THIS_METHOD, XPath, error);
+            continue;
+        }
+        
+        for (NSXMLNode *node in nodes) {
+            if (node.stringValue.length > 0) {
+                return YES;
+            }
+        }
+    }
+    
+    return NO;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -322,6 +345,36 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	return [NSEntityDescription entityForName:[self contactEntityName] inManagedObjectContext:moc];
 }
 
+- (NSArray<NSString *> *)relevantContentXPaths
+{
+    __block NSArray *result;
+    
+    dispatch_block_t block = ^{
+        result = relevantContentXPaths;
+    };
+    
+    if (dispatch_get_specific(storageQueueTag))
+        block();
+    else
+        dispatch_sync(storageQueue, block);
+    
+    return result;
+}
+
+- (void)setRelevantContentXPaths:(NSArray<NSString *> *)relevantContentXPathsToSet
+{
+    NSArray *newValue = [relevantContentXPathsToSet copy];
+    
+    dispatch_block_t block = ^{
+        relevantContentXPaths = newValue;
+    };
+    
+    if (dispatch_get_specific(storageQueueTag))
+        block();
+    else
+        dispatch_async(storageQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Storage Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -339,9 +392,9 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	BOOL isComposing = NO;
 	BOOL shouldDeleteComposingMessage = NO;
 	
-	if ([messageBody length] == 0)
+	if (![self messageContainsRelevantContent:message])
 	{
-		// Message doesn't have a body.
+		// Message doesn't have any content relevant for the module's user.
 		// Check to see if it has a chat state (composing, paused, etc).
 		
 		isComposing = [message hasComposingChatState];
@@ -440,7 +493,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 			
 			// Create or update contact (if message with actual content)
 			
-			if ([messageBody length] > 0)
+			if ([self messageContainsRelevantContent:message])
 			{
 				BOOL didCreateNewContact = NO;
 				
