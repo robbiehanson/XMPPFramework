@@ -59,7 +59,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	messageEntityName = @"XMPPMessageArchiving_Message_CoreDataObject";
 	contactEntityName = @"XMPPMessageArchiving_Contact_CoreDataObject";
     
-    relevantContentXPaths = @[@"./body"];
+    relevantContentXPaths = @[@"./*[local-name()='body']"];
 }
 
 /**
