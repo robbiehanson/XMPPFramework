@@ -43,7 +43,7 @@
 	self.checkDelegate = false;
 	XCTestExpectation *expectation = [self expectationWithDescription:@"receive message and correctly stored"];
 
-	XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"test.sqlite" storeOptions:nil];
+	XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testReceiveMessageWithStorage.sqlite" storeOptions:nil];
     storage.autoRemovePreviousDatabaseFile = YES;
 
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
@@ -91,7 +91,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"receive affiliation message and correctly stored"];
     
-    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"test.sqlite" storeOptions:nil];
+    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testReceiveAffiliationMessageWithStorage.sqlite" storeOptions:nil];
     storage.autoRemovePreviousDatabaseFile = YES;
     
     XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
@@ -140,7 +140,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"message imported"];
     
-    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"test.sqlite" storeOptions:nil];
+    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testImportMessage.sqlite" storeOptions:nil];
     storage.autoRemovePreviousDatabaseFile = YES;
     
     XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
@@ -186,7 +186,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"only one of two messages imported"];
     
-    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"test.sqlite" storeOptions:nil];
+    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testImportMessageUniquing.sqlite" storeOptions:nil];
     storage.autoRemovePreviousDatabaseFile = YES;
     
     XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
