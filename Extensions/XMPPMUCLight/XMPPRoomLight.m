@@ -14,6 +14,7 @@ static NSString *const XMPPRoomLightConfiguration = @"urn:xmpp:muclight:0#config
 static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 @interface XMPPRoomLight() {
+    BOOL shouldStoreAffiliationChangeMessages;
 	NSString *roomname;
 	NSString *subject;
     NSArray<NSXMLElement*> *knownMembersList;
@@ -75,6 +76,33 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		dispatch_sync(moduleQueue, block);
 	
 	[super deactivate];
+}
+
+- (BOOL)shouldStoreAffiliationChangeMessages
+{
+    __block BOOL result;
+    dispatch_block_t block = ^{ @autoreleasepool {
+        result = shouldStoreAffiliationChangeMessages;
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setShouldStoreAffiliationChangeMessages:(BOOL)newValue
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        shouldStoreAffiliationChangeMessages = newValue;
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
 }
 
 - (nonnull NSString *)roomname {
@@ -634,13 +662,16 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 	BOOL destroyRoom = false;
 	BOOL changeConfiguration = false;
+    BOOL changeAffiliantions = false;
 	NSArray <NSXMLElement*> *xElements = [message elementsForName:@"x"];
 	for (NSXMLElement *x in xElements) {
 		if ([x.xmlns isEqualToString:XMPPRoomLightDestroy]) {
 			destroyRoom = true;
 		} else if ([x.xmlns isEqualToString:XMPPRoomLightConfiguration]){
 			changeConfiguration = true;
-		}
+        } else if ([x.xmlns isEqualToString:XMPPRoomLightAffiliations]) {
+            changeAffiliantions = true;
+        }
 	}
 	// Is this a message we need to store (a chat message)?
 	//
@@ -657,6 +688,8 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		[self handleConfigElements:configElements];
 
 		[multicastDelegate xmppRoomLight:self configurationChanged:message];
+    } else if (changeAffiliantions && self.shouldStoreAffiliationChangeMessages) {
+        [xmppRoomLightStorage handleIncomingMessage:message room:self];
 	}else{
 		// Todo... Handle other types of messages.
 	}
