@@ -1,5 +1,6 @@
 #import "XMPPRoomLightCoreDataStorage+XEP_0313.h"
 #import "XMPPRoomLightCoreDataStorageProtected.h"
+#import "XMPPRoomMessage.h"
 
 @implementation XMPPRoomLightCoreDataStorage (XEP_0313)
 
@@ -42,6 +43,15 @@
     fetchRequest.fetchLimit = 1;
     
     NSArray *results = [moc executeFetchRequest:fetchRequest error:NULL];
+    
+    if (messageBody.length == 0) {
+        // for non-body messages fall back to comparing <x> elements; this has to be done post-fetch as managed objects lack relevant attributes
+        results = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+            id<XMPPRoomMessage> evaluatedMessage = evaluatedObject;
+            return [[[[evaluatedMessage message] elementsForName:@"x"] valueForKey:@"XMLString"] isEqual:
+                    [[message elementsForName:@"x"] valueForKey:@"XMLString"]];
+        }]];
+    }
     
     return results && results.count == 0;
 }
