@@ -48,7 +48,12 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 @interface XMPPSRVResolver ()
 {
-    __unsafe_unretained id delegate;
+#if __has_feature(objc_arc_weak)
+    __weak id<XMPPSRVResolverDelegate> delegate;
+#else
+    __unsafe_unretained id<XMPPSRVResolverDelegate> delegate;
+#endif
+    
     dispatch_queue_t delegateQueue;
     
     dispatch_queue_t resolverQueue;
@@ -71,8 +76,9 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 @implementation XMPPSRVResolver
 
-- (id)initWithdDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)dq resolverQueue:(dispatch_queue_t)rq
-{
+- (instancetype)initWithDelegate:(id<XMPPSRVResolverDelegate>)aDelegate
+                   delegateQueue:(dispatch_queue_t)dq
+                   resolverQueue:(nullable dispatch_queue_t)rq {
 	NSParameterAssert(aDelegate != nil);
 	NSParameterAssert(dq != NULL);
 	
@@ -290,9 +296,16 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 - (void)succeed
 {
+    NSParameterAssert(delegate != nil);
+    NSParameterAssert(delegateQueue != nil);
 	NSAssert(dispatch_get_specific(resolverQueueTag), @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
+    
+    if (!delegate || !delegateQueue) {
+        XMPPLogError(@"%@: No delegate or queue set for SRV resolver.", THIS_FILE);
+        return;
+    }
 	
 	[self sortResults];
 	
@@ -644,6 +657,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 
 + (NSString *)srvNameFromXMPPDomain:(NSString *)xmppDomain
 {
+    NSParameterAssert(xmppDomain != nil);
 	if (xmppDomain == nil)
 		return nil;
 	else
