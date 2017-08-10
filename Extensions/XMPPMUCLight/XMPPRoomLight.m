@@ -660,19 +660,11 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		return; // Stanza isn't for our room
 	}
 
-	BOOL destroyRoom = false;
-	BOOL changeConfiguration = false;
-    BOOL changeAffiliantions = false;
-	NSArray <NSXMLElement*> *xElements = [message elementsForName:@"x"];
-	for (NSXMLElement *x in xElements) {
-		if ([x.xmlns isEqualToString:XMPPRoomLightDestroy]) {
-			destroyRoom = true;
-		} else if ([x.xmlns isEqualToString:XMPPRoomLightConfiguration]){
-			changeConfiguration = true;
-        } else if ([x.xmlns isEqualToString:XMPPRoomLightAffiliations]) {
-            changeAffiliantions = true;
-        }
-	}
+    // note: do not use [message elementsForName:@"x"] as this will fail to find namespace-qualified elements in Apple's NSXML implementation (DDXML works fine)
+	BOOL destroyRoom = [message elementsForLocalName:@"x" URI:XMPPRoomLightDestroy].count > 0;
+	BOOL changeConfiguration = [message elementsForLocalName:@"x" URI:XMPPRoomLightConfiguration].count > 0;;
+    BOOL changeAffiliantions = [message elementsForLocalName:@"x" URI:XMPPRoomLightAffiliations].count > 0;;
+    
 	// Is this a message we need to store (a chat message)?
 	//
 	// We store messages that from is full room-id@domain/user-who-sends-message

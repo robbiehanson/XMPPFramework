@@ -2,6 +2,12 @@
 #import "XMPPRoomLightCoreDataStorageProtected.h"
 #import "XMPPRoomMessage.h"
 
+@interface XMPPMessage (XMPPRoomLightCoreDataStorage_XEP_0313)
+
+- (NSDictionary<NSString *, NSString *> *)xElementStringsDictionary;
+
+@end
+
 @implementation XMPPRoomLightCoreDataStorage (XEP_0313)
 
 - (void)importRemoteArchiveMessage:(XMPPMessage *)message withTimestamp:(NSDate *)archiveTimestamp inRoom:(XMPPRoomLight *)room fromStream:(XMPPStream *)stream
@@ -48,12 +54,30 @@
         // for non-body messages fall back to comparing <x> elements; this has to be done post-fetch as managed objects lack relevant attributes
         results = [results filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
             id<XMPPRoomMessage> evaluatedMessage = evaluatedObject;
-            return [[[[evaluatedMessage message] elementsForName:@"x"] valueForKey:@"XMLString"] isEqual:
-                    [[message elementsForName:@"x"] valueForKey:@"XMLString"]];
+            return [[[evaluatedMessage message] xElementStringsDictionary] isEqualToDictionary:[message xElementStringsDictionary]];
         }]];
     }
     
     return results && results.count == 0;
+}
+
+@end
+
+@implementation XMPPMessage (XMPPRoomLightCoreDataStorage_XEP_0313)
+
+- (NSDictionary<NSString *,NSString *> *)xElementStringsDictionary
+{
+    NSMutableDictionary *xElementStringsDictionary = [NSMutableDictionary dictionary];
+    
+    // Enumerating children due to a bug in Apple's NSXML implementation where -elementsForName: does not pick up namespace-qualified ones
+    for (NSXMLNode *node in self.children) {
+        if (node.kind == NSXMLElementKind && [node.name isEqualToString:@"x"]) {
+            // Returning XML strings as equality test in KissXML is based on comparing node pointers
+            xElementStringsDictionary[node.name] = node.XMLString;
+        }
+    }
+    
+    return xElementStringsDictionary;
 }
 
 @end
