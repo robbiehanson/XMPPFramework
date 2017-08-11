@@ -560,7 +560,7 @@ static NSMutableSet *databaseFileNames;
 		{
 			return;
 		}
-		
+        
 		XMPPLogVerbose(@"%@: Creating persistentStoreCoordinator", [self class]);
 		
 		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
