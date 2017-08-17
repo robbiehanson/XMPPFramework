@@ -708,7 +708,8 @@ static BOOL SupportsWeakReferences(id delegate)
 {
     dispatch_group_enter(self.continuityGroup);
     
-    dispatch_queue_t contextTransferQueue = dispatch_queue_create_with_target("GCDMulticastDelegateInvocationContext.contextTransferQueue", nil, targetQueue);
+	dispatch_queue_t contextTransferQueue = dispatch_queue_create("GCDMulticastDelegateInvocationContext.contextTransferQueue", NULL);
+	dispatch_set_target_queue(contextTransferQueue, targetQueue);
     dispatch_queue_set_specific(contextTransferQueue,
                                 GCDMulticastDelegateInvocationContextKey,
                                 (void *)CFBridgingRetain(self),
