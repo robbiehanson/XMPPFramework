@@ -396,6 +396,12 @@
 			[origInvocation getArgument:&value atIndex:i];
 			[dupInvocation setArgument:&value atIndex:i];
 		}
+        else if (*type == ':')
+        {
+            void *value;
+            [origInvocation getArgument:&value atIndex:i];
+            [dupInvocation setArgument:&value atIndex:i];
+        }
 		else if (*type == '^')
 		{
 			void *block;
