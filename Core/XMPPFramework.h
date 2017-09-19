@@ -34,6 +34,7 @@
 #import "XMPPTimer.h"
 #import "XMPPCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
+#import "XMPPDelayedDelivery.h"
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPFileTransfer.h"
 #import "XMPPIncomingFileTransfer.h"
