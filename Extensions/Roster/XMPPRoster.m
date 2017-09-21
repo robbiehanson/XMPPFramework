@@ -514,8 +514,11 @@ enum XMPPRosterFlags
 
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
-
+    
+    NSString *uuid = [[NSUUID UUID] UUIDString];
+    
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" child:query];
+    [iq addAttributeWithName:@"id" stringValue:uuid];
 
 	[xmppStream sendElement:iq];
 
