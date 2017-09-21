@@ -352,7 +352,7 @@
 	// </iq>
 	
 	NSXMLElement *pref = [NSXMLElement elementWithName:@"pref" xmlns:XMLNS_XMPP_ARCHIVE];
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:nil child:pref];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:[xmppStream generateUUID] child:pref];
 	
 	[sender sendElement:iq];
 }
