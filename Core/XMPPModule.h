@@ -32,6 +32,7 @@
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue;
 
 - (BOOL)activate:(XMPPStream *)aXmppStream;
+- (void)didActivate;
 - (void)deactivate;
 
 - (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
