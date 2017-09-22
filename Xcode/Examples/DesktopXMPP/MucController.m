@@ -51,7 +51,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		// xmppRoomStorage automatically inherits the delegate(s) of it's parent xmppRoom
 		
 		[xmppRoom activate:xmppStream];
-		[xmppRoom joinRoomUsingNickname:@"xmppFrameowrkMucTest" history:nil];
+		[xmppRoom joinRoomUsingNickname:@"xmppFrameworkMucTest" history:nil];
 		
 		#if USE_HYBRID_STORAGE
 		messages  = [[NSMutableArray alloc] init];
