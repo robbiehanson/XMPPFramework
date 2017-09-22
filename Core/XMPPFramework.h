@@ -105,6 +105,7 @@
 #import "TURNSocket.h"
 #import "XMPPIQ+XEP_0066.h"
 #import "XMPPMessage+XEP_0066.h"
+#import "XMPPOutOfBandResourceMessaging.h"
 #import "XMPPRegistration.h"
 #import "NSDate+XMPPDateTimeProfiles.h"
 #import "XMPPDateTimeProfiles.h"
