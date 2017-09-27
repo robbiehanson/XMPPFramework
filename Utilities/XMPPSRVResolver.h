@@ -7,8 +7,10 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 extern NSString *const XMPPSRVResolverErrorDomain;
-
+@protocol XMPPSRVResolverDelegate;
+@class XMPPSRVRecord;
 
 @interface XMPPSRVResolver : NSObject
 
@@ -16,9 +18,11 @@ extern NSString *const XMPPSRVResolverErrorDomain;
  * The delegate & delegateQueue are mandatory.
  * The resolverQueue is optional. If NULL, it will automatically create it's own internal queue.
 **/
-- (id)initWithdDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)dq resolverQueue:(dispatch_queue_t)rq;
+- (instancetype)initWithDelegate:(id<XMPPSRVResolverDelegate>)delegate
+                   delegateQueue:(dispatch_queue_t)delegateQueue
+                   resolverQueue:(nullable dispatch_queue_t)resolverQueue;
 
-@property (strong, readonly) NSString *srvName;
+@property (strong, readonly, nullable) NSString *srvName;
 @property (readonly) NSTimeInterval timeout;
 
 - (void)startWithSRVName:(NSString *)aSRVName timeout:(NSTimeInterval)aTimeout;
@@ -33,10 +37,9 @@ extern NSString *const XMPPSRVResolverErrorDomain;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @protocol XMPPSRVResolverDelegate
-
-- (void)xmppSRVResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray *)records;
+@optional
+- (void)xmppSRVResolver:(XMPPSRVResolver *)sender didResolveRecords:(NSArray<XMPPSRVRecord*> *)records;
 - (void)xmppSRVResolver:(XMPPSRVResolver *)sender didNotResolveDueToError:(NSError *)error;
-
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,9 +57,15 @@ extern NSString *const XMPPSRVResolverErrorDomain;
 	NSUInteger srvResultsIndex;
 }
 
-+ (XMPPSRVRecord *)recordWithPriority:(UInt16)priority weight:(UInt16)weight port:(UInt16)port target:(NSString *)target;
++ (instancetype)recordWithPriority:(UInt16)priority
+                            weight:(UInt16)weight
+                              port:(UInt16)port
+                            target:(NSString *)target;
 
-- (id)initWithPriority:(UInt16)priority weight:(UInt16)weight port:(UInt16)port target:(NSString *)target;
+- (instancetype)initWithPriority:(UInt16)priority
+                          weight:(UInt16)weight
+                            port:(UInt16)port
+                          target:(NSString *)target;
 
 @property (nonatomic, readonly) UInt16 priority;
 @property (nonatomic, readonly) UInt16 weight;
@@ -64,3 +73,4 @@ extern NSString *const XMPPSRVResolverErrorDomain;
 @property (nonatomic, readonly) NSString *target;
 
 @end
+NS_ASSUME_NONNULL_END

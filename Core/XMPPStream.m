@@ -74,7 +74,7 @@ enum XMPPStreamConfig
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface XMPPStream ()
+@interface XMPPStream () <XMPPSRVResolverDelegate>
 {
 	dispatch_queue_t xmppQueue;
 	void *xmppQueueTag;
@@ -1144,7 +1144,7 @@ enum XMPPStreamConfig
 			
 			state = STATE_XMPP_RESOLVING_SRV;
 			
-			srvResolver = [[XMPPSRVResolver alloc] initWithdDelegate:self delegateQueue:xmppQueue resolverQueue:NULL];
+			srvResolver = [[XMPPSRVResolver alloc] initWithDelegate:self delegateQueue:xmppQueue resolverQueue:NULL];
 			
 			srvResults = nil;
 			srvResultsIndex = 0;

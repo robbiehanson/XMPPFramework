@@ -59,14 +59,14 @@ class XMPPPushTests: XCTestCase {
         /**
         <iq type="set">
             <enable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo">
-                <x xmlns="jabber:x:data">
+                <x xmlns="jabber:x:data" type="submit">
                     <field var="FORM_TYPE"><value>http://jabber.org/protocol/pubsub#publish-options</value></field>
                     <field var="secret"><value>eruio234vzxc2kla-91</value></field>
                 </x>
             </enable>
         </iq>
         */
-        XCTAssertTrue(enableStanza.xmlString == "<iq type=\"set\"><enable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"><x xmlns=\"jabber:x:data\"><field var=\"FORM_TYPE\"><value>http://jabber.org/protocol/pubsub#publish-options</value></field><field var=\"secret\"><value>eruio234vzxc2kla-91</value></field></x></enable></iq>","XML does not match \(enableStanza.xmlString)")
+        XCTAssertTrue(enableStanza.xmlString == "<iq type=\"set\"><enable xmlns=\"urn:xmpp:push:0\" jid=\"push-5.client.example\" node=\"yxs32uqsflafdk3iuqo\"><x xmlns=\"jabber:x:data\" type=\"submit\"><field var=\"FORM_TYPE\"><value>http://jabber.org/protocol/pubsub#publish-options</value></field><field var=\"secret\"><value>eruio234vzxc2kla-91</value></field></x></enable></iq>","XML does not match \(enableStanza.xmlString)")
     }
     
     func testDisableStanza() {

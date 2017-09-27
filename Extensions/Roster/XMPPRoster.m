@@ -515,9 +515,7 @@ enum XMPPRosterFlags
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 
-	NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
-	[iq addAttributeWithName:@"type" stringValue:@"set"];
-	[iq addChild:query];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" child:query];
 
 	[xmppStream sendElement:iq];
 

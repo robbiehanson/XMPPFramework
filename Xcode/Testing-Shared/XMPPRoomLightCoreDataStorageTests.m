@@ -43,7 +43,7 @@
 	self.checkDelegate = false;
 	XCTestExpectation *expectation = [self expectationWithDescription:@"receive message and correctly stored"];
 
-	XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"test.sqlite" storeOptions:nil];
+	XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testReceiveMessageWithStorage.sqlite" storeOptions:nil];
     storage.autoRemovePreviousDatabaseFile = YES;
 
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
@@ -86,12 +86,61 @@
 	}];
 }
 
+- (void)testReceiveAffiliationMessageWithStorage {
+    self.checkDelegate = false;
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"receive affiliation message and correctly stored"];
+    
+    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testReceiveAffiliationMessageWithStorage.sqlite" storeOptions:nil];
+    storage.autoRemovePreviousDatabaseFile = YES;
+    
+    XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+    streamTest.myJID = [XMPPJID jidWithString:@"myUser@domain.com"];
+    XMPPJID *jid = [XMPPJID jidWithString:@"room@domain.com"];
+    XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithRoomLightStorage:storage jid:jid roomname:@"test" dispatchQueue:nil];
+    roomLight.shouldStoreAffiliationChangeMessages = true;
+    [roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    [roomLight activate:streamTest];
+    
+    [streamTest fakeMessageResponse:[self fakeIncomingAffiliationMessage]];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        NSManagedObjectContext *context = [storage mainThreadManagedObjectContext];
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPRoomLightMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:context];
+        
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"roomJIDStr = %@", jid.full];
+        NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"localTimestamp" ascending:YES];
+        
+        NSFetchRequest *request = [[NSFetchRequest alloc] init];
+        request.entity = entity;
+        request.predicate = predicate;
+        request.sortDescriptors = @[sortDescriptor];
+        
+        NSError *error;
+        XMPPRoomLightMessageCoreDataStorageObject *roomMessage = [[context executeFetchRequest:request error:&error] firstObject];
+        XCTAssertNil(error);
+        XCTAssertEqualObjects(roomMessage.jid.full, @"room@domain.com");
+        XCTAssertEqualObjects(roomMessage.body, @"");
+        XCTAssertEqualObjects(roomMessage.nickname, nil);
+        XCTAssertFalse(roomMessage.isFromMe);
+        
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectationsWithTimeout:3 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
 - (void)testImportMessage {
     self.checkDelegate = false;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"message imported"];
     
-    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"test.sqlite" storeOptions:nil];
+    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testImportMessage.sqlite" storeOptions:nil];
     storage.autoRemovePreviousDatabaseFile = YES;
     
     XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
@@ -137,7 +186,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"only one of two messages imported"];
     
-    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"test.sqlite" storeOptions:nil];
+    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testImportMessageUniquing.sqlite" storeOptions:nil];
     storage.autoRemovePreviousDatabaseFile = YES;
     
     XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
@@ -195,6 +244,26 @@
 	NSError *error;
 	NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
 	return [XMPPMessage messageFromElement:[doc rootElement]];
+}
+
+- (XMPPMessage *)fakeIncomingAffiliationMessage{
+    NSMutableString *s = [NSMutableString string];
+    [s appendString: @"<message xmlns='jabber:client' \
+                            from='room@domain.com' \
+                            to='test.user@erlang-solutions.com' \
+                            id='C7A969D8-C711-4516-9313-10EA9927B39B' \
+                            type='groupchat'>"];
+    [s appendString: @"    <body/>"];
+    [s appendString: @"    <x xmlns='urn:xmpp:muclight:0#affiliations'> \
+                                <prev-version>1111111</prev-version> \
+                                <version>aaaaaaa</version> \
+                                <user affiliation='member'>crone1@shakespeare.lit</user> \
+                            </x>"];
+    [s appendString: @"</message>"];
+    
+    NSError *error;
+    NSXMLDocument *doc = [[NSXMLDocument alloc] initWithXMLString:s options:0 error:&error];
+    return [XMPPMessage messageFromElement:[doc rootElement]];
 }
 
 @end
