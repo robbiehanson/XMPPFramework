@@ -34,22 +34,6 @@ enum XMPPRoomState
 
 @implementation XMPPRoom
 
-- (id)init
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPRoom.h are supported.
-	
-	return [self initWithRoomStorage:nil jid:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPRoom.h are supported.
-	
-	return [self initWithRoomStorage:nil jid:nil dispatchQueue:queue];
-}
-
 - (id)initWithRoomStorage:(id <XMPPRoomStorage>)storage jid:(XMPPJID *)aRoomJID
 {
 	return [self initWithRoomStorage:storage jid:aRoomJID dispatchQueue:NULL];
