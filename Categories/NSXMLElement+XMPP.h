@@ -98,17 +98,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (uint64_t)attributeUInt64ValueForName:(NSString *)name;
 - (NSInteger)attributeIntegerValueForName:(NSString *)name;
 - (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name;
-- (NSString *)attributeStringValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberIntValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberBoolValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberFloatValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberDoubleValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberInt32ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberUInt32ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberInt64ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberUInt64ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberIntegerValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberUnsignedIntegerValueForName:(NSString *)name;
+- (nullable NSString *)attributeStringValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberIntValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberBoolValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberFloatValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberDoubleValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberInt32ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberUInt32ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberInt64ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberUInt64ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberIntegerValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberUnsignedIntegerValueForName:(NSString *)name;
 
 - (int)attributeIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
 - (BOOL)attributeBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
