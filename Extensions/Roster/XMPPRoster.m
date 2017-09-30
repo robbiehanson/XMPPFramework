@@ -516,7 +516,7 @@ enum XMPPRosterFlags
 	[query addChild:item];
 
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" child:query];
-	[iq addAttributeWithName:@“id” stringValue:[xmppStream generateUUID]];
+	[iq addAttributeWithName:@"id" stringValue:[xmppStream generateUUID]];
 
 	[xmppStream sendElement:iq];
 
