@@ -131,6 +131,7 @@
 #import "XMPPStreamManagementMemoryStorage.h"
 #import "XMPPStreamManagementStanzas.h"
 #import "XMPPStreamManagement.h"
+#import "XMPPManagedMessaging.h"
 #import "XMPPAutoPing.h"
 #import "XMPPPing.h"
 #import "XMPPAutoTime.h"
