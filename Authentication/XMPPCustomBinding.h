@@ -38,6 +38,7 @@ typedef NS_ENUM(NSInteger, XMPPBindResult) {
  * A custom binding procedure may be plugged into an XMPPStream instance via the delegate method:
  * - (id <XMPPCustomBinding>)xmppStreamWillBind;
 **/
+NS_ASSUME_NONNULL_BEGIN
 @protocol XMPPCustomBinding <NSObject>
 @required
 
@@ -95,3 +96,4 @@ typedef NS_ENUM(NSInteger, XMPPBindResult) {
 - (BOOL)shouldSkipStartSessionAfterSuccessfulBinding;
 
 @end
+NS_ASSUME_NONNULL_END

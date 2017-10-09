@@ -10,6 +10,7 @@
 #import "XMPPSASLAuthentication.h"
 #import "XMPPStream.h"
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPSCRAMSHA1Authentication : NSObject <XMPPSASLAuthentication>
 
 @end
@@ -19,3 +20,4 @@
 - (BOOL)supportsSCRAMSHA1Authentication;
 
 @end
+NS_ASSUME_NONNULL_END

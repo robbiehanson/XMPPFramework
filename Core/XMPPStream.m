@@ -3628,7 +3628,7 @@ enum XMPPStreamConfig
 	
 	XMPPHandleAuthResponse result = [auth handleAuth:authResponse];
 	
-	if (result == XMPP_AUTH_SUCCESS)
+	if (result == XMPPHandleAuthResponseSuccess)
 	{
 		// We are successfully authenticated (via sasl:digest-md5)
 		[self setIsAuthenticated:YES];
@@ -3666,7 +3666,7 @@ enum XMPPStreamConfig
 		auth = nil;
 		
 	}
-	else if (result == XMPP_AUTH_FAIL)
+	else if (result == XMPPHandleAuthResponseFailed)
 	{
 		// Revert back to connected state (from authenticating state)
 		state = STATE_XMPP_CONNECTED;
@@ -3678,7 +3678,7 @@ enum XMPPStreamConfig
 		auth = nil;
 		
 	}
-	else if (result == XMPP_AUTH_CONTINUE)
+	else if (result == XMPPHandleAuthResponseContinue)
 	{
 		// Authentication continues.
 		// State doesn't change.

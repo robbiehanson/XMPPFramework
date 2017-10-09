@@ -2,7 +2,7 @@
 #import "XMPPSASLAuthentication.h"
 #import "XMPPStream.h"
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPPlainAuthentication : NSObject <XMPPSASLAuthentication>
 
 // This class implements the XMPPSASLAuthentication protocol.
@@ -20,3 +20,4 @@
 - (BOOL)supportsPlainAuthentication;
 
 @end
+NS_ASSUME_NONNULL_END

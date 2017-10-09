@@ -2,10 +2,10 @@
 #import "XMPPSASLAuthentication.h"
 #import "XMPP.h"
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPAnonymousAuthentication : NSObject <XMPPSASLAuthentication>
 
-- (id)initWithStream:(XMPPStream *)stream;
+- (instancetype)initWithStream:(XMPPStream *)stream;
 
 // This class implements the XMPPSASLAuthentication protocol.
 // 
@@ -43,3 +43,4 @@
 - (BOOL)authenticateAnonymously:(NSError **)errPtr;
 
 @end
+NS_ASSUME_NONNULL_END
