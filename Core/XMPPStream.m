@@ -3749,14 +3749,14 @@ enum XMPPStreamConfig
 	NSError *bindError = nil;
 	XMPPBindResult result = [customBinding start:&bindError];
 	
-	if (result == XMPP_BIND_CONTINUE)
+	if (result == XMPPBindResultContinue)
 	{
 		// Expected result
 		// Wait for reply from server, and forward to customBinding module.
 	}
 	else
 	{
-		if (result == XMPP_BIND_SUCCESS)
+		if (result == XMPPBindResultSuccess)
 		{
 			// It appears binding isn't needed (perhaps handled via auth)
 			
@@ -3767,14 +3767,14 @@ enum XMPPStreamConfig
 			
 			[self continuePostBinding:skipStartSessionOverride];
 		}
-		else if (result == XMPP_BIND_FAIL_FALLBACK)
+		else if (result == XMPPBindResultFailFallback)
 		{
 			// Custom binding isn't available for whatever reason,
 			// but the module has requested we fallback to standard binding.
 			
 			[self startStandardBinding];
 		}
-		else if (result == XMPP_BIND_FAIL_ABORT)
+		else if (result == XMPPBindResultFailAbort)
 		{
 			// Custom binding failed,
 			// and the module requested we abort.
@@ -3794,13 +3794,13 @@ enum XMPPStreamConfig
 	NSError *bindError = nil;
 	XMPPBindResult result = [customBinding handleBind:response withError:&bindError];
 	
-	if (result == XMPP_BIND_CONTINUE)
+	if (result == XMPPBindResultContinue)
 	{
 		// Binding still in progress
 	}
 	else
 	{
-		if (result == XMPP_BIND_SUCCESS)
+		if (result == XMPPBindResultSuccess)
 		{
 			// Binding complete. Continue.
 			
@@ -3811,14 +3811,14 @@ enum XMPPStreamConfig
 			
 			[self continuePostBinding:skipStartSessionOverride];
 		}
-		else if (result == XMPP_BIND_FAIL_FALLBACK)
+		else if (result == XMPPBindResultFailFallback)
 		{
 			// Custom binding failed for whatever reason,
 			// but the module has requested we fallback to standard binding.
 			
 			[self startStandardBinding];
 		}
-		else if (result == XMPP_BIND_FAIL_ABORT)
+		else if (result == XMPPBindResultFailAbort)
 		{
 			// Custom binding failed,
 			// and the module requested we abort.
