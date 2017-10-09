@@ -1,6 +1,20 @@
 #import <Foundation/Foundation.h>
 #import "XMPPElement.h"
 
+// https://xmpp.org/rfcs/rfc6121.html#presence-syntax-children-show
+typedef NS_ENUM(NSInteger, XMPPPresenceShow) {
+    /** Do not disturb */
+    XMPPPresenceShowDND,
+    /** Extended Away */
+    XMPPPresenceShowXA,
+    /** Away */
+    XMPPPresenceShowAway,
+    /** Unrecognized value, or not present */
+    XMPPPresenceShowOther,
+    /** Active and available for chatting */
+    XMPPPresenceShowChat
+};
+
 /**
  * The XMPPPresence class represents a <presence> element.
  * It extends XMPPElement, which in turn extends NSXMLElement.
@@ -29,11 +43,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, nullable) NSString *show;
 @property (nonatomic, readonly, nullable) NSString *status;
 
-- (int)priority;
+@property (nonatomic, readonly) NSInteger priority;
 
-- (int)intShow;
+/** This supercedes the previous intShow method */
+@property (nonatomic, readonly) XMPPPresenceShow showValue;
 
-- (BOOL)isErrorPresence;
+@property (nonatomic, readonly) XMPPPresenceShow intShow DEPRECATED_MSG_ATTRIBUTE("Use showValue instead. This property will be removed in a future release.");
+
+@property (nonatomic, readonly) BOOL isErrorPresence;
 
 @end
 NS_ASSUME_NONNULL_END

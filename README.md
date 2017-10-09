@@ -14,6 +14,14 @@ XMPPFramework provides a core implementation of RFC-3920 (the XMPP standard), al
 
 The minimum deployment target is iOS 8.0 / macOS 10.9 / tvOS 9.0.
 
+### Migration from 3.7 to 4.0
+
+There have been a number of changes to the public API of XMPPFramework in an attempt to improve the ergnomics and safety when used with Swift. Most Objective-C projects should see no issues, with a few minor exceptions. The process is still not complete so please submit issues and help if possible to minimize future breaking changes.
+
+* Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
+* Modern Syntax: Nullability, generics, and getter methods have been converted to readonly properties.
+* XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`.
+
 #### CocoaPods
 
 The easiest way to install XMPPFramework is using CocoaPods. Remember to add to the top of your `Podfile` the `use_frameworks!` line (even if you are not using swift):

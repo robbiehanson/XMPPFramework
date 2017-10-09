@@ -87,22 +87,22 @@
 	self.presenceStr = [newPresence compactXMLString];
 }
 
-- (int)priority
+- (NSInteger)priority
 {
 	return [[self priorityNum] intValue];
 }
 
-- (void)setPriority:(int)priority
+- (void)setPriority:(NSInteger)priority
 {
 	self.priorityNum = @(priority);
 }
 
-- (int)intShow
+- (XMPPPresenceShow)intShow
 {
 	return [[self showNum] intValue];
 }
 
-- (void)setIntShow:(int)intShow
+- (void)setIntShow:(XMPPPresenceShow)intShow
 {
 	self.showNum = @(intShow);
 }
@@ -172,7 +172,7 @@
 	self.presence = presence;
 	
 	self.priority = [presence priority];
-	self.intShow = [presence intShow];
+	self.intShow = [presence showValue];
 	
 	self.type = [presence type];
 	self.show = [presence show];
@@ -188,8 +188,8 @@
 	XMPPPresence *mp = [self presence];
 	XMPPPresence *ap = [another presence];
 	
-	int mpp = [mp priority];
-	int app = [ap priority];
+	NSInteger mpp = [mp priority];
+	NSInteger app = [ap priority];
 	
 	if(mpp < app)
 		return NSOrderedDescending;
@@ -198,8 +198,8 @@
 	
 	// Priority is the same.
 	// Determine who is more available based on their show.
-	int mps = [mp intShow];
-	int aps = [ap intShow];
+	XMPPPresenceShow mps = [mp showValue];
+	XMPPPresenceShow aps = [ap showValue];
 	
 	if(mps < aps)
 		return NSOrderedDescending;
