@@ -97,22 +97,6 @@
 
 @synthesize storage = storage;
 
-- (id)init
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPStreamManagement.h are supported.
-	
-	return [self initWithStorage:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPStreamManagement.h are supported.
-	
-	return [self initWithStorage:nil dispatchQueue:queue];
-}
-
 - (id)initWithStorage:(id <XMPPStreamManagementStorage>)inStorage
 {
 	return [self initWithStorage:inStorage dispatchQueue:NULL];
@@ -648,8 +632,8 @@
  *   YES if the stream was resumed.
  *   NO otherwise.
 **/
-- (BOOL)didResumeWithAckedStanzaIds:(NSArray **)stanzaIdsPtr
-					 serverResponse:(NSXMLElement **)responsePtr
+- (BOOL)didResumeWithAckedStanzaIds:(NSArray<id> * _Nullable * _Nullable)stanzaIdsPtr
+                     serverResponse:(NSXMLElement * _Nullable * _Nullable)responsePtr
 {
 	__block BOOL result = NO;
 	__block NSArray *stanzaIds = nil;
