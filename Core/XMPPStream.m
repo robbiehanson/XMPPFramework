@@ -1778,7 +1778,7 @@ enum XMPPStreamConfig
  * 
  * If the XMPPStream is not connected, or the server doesn't support in-band registration, this method does nothing.
 **/
-- (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr
+- (BOOL)registerWithPassword:(NSString *)password error:(NSError * __autoreleasing *)errPtr
 {
 	XMPPLogTrace();
 	
@@ -3628,7 +3628,7 @@ enum XMPPStreamConfig
 	
 	XMPPHandleAuthResponse result = [auth handleAuth:authResponse];
 	
-	if (result == XMPP_AUTH_SUCCESS)
+	if (result == XMPPHandleAuthResponseSuccess)
 	{
 		// We are successfully authenticated (via sasl:digest-md5)
 		[self setIsAuthenticated:YES];
@@ -3666,7 +3666,7 @@ enum XMPPStreamConfig
 		auth = nil;
 		
 	}
-	else if (result == XMPP_AUTH_FAIL)
+	else if (result == XMPPHandleAuthResponseFailed)
 	{
 		// Revert back to connected state (from authenticating state)
 		state = STATE_XMPP_CONNECTED;
@@ -3678,7 +3678,7 @@ enum XMPPStreamConfig
 		auth = nil;
 		
 	}
-	else if (result == XMPP_AUTH_CONTINUE)
+	else if (result == XMPPHandleAuthResponseContinue)
 	{
 		// Authentication continues.
 		// State doesn't change.
@@ -3749,14 +3749,14 @@ enum XMPPStreamConfig
 	NSError *bindError = nil;
 	XMPPBindResult result = [customBinding start:&bindError];
 	
-	if (result == XMPP_BIND_CONTINUE)
+	if (result == XMPPBindResultContinue)
 	{
 		// Expected result
 		// Wait for reply from server, and forward to customBinding module.
 	}
 	else
 	{
-		if (result == XMPP_BIND_SUCCESS)
+		if (result == XMPPBindResultSuccess)
 		{
 			// It appears binding isn't needed (perhaps handled via auth)
 			
@@ -3767,14 +3767,14 @@ enum XMPPStreamConfig
 			
 			[self continuePostBinding:skipStartSessionOverride];
 		}
-		else if (result == XMPP_BIND_FAIL_FALLBACK)
+		else if (result == XMPPBindResultFailFallback)
 		{
 			// Custom binding isn't available for whatever reason,
 			// but the module has requested we fallback to standard binding.
 			
 			[self startStandardBinding];
 		}
-		else if (result == XMPP_BIND_FAIL_ABORT)
+		else if (result == XMPPBindResultFailAbort)
 		{
 			// Custom binding failed,
 			// and the module requested we abort.
@@ -3794,13 +3794,13 @@ enum XMPPStreamConfig
 	NSError *bindError = nil;
 	XMPPBindResult result = [customBinding handleBind:response withError:&bindError];
 	
-	if (result == XMPP_BIND_CONTINUE)
+	if (result == XMPPBindResultContinue)
 	{
 		// Binding still in progress
 	}
 	else
 	{
-		if (result == XMPP_BIND_SUCCESS)
+		if (result == XMPPBindResultSuccess)
 		{
 			// Binding complete. Continue.
 			
@@ -3811,14 +3811,14 @@ enum XMPPStreamConfig
 			
 			[self continuePostBinding:skipStartSessionOverride];
 		}
-		else if (result == XMPP_BIND_FAIL_FALLBACK)
+		else if (result == XMPPBindResultFailFallback)
 		{
 			// Custom binding failed for whatever reason,
 			// but the module has requested we fallback to standard binding.
 			
 			[self startStandardBinding];
 		}
-		else if (result == XMPP_BIND_FAIL_ABORT)
+		else if (result == XMPPBindResultFailAbort)
 		{
 			// Custom binding failed,
 			// and the module requested we abort.
@@ -4218,7 +4218,10 @@ enum XMPPStreamConfig
 	
 	#if TARGET_OS_IPHONE
 	{
-		if (self.enableBackgroundingOnSocket)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        if (self.enableBackgroundingOnSocket)
+#pragma clang diagnostic pop
 		{
 			__block BOOL result;
 			
@@ -5062,16 +5065,7 @@ enum XMPPStreamConfig
 
 + (NSString *)generateUUID
 {
-	NSString *result = nil;
-	
-	CFUUIDRef uuid = CFUUIDCreate(NULL);
-	if (uuid)
-	{
-		result = (__bridge_transfer NSString *)CFUUIDCreateString(NULL, uuid);
-		CFRelease(uuid);
-	}
-	
-	return result;
+	return [NSUUID UUID].UUIDString;
 }
 
 - (NSString *)generateUUID

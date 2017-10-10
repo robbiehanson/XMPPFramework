@@ -4,15 +4,15 @@
 
 @interface XMPPMessage (XEP_0085)
 
-- (NSString *)chatState;
+@property (nonatomic, readonly, nullable) NSString *chatState;
 
-- (BOOL)hasChatState;
+@property (nonatomic, readonly) BOOL hasChatState;
 
-- (BOOL)hasActiveChatState;
-- (BOOL)hasComposingChatState;
-- (BOOL)hasPausedChatState;
-- (BOOL)hasInactiveChatState;
-- (BOOL)hasGoneChatState;
+@property (nonatomic, readonly) BOOL hasActiveChatState;
+@property (nonatomic, readonly) BOOL hasComposingChatState;
+@property (nonatomic, readonly) BOOL hasPausedChatState;
+@property (nonatomic, readonly) BOOL hasInactiveChatState;
+@property (nonatomic, readonly) BOOL hasGoneChatState;
 
 - (void)addActiveChatState;
 - (void)addComposingChatState;

@@ -1,13 +1,14 @@
 #import <Foundation/Foundation.h>
 
 @import KissXML;
-
+NS_ASSUME_NONNULL_BEGIN
+@protocol XMPPParserDelegate;
 @interface XMPPParser : NSObject
 
-- (id)initWithDelegate:(id)delegate delegateQueue:(dispatch_queue_t)dq;
-- (id)initWithDelegate:(id)delegate delegateQueue:(dispatch_queue_t)dq parserQueue:(dispatch_queue_t)pq;
+- (instancetype)initWithDelegate:(nullable id<XMPPParserDelegate>)delegate delegateQueue:(nullable dispatch_queue_t)dq;
+- (instancetype)initWithDelegate:(nullable id<XMPPParserDelegate>)delegate delegateQueue:(nullable dispatch_queue_t)dq parserQueue:(nullable dispatch_queue_t)pq;
 
-- (void)setDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
+- (void)setDelegate:(nullable id<XMPPParserDelegate>)delegate delegateQueue:(nullable dispatch_queue_t)delegateQueue;
 
 /**
  * Asynchronously parses the given data.
@@ -35,3 +36,4 @@
 - (void)xmppParserDidParseData:(XMPPParser *)sender;
 
 @end
+NS_ASSUME_NONNULL_END

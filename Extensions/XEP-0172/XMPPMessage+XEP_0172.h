@@ -3,6 +3,6 @@
 
 @interface XMPPMessage (XEP_0172)
 
-- (NSString *)nick;
+@property (nonatomic, readonly, nullable) NSString *nick;
 
 @end

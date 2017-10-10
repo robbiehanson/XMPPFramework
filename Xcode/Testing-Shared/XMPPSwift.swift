@@ -39,4 +39,10 @@ class XMPPSwift: XCTestCase {
         XCTAssertNotNil(parser)
     }
     
+    func testJIDCompare() {
+        let jid1 = XMPPJID(string: "a@a.com")!
+        let jid2 = XMPPJID(string: "b@b.com")!
+        XCTAssertFalse(jid1.isEqual(to: jid2, options: .bare))
+    }
+    
 }

@@ -31,28 +31,19 @@ NSString *const kXMPPvCardAvatarElement = @"x";
 NSString *const kXMPPvCardAvatarNS = @"vcard-temp:x:update";
 NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
+@interface XMPPvCardAvatarModule() {
+    __strong XMPPvCardTempModule *_xmppvCardTempModule;
+    __strong id <XMPPvCardAvatarStorage> _moduleStorage;
+    
+    BOOL _autoClearMyvcard;
+}
+@end
 
 @implementation XMPPvCardAvatarModule
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Init/dealloc
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (id)init
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPvCardAvatarModule.h are supported.
-	
-	return [self initWithvCardTempModule:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPvCardAvatarModule.h are supported.
-	
-	return [self initWithvCardTempModule:nil dispatchQueue:NULL];
-}
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule
 {

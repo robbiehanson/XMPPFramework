@@ -12,8 +12,8 @@
 @property (nonatomic, strong) XMPPJID *jid;
 @property (nonatomic, strong) XMPPPresence *presence;
 
-@property (nonatomic, assign) int priority;
-@property (nonatomic, assign) int intShow;
+@property (nonatomic, assign) NSInteger priority;
+@property (nonatomic, assign) XMPPPresenceShow intShow;
 
 @property (nonatomic, strong) NSString * jidStr;
 @property (nonatomic, strong) NSString * presenceStr;

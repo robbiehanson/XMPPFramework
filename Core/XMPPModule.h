@@ -13,6 +13,7 @@
  * The module also automatically registers/unregisters itself with the
  * xmpp stream during the activate/deactive methods.
 **/
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPModule : NSObject
 {
 	XMPPStream *xmppStream;
@@ -26,10 +27,10 @@
 @property (readonly) dispatch_queue_t moduleQueue;
 @property (readonly) void *moduleQueueTag;
 
-@property (strong, readonly) XMPPStream *xmppStream;
+@property (strong, readonly, nullable) XMPPStream *xmppStream;
 
-- (id)init;
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue;
 
 - (BOOL)activate:(XMPPStream *)aXmppStream;
 - (void)deactivate;
@@ -38,6 +39,7 @@
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate;
 
-- (NSString *)moduleName;
+@property (nonatomic, readonly) NSString *moduleName;
 
 @end
+NS_ASSUME_NONNULL_END

@@ -339,11 +339,11 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 {
 	if ([[response name] isEqualToString:@"rebind"])
 	{
-		return XMPP_AUTH_SUCCESS;
+		return XMPPHandleAuthResponseSuccess;
 	}
 	else
 	{
-		return XMPP_AUTH_FAIL;
+		return XMPPHandleAuthResponseFailed;
 	}
 }
 

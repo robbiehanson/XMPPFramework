@@ -151,8 +151,8 @@
 	XMPPPresence *mp = [self presence];
 	XMPPPresence *ap = [another presence];
 	
-	int mpp = [mp priority];
-	int app = [ap priority];
+	NSInteger mpp = [mp priority];
+	NSInteger app = [ap priority];
 	
 	if(mpp < app)
 		return NSOrderedDescending;
@@ -161,8 +161,8 @@
 	
 	// Priority is the same.
 	// Determine who is more available based on their show.
-	int mps = [mp intShow];
-	int aps = [ap intShow];
+	XMPPPresenceShow mps = [mp showValue];
+	XMPPPresenceShow aps = [ap showValue];
 	
 	if(mps < aps)
 		return NSOrderedDescending;

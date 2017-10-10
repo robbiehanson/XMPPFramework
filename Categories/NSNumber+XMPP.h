@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface NSNumber (XMPP)
 
 + (NSNumber *)xmpp_numberWithPtr:(const void *)ptr;
-- (id)xmpp_initWithPtr:(const void *)ptr __attribute__((objc_method_family(init)));
+- (instancetype)xmpp_initWithPtr:(const void *)ptr __attribute__((objc_method_family(init)));
 
 + (BOOL)xmpp_parseString:(NSString *)str intoInt32:(int32_t *)pNum;
 + (BOOL)xmpp_parseString:(NSString *)str intoUInt32:(uint32_t *)pNum;
@@ -44,3 +44,4 @@
 #undef XMPP_DEPRECATED
 
 #endif
+NS_ASSUME_NONNULL_END

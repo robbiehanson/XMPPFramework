@@ -43,6 +43,44 @@
 #define TIMEOUT_READ          5.00
 #define TIMEOUT_TOTAL        80.00
 
+@interface TURNSocket() {
+    int state;
+    BOOL isClient;
+    
+    dispatch_queue_t turnQueue;
+    void *turnQueueTag;
+    
+    XMPPStream *xmppStream;
+    XMPPJID *jid;
+    NSString *uuid;
+    
+    id delegate;
+    dispatch_queue_t delegateQueue;
+    
+    dispatch_source_t turnTimer;
+    
+    NSString *discoUUID;
+    dispatch_source_t discoTimer;
+    
+    NSArray *proxyCandidates;
+    NSUInteger proxyCandidateIndex;
+    
+    NSMutableArray *candidateJIDs;
+    NSUInteger candidateJIDIndex;
+    
+    NSMutableArray *streamhosts;
+    NSUInteger streamhostIndex;
+    
+    XMPPJID *proxyJID;
+    NSString *proxyHost;
+    UInt16 proxyPort;
+    
+    GCDAsyncSocket *asyncSocket;
+    
+    NSDate *startTime, *finishTime;
+}
+@end
+
 // Declare private methods
 @interface TURNSocket (PrivateAPI)
 - (void)processDiscoItemsResponse:(XMPPIQ *)iq;

@@ -56,7 +56,7 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
 /** Not available, use designated initializer */
 - (instancetype) init NS_UNAVAILABLE;
 /** Not available, use designated initializer */
-- (instancetype) initWithDispatchQueue:(dispatch_queue_t)queue NS_UNAVAILABLE;
+- (instancetype) initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
 
 #pragma mark Public methods
 

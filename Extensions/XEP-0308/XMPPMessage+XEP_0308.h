@@ -1,14 +1,16 @@
 #import "XMPPMessage.h"
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPMessage (XEP_0308)
 
-- (BOOL)isMessageCorrection;
+@property (nonatomic, readonly) BOOL isMessageCorrection;
 
-- (NSString *)correctedMessageID;
+@property (nonatomic, readonly, nullable) NSString *correctedMessageID;
 
 - (void)addMessageCorrectionWithID:(NSString *)messageCorrectionID;
 
-- (XMPPMessage *)generateCorrectionMessageWithID:(NSString *)elementID;
-- (XMPPMessage *)generateCorrectionMessageWithID:(NSString *)elementID body:(NSString *)body;
+- (nullable XMPPMessage *)generateCorrectionMessageWithID:(nullable NSString *)elementID;
+- (nullable XMPPMessage *)generateCorrectionMessageWithID:(nullable NSString *)elementID body:(NSString *)body;
 
 @end
+NS_ASSUME_NONNULL_END

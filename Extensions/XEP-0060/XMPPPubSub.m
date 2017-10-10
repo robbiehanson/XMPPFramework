@@ -101,22 +101,6 @@
         dispatch_async(moduleQueue, block);
 }
 
-- (id)init
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPPubSub.h are supported.
-	
-	return [self initWithServiceJID:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPPubSub.h are supported.
-	
-	return [self initWithServiceJID:nil dispatchQueue:NULL];
-}
-
 - (id)initWithServiceJID:(XMPPJID *)aServiceJID
 {
 	return [self initWithServiceJID:aServiceJID dispatchQueue:NULL];

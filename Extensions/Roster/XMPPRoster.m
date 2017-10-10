@@ -43,16 +43,6 @@ enum XMPPRosterFlags
 
 @implementation XMPPRoster
 
-- (id)init
-{
-	return [self initWithRosterStorage:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	return [self initWithRosterStorage:nil dispatchQueue:queue];
-}
-
 - (id)initWithRosterStorage:(id <XMPPRosterStorage>)storage
 {
 	return [self initWithRosterStorage:storage dispatchQueue:NULL];

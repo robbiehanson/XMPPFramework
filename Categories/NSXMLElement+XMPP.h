@@ -2,7 +2,7 @@
 
 @import KissXML;
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface NSXMLElement (XMPP)
 
 /**
@@ -10,10 +10,10 @@
 **/
 
 + (NSXMLElement *)elementWithName:(NSString *)name numberValue:(NSNumber *)number;
-- (id)initWithName:(NSString *)name numberValue:(NSNumber *)number;
+- (instancetype)initWithName:(NSString *)name numberValue:(NSNumber *)number;
 
 + (NSXMLElement *)elementWithName:(NSString *)name objectValue:(id)objectValue;
-- (id)initWithName:(NSString *)name objectValue:(id)objectValue;
+- (instancetype)initWithName:(NSString *)name objectValue:(id)objectValue;
 
 /**
  * Creating elements with explicit xmlns values.
@@ -23,22 +23,22 @@
 **/
 
 + (NSXMLElement *)elementWithName:(NSString *)name xmlns:(NSString *)ns;
-- (id)initWithName:(NSString *)name xmlns:(NSString *)ns;
+- (instancetype)initWithName:(NSString *)name xmlns:(NSString *)ns;
 
 /**
  * Extracting multiple elements.
 **/
 
-- (NSArray *)elementsForXmlns:(NSString *)ns;
-- (NSArray *)elementsForXmlnsPrefix:(NSString *)nsPrefix;
+- (NSArray<NSXMLElement*> *)elementsForXmlns:(NSString *)ns;
+- (NSArray<NSXMLElement*> *)elementsForXmlnsPrefix:(NSString *)nsPrefix;
 
 /**
  * Extracting a single element.
 **/
 
-- (NSXMLElement *)elementForName:(NSString *)name;
-- (NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns;
-- (NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
+- (nullable NSXMLElement *)elementForName:(NSString *)name;
+- (nullable NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns;
+- (nullable NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
 
 /**
  * Convenience methods for removing child elements.
@@ -58,15 +58,15 @@
  * The category methods below are more readable, and they actually work.
 **/
 
-- (NSString *)xmlns;
+@property (nonatomic, readonly, nullable) NSString *xmlns;
 - (void)setXmlns:(NSString *)ns;
 
 /**
  * Convenience methods for printing xml elements with different styles.
 **/
 
-- (NSString *)prettyXMLString;
-- (NSString *)compactXMLString;
+@property (nonatomic, readonly, nullable) NSString *prettyXMLString;
+@property (nonatomic, readonly, nullable) NSString *compactXMLString;
 
 /**
  * Convenience methods for adding attributes.
@@ -98,17 +98,17 @@
 - (uint64_t)attributeUInt64ValueForName:(NSString *)name;
 - (NSInteger)attributeIntegerValueForName:(NSString *)name;
 - (NSUInteger)attributeUnsignedIntegerValueForName:(NSString *)name;
-- (NSString *)attributeStringValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberIntValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberBoolValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberFloatValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberDoubleValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberInt32ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberUInt32ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberInt64ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberUInt64ValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberIntegerValueForName:(NSString *)name;
-- (NSNumber *)attributeNumberUnsignedIntegerValueForName:(NSString *)name;
+- (nullable NSString *)attributeStringValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberIntValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberBoolValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberFloatValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberDoubleValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberInt32ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberUInt32ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberInt64ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberUInt64ValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberIntegerValueForName:(NSString *)name;
+- (nullable NSNumber *)attributeNumberUnsignedIntegerValueForName:(NSString *)name;
 
 - (int)attributeIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
 - (BOOL)attributeBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
@@ -124,7 +124,7 @@
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
 
-- (NSMutableDictionary *)attributesAsDictionary;
+@property (nonatomic, readonly) NSMutableDictionary<NSString*,NSString*> *attributesAsDictionary;
 
 /**
  * Convenience methods for extracting element values in different formats.
@@ -149,7 +149,9 @@
 
 - (void)addNamespaceWithPrefix:(NSString *)prefix stringValue:(NSString *)string;
 
-- (NSString *)namespaceStringValueForPrefix:(NSString *)prefix;
+- (nullable NSString *)namespaceStringValueForPrefix:(NSString *)prefix;
 - (NSString *)namespaceStringValueForPrefix:(NSString *)prefix withDefaultValue:(NSString *)defaultValue;
 
 @end
+
+NS_ASSUME_NONNULL_END

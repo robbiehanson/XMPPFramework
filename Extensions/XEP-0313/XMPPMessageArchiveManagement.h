@@ -8,13 +8,14 @@
 #import "XMPPModule.h"
 #import "XMPPResultSet.h"
 #import "XMPPIQ.h"
+@import KissXML;
 
 @class XMPPIDTracker;
 @class XMPPMessage;
 
-@interface XMPPMessageArchiveManagement : XMPPModule {
-	XMPPIDTracker *xmppIDTracker;
-}
+NS_ASSUME_NONNULL_BEGIN
+
+@interface XMPPMessageArchiveManagement : XMPPModule
 
 /**
  When this is set to 0 (the default), the module will finish retrieving messages after receiving the first page IQ result.
@@ -23,10 +24,18 @@
  */
 @property (readwrite, assign) NSInteger resultAutomaticPagingPageSize;
 
-- (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet;
-- (void)retrieveMessageArchiveAt:(XMPPJID *)archiveJID withFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet;
+- (void)retrieveMessageArchiveWithFields:(nullable NSArray<NSXMLElement*> *)fields
+                           withResultSet:(nullable XMPPResultSet *)resultSet;
+
+- (void)retrieveMessageArchiveAt:(nullable XMPPJID *)archiveJID
+                      withFields:(nullable NSArray<NSXMLElement*> *)fields
+                   withResultSet:(nullable XMPPResultSet *)resultSet;
+
 - (void)retrieveFormFields;
-+ (NSXMLElement *)fieldWithVar:(NSString *)var type:(NSString *)type andValue:(NSString *)value;
+
++ (NSXMLElement *)fieldWithVar:(NSString *)var
+                          type:(nullable NSString *)type
+                      andValue:(NSString *)value;
 
 @end
 
@@ -39,3 +48,5 @@
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didReceiveFormFields:(XMPPIQ *)iq;
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFailToReceiveFormFields:(XMPPIQ *)iq;
 @end
+
+NS_ASSUME_NONNULL_END

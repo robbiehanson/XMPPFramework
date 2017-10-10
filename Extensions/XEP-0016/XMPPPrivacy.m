@@ -294,7 +294,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 
 - (NSArray *)listWithName:(NSString *)privacyListName
 {
-	NSArray* (^block)() = ^ NSArray* () {
+    NSArray* (^block)(void) = ^ NSArray* () {
 		
 		id result = privacyDict[privacyListName];
 		

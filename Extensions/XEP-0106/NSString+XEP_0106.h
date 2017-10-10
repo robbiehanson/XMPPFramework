@@ -2,8 +2,8 @@
 
 @interface NSString (XEP_0106)
 
-- (NSString *)jidEscapedString;
+@property (nonatomic, readonly, nullable) NSString * jidEscapedString;
 
-- (NSString *)jidUnescapedString;
+@property (nonatomic, readonly, nullable) NSString * jidUnescapedString;
 
 @end

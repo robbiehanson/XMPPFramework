@@ -4,7 +4,7 @@
 
 @interface NSXMLElement (XEP_0203)
 
-- (BOOL)wasDelayed;
-- (NSDate *)delayedDeliveryDate;
+@property (nonatomic, readonly) BOOL wasDelayed;
+@property (nonatomic, readonly, nullable) NSDate *delayedDeliveryDate;
 
 @end

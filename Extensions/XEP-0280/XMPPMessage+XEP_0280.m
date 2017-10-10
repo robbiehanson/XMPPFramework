@@ -62,6 +62,9 @@
 {
     BOOL isTrustedMessageCarbon = NO;
     XMPPMessage *messageCarbonForwardedMessage = [self messageCarbonForwardedMessage];
+    if (!messageCarbonForwardedMessage) {
+        return NO;
+    }
 
     if([self isSentMessageCarbon])
     {

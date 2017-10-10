@@ -19,6 +19,7 @@
  *    and provides an efficient query to see if a presence or message element is targeted at a room.
  *  - It listens for MUC room invitations sent from other users.
 **/
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPMUC : XMPPModule
 {
 /*	Inherited from XMPPModule:
@@ -28,9 +29,9 @@
 	dispatch_queue_t moduleQueue;
  */
 	
-	NSMutableSet *rooms;
+    NSMutableSet<XMPPJID*> *rooms;
 
-  XMPPIDTracker *xmppIDTracker;
+    XMPPIDTracker * _Nullable xmppIDTracker;
 }
 
 /* Inherited from XMPPModule:
@@ -93,7 +94,7 @@
 *
 *                 <item jid='chat.shakespeare.lit' name='Chatroom Service'/>
 */
-- (void)xmppMUC:(XMPPMUC *)sender didDiscoverServices:(NSArray *)services;
+- (void)xmppMUC:(XMPPMUC *)sender didDiscoverServices:(NSArray<NSXMLElement*> *)services;
 
 /**
 * Implement this method when calling [mucInstanse discoverServices]. It will be invoked if the request
@@ -129,3 +130,4 @@
 - (void)xmppMUC:(XMPPMUC *)sender failedToDiscoverRoomsForServiceNamed:(NSString *)serviceName withError:(NSError *)error;
 
 @end
+NS_ASSUME_NONNULL_END

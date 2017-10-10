@@ -182,10 +182,10 @@
  * Invoked when the extension needs values from a previous session.
  * This method is used to get values needed in order to resume a previous stream.
 **/
-- (void)getLastHandledByClient:(uint32_t *)lastHandledByClientPtr
-           lastHandledByServer:(uint32_t *)lastHandledByServerPtr
-        pendingOutgoingStanzas:(NSArray **)pendingOutgoingStanzasPtr
-                     forStream:(XMPPStream *)stream;
+- (void)getLastHandledByClient:(uint32_t * _Nullable)lastHandledByClientPtr
+           lastHandledByServer:(uint32_t * _Nullable)lastHandledByServerPtr
+        pendingOutgoingStanzas:(NSArray<XMPPStreamManagementOutgoingStanza*> * _Nullable * _Nullable)pendingOutgoingStanzasPtr
+                     forStream:(XMPPStream *)stream
 {
 	if (lastHandledByClientPtr)    *lastHandledByClientPtr    = lastHandledByClient;
 	if (lastHandledByServerPtr)    *lastHandledByServerPtr    = lastHandledByServer;

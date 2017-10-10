@@ -12,18 +12,19 @@
 
 #import "XMPPvCardTempBase.h"
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPvCardTempEmail : XMPPvCardTempBase
 
 + (XMPPvCardTempEmail *)vCardEmailFromElement:(NSXMLElement *)elem;
 
-@property (nonatomic, assign, setter=setHome:)      BOOL isHome;
-@property (nonatomic, assign, setter=setWork:)      BOOL isWork;
-@property (nonatomic, assign, setter=setInternet:)  BOOL isInternet;
-@property (nonatomic, assign, setter=setX400:)      BOOL isX400;
-@property (nonatomic, assign, setter=setPreferred:) BOOL isPreferred;
+@property (nonatomic, assign)   BOOL isHome;
+@property (nonatomic, assign)   BOOL isWork;
+@property (nonatomic, assign)   BOOL isInternet;
+@property (nonatomic, assign)   BOOL isX400;
+@property (nonatomic, assign)   BOOL isPreferred;
 
-@property (nonatomic, weak) NSString *userid;
+@property (nonatomic, strong, nullable) NSString *userid;
 
 
 @end
+NS_ASSUME_NONNULL_END
