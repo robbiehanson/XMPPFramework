@@ -6,6 +6,7 @@
  * XMPPMessageDeliveryReceipts can be configured to automatically send delivery receipts and requests in accordance to XEP-0184
 **/
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPMessageDeliveryReceipts : XMPPModule
 
 /**
@@ -30,3 +31,4 @@
 @property (assign) BOOL autoSendMessageDeliveryReceipts;
 
 @end
+NS_ASSUME_NONNULL_END
