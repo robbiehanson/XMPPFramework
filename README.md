@@ -18,10 +18,10 @@ The minimum deployment target is iOS 8.0 / macOS 10.9 / tvOS 9.0.
 
 There have been a number of changes to the public API of XMPPFramework in an attempt to improve the ergnomics and safety when used with Swift. Most Objective-C projects should see no issues, with a few minor exceptions. The process is still not complete so please submit issues and help if possible to minimize future breaking changes.
 
-* Modern Syntax: Nullability annotations, generics, and getter methods have been converted to readonly properties.
+* Modern Syntax: Nullability annotations, generics, and getter methods have been converted to readonly properties where applicable.
 * Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
 * XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`.
-* Still needs audit: XEP-0191, XEP-0199, XEP-0202, XEP-0153, XEP-0136, XEP-0115 (CoreDataStorage), XEP-0100, XEP-0092, XEP-0045 (Storage), XEP-0016, XEP-0012, XEP-0009, Roster (Storage), Reconnect, ProcessOne, XMPPGoogleSharedStatus, FileTransfer, CoreDataStorage, BandwidthMonitor.
+* Still needs audit: XEP-0191 Blocking, XEP-0199 Ping, XEP-0202 Time, XEP-0136, XEP-0115 (CoreDataStorage), XEP-0100, XEP-0092, XEP-0045 (Storage), XEP-0016, XEP-0012, XEP-0009, Roster (Storage), Reconnect, ProcessOne, XMPPGoogleSharedStatus, FileTransfer, CoreDataStorage, BandwidthMonitor.
 
 #### CocoaPods
 
