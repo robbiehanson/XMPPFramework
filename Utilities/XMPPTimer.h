@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 /**
  * This class is a simple wrapper around dispatch_source_t timers.
  * 
@@ -39,3 +40,4 @@
 - (void)cancel;
 
 @end
+NS_ASSUME_NONNULL_END
