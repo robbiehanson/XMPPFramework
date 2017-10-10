@@ -3,19 +3,20 @@
 
 @protocol XMPPResource;
 
-
-@protocol XMPPUser <NSObject>
+NS_ASSUME_NONNULL_BEGIN
+@protocol XMPPUser
 @required
 
-- (XMPPJID *)jid;
-- (NSString *)nickname;
+@property (nonatomic, readonly) XMPPJID *jid;
+@property (nonatomic, readonly) NSString *nickname;
 
-- (BOOL)isOnline;
-- (BOOL)isPendingApproval;
+@property (nonatomic, readonly) BOOL isOnline;
+@property (nonatomic, readonly) BOOL isPendingApproval;
 
-- (id <XMPPResource>)primaryResource;
-- (id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
+@property (nonatomic, readonly, nullable) id<XMPPResource> primaryResource;
+- (nullable id <XMPPResource>)resourceForJID:(XMPPJID *)jid;
 
-- (NSArray *)allResources;
+@property (nonatomic, readonly) NSArray<id<XMPPResource>> *allResources;
 
 @end
+NS_ASSUME_NONNULL_END

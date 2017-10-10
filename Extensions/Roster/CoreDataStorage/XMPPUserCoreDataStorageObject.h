@@ -9,9 +9,9 @@
 
 #import "XMPPUser.h"
 #import "XMPP.h"
+#import "XMPPResourceCoreDataStorageObject.h"
 
 @class XMPPGroupCoreDataStorageObject;
-@class XMPPResourceCoreDataStorageObject;
 
 
 @interface XMPPUserCoreDataStorageObject : NSManagedObject <XMPPUser>

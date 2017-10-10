@@ -21,7 +21,7 @@ There have been a number of changes to the public API of XMPPFramework in an att
 * Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
 * Modern Syntax: Nullability, generics, and getter methods have been converted to readonly properties.
 * XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`.
-* Still needs audit: XEP-0191, XEP-0198, XEP-0199, XEP-0202, XEP-0153, XEP-0136, XEP-0115 (CoreDataStorage), XEP-0100, 
+* Still needs audit: XEP-0191, XEP-0198, XEP-0199, XEP-0202, XEP-0153, XEP-0136, XEP-0115 (CoreDataStorage), XEP-0100, XEP-0092, XEP-0065, XEP-0045 (Storage), XEP-0016, XEP-0012, XEP-0009, Roster (Storage), Reconnect, ProcessOne, XMPPGoogleSharedStatus, FileTransfer, CoreDataStorage, BandwidthMonitor.
 
 #### CocoaPods
 
