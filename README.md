@@ -16,12 +16,32 @@ The minimum deployment target is iOS 8.0 / macOS 10.9 / tvOS 9.0.
 
 ### Migration from 3.7 to 4.0
 
-There have been a number of changes to the public API of XMPPFramework in an attempt to improve the ergnomics and safety when used with Swift. Most Objective-C projects should see no issues, with a few minor exceptions. The process is still not complete so please submit issues and help if possible to minimize future breaking changes.
+There have been a number of changes to the public API of XMPPFramework in an attempt to improve the ergnomics and safety when used with Swift. Most Objective-C projects should require no changes, with a few minor exceptions. Many (simple) changes will be required for pure Swift projects, mostly due to the new nullability annotations. The process is still not complete so please submit issues and help if possible to minimize future breaking changes.
 
-* Modern Syntax: Nullability annotations, generics, and getter methods have been converted to readonly properties where applicable.
+* Modern Objective-C Syntax: Nullability annotations and generics.
 * Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
-* XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`.
-* Still needs audit: XEP-0191 Blocking, XEP-0199 Ping, XEP-0202 Time, XEP-0136 Archiving, XEP-0115 Capabilities (CoreDataStorage unaudited), XEP-0045 MUC (Storage unaudited), XEP-0054 vCardTemp (CoreDataStorage unaudited), XEP-0016, XEP-0012, XEP-0009, Roster (Storage unaudited), Reconnect, ProcessOne, XMPPGoogleSharedStatus, FileTransfer, CoreDataStorage, BandwidthMonitor.
+* XMPPJID `bareJID` is now imported into Swift as `bareJID` instead of `bare` to prevent conflict with `bare` String. Also applies to `domainJID`.
+* XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`. This will be a warning in 4.0 but will be removed in 4.1.
+* Readonly properties are used instead of getter methods where applicable. Getter naming overrides for properties have been removed to reflect Apple's approach.
+* The following modules still need an audit. If you use these modules please help out and contribute some time to audit them and submit a pull request, otherwise their API may contain breaking changes in future releases.
+
+	* XEP-0191 Blocking
+	* XEP-0199 Ping
+	* XEP-0202 Time
+	* XEP-0136 Archiving
+	* XEP-0115 Capabilities (CoreDataStorage unaudited)
+	* XEP-0045 MUC (Storage unaudited)
+	* XEP-0054 vCardTemp (CoreDataStorage unaudited)
+	* XEP-0016 Privacy
+	* XEP-0012 Last Activity
+	* XEP-0009 RPC
+	* Roster (Storage unaudited)
+	* Reconnect
+	* ProcessOne
+	* XMPPGoogleSharedStatus
+	* FileTransfer
+	* CoreDataStorage
+	* BandwidthMonitor
 
 #### CocoaPods
 
@@ -31,7 +51,11 @@ This will install the whole framework with all the available extensions:
 
 ```ruby
 use_frameworks!
-pod 'XMPPFramework', '~> 4.0'
+# 3.7 Stable Release
+pod 'XMPPFramework', '~> 3.7.0'
+# 4.0 Preview / Master Branch
+pod 'XMPPFramework', :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master'
+
 ```
 
 After `pod install` open the `.xcworkspace` and import:
@@ -87,7 +111,9 @@ For more info please take a look at the wiki.
 - [Learn more about XMPPFramework](https://github.com/robbiehanson/XMPPFramework/wiki)
 
 
-Can't find the answer to your question in any of the [wiki](https://github.com/robbiehanson/XMPPFramework/wiki) articles? Try the [mailing list](http://groups.google.com/group/xmppframework). 
+Can't find the answer to your question in any of the [wiki](https://github.com/robbiehanson/XMPPFramework/wiki) articles? Try the [mailing list](http://groups.google.com/group/xmppframework).
+
+### Donation:
 
 Love the project? Wanna buy me a ☕️? (or a 🍺 😀):
 

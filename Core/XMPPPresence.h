@@ -48,7 +48,8 @@ NS_ASSUME_NONNULL_BEGIN
 /** This supercedes the previous intShow method */
 @property (nonatomic, readonly) XMPPPresenceShow showValue;
 
-@property (nonatomic, readonly) XMPPPresenceShow intShow DEPRECATED_MSG_ATTRIBUTE("Use showValue instead. This property will be removed in a future release.");
+/** @warn Use showValue instead. This property will be removed in a future release. */
+@property (nonatomic, readonly) NSInteger intShow DEPRECATED_MSG_ATTRIBUTE("Use showValue instead. This property will be removed in a future release.");
 
 @property (nonatomic, readonly) BOOL isErrorPresence;
 

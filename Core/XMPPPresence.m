@@ -140,7 +140,7 @@
 	return XMPPPresenceShowOther;
 }
 
-- (XMPPPresenceShow) intShow {
+- (NSInteger) intShow {
     return self.showValue;
 }
 
