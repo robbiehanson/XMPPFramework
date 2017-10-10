@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface XMPPStream (XMPPXOAuth2Google)
 
 
-- (BOOL)supportsXOAuth2GoogleAuthentication;
+@property (nonatomic, readonly) BOOL supportsXOAuth2GoogleAuthentication;
 
 - (BOOL)authenticateWithGoogleAccessToken:(NSString *)accessToken error:(NSError **)errPtr;
 

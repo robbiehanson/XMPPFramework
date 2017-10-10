@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface XMPPStream (XMPPDeprecatedDigestAuthentication)
 
-- (BOOL)supportsDeprecatedDigestAuthentication;
+@property (nonatomic, readonly) BOOL supportsDeprecatedDigestAuthentication;
 
 @end
 NS_ASSUME_NONNULL_END

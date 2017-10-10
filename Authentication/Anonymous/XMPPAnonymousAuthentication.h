@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  * This information is available after the stream is connected.
  * In other words, after the delegate has received xmppStreamDidConnect: notification.
 **/
-- (BOOL)supportsAnonymousAuthentication;
+@property (nonatomic, readonly) BOOL supportsAnonymousAuthentication;
 
 /**
  * This method attempts to start the anonymous authentication process.

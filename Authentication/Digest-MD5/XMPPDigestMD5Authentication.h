@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface XMPPStream (XMPPDigestMD5Authentication)
 
-- (BOOL)supportsDigestMD5Authentication;
+@property (nonatomic, readonly) BOOL supportsDigestMD5Authentication;
 
 @end
 NS_ASSUME_NONNULL_END

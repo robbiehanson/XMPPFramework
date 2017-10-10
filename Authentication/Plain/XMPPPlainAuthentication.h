@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface XMPPStream (XMPPPlainAuthentication)
 
-- (BOOL)supportsPlainAuthentication;
+@property (nonatomic, readonly) BOOL supportsPlainAuthentication;
 
 @end
 NS_ASSUME_NONNULL_END
