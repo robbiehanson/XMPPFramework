@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 
  * The mechanismName returned should match the value inside the <mechanism>HERE</mechanism>.
 **/
-+ (NSString *)mechanismName;
++ (nullable NSString *)mechanismName;
 
 /**
  * Standard init method.

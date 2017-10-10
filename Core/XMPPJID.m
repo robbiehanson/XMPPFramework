@@ -54,9 +54,9 @@
 	
 	if(jidStr == nil) return NO;
 	
-	NSString *rawUser = nil;
-	NSString *rawDomain = nil;
-	NSString *rawResource = nil;
+	NSString *rawUser = @"";
+	NSString *rawDomain = @"";
+	NSString *rawResource = @"";
 	
 	NSRange atRange = [jidStr rangeOfString:@"@"];
 	
