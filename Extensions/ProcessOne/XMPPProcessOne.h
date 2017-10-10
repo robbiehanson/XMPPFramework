@@ -12,6 +12,7 @@
  * 
  * This file implements the client side functionality for XMPPFramework.
 **/
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPProcessOne : XMPPModule
 
 /**
@@ -20,9 +21,9 @@
  * 
  * If the session information is available, and the server supports rebind, fast reconnect may be possible.
 **/
-@property (strong, readwrite) NSString *savedSessionID;
-@property (strong, readwrite) XMPPJID *savedSessionJID;
-@property (strong, readwrite) NSDate *savedSessionDate;
+@property (strong, readwrite, nullable) NSString *savedSessionID;
+@property (strong, readwrite, nullable) XMPPJID *savedSessionJID;
+@property (strong, readwrite, nullable) NSDate *savedSessionDate;
 
 /**
  * Push Mode Configuration.
@@ -56,7 +57,7 @@
  * 
  * @see pushConfigurationContainer
 **/
-@property (readwrite, strong) NSXMLElement *pushConfiguration;
+@property (readwrite, strong, nullable) NSXMLElement *pushConfiguration;
 
 /**
  * Standby Mode.
@@ -85,11 +86,11 @@
  * Methods to help create the pushConfiguration required to enable anything on the server.
 **/
 
-+ (NSXMLElement *)pushConfigurationContainer;
+@property (class, readonly) NSXMLElement *pushConfigurationContainer;
 
 + (NSXMLElement *)keepaliveWithMax:(NSTimeInterval)max;
 + (NSXMLElement *)sessionWithDuration:(NSTimeInterval)duration;
-+ (NSXMLElement *)statusWithType:(NSString *)type message:(NSString *)message;
++ (NSXMLElement *)statusWithType:(nullable NSString *)type message:(nullable NSString *)message;
 
 @end
 
@@ -99,7 +100,11 @@
 
 @interface XMPPRebindAuthentication : NSObject <XMPPSASLAuthentication>
 
-- (id)initWithStream:(XMPPStream *)stream sessionID:(NSString *)sessionID sessionJID:(XMPPJID *)sessionJID;
+- (instancetype)init NS_UNAVAILABLE;
+
+- (instancetype)initWithStream:(XMPPStream *)stream
+                     sessionID:(NSString *)sessionID
+                    sessionJID:(XMPPJID *)sessionJID;
 
 @end
 
@@ -109,9 +114,13 @@
 
 @interface XMPPStream (XMPPProcessOne)
 
-- (BOOL)supportsPush;
-- (BOOL)supportsRebind;
+/** Specific to XMPPProcessOne propreitary module */
+@property (nonatomic, readonly) BOOL supportsPush;
+/** Specific to XMPPProcessOne propreitary module */
+@property (nonatomic, readonly) BOOL supportsRebind;
 
-- (NSString *)rebindSessionID;
+/** Specific to XMPPProcessOne propreitary module */
+@property (nonatomic, readonly, nullable) NSString *rebindSessionID;
 
 @end
+NS_ASSUME_NONNULL_END

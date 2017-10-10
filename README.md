@@ -36,8 +36,6 @@ There have been a number of changes to the public API of XMPPFramework in an att
 	* XEP-0012 Last Activity
 	* XEP-0009 RPC
 	* Roster (Storage unaudited)
-	* Reconnect
-	* ProcessOne
 	* XMPPGoogleSharedStatus
 	* FileTransfer
 	* CoreDataStorage

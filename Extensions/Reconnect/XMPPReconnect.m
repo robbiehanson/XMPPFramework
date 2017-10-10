@@ -34,6 +34,26 @@ enum XMPPReconnectConfig
 typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #endif
 
+@interface XMPPReconnect() {
+    Byte flags;
+    Byte config;
+    NSTimeInterval reconnectDelay;
+    
+    dispatch_source_t reconnectTimer;
+    NSTimeInterval reconnectTimerInterval;
+    
+    SCNetworkReachabilityRef reachability;
+    
+    int reconnectTicket;
+    
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
+    SCNetworkConnectionFlags previousReachabilityFlags;
+#else
+    SCNetworkReachabilityFlags previousReachabilityFlags;
+#endif
+}
+@end
+
 @interface XMPPReconnect (PrivateAPI)
 
 - (void)setupReconnectTimer;

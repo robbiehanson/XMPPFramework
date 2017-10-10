@@ -50,26 +50,8 @@
  * which will trigger the class into action just as if an accidental disconnect occurred.
 **/
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPReconnect : XMPPModule
-{
-	Byte flags;
-	Byte config;
-	NSTimeInterval reconnectDelay;
-	
-	dispatch_source_t reconnectTimer;
-	NSTimeInterval reconnectTimerInterval;
-	
-	SCNetworkReachabilityRef reachability;
-	
-	int reconnectTicket;
-	
-#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
-	SCNetworkConnectionFlags previousReachabilityFlags;
-#else
-	SCNetworkReachabilityFlags previousReachabilityFlags;
-#endif
-}
-
 /**
  * Whether auto reconnect is enabled or disabled.
  * 
@@ -181,3 +163,4 @@
 #endif
 
 @end
+NS_ASSUME_NONNULL_END
