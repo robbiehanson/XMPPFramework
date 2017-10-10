@@ -15,11 +15,13 @@
 
 @interface XMPPMessageArchiveManagement()
 @property (strong, nonatomic) NSString *queryID;
+@property (strong, nonatomic) XMPPIDTracker *xmppIDTracker;
 @end
 
 @implementation XMPPMessageArchiveManagement
 
 @synthesize resultAutomaticPagingPageSize=_resultAutomaticPagingPageSize;
+@synthesize xmppIDTracker;
 
 - (NSInteger)resultAutomaticPagingPageSize
 {
