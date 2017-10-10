@@ -38,8 +38,8 @@ NS_ASSUME_NONNULL_BEGIN
  * For convenience, there are also methods that that check for a user component as well.
 **/
 
-@property (nonatomic, readonly) XMPPJID *bareJID;
-@property (nonatomic, readonly) XMPPJID *domainJID;
+@property (nonatomic, readonly) XMPPJID *bareJID NS_SWIFT_NAME(bareJID);
+@property (nonatomic, readonly) XMPPJID *domainJID NS_SWIFT_NAME(domainJID);
 
 @property (nonatomic, readonly) NSString *bare;
 @property (nonatomic, readonly) NSString *full;
