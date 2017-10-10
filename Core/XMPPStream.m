@@ -1778,7 +1778,7 @@ enum XMPPStreamConfig
  * 
  * If the XMPPStream is not connected, or the server doesn't support in-band registration, this method does nothing.
 **/
-- (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr
+- (BOOL)registerWithPassword:(NSString *)password error:(NSError * __autoreleasing *)errPtr
 {
 	XMPPLogTrace();
 	

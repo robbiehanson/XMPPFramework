@@ -524,10 +524,10 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     return results;
 }
 
-- (void)getSubscription:(NSString **)subscription
-                    ask:(NSString **)ask
-               nickname:(NSString **)nickname
-                 groups:(NSArray **)groups
+- (void)getSubscription:(NSString * __autoreleasing *)subscription
+                    ask:(NSString * __autoreleasing *)ask
+               nickname:(NSString * __autoreleasing *)nickname
+                 groups:(NSArray * __autoreleasing *)groups
                  forJID:(XMPPJID *)jid
              xmppStream:(XMPPStream *)stream
 {
