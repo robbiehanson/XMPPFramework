@@ -24,7 +24,10 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-@interface XMPPvCardTempModule()
+@interface XMPPvCardTempModule() {
+    id <XMPPvCardTempModuleStorage> __strong _xmppvCardTempModuleStorage;
+    XMPPIDTracker *_myvCardTracker;
+}
 
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid;
 - (void)_fetchvCardTempForJID:(XMPPJID *)jid;
@@ -38,22 +41,6 @@
 @implementation XMPPvCardTempModule
 
 @synthesize xmppvCardTempModuleStorage = _xmppvCardTempModuleStorage;
-
-- (id)init
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPvCardTempModule.h are supported.
-	
-	return [self initWithvCardStorage:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPvCardTempModule.h are supported.
-	
-	return [self initWithvCardStorage:nil dispatchQueue:NULL];
-}
 
 - (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage
 {

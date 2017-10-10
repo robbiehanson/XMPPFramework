@@ -17,19 +17,16 @@
 
 @protocol XMPPvCardTempModuleStorage;
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPvCardTempModule : XMPPModule
-{
-	id <XMPPvCardTempModuleStorage> __strong _xmppvCardTempModuleStorage;
-    XMPPIDTracker *_myvCardTracker;
-}
-
 
 @property(nonatomic, strong, readonly) id <XMPPvCardTempModuleStorage> xmppvCardTempModuleStorage;
-@property(nonatomic, strong, readonly) XMPPvCardTemp *myvCardTemp;
+@property(nonatomic, strong, readonly, nullable) XMPPvCardTemp *myvCardTemp;
 
-- (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage;
-- (id)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
+- (instancetype)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage;
+- (instancetype)initWithvCardStorage:(id <XMPPvCardTempModuleStorage>)storage dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
 /**
  * Fetches the vCardTemp for the given JID if it is not in the storage
@@ -45,7 +42,7 @@
  * Returns the vCardTemp for the given JID, this is the equivalent of calling the vCardTempForJID:xmppStream: on the moduleStorage
  * If there is no vCardTemp in the storage for the given jid and shouldFetch is YES, it will automatically fetch it from the network
 **/
-- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch;
+- (nullable XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch;
 
 /**
  * Updates myvCard in storage and sends it to the server
@@ -67,11 +64,11 @@
 
 - (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule
         failedToFetchvCardForJID:(XMPPJID *)jid
-                      error:(NSXMLElement*)error;
+                      error:(nullable NSXMLElement*)error;
 
 - (void)xmppvCardTempModuleDidUpdateMyvCard:(XMPPvCardTempModule *)vCardTempModule;
 
-- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule failedToUpdateMyvCard:(NSXMLElement *)error;
+- (void)xmppvCardTempModule:(XMPPvCardTempModule *)vCardTempModule failedToUpdateMyvCard:(nullable NSXMLElement *)error;
 
 @end
 
@@ -100,7 +97,7 @@
 /**
  * Returns a vCardTemp object or nil
 **/
-- (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (nullable XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Used to set the vCardTemp object when we get it from the XMPP server.
@@ -110,7 +107,7 @@
 /**
  * Returns My vCardTemp object or nil
 **/
-- (XMPPvCardTemp *)myvCardTempForXMPPStream:(XMPPStream *)stream;
+- (nullable XMPPvCardTemp *)myvCardTempForXMPPStream:(XMPPStream *)stream;
 
 /**
  * Asks the backend if we should fetch the vCardTemp from the network.
@@ -119,3 +116,5 @@
 - (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end
+NS_ASSUME_NONNULL_END
+

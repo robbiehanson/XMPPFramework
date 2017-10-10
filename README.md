@@ -21,7 +21,7 @@ There have been a number of changes to the public API of XMPPFramework in an att
 * Modern Syntax: Nullability annotations, generics, and getter methods have been converted to readonly properties where applicable.
 * Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
 * XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`.
-* Still needs audit: XEP-0191 Blocking, XEP-0199 Ping, XEP-0202 Time, XEP-0136 Archiving, XEP-0115 Capabilities (CoreDataStorage only), XEP-0045 (Storage), XEP-0016, XEP-0012, XEP-0009, Roster (Storage), Reconnect, ProcessOne, XMPPGoogleSharedStatus, FileTransfer, CoreDataStorage, BandwidthMonitor.
+* Still needs audit: XEP-0191 Blocking, XEP-0199 Ping, XEP-0202 Time, XEP-0136 Archiving, XEP-0115 Capabilities (CoreDataStorage unaudited), XEP-0045 MUC (Storage unaudited), XEP-0054 vCardTemp (CoreDataStorage unaudited), XEP-0016, XEP-0012, XEP-0009, Roster (Storage unaudited), Reconnect, ProcessOne, XMPPGoogleSharedStatus, FileTransfer, CoreDataStorage, BandwidthMonitor.
 
 #### CocoaPods
 
