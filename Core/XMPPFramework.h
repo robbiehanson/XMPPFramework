@@ -151,6 +151,7 @@
 #import "NSXMLElement+XEP_0335.h"
 #import "NSXMLElement+XEP_0352.h"
 #import "XMPPIQ+XEP_0357.h"
+#import "XMPPMessage+XEP_0359.h"
 #import "XMPPPushModule.h"
 #import "XMPPHTTPFileUpload.h"
 #import "XMPPSlot.h"

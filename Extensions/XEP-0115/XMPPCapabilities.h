@@ -373,7 +373,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Duplicate features are automatically discarded
  * For more control over your capablities use xmppCapabilities:collectingMyCapabilities:
 **/
-- (NSArray *)myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender;
+- (NSArray<NSString*>*)myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender;
 
 /**
  * Invoked when capabilities have been discovered for an available JID.
