@@ -24,6 +24,7 @@ NSString *const XMPPOriginIdElementName = @"origin-id";
         uniqueId = [NSUUID UUID].UUIDString;
     }
     NSXMLElement *element = [NSXMLElement elementWithName:XMPPOriginIdElementName xmlns:XMPPStanzaIdXmlns];
+    [element addAttributeWithName:@"id" objectValue:uniqueId];
     
     return element;
 }

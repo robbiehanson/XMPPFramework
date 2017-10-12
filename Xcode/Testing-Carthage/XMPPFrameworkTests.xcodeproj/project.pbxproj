@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D94285171F902FFF004533AA /* XMPPStanzaIdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94285161F902FFF004533AA /* XMPPStanzaIdTests.swift */; };
+		D94285181F902FFF004533AA /* XMPPStanzaIdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94285161F902FFF004533AA /* XMPPStanzaIdTests.swift */; };
+		D94285191F902FFF004533AA /* XMPPStanzaIdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94285161F902FFF004533AA /* XMPPStanzaIdTests.swift */; };
 		D973A07C1D2F18040096F3ED /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A06F1D2F18040096F3ED /* CapabilitiesHashingTest.m */; };
 		D973A07D1D2F18040096F3ED /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0701D2F18040096F3ED /* EncodeDecodeTest.m */; };
 		D973A07E1D2F18040096F3ED /* XMPPHTTPFileUploadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0711D2F18040096F3ED /* XMPPHTTPFileUploadTests.m */; };
@@ -111,6 +114,7 @@
 /* Begin PBXFileReference section */
 		63F50D921C60208200CA0201 /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63F50D971C60208200CA0201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../Testing-Shared/Info.plist"; sourceTree = SOURCE_ROOT; };
+		D94285161F902FFF004533AA /* XMPPStanzaIdTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMPPStanzaIdTests.swift; sourceTree = "<group>"; };
 		D973A06F1D2F18040096F3ED /* CapabilitiesHashingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CapabilitiesHashingTest.m; path = "../Testing-Shared/CapabilitiesHashingTest.m"; sourceTree = SOURCE_ROOT; };
 		D973A0701D2F18040096F3ED /* EncodeDecodeTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EncodeDecodeTest.m; path = "../Testing-Shared/EncodeDecodeTest.m"; sourceTree = SOURCE_ROOT; };
 		D973A0711D2F18040096F3ED /* XMPPHTTPFileUploadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPHTTPFileUploadTests.m; path = "../Testing-Shared/XMPPHTTPFileUploadTests.m"; sourceTree = SOURCE_ROOT; };
@@ -183,6 +187,7 @@
 		63F50D941C60208200CA0201 /* XMPPFrameworkTests */ = {
 			isa = PBXGroup;
 			children = (
+				D94285161F902FFF004533AA /* XMPPStanzaIdTests.swift */,
 				D97509271D9C82DB002E6F51 /* OMEMOServerTests.m */,
 				D99C5E0A1D99C48100FB068A /* OMEMOModuleTests.m */,
 				D99C5E0B1D99C48100FB068A /* OMEMOTestStorage.h */,
@@ -392,6 +397,7 @@
 				D973A07F1D2F18040096F3ED /* XMPPMessageArchiveManagementTests.m in Sources */,
 				D973A07E1D2F18040096F3ED /* XMPPHTTPFileUploadTests.m in Sources */,
 				D973A0821D2F18040096F3ED /* XMPPPushTests.swift in Sources */,
+				D94285171F902FFF004533AA /* XMPPStanzaIdTests.swift in Sources */,
 				D9E35E701D90B894002E7CF7 /* OMEMOElementTests.m in Sources */,
 				D973A0851D2F18040096F3ED /* XMPPStorageHintTests.m in Sources */,
 				D973A0891D2F18310096F3ED /* XMPPSwift.swift in Sources */,
@@ -416,6 +422,7 @@
 				D9DCD3DE1E6255E10010D1C7 /* XMPPMessageArchiveManagementTests.m in Sources */,
 				D9DCD3DF1E6255E10010D1C7 /* XMPPHTTPFileUploadTests.m in Sources */,
 				D9DCD3E01E6255E10010D1C7 /* XMPPPushTests.swift in Sources */,
+				D94285181F902FFF004533AA /* XMPPStanzaIdTests.swift in Sources */,
 				D9DCD3E11E6255E10010D1C7 /* OMEMOElementTests.m in Sources */,
 				D9DCD3E21E6255E10010D1C7 /* XMPPStorageHintTests.m in Sources */,
 				D9DCD3E31E6255E10010D1C7 /* XMPPSwift.swift in Sources */,
@@ -440,6 +447,7 @@
 				D9DCD7071E625C560010D1C7 /* XMPPMessageArchiveManagementTests.m in Sources */,
 				D9DCD7081E625C560010D1C7 /* XMPPHTTPFileUploadTests.m in Sources */,
 				D9DCD7091E625C560010D1C7 /* XMPPPushTests.swift in Sources */,
+				D94285191F902FFF004533AA /* XMPPStanzaIdTests.swift in Sources */,
 				D9DCD70A1E625C560010D1C7 /* OMEMOElementTests.m in Sources */,
 				D9DCD70B1E625C560010D1C7 /* XMPPStorageHintTests.m in Sources */,
 				D9DCD70C1E625C560010D1C7 /* XMPPSwift.swift in Sources */,

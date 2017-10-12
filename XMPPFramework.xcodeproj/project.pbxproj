@@ -77,9 +77,9 @@
 		D96D6E9D1F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6E991F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.m */; };
 		D96D6E9E1F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6E991F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.m */; };
 		D96D6E9F1F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6E991F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.m */; };
-		D96D6EA21F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D96D6EA01F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h */; };
-		D96D6EA31F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D96D6EA01F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h */; };
-		D96D6EA41F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D96D6EA01F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h */; };
+		D96D6EA21F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D96D6EA01F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D96D6EA31F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D96D6EA01F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D96D6EA41F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D96D6EA01F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D96D6EA51F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6EA11F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m */; };
 		D96D6EA61F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6EA11F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m */; };
 		D96D6EA71F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6EA11F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m */; };
