@@ -7,11 +7,8 @@
 //
 
 #import "XMPPMessage+XEP_0359.h"
+#import "NSXMLElement+XEP_0359.h"
 #import "NSXMLElement+XMPP.h"
-
-NSString *const XMPPStanzaIdXmlns = @"urn:xmpp:sid:0";
-NSString *const XMPPStanzaIdElementName = @"stanza-id";
-NSString *const XMPPOriginIdElementName = @"origin-id";
 
 @implementation XMPPMessage (XEP_0359)
 
@@ -40,6 +37,11 @@ NSString *const XMPPOriginIdElementName = @"origin-id";
     return [oid attributeStringValueForName:@"id"];
 }
 
+- (void) addOriginId:(nullable NSString*)originId {
+    NSXMLElement *oid = [NSXMLElement originIdElementWithUniqueId:originId];
+    [self addChild:oid];
+}
+
 - (XMPPJID*) stanzaIdBy {
     NSXMLElement *sid = [self stanzaIdElement];
     NSString *by = [sid attributeStringValueForName:@"by"];
@@ -47,5 +49,7 @@ NSString *const XMPPOriginIdElementName = @"origin-id";
     XMPPJID *jid = [XMPPJID jidWithString:by];
     return jid;
 }
+
+
 
 @end

@@ -9,6 +9,10 @@
 #import "NSXMLElement+XEP_0359.h"
 #import "NSXMLElement+XMPP.h"
 
+NSString *const XMPPStanzaIdXmlns = @"urn:xmpp:sid:0";
+NSString *const XMPPStanzaIdElementName = @"stanza-id";
+NSString *const XMPPOriginIdElementName = @"origin-id";
+
 @implementation NSXMLElement (XEP_0359)
 
 + (instancetype) originIdElement {
@@ -20,25 +24,6 @@
         uniqueId = [NSUUID UUID].UUIDString;
     }
     NSXMLElement *element = [NSXMLElement elementWithName:XMPPOriginIdElementName xmlns:XMPPStanzaIdXmlns];
-    
-    return element;
-}
-
-
-+ (instancetype) stanzaIdElementWithJID:(XMPPJID*)JID {
-    return [self stanzaIdElementWithJID:JID uniqueId:nil];
-}
-
-+ (instancetype) stanzaIdElementWithJID:(XMPPJID*)JID uniqueId:(nullable NSString*)uniqueId {
-    NSXMLElement *element = [NSXMLElement elementWithName:XMPPStanzaIdElementName xmlns:XMPPStanzaIdXmlns];
-    if (!uniqueId.length) {
-        uniqueId = [NSUUID UUID].UUIDString;
-    }
-    NSString *by = JID.bare;
-    
-    [element addAttributeWithName:@"id"
-                      stringValue:uniqueId];
-    [element addAttributeWithName:@"by" stringValue:by];
     
     return element;
 }

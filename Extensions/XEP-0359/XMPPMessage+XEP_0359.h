@@ -9,6 +9,7 @@
 #import "XMPPMessage.h"
 #import "XMPPElement.h"
 #import "XMPPJID.h"
+#import "XMPPCapabilities.h"
 
 /**
  * This XEP introduces unique and stable IDs for messages, which are beneficial in various ways. For example, they can be used together with Message Archive Management (XEP-0313) [1] to uniquely identify a message within an archive. They are also useful in the context of Multi-User Chat (XEP-0045) [2] conferences, as they allow to identify a message reflected by a MUC service back to the originating entity.
@@ -18,14 +19,27 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface XMPPMessage (XEP_0359)
 
-/** XEP-0359: Checks that the `by` attribute matches `from` */
-@property (nonatomic, readonly) BOOL hasValidStanzaId;
-
-/** XEP-0359: Stanza Id */
-@property (nonatomic, readonly, nullable) NSString *stanzaId;
 /** XEP-0359: Origin Id */
 @property (nonatomic, readonly, nullable) NSString *originId;
-/** XEP-0359: Stanza Id By */
+
+/**
+ * XEP-0359: Origin Id
+ *
+ * @note If nil is passed for uniqueId, this method will generate a NSUUID.uuidString for the 'id' attribute.
+ */
+- (void) addOriginId:(nullable NSString*)originId;
+
+/**
+ * XEP-0359: Stanza Id
+ *
+ * @warn ⚠️ Do not trust this value without first checking XMPPCapabilities hasValidStanzaId:
+ */
+@property (nonatomic, readonly, nullable) NSString *stanzaId;
+
+/** XEP-0359: Stanza Id By
+ *
+ * @warn ⚠️ Do not trust this value without first checking XMPPCapabilities hasValidStanzaId:
+ */
 @property (nonatomic, readonly, nullable) XMPPJID *stanzaIdBy;
 
 @end
