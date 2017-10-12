@@ -22,6 +22,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 #define XMLNS_XMPP_MESSAGE_CARBONS @"urn:xmpp:carbons:2"
 
+@interface XMPPMessageCarbons()
+{
+    BOOL autoEnableMessageCarbons;
+    BOOL allowsUntrustedMessageCarbons;
+    BOOL messageCarbonsEnabled;
+    
+    XMPPIDTracker *xmppIDTracker;
+}
+@end
+
 @implementation XMPPMessageCarbons
 
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue
