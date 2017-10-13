@@ -12,26 +12,6 @@
 
 @implementation XMPPMessage (XEP_0359)
 
-- (BOOL) hasValidStanzaId {
-    XMPPJID *by = self.stanzaIdBy;
-    if (!by || !self.stanzaId) {
-        return NO;
-    }
-    XMPPJID *from = self.from;
-    BOOL same = [by isEqualToJID:from options:XMPPJIDCompareBare];
-    return same;
-}
-
-- (nullable NSXMLElement*) stanzaIdElement {
-    NSXMLElement *sid = [self elementForName:XMPPStanzaIdElementName xmlns:XMPPStanzaIdXmlns];
-    return sid;
-}
-
-- (NSString*) stanzaId {
-    NSXMLElement *sid = [self stanzaIdElement];
-    return [sid attributeStringValueForName:@"id"];
-}
-
 - (NSString*) originId {
     NSXMLElement *oid = [self elementForName:XMPPOriginIdElementName xmlns:XMPPStanzaIdXmlns];
     return [oid attributeStringValueForName:@"id"];
@@ -42,14 +22,23 @@
     [self addChild:oid];
 }
 
-- (XMPPJID*) stanzaIdBy {
-    NSXMLElement *sid = [self stanzaIdElement];
-    NSString *by = [sid attributeStringValueForName:@"by"];
-    if (!by.length) { return nil; }
-    XMPPJID *jid = [XMPPJID jidWithString:by];
-    return jid;
+- (NSDictionary<XMPPJID*,NSString*>*) stanzaIds {
+    NSArray<NSXMLElement*> *stanzaIdElements = [self elementsForLocalName:XMPPStanzaIdElementName URI:XMPPStanzaIdXmlns];
+    if (!stanzaIdElements.count) { return @{}; }
+    
+    NSMutableDictionary<XMPPJID*,NSString*> *stanzaIds = [NSMutableDictionary dictionaryWithCapacity:stanzaIdElements.count];
+    
+    [stanzaIdElements enumerateObjectsUsingBlock:^void(NSXMLElement * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString *sid = [obj attributeStringValueForName:@"id"];
+        if (!sid) { return; }
+        NSString *by = [obj attributeStringValueForName:@"by"];
+        if (!by.length) { return; }
+        XMPPJID *jid = [XMPPJID jidWithString:by];
+        if (!jid) { return; }
+        [stanzaIds setObject:sid forKey:jid];
+    }];
+    
+    return stanzaIds;
 }
-
-
 
 @end

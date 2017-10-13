@@ -10,16 +10,15 @@
 #import "XMPPMessage+XEP0045.h"
 #import "XMPPMessage+XEP_0359.h"
 #import "NSXMLElement+XEP_0359.h"
+#import "XMPPMessage+XEP_0184.h"
 
 @implementation XMPPCapabilities (XEP_0359)
 
 - (BOOL) hasValidStanzaId:(XMPPMessage*)message {
     if (!message) { return NO; }
-    XMPPJID *stanzaIdBy = message.stanzaIdBy;
-    NSString *stanzaId = message.stanzaId;
-    if (!stanzaId || !stanzaIdBy) {
-        return NO;
-    }
+    NSDictionary<XMPPJID*,NSString*> *stanzaIds = message.stanzaIds;
+    if (!stanzaIds.count) { return NO; }
+    
     XMPPJID *expectedBy = nil;
     if (message.isGroupChatMessage) {
         expectedBy = message.from.bareJID;
@@ -30,6 +29,18 @@
     
     // The value of the 'by' attribute MUST be the XMPP address of the entity assigning the unique and stable stanza ID. For one-on-one messages the assigning entity is the account. In groupchats the assigning entity is the room. Note that XMPP addresses are normalized as defined in RFC 6122 [4].
 
+    NSString *expectedStanzaId = [stanzaIds objectForKey:expectedBy];
+    if (!expectedStanzaId.length) {
+        return NO;
+    }
+    
+    XMPPJID *stanzaIdBy = nil;
+    if (message.hasReceiptResponse) {
+        
+    } else {
+        
+    }
+    
     BOOL expectedByMatches = [stanzaIdBy isEqualToJID:expectedBy options:XMPPJIDCompareBare];
     if (!expectedByMatches) {
         return NO;

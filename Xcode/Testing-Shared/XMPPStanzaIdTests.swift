@@ -36,10 +36,10 @@ class XMPPStanzaIdTests: XCTestCase {
         </message>
         """
         let message = try! XMPPMessage(xmlString: xmlString)
-        
+        let stanza = message.stanzaIds.first!
         XCTAssertEqual(originId, message.originId!)
-        XCTAssertEqual(stanzaId, message.stanzaId!)
-        XCTAssertEqual(stanzaIdBy, message.stanzaIdBy!.bare)
+        XCTAssertEqual(stanzaId, stanza.value)
+        XCTAssertEqual(stanzaIdBy, stanza.key.bare)
     }
     
     func testAddOriginId() {

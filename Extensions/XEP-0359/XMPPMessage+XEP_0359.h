@@ -17,6 +17,7 @@
  */
 
 NS_ASSUME_NONNULL_BEGIN
+@class XMPPStanzaId;
 @interface XMPPMessage (XEP_0359)
 
 /** XEP-0359: Origin Id */
@@ -30,19 +31,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) addOriginId:(nullable NSString*)originId;
 
 /**
- * XEP-0359: Stanza Id
+ * XEP-0359: Stanza Ids
+ *
+ * Usually there will be just one stanzaId, if supported,
+ * but in the case of message receipts there can be more.
  *
  * @warn ⚠️ Do not trust this value without first checking XMPPCapabilities hasValidStanzaId:
  */
-@property (nonatomic, readonly, nullable) NSString *stanzaId;
-
-/** XEP-0359: Stanza Id By
- *
- * @warn ⚠️ Do not trust this value without first checking XMPPCapabilities hasValidStanzaId:
- */
-@property (nonatomic, readonly, nullable) XMPPJID *stanzaIdBy;
+@property (nonatomic, readonly) NSDictionary<XMPPJID*,NSString*> *stanzaIds;
 
 @end
-
 
 NS_ASSUME_NONNULL_END
