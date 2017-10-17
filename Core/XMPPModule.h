@@ -26,8 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (readonly) dispatch_queue_t moduleQueue;
 @property (readonly) void *moduleQueueTag;
-
 @property (strong, readonly, nullable) XMPPStream *xmppStream;
+@property (nonatomic, readonly) NSString *moduleName;
 
 - (instancetype)init;
 - (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue;
@@ -39,7 +39,37 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate;
 
-@property (nonatomic, readonly) NSString *moduleName;
+@end
 
+/**
+ * These helper methods are useful when synchronizing
+ * external access to properties in XMPPModule subclasses.
+ */
+@interface XMPPModule(Synchronization)
+/**
+ * Dispatches block synchronously on moduleQueue, or
+ * executes directly if we're already on the moduleQueue.
+ * This is most useful for synchronizing external read
+ * access to properties when writing XMPPModule subclasses.
+ *
+ *  if (dispatch_get_specific(moduleQueueTag))
+ *      block();
+ *  else
+ *      dispatch_sync(moduleQueue, block);
+ */
+- (void) performBlock:(dispatch_block_t)block NS_SWIFT_NAME(performBlock(_:));
+
+/**
+ * Dispatches block asynchronously on moduleQueue, or
+ * executes directly if we're already on the moduleQueue.
+ * This is most useful for synchronizing external write
+ * access to properties when writing XMPPModule subclasses.
+ *
+ *  if (dispatch_get_specific(moduleQueueTag))
+ *      block();
+ *  else
+ *      dispatch_async(moduleQueue, block);
+ */
+- (void) performBlockAsync:(dispatch_block_t)block NS_SWIFT_NAME(performBlockAsync(_:));
 @end
 NS_ASSUME_NONNULL_END

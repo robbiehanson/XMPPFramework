@@ -154,6 +154,7 @@
 #import "NSXMLElement+XEP_0359.h"
 #import "XMPPMessage+XEP_0359.h"
 #import "XMPPCapabilities+XEP_0359.h"
+#import "XMPPStanzaIdModule.h"
 #import "XMPPPushModule.h"
 #import "XMPPHTTPFileUpload.h"
 #import "XMPPSlot.h"

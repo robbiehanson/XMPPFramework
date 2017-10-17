@@ -8,6 +8,15 @@
 import XCTest
 import XMPPFramework
 
+extension XMPPJID {
+    static var alice: XMPPJID {
+        return XMPPJID(string: "alice@example.com/phone")!
+    }
+    static var bob: XMPPJID {
+        return XMPPJID(string: "bob@example.com/phone")!
+    }
+}
+
 class XMPPStanzaIdTests: XCTestCase {
     
     override func setUp() {
@@ -40,6 +49,29 @@ class XMPPStanzaIdTests: XCTestCase {
         XCTAssertEqual(originId, message.originId!)
         XCTAssertEqual(stanzaId, stanza.value)
         XCTAssertEqual(stanzaIdBy, stanza.key.bare)
+    }
+    
+    func testRealWorldDirectStanza() {
+        let aliceJID = XMPPJID.alice
+        let bobJID = XMPPJID.bob
+        let aliceId = "ZIz3m-9WfaGiDEFF"
+        let bobId = "aGPHNtY3YWO21PPe"
+
+        let xmlString = """
+        <message from="\(aliceJID.full)" id="dec6ee2c-2bc3-4d5b-ac05-be7adaeadd77" to="\(bobJID.bare)" type="chat" xmlns="jabber:client">
+            <body>Boop</body>
+            <markable xmlns="urn:xmpp:chat-markers:0"/>
+            <request xmlns="urn:xmpp:receipts"/>
+            <origin-id id="dec6ee2c-2bc3-4d5b-ac05-be7adaeadd77" xmlns="urn:xmpp:sid:0"/>
+            <active xmlns="http://jabber.org/protocol/chatstates"/>
+            <stanza-id by="\(aliceJID.bare)" id="\(aliceId)" xmlns="urn:xmpp:sid:0"/>
+            <stanza-id by="\(bobJID.bare)" id="\(bobId)" xmlns="urn:xmpp:sid:0"/>
+        </message>
+        """
+        let message = try! XMPPMessage(xmlString: xmlString)
+        let stanzaIds = message.stanzaIds
+        XCTAssertEqual(stanzaIds[aliceJID.bareJID]!, aliceId)
+        XCTAssertEqual(stanzaIds[bobJID.bareJID]!, bobId)
     }
     
     func testAddOriginId() {

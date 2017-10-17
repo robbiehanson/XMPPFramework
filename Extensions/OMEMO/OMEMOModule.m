@@ -344,14 +344,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 #pragma mark Utility
 
-/** Executes block on moduleQueue */
-- (void) performBlock:(dispatch_block_t)block {
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-}
-
 /** Generate elementId UUID if needed */
 - (nonnull NSString*) fixElementId:(nullable NSString*)elementId {
     NSString *eid = nil;

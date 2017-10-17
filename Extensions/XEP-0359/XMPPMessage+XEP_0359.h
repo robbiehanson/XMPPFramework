@@ -20,11 +20,19 @@ NS_ASSUME_NONNULL_BEGIN
 @class XMPPStanzaId;
 @interface XMPPMessage (XEP_0359)
 
-/** XEP-0359: Origin Id */
+/**
+ * XEP-0359: Origin Id
+ *
+ * Usually this will be the same as the XMPPElement elementID, if present.
+ * It is intended to be a unique identifier, useful for deduplication for MAM and MUC.
+ */
 @property (nonatomic, readonly, nullable) NSString *originId;
 
 /**
  * XEP-0359: Origin Id
+ *
+ * This usually should be the same as the XMPPElement elementID.
+ * It must be a unique identifier (UUID), and is useful for deduplication for MAM and MUC.
  *
  * @note If nil is passed for uniqueId, this method will generate a NSUUID.uuidString for the 'id' attribute.
  */
@@ -35,6 +43,9 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * Usually there will be just one stanzaId, if supported,
  * but in the case of message receipts there can be more.
+ * It will be a unique identifier, useful for deduplication for MAM and MUC.
+ *
+ * @note key=by, value=id
  *
  * @warn ⚠️ Do not trust this value without first checking XMPPCapabilities hasValidStanzaId:
  */
