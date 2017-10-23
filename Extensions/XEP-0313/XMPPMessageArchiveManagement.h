@@ -13,7 +13,11 @@
 @class XMPPIDTracker;
 @class XMPPMessage;
 
+
 NS_ASSUME_NONNULL_BEGIN
+
+/** 'urn:xmpp:mam:2' */
+extern NSString *const XMLNS_XMPP_MAM;
 
 @interface XMPPMessageArchiveManagement : XMPPModule
 
