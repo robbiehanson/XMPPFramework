@@ -8,6 +8,7 @@
 
 #import "XMPPMessage+XEP_0313.h"
 #import "XMPPMessageArchiveManagement.h"
+#import "NSXMLElement+XMPP.h"
 
 @implementation XMPPMessage (XEP_0313)
 
