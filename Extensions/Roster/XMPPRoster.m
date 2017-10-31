@@ -515,10 +515,7 @@ enum XMPPRosterFlags
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
     
-    NSString *uuid = [[NSUUID UUID] UUIDString];
-    
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" child:query];
-    [iq addAttributeWithName:@"id" stringValue:uuid];
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID] child:query];
 
 	[xmppStream sendElement:iq];
 
@@ -547,7 +544,7 @@ enum XMPPRosterFlags
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 	
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
@@ -645,7 +642,7 @@ enum XMPPRosterFlags
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
 	[query addChild:item];
 	
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
 	[iq addChild:query];
 	
 	[xmppStream sendElement:iq];
