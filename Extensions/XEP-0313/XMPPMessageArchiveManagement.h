@@ -24,6 +24,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (readwrite, assign) NSInteger resultAutomaticPagingPageSize;
 
+/**
+ When enabled, original messages unwrapped from query results will be injected back into the stream, exposing them to other modules.
+ Disabled by default.
+ */
+@property (readwrite, assign) BOOL submitsPayloadMessagesForStreamProcessing;
+
 - (void)retrieveMessageArchiveWithFields:(nullable NSArray<NSXMLElement*> *)fields
                            withResultSet:(nullable XMPPResultSet *)resultSet;
 
@@ -41,9 +47,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol XMPPMessageArchiveManagementDelegate
 @optional
+- (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFinishReceivingMessagesWithArchiveIDs:(NSArray<NSString *> *)archiveIDs;
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFinishReceivingMessagesWithSet:(XMPPResultSet *)resultSet;
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didReceiveMAMMessage:(XMPPMessage *)message;
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFailToReceiveMessages:(XMPPIQ *)error;
+- (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didSubmitPayloadMessageFromQueryResult:(NSXMLElement *)result;
 
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didReceiveFormFields:(XMPPIQ *)iq;
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFailToReceiveFormFields:(XMPPIQ *)iq;

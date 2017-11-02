@@ -2,6 +2,8 @@
 
 #define _XMPP_MESSAGE_DELIVERY_RECEIPTS_H
 
+@class XMPPMessage;
+
 /**
  * XMPPMessageDeliveryReceipts can be configured to automatically send delivery receipts and requests in accordance to XEP-0184
 **/
@@ -29,6 +31,20 @@ NS_ASSUME_NONNULL_BEGIN
 **/
 
 @property (assign) BOOL autoSendMessageDeliveryReceipts;
+
+@end
+
+/**
+ * A protocol defining @c XMPPManagedMessaging module delegate API.
+**/
+@protocol XMPPMessageDeliveryReceiptsDelegate <NSObject>
+
+@optional
+
+/**
+ * Notifies the delegate of a receipt response message received in the stream.
+**/
+- (void)xmppMessageDeliveryReceipts:(XMPPMessageDeliveryReceipts *)xmppMessageDeliveryReceipts didReceiveReceiptResponseMessage:(XMPPMessage *)message;
 
 @end
 NS_ASSUME_NONNULL_END

@@ -263,7 +263,7 @@
 	}];
 }
 
-- (void)xmppMUCLight:(XMPPMUCLight *)sender changedAffiliation:(NSString *)affiliation roomJID:(XMPPJID *)roomJID {
+- (void)xmppMUCLight:(XMPPMUCLight *)sender changedAffiliation:(NSString *)affiliation userJID:(XMPPJID *)userJID roomJID:(XMPPJID *)roomJID {
 	XCTAssertEqualObjects(affiliation, @"member");
 	XCTAssertEqualObjects(roomJID.full, @"coven@muclight.shakespeare.lit");
 	[self.delegateResponseExpectation fulfill];

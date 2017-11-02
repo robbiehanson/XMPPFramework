@@ -22,6 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)fakeIQResponse:(XMPPIQ *) iq;
 - (void)fakeMessageResponse:(XMPPMessage *) message;
 
+- (void)fakeCurrentEventWithID:(NSString *)fakeEventID timestamp:(NSDate *)fakeEventTimestamp forActionWithBlock:(dispatch_block_t)block;
+
 /** This is always called on XMPPStream's xmppQueue */
 @property (nonatomic, copy, nullable) void (^elementReceived)(__kindof XMPPElement *element);
 
