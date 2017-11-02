@@ -646,7 +646,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
 - (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt * _Nullable * _Nullable)receiptPtr;
-- (void)sendElement:(NSXMLElement *)element registeringEventWithID:(NSString *)eventID andGetReceipt:(XMPPElementReceipt **)receiptPtr;
+- (void)sendElement:(NSXMLElement *)element registeringEventWithID:(NSString *)eventID andGetReceipt:(XMPPElementReceipt * _Nullable * _Nullable)receiptPtr;
 
 /**
  * Fetches and resends the myPresence element (if available) in a single atomic operation.
@@ -747,7 +747,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * This method returns nil if called outside of those callbacks.
  * For more details, please refer to @c XMPPElementEvent documentation.
  */
-- (XMPPElementEvent *)currentElementEvent;
+- (nullable XMPPElementEvent *)currentElementEvent;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
@@ -822,7 +822,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 @property (nonatomic, copy, readonly) NSString *uniqueID;
 
 /// The value of the stream's @c myJID property at the time when the event occured.
-@property (nonatomic, strong, readonly) XMPPJID *myJID;
+@property (nonatomic, strong, readonly, nullable) XMPPJID *myJID;
 
 /// The local device time when the event occured.
 @property (nonatomic, strong, readonly) NSDate *timestamp;

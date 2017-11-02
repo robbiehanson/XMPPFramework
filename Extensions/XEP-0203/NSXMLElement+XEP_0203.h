@@ -7,7 +7,7 @@
 
 @property (nonatomic, readonly) BOOL wasDelayed;
 @property (nonatomic, readonly, nullable) NSDate *delayedDeliveryDate;
-- (XMPPJID *)delayedDeliveryFrom;
-- (NSString *)delayedDeliveryReasonDescription;
+@property (nonatomic, readonly, nullable) XMPPJID *delayedDeliveryFrom;
+@property (nonatomic, readonly, nullable) NSString *delayedDeliveryReasonDescription;
 
 @end

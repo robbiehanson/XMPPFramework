@@ -1,6 +1,8 @@
 #import <CoreData/CoreData.h>
 #import "XMPPJID.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface NSManagedObject (XMPPCoreDataStorage)
 
 /// @brief Inserts a managed object with an entity whose name matches the class name.
@@ -27,3 +29,5 @@
 - (NSArray *)xmpp_executeForcedSuccessFetchRequest:(NSFetchRequest *)fetchRequest;
 
 @end
+
+NS_ASSUME_NONNULL_END

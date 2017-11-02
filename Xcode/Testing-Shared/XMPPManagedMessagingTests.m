@@ -205,7 +205,7 @@
     });
 }
 
-- (BOOL)didResumeWithAckedStanzaIds:(NSArray *__autoreleasing *)stanzaIdsPtr serverResponse:(NSXMLElement *__autoreleasing *)responsePtr
+- (BOOL)didResumeWithAckedStanzaIds:(NSArray<id> *__autoreleasing  _Nullable *)stanzaIdsPtr serverResponse:(NSXMLElement *__autoreleasing  _Nullable *)responsePtr
 {
     *stanzaIdsPtr = self.resumeStanzaIDs;
     return YES;
