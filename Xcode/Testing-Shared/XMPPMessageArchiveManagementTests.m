@@ -9,9 +9,9 @@
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
 
-@interface XMPPMessageArchiveManagementTests : XCTestCase <XMPPMessageArchiveManagementDelegate>
+@interface XMPPMessageArchiveManagementTests : XCTestCase <XMPPMessageArchiveManagementDelegate, XMPPStreamDelegate>
 
-@property (nonatomic, strong) XCTestExpectation *delegateExpectation;
+@property (nonatomic, copy) NSDictionary<NSString *, XCTestExpectation *> *delegateExpectations;
 
 @end
 
@@ -117,8 +117,9 @@
 }
 
 - (void)testDelegateDidReceiveMAMMessage {
-	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
-	
+    self.delegateExpectations = @{ NSStringFromSelector(@selector(xmppMessageArchiveManagement:didReceiveMAMMessage:)) :
+                                       [self expectationWithDescription:@"Did receive MAM message"] };
+    
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	
 	XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
@@ -145,11 +146,14 @@
 
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didReceiveMAMMessage:(XMPPMessage *)message{
 
-	[self.delegateExpectation fulfill];
+	[self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
 }
 
 - (void)testDelegateDidReceiveIQ {
-	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
+    self.delegateExpectations = @{ NSStringFromSelector(@selector(xmppMessageArchiveManagement:didFinishReceivingMessagesWithArchiveIDs:)) :
+                                       [self expectationWithDescription:@"Did finish receiving messages with archive IDs"],
+                                   NSStringFromSelector(@selector(xmppMessageArchiveManagement:didFinishReceivingMessagesWithSet:)) :
+                                       [self expectationWithDescription:@"Did finish receiving messages with set"] };
 	
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	
@@ -159,6 +163,10 @@
 	
 	__weak typeof(XMPPMockStream) *weakStreamTest = streamTest;
 	streamTest.elementReceived = ^void(NSXMLElement *element) {
+        NSString *queryID = [[element elementForName:@"query"] attributeStringValueForName:@"queryid"];
+        XMPPMessage *fakeMessageResponse = [self fakeMessageWithQueryID:queryID eid:@"responseID"];
+        [weakStreamTest fakeMessageResponse:fakeMessageResponse];
+        
 		NSString *elementID = [element attributeForName:@"id"].stringValue;
 		XMPPIQ *fakeIQResponse = [self fakeIQWithID:elementID];
 		[weakStreamTest fakeIQResponse:fakeIQResponse];
@@ -173,6 +181,13 @@
 	}];
 }
 
+- (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFinishReceivingMessagesWithArchiveIDs:(NSArray<NSString *> *)archiveIDs
+{
+    XCTAssertEqualObjects(@[@"28482-98726-73623"], archiveIDs);
+    
+    [self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
+}
+
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFinishReceivingMessagesWithSet:(XMPPResultSet *)resultSet {
 	
 	XCTAssertEqualObjects(@"28482-98726-73623", resultSet.first);
@@ -180,11 +195,12 @@
 	XCTAssertEqual(20, resultSet.count);
 	XCTAssertEqual(0, resultSet.firstIndex);
 	
-	[self.delegateExpectation fulfill];
+	[self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
 }
 
 - (void)testDelegateDidReceiveError {
-	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
+    self.delegateExpectations = @{ NSStringFromSelector(@selector(xmppMessageArchiveManagement:didFailToReceiveMessages:)) :
+                                       [self expectationWithDescription:@"Did fail to receive messages"] };
 	
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 	
@@ -209,12 +225,13 @@
 }
 
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFailToReceiveMessages:(XMPPIQ *)error {
-	[self.delegateExpectation fulfill];
+	[self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
 }
 
 
 - (void)testRetrievingFormFields {
-	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
+    self.delegateExpectations = @{ NSStringFromSelector(@selector(xmppMessageArchiveManagement:didReceiveFormFields:)) :
+                                       [self expectationWithDescription:@"Did receive form fields"] };
 
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 
@@ -239,11 +256,12 @@
 }
 
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didReceiveFormFields:(XMPPIQ *)iq {
-	[self.delegateExpectation fulfill];
+	[self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
 }
 
 - (void)testFailToRetrievingFormFields {
-	self.delegateExpectation = [self expectationWithDescription:@"Delegate"];
+    self.delegateExpectations = @{ NSStringFromSelector(@selector(xmppMessageArchiveManagement:didFailToReceiveFormFields:)) :
+                                       [self expectationWithDescription:@"Did fail to receive form fields"] };
 
 	XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
 
@@ -268,7 +286,7 @@
 }
 
 - (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didFailToReceiveFormFields:(XMPPIQ *)iq {
-	[self.delegateExpectation fulfill];
+	[self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
 }
 
 - (void)testResultAutomaticPaging {
@@ -304,6 +322,49 @@
             XCTFail(@"Expectation Failed with error: %@", error);
         }
     }];
+}
+
+- (void)testPayloadMessageSubmission {
+    self.delegateExpectations = @{ NSStringFromSelector(@selector(xmppMessageArchiveManagement:didSubmitPayloadMessageFromQueryResult:)) :
+                                       [self expectationWithDescription:@"Did submit payload message from query result"],
+                                   NSStringFromSelector(@selector(xmppStream:didReceiveMessage:)) :
+                                       [self expectationWithDescription:@"Did receive message"] };
+    
+    XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+    [streamTest addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    
+    __weak XMPPMockStream *weakStreamTest = streamTest;
+    streamTest.elementReceived = ^void(NSXMLElement *element) {
+        XMPPIQ *iq = [XMPPIQ iqFromElement:element];
+        NSString *queryID = [[iq elementForName:@"query"] attributeStringValueForName:@"queryid"];
+        XMPPMessage *fakeMessage = [self fakeMessageWithQueryID:queryID eid:@"responseID"];
+        [weakStreamTest fakeMessageResponse:fakeMessage];
+    };
+    
+    XMPPMessageArchiveManagement *messageArchiveManagement = [[XMPPMessageArchiveManagement alloc] init];
+    messageArchiveManagement.submitsPayloadMessagesForStreamProcessing = YES;
+    [messageArchiveManagement addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    [messageArchiveManagement activate:streamTest];
+    [messageArchiveManagement retrieveMessageArchiveWithFields:nil withResultSet:nil];
+    
+    [self waitForExpectationsWithTimeout:1 handler:^(NSError * _Nullable error) {
+        if (error) {
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
+- (void)xmppMessageArchiveManagement:(XMPPMessageArchiveManagement *)xmppMessageArchiveManagement didSubmitPayloadMessageFromQueryResult:(NSXMLElement *)result
+{
+    if ([[[result forwardedMessage] body] isEqualToString:@"Hail to thee"]) {
+        [self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
+    }
+}
+
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
+    if ([[message body] isEqualToString:@"Hail to thee"]) {
+        [self.delegateExpectations[NSStringFromSelector(_cmd)] fulfill];
+    }
 }
 
 - (XMPPMessage *)fakeMessageWithQueryID:(NSString *)queryID eid:(NSString*)eid{

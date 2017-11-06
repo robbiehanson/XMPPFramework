@@ -66,11 +66,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPIQ iqFromElement:[self elementForName:@"iq"]];
+        return [XMPPIQ iqFromElement:[self elementForName_fixed:@"iq"]];
     }
     else
     {
-        return [XMPPIQ iqFromElement:[[self forwardedStanza] elementForName:@"iq"]];
+        return [XMPPIQ iqFromElement:[[self forwardedStanza] elementForName_fixed:@"iq"]];
     }
 }
 
@@ -90,11 +90,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPMessage messageFromElement:[self elementForName:@"message"]];
+        return [XMPPMessage messageFromElement:[self elementForName_fixed:@"message"]];
     }
     else
     {
-        return [XMPPMessage messageFromElement:[[self forwardedStanza] elementForName:@"message"]];
+        return [XMPPMessage messageFromElement:[[self forwardedStanza] elementForName_fixed:@"message"]];
     }
 }
 
@@ -115,11 +115,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPPresence presenceFromElement:[self elementForName:@"presence"]];
+        return [XMPPPresence presenceFromElement:[self elementForName_fixed:@"presence"]];
     }
     else
     {
-        return [XMPPPresence presenceFromElement:[[self forwardedStanza] elementForName:@"presence"]];
+        return [XMPPPresence presenceFromElement:[[self forwardedStanza] elementForName_fixed:@"presence"]];
     }
 }
 
@@ -133,6 +133,18 @@
     {
         return NO;
     }
+}
+
+#pragma mark -elementsForName: bug workaround
+
+- (NSXMLElement *)elementForName_fixed:(NSString *)name
+{
+    for (__kindof NSXMLNode *child in self.children) {
+        if ([child isKindOfClass:[NSXMLElement class]] && [child.name isEqualToString:name]) {
+            return child;
+        }
+    }
+    return nil;
 }
 
 @end
