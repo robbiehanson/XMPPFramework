@@ -222,3 +222,25 @@
 }
 
 @end
+
+@implementation XMPPModule(Synchronization)
+/** Executes block synchronously on moduleQueue */
+- (void) performBlock:(dispatch_block_t)block {
+    NSParameterAssert(block);
+    if (!block) { return; }
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+}
+
+/** Executes block asynchronously on moduleQueue */
+- (void) performBlockAsync:(dispatch_block_t)block {
+    NSParameterAssert(block);
+    if (!block) { return; }
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+@end

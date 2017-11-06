@@ -252,22 +252,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return eid;
 }
 
-/** Executes block synchronously on moduleQueue */
-- (void) performBlock:(dispatch_block_t)block {
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-}
-
-/** Executes block asynchronously on moduleQueue */
-- (void) performBlockAsync:(dispatch_block_t)block {
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-
 - (BOOL) supportsPushFromCaps:(NSXMLElement*)caps {
     __block BOOL supportsPushXEP = NO;
     NSArray <NSXMLElement*> *featureElements = [caps elementsForName:@"feature"];
