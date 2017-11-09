@@ -29,6 +29,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (atomic, readwrite) BOOL copyElementIdIfPresent;
 
+
+/**
+ * Return NO in this block to prevent origin-id from being added to a specific message.
+ */
+@property (atomic, nullable, copy) BOOL (^filterBlock)(XMPPStream *stream, XMPPMessage* message);
+
 @end
 
 @protocol XMPPStanzaIdDelegate <NSObject>
