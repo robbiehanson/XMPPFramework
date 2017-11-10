@@ -34,6 +34,7 @@
 #import "XMPPTimer.h"
 #import "XMPPCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
+#import "NSManagedObject+XMPPCoreDataStorage.h"
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPFileTransfer.h"
 #import "XMPPIncomingFileTransfer.h"
@@ -163,7 +164,14 @@
 #import "XMPPRoomLightCoreDataStorage.h"
 #import "XMPPRoomLightCoreDataStorageProtected.h"
 #import "XMPPRoomLightMessageCoreDataStorageObject.h"
-
+#import "XMPPMessageCoreDataStorage.h"
+#import "XMPPMessageCoreDataStorageObject.h"
+#import "XMPPMessageCoreDataStorageObject+Protected.h"
+#import "XMPPMessageCoreDataStorageObject+ContextHelpers.h"
+#import "XMPPMessageContextCoreDataStorageObject.h"
+#import "XMPPMessageContextCoreDataStorageObject+Protected.h"
+#import "XMPPMessageContextItemCoreDataStorageObject.h"
+#import "XMPPMessageContextItemCoreDataStorageObject+Protected.h"
 
 FOUNDATION_EXPORT double XMPPFrameworkVersionNumber;
 FOUNDATION_EXPORT const unsigned char XMPPFrameworkVersionString[];
