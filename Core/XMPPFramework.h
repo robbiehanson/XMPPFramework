@@ -151,6 +151,8 @@
 #import "NSXMLElement+XEP_0335.h"
 #import "NSXMLElement+XEP_0352.h"
 #import "NSXMLElement+XEP_0048.h"
+#import "XMPPBookmark.h"
+#import "XMPPBookmarksStorageElement.h"
 #import "XMPPIQ+XEP_0357.h"
 #import "NSXMLElement+XEP_0359.h"
 #import "XMPPMessage+XEP_0359.h"
