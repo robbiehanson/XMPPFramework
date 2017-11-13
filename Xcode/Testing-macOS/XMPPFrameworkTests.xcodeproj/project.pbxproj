@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4A6D92D0C7C1950CBA77BE55 /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */; };
+		B407FF87953F6A78BCCE2871 /* Pods_XMPPFrameworkSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 777EEF98731B0EC5DBD49953 /* Pods_XMPPFrameworkSwiftTests.framework */; };
 		D9669B591D9B13FF0018533D /* OMEMOServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9669B581D9B13FF0018533D /* OMEMOServerTests.m */; };
 		D973A0A41D2F1EF60096F3ED /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */; };
 		D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */; };
@@ -23,6 +24,7 @@
 		D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */; };
 		D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */; };
 		D99C5E091D95EBA100FB068A /* OMEMOTestStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = D99C5E081D95EBA100FB068A /* OMEMOTestStorage.m */; };
+		D9A7B0361FB98609005183CD /* SwiftOnlyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A7B0351FB98608005183CD /* SwiftOnlyTest.swift */; };
 		D9E35E6E1D90B2C5002E7CF7 /* OMEMOElementTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E35E6D1D90B2C5002E7CF7 /* OMEMOElementTests.m */; };
 		D9F20D011D836080002A8D6F /* OMEMOModuleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F20D001D836080002A8D6F /* OMEMOModuleTests.m */; };
 		DD4003D51F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4003D41F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m */; };
@@ -31,7 +33,10 @@
 /* Begin PBXFileReference section */
 		1FFB10AE98925E51A8604C49 /* Pods-XMPPFrameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.release.xcconfig"; sourceTree = "<group>"; };
 		23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4477B7888D8BC25AB55EDBCA /* Pods-XMPPFrameworkSwiftTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkSwiftTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkSwiftTests/Pods-XMPPFrameworkSwiftTests.release.xcconfig"; sourceTree = "<group>"; };
 		5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
+		5CE125FD447C51125BCAAAFF /* Pods-XMPPFrameworkSwiftTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkSwiftTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkSwiftTests/Pods-XMPPFrameworkSwiftTests.debug.xcconfig"; sourceTree = "<group>"; };
+		777EEF98731B0EC5DBD49953 /* Pods_XMPPFrameworkSwiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkSwiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9669B581D9B13FF0018533D /* OMEMOServerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOServerTests.m; path = "../../Testing-Shared/OMEMOServerTests.m"; sourceTree = "<group>"; };
 		D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D973A0921D2F1EB10096F3ED /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -51,6 +56,9 @@
 		D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPvCardTests.m; path = "../../Testing-Shared/XMPPvCardTests.m"; sourceTree = "<group>"; };
 		D99C5E071D95EBA100FB068A /* OMEMOTestStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OMEMOTestStorage.h; path = "../../Testing-Shared/OMEMOTestStorage.h"; sourceTree = "<group>"; };
 		D99C5E081D95EBA100FB068A /* OMEMOTestStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOTestStorage.m; path = "../../Testing-Shared/OMEMOTestStorage.m"; sourceTree = "<group>"; };
+		D9A7B02D1FB985BE005183CD /* XMPPFrameworkSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9A7B0311FB985BE005183CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D9A7B0351FB98608005183CD /* SwiftOnlyTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftOnlyTest.swift; path = "../../Testing-Swift/SwiftOnlyTest.swift"; sourceTree = "<group>"; };
 		D9E35E6D1D90B2C5002E7CF7 /* OMEMOElementTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOElementTests.m; path = "../../Testing-Shared/OMEMOElementTests.m"; sourceTree = "<group>"; };
 		D9F20D001D836080002A8D6F /* OMEMOModuleTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOModuleTests.m; path = "../../Testing-Shared/OMEMOModuleTests.m"; sourceTree = "<group>"; };
 		DD4003D41F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPOutOfBandResourceMessagingTests.m; path = "../../Testing-Shared/XMPPOutOfBandResourceMessagingTests.m"; sourceTree = "<group>"; };
@@ -65,6 +73,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D9A7B02A1FB985BE005183CD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B407FF87953F6A78BCCE2871 /* Pods_XMPPFrameworkSwiftTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -73,6 +89,8 @@
 			children = (
 				5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */,
 				1FFB10AE98925E51A8604C49 /* Pods-XMPPFrameworkTests.release.xcconfig */,
+				5CE125FD447C51125BCAAAFF /* Pods-XMPPFrameworkSwiftTests.debug.xcconfig */,
+				4477B7888D8BC25AB55EDBCA /* Pods-XMPPFrameworkSwiftTests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -80,6 +98,7 @@
 		63F55A521C60204300438CE2 = {
 			isa = PBXGroup;
 			children = (
+				D9A7B02E1FB985BE005183CD /* XMPPFrameworkSwiftTests */,
 				D9834FE81DAC49DA00296B0C /* Products */,
 				D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */,
 				D973A08F1D2F1EB10096F3ED /* XMPPFrameworkTests */,
@@ -119,14 +138,25 @@
 		D9834FE81DAC49DA00296B0C /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				D9A7B02D1FB985BE005183CD /* XMPPFrameworkSwiftTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D9A7B02E1FB985BE005183CD /* XMPPFrameworkSwiftTests */ = {
+			isa = PBXGroup;
+			children = (
+				D9A7B0351FB98608005183CD /* SwiftOnlyTest.swift */,
+				D9A7B0311FB985BE005183CD /* Info.plist */,
+			);
+			path = XMPPFrameworkSwiftTests;
 			sourceTree = "<group>";
 		};
 		EAAA3F63141413653179C632 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */,
+				777EEF98731B0EC5DBD49953 /* Pods_XMPPFrameworkSwiftTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -154,17 +184,43 @@
 			productReference = D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		D9A7B02C1FB985BE005183CD /* XMPPFrameworkSwiftTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D9A7B0341FB985BE005183CD /* Build configuration list for PBXNativeTarget "XMPPFrameworkSwiftTests" */;
+			buildPhases = (
+				3C29DB425E80FECAC2EE8124 /* [CP] Check Pods Manifest.lock */,
+				D9A7B0291FB985BE005183CD /* Sources */,
+				D9A7B02A1FB985BE005183CD /* Frameworks */,
+				D9A7B02B1FB985BE005183CD /* Resources */,
+				327BAEDD88C69C499981F4E8 /* [CP] Embed Pods Frameworks */,
+				D07C3AC25A4D3FA2ACE70C6F /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = XMPPFrameworkSwiftTests;
+			productName = XMPPFrameworkSwiftTests;
+			productReference = D9A7B02D1FB985BE005183CD /* XMPPFrameworkSwiftTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		63F55A531C60204300438CE2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0800;
+				LastSwiftUpdateCheck = 0910;
+				LastUpgradeCheck = 0910;
 				TargetAttributes = {
 					D973A08D1D2F1EB10096F3ED = {
 						CreatedOnToolsVersion = 7.3.1;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0910;
+					};
+					D9A7B02C1FB985BE005183CD = {
+						CreatedOnToolsVersion = 9.1;
+						LastSwiftMigration = 0910;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -181,12 +237,20 @@
 			projectRoot = "";
 			targets = (
 				D973A08D1D2F1EB10096F3ED /* XMPPFrameworkTests */,
+				D9A7B02C1FB985BE005183CD /* XMPPFrameworkSwiftTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D973A08C1D2F1EB10096F3ED /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9A7B02B1FB985BE005183CD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -202,13 +266,50 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CocoaAsyncSocket/CocoaAsyncSocket.framework",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework",
+				"${BUILT_PRODUCTS_DIR}/KissXML/KissXML.framework",
+				"${BUILT_PRODUCTS_DIR}/XMPPFramework/XMPPFramework.framework",
+				"${BUILT_PRODUCTS_DIR}/libidn/libidn.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaAsyncSocket.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaLumberjack.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KissXML.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/XMPPFramework.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/libidn.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		327BAEDD88C69C499981F4E8 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkSwiftTests/Pods-XMPPFrameworkSwiftTests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CocoaAsyncSocket/CocoaAsyncSocket.framework",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack.default-Swift/CocoaLumberjack.framework",
+				"${BUILT_PRODUCTS_DIR}/KissXML/KissXML.framework",
+				"${BUILT_PRODUCTS_DIR}/XMPPFramework-ObjC-Swift/XMPPFramework.framework",
+				"${BUILT_PRODUCTS_DIR}/libidn/libidn.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaAsyncSocket.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaLumberjack.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KissXML.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/XMPPFramework.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/libidn.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkSwiftTests/Pods-XMPPFrameworkSwiftTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		363412D993A683505AF253DE /* [CP] Check Pods Manifest.lock */ = {
@@ -217,13 +318,34 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-XMPPFrameworkTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3C29DB425E80FECAC2EE8124 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-XMPPFrameworkSwiftTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		641866745039D77DBEB0D018 /* [CP] Copy Pods Resources */ = {
@@ -239,6 +361,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D07C3AC25A4D3FA2ACE70C6F /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-XMPPFrameworkSwiftTests/Pods-XMPPFrameworkSwiftTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -269,18 +406,32 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D9A7B0291FB985BE005183CD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D9A7B0361FB98609005183CD /* SwiftOnlyTest.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		63F55A571C60204300438CE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -301,12 +452,18 @@
 		63F55A581C60204300438CE2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -369,6 +526,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -412,6 +571,97 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.xmppframework.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
+		D9A7B0321FB985BE005183CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5CE125FD447C51125BCAAAFF /* Pods-XMPPFrameworkSwiftTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = XMPPFrameworkSwiftTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwiftTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		D9A7B0331FB985BE005183CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4477B7888D8BC25AB55EDBCA /* Pods-XMPPFrameworkSwiftTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = XMPPFrameworkSwiftTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwiftTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -432,6 +682,15 @@
 			buildConfigurations = (
 				D973A0941D2F1EB10096F3ED /* Debug */,
 				D973A0951D2F1EB10096F3ED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D9A7B0341FB985BE005183CD /* Build configuration list for PBXNativeTarget "XMPPFrameworkSwiftTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D9A7B0321FB985BE005183CD /* Debug */,
+				D9A7B0331FB985BE005183CD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
