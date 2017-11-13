@@ -1,35 +1,41 @@
 PODS:
   - CocoaAsyncSocket (7.6.0)
-  - CocoaLumberjack (3.0.0):
-    - CocoaLumberjack/Default (= 3.0.0)
-    - CocoaLumberjack/Extensions (= 3.0.0)
-  - CocoaLumberjack/Core (3.0.0)
-  - CocoaLumberjack/Default (3.0.0):
-    - CocoaLumberjack/Core
-  - CocoaLumberjack/Extensions (3.0.0):
+  - CocoaLumberjack (3.3.0):
+    - CocoaLumberjack/Default (= 3.3.0)
+    - CocoaLumberjack/Extensions (= 3.3.0)
+  - CocoaLumberjack/Default (3.3.0)
+  - CocoaLumberjack/Extensions (3.3.0):
+    - CocoaLumberjack/Default
+  - CocoaLumberjack/Swift (3.3.0):
     - CocoaLumberjack/Default
   - KissXML (5.2.0)
   - libidn (1.33)
-  - XMPPFramework (3.7.0):
+  - XMPPFramework (4.0):
+    - XMPPFramework/ObjC (= 4.0)
+  - XMPPFramework/ObjC (4.0):
     - CocoaAsyncSocket (~> 7.6.0)
     - CocoaLumberjack
     - KissXML (~> 5.2.0)
     - libidn (~> 1.33.0)
+  - XMPPFramework/Swift (4.0):
+    - CocoaLumberjack/Swift (~> 3.3.0)
+    - XMPPFramework/ObjC
 
 DEPENDENCIES:
   - XMPPFramework (from `../../`)
+  - XMPPFramework/Swift (from `../../`)
 
 EXTERNAL SOURCES:
   XMPPFramework:
-    :path: "../../"
+    :path: ../../
 
 SPEC CHECKSUMS:
   CocoaAsyncSocket: b9d5589f07baf9de8f34cc25abd4fcba28f13805
-  CocoaLumberjack: c823149bccc5519a9447aeb433be7b1212a7d6a5
+  CocoaLumberjack: 3c8c74683302f9012bb168e1c4b7ae3c0b558431
   KissXML: 1c1eeeb6b94e4522cd2f2373e5d0d03c9227738f
   libidn: 90fc1a62b60288dcf543f13f4ebca913f17d829f
-  XMPPFramework: 164ed2ce99e3eb2f358e9f5ca5eeaa8d75339fde
+  XMPPFramework: ea5684d4f4bc0e8b2933da64a6390cfc032cf929
 
-PODFILE CHECKSUM: 189df3d04c4edec13c490940533ce3a8b9b33e5b
+PODFILE CHECKSUM: d06d8aad56c091bf567d7a678dfe9985eec650d7
 
-COCOAPODS: 1.2.1
+COCOAPODS: 1.3.1

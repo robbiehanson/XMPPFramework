@@ -18,6 +18,7 @@ The minimum deployment target is iOS 8.0 / macOS 10.9 / tvOS 9.0.
 
 There have been a number of changes to the public API of XMPPFramework in an attempt to improve the ergnomics and safety when used with Swift. Most Objective-C projects should require no changes, with a few minor exceptions. Many (simple) changes will be required for pure Swift projects, mostly due to the new nullability annotations. The process is still not complete so please submit issues and help if possible to minimize future breaking changes.
 
+* Swift Support
 * Modern Objective-C Syntax: Nullability annotations and generics.
 * Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
 * XMPPJID `bareJID` is now imported into Swift as `bareJID` instead of `bare` to prevent conflict with `bare` String. Also applies to `domainJID`.
@@ -40,6 +41,12 @@ There have been a number of changes to the public API of XMPPFramework in an att
 	* FileTransfer
 	* CoreDataStorage
 	* BandwidthMonitor
+
+### Swift Support
+
+XMPPFramework is now accepting contributions written in Swift, with some limitations. Swift code must be isolated in the `Swift/` folder, and none of the existing or future Obj-C code may depend upon it. All public APIs written in Swift must be Obj-C compatible and marked with `@objc`.
+
+See the Contributing section below for more details.
 
 #### CocoaPods
 
@@ -79,7 +86,7 @@ github "robbiehanson/XMPPFramework" "master"
 
 ```
 
-Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project. If you'd like to include new features written in Swift, drag `XMPPFrameworkSwift.framework` into your project as well. You'll need to manually import `XMPPFrameworkSwift` in your headers.
+Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project. If you'd like to include new features written in Swift, drag `XMPPFrameworkSwift.framework` into your project as well. You'll need to manually `import XMPPFrameworkSwift` in your headers.
 
 ### Contributing
 
@@ -89,7 +96,7 @@ Pull requests are welcome! If you are planning a larger feature, please open an 
 * Please try to write your code in a way that's testable. Using `XMPPMockStream` makes testing pretty easy. Look at examples in `Testing-Shared` for inspiration.
 * You will need both CocoaPods and Carthage to work on tests. Run `carthage checkout` in the root of the repository, and `bundle install && bundle exec pod install` in the `Testing-iOS` and `Testing-macOS` folders.
 * Create your test files to the `Testing-Shared` folder, and then add them to the iOS, macOS, and tvOS targets in `Testing-Carthage/XMPPFrameworkTests.xcodeproj`, `Testing-macOS/XMPPFrameworkTests.xcworkspace` and `Testing-iOS/XMPPFrameworkTests.xcworkspace`.
-* If you plan on writing Swift code, please keep it isolated in the `Swift/` folder and `XMPPFrameworkSwift.framework` target, and ensure none of the pure Obj-C code has dependencies on it.
+* If you plan on writing Swift code, please keep it isolated in the `Swift/` folder, and ensure none of the pure Obj-C code has dependencies on it. All public APIs must be Obj-C compatible and marked with `@objc`. Remember to add your files to the `XMPPFrameworkSwift.framework` target. Ensure that all your unit tests pass for both the CocoaPods and Carthage integrations. For an example, look at `Testing-Carthage/XMPPFrameworkSwiftTests.xcodeproj`, `Testing-Swift/SwiftOnlyTest.swift`, and the `XMPPFrameworkSwiftTests` targets within `Testing-macOS` and `Testing-iOS`.
 
 Looking to help but don't know where to start? 
 

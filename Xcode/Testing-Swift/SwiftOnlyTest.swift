@@ -6,7 +6,12 @@
 //
 
 import XCTest
-import XMPPFrameworkSwift
+
+#if COCOAPODS
+    import XMPPFramework
+#else
+    import XMPPFrameworkSwift
+#endif
 
 class SwiftOnlyTest: XCTestCase {
     
@@ -21,10 +26,6 @@ class SwiftOnlyTest: XCTestCase {
     }
     
     func testSwiftOnlyFeature() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        let element = XMPPElement()
-        XCTAssertNotNil(element.swiftTest)
+        XCTAssertTrue(XMPPFrameworkSwiftAvailable)
     }
-    
 }

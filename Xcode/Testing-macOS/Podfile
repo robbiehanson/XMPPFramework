@@ -1,10 +1,16 @@
 # Uncomment this line to define a global platform for your project
-platform :osx, '10.9'
+platform :osx, '10.10'
 # Uncomment this line if you're using Swift
 use_frameworks!
 
 target 'XMPPFrameworkTests' do
 
   pod "XMPPFramework", :path => "../../"
+
+end
+
+target 'XMPPFrameworkSwiftTests' do
+
+  pod "XMPPFramework/Swift", :path => "../../"
 
 end
