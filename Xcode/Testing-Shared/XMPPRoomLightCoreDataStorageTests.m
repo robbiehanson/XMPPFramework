@@ -31,7 +31,7 @@
 	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	[roomLight activate:streamTest];
 
-	[streamTest fakeMessageResponse:[self fakeIncomingMessage]];
+	[streamTest fakeMessageResponse:[self fakeIncomingMessageWithBody:YES]];
 	[self waitForExpectationsWithTimeout:2 handler:^(NSError * _Nullable error) {
 		if(error){
 			XCTFail(@"Expectation Failed with error: %@", error);
@@ -53,7 +53,7 @@
 	[roomLight addDelegate:self delegateQueue:dispatch_get_main_queue()];
 	[roomLight activate:streamTest];
 
-	[streamTest fakeMessageResponse:[self fakeIncomingMessage]];
+	[streamTest fakeMessageResponse:[self fakeIncomingMessageWithBody:YES]];
 
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 		NSManagedObjectContext *context = [storage mainThreadManagedObjectContext];
@@ -135,6 +135,52 @@
     }];
 }
 
+- (void)testReceiveMessageWithoutBody {
+    self.checkDelegate = false;
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"receive message without body and correctly stored"];
+    
+    XMPPRoomLightCoreDataStorage *storage = [[XMPPRoomLightCoreDataStorage alloc] initWithDatabaseFilename:@"testReceiveMessageWithoutBody.sqlite"
+                                                                                              storeOptions:nil];
+    storage.autoRemovePreviousDatabaseFile = YES;
+    
+    XMPPMockStream *streamTest = [[XMPPMockStream alloc] init];
+    streamTest.myJID = [XMPPJID jidWithString:@"myUser@domain.com"];
+    XMPPJID *jid = [XMPPJID jidWithString:@"room@domain.com"];
+    XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithRoomLightStorage:storage jid:jid roomname:@"test" dispatchQueue:nil];
+    roomLight.shouldHandleMemberMessagesWithoutBody = YES;
+    [roomLight activate:streamTest];
+    
+    [streamTest fakeMessageResponse:[self fakeIncomingMessageWithBody:NO]];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        NSManagedObjectContext *context = [storage mainThreadManagedObjectContext];
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPRoomLightMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:context];
+        
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"roomJIDStr = %@", jid.full];
+        
+        NSFetchRequest *request = [[NSFetchRequest alloc] init];
+        request.entity = entity;
+        request.predicate = predicate;
+        
+        NSError *error;
+        XMPPRoomLightMessageCoreDataStorageObject *roomMessage = [[context executeFetchRequest:request error:&error] firstObject];
+        XCTAssertNil(error);
+        XCTAssertEqualObjects(roomMessage.jid.full, @"room@domain.com/test.user@erlang-solutions.com");
+        XCTAssertNil(roomMessage.body);
+        XCTAssertEqualObjects(roomMessage.nickname, @"test.user@erlang-solutions.com");
+        
+        [expectation fulfill];
+    });
+    
+    [self waitForExpectationsWithTimeout:3 handler:^(NSError * _Nullable error) {
+        if(error){
+            XCTFail(@"Expectation Failed with error: %@", error);
+        }
+    }];
+}
+
 - (void)testImportMessage {
     self.checkDelegate = false;
     
@@ -148,7 +194,10 @@
     XMPPJID *jid = [XMPPJID jidWithString:@"room@domain.com"];
     XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithRoomLightStorage:storage jid:jid roomname:@"test" dispatchQueue:nil];
     
-    [storage importRemoteArchiveMessage:[self fakeIncomingMessage] withTimestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:0] inRoom:roomLight fromStream:streamTest];
+    [storage importRemoteArchiveMessage:[self fakeIncomingMessageWithBody:YES]
+                          withTimestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:0]
+                                 inRoom:roomLight
+                             fromStream:streamTest];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         NSManagedObjectContext *context = [storage mainThreadManagedObjectContext];
@@ -194,8 +243,14 @@
     XMPPJID *jid = [XMPPJID jidWithString:@"room@domain.com"];
     XMPPRoomLight *roomLight = [[XMPPRoomLight alloc] initWithRoomLightStorage:storage jid:jid roomname:@"test" dispatchQueue:nil];
     
-    [storage importRemoteArchiveMessage:[self fakeIncomingMessage] withTimestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:0] inRoom:roomLight fromStream:streamTest];
-    [storage importRemoteArchiveMessage:[self fakeIncomingMessage] withTimestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:0] inRoom:roomLight fromStream:streamTest];
+    [storage importRemoteArchiveMessage:[self fakeIncomingMessageWithBody:YES]
+                          withTimestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:0]
+                                 inRoom:roomLight
+                             fromStream:streamTest];
+    [storage importRemoteArchiveMessage:[self fakeIncomingMessageWithBody:YES]
+                          withTimestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:0]
+                                 inRoom:roomLight
+                             fromStream:streamTest];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         NSManagedObjectContext *context = [storage mainThreadManagedObjectContext];
@@ -231,14 +286,16 @@
 	}
 }
 
-- (XMPPMessage *)fakeIncomingMessage{
+- (XMPPMessage *)fakeIncomingMessageWithBody:(BOOL)shouldIncludeBody {
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<message xmlns='jabber:client' \
 								 from='room@domain.com/test.user@erlang-solutions.com' \
 								   to='test.user@erlang-solutions.com' \
 								   id='C7A969D8-C711-4516-9313-10EA9927B39B' \
 								 type='groupchat'>"];
-	[s appendString: @"    <body>Yo! 13</body>'"];
+    if (shouldIncludeBody) {
+        [s appendString: @"<body>Yo! 13</body>'"];
+    }
 	[s appendString: @"</message>"];
 
 	NSError *error;

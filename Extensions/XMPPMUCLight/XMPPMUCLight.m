@@ -241,12 +241,11 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 
 	XMPPJID *from = message.from;
 	NSXMLElement *x = [message elementForName:@"x" xmlns:XMPPRoomLightAffiliations];
-	NSXMLElement *user  = [x elementForName:@"user"];
-	NSString *affiliation = [user attributeForName:@"affiliation"].stringValue;
-
-	if (affiliation) {
-		[multicastDelegate xmppMUCLight:self changedAffiliation:affiliation roomJID:from];
-	}
+    for (NSXMLElement *user in [x elementsForName:@"user"]) {
+        NSString *affiliation = [user attributeForName:@"affiliation"].stringValue;
+        XMPPJID *userJID = [XMPPJID jidWithString:user.stringValue];
+        [multicastDelegate xmppMUCLight:self changedAffiliation:affiliation userJID:userJID roomJID:from];
+    }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module {

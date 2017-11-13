@@ -53,7 +53,7 @@
 
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender didDiscoverRooms:(nonnull NSArray<__kindof NSXMLElement*>*)rooms forServiceNamed:(nonnull NSString *)serviceName;
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender failedToDiscoverRoomsForServiceNamed:(nonnull NSString *)serviceName withError:(nonnull NSError *)error;
-- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender changedAffiliation:(nonnull NSString *)affiliation roomJID:(nonnull XMPPJID *)roomJID;
+- (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender changedAffiliation:(nonnull NSString *)affiliation userJID:(nonnull XMPPJID *)userJID roomJID:(nonnull XMPPJID *)roomJID;
 
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender didRequestBlockingList:(nonnull NSArray<NSXMLElement*>*)items forServiceNamed:(nonnull NSString *)serviceName;
 - (void)xmppMUCLight:(nonnull XMPPMUCLight *)sender failedToRequestBlockingList:(nonnull NSString *)serviceName withError:(nonnull XMPPIQ *)iq;
