@@ -34,6 +34,7 @@
 #import "XMPPTimer.h"
 #import "XMPPCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
+#import "XMPPDelayedDelivery.h"
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPFileTransfer.h"
 #import "XMPPIncomingFileTransfer.h"
@@ -132,6 +133,7 @@
 #import "XMPPStreamManagementMemoryStorage.h"
 #import "XMPPStreamManagementStanzas.h"
 #import "XMPPStreamManagement.h"
+#import "XMPPManagedMessaging.h"
 #import "XMPPAutoPing.h"
 #import "XMPPPing.h"
 #import "XMPPAutoTime.h"
@@ -164,6 +166,7 @@
 #import "XMPPRoomLightCoreDataStorage.h"
 #import "XMPPRoomLightCoreDataStorageProtected.h"
 #import "XMPPRoomLightMessageCoreDataStorageObject.h"
+#import "XMPPOneToOneChat.h"
 
 
 FOUNDATION_EXPORT double XMPPFrameworkVersionNumber;
