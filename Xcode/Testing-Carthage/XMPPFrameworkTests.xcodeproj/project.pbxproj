@@ -67,6 +67,9 @@
 		DD4003E81F75283D0078D144 /* XMPPOutOfBandResourceMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB40BAA1F75255100B82A93 /* XMPPOutOfBandResourceMessagingTests.m */; };
 		DD4003E91F75283E0078D144 /* XMPPOutOfBandResourceMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB40BAA1F75255100B82A93 /* XMPPOutOfBandResourceMessagingTests.m */; };
 		DDB40BAB1F75255100B82A93 /* XMPPOutOfBandResourceMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB40BAA1F75255100B82A93 /* XMPPOutOfBandResourceMessagingTests.m */; };
+		DD26F5881F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD26F5871F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m */; };
+		DD26F5891F7CF1B400F54F18 /* XMPPOneToOneChatTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD26F5871F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m */; };
+		DD26F58A1F7CF1B400F54F18 /* XMPPOneToOneChatTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD26F5871F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -141,6 +144,7 @@
 		D9DCD7151E625C560010D1C7 /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9E35E6F1D90B894002E7CF7 /* OMEMOElementTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOElementTests.m; path = "../Testing-Shared/OMEMOElementTests.m"; sourceTree = SOURCE_ROOT; };
 		DDB40BAA1F75255100B82A93 /* XMPPOutOfBandResourceMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPOutOfBandResourceMessagingTests.m; sourceTree = "<group>"; };
+		DD26F5871F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPOneToOneChatTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +216,7 @@
 				D973A07A1D2F18040096F3ED /* XMPPURITests.m */,
 				D973A07B1D2F18040096F3ED /* XMPPvCardTests.m */,
 				DDB40BAA1F75255100B82A93 /* XMPPOutOfBandResourceMessagingTests.m */,
+				DD26F5871F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m */,
 				63F50D971C60208200CA0201 /* Info.plist */,
 			);
 			name = XMPPFrameworkTests;
@@ -395,6 +400,7 @@
 				D973A07D1D2F18040096F3ED /* EncodeDecodeTest.m in Sources */,
 				D973A0831D2F18040096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
 				D973A0801D2F18040096F3ED /* XMPPMockStream.m in Sources */,
+				DD26F5881F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m in Sources */,
 				D973A0841D2F18040096F3ED /* XMPPRoomLightTests.m in Sources */,
 				D97509281D9C82DB002E6F51 /* OMEMOServerTests.m in Sources */,
 				D99C5E0D1D99C48100FB068A /* OMEMOModuleTests.m in Sources */,
@@ -421,6 +427,7 @@
 				D9DCD3D71E6255E10010D1C7 /* EncodeDecodeTest.m in Sources */,
 				D9DCD3D81E6255E10010D1C7 /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
 				D9DCD3D91E6255E10010D1C7 /* XMPPMockStream.m in Sources */,
+				DD26F5891F7CF1B400F54F18 /* XMPPOneToOneChatTests.m in Sources */,
 				D9DCD3DA1E6255E10010D1C7 /* XMPPRoomLightTests.m in Sources */,
 				D9DCD3DB1E6255E10010D1C7 /* OMEMOServerTests.m in Sources */,
 				D9DCD3DC1E6255E10010D1C7 /* OMEMOModuleTests.m in Sources */,
@@ -447,6 +454,7 @@
 				D9DCD7001E625C560010D1C7 /* EncodeDecodeTest.m in Sources */,
 				D9DCD7011E625C560010D1C7 /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
 				D9DCD7021E625C560010D1C7 /* XMPPMockStream.m in Sources */,
+				DD26F58A1F7CF1B400F54F18 /* XMPPOneToOneChatTests.m in Sources */,
 				D9DCD7031E625C560010D1C7 /* XMPPRoomLightTests.m in Sources */,
 				D9DCD7041E625C560010D1C7 /* OMEMOServerTests.m in Sources */,
 				D9DCD7051E625C560010D1C7 /* OMEMOModuleTests.m in Sources */,
