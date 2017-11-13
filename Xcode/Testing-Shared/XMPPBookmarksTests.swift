@@ -52,16 +52,16 @@ class XMPPBookmarksTests: XCTestCase {
         let conference = storage.conferenceBookmarks.first!
         
         let testConference = { (_ conference: XMPPConferenceBookmark) in
-            XCTAssertEqual(name, conference.name)
+            XCTAssertEqual(name, conference.bookmarkName)
             XCTAssertEqual(true, conference.autoJoin)
-            XCTAssertEqual(jid, conference.jid.bare)
+            XCTAssertEqual(jid, conference.jid?.bare)
             XCTAssertEqual(nick, conference.nick)
             XCTAssertEqual(password, conference.password)
         }
         testConference(conference)
         
-        let outXml = conference.bookmarkElement
-        let outConference = XMPPConferenceBookmark(bookmarkElement: outXml)!
+        let outXml = conference.element
+        let outConference = XMPPConferenceBookmark.fromElement(outXml)!
         testConference(outConference)
         
         // Test URL
@@ -69,13 +69,13 @@ class XMPPBookmarksTests: XCTestCase {
         let url = storage.urlBookmarks.first!
         
         let testUrl = { (_ url: XMPPURLBookmark) in
-            XCTAssertEqual(url.name, urlName)
-            XCTAssertEqual(url.url.absoluteString, urlString)
+            XCTAssertEqual(url.bookmarkName, urlName)
+            XCTAssertEqual(url.url?.absoluteString, urlString)
         }
         testUrl(url)
         
-        let outUrlXml = url.bookmarkElement
-        let outUrl = XMPPURLBookmark(bookmarkElement: outUrlXml)!
+        let outUrlXml = url.element
+        let outUrl = XMPPURLBookmark.fromElement(outUrlXml)!
         testUrl(outUrl)
     }
     

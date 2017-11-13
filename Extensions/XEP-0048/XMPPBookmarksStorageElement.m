@@ -30,8 +30,7 @@
 - (instancetype) initWithBookmarks:(NSArray<id<XMPPBookmark>>*)bookmarks {
     if (self = [super initWithName:XMPPBookmarkConstants.storageElement xmlns:XMPPBookmarkConstants.xmlns]) {
         [bookmarks enumerateObjectsUsingBlock:^(id<XMPPBookmark> _Nonnull bookmark, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSXMLElement *bookmarkElement = bookmark.bookmarkElement;
-            [self addChild:bookmarkElement];
+            [self addChild:bookmark.element];
         }];
     }
     return self;
@@ -51,7 +50,7 @@
     NSArray<NSXMLElement*> *bookmarkElements = [self elementsForName:elementName];
     NSMutableArray<id<XMPPBookmark>> *bookmarks = [[NSMutableArray alloc] initWithCapacity:bookmarkElements.count];
     [bookmarkElements enumerateObjectsUsingBlock:^(NSXMLElement * _Nonnull bookmarkElement, NSUInteger idx, BOOL * _Nonnull stop) {
-        id<XMPPBookmark> bookmark = [[class alloc] initWithBookmarkElement:bookmarkElement];
+        id<XMPPBookmark> bookmark = [class bookmarkFromElement:bookmarkElement];
         if (bookmark) {
             [bookmarks addObject:bookmark];
         }

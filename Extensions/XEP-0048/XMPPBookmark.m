@@ -9,129 +9,140 @@
 #import "XMPPBookmark.h"
 #import "NSXMLElement+XEP_0048.h"
 #import "NSXMLElement+XMPP.h"
-
+#import <objc/runtime.h>
 
 @implementation XMPPConferenceBookmark
-@synthesize name = _name;
+
+// MARK: Init
 
 - (instancetype) initWithJID:(XMPPJID*)jid {
-    return [self initWithJID:jid name:nil nick:nil autoJoin:NO password:nil];
+    return [self initWithJID:jid bookmarkName:nil nick:nil autoJoin:NO password:nil];
 }
 
 - (instancetype) initWithJID:(XMPPJID*)jid
-                        name:(nullable NSString*)name
+                bookmarkName:(nullable NSString*)bookmarkName
                         nick:(nullable NSString*)nick
                     autoJoin:(BOOL)autoJoin {
-    return [self initWithJID:jid name:name nick:nick autoJoin:autoJoin password:nil];
+    return [self initWithJID:jid bookmarkName:bookmarkName nick:nick autoJoin:autoJoin password:nil];
 }
 
 - (instancetype) initWithJID:(XMPPJID*)jid
-                        name:(nullable NSString*)name
+                bookmarkName:(nullable NSString*)bookmarkName
                         nick:(nullable NSString*)nick
                     autoJoin:(BOOL)autoJoin
                     password:(nullable NSString*)password {
-    if (self = [super init]) {
-        _jid = jid;
-        _name = [name copy];
-        _nick = [nick copy];
-        _autoJoin = autoJoin;
-        _password = [password copy];
+    if (self = [super initWithName:self.class.elementName]) {
+        [self addAttributeWithName:XMPPBookmarkConstants.jidAttribute stringValue:jid.bare];
+        
+        if (bookmarkName.length) {
+            [self addAttributeWithName:XMPPBookmarkConstants.nameAttribute stringValue:bookmarkName];
+        }
+        [self addAttributeWithName:XMPPBookmarkConstants.autojoinAttribute boolValue:autoJoin];
+        
+        if (nick.length) {
+            NSXMLElement *nickElement = [NSXMLElement elementWithName:XMPPBookmarkConstants.nickElement stringValue:nick];
+            [self addChild:nickElement];
+        }
+        if (password.length) {
+            NSXMLElement *passwordElement = [NSXMLElement elementWithName:XMPPBookmarkConstants.passwordElement stringValue:password];
+            [self addChild:passwordElement];
+        }
     }
     return self;
 }
 
-- (nullable instancetype) initWithBookmarkElement:(NSXMLElement*)bookmarkElement {
-    NSParameterAssert(bookmarkElement);
-    if (!bookmarkElement) { return nil; }
-    if (![bookmarkElement.name isEqualToString:self.class.elementName]) {
-        return nil;
-    }
-    NSString *jidString = [bookmarkElement attributeStringValueForName:XMPPBookmarkConstants.jidAttribute];
-    if (!jidString.length) {
-        return nil;
-    }
-    XMPPJID *jid = [XMPPJID jidWithString:jidString];
-    if (!jid) {
-        return nil;
-    }
-    BOOL autojoin = [bookmarkElement attributeBoolValueForName:XMPPBookmarkConstants.autojoinAttribute withDefaultValue:NO];
-    NSString *name = [bookmarkElement attributeStringValueForName:XMPPBookmarkConstants.nameAttribute];
-    
-    NSString *nick = [bookmarkElement elementForName:XMPPBookmarkConstants.nickElement].stringValue;
-    NSString *password = [bookmarkElement elementForName:XMPPBookmarkConstants.passwordElement].stringValue;
-    return [self initWithJID:jid name:name nick:nick autoJoin:autojoin password:password];
+// MARK: Properties
+
+- (XMPPJID*) jid {
+    NSString *jidString = [self attributeStringValueForName:XMPPBookmarkConstants.jidAttribute];
+    if (!jidString) { return nil; }
+    return [XMPPJID jidWithString:jidString];
 }
 
-- (NSXMLElement*) bookmarkElement {
-    NSXMLElement *conference = [NSXMLElement elementWithName:self.class.elementName];
-    
-    [conference addAttributeWithName:XMPPBookmarkConstants.jidAttribute stringValue:self.jid.bare];
-    
-    if (self.name.length) {
-        [conference addAttributeWithName:XMPPBookmarkConstants.nameAttribute stringValue:self.name];
+- (BOOL) autoJoin {
+    return [self attributeBoolValueForName:XMPPBookmarkConstants.autojoinAttribute withDefaultValue:NO];
+}
+
+- (NSString*) nick {
+    return [self elementForName:XMPPBookmarkConstants.nickElement].stringValue;
+}
+
+- (NSString*) password {
+    return [self elementForName:XMPPBookmarkConstants.passwordElement].stringValue;
+}
+
+// MARK: XMPPBookmark
+
++ (nullable instancetype) bookmarkFromElement:(NSXMLElement*)element {
+    if (![element.name isEqualToString:self.class.elementName]) {
+        return nil;
     }
-    [conference addAttributeWithName:XMPPBookmarkConstants.autojoinAttribute boolValue:self.autoJoin];
-    
-    if (self.nick.length) {
-        NSXMLElement *nick = [NSXMLElement elementWithName:XMPPBookmarkConstants.nickElement stringValue:self.nick];
-        [conference addChild:nick];
-    }
-    if (self.password.length) {
-        NSXMLElement *password = [NSXMLElement elementWithName:XMPPBookmarkConstants.passwordElement stringValue:self.password];
-        [conference addChild:password];
-    }
-    
-    return conference;
+    object_setClass(element, self.class);
+    return (id)element;
+}
+
+- (NSString*) bookmarkName {
+    return [self attributeStringValueForName:XMPPBookmarkConstants.nameAttribute];
 }
 
 + (NSString*) elementName {
     return XMPPBookmarkConstants.conferenceElement;
 }
 
+- (NSXMLElement*) element {
+    return self;
+}
+
 @end
 
 @implementation XMPPURLBookmark
-@synthesize name = _name;
+
+// MARK: Init
 
 - (instancetype) initWithURL:(NSURL*)url {
-    return [self initWithURL:url name:nil];
+    return [self initWithURL:url bookmarkName:nil];
 }
 
 - (instancetype) initWithURL:(NSURL*)url
-                        name:(nullable NSString*)name {
-    if (self = [super init]) {
-        _url = [url copy];
-        _name = [name copy];
+                bookmarkName:(nullable NSString*)bookmarkName {
+    if (self = [super initWithName:self.class.elementName]) {
+        if (bookmarkName.length) {
+            [self addAttributeWithName:XMPPBookmarkConstants.nameAttribute stringValue:bookmarkName];
+        }
+        [self addAttributeWithName:XMPPBookmarkConstants.urlAttribute stringValue:url.absoluteString];
     }
     return self;
 }
 
-- (nullable instancetype) initWithBookmarkElement:(NSXMLElement*)bookmarkElement {
-    NSParameterAssert(bookmarkElement);
-    if (!bookmarkElement) { return nil; }
-    if (![bookmarkElement.name isEqualToString:self.class.elementName]) {
-        return nil;
-    }
-    NSString *urlString = [bookmarkElement attributeStringValueForName:XMPPBookmarkConstants.urlAttribute];
+// MARK: Properties
+
+- (NSURL*) url {
+    NSString *urlString = [self attributeStringValueForName:XMPPBookmarkConstants.urlAttribute];
     if (!urlString) { return nil; }
     NSURL *url = [NSURL URLWithString:urlString];
-    if (!url) { return nil; }
-    
-    NSString *name = [bookmarkElement attributeStringValueForName:XMPPBookmarkConstants.nameAttribute];
-    return [self initWithURL:url name:name];
+    return url;
 }
 
-- (NSXMLElement*)bookmarkElement {
-    NSXMLElement *urlElement = [NSXMLElement elementWithName:self.class.elementName];
-    if (self.name.length) {
-        [urlElement addAttributeWithName:XMPPBookmarkConstants.nameAttribute stringValue:self.name];
+// MARK: XMPPBookmark
+
++ (nullable instancetype) bookmarkFromElement:(NSXMLElement*)element {
+    if (![element.name isEqualToString:self.class.elementName]) {
+        return nil;
     }
-    [urlElement addAttributeWithName:XMPPBookmarkConstants.urlAttribute stringValue:self.url.absoluteString];
-    return urlElement;
+    object_setClass(element, self.class);
+    return (id)element;
+}
+
+- (NSString*) bookmarkName {
+    return [self attributeStringValueForName:XMPPBookmarkConstants.nameAttribute];
 }
 
 + (NSString*) elementName {
     return XMPPBookmarkConstants.urlElement;
+}
+
+- (NSXMLElement*) element {
+    return self;
 }
 
 @end
