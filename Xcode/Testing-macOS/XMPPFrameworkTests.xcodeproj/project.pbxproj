@@ -29,6 +29,7 @@
 		DD26F5851F7CF17200F54F18 /* XMPPOneToOneChatTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD26F5841F7CF17200F54F18 /* XMPPOneToOneChatTests.m */; };
 		DD06EA421F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD06EA411F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m */; };
 		DDA11A491F8517C300591D1B /* XMPPManagedMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDA11A481F8517C200591D1B /* XMPPManagedMessagingTests.m */; };
+		DD24E0271F71463C00FA813C /* XMPPDelayedDeliveryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD24E0261F71463C00FA813C /* XMPPDelayedDeliveryTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		DD26F5841F7CF17200F54F18 /* XMPPOneToOneChatTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPOneToOneChatTests.m; path = "../../Testing-Shared/XMPPOneToOneChatTests.m"; sourceTree = "<group>"; };
 		DD06EA411F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMessageDeliveryReceiptsTests.m; path = "../../Testing-Shared/XMPPMessageDeliveryReceiptsTests.m"; sourceTree = "<group>"; };
 		DDA11A481F8517C200591D1B /* XMPPManagedMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPManagedMessagingTests.m; path = "../../Testing-Shared/XMPPManagedMessagingTests.m"; sourceTree = "<group>"; };
+		DD24E0261F71463C00FA813C /* XMPPDelayedDeliveryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDelayedDeliveryTests.m; path = "../../Testing-Shared/XMPPDelayedDeliveryTests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +122,7 @@
 				DD26F5841F7CF17200F54F18 /* XMPPOneToOneChatTests.m */,
 				DD06EA411F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m */,
 				DDA11A481F8517C200591D1B /* XMPPManagedMessagingTests.m */,
+				DD24E0261F71463C00FA813C /* XMPPDelayedDeliveryTests.m */,
 				D973A0921D2F1EB10096F3ED /* Info.plist */,
 			);
 			path = XMPPFrameworkTests;
@@ -262,6 +265,7 @@
 				DD06EA421F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m in Sources */,
 				D9F20D011D836080002A8D6F /* OMEMOModuleTests.m in Sources */,
 				D973A0A91D2F1EF60096F3ED /* XMPPMUCLightTests.m in Sources */,
+				DD24E0271F71463C00FA813C /* XMPPDelayedDeliveryTests.m in Sources */,
 				D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */,
 				D973A0AB1D2F1EF60096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
 				D973A0AE1D2F1EF60096F3ED /* XMPPSwift.swift in Sources */,

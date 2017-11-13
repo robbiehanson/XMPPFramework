@@ -76,6 +76,9 @@
 		DDA11A4C1F8518AE00591D1B /* XMPPManagedMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDA11A4B1F8518AE00591D1B /* XMPPManagedMessagingTests.m */; };
 		DDA11A4D1F8518BA00591D1B /* XMPPManagedMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDA11A4B1F8518AE00591D1B /* XMPPManagedMessagingTests.m */; };
 		DDA11A4E1F8518BB00591D1B /* XMPPManagedMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDA11A4B1F8518AE00591D1B /* XMPPManagedMessagingTests.m */; };
+		DD4003F91F7528A90078D144 /* XMPPDelayedDeliveryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4003F81F7528A90078D144 /* XMPPDelayedDeliveryTests.m */; };
+		DD4003FA1F7528B40078D144 /* XMPPDelayedDeliveryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4003F81F7528A90078D144 /* XMPPDelayedDeliveryTests.m */; };
+		DD4003FB1F7528B40078D144 /* XMPPDelayedDeliveryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4003F81F7528A90078D144 /* XMPPDelayedDeliveryTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -153,6 +156,7 @@
 		DD26F5871F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPOneToOneChatTests.m; sourceTree = "<group>"; };
 		DD06EA441F78EBFD008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMessageDeliveryReceiptsTests.m; sourceTree = "<group>"; };
 		DDA11A4B1F8518AE00591D1B /* XMPPManagedMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPManagedMessagingTests.m; sourceTree = "<group>"; };
+		DD4003F81F7528A90078D144 /* XMPPDelayedDeliveryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPDelayedDeliveryTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -227,6 +231,7 @@
 				DD26F5871F7CF1AE00F54F18 /* XMPPOneToOneChatTests.m */,
 				DD06EA441F78EBFD008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m */,
 				DDA11A4B1F8518AE00591D1B /* XMPPManagedMessagingTests.m */,
+				DD4003F81F7528A90078D144 /* XMPPDelayedDeliveryTests.m */,
 				63F50D971C60208200CA0201 /* Info.plist */,
 			);
 			name = XMPPFrameworkTests;
@@ -406,6 +411,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D973A07C1D2F18040096F3ED /* CapabilitiesHashingTest.m in Sources */,
+				DD4003F91F7528A90078D144 /* XMPPDelayedDeliveryTests.m in Sources */,
 				D973A0811D2F18040096F3ED /* XMPPMUCLightTests.m in Sources */,
 				D973A07D1D2F18040096F3ED /* EncodeDecodeTest.m in Sources */,
 				D973A0831D2F18040096F3ED /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
@@ -435,6 +441,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9DCD3D51E6255E10010D1C7 /* CapabilitiesHashingTest.m in Sources */,
+				DD4003FA1F7528B40078D144 /* XMPPDelayedDeliveryTests.m in Sources */,
 				D9DCD3D61E6255E10010D1C7 /* XMPPMUCLightTests.m in Sources */,
 				D9DCD3D71E6255E10010D1C7 /* EncodeDecodeTest.m in Sources */,
 				D9DCD3D81E6255E10010D1C7 /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
@@ -464,6 +471,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9DCD6FE1E625C560010D1C7 /* CapabilitiesHashingTest.m in Sources */,
+				DD4003FB1F7528B40078D144 /* XMPPDelayedDeliveryTests.m in Sources */,
 				D9DCD6FF1E625C560010D1C7 /* XMPPMUCLightTests.m in Sources */,
 				D9DCD7001E625C560010D1C7 /* EncodeDecodeTest.m in Sources */,
 				D9DCD7011E625C560010D1C7 /* XMPPRoomLightCoreDataStorageTests.m in Sources */,
