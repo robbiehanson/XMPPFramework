@@ -54,6 +54,9 @@ pod 'XMPPFramework', '~> 3.7.0'
 # 4.0 Preview / Master Branch
 pod 'XMPPFramework', :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master'
 
+# XMPPFramework with Swift extensions
+pod 'XMPPFramework/Swift', :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master'
+
 ```
 
 After `pod install` open the `.xcworkspace` and import:
@@ -76,7 +79,7 @@ github "robbiehanson/XMPPFramework" "master"
 
 ```
 
-Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project.
+Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project. If you'd like to include new features written in Swift, drag `XMPPFrameworkSwift.framework` into your project as well. You'll need to manually import `XMPPFrameworkSwift` in your headers.
 
 ### Contributing
 
@@ -86,6 +89,7 @@ Pull requests are welcome! If you are planning a larger feature, please open an 
 * Please try to write your code in a way that's testable. Using `XMPPMockStream` makes testing pretty easy. Look at examples in `Testing-Shared` for inspiration.
 * You will need both CocoaPods and Carthage to work on tests. Run `carthage checkout` in the root of the repository, and `bundle install && bundle exec pod install` in the `Testing-iOS` and `Testing-macOS` folders.
 * Create your test files to the `Testing-Shared` folder, and then add them to the iOS, macOS, and tvOS targets in `Testing-Carthage/XMPPFrameworkTests.xcodeproj`, `Testing-macOS/XMPPFrameworkTests.xcworkspace` and `Testing-iOS/XMPPFrameworkTests.xcworkspace`.
+* If you plan on writing Swift code, please keep it isolated in the `Swift/` folder and `XMPPFrameworkSwift.framework` target, and ensure none of the pure Obj-C code has dependencies on it.
 
 Looking to help but don't know where to start? 
 

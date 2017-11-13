@@ -23,17 +23,28 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
 
-  s.source_files = ['Core/**/*.{h,m}',
-                    'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}',
-                    'Utilities/**/*.{h,m}', 'Extensions/**/*.{h,m}']
-  s.ios.exclude_files = 'Extensions/SystemInputActivityMonitor/**/*.{h,m}'
-  s.libraries = 'xml2', 'resolv'
-  s.frameworks = 'CoreData', 'SystemConfiguration', 'CoreLocation'
-  s.xcconfig = {
-    'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv',
-  }
-  s.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
-  s.dependency 'CocoaAsyncSocket', '~> 7.6.0'
-  s.dependency 'KissXML', '~> 5.2.0'
-  s.dependency 'libidn', '~> 1.33.0'
+  s.default_subspec = 'ObjC'
+
+  s.subspec 'ObjC' do |ss|
+	  ss.source_files = ['Core/**/*.{h,m}',
+	                    'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}',
+	                    'Utilities/**/*.{h,m}', 'Extensions/**/*.{h,m}']
+	  ss.ios.exclude_files = 'Extensions/SystemInputActivityMonitor/**/*.{h,m}'
+	  ss.libraries = 'xml2', 'resolv'
+	  ss.frameworks = 'CoreData', 'SystemConfiguration', 'CoreLocation'
+	  ss.xcconfig = {
+	    'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv',
+	  }
+	  ss.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
+	  ss.dependency 'CocoaAsyncSocket', '~> 7.6.0'
+	  ss.dependency 'KissXML', '~> 5.2.0'
+	  ss.dependency 'libidn', '~> 1.33.0'
+  end
+
+  s.subspec 'Swift' do |ss|
+    ss.source_files = 'Swift/**/*.{h,m,swift}'
+    ss.dependency 'XMPPFramework/ObjC'
+    ss.dependency 'CocoaLumberjack/Swift'
+  end
+
 end
