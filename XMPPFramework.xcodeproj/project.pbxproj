@@ -1002,12 +1002,6 @@
 		DD1E733A1ED88622009B529B /* XMPPRoomLightCoreDataStorageProtected.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1E73391ED88622009B529B /* XMPPRoomLightCoreDataStorageProtected.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1E733B1ED88622009B529B /* XMPPRoomLightCoreDataStorageProtected.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1E73391ED88622009B529B /* XMPPRoomLightCoreDataStorageProtected.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1E733C1ED88622009B529B /* XMPPRoomLightCoreDataStorageProtected.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1E73391ED88622009B529B /* XMPPRoomLightCoreDataStorageProtected.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DD855F911F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DD855F921F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DD855F931F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DD855F941F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */; };
-		DD855F951F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */; };
-		DD855F961F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */; };
 		DD26F5701F7CD9B500F54F18 /* XMPPOneToOneChat.h in Headers */ = {isa = PBXBuildFile; fileRef = DD26F56E1F7CD9B500F54F18 /* XMPPOneToOneChat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD26F5711F7CD9B500F54F18 /* XMPPOneToOneChat.h in Headers */ = {isa = PBXBuildFile; fileRef = DD26F56E1F7CD9B500F54F18 /* XMPPOneToOneChat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD26F5721F7CD9B500F54F18 /* XMPPOneToOneChat.h in Headers */ = {isa = PBXBuildFile; fileRef = DD26F56E1F7CD9B500F54F18 /* XMPPOneToOneChat.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1020,6 +1014,12 @@
 		DD2AD6EB1F84B49200E0FED2 /* XMPPManagedMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD2AD6DE1F84B49200E0FED2 /* XMPPManagedMessaging.m */; };
 		DD2AD6EC1F84B49200E0FED2 /* XMPPManagedMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD2AD6DE1F84B49200E0FED2 /* XMPPManagedMessaging.m */; };
 		DD2AD6ED1F84B49200E0FED2 /* XMPPManagedMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD2AD6DE1F84B49200E0FED2 /* XMPPManagedMessaging.m */; };
+		DD855F911F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DD855F921F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DD855F931F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DD855F941F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */; };
+		DD855F951F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */; };
+		DD855F961F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1745,12 +1745,12 @@
 		DD1E73311ED885FD009B529B /* XMPPRoomLightCoreDataStorage+XEP_0313.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPRoomLightCoreDataStorage+XEP_0313.h"; sourceTree = "<group>"; };
 		DD1E73321ED885FD009B529B /* XMPPRoomLightCoreDataStorage+XEP_0313.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XMPPRoomLightCoreDataStorage+XEP_0313.m"; sourceTree = "<group>"; };
 		DD1E73391ED88622009B529B /* XMPPRoomLightCoreDataStorageProtected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPRoomLightCoreDataStorageProtected.h; sourceTree = "<group>"; };
-		DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPOutOfBandResourceMessaging.h; sourceTree = "<group>"; };
-		DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPOutOfBandResourceMessaging.m; sourceTree = "<group>"; };
 		DD26F56E1F7CD9B500F54F18 /* XMPPOneToOneChat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPOneToOneChat.h; sourceTree = "<group>"; };
 		DD26F56F1F7CD9B500F54F18 /* XMPPOneToOneChat.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPOneToOneChat.m; sourceTree = "<group>"; };
 		DD2AD6DD1F84B49200E0FED2 /* XMPPManagedMessaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPManagedMessaging.h; sourceTree = "<group>"; };
 		DD2AD6DE1F84B49200E0FED2 /* XMPPManagedMessaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPManagedMessaging.m; sourceTree = "<group>"; };
+		DD855F8F1F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPOutOfBandResourceMessaging.h; sourceTree = "<group>"; };
+		DD855F901F74F2B000E12330 /* XMPPOutOfBandResourceMessaging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPOutOfBandResourceMessaging.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3581,6 +3581,7 @@
 						ProvisioningStyle = Automatic;
 					};
 					D9A7A9191FB97892005183CD = {
+						LastSwiftMigration = 0910;
 						ProvisioningStyle = Automatic;
 					};
 					D9A7AD0C1FB97A3C005183CD = {
@@ -4589,6 +4590,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -4642,6 +4644,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -4720,7 +4723,6 @@
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -4747,7 +4749,6 @@
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -4774,7 +4775,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -4801,7 +4801,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -4828,7 +4827,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
@@ -4856,7 +4854,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
