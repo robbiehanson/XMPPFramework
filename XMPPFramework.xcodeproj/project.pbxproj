@@ -135,6 +135,12 @@
 		D9A7B0191FB980E5005183CD /* XMPPFrameworkSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = D9A7B0061FB97FE6005183CD /* XMPPFrameworkSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D9A7B01A1FB980E6005183CD /* XMPPFrameworkSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = D9A7B0061FB97FE6005183CD /* XMPPFrameworkSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D9A7B01B1FB980E6005183CD /* XMPPFrameworkSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = D9A7B0061FB97FE6005183CD /* XMPPFrameworkSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D9B81AC21FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B81AC11FBCD25100455683 /* GCDMulticastDelegate.swift */; };
+		D9B81AC31FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B81AC11FBCD25100455683 /* GCDMulticastDelegate.swift */; };
+		D9B81AC41FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B81AC11FBCD25100455683 /* GCDMulticastDelegate.swift */; };
+		D9B81AD91FBCE38F00455683 /* XMLElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B81AD81FBCE38F00455683 /* XMLElement.swift */; };
+		D9B81ADA1FBCE38F00455683 /* XMLElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B81AD81FBCE38F00455683 /* XMLElement.swift */; };
+		D9B81ADB1FBCE38F00455683 /* XMLElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B81AD81FBCE38F00455683 /* XMLElement.swift */; };
 		D9CC4F991F8F336D00010999 /* XMPPCapabilities+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D9CC4F971F8F336D00010999 /* XMPPCapabilities+XEP_0359.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D9CC4F9A1F8F336D00010999 /* XMPPCapabilities+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D9CC4F971F8F336D00010999 /* XMPPCapabilities+XEP_0359.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D9CC4F9B1F8F336D00010999 /* XMPPCapabilities+XEP_0359.h in Headers */ = {isa = PBXBuildFile; fileRef = D9CC4F971F8F336D00010999 /* XMPPCapabilities+XEP_0359.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1498,6 +1504,8 @@
 		D9A7AE561FB97A3C005183CD /* XMPPFrameworkSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XMPPFrameworkSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9A7AFA11FB97A65005183CD /* XMPPFrameworkSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XMPPFrameworkSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9A7B0061FB97FE6005183CD /* XMPPFrameworkSwift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPFrameworkSwift.h; sourceTree = "<group>"; };
+		D9B81AC11FBCD25100455683 /* GCDMulticastDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCDMulticastDelegate.swift; sourceTree = "<group>"; };
+		D9B81AD81FBCE38F00455683 /* XMLElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLElement.swift; sourceTree = "<group>"; };
 		D9CC4F971F8F336D00010999 /* XMPPCapabilities+XEP_0359.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPCapabilities+XEP_0359.h"; sourceTree = "<group>"; };
 		D9CC4F981F8F336D00010999 /* XMPPCapabilities+XEP_0359.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "XMPPCapabilities+XEP_0359.m"; sourceTree = "<group>"; };
 		D9DCD11F1E6250920010D1C7 /* XMPPBandwidthMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPBandwidthMonitor.h; sourceTree = "<group>"; };
@@ -2070,14 +2078,32 @@
 		D9A7AA731FB97908005183CD /* Swift */ = {
 			isa = PBXGroup;
 			children = (
-				D97BE9F41FBBC82D00CFE3BB /* XMPPModule.swift */,
+				D9B81AC01FBCD0CA00455683 /* Utilities */,
+				D9B81ABF1FBCD0BC00455683 /* Core */,
 				D97BE9F21FBBACF300CFE3BB /* XEP-0048 */,
 				D9A7B0061FB97FE6005183CD /* XMPPFrameworkSwift.h */,
 				D9A7AA741FB97908005183CD /* XMPPFrameworkSwift-Info.plist */,
 				D9A7AA751FB97908005183CD /* XMPPFramework.swift */,
-				D97BE9FD1FBBE4E200CFE3BB /* XMPPIQ.swift */,
 			);
 			path = Swift;
+			sourceTree = "<group>";
+		};
+		D9B81ABF1FBCD0BC00455683 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				D9B81AD81FBCE38F00455683 /* XMLElement.swift */,
+				D97BE9FD1FBBE4E200CFE3BB /* XMPPIQ.swift */,
+				D97BE9F41FBBC82D00CFE3BB /* XMPPModule.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		D9B81AC01FBCD0CA00455683 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				D9B81AC11FBCD25100455683 /* GCDMulticastDelegate.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 		D9DCD11D1E6250920010D1C7 /* Extensions */ = {
@@ -3596,7 +3622,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = XMPP;
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = XMPPFramework;
 				TargetAttributes = {
 					0D44BAE91E537066000930E0 = {
@@ -4066,9 +4092,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9B81AC21FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
 				D97BE9EF1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0161FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BE9FE1FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
+				D9B81AD91FBCE38F00455683 /* XMLElement.swift in Sources */,
 				D97BE9F71FBBCAA100CFE3BB /* XMPPModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4077,9 +4105,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9B81AC31FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
 				D97BE9F01FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0171FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BE9FF1FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
+				D9B81ADA1FBCE38F00455683 /* XMLElement.swift in Sources */,
 				D97BE9F61FBBCAA000CFE3BB /* XMPPModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4088,9 +4118,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9B81AC41FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
 				D97BE9F11FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0181FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BEA001FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
+				D9B81ADB1FBCE38F00455683 /* XMLElement.swift in Sources */,
 				D97BE9F51FBBCAA000CFE3BB /* XMPPModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4738,7 +4770,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4764,7 +4796,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4789,7 +4821,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4815,7 +4847,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4842,7 +4874,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4869,7 +4901,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4895,7 +4927,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4922,7 +4954,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4950,7 +4982,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -4978,7 +5010,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";

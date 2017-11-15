@@ -16,9 +16,6 @@
 		D9A7AFD51FB97DE8005183CD /* XMPPFrameworkSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A7AFC61FB97D5E005183CD /* XMPPFrameworkSwift.framework */; };
 		D9A7AFD81FB97E03005183CD /* XMPPFrameworkSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A7AFC81FB97D5E005183CD /* XMPPFrameworkSwift.framework */; };
 		D9A7AFDB1FB97E12005183CD /* XMPPFrameworkSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A7AFCA1FB97D5E005183CD /* XMPPFrameworkSwift.framework */; };
-		D9A7AFEE1FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A7AFED1FB97F1F005183CD /* SwiftOnlyTest.swift */; };
-		D9A7AFEF1FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A7AFED1FB97F1F005183CD /* SwiftOnlyTest.swift */; };
-		D9A7AFF01FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A7AFED1FB97F1F005183CD /* SwiftOnlyTest.swift */; };
 		D9DCD3D01E6254AB0010D1C7 /* XMPPFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9DCD3CD1E62549E0010D1C7 /* XMPPFramework.framework */; };
 		D9DCD6B11E625AA40010D1C7 /* XMPPFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9DCD6AE1E625A9B0010D1C7 /* XMPPFramework.framework */; };
 		D9DCD7191E625CAE0010D1C7 /* XMPPFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9DCD6B01E625A9B0010D1C7 /* XMPPFramework.framework */; };
@@ -118,7 +115,6 @@
 		D97BEA051FBBF52200CFE3BB /* XMPPFrameworkTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPFrameworkTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		D97BEA081FBBF52300CFE3BB /* XMPPMockStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMockStream.m; path = "../Testing-Shared/XMPPMockStream.m"; sourceTree = "<group>"; };
 		D97BEA091FBBF52300CFE3BB /* XMPPMockStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPMockStream.h; path = "../Testing-Shared/XMPPMockStream.h"; sourceTree = "<group>"; };
-		D9A7AFED1FB97F1F005183CD /* SwiftOnlyTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftOnlyTest.swift; sourceTree = "<group>"; };
 		D9DCD3C41E62549D0010D1C7 /* XMPPFramework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XMPPFramework.xcodeproj; path = ../../XMPPFramework.xcodeproj; sourceTree = "<group>"; };
 		D9DCD3EC1E6255E10010D1C7 /* XMPPFrameworkSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9DCD7151E625C560010D1C7 /* XMPPFrameworkSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -197,7 +193,6 @@
 			children = (
 				D97BEA091FBBF52300CFE3BB /* XMPPMockStream.h */,
 				D97BEA081FBBF52300CFE3BB /* XMPPMockStream.m */,
-				D9A7AFED1FB97F1F005183CD /* SwiftOnlyTest.swift */,
 				D97BEA011FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift */,
 				D97BEA051FBBF52200CFE3BB /* XMPPFrameworkTests-Bridging-Header.h */,
 			);
@@ -398,7 +393,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D97BEA021FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */,
-				D9A7AFEE1FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */,
 				D97BEA0A1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -408,7 +402,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D97BEA031FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */,
-				D9A7AFEF1FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */,
 				D97BEA0B1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -418,7 +411,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D97BEA041FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */,
-				D9A7AFF01FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */,
 				D97BEA0C1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

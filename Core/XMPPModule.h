@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) void *moduleQueueTag;
 @property (strong, readonly, nullable) XMPPStream *xmppStream;
 @property (nonatomic, readonly) NSString *moduleName;
-@property (nonatomic, readonly) id multicastDelegate;
+@property (nonatomic, readonly) id multicastDelegate NS_REFINED_FOR_SWIFT;
 
 - (instancetype)init;
 - (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue;

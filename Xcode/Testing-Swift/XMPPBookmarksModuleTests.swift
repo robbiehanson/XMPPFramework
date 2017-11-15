@@ -86,6 +86,6 @@ extension XMPPBookmarksModuleTests: XMPPBookmarksDelegate {
     }
     
     func xmppBookmarks(_ sender: XMPPBookmarksModule, didNotRetrieveBookmarks errorIq: XMPPIQ?) {
-        
+        expectation?.fulfill()
     }
 }

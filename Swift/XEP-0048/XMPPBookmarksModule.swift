@@ -7,8 +7,13 @@
 //
 
 import Foundation
-import CocoaLumberjackSwift
 
+#if COCOAPODS
+    import CocoaLumberjack
+#else
+    import CocoaLumberjackSwift
+#endif
+    
 @objc public enum XMPPBookmarksMode: Int {
     /// Private XML Storage (XEP-0049)
     /// https://xmpp.org/extensions/xep-0049.html
@@ -78,12 +83,15 @@ public class XMPPBookmarksModule: XMPPModule {
                 let query = responseIq.query,
                 let storage = query.bookmarksStorageElement,
                 iqType != .error else {
-                    self.multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: obj as? XMPPIQ)
+                    self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
+                        multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: obj as? XMPPIQ)
+                    })
                     return
             }
-            
             let bookmarks = storage.bookmarks
-            self.multicast.xmppBookmarks!(self, didRetrieve: bookmarks, responseIq: responseIq)
+            self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
+                multicast.xmppBookmarks!(self, didRetrieve: bookmarks, responseIq: responseIq)
+            })
         }
         performBlockAsync {
             self.tracker?.add(get, block: handler, timeout: 30.0)
@@ -112,8 +120,13 @@ extension XMPPBookmarksModule: XMPPStreamDelegate {
 }
 
 // MARK: - Private Extensions
+
+/// This is required for the Swift invoke helper forced downcast.
+extension GCDMulticastDelegate: XMPPBookmarksDelegate {}
+
 private extension XMPPIQ {
     var query: XMLElement? {
+        
         return element(forName: PrivateXmlStorageConstants.queryElement, xmlns: PrivateXmlStorageConstants.xmlns)
     }
 }
