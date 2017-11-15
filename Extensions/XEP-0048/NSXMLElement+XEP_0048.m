@@ -14,7 +14,7 @@
 @implementation NSXMLElement (XEP_0048)
 
 - (XMPPBookmarksStorageElement*) bookmarksStorageElement {
-    NSXMLElement *element = [NSXMLElement elementWithName:XMPPBookmarkConstants.storageElement xmlns:XMPPBookmarkConstants.xmlns];
+    NSXMLElement *element = [self elementForName:XMPPBookmarkConstants.storageElement xmlns:XMPPBookmarkConstants.xmlns];
     return [XMPPBookmarksStorageElement bookmarksStorageElementFromElement:element];
 }
 @end

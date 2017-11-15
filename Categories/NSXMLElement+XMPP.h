@@ -36,9 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Extracting a single element.
 **/
 
-- (nullable NSXMLElement *)elementForName:(NSString *)name;
-- (nullable NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns;
-- (nullable NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
+- (nullable NSXMLElement *)elementForName:(NSString *)name NS_SWIFT_NAME(element(forName:));
+- (nullable NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns NS_SWIFT_NAME(element(forName:xmlns:));
+- (nullable NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix NS_SWIFT_NAME(element(forName:xmlnsPrefix:));
 
 /**
  * Convenience methods for removing child elements.

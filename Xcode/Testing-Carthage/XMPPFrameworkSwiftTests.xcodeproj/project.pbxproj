@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D97BEA021FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97BEA011FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift */; };
+		D97BEA031FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97BEA011FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift */; };
+		D97BEA041FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97BEA011FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift */; };
+		D97BEA0A1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */ = {isa = PBXBuildFile; fileRef = D97BEA081FBBF52300CFE3BB /* XMPPMockStream.m */; };
+		D97BEA0B1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */ = {isa = PBXBuildFile; fileRef = D97BEA081FBBF52300CFE3BB /* XMPPMockStream.m */; };
+		D97BEA0C1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */ = {isa = PBXBuildFile; fileRef = D97BEA081FBBF52300CFE3BB /* XMPPMockStream.m */; };
 		D9A7AFD51FB97DE8005183CD /* XMPPFrameworkSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A7AFC61FB97D5E005183CD /* XMPPFrameworkSwift.framework */; };
 		D9A7AFD81FB97E03005183CD /* XMPPFrameworkSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A7AFC81FB97D5E005183CD /* XMPPFrameworkSwift.framework */; };
 		D9A7AFDB1FB97E12005183CD /* XMPPFrameworkSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A7AFCA1FB97D5E005183CD /* XMPPFrameworkSwift.framework */; };
@@ -108,6 +114,10 @@
 /* Begin PBXFileReference section */
 		63F50D921C60208200CA0201 /* XMPPFrameworkSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63F50D971C60208200CA0201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../Testing-Shared/Info.plist"; sourceTree = SOURCE_ROOT; };
+		D97BEA011FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMPPBookmarksModuleTests.swift; sourceTree = "<group>"; };
+		D97BEA051FBBF52200CFE3BB /* XMPPFrameworkTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPFrameworkTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		D97BEA081FBBF52300CFE3BB /* XMPPMockStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMockStream.m; path = "../Testing-Shared/XMPPMockStream.m"; sourceTree = "<group>"; };
+		D97BEA091FBBF52300CFE3BB /* XMPPMockStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPMockStream.h; path = "../Testing-Shared/XMPPMockStream.h"; sourceTree = "<group>"; };
 		D9A7AFED1FB97F1F005183CD /* SwiftOnlyTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftOnlyTest.swift; sourceTree = "<group>"; };
 		D9DCD3C41E62549D0010D1C7 /* XMPPFramework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XMPPFramework.xcodeproj; path = ../../XMPPFramework.xcodeproj; sourceTree = "<group>"; };
 		D9DCD3EC1E6255E10010D1C7 /* XMPPFrameworkSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -185,7 +195,11 @@
 		D9A7AFDC1FB97E97005183CD /* Testing-Swift */ = {
 			isa = PBXGroup;
 			children = (
+				D97BEA091FBBF52300CFE3BB /* XMPPMockStream.h */,
+				D97BEA081FBBF52300CFE3BB /* XMPPMockStream.m */,
 				D9A7AFED1FB97F1F005183CD /* SwiftOnlyTest.swift */,
+				D97BEA011FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift */,
+				D97BEA051FBBF52200CFE3BB /* XMPPFrameworkTests-Bridging-Header.h */,
 			);
 			name = "Testing-Swift";
 			path = "../Testing-Swift";
@@ -383,7 +397,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D97BEA021FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */,
 				D9A7AFEE1FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */,
+				D97BEA0A1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,7 +407,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D97BEA031FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */,
 				D9A7AFEF1FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */,
+				D97BEA0B1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,7 +417,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D97BEA041FBBF3E700CFE3BB /* XMPPBookmarksModuleTests.swift in Sources */,
 				D9A7AFF01FB97F1F005183CD /* SwiftOnlyTest.swift in Sources */,
+				D97BEA0C1FBBF52300CFE3BB /* XMPPMockStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -483,6 +503,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davidchiles.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
@@ -526,6 +547,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davidchiles.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 				VALIDATE_PRODUCT = YES;
@@ -560,7 +582,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				SWIFT_VERSION = 3.0;
 			};
@@ -593,7 +615,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
 			};
@@ -642,6 +664,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davidchiles.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
@@ -683,6 +706,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davidchiles.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -732,6 +756,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davidchiles.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = appletvos;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
@@ -774,6 +799,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davidchiles.XMPPFrameworkTests;
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = appletvos;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 				VALIDATE_PRODUCT = YES;
 			};
