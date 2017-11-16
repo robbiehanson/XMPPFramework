@@ -8,6 +8,7 @@
 
 import Foundation
 
+// MARK: - Multicast Delegate
 public extension XMPPModule {
     
     /**
@@ -48,5 +49,28 @@ public extension XMPPModule {
      */
     public var multicastDelegate: AnyObject {
         return __multicastDelegate as AnyObject
+    }
+}
+
+// MARK: - Synchronization
+public extension XMPPModule {
+    
+    /**
+     * Dispatches block synchronously or asynchronously on moduleQueue, or
+     * executes directly if we're already on the moduleQueue.
+     * This is most useful for synchronizing external read
+     * access to properties when writing XMPPModule subclasses.
+     *
+     *  if (dispatch_get_specific(moduleQueueTag))
+     *      block();
+     *  else
+     *      dispatch_sync(moduleQueue, block); (or dispatch_async)
+     */
+    public func performBlock(async: Bool = false, _ block: @escaping ()->()) {
+        if async {
+            __performBlockAsync(block)
+        } else {
+            __perform(block)
+        }
     }
 }

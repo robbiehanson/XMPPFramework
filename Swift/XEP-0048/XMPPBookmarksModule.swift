@@ -55,7 +55,7 @@ public class XMPPBookmarksModule: XMPPModule {
         guard super.activate(xmppStream) else {
             return false
         }
-        performBlockAsync {
+        performBlock(async: true) {
             self.tracker = XMPPIDTracker(stream: self.xmppStream, dispatchQueue: self.moduleQueue)
         }
         return true
@@ -93,7 +93,7 @@ public class XMPPBookmarksModule: XMPPModule {
                 multicast.xmppBookmarks!(self, didRetrieve: bookmarks, responseIq: responseIq)
             })
         }
-        performBlockAsync {
+        performBlock(async: true) {
             self.tracker?.add(get, block: handler, timeout: 30.0)
             self.xmppStream?.send(get)
         }
