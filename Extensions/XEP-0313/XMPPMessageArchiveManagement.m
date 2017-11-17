@@ -11,7 +11,7 @@
 #import "XMPPIDTracker.h"
 #import "NSXMLElement+XEP_0297.h"
 
-#define XMLNS_XMPP_MAM @"urn:xmpp:mam:1"
+#define XMLNS_XMPP_MAM @"urn:xmpp:mam:2"
 
 @interface XMPPMessageArchiveManagement()
 @property (strong, nonatomic) NSString *queryID;
@@ -58,7 +58,7 @@
 - (void)retrieveMessageArchiveAt:(XMPPJID *)archiveJID withFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
     NSXMLElement *formElement = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
     [formElement addAttributeWithName:@"type" stringValue:@"submit"];
-    [formElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:@"urn:xmpp:mam:1"]];
+    [formElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:XMLNS_XMPP_MAM]];
     
     for (NSXMLElement *field in fields) {
         [formElement addChild:field];
