@@ -23,9 +23,9 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
 
-  s.default_subspec = 'ObjC'
+  s.default_subspec = 'default'
 
-  s.subspec 'ObjC' do |ss|
+  s.subspec 'default' do |ss|
 	  ss.source_files = ['Core/**/*.{h,m}',
 	                    'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}',
 	                    'Utilities/**/*.{h,m}', 'Extensions/**/*.{h,m}']
@@ -46,7 +46,7 @@ Pod::Spec.new do |s|
 	  ss.tvos.deployment_target = '9.0'
     ss.osx.deployment_target      = '10.10'
     ss.source_files = 'Swift/**/*.swift'
-    ss.dependency 'XMPPFramework/ObjC'
+    ss.dependency 'XMPPFramework/default'
     ss.dependency 'CocoaLumberjack/Swift', '~> 3.3.0'
   end
 

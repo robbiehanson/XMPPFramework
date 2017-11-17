@@ -11,15 +11,15 @@ PODS:
   - KissXML (5.2.0)
   - libidn (1.33)
   - XMPPFramework (4.0):
-    - XMPPFramework/ObjC (= 4.0)
-  - XMPPFramework/ObjC (4.0):
+    - XMPPFramework/default (= 4.0)
+  - XMPPFramework/default (4.0):
     - CocoaAsyncSocket (~> 7.6.0)
     - CocoaLumberjack
     - KissXML (~> 5.2.0)
     - libidn (~> 1.33.0)
   - XMPPFramework/Swift (4.0):
     - CocoaLumberjack/Swift (~> 3.3.0)
-    - XMPPFramework/ObjC
+    - XMPPFramework/default
 
 DEPENDENCIES:
   - XMPPFramework (from `../../`)
@@ -34,7 +34,7 @@ SPEC CHECKSUMS:
   CocoaLumberjack: 3c8c74683302f9012bb168e1c4b7ae3c0b558431
   KissXML: 1c1eeeb6b94e4522cd2f2373e5d0d03c9227738f
   libidn: 90fc1a62b60288dcf543f13f4ebca913f17d829f
-  XMPPFramework: ea5684d4f4bc0e8b2933da64a6390cfc032cf929
+  XMPPFramework: 62f5cd23e7b4c31aadd3b034a939157ecd415035
 
 PODFILE CHECKSUM: ce5651a01a2b1f779d8d999ff8c04566b9161d73
 

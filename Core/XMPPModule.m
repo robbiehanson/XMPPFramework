@@ -8,6 +8,7 @@
 
 
 @implementation XMPPModule
+@synthesize multicastDelegate, moduleQueue, xmppStream, moduleQueueTag;
 
 /**
  * Standard init method.

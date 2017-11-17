@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		4A6D92D0C7C1950CBA77BE55 /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */; };
 		B407FF87953F6A78BCCE2871 /* Pods_XMPPFrameworkSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 777EEF98731B0EC5DBD49953 /* Pods_XMPPFrameworkSwiftTests.framework */; };
+		D93B87901FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D93B878F1FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift */; };
+		D93B87931FBCE90D002B6CB7 /* XMPPMockStream.m in Sources */ = {isa = PBXBuildFile; fileRef = D93B87911FBCE90C002B6CB7 /* XMPPMockStream.m */; };
 		D9669B591D9B13FF0018533D /* OMEMOServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9669B581D9B13FF0018533D /* OMEMOServerTests.m */; };
 		D973A0A41D2F1EF60096F3ED /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0961D2F1EF60096F3ED /* CapabilitiesHashingTest.m */; };
 		D973A0A51D2F1EF60096F3ED /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0971D2F1EF60096F3ED /* EncodeDecodeTest.m */; };
@@ -24,14 +26,13 @@
 		D973A0AF1D2F1EF60096F3ED /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A21D2F1EF60096F3ED /* XMPPURITests.m */; };
 		D973A0B01D2F1EF60096F3ED /* XMPPvCardTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0A31D2F1EF60096F3ED /* XMPPvCardTests.m */; };
 		D99C5E091D95EBA100FB068A /* OMEMOTestStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = D99C5E081D95EBA100FB068A /* OMEMOTestStorage.m */; };
-		D9A7B0361FB98609005183CD /* SwiftOnlyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A7B0351FB98608005183CD /* SwiftOnlyTest.swift */; };
 		D9E35E6E1D90B2C5002E7CF7 /* OMEMOElementTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E35E6D1D90B2C5002E7CF7 /* OMEMOElementTests.m */; };
 		D9F20D011D836080002A8D6F /* OMEMOModuleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F20D001D836080002A8D6F /* OMEMOModuleTests.m */; };
-		DD4003D51F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4003D41F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m */; };
-		DD26F5851F7CF17200F54F18 /* XMPPOneToOneChatTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD26F5841F7CF17200F54F18 /* XMPPOneToOneChatTests.m */; };
 		DD06EA421F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD06EA411F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m */; };
-		DDA11A491F8517C300591D1B /* XMPPManagedMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDA11A481F8517C200591D1B /* XMPPManagedMessagingTests.m */; };
 		DD24E0271F71463C00FA813C /* XMPPDelayedDeliveryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD24E0261F71463C00FA813C /* XMPPDelayedDeliveryTests.m */; };
+		DD26F5851F7CF17200F54F18 /* XMPPOneToOneChatTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD26F5841F7CF17200F54F18 /* XMPPOneToOneChatTests.m */; };
+		DD4003D51F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DD4003D41F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m */; };
+		DDA11A491F8517C300591D1B /* XMPPManagedMessagingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDA11A481F8517C200591D1B /* XMPPManagedMessagingTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,10 @@
 		5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5CE125FD447C51125BCAAAFF /* Pods-XMPPFrameworkSwiftTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkSwiftTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkSwiftTests/Pods-XMPPFrameworkSwiftTests.debug.xcconfig"; sourceTree = "<group>"; };
 		777EEF98731B0EC5DBD49953 /* Pods_XMPPFrameworkSwiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkSwiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D93B878E1FBCE8D6002B6CB7 /* XMPPFrameworkTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XMPPFrameworkTests-Bridging-Header.h"; path = "../../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		D93B878F1FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPBookmarksModuleTests.swift; path = "../../Testing-Swift/XMPPBookmarksModuleTests.swift"; sourceTree = "<group>"; };
+		D93B87911FBCE90C002B6CB7 /* XMPPMockStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMockStream.m; path = "../../Testing-Shared/XMPPMockStream.m"; sourceTree = "<group>"; };
+		D93B87921FBCE90D002B6CB7 /* XMPPMockStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPMockStream.h; path = "../../Testing-Shared/XMPPMockStream.h"; sourceTree = "<group>"; };
 		D9669B581D9B13FF0018533D /* OMEMOServerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOServerTests.m; path = "../../Testing-Shared/OMEMOServerTests.m"; sourceTree = "<group>"; };
 		D973A08E1D2F1EB10096F3ED /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D973A0921D2F1EB10096F3ED /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -62,14 +67,13 @@
 		D99C5E081D95EBA100FB068A /* OMEMOTestStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOTestStorage.m; path = "../../Testing-Shared/OMEMOTestStorage.m"; sourceTree = "<group>"; };
 		D9A7B02D1FB985BE005183CD /* XMPPFrameworkSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9A7B0311FB985BE005183CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D9A7B0351FB98608005183CD /* SwiftOnlyTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftOnlyTest.swift; path = "../../Testing-Swift/SwiftOnlyTest.swift"; sourceTree = "<group>"; };
 		D9E35E6D1D90B2C5002E7CF7 /* OMEMOElementTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOElementTests.m; path = "../../Testing-Shared/OMEMOElementTests.m"; sourceTree = "<group>"; };
 		D9F20D001D836080002A8D6F /* OMEMOModuleTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OMEMOModuleTests.m; path = "../../Testing-Shared/OMEMOModuleTests.m"; sourceTree = "<group>"; };
-		DD4003D41F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPOutOfBandResourceMessagingTests.m; path = "../../Testing-Shared/XMPPOutOfBandResourceMessagingTests.m"; sourceTree = "<group>"; };
-		DD26F5841F7CF17200F54F18 /* XMPPOneToOneChatTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPOneToOneChatTests.m; path = "../../Testing-Shared/XMPPOneToOneChatTests.m"; sourceTree = "<group>"; };
 		DD06EA411F78EB3B008FA8C2 /* XMPPMessageDeliveryReceiptsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMessageDeliveryReceiptsTests.m; path = "../../Testing-Shared/XMPPMessageDeliveryReceiptsTests.m"; sourceTree = "<group>"; };
-		DDA11A481F8517C200591D1B /* XMPPManagedMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPManagedMessagingTests.m; path = "../../Testing-Shared/XMPPManagedMessagingTests.m"; sourceTree = "<group>"; };
 		DD24E0261F71463C00FA813C /* XMPPDelayedDeliveryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPDelayedDeliveryTests.m; path = "../../Testing-Shared/XMPPDelayedDeliveryTests.m"; sourceTree = "<group>"; };
+		DD26F5841F7CF17200F54F18 /* XMPPOneToOneChatTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPOneToOneChatTests.m; path = "../../Testing-Shared/XMPPOneToOneChatTests.m"; sourceTree = "<group>"; };
+		DD4003D41F7525A50078D144 /* XMPPOutOfBandResourceMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPOutOfBandResourceMessagingTests.m; path = "../../Testing-Shared/XMPPOutOfBandResourceMessagingTests.m"; sourceTree = "<group>"; };
+		DDA11A481F8517C200591D1B /* XMPPManagedMessagingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPManagedMessagingTests.m; path = "../../Testing-Shared/XMPPManagedMessagingTests.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,7 +162,10 @@
 		D9A7B02E1FB985BE005183CD /* XMPPFrameworkSwiftTests */ = {
 			isa = PBXGroup;
 			children = (
-				D9A7B0351FB98608005183CD /* SwiftOnlyTest.swift */,
+				D93B87921FBCE90D002B6CB7 /* XMPPMockStream.h */,
+				D93B87911FBCE90C002B6CB7 /* XMPPMockStream.m */,
+				D93B878F1FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift */,
+				D93B878E1FBCE8D6002B6CB7 /* XMPPFrameworkTests-Bridging-Header.h */,
 				D9A7B0311FB985BE005183CD /* Info.plist */,
 			);
 			path = XMPPFrameworkSwiftTests;
@@ -308,7 +315,7 @@
 				"${BUILT_PRODUCTS_DIR}/CocoaAsyncSocket/CocoaAsyncSocket.framework",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack.default-Swift/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/KissXML/KissXML.framework",
-				"${BUILT_PRODUCTS_DIR}/XMPPFramework-ObjC-Swift/XMPPFramework.framework",
+				"${BUILT_PRODUCTS_DIR}/XMPPFramework-Swift-default/XMPPFramework.framework",
 				"${BUILT_PRODUCTS_DIR}/libidn/libidn.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -426,7 +433,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D9A7B0361FB98609005183CD /* SwiftOnlyTest.swift in Sources */,
+				D93B87931FBCE90D002B6CB7 /* XMPPMockStream.m in Sources */,
+				D93B87901FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -635,6 +643,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
@@ -677,6 +686,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;

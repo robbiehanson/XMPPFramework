@@ -9,15 +9,15 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D9DCD3F71E6256D90010D1C7"
-               BuildableName = "XMPPFramework.framework"
-               BlueprintName = "XMPPFramework (macOS)"
-               ReferencedContainer = "container:XMPPFramework.xcodeproj">
+               BlueprintIdentifier = "D9A7B03A1FB988EC005183CD"
+               BuildableName = "XMPPFrameworkSwiftTests.xctest"
+               BlueprintName = "XMPPFrameworkSwiftTests"
+               ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,6 +29,16 @@
       language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D9A7B03A1FB988EC005183CD"
+               BuildableName = "XMPPFrameworkSwiftTests.xctest"
+               BlueprintName = "XMPPFrameworkSwiftTests"
+               ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <AdditionalOptions>
       </AdditionalOptions>
@@ -47,10 +57,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D9DCD3F71E6256D90010D1C7"
-            BuildableName = "XMPPFramework.framework"
-            BlueprintName = "XMPPFramework (macOS)"
-            ReferencedContainer = "container:XMPPFramework.xcodeproj">
+            BlueprintIdentifier = "D9A7B03A1FB988EC005183CD"
+            BuildableName = "XMPPFrameworkSwiftTests.xctest"
+            BlueprintName = "XMPPFrameworkSwiftTests"
+            ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -65,10 +75,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D9DCD3F71E6256D90010D1C7"
-            BuildableName = "XMPPFramework.framework"
-            BlueprintName = "XMPPFramework (macOS)"
-            ReferencedContainer = "container:XMPPFramework.xcodeproj">
+            BlueprintIdentifier = "D9A7B03A1FB988EC005183CD"
+            BuildableName = "XMPPFrameworkSwiftTests.xctest"
+            BlueprintName = "XMPPFrameworkSwiftTests"
+            ReferencedContainer = "container:XMPPFrameworkTests.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

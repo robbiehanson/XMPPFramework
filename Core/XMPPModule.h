@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) void *moduleQueueTag;
 @property (strong, readonly, nullable) XMPPStream *xmppStream;
 @property (nonatomic, readonly) NSString *moduleName;
+@property (nonatomic, readonly) id multicastDelegate NS_REFINED_FOR_SWIFT;
 
 - (instancetype)init;
 - (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue;
@@ -57,7 +58,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  else
  *      dispatch_sync(moduleQueue, block);
  */
-- (void) performBlock:(dispatch_block_t)block NS_SWIFT_NAME(performBlock(_:));
+- (void) performBlock:(dispatch_block_t)block NS_REFINED_FOR_SWIFT;
 
 /**
  * Dispatches block asynchronously on moduleQueue, or
@@ -70,6 +71,6 @@ NS_ASSUME_NONNULL_BEGIN
  *  else
  *      dispatch_async(moduleQueue, block);
  */
-- (void) performBlockAsync:(dispatch_block_t)block NS_SWIFT_NAME(performBlockAsync(_:));
+- (void) performBlockAsync:(dispatch_block_t)block NS_REFINED_FOR_SWIFT;
 @end
 NS_ASSUME_NONNULL_END
