@@ -69,34 +69,167 @@ public class XMPPBookmarksModule: XMPPModule {
         super.deactivate()
     }
     
-    // MARK: - Public API
+    // MARK: - Public API with multicast response via XMPPBookmarksDelegate
     
-    /// Fetches all of your stored bookmarks on the server
+    /// Fetches all of your stored bookmarks on the server and responds via XMPPBookmarksDelegate
     @objc public func fetchBookmarks() {
+        fetchBookmarks({ (_bookmarks, _responseIq) in
+            guard let bookmarks = _bookmarks, let responseIq = _responseIq else {
+                self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
+                    multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: _responseIq)
+                })
+                return
+            }
+            self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
+                multicast.xmppBookmarks!(self, didRetrieve: bookmarks, responseIq: responseIq)
+            })
+        })
+    }
+    
+    /// Overwrites bookmarks on the server and responds via XMPPBookmarksDelegate
+    @objc public func publishBookmarks(_ bookmarks: [XMPPBookmark]) {
+        publishBookmarks(bookmarks, completion: { (success, responseIq) in
+            if success, let responseIq = responseIq {
+                self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
+                    multicast.xmppBookmarks!(self, didPublish: bookmarks, responseIq: responseIq)
+                })
+            } else {
+                self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
+                    multicast.xmppBookmarks!(self, didNotPublishBookmarks: responseIq)
+                })
+            }
+        })
+    }
+    
+    // MARK: - Public API with Block response only
+    
+    /// Fetches bookmarks from server. Block response only (will not trigger MulticastDelegate)
+    @objc public func fetchBookmarks(_ completion: @escaping (_ bookmarks: [XMPPBookmark]?, _ responseIq: XMPPIQ?)->(), completionQueue: DispatchQueue? = nil) {
         let storage = XMLElement.storage
         let query = XMLElement.query(child: storage)
         let get = XMPPIQ(iqType: .get, child: query)
         
-        let handler = { (_ obj: Any, _ info: XMPPTrackingInfo) in
+        // Executes completion block on proper queue
+        let completionHandler = { (_ bookmarks: [XMPPBookmark]?, _ responseIq: XMPPIQ?)->() in
+            if let completionQueue = completionQueue {
+                completionQueue.async {
+                    completion(bookmarks, responseIq)
+                }
+            } else {
+                completion(bookmarks, responseIq)
+            }
+        }
+        
+        // Handles response from XMPPIDTracker
+        let iqHandler = { (_ obj: Any, _ info: XMPPTrackingInfo) in
             guard let responseIq = obj as? XMPPIQ,
                 let iqType = responseIq.iqType,
                 let query = responseIq.query,
                 let storage = query.bookmarksStorageElement,
                 iqType != .error else {
-                    self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
-                        multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: obj as? XMPPIQ)
-                    })
+                    completionHandler(nil, obj as? XMPPIQ)
                     return
             }
             let bookmarks = storage.bookmarks
-            self.multicast.invoke(ofType: XMPPBookmarksDelegate.self, { (multicast) in
-                multicast.xmppBookmarks!(self, didRetrieve: bookmarks, responseIq: responseIq)
-            })
+            completionHandler(bookmarks, responseIq)
         }
         performBlock(async: true) {
-            self.tracker?.add(get, block: handler, timeout: 30.0)
+            self.tracker?.add(get, block: iqHandler, timeout: 30.0)
             self.xmppStream?.send(get)
         }
+    }
+    
+    /// Fetches and publishes a merged set of bookmarks on the server. The response block will be nil if there was a failure, or the merged set if successful. Block response only (will not trigger MulticastDelegate)
+    @objc public func fetchAndPublishBookmarks(_ bookmarks: [XMPPBookmark], completion: @escaping (_ bookmarks: [XMPPBookmark]?, _ responseIq: XMPPIQ?)->(), completionQueue: DispatchQueue? = nil) {
+        
+        // Executes completion block on proper queue
+        let completionHandler = { (_ bookmarks: [XMPPBookmark]?, _ responseIq: XMPPIQ?)->() in
+            if let completionQueue = completionQueue {
+                completionQueue.async {
+                    completion(bookmarks, responseIq)
+                }
+            } else {
+                completion(bookmarks, responseIq)
+            }
+        }
+        
+        fetchBookmarks({ (responseBookmarks, responseIq) in
+            if let responseBookmarks = responseBookmarks {
+                let newBookmarks = self.merge(original: responseBookmarks, new: bookmarks)
+                self.publishBookmarks(newBookmarks, completion: { (success, responseIq) in
+                    if !success {
+                        completionHandler(nil, responseIq)
+                    } else {
+                        completionHandler(newBookmarks, responseIq)
+                    }
+                }, completionQueue: completionQueue)
+            } else {
+                completionHandler(nil, responseIq)
+            }
+        }, completionQueue: completionQueue)
+    }
+
+    
+    /// Overwrites bookmarks on the server. Block response only (will not trigger MulticastDelegate)
+    @objc public func publishBookmarks(_ bookmarks: [XMPPBookmark], completion: @escaping (_ success: Bool, _ responseIq: XMPPIQ?)->(), completionQueue: DispatchQueue? = nil) {
+        let storage = XMLElement.storage
+        let query = XMLElement.query(child: storage)
+        let set = XMPPIQ(iqType: .set, child: query)
+        
+        bookmarks.forEach { (bookmark) in
+            let element = bookmark.element.copy() as! XMLElement
+            storage.addChild(element)
+        }
+        
+        // Executes completion block on proper queue
+        let completionHandler = { (_ success: Bool, _ responseIq: XMPPIQ?)->() in
+            if let completionQueue = completionQueue {
+                completionQueue.async {
+                    completion(success, responseIq)
+                }
+            } else {
+                completion(success, responseIq)
+            }
+        }
+        
+        // Handles response from XMPPIDTracker
+        let iqHandler = { (_ obj: Any, _ info: XMPPTrackingInfo) in
+            guard let responseIq = obj as? XMPPIQ,
+                let iqType = responseIq.iqType,
+                iqType == .result else {
+                    completionHandler(false, obj as? XMPPIQ)
+                    return
+            }
+            completionHandler(true, responseIq)
+        }
+        performBlock(async: true) {
+            self.tracker?.add(set, block: iqHandler, timeout: 30.0)
+            self.xmppStream?.send(set)
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    /// Merges bookmarks allowing only one unique value of conference.jid or url.url
+    /// overwriting the contents of original with new values if there is collision
+    private func merge(original: [XMPPBookmark], new: [XMPPBookmark]) -> [XMPPBookmark] {
+        var bookmarksDict: [String:XMPPBookmark] = [:]
+        
+        let mergeBookmark = { (_ bookmark: XMPPBookmark) in
+            if let conference = bookmark as? XMPPConferenceBookmark,
+                let jidString = conference.jid?.full {
+                bookmarksDict[jidString] = conference
+            } else if let url = bookmark as? XMPPURLBookmark,
+                let urlString = url.url?.absoluteString {
+                bookmarksDict[urlString] = url
+            }
+        }
+        
+        original.forEach(mergeBookmark)
+        new.forEach(mergeBookmark)
+        
+        let merged = [XMPPBookmark](bookmarksDict.values)
+        return merged
     }
 }
 

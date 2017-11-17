@@ -75,6 +75,91 @@ class XMPPBookmarksModuleTests: XCTestCase {
             
         }
     }
+    
+    func testPublishBookmarks() {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let xmlString = """
+        <iq type="result"
+            from="\(myJID.full)"
+            to="\(myJID.full)"
+            id="1001"/>
+        """
+        let result = try! XMLElement(xmlString: xmlString)
+        let resultIq = XMPPIQ(from: result)
+        
+        stream.elementReceived = { element in
+            resultIq.copyElementId(from: element)
+            self.stream.fakeIQResponse(resultIq)
+        }
+        let conference = XMPPConferenceBookmark(jid: XMPPJID(string: "room@conference.example.com")!, bookmarkName: "room", nick: myJID.user, autoJoin: true)
+        let url = XMPPURLBookmark(url: URL(string: "http://example.com")!, bookmarkName: "example")
+        let bookmarks: [XMPPBookmark] = [conference, url]
+        bookmarksModule.publishBookmarks(bookmarks)
+        
+        expectation = expectation(description: "retreiving bookmarks")
+        waitForExpectations(timeout: 5) { (error) in
+            
+        }
+    }
+    
+    func testFetchAndPublishBookmarks() {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        var responses: [XMPPIQ] = []
+        
+        let addResponse = { (_ xmlString: String) in
+            let result = try! XMLElement(xmlString: xmlString)
+            let resultIq = XMPPIQ(from: result)
+            responses.append(resultIq)
+        }
+        
+        let originalString = """
+        <iq type="result"
+            from="\(myJID.full)"
+            to="\(myJID.full)"
+            id="1002">
+            <query xmlns="jabber:iq:private">
+                <storage xmlns='storage:bookmarks'>
+                    <conference name='Council of Oberon'
+                      autojoin='true'
+                      jid='council@conference.underhill.org'>
+                        <nick>Puck</nick>
+                    </conference>
+                    <url name='Complete Works of Shakespeare'
+                    url='http://the-tech.mit.edu/Shakespeare/'/>
+                </storage>
+            </query>
+        </iq>
+        """
+        let resultString = """
+        <iq type="result"
+            from="\(myJID.full)"
+            to="\(myJID.full)"
+            id="1001"/>
+        """
+        addResponse(originalString)
+        addResponse(resultString)
+        
+        stream.elementReceived = { element in
+            let resultIq = responses.removeFirst()
+            resultIq.copyElementId(from: element)
+            self.stream.fakeIQResponse(resultIq)
+        }
+        let conference = XMPPConferenceBookmark(jid: XMPPJID(string: "room@conference.example.com")!, bookmarkName: "room", nick: myJID.user, autoJoin: true)
+        let url = XMPPURLBookmark(url: URL(string: "http://example.com")!, bookmarkName: "example")
+        let bookmarks: [XMPPBookmark] = [conference, url]
+        
+        bookmarksModule.fetchAndPublishBookmarks(bookmarks, completion: { (bookmarks, responseIq) in
+            XCTAssert(bookmarks?.count == 4)
+            self.expectation?.fulfill()
+        }, completionQueue: DispatchQueue.main)
+        
+        expectation = expectation(description: "retreiving bookmarks")
+        waitForExpectations(timeout: 5) { (error) in
+            
+        }
+    }
 
 
 }
@@ -86,6 +171,15 @@ extension XMPPBookmarksModuleTests: XMPPBookmarksDelegate {
     }
     
     func xmppBookmarks(_ sender: XMPPBookmarksModule, didNotRetrieveBookmarks errorIq: XMPPIQ?) {
+        expectation?.fulfill()
+    }
+    
+    func xmppBookmarks(_ sender: XMPPBookmarksModule, didPublish bookmarks: [XMPPBookmark], responseIq: XMPPIQ) {
+        XCTAssert(bookmarks.count == 2)
+        expectation?.fulfill()
+    }
+    
+    func xmppBookmarks(_ sender: XMPPBookmarksModule, didNotPublishBookmarks errorIq: XMPPIQ?) {
         expectation?.fulfill()
     }
 }
