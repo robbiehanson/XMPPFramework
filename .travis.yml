@@ -4,14 +4,16 @@ language: objective-c
 cache:
   directories:
   - Carthage
+  - Xcode/Testing-iOS/Pods
+  - Xcode/Testing-macOS/Pods
 
 before_install:
-  - brew update
-  - brew outdated carthage || brew upgrade carthage
+  # - brew update
+  # - brew outdated carthage || brew upgrade carthage
   - export IOS_SIMULATOR_DESTINATION="platform=iOS Simulator,name=iPhone 8,OS=11.1"
 
 install:
-  - carthage bootstrap --no-use-binaries --cache-builds
+  - carthage bootstrap --no-build
   - cd Xcode
   - bundle install
   - bundle exec pod repo update --silent
