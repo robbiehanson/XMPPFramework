@@ -646,7 +646,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
 - (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt * _Nullable * _Nullable)receiptPtr;
-- (void)sendElement:(NSXMLElement *)element registeringEventWithID:(NSString *)eventID andGetReceipt:(XMPPElementReceipt * _Nullable * _Nullable)receiptPtr;
+- (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt * _Nullable * _Nullable)receiptPtr registeringEventWithID:(NSString *)eventID;
 
 /**
  * Fetches and resends the myPresence element (if available) in a single atomic operation.
@@ -741,13 +741,13 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Returns the stream metadata corresponding to the currently processed XMPP stanza.
+ * The stream metadata corresponding to the currently processed XMPP stanza.
  *
  * Event information is only available in the context of @c didSendXXX/didFailToSendXXX/didReceiveXXX delegate callbacks.
- * This method returns nil if called outside of those callbacks.
+ * This property is nil if accessed outside of those callbacks.
  * For more details, please refer to @c XMPPElementEvent documentation.
  */
-- (nullable XMPPElementEvent *)currentElementEvent;
+@property (nonatomic, readonly, nullable) XMPPElementEvent *currentElementEvent;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Utilities
@@ -798,79 +798,6 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Even if you close the xmpp stream after this point, the OS will still do everything it can to send the data.
 **/
 - (BOOL)wait:(NSTimeInterval)timeout;
-
-@end
-
-/**
- * A handle that allows identifying elements sent or received in the stream across different delegates
- * and tracking their processing progress.
- *
- * While the core XMPP specification does not require stanzas to be uniquely identifiable, you may still want to
- * identify them internally across different modules or trace the sent ones to the respective send result delegate callbacks.
- *
- * An instance of this class is provided in the context of execution of any of the @c didSendXXX/didFailToSendXXX/didReceiveXXX
- * stream delegate methods. It is retrieved by calling the @c currentElementEvent method on the calling stream.
- * The delegates can then use it to:
- * - identify the corresponding XMPP stanzas.
- * - be notified of asynchronous processing completion for a given XMPP stanza.
- *
- * Using @c XMPPElementEvent handles is a more robust approach than relying on pointer equality of @c XMPPElement instances.
- */
-@interface XMPPElementEvent : NSObject
-
-/// The universally unique identifier of the event that provides the internal identity of the corresponding XMPP stanza.
-@property (nonatomic, copy, readonly) NSString *uniqueID;
-
-/// The value of the stream's @c myJID property at the time when the event occured.
-@property (nonatomic, strong, readonly, nullable) XMPPJID *myJID;
-
-/// The local device time when the event occured.
-@property (nonatomic, strong, readonly) NSDate *timestamp;
-
-/**
- * A flag indicating whether all delegates are done processing the given event.
- *
- * Supports Key-Value Observing. Change notifications are emitted on the stream queue.
- *
- * @see beginDelayedProcessing
- * @see endDelayedProcessingWithToken
- */
-@property (nonatomic, assign, readonly, getter=isProcessingCompleted) BOOL processingCompleted;
-
-// Instances are created by the stream only.
-- (instancetype)init NS_UNAVAILABLE;
-
-/**
- * Marks the event as being asynchronously processed by a delegate and returns a completion token.
- *
- * Event processing is completed after every @c beginDelayedProcessing call has been followed
- * by @c endDelayedProcessingWithToken: with a matching completion token.
- *
- * Unpaired invocations may lead to undefined behavior or stalled events.
- *
- * Events that are not marked for asynchronous processing by any of the delegates complete immediately
- * after control returns from all callbacks.
- *
- * @see endDelayedProcessingWithToken:
- * @see processingCompleted
- */
-- (id)beginDelayedProcessing;
-
-/**
- * Marks an end of the previously initiated asynchronous delegate processing.
- *
- * Event processing is completed after every @c beginDelayedProcessing call has been followed
- * by @c endDelayedProcessingWithToken: with a matching completion token.
- *
- * Unpaired invocations may lead to undefined behavior or stalled events.
- *
- * Events that are not marked for asynchronous processing by any of the delegates complete immediately
- * after control returns from all callbacks.
- *
- * @see beginDelayedProcessing
- * @see processingCompleted
- */
-- (void)endDelayedProcessingWithToken:(id)delayedProcessingToken;
 
 @end
 
@@ -1077,7 +1004,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * If you have need to modify an element for any reason,
  * you should copy the element first, and then modify and use the copy.
  *
- * Delegates can obtain event metadata associated with the respective element by calling @c currentElementEvent on @c sender
+ * Delegates can obtain event metadata associated with the respective element by accessing @c currentElementEvent on @c sender
  * from within these callbacks. For more details, please refer to @c XMPPElementEvent documentation.
 **/
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq;
@@ -1125,7 +1052,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * These methods may be used to listen for certain events (such as an unavailable presence having been sent),
  * or for general logging purposes. (E.g. a central history logging mechanism).
  *
- * Delegates can obtain event metadata associated with the respective element by calling @c currentElementEvent on @c sender
+ * Delegates can obtain event metadata associated with the respective element by accessing @c currentElementEvent on @c sender
  * from within these callbacks. For more details, please refer to @c XMPPElementEvent documentation.
 **/
 - (void)xmppStream:(XMPPStream *)sender didSendIQ:(XMPPIQ *)iq;
@@ -1136,7 +1063,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * These methods are called after failing to send the respective XML elements over the stream.
  * This occurs when the stream gets disconnected before the element can get sent out.
  *
- * Delegates can obtain event metadata associated with the respective element by calling @c currentElementEvent on @c sender
+ * Delegates can obtain event metadata associated with the respective element by accessing @c currentElementEvent on @c sender
  * from within these callbacks.
  * Note that if these methods are called, the event context is incomplete, e.g. the stream might have not been connected
  * and the actual myJID value is not determined. For more details, please refer to @c XMPPElementEvent documentation.
@@ -1244,7 +1171,7 @@ NS_SWIFT_NAME(xmppStream(_:didFinishProcessing:));
  * If you're using custom elements, you must register the custom element name(s).
  * Otherwise the xmppStream will treat non-XMPP elements as errors (xmppStream:didReceiveError:).
  * 
- * Delegates can obtain event metadata associated with the respective element by calling @c currentElementEvent on @c sender
+ * Delegates can obtain event metadata associated with the respective element by accessing @c currentElementEvent on @c sender
  * from within these callbacks. For more details, please refer to @c XMPPElementEvent documentation.
  *
  * @see registerCustomElementNames (in XMPPInternal.h)

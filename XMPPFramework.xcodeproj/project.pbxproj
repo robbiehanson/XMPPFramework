@@ -77,6 +77,9 @@
 		D95367E61FB90F0E0075502D /* XMPPBookmarksStorageElement.m in Sources */ = {isa = PBXBuildFile; fileRef = D95367E21FB90F0E0075502D /* XMPPBookmarksStorageElement.m */; };
 		D95367E71FB90F0E0075502D /* XMPPBookmarksStorageElement.m in Sources */ = {isa = PBXBuildFile; fileRef = D95367E21FB90F0E0075502D /* XMPPBookmarksStorageElement.m */; };
 		D95367E81FB90F0E0075502D /* XMPPBookmarksStorageElement.m in Sources */ = {isa = PBXBuildFile; fileRef = D95367E21FB90F0E0075502D /* XMPPBookmarksStorageElement.m */; };
+		249704751FC0680900D25EC6 /* XMPPElementEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 249704731FC0680900D25EC6 /* XMPPElementEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		249704761FC0680900D25EC6 /* XMPPElementEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 249704731FC0680900D25EC6 /* XMPPElementEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		249704771FC0680900D25EC6 /* XMPPElementEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 249704731FC0680900D25EC6 /* XMPPElementEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D96D6E7D1F8D9701006DEC58 /* XMPPPushModule.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6E7C1F8D9701006DEC58 /* XMPPPushModule.m */; };
 		D96D6E7E1F8D9701006DEC58 /* XMPPPushModule.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6E7C1F8D9701006DEC58 /* XMPPPushModule.m */; };
 		D96D6E7F1F8D9701006DEC58 /* XMPPPushModule.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6E7C1F8D9701006DEC58 /* XMPPPushModule.m */; };
@@ -1489,6 +1492,7 @@
 		D95367DA1FB90DA00075502D /* XMPPBookmark.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPBookmark.m; sourceTree = "<group>"; };
 		D95367E11FB90F0E0075502D /* XMPPBookmarksStorageElement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPBookmarksStorageElement.h; sourceTree = "<group>"; };
 		D95367E21FB90F0E0075502D /* XMPPBookmarksStorageElement.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPBookmarksStorageElement.m; sourceTree = "<group>"; };
+		249704731FC0680900D25EC6 /* XMPPElementEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPElementEvent.h; sourceTree = "<group>"; };
 		D96D6E6C1F8D9700006DEC58 /* XMPPPushModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPPushModule.h; sourceTree = "<group>"; };
 		D96D6E7C1F8D9701006DEC58 /* XMPPPushModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPPushModule.m; sourceTree = "<group>"; };
 		D96D6E981F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPMessage+XEP_0359.h"; sourceTree = "<group>"; };
@@ -1924,6 +1928,7 @@
 				0D44BB0A1E5370ED000930E0 /* XMPPPresence.m */,
 				0D44BB0B1E5370ED000930E0 /* XMPPStream.h */,
 				0D44BB0C1E5370ED000930E0 /* XMPPStream.m */,
+				249704731FC0680900D25EC6 /* XMPPElementEvent.h */,
 			);
 			path = Core;
 			sourceTree = SOURCE_ROOT;
@@ -2959,6 +2964,7 @@
 				D9DCD3241E6250930010D1C7 /* XMPPMessage+XEP_0334.h in Headers */,
 				D96D6E801F8D970E006DEC58 /* XMPPPushModule.h in Headers */,
 				D9DCD3281E6250930010D1C7 /* NSXMLElement+XEP_0352.h in Headers */,
+				249704751FC0680900D25EC6 /* XMPPElementEvent.h in Headers */,
 				D9DCD2541E6250930010D1C7 /* XMPPOutgoingFileTransfer.h in Headers */,
 				D9DCD2561E6250930010D1C7 /* XMPPGoogleSharedStatus.h in Headers */,
 				D9DCD2B61E6250930010D1C7 /* XMPPvCardTemp.h in Headers */,
@@ -3155,6 +3161,7 @@
 				D9DCD4A51E6256D90010D1C7 /* XMPPMessage+XEP_0334.h in Headers */,
 				D96D6E811F8D970E006DEC58 /* XMPPPushModule.h in Headers */,
 				D9DCD4A61E6256D90010D1C7 /* NSXMLElement+XEP_0352.h in Headers */,
+				249704761FC0680900D25EC6 /* XMPPElementEvent.h in Headers */,
 				D9DCD4A71E6256D90010D1C7 /* XMPPOutgoingFileTransfer.h in Headers */,
 				D9DCD4A81E6256D90010D1C7 /* XMPPGoogleSharedStatus.h in Headers */,
 				D9DCD4A91E6256D90010D1C7 /* XMPPvCardTemp.h in Headers */,
@@ -3327,6 +3334,7 @@
 				D9DCD6081E6258CF0010D1C7 /* XMPPMessage+XEP_0334.h in Headers */,
 				D96D6E821F8D970F006DEC58 /* XMPPPushModule.h in Headers */,
 				D9DCD6091E6258CF0010D1C7 /* NSXMLElement+XEP_0352.h in Headers */,
+				249704771FC0680900D25EC6 /* XMPPElementEvent.h in Headers */,
 				D9DCD60A1E6258CF0010D1C7 /* XMPPOutgoingFileTransfer.h in Headers */,
 				D9DCD60B1E6258CF0010D1C7 /* XMPPGoogleSharedStatus.h in Headers */,
 				D9DCD60C1E6258CF0010D1C7 /* XMPPvCardTemp.h in Headers */,

@@ -156,7 +156,7 @@ enum XMPPStreamConfig
 @interface XMPPElementEvent ()
 
 @property (nonatomic, unsafe_unretained, readonly) XMPPStream *xmppStream;
-@property (nonatomic, assign, readwrite, getter=isProcessingCompleted) BOOL processingCompleted;
+@property (nonatomic, assign, readwrite) BOOL isProcessingCompleted;
 
 @end
 
@@ -2639,12 +2639,12 @@ enum XMPPStreamConfig
 **/
 - (void)sendElement:(NSXMLElement *)element
 {
-    [self sendElement:element registeringEventWithID:[self generateUUID] andGetReceipt:nil];
+    [self sendElement:element andGetReceipt:nil registeringEventWithID:[self generateUUID]];
 }
 
 - (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt **)receiptPtr
 {
-    [self sendElement:element registeringEventWithID:[self generateUUID] andGetReceipt:receiptPtr];
+    [self sendElement:element andGetReceipt:receiptPtr registeringEventWithID:[self generateUUID]];
 }
 
 /**
@@ -2654,7 +2654,7 @@ enum XMPPStreamConfig
  * After the element has been successfully sent,
  * the xmppStream:didSendElementWithTag: delegate method is called.
 **/
-- (void)sendElement:(NSXMLElement *)element registeringEventWithID:(NSString *)eventID andGetReceipt:(XMPPElementReceipt **)receiptPtr
+- (void)sendElement:(NSXMLElement *)element andGetReceipt:(XMPPElementReceipt **)receiptPtr registeringEventWithID:(NSString *)eventID
 {
 	if (element == nil) return;
 	
@@ -5155,7 +5155,7 @@ enum XMPPStreamConfig
     [eventProcessingDelegateInvocationContext becomeCurrentOnQueue:self.xmppQueue forActionWithBlock:block];
     
     dispatch_group_notify(eventProcessingDelegateInvocationContext.continuityGroup, self.xmppQueue, ^{
-        event.processingCompleted = YES;
+        event.isProcessingCompleted = YES;
         [multicastDelegate xmppStream:self didFinishProcessingElementEvent:event];
     });
 }
@@ -5265,7 +5265,7 @@ static const uint32_t receipt_success = 1 << 1;
     __block BOOL result;
     
     dispatch_block_t block = ^{
-        result = _processingCompleted;
+        result = _isProcessingCompleted;
     };
     
     if (dispatch_get_specific(self.xmppStream.xmppQueueTag))

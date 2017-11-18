@@ -9,6 +9,7 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 #import "XMPPModule.h"
+#import "XMPPElementEvent.h"
 
 // 
 // Authentication
