@@ -51,7 +51,7 @@ public class XMPPBookmarksModule: XMPPModule {
     }
     
     // MARK: - XMPPModule Overrides
-    override public func activate(_ xmppStream: XMPPStream) -> Bool {
+    @discardableResult override public func activate(_ xmppStream: XMPPStream) -> Bool {
         guard super.activate(xmppStream) else {
             return false
         }
@@ -140,7 +140,7 @@ public class XMPPBookmarksModule: XMPPModule {
     }
     
     /// Fetches and publishes a merged set of bookmarks on the server. The response block will be nil if there was a failure, or the merged set if successful. Block response only (will not trigger MulticastDelegate)
-    @objc public func fetchAndPublishBookmarks(_ bookmarks: [XMPPBookmark], completion: @escaping (_ bookmarks: [XMPPBookmark]?, _ responseIq: XMPPIQ?)->(), completionQueue: DispatchQueue? = nil) {
+    @objc public func fetchAndPublish(bookmarksToAdd: [XMPPBookmark], bookmarksToRemove: [XMPPBookmark]? = nil, completion: @escaping (_ bookmarks: [XMPPBookmark]?, _ responseIq: XMPPIQ?)->(), completionQueue: DispatchQueue? = nil) {
         
         // Executes completion block on proper queue
         let completionHandler = { (_ bookmarks: [XMPPBookmark]?, _ responseIq: XMPPIQ?)->() in
@@ -155,7 +155,7 @@ public class XMPPBookmarksModule: XMPPModule {
         
         fetchBookmarks({ (responseBookmarks, responseIq) in
             if let responseBookmarks = responseBookmarks {
-                let newBookmarks = self.merge(original: responseBookmarks, new: bookmarks)
+                let newBookmarks = self.merge(original: responseBookmarks, adding: bookmarksToAdd, removing: bookmarksToRemove ?? [])
                 self.publishBookmarks(newBookmarks, completion: { (success, responseIq) in
                     if !success {
                         completionHandler(nil, responseIq)
@@ -212,21 +212,33 @@ public class XMPPBookmarksModule: XMPPModule {
     
     /// Merges bookmarks allowing only one unique value of conference.jid or url.url
     /// overwriting the contents of original with new values if there is collision
-    private func merge(original: [XMPPBookmark], new: [XMPPBookmark]) -> [XMPPBookmark] {
+    private func merge(original: [XMPPBookmark], adding: [XMPPBookmark], removing: [XMPPBookmark]) -> [XMPPBookmark] {
         var bookmarksDict: [String:XMPPBookmark] = [:]
         
-        let mergeBookmark = { (_ bookmark: XMPPBookmark) in
+        let keyForBookmark = { (_ bookmark: XMPPBookmark) -> String? in
             if let conference = bookmark as? XMPPConferenceBookmark,
                 let jidString = conference.jid?.full {
-                bookmarksDict[jidString] = conference
+                return jidString
             } else if let url = bookmark as? XMPPURLBookmark,
                 let urlString = url.url?.absoluteString {
-                bookmarksDict[urlString] = url
+                return urlString
+            }
+            return nil
+        }
+        
+        let mergeBookmark = { (_ bookmark: XMPPBookmark) in
+            if let key = keyForBookmark(bookmark) {
+                bookmarksDict[key] = bookmark
             }
         }
         
         original.forEach(mergeBookmark)
-        new.forEach(mergeBookmark)
+        adding.forEach(mergeBookmark)
+        removing.forEach { (bookmark) in
+            if let key = keyForBookmark(bookmark) {
+                bookmarksDict.removeValue(forKey: key)
+            }
+        }
         
         let merged = [XMPPBookmark](bookmarksDict.values)
         return merged

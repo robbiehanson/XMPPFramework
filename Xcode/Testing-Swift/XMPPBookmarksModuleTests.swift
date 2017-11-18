@@ -150,7 +150,7 @@ class XMPPBookmarksModuleTests: XCTestCase {
         let url = XMPPURLBookmark(url: URL(string: "http://example.com")!, bookmarkName: "example")
         let bookmarks: [XMPPBookmark] = [conference, url]
         
-        bookmarksModule.fetchAndPublishBookmarks(bookmarks, completion: { (bookmarks, responseIq) in
+        bookmarksModule.fetchAndPublish(bookmarksToAdd: bookmarks, completion: { (bookmarks, responseIq) in
             XCTAssert(bookmarks?.count == 4)
             self.expectation?.fulfill()
         }, completionQueue: DispatchQueue.main)
