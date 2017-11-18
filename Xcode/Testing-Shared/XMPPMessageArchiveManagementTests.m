@@ -60,7 +60,7 @@
 		
 		NSXMLElement *value = [firstField elementForName:@"value"];
 		XCTAssertEqualObjects(@"value", [value name]);
-		XCTAssertEqualObjects(@"urn:xmpp:mam:1", [value stringValue]);
+		XCTAssertEqualObjects(@"urn:xmpp:mam:2", [value stringValue]);
 		
 		NSXMLElement *lastField = [fields lastObject];
 		XCTAssertEqualObjects(@"field", [lastField name]);
@@ -308,7 +308,7 @@
 
 - (XMPPMessage *)fakeMessageWithQueryID:(NSString *)queryID eid:(NSString*)eid{
 	
-	NSString *resultOpenXML = [NSString stringWithFormat:@"<result xmlns='urn:xmpp:mam:1' queryid='%@' id='28482-98726-73623'>",queryID];
+	NSString *resultOpenXML = [NSString stringWithFormat:@"<result xmlns='urn:xmpp:mam:2' queryid='%@' id='28482-98726-73623'>",queryID];
 	
 	NSMutableString *s = [NSMutableString string];
 	[s appendFormat: @"<message id='%@' to='juliet@capulet.lit/chamber'>", eid];
@@ -330,7 +330,7 @@
 - (XMPPIQ *)fakeIQWithID:(NSString *) elementID{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<iq type='result' id='q29302'>"];
-	[s appendString: @"   <fin xmlns='urn:xmpp:mam:1'>"];
+	[s appendString: @"   <fin xmlns='urn:xmpp:mam:2'>"];
 	[s appendString: @"      <set xmlns='http://jabber.org/protocol/rsm'>"];
 	[s appendString: @"         <first index='0'>28482-98726-73623</first>"];
 	[s appendString: @"         <last>09af3-cc343-b409f</last>"];
@@ -361,10 +361,10 @@
 - (XMPPIQ *)fakeFormFieldsMessageWithID:(NSString *) elementID{
 	NSMutableString *s = [NSMutableString string];
 	[s appendString: @"<iq type='result' id='form1'>"];
-	[s appendString: @"  <query xmlns='urn:xmpp:mam:1'>"];
+	[s appendString: @"  <query xmlns='urn:xmpp:mam:2'>"];
 	[s appendString: @"    <x xmlns='jabber:x:data' type='form'>"];
 	[s appendString: @"      <field type='hidden' var='FORM_TYPE'>"];
-	[s appendString: @"        <value>urn:xmpp:mam:1</value>"];
+	[s appendString: @"        <value>urn:xmpp:mam:2</value>"];
 	[s appendString: @"      </field>"];
 	[s appendString: @"      <field type='jid-single' var='with'/>"];
 	[s appendString: @"      <field type='text-single' var='start'/>"];
