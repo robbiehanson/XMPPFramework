@@ -8,3 +8,10 @@ target 'XMPPFrameworkTests' do
   pod "XMPPFramework", :path => "../../"
 
 end
+
+target 'XMPPFrameworkSwiftTests' do
+
+  pod "XMPPFramework/Swift", :path => "../../"
+
+end
+

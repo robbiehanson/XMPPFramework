@@ -9,11 +9,13 @@
 #import "XMPPStanzaIdModule.h"
 #import "XMPPMessage.h"
 #import "XMPPMessage+XEP_0359.h"
+#import "XMPPRoom.h"
 
 @implementation XMPPStanzaIdModule
 // MARK: Setup
 @synthesize autoAddOriginId = _autoAddOriginId;
 @synthesize copyElementIdIfPresent = _copyElementIdIfPresent;
+@synthesize filterBlock = _filterBlock;
 
 - (instancetype) initWithDispatchQueue:(dispatch_queue_t)queue {
     if (self = [super initWithDispatchQueue:queue]) {
@@ -53,6 +55,31 @@
     }];
 }
 
+- (void) setFilterBlock:(BOOL (^)(XMPPStream *stream, XMPPMessage* message))filterBlock {
+    [self performBlockAsync:^{
+        _filterBlock = [filterBlock copy];
+    }];
+}
+
+- (BOOL (^)(XMPPStream *stream, XMPPMessage* message))filterBlock {
+    __block BOOL (^filterBlock)(XMPPStream *stream, XMPPMessage* message) = nil;
+    [self performBlock:^{
+        filterBlock = _filterBlock;
+    }];
+    return filterBlock;
+}
+
+/** Returning YES means message is omitted from further processing */
+- (BOOL) shouldFilterMessage:(XMPPMessage*)message {
+    // Attaching origin-id to MUC invite elements is rejected by some servers
+    // Possibly other stanzas as well
+    NSXMLElement *mucUserElement = [message elementForName:@"x" xmlns:XMPPMUCUserNamespace];
+    if ([mucUserElement elementForName:@"invite"]) {
+        return YES;
+    }
+    return NO;
+}
+
 // MARK: XMPPStreamDelegate
 
 - (nullable XMPPMessage *)xmppStream:(XMPPStream *)sender willSendMessage:(XMPPMessage *)message {
@@ -62,6 +89,18 @@
         !self.autoAddOriginId) {
         return message;
     }
+    
+    // Filter out message types known not to work with origin-id
+    if ([self shouldFilterMessage:message]) {
+        return message;
+    }
+    
+    // User-filtering of messages
+    BOOL (^filterBlock)(XMPPStream *stream, XMPPMessage* message) = self.filterBlock;
+    if (filterBlock && !filterBlock(sender, message)) {
+        return message;
+    }
+    
     NSString *originId = [NSUUID UUID].UUIDString;
     
     // Copy existing elementId if desired,

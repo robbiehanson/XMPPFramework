@@ -1,14 +1,19 @@
-osx_image: xcode9
+osx_image: xcode9.1
 language: objective-c
 
+cache:
+  directories:
+  - Carthage
+  - Xcode/Testing-iOS/Pods
+  - Xcode/Testing-macOS/Pods
+
 before_install:
-  # Fix Travis  xcodebuild exited with 65 https://github.com/travis-ci/travis-ci/issues/6675#issuecomment-257964767
-  - export IOS_SIMULATOR_UDID=`instruments -s devices | grep -m 1 "iPhone 8 (11" | awk -F '[ ]' '{print $4}' | awk -F '[\[]' '{print $2}' | sed 's/.$//'`
-  - echo $IOS_SIMULATOR_UDID
-  - open -a "simulator" --args -CurrentDeviceUDID $IOS_SIMULATOR_UDID
+  # - brew update
+  # - brew outdated carthage || brew upgrade carthage
+  - export IOS_SIMULATOR_DESTINATION="platform=iOS Simulator,name=iPhone 8,OS=11.1"
 
 install:
-  - carthage checkout
+  - carthage bootstrap --no-build
   - cd Xcode
   - bundle install
   - bundle exec pod repo update --silent
@@ -21,8 +26,11 @@ before_script:
 
 script:
   - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
-  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c
+  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
+  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkSwiftTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
+  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkSwiftTests -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
 
   - xcodebuild -project XMPPFramework.xcodeproj -scheme "XMPPFramework (tvOS)" -sdk appletvsimulator -arch x86_64 build | xcpretty -c
   - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
-  - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c
+  - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkSwiftTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
+  - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
