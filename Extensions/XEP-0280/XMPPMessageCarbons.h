@@ -51,6 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @protocol XMPPMessageCarbonsDelegate <NSObject>
+@optional
 
 - (void)xmppMessageCarbons:(XMPPMessageCarbons *)xmppMessageCarbons willReceiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing;
 

@@ -101,6 +101,15 @@
 		D96D6EA51F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6EA11F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m */; };
 		D96D6EA61F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6EA11F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m */; };
 		D96D6EA71F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m in Sources */ = {isa = PBXBuildFile; fileRef = D96D6EA11F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m */; };
+		D97097A81FC4DF86008ED04B /* XMPPMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097A71FC4DF86008ED04B /* XMPPMessage.swift */; };
+		D97097A91FC4DF86008ED04B /* XMPPMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097A71FC4DF86008ED04B /* XMPPMessage.swift */; };
+		D97097AA1FC4DF86008ED04B /* XMPPMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097A71FC4DF86008ED04B /* XMPPMessage.swift */; };
+		D97097B81FC4DF96008ED04B /* XMPPPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097B71FC4DF96008ED04B /* XMPPPresence.swift */; };
+		D97097B91FC4DF96008ED04B /* XMPPPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097B71FC4DF96008ED04B /* XMPPPresence.swift */; };
+		D97097BA1FC4DF96008ED04B /* XMPPPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097B71FC4DF96008ED04B /* XMPPPresence.swift */; };
+		D97097BD1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097BC1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift */; };
+		D97097BE1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097BC1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift */; };
+		D97097BF1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97097BC1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift */; };
 		D97BE9EF1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97BE9EE1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift */; };
 		D97BE9F01FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97BE9EE1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift */; };
 		D97BE9F11FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97BE9EE1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift */; };
@@ -1503,6 +1512,9 @@
 		D96D6E991F8D9D7E006DEC58 /* XMPPMessage+XEP_0359.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "XMPPMessage+XEP_0359.m"; sourceTree = "<group>"; };
 		D96D6EA01F8DA80A006DEC58 /* NSXMLElement+XEP_0359.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSXMLElement+XEP_0359.h"; sourceTree = "<group>"; };
 		D96D6EA11F8DA80A006DEC58 /* NSXMLElement+XEP_0359.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSXMLElement+XEP_0359.m"; sourceTree = "<group>"; };
+		D97097A71FC4DF86008ED04B /* XMPPMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMPPMessage.swift; sourceTree = "<group>"; };
+		D97097B71FC4DF96008ED04B /* XMPPPresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMPPPresence.swift; sourceTree = "<group>"; };
+		D97097BC1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XMPPMessage+XEP_0085.swift"; sourceTree = "<group>"; };
 		D97BE9EE1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMPPBookmarksModule.swift; sourceTree = "<group>"; };
 		D97BE9F41FBBC82D00CFE3BB /* XMPPModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMPPModule.swift; sourceTree = "<group>"; };
 		D97BE9FD1FBBE4E200CFE3BB /* XMPPIQ.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMPPIQ.swift; sourceTree = "<group>"; };
@@ -2075,6 +2087,14 @@
 			path = "XEP-0359";
 			sourceTree = "<group>";
 		};
+		D97097BB1FC4DFB6008ED04B /* XEP-0085 */ = {
+			isa = PBXGroup;
+			children = (
+				D97097BC1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift */,
+			);
+			path = "XEP-0085";
+			sourceTree = "<group>";
+		};
 		D97BE9F21FBBACF300CFE3BB /* XEP-0048 */ = {
 			isa = PBXGroup;
 			children = (
@@ -2086,6 +2106,7 @@
 		D9A7AA731FB97908005183CD /* Swift */ = {
 			isa = PBXGroup;
 			children = (
+				D97097BB1FC4DFB6008ED04B /* XEP-0085 */,
 				D9B81AC01FBCD0CA00455683 /* Utilities */,
 				D9B81ABF1FBCD0BC00455683 /* Core */,
 				D97BE9F21FBBACF300CFE3BB /* XEP-0048 */,
@@ -2099,6 +2120,8 @@
 		D9B81ABF1FBCD0BC00455683 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				D97097A71FC4DF86008ED04B /* XMPPMessage.swift */,
+				D97097B71FC4DF96008ED04B /* XMPPPresence.swift */,
 				D9B81AD81FBCE38F00455683 /* XMLElement.swift */,
 				D97BE9FD1FBBE4E200CFE3BB /* XMPPIQ.swift */,
 				D97BE9F41FBBC82D00CFE3BB /* XMPPModule.swift */,
@@ -4106,12 +4129,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D97097BD1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */,
 				D9B81AC21FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
+				D97097A81FC4DF86008ED04B /* XMPPMessage.swift in Sources */,
 				D97BE9EF1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0161FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BE9FE1FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
 				D9B81AD91FBCE38F00455683 /* XMLElement.swift in Sources */,
 				D97BE9F71FBBCAA100CFE3BB /* XMPPModule.swift in Sources */,
+				D97097B81FC4DF96008ED04B /* XMPPPresence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4119,12 +4145,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D97097BE1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */,
 				D9B81AC31FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
+				D97097A91FC4DF86008ED04B /* XMPPMessage.swift in Sources */,
 				D97BE9F01FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0171FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BE9FF1FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
 				D9B81ADA1FBCE38F00455683 /* XMLElement.swift in Sources */,
 				D97BE9F61FBBCAA000CFE3BB /* XMPPModule.swift in Sources */,
+				D97097B91FC4DF96008ED04B /* XMPPPresence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4132,12 +4161,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D97097BF1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */,
 				D9B81AC41FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
+				D97097AA1FC4DF86008ED04B /* XMPPMessage.swift in Sources */,
 				D97BE9F11FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0181FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BEA001FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
 				D9B81ADB1FBCE38F00455683 /* XMLElement.swift in Sources */,
 				D97BE9F51FBBCAA000CFE3BB /* XMPPModule.swift in Sources */,
+				D97097BA1FC4DF96008ED04B /* XMPPPresence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

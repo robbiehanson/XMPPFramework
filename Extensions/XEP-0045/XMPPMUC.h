@@ -20,6 +20,10 @@
  *  - It listens for MUC room invitations sent from other users.
 **/
 NS_ASSUME_NONNULL_BEGIN
+
+/** jabber:x:conference */
+extern NSString *const XMPPConferenceXmlns;
+
 @interface XMPPMUC : XMPPModule
 {
 /*	Inherited from XMPPModule:

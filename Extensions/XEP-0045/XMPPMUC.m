@@ -11,6 +11,7 @@
 
 NSString *const XMPPDiscoverItemsNamespace = @"http://jabber.org/protocol/disco#items";
 NSString *const XMPPMUCErrorDomain = @"XMPPMUCErrorDomain";
+NSString *const XMPPConferenceXmlns = @"jabber:x:conference";
 
 @interface XMPPMUC()
 {
@@ -373,7 +374,7 @@ failedToDiscoverRoomsForServiceNamed:serviceName
 	NSXMLElement * invite  = [x elementForName:@"invite"];
 	NSXMLElement * decline = [x elementForName:@"decline"];
 	
-	NSXMLElement * directInvite = [message elementForName:@"x" xmlns:@"jabber:x:conference"];
+	NSXMLElement * directInvite = [message elementForName:@"x" xmlns:XMPPConferenceXmlns];
     
     XMPPJID * roomJID = [message from];
 	
