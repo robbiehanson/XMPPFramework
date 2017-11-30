@@ -220,6 +220,19 @@ senderDeviceId:(uint32_t)senderDeviceId
       payload:(nullable NSData*)payload
       message:(XMPPMessage*)message;
 
+
+/** This is called when receiving a MAM or Carbons message */
+- (void)omemo:(OMEMOModule*)omemo
+receivedForwardedKeyData:(NSArray<OMEMOKeyData*>*)keyData
+           iv:(NSData*)iv
+senderDeviceId:(uint32_t)senderDeviceId
+       forJID:(XMPPJID*)forJID
+      payload:(nullable NSData*)payload
+   isIncoming:(BOOL)isIncoming
+      delayed:(nullable NSDate*)delayed
+forwardedMessage:(XMPPMessage*)forwardedMessage
+originalMessage:(XMPPMessage*)originalMessage;
+
 @end
 
 @protocol OMEMOStorageDelegate <NSObject>
