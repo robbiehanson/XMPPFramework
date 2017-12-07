@@ -65,6 +65,12 @@
 		0D44BB721E537110000930E0 /* XMPPStringPrep.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D44BB641E537110000930E0 /* XMPPStringPrep.m */; };
 		0D44BB731E537110000930E0 /* XMPPTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D44BB651E537110000930E0 /* XMPPTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0D44BB741E537110000930E0 /* XMPPTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D44BB661E537110000930E0 /* XMPPTimer.m */; };
+		D91D42431FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91D42421FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift */; };
+		D91D42441FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91D42421FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift */; };
+		D91D42451FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91D42421FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift */; };
+		D91D42481FD9DCAA0064FD27 /* Date+XEP_0082.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91D42471FD9DCAA0064FD27 /* Date+XEP_0082.swift */; };
+		D91D42491FD9DCAA0064FD27 /* Date+XEP_0082.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91D42471FD9DCAA0064FD27 /* Date+XEP_0082.swift */; };
+		D91D424A1FD9DCAA0064FD27 /* Date+XEP_0082.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91D42471FD9DCAA0064FD27 /* Date+XEP_0082.swift */; };
 		D9268BAC1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.h in Headers */ = {isa = PBXBuildFile; fileRef = D9268BAA1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.h */; };
 		D9268BAD1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.h in Headers */ = {isa = PBXBuildFile; fileRef = D9268BAA1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.h */; };
 		D9268BAE1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.h in Headers */ = {isa = PBXBuildFile; fileRef = D9268BAA1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.h */; };
@@ -1500,6 +1506,8 @@
 		0D44BB641E537110000930E0 /* XMPPStringPrep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPStringPrep.m; sourceTree = "<group>"; };
 		0D44BB651E537110000930E0 /* XMPPTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPTimer.h; sourceTree = "<group>"; };
 		0D44BB661E537110000930E0 /* XMPPTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPTimer.m; sourceTree = "<group>"; };
+		D91D42421FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XMPPPresence+XEP_0319.swift"; sourceTree = "<group>"; };
+		D91D42471FD9DCAA0064FD27 /* Date+XEP_0082.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+XEP_0082.swift"; sourceTree = "<group>"; };
 		D9268BAA1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPMessage+XEP_0313.h"; sourceTree = "<group>"; };
 		D9268BAB1F9EB0BB009A37C7 /* XMPPMessage+XEP_0313.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "XMPPMessage+XEP_0313.m"; sourceTree = "<group>"; };
 		D95367D91FB90DA00075502D /* XMPPBookmark.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPBookmark.h; sourceTree = "<group>"; };
@@ -2072,6 +2080,22 @@
 			name = Dependencies;
 			sourceTree = "<group>";
 		};
+		D91D42351FD9DA9B0064FD27 /* XEP-0319 */ = {
+			isa = PBXGroup;
+			children = (
+				D91D42421FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift */,
+			);
+			path = "XEP-0319";
+			sourceTree = "<group>";
+		};
+		D91D42461FD9DC730064FD27 /* XEP-0082 */ = {
+			isa = PBXGroup;
+			children = (
+				D91D42471FD9DCAA0064FD27 /* Date+XEP_0082.swift */,
+			);
+			path = "XEP-0082";
+			sourceTree = "<group>";
+		};
 		D96D6E881F8D9D1B006DEC58 /* XEP-0359 */ = {
 			isa = PBXGroup;
 			children = (
@@ -2106,6 +2130,8 @@
 		D9A7AA731FB97908005183CD /* Swift */ = {
 			isa = PBXGroup;
 			children = (
+				D91D42461FD9DC730064FD27 /* XEP-0082 */,
+				D91D42351FD9DA9B0064FD27 /* XEP-0319 */,
 				D97097BB1FC4DFB6008ED04B /* XEP-0085 */,
 				D9B81AC01FBCD0CA00455683 /* Utilities */,
 				D9B81ABF1FBCD0BC00455683 /* Core */,
@@ -4131,7 +4157,9 @@
 			files = (
 				D97097BD1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */,
 				D9B81AC21FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
+				D91D42431FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift in Sources */,
 				D97097A81FC4DF86008ED04B /* XMPPMessage.swift in Sources */,
+				D91D42481FD9DCAA0064FD27 /* Date+XEP_0082.swift in Sources */,
 				D97BE9EF1FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0161FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BE9FE1FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
@@ -4147,7 +4175,9 @@
 			files = (
 				D97097BE1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */,
 				D9B81AC31FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
+				D91D42441FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift in Sources */,
 				D97097A91FC4DF86008ED04B /* XMPPMessage.swift in Sources */,
+				D91D42491FD9DCAA0064FD27 /* Date+XEP_0082.swift in Sources */,
 				D97BE9F01FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0171FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BE9FF1FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
@@ -4163,7 +4193,9 @@
 			files = (
 				D97097BF1FC4DFD2008ED04B /* XMPPMessage+XEP_0085.swift in Sources */,
 				D9B81AC41FBCD25100455683 /* GCDMulticastDelegate.swift in Sources */,
+				D91D42451FD9DAC90064FD27 /* XMPPPresence+XEP_0319.swift in Sources */,
 				D97097AA1FC4DF86008ED04B /* XMPPMessage.swift in Sources */,
+				D91D424A1FD9DCAA0064FD27 /* Date+XEP_0082.swift in Sources */,
 				D97BE9F11FBBACEA00CFE3BB /* XMPPBookmarksModule.swift in Sources */,
 				D9A7B0181FB980E2005183CD /* XMPPFramework.swift in Sources */,
 				D97BEA001FBBE4E200CFE3BB /* XMPPIQ.swift in Sources */,
