@@ -18,11 +18,12 @@ The minimum deployment target is iOS 8.0 / macOS 10.9 / tvOS 9.0.
 
 There have been a number of changes to the public API of XMPPFramework in an attempt to improve the ergnomics and safety when used with Swift. Most Objective-C projects should require no changes, with a few minor exceptions. Many (simple) changes will be required for pure Swift projects, mostly due to the new nullability annotations. The process is still not complete so please submit issues and help if possible to minimize future breaking changes.
 
-* Swift Support
+* Swift Support in XMPPFrameworkSwift.framework and XMPPFramework/Swift subspec
 * Modern Objective-C Syntax: Nullability annotations and generics.
 * Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
 * XMPPJID `bareJID` is now imported into Swift as `bareJID` instead of `bare` to prevent conflict with `bare` String. Also applies to `domainJID`.
 * XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`. This will be a warning in 4.0 but will be removed in 4.1.
+* The XMPPMessage `chatState` string value is now imported into Swift as a native Swift String enum when using the Swift extensions. A new `chatStateValue` property is provided for accessing the raw String value in both Swift and Obj-C.
 * Readonly properties are used instead of getter methods where applicable. Getter naming overrides for properties have been removed to reflect Apple's approach.
 * The following modules still need an audit. If you use these modules please help out and contribute some time to audit them and submit a pull request, otherwise their API may contain breaking changes in future releases.
 
