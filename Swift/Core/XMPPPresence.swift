@@ -60,6 +60,13 @@ public extension XMPPPresence {
         return ShowType(rawValue: show)
     }
     
+    public var presenceType: PresenceType? {
+        guard let type = self.type else {
+            return nil
+        }
+        return PresenceType(rawValue: type)
+    }
+    
     public convenience init(type: PresenceType? = nil,
                             show: ShowType? = nil,
                             status: String? = nil,
