@@ -607,6 +607,132 @@ enum XMPPRoomState
 	
 }
 
+- (void)handleFetchAdminsListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+    if ([[iq type] isEqualToString:@"result"])
+    {
+        // <iq type='result'
+        //     from='coven@chat.shakespeare.lit'
+        //       id='member3'>
+        //   <query xmlns='http://jabber.org/protocol/muc#admin'>
+        //     <item affiliation='admin' jid='hag66@shakespeare.lit' nick='thirdwitch' role='participant'/>
+        //   </query>
+        // </iq>
+        
+        NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+        NSArray *items = [query elementsForName:@"item"];
+        
+        [multicastDelegate xmppRoom:self didFetchAdminsList:items];
+    }
+    else
+    {
+        [multicastDelegate xmppRoom:self didNotFetchAdminsList:iq];
+    }
+}
+
+- (void)fetchAdminsList
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        XMPPLogTrace();
+        
+        // <iq type='get'
+        //       id='member3'
+        //       to='coven@chat.shakespeare.lit'>
+        //   <query xmlns='http://jabber.org/protocol/muc#admin'>
+        //     <item affiliation='admin'/>
+        //   </query>
+        // </iq>
+        
+        NSString *fetchID = [xmppStream generateUUID];
+        
+        NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+        [item addAttributeWithName:@"affiliation" stringValue:@"admin"];
+        
+        NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+        [query addChild:item];
+        
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
+        
+        [xmppStream sendElement:iq];
+        
+        [responseTracker addID:fetchID
+                        target:self
+                      selector:@selector(handleFetchAdminsListResponse:withInfo:)
+                       timeout:60.0];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+    
+}
+
+- (void)handleFetchOwnersListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
+{
+    if ([[iq type] isEqualToString:@"result"])
+    {
+        // <iq type='result'
+        //     from='coven@chat.shakespeare.lit'
+        //       id='member3'>
+        //   <query xmlns='http://jabber.org/protocol/muc#admin'>
+        //     <item affiliation='owner' jid='hag66@shakespeare.lit' nick='thirdwitch' role='participant'/>
+        //   </query>
+        // </iq>
+        
+        NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPMUCAdminNamespace];
+        NSArray *items = [query elementsForName:@"item"];
+        
+        [multicastDelegate xmppRoom:self didFetchOwnersList:items];
+    }
+    else
+    {
+        [multicastDelegate xmppRoom:self didNotFetchOwnersList:iq];
+    }
+}
+
+- (void)fetchOwnersList
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        XMPPLogTrace();
+        
+        // <iq type='get'
+        //       id='member3'
+        //       to='coven@chat.shakespeare.lit'>
+        //   <query xmlns='http://jabber.org/protocol/muc#admin'>
+        //     <item affiliation='owner'/>
+        //   </query>
+        // </iq>
+        
+        NSString *fetchID = [xmppStream generateUUID];
+        
+        NSXMLElement *item = [NSXMLElement elementWithName:@"item"];
+        [item addAttributeWithName:@"affiliation" stringValue:@"owner"];
+        
+        NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPMUCAdminNamespace];
+        [query addChild:item];
+        
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:roomJID elementID:fetchID child:query];
+        
+        [xmppStream sendElement:iq];
+        
+        [responseTracker addID:fetchID
+                        target:self
+                      selector:@selector(handleFetchOwnersListResponse:withInfo:)
+                       timeout:60.0];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+    
+}
+
 - (void)handleFetchModeratorsListResponse:(XMPPIQ *)iq withInfo:(id <XMPPTrackingInfo>)info
 {
 	if ([[iq type] isEqualToString:@"result"])
