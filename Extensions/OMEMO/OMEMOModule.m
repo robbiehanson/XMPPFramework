@@ -236,12 +236,24 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                toJID:(XMPPJID*)toJID
              payload:(nullable NSData*)payload
            elementId:(nullable NSString*)elementId {
+    XMPPMessage *message = [self messageForKeyData:keyData iv:iv toJID:toJID payload:payload elementId:elementId];
+    if (message) {
+        [xmppStream sendElement:message];
+    }
+}
+
+- (nullable XMPPMessage*) messageForKeyData:(NSArray<OMEMOKeyData*>*)keyData
+                                iv:(NSData*)iv
+                             toJID:(XMPPJID*)toJID
+                           payload:(nullable NSData*)payload
+                         elementId:(nullable NSString*)elementId {
     NSParameterAssert(keyData.count > 0);
     NSParameterAssert(iv.length > 0);
     NSParameterAssert(toJID != nil);
     if (!keyData.count || !iv.length || !toJID) {
-        return;
+        return nil;
     }
+    __block XMPPMessage *message = nil;
     [self performBlock:^{
         OMEMOBundle *myBundle = [self.omemoStorage fetchMyBundle];
         if (!myBundle) {
@@ -249,9 +261,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             return;
         }
         NSString *eid = [self fixElementId:elementId];
-        XMPPMessage *message = [XMPPMessage omemo_messageWithKeyData:keyData iv:iv senderDeviceId:myBundle.deviceId toJID:toJID payload:payload elementId:eid xmlNamespace:self.xmlNamespace];
-        [xmppStream sendElement:message];
+        message = [XMPPMessage omemo_messageWithKeyData:keyData iv:iv senderDeviceId:myBundle.deviceId toJID:toJID payload:payload elementId:eid xmlNamespace:self.xmlNamespace];
     }];
+    return message;
 }
 
 #pragma mark Private Methods

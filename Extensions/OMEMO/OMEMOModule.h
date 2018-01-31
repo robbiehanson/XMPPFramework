@@ -128,6 +128,13 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
              payload:(nullable NSData*)payload
            elementId:(nullable NSString*)elementId;
 
+/** Returns an unsent OMEMO message to be modified or sent elsewhere. Beware this may block! */
+- (nullable XMPPMessage*) messageForKeyData:(NSArray<OMEMOKeyData*>*)keyData
+                                iv:(NSData*)iv
+                             toJID:(XMPPJID*)toJID
+                           payload:(nullable NSData*)payload
+                         elementId:(nullable NSString*)elementId;
+
 #pragma mark Namespace methods
 
 + (NSString*) xmlnsOMEMO:(OMEMOModuleNamespace)ns;
