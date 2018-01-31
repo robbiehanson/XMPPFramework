@@ -47,7 +47,7 @@ Pod::Spec.new do |s|
     ss.osx.deployment_target      = '10.10'
     ss.source_files = 'Swift/**/*.swift'
     ss.dependency 'XMPPFramework/default'
-    ss.dependency 'CocoaLumberjack/Swift', '~> 3.3.0'
+    ss.dependency 'CocoaLumberjack/Swift'
   end
 
 end
