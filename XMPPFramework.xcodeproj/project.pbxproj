@@ -4863,7 +4863,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwift;
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -4889,7 +4889,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwift;
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -4914,7 +4914,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwift;
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -4940,7 +4940,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwift;
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -4966,7 +4966,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwift;
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
@@ -4993,7 +4993,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = org.robbiehanson.XMPPFrameworkSwift;
 				PRODUCT_NAME = "$(PROJECT_NAME)Swift";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
