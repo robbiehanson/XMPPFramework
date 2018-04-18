@@ -452,9 +452,11 @@ static NSMutableSet *databaseFileNames;
     // Previously the Peristent Story Directory was based on the Bundle Display Name but this can be Localized
     // If Peristent Story Directory already exists we will use that
     NSString *bundleDisplayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-    NSString *legacyPersistentStoreDirectory  = [basePath stringByAppendingPathComponent:bundleDisplayName];
-    if ([fileManager fileExistsAtPath:legacyPersistentStoreDirectory]) {
-        return legacyPersistentStoreDirectory;
+    if (bundleDisplayName) {
+        NSString *legacyPersistentStoreDirectory  = [basePath stringByAppendingPathComponent:bundleDisplayName];
+        if ([fileManager fileExistsAtPath:legacyPersistentStoreDirectory]) {
+            return legacyPersistentStoreDirectory;
+        }
     }
     
     // Peristent Story Directory now uses the Bundle Identifier
