@@ -1,41 +1,48 @@
 PODS:
-  - CocoaAsyncSocket (7.6.0)
-  - CocoaLumberjack (3.3.0):
-    - CocoaLumberjack/Default (= 3.3.0)
-    - CocoaLumberjack/Extensions (= 3.3.0)
-  - CocoaLumberjack/Default (3.3.0)
-  - CocoaLumberjack/Extensions (3.3.0):
+  - CocoaAsyncSocket (7.6.3)
+  - CocoaLumberjack (3.4.2):
+    - CocoaLumberjack/Default (= 3.4.2)
+    - CocoaLumberjack/Extensions (= 3.4.2)
+  - CocoaLumberjack/Default (3.4.2)
+  - CocoaLumberjack/Extensions (3.4.2):
     - CocoaLumberjack/Default
-  - CocoaLumberjack/Swift (3.3.0):
+  - CocoaLumberjack/Swift (3.4.2):
     - CocoaLumberjack/Default
-  - KissXML (5.2.0)
-  - libidn (1.33)
+  - KissXML (5.2.3)
+  - libidn (1.35)
   - XMPPFramework (4.0):
     - XMPPFramework/default (= 4.0)
   - XMPPFramework/default (4.0):
-    - CocoaAsyncSocket (~> 7.6.0)
+    - CocoaAsyncSocket
     - CocoaLumberjack
-    - KissXML (~> 5.2.0)
-    - libidn (~> 1.33.0)
+    - KissXML
+    - libidn
   - XMPPFramework/Swift (4.0):
-    - CocoaLumberjack/Swift (~> 3.3.0)
+    - CocoaLumberjack/Swift
     - XMPPFramework/default
 
 DEPENDENCIES:
   - XMPPFramework (from `../../`)
   - XMPPFramework/Swift (from `../../`)
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - CocoaAsyncSocket
+    - CocoaLumberjack
+    - KissXML
+    - libidn
+
 EXTERNAL SOURCES:
   XMPPFramework:
-    :path: ../../
+    :path: "../../"
 
 SPEC CHECKSUMS:
-  CocoaAsyncSocket: b9d5589f07baf9de8f34cc25abd4fcba28f13805
-  CocoaLumberjack: 3c8c74683302f9012bb168e1c4b7ae3c0b558431
-  KissXML: 1c1eeeb6b94e4522cd2f2373e5d0d03c9227738f
-  libidn: 90fc1a62b60288dcf543f13f4ebca913f17d829f
-  XMPPFramework: 36b1a94ab8fb4292b6cad64ddfa8b452e58d6523
+  CocoaAsyncSocket: eafaa68a7e0ec99ead0a7b35015e0bf25d2c8987
+  CocoaLumberjack: db7cc9e464771f12054c22ff6947c5a58d43a0fd
+  KissXML: 09f88ff8161fd058d67b70740b8b516687b52823
+  libidn: e4576a956b797c584c77aaedfc6e3dd639b61bdc
+  XMPPFramework: d853f01ec7a6ca72fdb45682ccbaf5ed6fdae9a3
 
 PODFILE CHECKSUM: d06d8aad56c091bf567d7a678dfe9985eec650d7
 
-COCOAPODS: 1.3.1
+COCOAPODS: 1.5.3
