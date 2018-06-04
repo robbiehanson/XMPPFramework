@@ -51,27 +51,30 @@ See the Contributing section below for more details.
 
 #### CocoaPods
 
-The easiest way to install XMPPFramework is using CocoaPods. Remember to add to the top of your `Podfile` the `use_frameworks!` line (even if you are not using swift):
+The easiest way to install XMPPFramework is using CocoaPods.
 
-This will install the whole framework with all the available extensions:
+To install only the Objective-C portion of the framework:
 
 ```ruby
+pod 'XMPPFramework'
+```
+
+To use the new Swift additions:
+
+
+```
 use_frameworks!
-# 3.7 Stable Release
-pod 'XMPPFramework', '~> 3.7.0'
-# 4.0 Preview / Master Branch
-pod 'XMPPFramework', :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master'
-
-# XMPPFramework with Swift extensions
-pod 'XMPPFramework/Swift', :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master'
-
+pod 'XMPPFramework/Swift'
 ```
 
 After `pod install` open the `.xcworkspace` and import:
 
+```objc
+@import XMPPFramework;   // Objective-C
 ```
-import XMPPFramework      // swift
-@import XMPPFramework;   //objective-c
+
+```swift
+import XMPPFramework     // Swift
 ```
 
 #### Carthage
@@ -79,12 +82,7 @@ import XMPPFramework      // swift
 To integrate XMPPFramework into your Xcode project using Carthage, specify it in your `Cartfile`:
 
 ```
-# ⚠️ Carthage support is currently experimental ⚠️
-# For now, use the master branch until a Carthage-compatible
-# tagged release is available.
-
-github "robbiehanson/XMPPFramework" "master"
-
+github "robbiehanson/XMPPFramework"
 ```
 
 Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project. If you'd like to include new features written in Swift, drag `XMPPFrameworkSwift.framework` into your project as well. You'll need to manually `import XMPPFrameworkSwift` in your headers.
