@@ -541,7 +541,27 @@
 			            (unsigned long)[prev_unackedByServer count]);
 			
 			diff = (uint32_t)[prev_unackedByServer count];
-		}
+        }
+        else if (diff < [prev_unackedByServer count])
+        {
+            //Resend All unacked stanzaIds by Server
+            NSUInteger offset = [prev_unackedByServer count] - diff;
+            
+            NSMutableArray *resendIds = [NSMutableArray array];
+            
+            for (NSUInteger i = offset; i > 0; i--)
+            {
+                NSUInteger index = [prev_unackedByServer count] - i;
+                XMPPStreamManagementOutgoingStanza *outgoingStanza = prev_unackedByServer[index];
+                
+                if (outgoingStanza.stanzaId) {
+                    [resendIds addObject:outgoingStanza.stanzaId];
+                }
+            }
+            [multicastDelegate xmppStreamManagement:self shouldResendStanzaIds:resendIds];
+            
+        }
+
 		
 		NSMutableArray *stanzaIds = [NSMutableArray arrayWithCapacity:(NSUInteger)diff];
 		
