@@ -9,6 +9,10 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+static void * const GCDMulticastDelegateInvocationContextKey = (void *)&GCDMulticastDelegateInvocationContextKey;
+
+static void GCDMulticastDelegateInvocationContextLeave(void *contextPtr);
+
 /**
  * How does this class work?
  * 
@@ -73,6 +77,12 @@
 }
 
 - (id)initFromDelegateNodes:(NSMutableArray *)inDelegateNodes;
+
+@end
+
+@interface GCDMulticastDelegateInvocationContext ()
+
+- (dispatch_queue_t)transferContextToTargetQueue:(dispatch_queue_t)targetQueue;
 
 @end
 
@@ -227,7 +237,22 @@
 
 - (GCDMulticastDelegateEnumerator *)delegateEnumerator
 {
-	return [[GCDMulticastDelegateEnumerator alloc] initFromDelegateNodes:delegateNodes];
+    NSMutableArray *actualDelegateNodes;
+    
+    GCDMulticastDelegateInvocationContext *currentInvocationContext = [GCDMulticastDelegateInvocationContext currentContext];
+    if (currentInvocationContext) {
+        actualDelegateNodes = [[NSMutableArray alloc] init];
+        for (GCDMulticastDelegateNode *node in delegateNodes) {
+            dispatch_queue_t contextTransferQueue = [currentInvocationContext transferContextToTargetQueue:node.delegateQueue];
+            GCDMulticastDelegateNode *contextTransferNode = [[GCDMulticastDelegateNode alloc] initWithDelegate:node.delegate
+                                                                                                 delegateQueue:contextTransferQueue];
+            [actualDelegateNodes addObject:contextTransferNode];
+        }
+    } else {
+        actualDelegateNodes = delegateNodes;
+    }
+    
+	return [[GCDMulticastDelegateEnumerator alloc] initFromDelegateNodes:actualDelegateNodes];
 }
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
@@ -276,7 +301,10 @@
 			
 			NSInvocation *dupInvocation = [self duplicateInvocation:origInvocation];
 			
-			dispatch_async(node.delegateQueue, ^{ @autoreleasepool {
+            GCDMulticastDelegateInvocationContext *currentContext = [GCDMulticastDelegateInvocationContext currentContext];
+            dispatch_queue_t invocationQueue = [currentContext transferContextToTargetQueue:node.delegateQueue] ?: node.delegateQueue;
+            
+			dispatch_async(invocationQueue, ^{ @autoreleasepool {
 				
 				[dupInvocation invokeWithTarget:nodeDelegate];
 				
@@ -652,3 +680,48 @@ static BOOL SupportsWeakReferences(id delegate)
 }
 
 @end
+
+@implementation GCDMulticastDelegateInvocationContext
+
++ (instancetype)currentContext
+{
+    void *contextPtr = dispatch_get_specific(GCDMulticastDelegateInvocationContextKey);
+    return contextPtr ? CFBridgingRelease(CFRetain(contextPtr)) : nil;
+}
+
+- (instancetype)initWithValue:(id)value
+{
+    self = [super init];
+    if (self) {
+        _continuityGroup = dispatch_group_create();
+        _value = value;
+    }
+    return self;
+}
+
+- (void)becomeCurrentOnQueue:(dispatch_queue_t)queue forActionWithBlock:(dispatch_block_t)block
+{
+    dispatch_async([self transferContextToTargetQueue:queue], block);
+}
+
+- (dispatch_queue_t)transferContextToTargetQueue:(dispatch_queue_t)targetQueue
+{
+    dispatch_group_enter(self.continuityGroup);
+    
+	dispatch_queue_t contextTransferQueue = dispatch_queue_create("GCDMulticastDelegateInvocationContext.contextTransferQueue", NULL);
+	dispatch_set_target_queue(contextTransferQueue, targetQueue);
+    dispatch_queue_set_specific(contextTransferQueue,
+                                GCDMulticastDelegateInvocationContextKey,
+                                (void *)CFBridgingRetain(self),
+                                GCDMulticastDelegateInvocationContextLeave);
+    
+    return contextTransferQueue;
+}
+
+@end
+
+static void GCDMulticastDelegateInvocationContextLeave(void *contextPtr)
+{
+    GCDMulticastDelegateInvocationContext *context = CFBridgingRelease(contextPtr);
+    dispatch_group_leave(context.continuityGroup);
+}
