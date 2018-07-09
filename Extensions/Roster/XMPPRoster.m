@@ -101,7 +101,7 @@ enum XMPPRosterFlags
 				
 				if ([module isKindOfClass:[XMPPMUC class]])
 				{
-					[mucModules add:(__bridge void *)module];
+					[self->mucModules add:(__bridge void *)module];
 				}
 			}];
 		}
@@ -119,8 +119,8 @@ enum XMPPRosterFlags
     
     dispatch_block_t block = ^{ @autoreleasepool {
         
-		[xmppIDTracker removeAllIDs];
-		xmppIDTracker = nil;
+		[self->xmppIDTracker removeAllIDs];
+		self->xmppIDTracker = nil;
         
 	}};
     
@@ -167,7 +167,7 @@ enum XMPPRosterFlags
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (config & kAutoFetchRoster) ? YES : NO;
+		result = (self->config & kAutoFetchRoster) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -183,9 +183,9 @@ enum XMPPRosterFlags
 	dispatch_block_t block = ^{
 		
 		if (flag)
-			config |= kAutoFetchRoster;
+			self->config |= kAutoFetchRoster;
 		else
-			config &= ~kAutoFetchRoster;
+			self->config &= ~kAutoFetchRoster;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -199,7 +199,7 @@ enum XMPPRosterFlags
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (config & kAutoClearAllUsersAndResources) ? YES : NO;
+		result = (self->config & kAutoClearAllUsersAndResources) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -215,9 +215,9 @@ enum XMPPRosterFlags
 	dispatch_block_t block = ^{
 		
 		if (flag)
-			config |= kAutoClearAllUsersAndResources;
+			self->config |= kAutoClearAllUsersAndResources;
 		else
-			config &= ~kAutoClearAllUsersAndResources;
+			self->config &= ~kAutoClearAllUsersAndResources;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -231,7 +231,7 @@ enum XMPPRosterFlags
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (config & kAutoAcceptKnownPresenceSubscriptionRequests) ? YES : NO;
+		result = (self->config & kAutoAcceptKnownPresenceSubscriptionRequests) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -247,9 +247,9 @@ enum XMPPRosterFlags
 	dispatch_block_t block = ^{
 		
 		if (flag)
-			config |= kAutoAcceptKnownPresenceSubscriptionRequests;
+			self->config |= kAutoAcceptKnownPresenceSubscriptionRequests;
 		else
-			config &= ~kAutoAcceptKnownPresenceSubscriptionRequests;
+			self->config &= ~kAutoAcceptKnownPresenceSubscriptionRequests;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -263,7 +263,7 @@ enum XMPPRosterFlags
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (config & kRosterlessOperation) ? YES : NO;
+		result = (self->config & kRosterlessOperation) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -279,9 +279,9 @@ enum XMPPRosterFlags
 	dispatch_block_t block = ^{
 		
 		if (flag)
-			config |= kRosterlessOperation;
+			self->config |= kRosterlessOperation;
 		else
-			config &= ~kRosterlessOperation;
+			self->config &= ~kRosterlessOperation;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -296,7 +296,7 @@ enum XMPPRosterFlags
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (flags & kRequestedRoster) ? YES : NO;
+		result = (self->flags & kRequestedRoster) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -312,7 +312,7 @@ enum XMPPRosterFlags
     __block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (flags & kPopulatingRoster) ? YES : NO;
+		result = (self->flags & kPopulatingRoster) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -328,7 +328,7 @@ enum XMPPRosterFlags
     __block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (flags & kHasRoster) ? YES : NO;
+		result = (self->flags & kHasRoster) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -703,15 +703,15 @@ enum XMPPRosterFlags
         if (version)
             [query addAttributeWithName:@"ver" stringValue:version];
 		
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[self->xmppStream generateUUID]];
 		[iq addChild:query];
         
-        [xmppIDTracker addElement:iq
+		[self->xmppIDTracker addElement:iq
                            target:self
                          selector:@selector(handleFetchRosterQueryIQ:withInfo:)
                           timeout:60];
 		
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 		
 		[self _setRequestedRoster:YES];
 	}};
@@ -737,10 +737,10 @@ enum XMPPRosterFlags
 		
 		if (!hasRoster)
 		{
-            [xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
-            [self _setPopulatingRoster:YES];
-            [multicastDelegate xmppRosterDidBeginPopulating:self withVersion:version];
-			[xmppRosterStorage beginRosterPopulationForXMPPStream:xmppStream withVersion:version];
+			[self->xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:self->xmppStream];
+			[self _setPopulatingRoster:YES];
+			[self->multicastDelegate xmppRosterDidBeginPopulating:self withVersion:version];
+			[self->xmppRosterStorage beginRosterPopulationForXMPPStream:self->xmppStream withVersion:version];
 		}
 		
 		NSArray *items = [query elementsForName:@"item"];
@@ -751,18 +751,18 @@ enum XMPPRosterFlags
 			// We should have our roster now
 			
 			[self _setHasRoster:YES];
-            [self _setPopulatingRoster:NO];
-            [multicastDelegate xmppRosterDidEndPopulating:self];
-			[xmppRosterStorage endRosterPopulationForXMPPStream:xmppStream];
+			[self _setPopulatingRoster:NO];
+			[self->multicastDelegate xmppRosterDidEndPopulating:self];
+			[self->xmppRosterStorage endRosterPopulationForXMPPStream:self->xmppStream];
 			
 			// Process any premature presence elements we received.
 			
-			for (XMPPPresence *presence in earlyPresenceElements)
+			for (XMPPPresence *presence in self->earlyPresenceElements)
 			{
-				[self xmppStream:xmppStream didReceivePresence:presence];
+				[self xmppStream:self->xmppStream didReceivePresence:presence];
 			}
             
-			[earlyPresenceElements removeAllObjects];
+			[self->earlyPresenceElements removeAllObjects];
 		}
         
     }};

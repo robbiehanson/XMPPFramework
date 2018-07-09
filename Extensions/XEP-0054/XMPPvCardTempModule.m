@@ -85,8 +85,8 @@
     
     dispatch_block_t block = ^{ @autoreleasepool {
 		
-		[_myvCardTracker removeAllIDs];
-		_myvCardTracker = nil;
+		[self->_myvCardTracker removeAllIDs];
+		self->_myvCardTracker = nil;
 		
 	}};
 	
@@ -121,10 +121,10 @@
 		if (!ignoreStorage)
 		{
 			// Try loading from storage
-			vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
+			vCardTemp = [self->_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:self->xmppStream];
 		}
 		
-		if (vCardTemp == nil && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
+		if (vCardTemp == nil && [self->_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:self->xmppStream])
 		{
 			[self _fetchvCardTempForJID:jid];
 		}
@@ -143,9 +143,9 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		XMPPvCardTemp *vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
+		XMPPvCardTemp *vCardTemp = [self->_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:self->xmppStream];
 		
-		if (vCardTemp == nil && shouldFetch && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
+		if (vCardTemp == nil && shouldFetch && [self->_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:self->xmppStream])
 		{
 			[self _fetchvCardTempForJID:jid];
 		}
@@ -173,15 +173,15 @@
 
         XMPPvCardTemp *newvCardTemp = [vCardTemp copy];
         
-        XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:[xmppStream generateUUID] child:newvCardTemp];
-        [xmppStream sendElement:iq];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:nil elementID:[self->xmppStream generateUUID] child:newvCardTemp];
+		[self->xmppStream sendElement:iq];
         
-        [_myvCardTracker addElement:iq
+		[self->_myvCardTracker addElement:iq
                              target:self
                            selector:@selector(handleMyvcard:withInfo:)
                             timeout:600];
         
-        [self _updatevCardTemp:newvCardTemp forJID:[xmppStream myJID]];
+		[self _updatevCardTemp:newvCardTemp forJID:[self->xmppStream myJID]];
         
     }};
 	
@@ -205,9 +205,9 @@
 		
 		XMPPLogVerbose(@"%@: %s %@", THIS_FILE, __PRETTY_FUNCTION__, [jid bare]);
 		
-		[_xmppvCardTempModuleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:xmppStream];
+		[self->_xmppvCardTempModuleStorage setvCardTemp:vCardTemp forJID:jid xmppStream:self->xmppStream];
 		
-		[(id <XMPPvCardTempModuleDelegate>)multicastDelegate xmppvCardTempModule:self
+		[(id <XMPPvCardTempModuleDelegate>)self->multicastDelegate xmppvCardTempModule:self
 		                                                     didReceivevCardTemp:vCardTemp
 		                                                                  forJID:jid];
 	}};

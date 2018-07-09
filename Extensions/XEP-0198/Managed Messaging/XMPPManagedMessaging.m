@@ -85,7 +85,7 @@ static NSString * const XMPPManagedMessagingURLScheme = @"xmppmanagedmessage";
     }];
     
     dispatch_group_notify(stanzaAcknowledgementGroup, self.moduleQueue, ^{
-        [multicastDelegate xmppManagedMessagingDidFinishProcessingPreviousStreamConfirmations:self];
+        [self->multicastDelegate xmppManagedMessagingDidFinishProcessingPreviousStreamConfirmations:self];
     });
 }
 

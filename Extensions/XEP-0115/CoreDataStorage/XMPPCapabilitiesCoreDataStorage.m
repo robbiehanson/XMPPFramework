@@ -476,7 +476,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
 		[fetchRequest setPredicate:predicate];
-		[fetchRequest setFetchBatchSize:saveThreshold];
+		[fetchRequest setFetchBatchSize:self->saveThreshold];
 		
 		NSArray *results = [[self managedObjectContext] executeFetchRequest:fetchRequest error:nil];
 		
@@ -486,7 +486,7 @@ static XMPPCapabilitiesCoreDataStorage *sharedInstance;
 		{
 			resource.caps = caps;
 			
-			if (++unsavedCount >= saveThreshold)
+			if (++unsavedCount >= self->saveThreshold)
 			{
 				[self save];
 			}

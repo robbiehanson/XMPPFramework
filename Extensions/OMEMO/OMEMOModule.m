@@ -62,8 +62,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if ([super activate:aXmppStream])
     {
         [self performBlock:^{
-            [xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
-            _tracker = [[XMPPIDTracker alloc] initWithStream:aXmppStream dispatchQueue:moduleQueue];
+            [self->xmppStream autoAddDelegate:self delegateQueue:self->moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+            self->_tracker = [[XMPPIDTracker alloc] initWithStream:aXmppStream dispatchQueue:self->moduleQueue];
         }];
         return YES;
     }
@@ -73,9 +73,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void) deactivate {
     [self performBlock:^{
-        [_tracker removeAllIDs];
-        _tracker = nil;
-        [xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+        [self->_tracker removeAllIDs];
+        self->_tracker = nil;
+        [self->xmppStream removeAutoDelegate:self delegateQueue:self->moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
     }];
     [super deactivate];
 }
@@ -100,7 +100,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             }
             [weakMulticast omemo:strongSelf publishedDeviceIds:deviceIds responseIq:responseIq outgoingIq:iq];
         } timeout:30];
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
     }];
 }
 
@@ -115,7 +115,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         if ((!responseIq || [responseIq isErrorIQ]) && !isOurJID) {
             // timeout
             XMPPLogWarn(@"fetchDeviceIdsForJID error: %@ %@", info.element, responseIq);
-            [multicastDelegate omemo:self failedToFetchDeviceIdsForJID:jid errorIq:responseIq outgoingIq:(XMPPIQ*)info.element];
+            [self->multicastDelegate omemo:self failedToFetchDeviceIdsForJID:jid errorIq:responseIq outgoingIq:(XMPPIQ*)info.element];
             return;
         }
         
@@ -131,7 +131,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             // Should always be the account bare jid.
             bareJID = [[[info element] to] bareJID];
         }
-        [multicastDelegate omemo:self deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
+        [self->multicastDelegate omemo:self deviceListUpdate:devices fromJID:bareJID incomingElement:responseIq];
         [self processIncomingDeviceIds:devices fromJID:bareJID];
     }];
 }
@@ -143,7 +143,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         NSString *eid = [self fixElementId:elementId];
         XMPPIQ *iq = [XMPPIQ omemo_iqFetchDeviceIdsForJID:jid elementId:eid xmlNamespace:self.xmlNamespace];
         [self.tracker addElement:iq block:completion timeout:30];
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
     }];
 }
 
@@ -167,7 +167,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             }
             [weakMulticast omemo:strongSelf publishedBundle:bundle responseIq:responseIq outgoingIq:iq];
         } timeout:30];
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
     }];
 }
 
@@ -199,7 +199,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                 [weakMulticast omemo:strongSelf failedToFetchBundleForDeviceId:deviceId fromJID:jid errorIq:responseIq outgoingIq:iq];
             }
         } timeout:30];
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
     }];
 }
 

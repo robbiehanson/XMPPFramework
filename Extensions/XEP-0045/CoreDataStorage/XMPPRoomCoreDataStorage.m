@@ -101,7 +101,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
-		result = messageEntityName;
+		result = self->messageEntityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -115,7 +115,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 - (void)setMessageEntityName:(NSString *)newMessageEntityName
 {
 	dispatch_block_t block = ^{
-		messageEntityName = newMessageEntityName;
+		self->messageEntityName = newMessageEntityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -129,7 +129,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
-		result = occupantEntityName;
+		result = self->occupantEntityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -143,7 +143,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 - (void)setOccupantEntityName:(NSString *)newOccupantEntityName
 {
 	dispatch_block_t block = ^{
-		occupantEntityName = newOccupantEntityName;
+		self->occupantEntityName = newOccupantEntityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -157,7 +157,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	__block NSTimeInterval result = 0;
 	
 	dispatch_block_t block = ^{
-		result = maxMessageAge;
+		result = self->maxMessageAge;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -172,10 +172,10 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSTimeInterval oldMaxMessageAge = maxMessageAge;
+		NSTimeInterval oldMaxMessageAge = self->maxMessageAge;
 		NSTimeInterval newMaxMessageAge = age;
 		
-		maxMessageAge = age;
+		self->maxMessageAge = age;
 		
 		// There are several cases we need to handle here.
 		// 
@@ -221,7 +221,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		{
 			[self performDelete];
 			
-			if (deleteTimer)
+			if (self->deleteTimer)
 				[self updateDeleteTimer];
 			else
 				[self createAndStartDeleteTimer];
@@ -239,7 +239,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	__block NSTimeInterval result = 0;
 	
 	dispatch_block_t block = ^{
-		result = deleteInterval;
+		result = self->deleteInterval;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -254,7 +254,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		deleteInterval = interval;
+		self->deleteInterval = interval;
 		
 		// There are several cases we need to handle here.
 		// 
@@ -269,9 +269,9 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 		// 4. If the deleteInterval decreased, then we need to reset the timer so that it fires at an earlier date.
 		//    (Plus we might need to do an immediate delete.)
 		
-		if (deleteInterval > 0.0)
+		if (self->deleteInterval > 0.0)
 		{
-			if (deleteTimer == NULL)
+			if (self->deleteTimer == NULL)
 			{
 				// Handles #2
 				// 
@@ -291,7 +291,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 				[self updateDeleteTimer];
 			}
 		}
-		else if (deleteTimer)
+		else if (self->deleteTimer)
 		{
 			// Handles #1
 			
@@ -309,7 +309,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		[pausedMessageDeletion addObject:[roomJID bareJID]];
+		[self->pausedMessageDeletion addObject:[roomJID bareJID]];
 	}};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -322,7 +322,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		[pausedMessageDeletion removeObject:[roomJID bareJID]];
+		[self->pausedMessageDeletion removeObject:[roomJID bareJID]];
 		[self performDelete];
 	}};
 	

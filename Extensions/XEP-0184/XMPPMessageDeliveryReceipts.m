@@ -64,7 +64,7 @@
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = autoSendMessageDeliveryRequests;
+		result = self->autoSendMessageDeliveryRequests;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -78,7 +78,7 @@
 - (void)setAutoSendMessageDeliveryRequests:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		autoSendMessageDeliveryRequests = flag;
+		self->autoSendMessageDeliveryRequests = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -92,7 +92,7 @@
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = autoSendMessageDeliveryReceipts;
+		result = self->autoSendMessageDeliveryReceipts;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -106,7 +106,7 @@
 - (void)setAutoSendMessageDeliveryReceipts:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		autoSendMessageDeliveryReceipts = flag;
+		self->autoSendMessageDeliveryReceipts = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))

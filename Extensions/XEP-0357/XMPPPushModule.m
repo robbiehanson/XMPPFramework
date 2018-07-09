@@ -81,7 +81,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             [weakMulticast pushModule:strongSelf didRegisterWithResponseIq:responseIq outgoingIq:enableElement];
         } timeout:30];
         [self setRegistrationStatus:XMPPPushStatusRegistering forServerJID:options.serverJID];
-        [xmppStream sendElement:enableElement];
+        [self->xmppStream sendElement:enableElement];
     }];
 }
 
@@ -107,7 +107,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             [strongSelf setRegistrationStatus:XMPPPushStatusNotRegistered forServerJID:serverJID];
             [weakMulticast pushModule:strongSelf disabledPushForServerJID:serverJID node:node responseIq:responseIq outgoingIq:disableElement];
         } timeout:30];
-        [xmppStream sendElement:disableElement];
+        [self->xmppStream sendElement:disableElement];
     }];
 }
 
@@ -118,12 +118,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if ([super activate:aXmppStream])
     {
         [self performBlock:^{
-            _registrationStatus = [NSMutableDictionary dictionary];
-            _capabilitiesModules = [NSMutableSet set];
-            [xmppStream autoAddDelegate:self delegateQueue:moduleQueue toModulesOfClass:[XMPPCapabilities class]];
-            _tracker = [[XMPPIDTracker alloc] initWithStream:aXmppStream dispatchQueue:moduleQueue];
+            self->_registrationStatus = [NSMutableDictionary dictionary];
+            self->_capabilitiesModules = [NSMutableSet set];
+            [self->xmppStream autoAddDelegate:self delegateQueue:self->moduleQueue toModulesOfClass:[XMPPCapabilities class]];
+            self->_tracker = [[XMPPIDTracker alloc] initWithStream:aXmppStream dispatchQueue:self->moduleQueue];
             
-            [xmppStream enumerateModulesWithBlock:^(XMPPModule *module, NSUInteger idx, BOOL *stop) {
+            [self->xmppStream enumerateModulesWithBlock:^(XMPPModule *module, NSUInteger idx, BOOL *stop) {
                 if ([module isKindOfClass:[XMPPCapabilities class]]) {
                     [self.capabilitiesModules addObject:(XMPPCapabilities*)module];
                 }
@@ -137,11 +137,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void) deactivate {
     [self performBlock:^{
-        [_tracker removeAllIDs];
-        _tracker = nil;
-        [xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
-        _capabilitiesModules = nil;
-        _registrationStatus = nil;
+        [self->_tracker removeAllIDs];
+        self->_tracker = nil;
+        [self->xmppStream removeAutoDelegate:self delegateQueue:self->moduleQueue fromModulesOfClass:[XMPPCapabilities class]];
+        self->_capabilitiesModules = nil;
+        self->_registrationStatus = nil;
     }];
     [super deactivate];
 }
@@ -150,20 +150,20 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void) refresh {
     [self performBlockAsync:^{
-        if (xmppStream.state != STATE_XMPP_CONNECTED) {
+        if (self->xmppStream.state != STATE_XMPP_CONNECTED) {
             XMPPLogError(@"XMPPPushModule: refresh error - not connected. %@", self);
             return;
         }
         [self.registrationStatus removeAllObjects];
-        XMPPJID *jid = xmppStream.myJID.bareJID;
+        XMPPJID *jid = self->xmppStream.myJID.bareJID;
         if (!jid) { return; }
         __block BOOL supportsPush = NO;
         __block NSXMLElement *capabilities = nil;
         [self.capabilitiesModules enumerateObjectsUsingBlock:^(XMPPCapabilities * _Nonnull capsModule, BOOL * _Nonnull stop) {
             id <XMPPCapabilitiesStorage> storage = capsModule.xmppCapabilitiesStorage;
-            BOOL fetched = [storage areCapabilitiesKnownForJID:jid xmppStream:xmppStream];
+            BOOL fetched = [storage areCapabilitiesKnownForJID:jid xmppStream:self->xmppStream];
             if (fetched) {
-                capabilities = [storage capabilitiesForJID:jid xmppStream:xmppStream];
+                capabilities = [storage capabilitiesForJID:jid xmppStream:self->xmppStream];
                 if (capabilities) {
                     supportsPush = [self supportsPushFromCaps:capabilities];
                     *stop = YES;
@@ -173,7 +173,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             }
         }];
         if (supportsPush) {
-            [multicastDelegate pushModule:self readyWithCapabilities:capabilities jid:jid];
+            [self->multicastDelegate pushModule:self readyWithCapabilities:capabilities jid:jid];
         }
     }];
 }

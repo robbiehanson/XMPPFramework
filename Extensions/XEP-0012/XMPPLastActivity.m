@@ -68,8 +68,8 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 #endif
     
 	dispatch_block_t block = ^{ @autoreleasepool {
-		[_queryTracker removeAllIDs];
-		_queryTracker = nil;
+		[self->_queryTracker removeAllIDs];
+		self->_queryTracker = nil;
 	}};
     
 	if (dispatch_get_specific(moduleQueueTag))
@@ -91,7 +91,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 		__block BOOL result;
         
 		dispatch_sync(moduleQueue, ^{
-			result = _respondsToQueries;
+			result = self->_respondsToQueries;
 		});
         
 		return result;
@@ -101,14 +101,14 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 - (void)setRespondsToQueries:(BOOL)respondsToQueries
 {
 	dispatch_block_t block = ^{
-		if (_respondsToQueries != respondsToQueries)
+		if (self->_respondsToQueries != respondsToQueries)
 		{
-			_respondsToQueries = respondsToQueries;
+			self->_respondsToQueries = respondsToQueries;
             
 #ifdef _XMPP_CAPABILITIES_H
 			@autoreleasepool {
 				// Capabilities may have changed, need to notify others
-				[xmppStream resendMyPresence];
+				[self->xmppStream resendMyPresence];
 			}
 #endif
 		}
@@ -132,7 +132,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
     
 	dispatch_async(moduleQueue, ^{
 		__weak __typeof__(self) self_weak_ = self;
-		[_queryTracker addID:queryID block:^(XMPPIQ *iq, id<XMPPTrackingInfo> info) {
+		[self->_queryTracker addID:queryID block:^(XMPPIQ *iq, id<XMPPTrackingInfo> info) {
 			__strong __typeof__(self) self = self_weak_;
 			if (iq)
 			{
@@ -144,7 +144,7 @@ static const NSTimeInterval XMPPLastActivityDefaultTimeout = 30.0;
 			}
 		} timeout:timeout];
         
-		[xmppStream sendElement:query];
+		[self->xmppStream sendElement:query];
 	});
     
 	return queryID;

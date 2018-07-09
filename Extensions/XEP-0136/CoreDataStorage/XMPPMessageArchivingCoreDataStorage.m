@@ -278,7 +278,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
-		result = messageEntityName;
+		result = self->messageEntityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -292,7 +292,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 - (void)setMessageEntityName:(NSString *)entityName
 {
 	dispatch_block_t block = ^{
-		messageEntityName = entityName;
+		self->messageEntityName = entityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -306,7 +306,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
-		result = contactEntityName;
+		result = self->contactEntityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -320,7 +320,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 - (void)setContactEntityName:(NSString *)entityName
 {
 	dispatch_block_t block = ^{
-		contactEntityName = entityName;
+		self->contactEntityName = entityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -347,32 +347,32 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
 - (NSArray<NSString *> *)relevantContentXPaths
 {
-    __block NSArray *result;
-    
-    dispatch_block_t block = ^{
-        result = relevantContentXPaths;
-    };
-    
-    if (dispatch_get_specific(storageQueueTag))
-        block();
-    else
-        dispatch_sync(storageQueue, block);
-    
-    return result;
+	__block NSArray *result;
+
+	dispatch_block_t block = ^{
+		result = self->relevantContentXPaths;
+	};
+
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_sync(storageQueue, block);
+
+	return result;
 }
 
 - (void)setRelevantContentXPaths:(NSArray<NSString *> *)relevantContentXPathsToSet
 {
-    NSArray *newValue = [relevantContentXPathsToSet copy];
-    
-    dispatch_block_t block = ^{
-        relevantContentXPaths = newValue;
-    };
-    
-    if (dispatch_get_specific(storageQueueTag))
-        block();
-    else
-        dispatch_async(storageQueue, block);
+	NSArray *newValue = [relevantContentXPathsToSet copy];
+	
+	dispatch_block_t block = ^{
+		self->relevantContentXPaths = newValue;
+	};
+	
+	if (dispatch_get_specific(storageQueueTag))
+		block();
+	else
+		dispatch_async(storageQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

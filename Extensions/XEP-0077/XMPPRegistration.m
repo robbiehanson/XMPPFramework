@@ -50,11 +50,11 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
 
   dispatch_block_t block = ^{
       @autoreleasepool {
-        NSString *toStr = xmppStream.myJID.domain;
+        NSString *toStr = self->xmppStream.myJID.domain;
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
 
         NSXMLElement *username = [NSXMLElement elementWithName:@"username"
-                                                   stringValue:xmppStream.myJID.user];
+                                                   stringValue:self->xmppStream.myJID.user];
         NSXMLElement *password = [NSXMLElement elementWithName:@"password"
                                                    stringValue:newPassword];
         [query addChild:username];
@@ -62,15 +62,15 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
 
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set"
                                      to:[XMPPJID jidWithString:toStr]
-                              elementID:[xmppStream generateUUID]
+                              elementID:[self->xmppStream generateUUID]
                                   child:query];
 
-        [xmppIDTracker addID:[iq elementID]
+          [self->xmppIDTracker addID:[iq elementID]
                       target:self
                     selector:@selector(handlePasswordChangeQueryIQ:withInfo:)
                      timeout:60];
 
-        [xmppStream sendElement:iq];
+          [self->xmppStream sendElement:iq];
       }
   };
 
@@ -113,15 +113,15 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:register"];
         [query addChild:remove];
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set"
-                              elementID:[xmppStream generateUUID]
+                              elementID:[self->xmppStream generateUUID]
                                   child:query];
 
-        [xmppIDTracker addElement:iq
+        [self->xmppIDTracker addElement:iq
                            target:self
                          selector:@selector(handleRegistrationCancelQueryIQ:withInfo:)
                           timeout:60];
 
-        [xmppStream sendElement:iq];
+        [self->xmppStream sendElement:iq];
       }
   };
 
@@ -155,7 +155,7 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
                                              code:errCode
                                          userInfo:errInfo];
 
-          [multicastDelegate passwordChangeFailed:self
+          [self->multicastDelegate passwordChangeFailed:self
                                         withError:err];
           return;
         }
@@ -163,11 +163,11 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
         NSString *type = [iq type];
 
         if ([type isEqualToString:@"result"]) {
-          [multicastDelegate passwordChangeSuccessful:self];
+          [self->multicastDelegate passwordChangeSuccessful:self];
         } else {
           // this should be impossible to reach, but just for safety's sake...
-          [multicastDelegate passwordChangeFailed:self
-                                        withError:nil];
+          [self->multicastDelegate passwordChangeFailed:self
+                                              withError:nil];
         }
       }
   };
@@ -196,19 +196,19 @@ NSString *const XMPPRegistrationErrorDomain = @"XMPPRegistrationErrorDomain";
                                              code:errCode
                                          userInfo:errInfo];
 
-          [multicastDelegate cancelRegistrationFailed:self
-                                            withError:err];
+          [self->multicastDelegate cancelRegistrationFailed:self
+                                                  withError:err];
           return;
         }
 
         NSString *type = [iq type];
 
         if ([type isEqualToString:@"result"]) {
-          [multicastDelegate cancelRegistrationSuccessful:self];
+          [self->multicastDelegate cancelRegistrationSuccessful:self];
         } else {
           // this should be impossible to reach, but just for safety's sake...
-          [multicastDelegate cancelRegistrationFailed:self
-                                            withError:nil];
+          [self->multicastDelegate cancelRegistrationFailed:self
+                                                  withError:nil];
         }
       }
   };
