@@ -467,7 +467,7 @@ NS_ASSUME_NONNULL_BEGIN
 **/
 - (void)setResumptionId:(nullable NSString *)resumptionId
                 timeout:(uint32_t)timeout
-         lastDisconnect:(NSDate *)date
+         lastDisconnect:(nullable NSDate *)date
               forStream:(XMPPStream *)stream;
 
 /**
@@ -485,7 +485,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param stream
  *   The associated xmppStream (standard parameter for storage classes)
 **/
-- (void)setLastDisconnect:(NSDate *)date
+- (void)setLastDisconnect:(nullable NSDate *)date
       lastHandledByClient:(uint32_t)lastHandledByClient
                 forStream:(XMPPStream *)stream;
 
@@ -510,7 +510,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param stream
  *   The associated xmppStream (standard parameter for storage classes)
 **/
-- (void)setLastDisconnect:(NSDate *)date
+- (void)setLastDisconnect:(nullable NSDate *)date
       lastHandledByServer:(uint32_t)lastHandledByServer
    pendingOutgoingStanzas:(nullable NSArray<XMPPStreamManagementOutgoingStanza*> *)pendingOutgoingStanzas
                 forStream:(XMPPStream *)stream;
@@ -573,7 +573,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param stream
  *   The associated xmppStream (standard parameter for storage classes)
 **/
-- (void)setLastDisconnect:(NSDate *)date
+- (void)setLastDisconnect:(nullable NSDate *)date
       lastHandledByClient:(uint32_t)lastHandledByClient
       lastHandledByServer:(uint32_t)lastHandledByServer
    pendingOutgoingStanzas:(nullable NSArray<XMPPStreamManagementOutgoingStanza*> *)pendingOutgoingStanzas
