@@ -86,7 +86,7 @@
             NSMutableDictionary *queryParameters = [NSMutableDictionary dictionaryWithCapacity:queryKeys.count];
             [queryKeys enumerateObjectsUsingBlock:^(NSString *queryItem, NSUInteger idx, BOOL *stop) {
                 if (idx == 0) {
-                    _queryAction = queryItem;
+                    self->_queryAction = queryItem;
                 } else {
                     NSArray *keyValue = [queryItem componentsSeparatedByString:@"="];
                     if (keyValue.count == 2) {

@@ -30,7 +30,7 @@
 	__block double result = 0.0;
 	
 	dispatch_block_t block = ^{
-		result = smoothedAverageOutgoingBandwidth;
+		result = self->smoothedAverageOutgoingBandwidth;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -46,7 +46,7 @@
 	__block double result = 0.0;
 	
 	dispatch_block_t block = ^{
-		result = smoothedAverageIncomingBandwidth;
+		result = self->smoothedAverageIncomingBandwidth;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))

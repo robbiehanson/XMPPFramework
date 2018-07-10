@@ -279,7 +279,7 @@
 		__block XMPPUserMemoryStorageObject *result;
 		
 		dispatch_sync(parentQueue, ^{
-			result = [myUser copy];
+			result = [self->myUser copy];
 		});
 		
 		return result;
@@ -306,7 +306,7 @@
 		
 		dispatch_sync(parentQueue, ^{
 			XMPPResourceMemoryStorageObject *resource =
-			    (XMPPResourceMemoryStorageObject *)[myUser resourceForJID:myJID];
+			    (XMPPResourceMemoryStorageObject *)[self->myUser resourceForJID:self->myJID];
 			result = [resource copy];
 		});
 		

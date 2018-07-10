@@ -65,10 +65,10 @@
 		
 		[self stopPingIntervalTimer];
 		
-		lastReceiveTime = 0;
-		awaitingPingResponse = NO;
+		self->lastReceiveTime = 0;
+		self->awaitingPingResponse = NO;
 		
-		[xmppPing deactivate];
+		[self->xmppPing deactivate];
 		[super deactivate];
 		
 	}};
@@ -103,7 +103,7 @@
 		__block NSTimeInterval result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = pingInterval;
+			result = self->pingInterval;
 		});
 		return result;
 	}
@@ -113,19 +113,19 @@
 {
 	dispatch_block_t block = ^{
 		
-		if (pingInterval != interval)
+		if (self->pingInterval != interval)
 		{
-			pingInterval = interval;
+			self->pingInterval = interval;
 			
 			// Update the pingTimer.
 			// 
 			// Depending on new value and current state of the pingTimer,
 			// this may mean starting, stoping, or simply updating the timer.
 			
-			if (pingInterval > 0)
+			if (self->pingInterval > 0)
 			{
 				// Remember: Only start the pinger after the xmpp stream is up and authenticated
-				if ([xmppStream isAuthenticated])
+				if ([self->xmppStream isAuthenticated])
 					[self startPingIntervalTimer];
 			}
 			else
@@ -152,7 +152,7 @@
 		__block NSTimeInterval result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = pingTimeout;
+			result = self->pingTimeout;
 		});
 		return result;
 	}
@@ -162,9 +162,9 @@
 {
 	dispatch_block_t block = ^{
 		
-		if (pingTimeout != timeout)
+		if (self->pingTimeout != timeout)
 		{
-			pingTimeout = timeout;
+			self->pingTimeout = timeout;
 		}
 	};
 	
@@ -185,7 +185,7 @@
 		__block XMPPJID *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = targetJID;
+			result = self->targetJID;
 		});
 		return result;
 	}
@@ -195,11 +195,11 @@
 {
 	dispatch_block_t block = ^{
 		
-		if (![targetJID isEqualToJID:jid])
+		if (![self->targetJID isEqualToJID:jid])
 		{
-			targetJID = jid;
+			self->targetJID = jid;
 			
-			targetJIDStr = [targetJID full];
+			self->targetJIDStr = [self->targetJID full];
 		}
 	};
 	
@@ -220,7 +220,7 @@
 		__block NSTimeInterval result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = lastReceiveTime;
+			result = self->lastReceiveTime;
 		});
 		return result;
 	}

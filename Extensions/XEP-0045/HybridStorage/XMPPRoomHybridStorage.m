@@ -122,7 +122,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 	__block NSTimeInterval result = 0;
 	
 	dispatch_block_t block = ^{
-		result = maxMessageAge;
+		result = self->maxMessageAge;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -137,10 +137,10 @@ static XMPPRoomHybridStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		NSTimeInterval oldMaxMessageAge = maxMessageAge;
+		NSTimeInterval oldMaxMessageAge = self->maxMessageAge;
 		NSTimeInterval newMaxMessageAge = age;
 		
-		maxMessageAge = age;
+		self->maxMessageAge = age;
 		
 		// There are several cases we need to handle here.
 		// 
@@ -186,7 +186,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		{
 			[self performDelete];
 			
-			if (deleteTimer)
+			if (self->deleteTimer)
 				[self updateDeleteTimer];
 			else
 				[self createAndStartDeleteTimer];
@@ -204,7 +204,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 	__block NSTimeInterval result = 0;
 	
 	dispatch_block_t block = ^{
-		result = deleteInterval;
+		result = self->deleteInterval;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -219,7 +219,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		deleteInterval = interval;
+		self->deleteInterval = interval;
 		
 		// There are several cases we need to handle here.
 		// 
@@ -234,9 +234,9 @@ static XMPPRoomHybridStorage *sharedInstance;
 		// 4. If the deleteInterval decreased, then we need to reset the timer so that it fires at an earlier date.
 		//    (Plus we might need to do an immediate delete.)
 		
-		if (deleteInterval > 0.0)
+		if (self->deleteInterval > 0.0)
 		{
-			if (deleteTimer == NULL)
+			if (self->deleteTimer == NULL)
 			{
 				// Handles #2
 				// 
@@ -256,7 +256,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 				[self updateDeleteTimer];
 			}
 		}
-		else if (deleteTimer)
+		else if (self->deleteTimer)
 		{
 			// Handles #1
 			
@@ -274,7 +274,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		[pausedMessageDeletion addObject:[roomJID bareJID]];
+		[self->pausedMessageDeletion addObject:[roomJID bareJID]];
 	}};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -287,7 +287,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		[pausedMessageDeletion removeObject:[roomJID bareJID]];
+		[self->pausedMessageDeletion removeObject:[roomJID bareJID]];
 		[self performDelete];
 	}};
 	
@@ -759,16 +759,16 @@ static XMPPRoomHybridStorage *sharedInstance;
 		{
 			XMPPJID *streamFullJid = [self myJIDForXMPPStream:xmppStream];
 			
-			NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+			NSDictionary *occupantsRoomsDict = self->occupantsGlobalDict[streamFullJid];
 			NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 			
 			occupant = occupantsRoomDict[occupantJid];
 		}
 		else
 		{
-			for (XMPPJID *streamFullJid in occupantsGlobalDict)
+			for (XMPPJID *streamFullJid in self->occupantsGlobalDict)
 			{
-				NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+				NSDictionary *occupantsRoomsDict = self->occupantsGlobalDict[streamFullJid];
 				NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 								
 				occupant = occupantsRoomDict[occupantJid];
@@ -802,16 +802,16 @@ static XMPPRoomHybridStorage *sharedInstance;
 		{
 			XMPPJID *streamFullJid = [self myJIDForXMPPStream:xmppStream];
 			
-			NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+			NSDictionary *occupantsRoomsDict = self->occupantsGlobalDict[streamFullJid];
 			NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 			
 			results = [occupantsRoomDict allValues];
 		}
 		else
 		{
-			for (XMPPJID *streamFullJid in occupantsGlobalDict)
+			for (XMPPJID *streamFullJid in self->occupantsGlobalDict)
 			{
-				NSDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+				NSDictionary *occupantsRoomsDict = self->occupantsGlobalDict[streamFullJid];
 				NSDictionary *occupantsRoomDict = occupantsRoomsDict[roomJid];
 				
 				if (occupantsRoomDict)
@@ -981,7 +981,7 @@ static XMPPRoomHybridStorage *sharedInstance;
 		
 		XMPPJID *streamFullJid = [self myJIDForXMPPStream:xmppStream];
 		
-		NSMutableDictionary *occupantsRoomsDict = occupantsGlobalDict[streamFullJid];
+		NSMutableDictionary *occupantsRoomsDict = self->occupantsGlobalDict[streamFullJid];
 		
 		[occupantsRoomsDict removeObjectForKey:roomJid]; // Remove room (and all associated occupants)
 	}];

@@ -55,7 +55,7 @@
 		__block BOOL result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = respondsToQueries;
+			result = self->respondsToQueries;
 		});
 		return result;
 	}
@@ -65,14 +65,14 @@
 {
 	dispatch_block_t block = ^{
 		
-		if (respondsToQueries != flag)
+		if (self->respondsToQueries != flag)
 		{
-			respondsToQueries = flag;
+			self->respondsToQueries = flag;
 			
 #ifdef _XMPP_CAPABILITIES_H
 			@autoreleasepool {
 				// Capabilities may have changed, need to notify others.
-				[xmppStream resendMyPresence];
+				[self->xmppStream resendMyPresence];
 			}
 #endif
 		}

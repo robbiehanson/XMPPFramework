@@ -94,7 +94,7 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 		__block NSXMLElement *result = nil;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = [pushConfiguration copy];
+			result = [self->pushConfiguration copy];
 		});
 		
 		return result;
@@ -107,16 +107,16 @@ NSString *const XMPPProcessOneSessionDate = @"XMPPProcessOneSessionDate";
 	
 	dispatch_block_t block = ^{
 		
-		if (pushConfiguration == nil && newPushConfiguration == nil)
+		if (self->pushConfiguration == nil && newPushConfiguration == nil)
 		{
 			return;
 		}
 		
-		pushConfiguration = newPushConfiguration;
-		pushConfigurationSent = NO;
-		pushConfigurationConfirmed = NO;
+		self->pushConfiguration = newPushConfiguration;
+		self->pushConfigurationSent = NO;
+		self->pushConfigurationConfirmed = NO;
 		
-		if ([xmppStream isAuthenticated])
+		if ([self->xmppStream isAuthenticated])
 		{
 			[self sendPushConfiguration];
 		}

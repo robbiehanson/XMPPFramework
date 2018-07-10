@@ -109,7 +109,7 @@
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = clientSideMessageArchivingOnly;
+		result = self->clientSideMessageArchivingOnly;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -123,7 +123,7 @@
 - (void)setClientSideMessageArchivingOnly:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		clientSideMessageArchivingOnly = flag;
+		self->clientSideMessageArchivingOnly = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -138,7 +138,7 @@
 	
 	dispatch_block_t block = ^{
 		
-		result = [preferences copy];
+		result = [self->preferences copy];
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -155,15 +155,15 @@
 		
 		// Update cached value
 		
-		preferences = [newPreferences copy];
+		self->preferences = [newPreferences copy];
 		
 		// Update storage
 		
-		if ([xmppMessageArchivingStorage respondsToSelector:@selector(setPreferences:forUser:)])
+		if ([self->xmppMessageArchivingStorage respondsToSelector:@selector(setPreferences:forUser:)])
 		{
-			XMPPJID *myBareJid = [[xmppStream myJID] bareJID];
+			XMPPJID *myBareJid = [[self->xmppStream myJID] bareJID];
 			
-			[xmppMessageArchivingStorage setPreferences:preferences forUser:myBareJid];
+			[self->xmppMessageArchivingStorage setPreferences:self->preferences forUser:myBareJid];
 		}
 		
 		// Todo:

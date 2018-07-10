@@ -29,14 +29,14 @@
 
 - (void) setAutoAddOriginId:(BOOL)autoAddOriginId {
     [self performBlockAsync:^{
-        _autoAddOriginId = autoAddOriginId;
+        self->_autoAddOriginId = autoAddOriginId;
     }];
 }
 
 - (BOOL) autoAddOriginId {
     __block BOOL autoAddOriginId = NO;
     [self performBlock:^{
-        autoAddOriginId = _autoAddOriginId;
+        autoAddOriginId = self->_autoAddOriginId;
     }];
     return autoAddOriginId;
 }
@@ -44,27 +44,27 @@
 - (BOOL) copyElementIdIfPresent {
     __block BOOL copyElementIdIfPresent = NO;
     [self performBlock:^{
-        copyElementIdIfPresent = _copyElementIdIfPresent;
+        copyElementIdIfPresent = self->_copyElementIdIfPresent;
     }];
     return copyElementIdIfPresent;
 }
 
 - (void) setCopyElementIdIfPresent:(BOOL)copyElementIdIfPresent {
     [self performBlockAsync:^{
-        _copyElementIdIfPresent = copyElementIdIfPresent;
+        self->_copyElementIdIfPresent = copyElementIdIfPresent;
     }];
 }
 
 - (void) setFilterBlock:(BOOL (^)(XMPPStream *stream, XMPPMessage* message))filterBlock {
     [self performBlockAsync:^{
-        _filterBlock = [filterBlock copy];
+        self->_filterBlock = [filterBlock copy];
     }];
 }
 
 - (BOOL (^)(XMPPStream *stream, XMPPMessage* message))filterBlock {
     __block BOOL (^filterBlock)(XMPPStream *stream, XMPPMessage* message) = nil;
     [self performBlock:^{
-        filterBlock = _filterBlock;
+        filterBlock = self->_filterBlock;
     }];
     return filterBlock;
 }
@@ -114,7 +114,7 @@
     [message addOriginId:originId];
     
     [self performBlockAsync:^{
-        [multicastDelegate stanzaIdModule:self didAddOriginId:originId toMessage:message];
+        [self->multicastDelegate stanzaIdModule:self didAddOriginId:originId toMessage:message];
     }];
     
     return message;

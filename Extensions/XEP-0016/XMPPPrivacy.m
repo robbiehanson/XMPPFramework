@@ -124,7 +124,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 		__block BOOL result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = autoRetrievePrivacyListNames;
+			result = self->autoRetrievePrivacyListNames;
 		});
 		
 		return result;
@@ -135,7 +135,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 {
 	dispatch_block_t block = ^{
 		
-		autoRetrievePrivacyListNames = flag;
+		self->autoRetrievePrivacyListNames = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -155,7 +155,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 		__block BOOL result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = autoRetrievePrivacyListItems;
+			result = self->autoRetrievePrivacyListItems;
 		});
 		
 		return result;
@@ -166,7 +166,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 {
 	dispatch_block_t block = ^{
 		
-		autoRetrievePrivacyListItems = flag;
+		self->autoRetrievePrivacyListItems = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -186,7 +186,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 		__block BOOL result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = autoClearPrivacyListInfo;
+			result = self->autoClearPrivacyListInfo;
 		});
 		
 		return result;
@@ -197,7 +197,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 {
 	dispatch_block_t block = ^{
 		
-		autoClearPrivacyListInfo = flag;
+		self->autoClearPrivacyListInfo = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -268,7 +268,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 	{
 		dispatch_async(moduleQueue, ^{ @autoreleasepool {
 			
-			[privacyDict removeAllObjects];
+			[self->privacyDict removeAllObjects];
 		}});
 	}
 }
@@ -285,7 +285,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 		
 		dispatch_sync(moduleQueue, ^{ @autoreleasepool {
 			
-			result = [[privacyDict allKeys] copy];
+			result = [[self->privacyDict allKeys] copy];
 		}});
 		
 		return result;
@@ -296,7 +296,7 @@ typedef enum XMPPPrivacyQueryInfoType {
 {
     NSArray* (^block)(void) = ^ NSArray* () {
 		
-		id result = privacyDict[privacyListName];
+		id result = self->privacyDict[privacyListName];
 		
 		if (result == [NSNull null]) // Not fetched yet
 			return nil;

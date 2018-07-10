@@ -19,7 +19,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     __block NSSet *result;
     dispatch_block_t block = ^{
-        result = _relevantURLSchemes;
+        result = self->_relevantURLSchemes;
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -34,7 +34,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     NSSet *newValue = [relevantURLSchemes copy];
     dispatch_block_t block = ^{
-        _relevantURLSchemes = newValue;
+        self->_relevantURLSchemes = newValue;
     };
     
     if (dispatch_get_specific(moduleQueueTag))

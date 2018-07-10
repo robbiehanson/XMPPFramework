@@ -332,7 +332,7 @@ static NSMutableSet *databaseFileNames;
 		__block NSUInteger result;
 		
 		dispatch_sync(storageQueue, ^{
-			result = saveThreshold;
+			result = self->saveThreshold;
 		});
 		
 		return result;
@@ -342,7 +342,7 @@ static NSMutableSet *databaseFileNames;
 - (void)setSaveThreshold:(NSUInteger)newSaveThreshold
 {
 	dispatch_block_t block = ^{
-		saveThreshold = newSaveThreshold;
+		self->saveThreshold = newSaveThreshold;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -375,13 +375,13 @@ static NSMutableSet *databaseFileNames;
 		
 		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
 		
-		result = (XMPPJID *) myJidCache[key];
+		result = (XMPPJID *) self->myJidCache[key];
 		if (!result)
 		{
 			result = [stream myJID];
 			if (result)
 			{
-				myJidCache[key] = result;
+				self->myJidCache[key] = result;
 			}
 		}
 	}};
@@ -411,7 +411,7 @@ static NSMutableSet *databaseFileNames;
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
 		NSNumber *key = [NSNumber xmpp_numberWithPtr:(__bridge void *)stream];
-		XMPPJID *cachedJID = myJidCache[key];
+		XMPPJID *cachedJID = self->myJidCache[key];
 		
 		if (cachedJID)
 		{
@@ -421,13 +421,13 @@ static NSMutableSet *databaseFileNames;
 			{
 				if (![cachedJID isEqualToJID:newJID])
 				{
-					myJidCache[key] = newJID;
+					self->myJidCache[key] = newJID;
 					[self didChangeCachedMyJID:newJID forXMPPStream:stream];
 				}
 			}
 			else
 			{
-				[myJidCache removeObjectForKey:key];
+				[self->myJidCache removeObjectForKey:key];
 				[self didChangeCachedMyJID:nil forXMPPStream:stream];
 			}
 		}
@@ -477,9 +477,9 @@ static NSMutableSet *databaseFileNames;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if (managedObjectModel)
+		if (self->managedObjectModel)
 		{
-			result = managedObjectModel;
+			result = self->managedObjectModel;
 			return;
 		}
 		        
@@ -500,38 +500,38 @@ static NSMutableSet *databaseFileNames;
 			
 			NSURL *momUrl = [NSURL fileURLWithPath:momPath];
 			
-			managedObjectModel = [[[NSManagedObjectModel alloc] initWithContentsOfURL:momUrl] copy];
+			self->managedObjectModel = [[[NSManagedObjectModel alloc] initWithContentsOfURL:momUrl] copy];
 		}
 		else
 		{
 			XMPPLogWarn(@"%@: Couldn't find managedObjectModel file - %@", [self class], momName);
 		}
         
-        if([NSAttributeDescription instancesRespondToSelector:@selector(setAllowsExternalBinaryDataStorage:)])
-        {
-            if(autoAllowExternalBinaryDataStorage)
-            {
-                NSArray *entities = [managedObjectModel entities];
-                
-                for(NSEntityDescription *entity in entities)
-                {
-                    NSDictionary *attributesByName = [entity attributesByName];
-                    
-                    [attributesByName enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-                        
-                        if([obj attributeType] == NSBinaryDataAttributeType)
-                        {
-                            [obj setAllowsExternalBinaryDataStorage:YES];
-                        }
-                        
-                    }];			
-                }
-                
-            }
+		if([NSAttributeDescription instancesRespondToSelector:@selector(setAllowsExternalBinaryDataStorage:)])
+		{
+			if(self->autoAllowExternalBinaryDataStorage)
+			{
+				NSArray *entities = [self->managedObjectModel entities];
+
+				for(NSEntityDescription *entity in entities)
+				{
+					NSDictionary *attributesByName = [entity attributesByName];
+
+					[attributesByName enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+
+						if([obj attributeType] == NSBinaryDataAttributeType)
+						{
+							[obj setAllowsExternalBinaryDataStorage:YES];
+						}
+
+					}];
+				}
+
+			}
             
         }
 		
-		result = managedObjectModel;
+		result = self->managedObjectModel;
 	}};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -551,9 +551,9 @@ static NSMutableSet *databaseFileNames;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if (persistentStoreCoordinator)
+		if (self->persistentStoreCoordinator)
 		{
-			result = persistentStoreCoordinator;
+			result = self->persistentStoreCoordinator;
 			return;
 		}
 		
@@ -565,42 +565,42 @@ static NSMutableSet *databaseFileNames;
 		
 		XMPPLogVerbose(@"%@: Creating persistentStoreCoordinator", [self class]);
 		
-		persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
+		self->persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
 		
-		if (databaseFileName)
+		if (self->databaseFileName)
 		{
 			// SQLite persistent store
 			
 			NSString *docsPath = [self persistentStoreDirectory];
-			NSString *storePath = [docsPath stringByAppendingPathComponent:databaseFileName];
+			NSString *storePath = [docsPath stringByAppendingPathComponent:self->databaseFileName];
 			if (storePath)
 			{
 				// If storePath is nil, then NSURL will throw an exception
-                
-                if(autoRemovePreviousDatabaseFile)
-                {
-                    if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
-                    {
-                        [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
-                    }
-                }
+
+				if(self->autoRemovePreviousDatabaseFile)
+				{
+					if ([[NSFileManager defaultManager] fileExistsAtPath:storePath])
+					{
+						[[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
+					}
+				}
 				
-				[self willCreatePersistentStoreWithPath:storePath options:storeOptions];
+				[self willCreatePersistentStoreWithPath:storePath options:self->storeOptions];
 				
 				NSError *error = nil;
 				
-				BOOL didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:storeOptions error:&error];
+				BOOL didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:self->storeOptions error:&error];
 				
-				if(autoRecreateDatabaseFile && !didAddPersistentStore)
+				if(self->autoRecreateDatabaseFile && !didAddPersistentStore)
 				{
 					[[NSFileManager defaultManager] removeItemAtPath:storePath error:NULL];
 					
-					didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:storeOptions error:&error];
+					didAddPersistentStore = [self addPersistentStoreWithPath:storePath options:self->storeOptions error:&error];
 				}
 				
 				if (!didAddPersistentStore)
 				{
-					[self didNotAddPersistentStoreWithPath:storePath options:storeOptions error:error];
+					[self didNotAddPersistentStoreWithPath:storePath options:self->storeOptions error:error];
 				}
 			}
 			else
@@ -613,16 +613,16 @@ static NSMutableSet *databaseFileNames;
 		{
 			// In-Memory persistent store
 			
-			[self willCreatePersistentStoreWithPath:nil options:storeOptions];
+			[self willCreatePersistentStoreWithPath:nil options:self->storeOptions];
 			
 			NSError *error = nil;
-			if (![self addPersistentStoreWithPath:nil options:storeOptions error:&error])
+			if (![self addPersistentStoreWithPath:nil options:self->storeOptions error:&error])
 			{
-				[self didNotAddPersistentStoreWithPath:nil options:storeOptions error:error];
+				[self didNotAddPersistentStoreWithPath:nil options:self->storeOptions error:error];
 			}
 		}
 		
-		result = persistentStoreCoordinator;
+		result = self->persistentStoreCoordinator;
 		
 	}};
 	
@@ -746,11 +746,11 @@ static NSMutableSet *databaseFileNames;
 		dispatch_async(dispatch_get_main_queue(), ^{
             
             // http://stackoverflow.com/questions/3923826/nsfetchedresultscontroller-with-predicate-ignores-changes-merged-from-different
-            for (NSManagedObject *object in [notification userInfo][NSUpdatedObjectsKey]) {
-                [[mainThreadManagedObjectContext objectWithID:[object objectID]] willAccessValueForKey:nil];
-            }
+			for (NSManagedObject *object in [notification userInfo][NSUpdatedObjectsKey]) {
+				[[self->mainThreadManagedObjectContext objectWithID:[object objectID]] willAccessValueForKey:nil];
+			}
 			
-			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+			[self->mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
 			[self mainThreadManagedObjectContextDidMergeChanges];
 		});
     }
@@ -761,7 +761,7 @@ static NSMutableSet *databaseFileNames;
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
-		result = autoRemovePreviousDatabaseFile;
+		result = self->autoRemovePreviousDatabaseFile;
 	}};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -775,7 +775,7 @@ static NSMutableSet *databaseFileNames;
 - (void)setAutoRemovePreviousDatabaseFile:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		autoRemovePreviousDatabaseFile = flag;
+		self->autoRemovePreviousDatabaseFile = flag;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -789,7 +789,7 @@ static NSMutableSet *databaseFileNames;
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
-		result = autoRecreateDatabaseFile;
+		result = self->autoRecreateDatabaseFile;
 	}};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -803,7 +803,7 @@ static NSMutableSet *databaseFileNames;
 - (void)setAutoRecreateDatabaseFile:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		autoRecreateDatabaseFile = flag;
+		self->autoRecreateDatabaseFile = flag;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -817,7 +817,7 @@ static NSMutableSet *databaseFileNames;
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
-		result = autoAllowExternalBinaryDataStorage;
+		result = self->autoAllowExternalBinaryDataStorage;
 	}};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -831,7 +831,7 @@ static NSMutableSet *databaseFileNames;
 - (void)setAutoAllowExternalBinaryDataStorage:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		autoAllowExternalBinaryDataStorage = flag;
+		self->autoAllowExternalBinaryDataStorage = flag;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -945,9 +945,9 @@ static NSMutableSet *databaseFileNames;
 		// Since this is a synchronous request, we want to return as quickly as possible.
 		// So we delay the maybeSave operation til later.
 		
-		dispatch_async(storageQueue, ^{ @autoreleasepool {
+		dispatch_async(self->storageQueue, ^{ @autoreleasepool {
 			
-			[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
+			[self maybeSave:OSAtomicDecrement32(&self->pendingRequests)];
 		}});
 		
 	}});
@@ -971,14 +971,14 @@ static NSMutableSet *databaseFileNames;
 	dispatch_async(storageQueue, ^{ @autoreleasepool {
 		
 		block();
-		[self maybeSave:OSAtomicDecrement32(&pendingRequests)];
+		[self maybeSave:OSAtomicDecrement32(&self->pendingRequests)];
 	}});
 }
 
 - (void)addWillSaveManagedObjectContextBlock:(void (^)(void))willSaveBlock
 {
     dispatch_block_t block = ^{
-		[willSaveManagedObjectContextBlocks addObject:[willSaveBlock copy]];
+		[self->willSaveManagedObjectContextBlocks addObject:[willSaveBlock copy]];
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))
@@ -990,7 +990,7 @@ static NSMutableSet *databaseFileNames;
 - (void)addDidSaveManagedObjectContextBlock:(void (^)(void))didSaveBlock
 {
     dispatch_block_t block = ^{
-		[didSaveManagedObjectContextBlocks addObject:[didSaveBlock copy]];
+		[self->didSaveManagedObjectContextBlocks addObject:[didSaveBlock copy]];
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))

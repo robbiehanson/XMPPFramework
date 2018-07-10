@@ -46,7 +46,7 @@ static NSString *const QueryIdAttributeName = @"queryid";
 {
     __block NSInteger result = NO;
     [self performBlock:^{
-        result = _resultAutomaticPagingPageSize;
+		result = self->_resultAutomaticPagingPageSize;
     }];
     return result;
 }
@@ -54,7 +54,7 @@ static NSString *const QueryIdAttributeName = @"queryid";
 - (void)setResultAutomaticPagingPageSize:(NSInteger)resultAutomaticPagingPageSize
 {
     [self performBlockAsync:^{
-        _resultAutomaticPagingPageSize = resultAutomaticPagingPageSize;
+		self->_resultAutomaticPagingPageSize = resultAutomaticPagingPageSize;
     }];
 }
 
@@ -84,7 +84,7 @@ static NSString *const QueryIdAttributeName = @"queryid";
 		}
 
 		NSString *queryId = [XMPPStream generateUUID];
-        [_outstandingQueryIds addObject:queryId];
+		[self->_outstandingQueryIds addObject:queryId];
 		
 		NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
 		[queryElement addAttributeWithName:QueryIdAttributeName stringValue:queryId];
@@ -101,7 +101,7 @@ static NSString *const QueryIdAttributeName = @"queryid";
 						 selector:@selector(handleMessageArchiveIQ:withInfo:)
 						  timeout:60];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}];
 }
 
@@ -166,7 +166,7 @@ static NSString *const QueryIdAttributeName = @"queryid";
 						 selector:@selector(handleFormFieldsIQ:withInfo:)
 						  timeout:60];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}];
 }
 
@@ -190,7 +190,7 @@ static NSString *const QueryIdAttributeName = @"queryid";
 - (void)deactivate {
 	[self performBlock:^{ @autoreleasepool {
 		[self.xmppIDTracker removeAllIDs];
-		_xmppIDTracker = nil;
+		self->_xmppIDTracker = nil;
 	}}];
 	[super deactivate];
 }

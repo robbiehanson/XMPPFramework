@@ -145,7 +145,7 @@
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = autoResume;
+		result = self->autoResume;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -161,7 +161,7 @@
 	XMPPLogTrace();
 	
 	dispatch_block_t block = ^{
-		autoResume = newAutoResume;
+		self->autoResume = newAutoResume;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -176,13 +176,13 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		autoRequest_stanzaCount = stanzaCount;
-		autoRequest_timeout = MAX(0.0, timeout);
+		self->autoRequest_stanzaCount = stanzaCount;
+		self->autoRequest_timeout = MAX(0.0, timeout);
 		
-		if (autoRequestTimer) {
-			[autoRequestTimer updateTimeout:autoRequest_timeout fromOriginalStartTime:YES];
+		if (self->autoRequestTimer) {
+			[self->autoRequestTimer updateTimeout:self->autoRequest_timeout fromOriginalStartTime:YES];
 		}
-		if (isStarted) {
+		if (self->isStarted) {
 			[self maybeRequestAck];
 		}
 	}};
@@ -202,8 +202,8 @@
 	
 	dispatch_block_t block = ^{
 		
-		stanzaCount = autoRequest_stanzaCount;
-		timeout = autoRequest_timeout;
+		stanzaCount = self->autoRequest_stanzaCount;
+		timeout = self->autoRequest_timeout;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -221,13 +221,13 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		autoAck_stanzaCount = stanzaCount;
-		autoAck_timeout = MAX(0.0, timeout);
+		self->autoAck_stanzaCount = stanzaCount;
+		self->autoAck_timeout = MAX(0.0, timeout);
 		
-		if (autoAckTimer) {
-			[autoAckTimer updateTimeout:autoAck_timeout fromOriginalStartTime:YES];
+		if (self->autoAckTimer) {
+			[self->autoAckTimer updateTimeout:self->autoAck_timeout fromOriginalStartTime:YES];
 		}
-		if (isStarted) {
+		if (self->isStarted) {
 			[self maybeSendAck];
 		}
 	}};
@@ -247,8 +247,8 @@
 	
 	dispatch_block_t block = ^{
 		
-		stanzaCount = autoAck_stanzaCount;
-		timeout = autoAck_timeout;
+		stanzaCount = self->autoAck_stanzaCount;
+		timeout = self->autoAck_timeout;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -268,7 +268,7 @@
 	
 	dispatch_block_t block = ^{
 		
-		delay = ackResponseDelay;
+		delay = self->ackResponseDelay;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -285,7 +285,7 @@
 	
 	dispatch_block_t block = ^{
 		
-		ackResponseDelay = delay;
+		self->ackResponseDelay = delay;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -325,12 +325,12 @@
 {
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		if (isStarted)
+		if (self->isStarted)
 		{
 			XMPPLogWarn(@"Stream management is already enabled/resumed.");
 			return;
 		}
-		if (enableQueued || enableSent)
+		if (self->enableQueued || self->enableSent)
 		{
 			XMPPLogWarn(@"Stream management is already started (pending response from server).");
 			return;
@@ -338,16 +338,16 @@
 		
 		// State transition cleanup
 		
-		[unackedByServer removeAllObjects];
-		unackedByServer_lastRequestOffset = 0;
+		[self->unackedByServer removeAllObjects];
+		self->unackedByServer_lastRequestOffset = 0;
 		
-		[unackedByClient removeAllObjects];
-		unackedByClient_lastAckOffset = 0;
+		[self->unackedByClient removeAllObjects];
+		self->unackedByClient_lastAckOffset = 0;
 		
-		unprocessedReceivedAcks = nil;
+		self->unprocessedReceivedAcks = nil;
 		
-		pendingHandledStanzaIds = nil;
-		outstandingStanzaIds = 0;
+		self->pendingHandledStanzaIds = nil;
+		self->outstandingStanzaIds = 0;
 		
 		// Send enable stanza:
 		//
@@ -362,10 +362,10 @@
 			[enable addAttributeWithName:@"max" stringValue:[NSString stringWithFormat:@"%.0f", maxTimeout]];
 		}
 		
-		[xmppStream sendElement:enable];
+		[self->xmppStream sendElement:enable];
 		
-		enableQueued = YES;
-		requestedMax = (maxTimeout > 0.0) ? (uint32_t)maxTimeout : (uint32_t)0;
+		self->enableQueued = YES;
+		self->requestedMax = (maxTimeout > 0.0) ? (uint32_t)maxTimeout : (uint32_t)0;
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -426,7 +426,7 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		if (isStarted || enableQueued || enableSent) {
+		if (self->isStarted || self->enableQueued || self->enableSent) {
 			return_from_block;
 		}
 		
@@ -434,10 +434,10 @@
 		uint32_t timeout = 0;
 		NSDate *lastDisconnect = nil;
 		
-		[storage getResumptionId:&resumptionId
-		                 timeout:&timeout
-		          lastDisconnect:&lastDisconnect
-		               forStream:xmppStream];
+		[self->storage getResumptionId:&resumptionId
+							   timeout:&timeout
+						lastDisconnect:&lastDisconnect
+							 forStream:self->xmppStream];
 		
 		result = [self canResumeStreamWithResumptionId:resumptionId timeout:timeout lastDisconnect:lastDisconnect];
 	}};
@@ -461,16 +461,16 @@
 		
 		// State transition cleanup
 		
-		[unackedByServer removeAllObjects];
-		unackedByServer_lastRequestOffset = 0;
+		[self->unackedByServer removeAllObjects];
+		self->unackedByServer_lastRequestOffset = 0;
 		
-		[unackedByClient removeAllObjects];
-		unackedByClient_lastAckOffset = 0;
+		[self->unackedByClient removeAllObjects];
+		self->unackedByClient_lastAckOffset = 0;
 		
-		unprocessedReceivedAcks = nil;
+		self->unprocessedReceivedAcks = nil;
 		
-		pendingHandledStanzaIds = nil;
-		outstandingStanzaIds = 0;
+		self->pendingHandledStanzaIds = nil;
+		self->outstandingStanzaIds = 0;
 		
 		// Restore our state from the last stream
 		
@@ -478,20 +478,20 @@
 		uint32_t newLastHandledByServer = 0;
 		NSArray *pendingOutgoingStanzas = nil;
 		
-		[storage getLastHandledByClient:&newLastHandledByClient
-		            lastHandledByServer:&newLastHandledByServer
-		         pendingOutgoingStanzas:&pendingOutgoingStanzas
-		                      forStream:xmppStream];
+		[self->storage getLastHandledByClient:&newLastHandledByClient
+						  lastHandledByServer:&newLastHandledByServer
+					   pendingOutgoingStanzas:&pendingOutgoingStanzas
+									forStream:self->xmppStream];
 		
-		lastHandledByClient = newLastHandledByClient;
-		lastHandledByServer = newLastHandledByServer;
+		self->lastHandledByClient = newLastHandledByClient;
+		self->lastHandledByServer = newLastHandledByServer;
 		
 		if ([pendingOutgoingStanzas count] > 0) {
-			prev_unackedByServer = [[NSMutableArray alloc] initWithArray:pendingOutgoingStanzas copyItems:YES];
+			self->prev_unackedByServer = [[NSMutableArray alloc] initWithArray:pendingOutgoingStanzas copyItems:YES];
 		}
 		
 		XMPPLogVerbose(@"%@: Attempting to resume: lastHandledByClient(%u) lastHandledByServer(%u)",
-		               THIS_FILE, lastHandledByClient, lastHandledByServer);
+					   THIS_FILE, self->lastHandledByClient, self->lastHandledByServer);
 		
 		// Send the resume stanza:
 		//
@@ -499,11 +499,11 @@
 		
 		NSXMLElement *resume = [NSXMLElement elementWithName:@"resume" xmlns:XMLNS_STREAM_MANAGEMENT];
 		[resume addAttributeWithName:@"previd" stringValue:resumptionId];
-		[resume addAttributeWithName:@"h" stringValue:[NSString stringWithFormat:@"%u", lastHandledByClient]];
+		[resume addAttributeWithName:@"h" stringValue:[NSString stringWithFormat:@"%u", self->lastHandledByClient]];
 		
-		[xmppStream sendBindElement:resume];
+		[self->xmppStream sendBindElement:resume];
 		
-		didAttemptResume = YES;
+		self->didAttemptResume = YES;
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -521,61 +521,61 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		uint32_t h = [resumed attributeUInt32ValueForName:@"h" withDefaultValue:lastHandledByServer];
+		uint32_t h = [resumed attributeUInt32ValueForName:@"h" withDefaultValue:self->lastHandledByServer];
 		
 		uint32_t diff;
-		if (h >= lastHandledByServer)
-			diff = h - lastHandledByServer;
+		if (h >= self->lastHandledByServer)
+			diff = h - self->lastHandledByServer;
 		else
-			diff = (UINT32_MAX - lastHandledByServer) + h;
+			diff = (UINT32_MAX - self->lastHandledByServer) + h;
 		
 		// IMPORTATNT:
 		// This code path uses prev_unackedByServer (NOT unackedByServer).
 		// This is because the ack has to do with stanzas sent from the previous connection.
 		
-		if (diff > [prev_unackedByServer count])
+		if (diff > [self->prev_unackedByServer count])
 		{
 			XMPPLogWarn(@"Unexpected h value from resume: lastH=%lu, newH=%lu, numPendingStanzas=%lu",
-			            (unsigned long)lastHandledByServer,
-			            (unsigned long)h,
-			            (unsigned long)[prev_unackedByServer count]);
+						(unsigned long)self->lastHandledByServer,
+						(unsigned long)h,
+						(unsigned long)[self->prev_unackedByServer count]);
 			
-			diff = (uint32_t)[prev_unackedByServer count];
+			diff = (uint32_t)[self->prev_unackedByServer count];
 		}
 		
 		NSMutableArray *stanzaIds = [NSMutableArray arrayWithCapacity:(NSUInteger)diff];
 		
 		for (uint32_t i = 0; i < diff; i++)
 		{
-			XMPPStreamManagementOutgoingStanza *outgoingStanza = prev_unackedByServer[(NSUInteger) i];
+			XMPPStreamManagementOutgoingStanza *outgoingStanza = self->prev_unackedByServer[(NSUInteger) i];
 			
 			if (outgoingStanza.stanzaId) {
 				[stanzaIds addObject:outgoingStanza.stanzaId];
 			}
 		}
 		
-		lastHandledByServer = h;
+		self->lastHandledByServer = h;
 		
-		XMPPLogVerbose(@"%@: processResumed: lastHandledByServer(%u)", THIS_FILE, lastHandledByServer);
+		XMPPLogVerbose(@"%@: processResumed: lastHandledByServer(%u)", THIS_FILE, self->lastHandledByServer);
 		
-		isStarted = YES;
-		didResume = YES;
+		self->isStarted = YES;
+		self->didResume = YES;
 		
-		prev_unackedByServer = nil;
+		self->prev_unackedByServer = nil;
 		
-		resume_response = resumed;
-		resume_stanzaIds = [stanzaIds copy];
+		self->resume_response = resumed;
+		self->resume_stanzaIds = [stanzaIds copy];
 		
 		// Update storage
 		
-		[storage setLastDisconnect:[NSDate date]
-		       lastHandledByServer:lastHandledByServer
-		    pendingOutgoingStanzas:nil
-		                 forStream:xmppStream];
+		[self->storage setLastDisconnect:[NSDate date]
+					 lastHandledByServer:self->lastHandledByServer
+				  pendingOutgoingStanzas:nil
+							   forStream:self->xmppStream];
 		
 		// Notify delegate
 		
-		[multicastDelegate xmppStreamManagement:self didReceiveAckForStanzaIds:stanzaIds];
+		[self->multicastDelegate xmppStreamManagement:self didReceiveAckForStanzaIds:stanzaIds];
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -598,7 +598,7 @@
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = didResume;
+		result = self->didResume;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -641,9 +641,9 @@
 	
 	dispatch_block_t block = ^{
 		
-		result = didResume;
-		stanzaIds = resume_stanzaIds;
-		response = resume_response;
+		result = self->didResume;
+		stanzaIds = self->resume_stanzaIds;
+		response = self->resume_response;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -733,10 +733,10 @@
 		
 		dispatch_async(moduleQueue, ^{ @autoreleasepool {
 			
-			didResume = NO;
-			resume_response = element;
+			self->didResume = NO;
+			self->resume_response = element;
 			
-			prev_unackedByServer = nil;
+			self->prev_unackedByServer = nil;
 		}});
 		
 		return XMPPBindResultFailFallback;
@@ -787,7 +787,7 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		if (isStarted || enableQueued || enableSent)
+		if (self->isStarted || self->enableQueued || self->enableSent)
 		{
 			[self _requestAck];
 		}
@@ -920,7 +920,7 @@
 				stanzaId = [element elementID];
 			}
 			
-			dispatch_async(moduleQueue, ^{ @autoreleasepool{
+			dispatch_async(self->moduleQueue, ^{ @autoreleasepool{
 				
 				// Set the stanzaId.
 				stanza.stanzaId = stanzaId;
@@ -933,13 +933,13 @@
 				
 				BOOL dequeuedPendingAck = NO;
 				
-				while ([unprocessedReceivedAcks count] > 0)
+				while ([self->unprocessedReceivedAcks count] > 0)
 				{
-					NSXMLElement *ack = unprocessedReceivedAcks[0];
+					NSXMLElement *ack = self->unprocessedReceivedAcks[0];
 					
 					if ([self processReceivedAck:ack])
 					{
-						[unprocessedReceivedAcks removeObjectAtIndex:0];
+						[self->unprocessedReceivedAcks removeObjectAtIndex:0];
 						dequeuedPendingAck = YES;
 					}
 					else
@@ -1115,7 +1115,7 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool{
 		
-		if (isStarted)
+		if (self->isStarted)
 		{
 			[self _sendAck];
 		}
@@ -1328,7 +1328,7 @@
 		
 		BOOL found = NO;
 		
-		for (XMPPStreamManagementIncomingStanza *stanza in unackedByClient)
+		for (XMPPStreamManagementIncomingStanza *stanza in self->unackedByClient)
 		{
 			if (stanza.isHandled)
 			{
@@ -1360,12 +1360,12 @@
 			// to actually "handle" the element. So we have this odd edge case,
 			// which we handle by queuing up the stanzaId for later processing.
 			
-			if (outstandingStanzaIds > 0)
+			if (self->outstandingStanzaIds > 0)
 			{
-				if (pendingHandledStanzaIds == nil)
-					pendingHandledStanzaIds = [[NSMutableArray alloc] init];
+				if (self->pendingHandledStanzaIds == nil)
+					self->pendingHandledStanzaIds = [[NSMutableArray alloc] init];
 				
-				[pendingHandledStanzaIds addObject:stanzaId];
+				[self->pendingHandledStanzaIds addObject:stanzaId];
 			}
 		}
 	}};
@@ -1442,7 +1442,7 @@
 				}});
 			}
 			
-			dispatch_async(moduleQueue, ^{ @autoreleasepool
+			dispatch_async(self->moduleQueue, ^{ @autoreleasepool
 			{
 				if (isHandled)
 				{
@@ -1454,14 +1454,14 @@
 					
 					// Check for edge case:
 					// - stanzaId was marked as handled before we figured out what the stanzaId was
-					if ([pendingHandledStanzaIds count] > 0)
+					if ([self->pendingHandledStanzaIds count] > 0)
 					{
 						NSUInteger i = 0;
-						for (id pendingStanzaId in pendingHandledStanzaIds)
+						for (id pendingStanzaId in self->pendingHandledStanzaIds)
 						{
 							if ([pendingStanzaId isEqual:stanzaId])
 							{
-								[pendingHandledStanzaIds removeObjectAtIndex:i];
+								[self->pendingHandledStanzaIds removeObjectAtIndex:i];
 								
 								stanza.isHandled = YES;
 								break;
@@ -1474,8 +1474,8 @@
 				
 				// Defensive programming.
 				// Don't let this array grow infinitely big (if markHandledStanzaId is being invoked incorrectly).
-				if (--outstandingStanzaIds == 0) {
-					[pendingHandledStanzaIds removeAllObjects];
+				if (--self->outstandingStanzaIds == 0) {
+					[self->pendingHandledStanzaIds removeAllObjects];
 				}
 				
 				if (stanza.isHandled)
