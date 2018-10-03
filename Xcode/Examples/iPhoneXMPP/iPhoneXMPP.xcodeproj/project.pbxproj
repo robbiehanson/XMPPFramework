@@ -19,6 +19,16 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
 		28F335F11007B36200424DE2 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* RootViewController.xib */; };
+		78E470FA216507AB00217D0F /* CocoaAsyncSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F22165079100217D0F /* CocoaAsyncSocket.framework */; };
+		78E470FB216507AB00217D0F /* CocoaAsyncSocket.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F22165079100217D0F /* CocoaAsyncSocket.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		78E470FC216507AB00217D0F /* CocoaLumberjack.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F42165079100217D0F /* CocoaLumberjack.framework */; };
+		78E470FD216507AB00217D0F /* CocoaLumberjack.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F42165079100217D0F /* CocoaLumberjack.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		78E470FE216507AB00217D0F /* KissXML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F32165079100217D0F /* KissXML.framework */; };
+		78E470FF216507AB00217D0F /* KissXML.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F32165079100217D0F /* KissXML.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		78E47100216507AB00217D0F /* libidn.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F52165079100217D0F /* libidn.framework */; };
+		78E47101216507AB00217D0F /* libidn.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 78E470F52165079100217D0F /* libidn.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		78E4711C216507E000217D0F /* XMPPFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E47111216507CA00217D0F /* XMPPFramework.framework */; };
+		78E4711D216507E000217D0F /* XMPPFramework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 78E47111216507CA00217D0F /* XMPPFramework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DC19DDA1170B4138000D2178 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DC19DDA0170B4138000D2178 /* Default-568h@2x.png */; };
 		DC1F97E21152CA2D00138A8F /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F97E11152CA2D00138A8F /* libxml2.dylib */; };
 		DC1F97E81152CA4E00138A8F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F97E71152CA4E00138A8F /* CFNetwork.framework */; };
@@ -30,49 +40,74 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		78E470852164FCFD00217D0F /* PBXContainerItemProxy */ = {
+		78E47110216507CA00217D0F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */;
+			containerPortal = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 0D44BAEA1E537066000930E0;
 			remoteInfo = "XMPPFramework (iOS)";
 		};
-		78E470872164FCFD00217D0F /* PBXContainerItemProxy */ = {
+		78E47112216507CA00217D0F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */;
+			containerPortal = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D9DCD5331E6256D90010D1C7;
 			remoteInfo = "XMPPFramework (macOS)";
 		};
-		78E470892164FCFD00217D0F /* PBXContainerItemProxy */ = {
+		78E47114216507CA00217D0F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */;
+			containerPortal = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D9DCD6961E6258CF0010D1C7;
 			remoteInfo = "XMPPFramework (tvOS)";
 		};
-		78E4708B2164FCFD00217D0F /* PBXContainerItemProxy */ = {
+		78E47116216507CA00217D0F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */;
+			containerPortal = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D9A7AA621FB97892005183CD;
 			remoteInfo = "XMPPFrameworkSwift (iOS)";
 		};
-		78E4708D2164FCFD00217D0F /* PBXContainerItemProxy */ = {
+		78E47118216507CA00217D0F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */;
+			containerPortal = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D9A7AE561FB97A3C005183CD;
 			remoteInfo = "XMPPFrameworkSwift (macOS)";
 		};
-		78E4708F2164FCFD00217D0F /* PBXContainerItemProxy */ = {
+		78E4711A216507CA00217D0F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */;
+			containerPortal = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D9A7AFA11FB97A65005183CD;
 			remoteInfo = "XMPPFrameworkSwift (tvOS)";
 		};
+		78E4711E216507E000217D0F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0D44BAE91E537066000930E0;
+			remoteInfo = "XMPPFramework (iOS)";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		78E47102216507AB00217D0F /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				78E470FD216507AB00217D0F /* CocoaLumberjack.framework in Embed Frameworks */,
+				78E470FF216507AB00217D0F /* KissXML.framework in Embed Frameworks */,
+				78E47101216507AB00217D0F /* libidn.framework in Embed Frameworks */,
+				78E470FB216507AB00217D0F /* CocoaAsyncSocket.framework in Embed Frameworks */,
+				78E4711D216507E000217D0F /* XMPPFramework.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		070400441347CB140092A737 /* defaultPerson.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = defaultPerson.png; sourceTree = "<group>"; };
@@ -92,7 +127,11 @@
 		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = RootViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XMPPFramework.xcodeproj; path = ../../../../XMPPFramework.xcodeproj; sourceTree = "<group>"; };
+		78E470F22165079100217D0F /* CocoaAsyncSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CocoaAsyncSocket.framework; path = ../../../Carthage/Build/iOS/CocoaAsyncSocket.framework; sourceTree = "<group>"; };
+		78E470F32165079100217D0F /* KissXML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = KissXML.framework; path = ../../../Carthage/Build/iOS/KissXML.framework; sourceTree = "<group>"; };
+		78E470F42165079100217D0F /* CocoaLumberjack.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CocoaLumberjack.framework; path = ../../../Carthage/Build/iOS/CocoaLumberjack.framework; sourceTree = "<group>"; };
+		78E470F52165079100217D0F /* libidn.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libidn.framework; path = ../../../Carthage/Build/iOS/libidn.framework; sourceTree = "<group>"; };
+		78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XMPPFramework.xcodeproj; path = ../../../XMPPFramework.xcodeproj; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* iPhoneXMPP-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iPhoneXMPP-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		DC19DDA0170B4138000D2178 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		DC1F97E11152CA2D00138A8F /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
@@ -110,16 +149,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				DC26A52D152A3E82004B71C0 /* Security.framework in Frameworks */,
+				78E470FC216507AB00217D0F /* CocoaLumberjack.framework in Frameworks */,
+				78E470FE216507AB00217D0F /* KissXML.framework in Frameworks */,
 				070400B91347D09A0092A737 /* CoreLocation.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
+				78E4711C216507E000217D0F /* XMPPFramework.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				DC1F97E21152CA2D00138A8F /* libxml2.dylib in Frameworks */,
+				78E470FA216507AB00217D0F /* CocoaAsyncSocket.framework in Frameworks */,
 				DC1F97E81152CA4E00138A8F /* CFNetwork.framework in Frameworks */,
 				DC1F98371152CBC200138A8F /* SystemConfiguration.framework in Frameworks */,
 				DC1F985D1152CC2B00138A8F /* CoreData.framework in Frameworks */,
 				DCD4944312234A49004BEE1A /* libresolv.dylib in Frameworks */,
 				DC84BC1812440C500055A459 /* libidn.a in Frameworks */,
+				78E47100216507AB00217D0F /* libidn.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,6 +195,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				78E470EB2165076300217D0F /* Vendor */,
 				78E470772164FCB900217D0F /* XMPPFramework */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -203,21 +248,31 @@
 		78E470772164FCB900217D0F /* XMPPFramework */ = {
 			isa = PBXGroup;
 			children = (
-				78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */,
+				78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */,
 			);
 			name = XMPPFramework;
-			path = "New Group";
 			sourceTree = "<group>";
 		};
-		78E470792164FCFC00217D0F /* Products */ = {
+		78E470EB2165076300217D0F /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
-				78E470862164FCFD00217D0F /* XMPPFramework.framework */,
-				78E470882164FCFD00217D0F /* XMPPFramework.framework */,
-				78E4708A2164FCFD00217D0F /* XMPPFramework.framework */,
-				78E4708C2164FCFD00217D0F /* XMPPFrameworkSwift.framework */,
-				78E4708E2164FCFD00217D0F /* XMPPFrameworkSwift.framework */,
-				78E470902164FCFD00217D0F /* XMPPFrameworkSwift.framework */,
+				78E470F22165079100217D0F /* CocoaAsyncSocket.framework */,
+				78E470F42165079100217D0F /* CocoaLumberjack.framework */,
+				78E470F32165079100217D0F /* KissXML.framework */,
+				78E470F52165079100217D0F /* libidn.framework */,
+			);
+			name = Vendor;
+			sourceTree = "<group>";
+		};
+		78E47104216507CA00217D0F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				78E47111216507CA00217D0F /* XMPPFramework.framework */,
+				78E47113216507CA00217D0F /* XMPPFramework.framework */,
+				78E47115216507CA00217D0F /* XMPPFramework.framework */,
+				78E47117216507CA00217D0F /* XMPPFrameworkSwift.framework */,
+				78E47119216507CA00217D0F /* XMPPFrameworkSwift.framework */,
+				78E4711B216507CA00217D0F /* XMPPFrameworkSwift.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -232,10 +287,12 @@
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
+				78E47102216507AB00217D0F /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				78E4711F216507E000217D0F /* PBXTargetDependency */,
 			);
 			name = iPhoneXMPP;
 			productName = iPhoneXMPP;
@@ -267,8 +324,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 78E470792164FCFC00217D0F /* Products */;
-					ProjectRef = 78E470782164FCFC00217D0F /* XMPPFramework.xcodeproj */;
+					ProductGroup = 78E47104216507CA00217D0F /* Products */;
+					ProjectRef = 78E47103216507CA00217D0F /* XMPPFramework.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -279,46 +336,46 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		78E470862164FCFD00217D0F /* XMPPFramework.framework */ = {
+		78E47111216507CA00217D0F /* XMPPFramework.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = XMPPFramework.framework;
-			remoteRef = 78E470852164FCFD00217D0F /* PBXContainerItemProxy */;
+			remoteRef = 78E47110216507CA00217D0F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		78E470882164FCFD00217D0F /* XMPPFramework.framework */ = {
+		78E47113216507CA00217D0F /* XMPPFramework.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = XMPPFramework.framework;
-			remoteRef = 78E470872164FCFD00217D0F /* PBXContainerItemProxy */;
+			remoteRef = 78E47112216507CA00217D0F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		78E4708A2164FCFD00217D0F /* XMPPFramework.framework */ = {
+		78E47115216507CA00217D0F /* XMPPFramework.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = XMPPFramework.framework;
-			remoteRef = 78E470892164FCFD00217D0F /* PBXContainerItemProxy */;
+			remoteRef = 78E47114216507CA00217D0F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		78E4708C2164FCFD00217D0F /* XMPPFrameworkSwift.framework */ = {
+		78E47117216507CA00217D0F /* XMPPFrameworkSwift.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = XMPPFrameworkSwift.framework;
-			remoteRef = 78E4708B2164FCFD00217D0F /* PBXContainerItemProxy */;
+			remoteRef = 78E47116216507CA00217D0F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		78E4708E2164FCFD00217D0F /* XMPPFrameworkSwift.framework */ = {
+		78E47119216507CA00217D0F /* XMPPFrameworkSwift.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = XMPPFrameworkSwift.framework;
-			remoteRef = 78E4708D2164FCFD00217D0F /* PBXContainerItemProxy */;
+			remoteRef = 78E47118216507CA00217D0F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		78E470902164FCFD00217D0F /* XMPPFrameworkSwift.framework */ = {
+		78E4711B216507CA00217D0F /* XMPPFrameworkSwift.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = XMPPFrameworkSwift.framework;
-			remoteRef = 78E4708F2164FCFD00217D0F /* PBXContainerItemProxy */;
+			remoteRef = 78E4711A216507CA00217D0F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -352,6 +409,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		78E4711F216507E000217D0F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "XMPPFramework (iOS)";
+			targetProxy = 78E4711E216507E000217D0F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -365,6 +430,7 @@
 				GCC_PREFIX_HEADER = iPhoneXMPP_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "iPhoneXMPP-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
@@ -384,6 +450,7 @@
 				GCC_PREFIX_HEADER = iPhoneXMPP_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "iPhoneXMPP-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Vendor/libidn\"",
