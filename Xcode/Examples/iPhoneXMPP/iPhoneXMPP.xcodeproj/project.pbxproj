@@ -35,7 +35,6 @@
 		DC1F98371152CBC200138A8F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F98361152CBC200138A8F /* SystemConfiguration.framework */; };
 		DC1F985D1152CC2B00138A8F /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC1F985C1152CC2B00138A8F /* CoreData.framework */; };
 		DC26A52D152A3E82004B71C0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC26A52C152A3E82004B71C0 /* Security.framework */; };
-		DC84BC1812440C500055A459 /* libidn.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC84BC1712440C500055A459 /* libidn.a */; };
 		DCD4944312234A49004BEE1A /* libresolv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DCD4944212234A49004BEE1A /* libresolv.dylib */; };
 /* End PBXBuildFile section */
 
@@ -162,7 +161,6 @@
 				DC1F98371152CBC200138A8F /* SystemConfiguration.framework in Frameworks */,
 				DC1F985D1152CC2B00138A8F /* CoreData.framework in Frameworks */,
 				DCD4944312234A49004BEE1A /* libresolv.dylib in Frameworks */,
-				DC84BC1812440C500055A459 /* libidn.a in Frameworks */,
 				78E47100216507AB00217D0F /* libidn.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -431,10 +429,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "iPhoneXMPP-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../Vendor/libidn\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.deusty.oss.xmppframework.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = iPhoneXMPP;
 			};
@@ -451,10 +446,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "iPhoneXMPP-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../Vendor/libidn\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.deusty.oss.xmppframework.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = iPhoneXMPP;
 			};
