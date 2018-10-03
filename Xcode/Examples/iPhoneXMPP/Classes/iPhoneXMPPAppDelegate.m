@@ -62,10 +62,10 @@
 
 	if (![self connect])
 	{
-        __weak iPhoneXMPPAppDelegate *weakSelf = self;
+		__weak iPhoneXMPPAppDelegate *weakSelf = self;
 		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.0 * NSEC_PER_SEC);
 		dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-			[weakSelf.navigationController presentViewController:weakSelf.settingsViewController animated:YES completion:NULL];
+				[weakSelf.navigationController presentViewController:weakSelf.settingsViewController animated:YES completion:NULL];
 		});
 	}
 		
@@ -209,7 +209,7 @@
 	
 //	[xmppStream setHostName:@"talk.google.com"];
 //	[xmppStream setHostPort:5222];
-//  bypassTLS = YES;
+//	bypassTLS = YES;
 
 	// You may need to alter these settings depending on the server you're connecting to
 	customCertEvaluation = YES;
@@ -440,10 +440,10 @@
 	// but will presumably perform some extra security code stuff.
 	// For example, allowing a specific self-signed certificate that is known to the app.
 	
-    if (bypassTLS) {
-        completionHandler(YES);
-        return;
-    }
+	if (bypassTLS) {
+		completionHandler(YES);
+		return;
+	}
     
 	dispatch_queue_t bgQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	dispatch_async(bgQueue, ^{
