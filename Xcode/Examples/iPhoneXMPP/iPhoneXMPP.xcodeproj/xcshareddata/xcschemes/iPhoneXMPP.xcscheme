@@ -14,10 +14,24 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D9DCD55A1E6258CF0010D1C7"
+               BlueprintIdentifier = "0D44BAE91E537066000930E0"
                BuildableName = "XMPPFramework.framework"
-               BlueprintName = "XMPPFramework (tvOS)"
-               ReferencedContainer = "container:XMPPFramework.xcodeproj">
+               BlueprintName = "XMPPFramework (iOS)"
+               ReferencedContainer = "container:../../../XMPPFramework.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+               BuildableName = "iPhoneXMPP.app"
+               BlueprintName = "iPhoneXMPP"
+               ReferencedContainer = "container:iPhoneXMPP.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,6 +43,15 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "iPhoneXMPP.app"
+            BlueprintName = "iPhoneXMPP"
+            ReferencedContainer = "container:iPhoneXMPP.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -42,15 +65,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D9DCD55A1E6258CF0010D1C7"
-            BuildableName = "XMPPFramework.framework"
-            BlueprintName = "XMPPFramework (tvOS)"
-            ReferencedContainer = "container:XMPPFramework.xcodeproj">
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "iPhoneXMPP.app"
+            BlueprintName = "iPhoneXMPP"
+            ReferencedContainer = "container:iPhoneXMPP.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -60,15 +84,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D9DCD55A1E6258CF0010D1C7"
-            BuildableName = "XMPPFramework.framework"
-            BlueprintName = "XMPPFramework (tvOS)"
-            ReferencedContainer = "container:XMPPFramework.xcodeproj">
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "iPhoneXMPP.app"
+            BlueprintName = "iPhoneXMPP"
+            ReferencedContainer = "container:iPhoneXMPP.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
