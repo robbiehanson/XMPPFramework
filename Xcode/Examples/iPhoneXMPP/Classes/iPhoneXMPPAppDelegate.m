@@ -208,8 +208,8 @@
 	// If you don't specify a hostPort, then the default (5222) will be used.
 	
 //	[xmppStream setHostName:@"talk.google.com"];
-//	[xmppStream setHostPort:5222];	
-	
+//	[xmppStream setHostPort:5222];
+//  bypassTLS = YES;
 
 	// You may need to alter these settings depending on the server you're connecting to
 	customCertEvaluation = YES;
@@ -440,6 +440,11 @@
 	// but will presumably perform some extra security code stuff.
 	// For example, allowing a specific self-signed certificate that is known to the app.
 	
+    if (bypassTLS) {
+        completionHandler(YES);
+        return;
+    }
+    
 	dispatch_queue_t bgQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	dispatch_async(bgQueue, ^{
 		
