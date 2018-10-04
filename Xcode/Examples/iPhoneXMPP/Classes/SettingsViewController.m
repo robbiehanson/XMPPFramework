@@ -20,6 +20,7 @@ NSString *const kXMPPmyPassword = @"kXMPPmyPassword";
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)awakeFromNib {
+  [super awakeFromNib];
   self.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
 }
 

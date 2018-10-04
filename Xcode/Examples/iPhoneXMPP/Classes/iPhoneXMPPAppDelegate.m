@@ -2,25 +2,17 @@
 #import "RootViewController.h"
 #import "SettingsViewController.h"
 
-#import "GCDAsyncSocket.h"
-#import "XMPP.h"
-#import "XMPPLogging.h"
-#import "XMPPReconnect.h"
-#import "XMPPCapabilitiesCoreDataStorage.h"
-#import "XMPPRosterCoreDataStorage.h"
-#import "XMPPvCardAvatarModule.h"
-#import "XMPPvCardCoreDataStorage.h"
-
-#import "DDLog.h"
-#import "DDTTYLogger.h"
-
 #import <CFNetwork/CFNetwork.h>
 
-// Log levels: off, error, warn, info, verbose
+@import XMPPFramework;
+@import CocoaAsyncSocket;
+@import CocoaLumberjack;
+
+//Log levels: off, error, warn, info, verbose
 #if DEBUG
-  static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+  static const int ddLogLevel = DDLogLevelVerbose;
 #else
-  static const int ddLogLevel = LOG_LEVEL_INFO;
+  static const int ddLogLevel = DDLogLevelInfo;
 #endif
 
 
@@ -57,8 +49,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 	// Configure logging framework
-	
-	[DDLog addLogger:[DDTTYLogger sharedInstance] withLogLevel:XMPP_LOG_FLAG_SEND_RECV];
+	[DDLog addLogger:[DDTTYLogger sharedInstance] withLevel:XMPP_LOG_FLAG_SEND_RECV];
 
   // Setup the XMPP stream
   
@@ -71,10 +62,10 @@
 
 	if (![self connect])
 	{
+		__weak iPhoneXMPPAppDelegate *weakSelf = self;
 		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.0 * NSEC_PER_SEC);
 		dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-			
-			[navigationController presentViewController:settingsViewController animated:YES completion:NULL];
+				[weakSelf.navigationController presentViewController:weakSelf.settingsViewController animated:YES completion:NULL];
 		});
 	}
 		
@@ -217,8 +208,8 @@
 	// If you don't specify a hostPort, then the default (5222) will be used.
 	
 //	[xmppStream setHostName:@"talk.google.com"];
-//	[xmppStream setHostPort:5222];	
-	
+//	[xmppStream setHostPort:5222];
+//	bypassTLS = YES;
 
 	// You may need to alter these settings depending on the server you're connecting to
 	customCertEvaluation = YES;
@@ -449,6 +440,11 @@
 	// but will presumably perform some extra security code stuff.
 	// For example, allowing a specific self-signed certificate that is known to the app.
 	
+	if (bypassTLS) {
+		completionHandler(YES);
+		return;
+	}
+    
 	dispatch_queue_t bgQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	dispatch_async(bgQueue, ^{
 		

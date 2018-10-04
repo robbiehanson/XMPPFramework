@@ -21,6 +21,7 @@
 	NSString *password;
 	
 	BOOL customCertEvaluation;
+    BOOL bypassTLS;
 	
 	BOOL isXmppConnected;
 	
