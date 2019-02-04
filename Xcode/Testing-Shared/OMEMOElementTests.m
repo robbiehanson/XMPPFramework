@@ -54,6 +54,19 @@
     </list> \
     </item> \
     </publish> \
+    <publish-options> \
+    <x xmlns='jabber:x:data' type='submit'> \
+    <field var='FORM_TYPE' type='hidden'> \
+    <value>http://jabber.org/protocol/pubsub#publish-options</value> \
+    </field> \
+    <field var='pubsub#persist_items'> \
+    <value>1</value> \
+    </field> \
+    <field var='pubsub#access_model'> \
+    <value>open</value> \
+    </field> \
+    </x> \
+    </publish-options> \
     </pubsub> \
     </iq> \
     ", [OMEMOModule xmlnsOMEMODeviceList:self.ns], [OMEMOModule xmlnsOMEMO:self.ns]];
@@ -84,6 +97,19 @@
     </bundle> \
     </item> \
     </publish> \
+    <publish-options> \
+    <x xmlns='jabber:x:data' type='submit'> \
+    <field var='FORM_TYPE' type='hidden'> \
+    <value>http://jabber.org/protocol/pubsub#publish-options</value> \
+    </field> \
+    <field var='pubsub#persist_items'> \
+    <value>1</value> \
+    </field> \
+    <field var='pubsub#access_model'> \
+    <value>open</value> \
+    </field> \
+    </x> \
+    </publish-options> \
     </pubsub> \
     </iq> \
     ", [OMEMOModule xmlnsOMEMOBundles:self.ns], [OMEMOModule xmlnsOMEMO:self.ns]];
@@ -251,6 +277,19 @@
     </bundle> \
     </item> \
     </publish> \
+    <publish-options> \
+    <x xmlns='jabber:x:data' type='submit'> \
+    <field var='FORM_TYPE' type='hidden'> \
+    <value>http://jabber.org/protocol/pubsub#publish-options</value> \
+    </field> \
+    <field var='pubsub#persist_items'> \
+    <value>1</value> \
+    </field> \
+    <field var='pubsub#access_model'> \
+    <value>open</value> \
+    </field> \
+    </x> \
+    </publish-options> \
     </pubsub> \
     </iq> \
     ",[OMEMOModule xmlnsOMEMOBundles:self.ns], [OMEMOModule xmlnsOMEMO:self.ns]];
