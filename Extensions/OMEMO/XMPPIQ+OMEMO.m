@@ -50,6 +50,19 @@
             </list>
           </item>
         </publish>
+        <publish-options>
+          <x xmlns="jabber:x:data" type="submit">
+            <field var="FORM_TYPE" type="hidden">
+              <value>http://jabber.org/protocol/pubsub#publish-options</value>
+            </field>
+            <field var="pubsub#persist_items">
+              <value>1</value>
+            </field>
+            <field var="pubsub#access_model">
+              <value>open</value>
+            </field>
+          </x>
+        </publish-options>
       </pubsub>
     </iq>
  */
@@ -70,6 +83,33 @@
     
     NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
     [pubsub addChild:publish];
+    
+    NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
+    [x addAttributeWithName:@"type" stringValue:@"submit"];
+    
+    NSXMLElement *formTypeField = [NSXMLElement elementWithName:@"field"];
+    [formTypeField addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
+    [formTypeField addAttributeWithName:@"type" stringValue:@"hidden"];
+    [formTypeField addChild:[NSXMLElement elementWithName:@"value" stringValue:XMLNS_PUBSUB_PUBLISH_OPTIONS]];
+    
+    [x addChild:formTypeField];
+    
+    NSXMLElement *persistanceField = [NSXMLElement elementWithName:@"field"];
+    [persistanceField addAttributeWithName:@"var" stringValue:@"pubsub#persist_items"];
+    [persistanceField addChild:[NSXMLElement elementWithName:@"value" objectValue:@"1"]];
+    
+    [x addChild:persistanceField];
+    
+    NSXMLElement *accessModelField = [NSXMLElement elementWithName:@"field"];
+    [accessModelField addAttributeWithName:@"var" stringValue:@"pubsub#access_model"];
+    [accessModelField addChild:[NSXMLElement elementWithName:@"value" objectValue:@"open"]];
+
+    [x addChild:accessModelField];
+    
+    NSXMLElement *publishOptions = [NSXMLElement elementWithName:@"publish-options"];
+    [publishOptions addChild:x];
+    
+    [pubsub addChild:publishOptions];
     
     XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:elementId];
     [iq addChild:pubsub];
@@ -108,6 +148,19 @@
         </bundle>
       </item>
     </publish>
+    <publish-options>
+      <x xmlns="jabber:x:data" type="submit">
+        <field var="FORM_TYPE" type="hidden">
+          <value>http://jabber.org/protocol/pubsub#publish-options</value>
+        </field>
+        <field var="pubsub#persist_items">
+          <value>1</value>
+        </field>
+        <field var="pubsub#access_model">
+          <value>open</value>
+        </field>
+      </x>
+    </publish-options>
   </pubsub>
 </iq>
  
@@ -155,6 +208,33 @@
     
     NSXMLElement *pubsub = [NSXMLElement elementWithName:@"pubsub" xmlns:XMLNS_PUBSUB];
     [pubsub addChild:publish];
+    
+    NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
+    [x addAttributeWithName:@"type" stringValue:@"submit"];
+    
+    NSXMLElement *formTypeField = [NSXMLElement elementWithName:@"field"];
+    [formTypeField addAttributeWithName:@"var" stringValue:@"FORM_TYPE"];
+    [formTypeField addAttributeWithName:@"type" stringValue:@"hidden"];
+    [formTypeField addChild:[NSXMLElement elementWithName:@"value" stringValue:XMLNS_PUBSUB_PUBLISH_OPTIONS]];
+    
+    [x addChild:formTypeField];
+    
+    NSXMLElement *persistanceField = [NSXMLElement elementWithName:@"field"];
+    [persistanceField addAttributeWithName:@"var" stringValue:@"pubsub#persist_items"];
+    [persistanceField addChild:[NSXMLElement elementWithName:@"value" objectValue:@"1"]];
+    
+    [x addChild:persistanceField];
+    
+    NSXMLElement *accessModelField = [NSXMLElement elementWithName:@"field"];
+    [accessModelField addAttributeWithName:@"var" stringValue:@"pubsub#access_model"];
+    [accessModelField addChild:[NSXMLElement elementWithName:@"value" objectValue:@"open"]];
+    
+    [x addChild:accessModelField];
+    
+    NSXMLElement *publishOptions = [NSXMLElement elementWithName:@"publish-options"];
+    [publishOptions addChild:x];
+    
+    [pubsub addChild:publishOptions];
     
     XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:elementId];
     [iq addChild:pubsub];
