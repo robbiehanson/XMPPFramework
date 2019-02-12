@@ -282,15 +282,6 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		[fetchRequest setEntity:entity];
 		[fetchRequest setFetchBatchSize:self->saveThreshold];
 		
-		if (stream)
-		{
-			NSPredicate *predicate;
-			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
-			                                     [[self myJIDForXMPPStream:stream] bare]];
-			
-			[fetchRequest setPredicate:predicate];
-		}
-		
 		NSArray *allUsers = [moc executeFetchRequest:fetchRequest error:nil];
 		
 		for (XMPPUserCoreDataStorageObject *user in allUsers)
@@ -298,7 +289,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			[moc deleteObject:user];
 		}
 		
-		[XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:moc];
+		[XMPPGroupCoreDataStorageObject clearGroupsInManagedObjectContext:moc];
 	}];
 }
 
@@ -459,15 +450,6 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		[fetchRequest setEntity:entity];
 		[fetchRequest setFetchBatchSize:self->saveThreshold];
 		
-		if (stream)
-		{
-			NSPredicate *predicate;
-			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
-			                            [[self myJIDForXMPPStream:stream] bare]];
-			
-			[fetchRequest setPredicate:predicate];
-		}
-		
 		NSArray *allUsers = [moc executeFetchRequest:fetchRequest error:nil];
 		
 		NSUInteger unsavedCount = [self numberOfUnsavedChanges];
@@ -483,7 +465,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			}
 		}
     
-		[XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:moc];
+		[XMPPGroupCoreDataStorageObject clearGroupsInManagedObjectContext:moc];
 	}];
 }
 

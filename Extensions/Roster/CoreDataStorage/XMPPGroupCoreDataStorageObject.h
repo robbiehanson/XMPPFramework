@@ -19,7 +19,7 @@
 @property (nonatomic, strong) NSString * name;
 @property (nonatomic, strong) NSSet* users;
 
-+ (void)clearEmptyGroupsInManagedObjectContext:(NSManagedObjectContext *)moc;
++ (void)clearGroupsInManagedObjectContext:(NSManagedObjectContext *)moc;
 
 + (id)fetchOrInsertGroupName:(NSString *)groupName inManagedObjectContext:(NSManagedObjectContext *)moc;
 
