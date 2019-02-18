@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
     ss.resources = [ 'Extensions/**/*.{xcdatamodel,xcdatamodeld}']
 	  ss.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
 	  ss.dependency 'CocoaAsyncSocket', '~> 7.6'
-	  ss.dependency 'KissXML', '~> 5.2', :modular_headers => false
+	  ss.dependency 'KissXML', '~> 5.2'
 	  ss.dependency 'libidn', '~> 1.35'
   end
 
@@ -90,13 +90,13 @@ end
 ss.dependency 'XMPPFramework/Core'
 end
 
- s.subspec 'KissXML' do |ss|
-ss.source_files = ['Vendor/KissXML/**/*.{h,m}', 'module/module.modulemap']
-ss.libraries = 'xml2','resolv'
-ss.xcconfig = {
-'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/XMPPFramework/module $(SDKROOT)/usr/include/libresolv'
-}
-end
+# s.subspec 'KissXML' do |ss|
+#ss.source_files = ['Vendor/KissXML/**/*.{h,m}', 'module/module.modulemap']
+#ss.libraries = 'xml2','resolv'
+#ss.xcconfig = {
+#'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/libxml2 $(PODS_ROOT)/XMPPFramework/module $(SDKROOT)/usr/include/libresolv'
+#}
+#end
 
  s.subspec 'BandwidthMonitor' do |ss|
 ss.source_files = 'Extensions/BandwidthMonitor/**/*.{h,m}'
