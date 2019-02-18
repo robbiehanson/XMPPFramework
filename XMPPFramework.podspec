@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
     ss.resources = [ 'Extensions/**/*.{xcdatamodel,xcdatamodeld}']
 	  ss.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
 	  ss.dependency 'CocoaAsyncSocket', '~> 7.6'
-	  ss.dependency 'KissXML', '~> 5.2'
+	  ss.dependency 'KissXML', '~> 5.2', :modular_headers => false
 	  ss.dependency 'libidn', '~> 1.35'
   end
 
