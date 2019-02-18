@@ -160,7 +160,6 @@ enum XMPPStreamConfig
 @implementation XMPPStream
 
 @synthesize tag = userTag;
-@synthesize asyncSocketMiddleware = asyncSocketMiddleware;
 
 /**
  * Shared initialization between the various init methods.
