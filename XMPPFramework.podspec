@@ -1,9 +1,9 @@
 Pod::Spec.new do |s|
   s.name = 'XMPPFramework'
-  s.version = '4.0.0'
+  s.version = '4.0.1'
 
   s.osx.deployment_target = '10.9'
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
   s.tvos.deployment_target = '9.0'
 
   s.license = { :type => 'BSD', :file => 'copying.txt' }
@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
     ss.resources = [ 'Extensions/**/*.{xcdatamodel,xcdatamodeld}']
 	  ss.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
 	  ss.dependency 'CocoaAsyncSocket', '~> 7.6'
-	  ss.dependency 'KissXML', '~> 5.2'
+	  #ss.dependency 'KissXML', '~> 5.2'
 	  ss.dependency 'libidn', '~> 1.35'
   end
 
@@ -75,7 +75,7 @@ core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(inherited) $(SDKROOT)/usr/include/
 }
 core.dependency 'CocoaLumberjack','~>3.5.1'
 core.dependency 'CocoaAsyncSocket','~>7.6.3'
-core.ios.dependency 'XMPPFramework/KissXML'
+#core.ios.dependency 'XMPPFramework/KissXML'
 end
 
  s.subspec 'Authentication' do |ss|
