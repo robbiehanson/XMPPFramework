@@ -187,7 +187,7 @@ enum XMPPStreamConfig
 	numberOfBytesSent = 0;
 	numberOfBytesReceived = 0;
 	
-	hostPort = 5222;
+	hostPort = 5223;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
 	keepAliveData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
 	
@@ -4160,7 +4160,7 @@ enum XMPPStreamConfig
 		// 
 		// In other words, just try connecting to the domain specified in the JID.
 		
-		success = [self connectToHost:[myJID_setByClient domain] onPort:5222 withTimeout:XMPPStreamTimeoutNone error:&connectError];
+		success = [self connectToHost:[myJID_setByClient domain] onPort:5223 withTimeout:XMPPStreamTimeoutNone error:&connectError];
 	}
 	
 	if (!success)

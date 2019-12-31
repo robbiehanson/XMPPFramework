@@ -71,7 +71,7 @@
 // The logging context can be extracted from the DDLogMessage from within the logging framework.
 // This gives loggers, formatters, and filters the ability to optionally process them differently.
 
-#define XMPP_LOG_CONTEXT 5222
+#define XMPP_LOG_CONTEXT 5223
 
 // Configure log levels.
 
