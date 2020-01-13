@@ -9,8 +9,8 @@
 import Foundation
 
 // MARK: - Multicast Delegate
+
 public extension XMPPModule {
-    
     /**
      * Multicast helper which, when used with the invoke function in the class extension,
      * helps with code completion of the intended delegate methods.
@@ -30,10 +30,10 @@ public extension XMPPModule {
      *       multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: obj as? XMPPIQ)
      *   })
      */
-    public var multicast: GCDMulticastDelegate {
+    var multicast: GCDMulticastDelegate {
         return __multicastDelegate as! GCDMulticastDelegate
     }
-    
+
     /**
      * This helper helps smooth things over with the multicastDelegate.
      * Normally you'd have to repeatedly downcast 'Any' to 'AnyObject' every time
@@ -47,14 +47,14 @@ public extension XMPPModule {
      * multicastDelegate.xmppBookmarks!(self, didRetrieve: bookmarks, responseIq: responseIq)
      *
      */
-    public var multicastDelegate: AnyObject {
+    var multicastDelegate: AnyObject {
         return __multicastDelegate as AnyObject
     }
 }
 
 // MARK: - Synchronization
+
 public extension XMPPModule {
-    
     /**
      * Dispatches block synchronously or asynchronously on moduleQueue, or
      * executes directly if we're already on the moduleQueue.
@@ -66,7 +66,7 @@ public extension XMPPModule {
      *  else
      *      dispatch_sync(moduleQueue, block); (or dispatch_async)
      */
-    public func performBlock(async: Bool = false, _ block: @escaping ()->()) {
+    func performBlock(async: Bool = false, _ block: @escaping () -> Void) {
         if async {
             __performBlockAsync(block)
         } else {

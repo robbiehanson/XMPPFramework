@@ -29,11 +29,10 @@ extension GCDMulticastDelegate {
      *     multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: obj as? XMPPIQ)
      * })
      */
-    public func invoke<T>(ofType: T.Type, _ invocation: (_ multicast: T) -> ()) {
+    public func invoke<T>(ofType _: T.Type, _ invocation: (_ multicast: T) -> Void) {
         // Crashing here? See the documentation above.
         // You must implement a stub extension on GCDMulticastDelegate conforming to the
         // delegate type you are attempting to downcast.
         invocation(self as! T)
     }
 }
-
