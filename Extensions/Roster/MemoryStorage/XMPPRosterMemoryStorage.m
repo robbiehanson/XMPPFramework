@@ -804,7 +804,7 @@
 	[[self multicastDelegate] xmppRosterDidChange:self];
 }
 
-- (NSArray *)jidsForXMPPStream:(XMPPStream *)stream
+- (NSArray *)jidsForXMPPStream:(XMPPStream * _Nullable)stream
 {
     XMPPLogTrace();
 	AssertParentQueue();

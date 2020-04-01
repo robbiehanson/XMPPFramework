@@ -337,7 +337,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream;
 - (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream;
 
-- (NSArray<XMPPJID*> *)jidsForXMPPStream:(XMPPStream *)stream;
+- (NSArray<XMPPJID*> *)jidsForXMPPStream:(XMPPStream * _Nullable)stream;
 
 - (void)getSubscription:(NSString * _Nullable * _Nullable)subscription
                     ask:(NSString * _Nullable * _Nullable)ask
