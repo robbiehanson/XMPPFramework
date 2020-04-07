@@ -117,7 +117,7 @@
 }
 
 
-- (void)setIsUserid:(NSString *)userid {
+- (void)setUserid:(NSString *)userid {
 	XMPP_VCARD_SET_STRING_CHILD(userid, @"USERID");
 }
 
