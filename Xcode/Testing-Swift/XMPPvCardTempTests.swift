@@ -6,7 +6,6 @@
 //
 
 import XCTest
-import XMPPFramework
 
 class XMPPvCardTempTests: XCTestCase {
     var xmlString: String!
@@ -27,7 +26,7 @@ class XMPPvCardTempTests: XCTestCase {
             </TEL>
         </vCard>
         """
-        let element = try! DDXMLElement(xmlString: xmlString)
+        let element = try! XMLElement(xmlString: xmlString)
         sut = XMPPvCardTemp.vCardTemp(from: element)
     }
 
@@ -54,7 +53,7 @@ class XMPPvCardTempTests: XCTestCase {
         // Remove all first
         sut.clearEmailAddresses()
         
-        let element = DDXMLElement(name: "EMAIL")
+        let element = XMLElement(name: "EMAIL")
         let newMail = XMPPvCardTempEmail.vCardEmail(from: element)
         newMail.isWork = true
         newMail.userid = "new_mail@example.com"
@@ -80,7 +79,7 @@ class XMPPvCardTempTests: XCTestCase {
     func testAddTelecomAddress() {
         sut.clearTelecomsAddresses()
         
-        let element = DDXMLElement(name: "TEL")
+        let element = XMLElement(name: "TEL")
         let newTel = XMPPvCardTempTel.vCardTel(from: element)
         newTel.isCell = true
         newTel.number = "101"
