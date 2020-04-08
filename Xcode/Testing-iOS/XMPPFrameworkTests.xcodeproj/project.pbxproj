@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1A5DC58D2566E3FC0AAB5BA7 /* Pods_XMPPFrameworkSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6923171573DDCA8E2DEC3A22 /* Pods_XMPPFrameworkSwiftTests.framework */; };
+		9943D285243CA2EB000A9DFC /* XMPPvCardTempTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943D284243CA2EB000A9DFC /* XMPPvCardTempTests.swift */; };
 		D945D6F71FD9EA2100C7502C /* XMPPPresenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D945D6F61FD9EA2100C7502C /* XMPPPresenceTests.swift */; };
 		D973A07C1D2F18040096F3ED /* CapabilitiesHashingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A06F1D2F18040096F3ED /* CapabilitiesHashingTest.m */; };
 		D973A07D1D2F18040096F3ED /* EncodeDecodeTest.m in Sources */ = {isa = PBXBuildFile; fileRef = D973A0701D2F18040096F3ED /* EncodeDecodeTest.m */; };
@@ -45,6 +46,7 @@
 		63F50D921C60208200CA0201 /* XMPPFrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63F50D971C60208200CA0201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6923171573DDCA8E2DEC3A22 /* Pods_XMPPFrameworkSwiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkSwiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9943D284243CA2EB000A9DFC /* XMPPvCardTempTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = XMPPvCardTempTests.swift; path = "../../Testing-Swift/XMPPvCardTempTests.swift"; sourceTree = "<group>"; };
 		AE993B61B8D33F0468A9B133 /* Pods-XMPPFrameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.release.xcconfig"; sourceTree = "<group>"; };
 		D945D6F61FD9EA2100C7502C /* XMPPPresenceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPPresenceTests.swift; path = "../../Testing-Swift/XMPPPresenceTests.swift"; sourceTree = "<group>"; };
 		D973A06E1D2F18030096F3ED /* XMPPFrameworkTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XMPPFrameworkTests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				D9B81AC61FBCD39E00455683 /* XMPPMockStream.h */,
 				D9B81AC51FBCD39E00455683 /* XMPPMockStream.m */,
 				D9A7B03F1FB988EC005183CD /* Info.plist */,
+				9943D284243CA2EB000A9DFC /* XMPPvCardTempTests.swift */,
 			);
 			path = XMPPFrameworkSwiftTests;
 			sourceTree = "<group>";
@@ -411,6 +414,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9B81AC91FBCD3B400455683 /* XMPPBookmarksModuleTests.swift in Sources */,
+				9943D285243CA2EB000A9DFC /* XMPPvCardTempTests.swift in Sources */,
 				D9B81AC71FBCD39E00455683 /* XMPPMockStream.m in Sources */,
 				D945D6F71FD9EA2100C7502C /* XMPPPresenceTests.swift in Sources */,
 			);
