@@ -33,7 +33,7 @@ public extension XMPPModule {
      *       multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: obj as? XMPPIQ)
      *   })
      */
-    public var multicast: GCDMulticastDelegate {
+    var multicast: GCDMulticastDelegate {
         return __multicastDelegate as! GCDMulticastDelegate
     }
     
@@ -50,7 +50,7 @@ public extension XMPPModule {
      * multicastDelegate.xmppBookmarks!(self, didRetrieve: bookmarks, responseIq: responseIq)
      *
      */
-    public var multicastDelegate: AnyObject {
+    var multicastDelegate: AnyObject {
         return __multicastDelegate as AnyObject
     }
 }
@@ -69,7 +69,7 @@ public extension XMPPModule {
      *  else
      *      dispatch_sync(moduleQueue, block); (or dispatch_async)
      */
-    public func performBlock(async: Bool = false, _ block: @escaping ()->()) {
+    func performBlock(async: Bool = false, _ block: @escaping ()->()) {
         if async {
             __performBlockAsync(block)
         } else {

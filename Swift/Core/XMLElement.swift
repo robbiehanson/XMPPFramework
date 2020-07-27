@@ -16,12 +16,12 @@ public extension XMLElement {
     
     // MARK: Extracting a single element.
     
-    public func element(forName name: String) -> XMLElement? {
+    func element(forName name: String) -> XMLElement? {
         let elements = self.elements(forName: name)
         return elements.first
     }
     
-    public func element(forName name: String, xmlns: String) -> XMLElement? {
+    func element(forName name: String, xmlns: String) -> XMLElement? {
         let elements = self.elements(forLocalName: name, uri: xmlns)
         return elements.first
     }

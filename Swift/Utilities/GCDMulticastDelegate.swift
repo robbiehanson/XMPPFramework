@@ -24,7 +24,7 @@ import XMPPFramework
  *
  * This will prevent your code from crashing during the forced cast.
  */
-extension GCDMulticastDelegate {
+public extension GCDMulticastDelegate {
     /**
      * This is a helper mainly to provide better code completion.
      *
@@ -32,7 +32,7 @@ extension GCDMulticastDelegate {
      *     multicast.xmppBookmarks!(self, didNotRetrieveBookmarks: obj as? XMPPIQ)
      * })
      */
-    public func invoke<T>(ofType: T.Type, _ invocation: (_ multicast: T) -> ()) {
+    func invoke<T>(ofType: T.Type, _ invocation: (_ multicast: T) -> ()) {
         // Crashing here? See the documentation above.
         // You must implement a stub extension on GCDMulticastDelegate conforming to the
         // delegate type you are attempting to downcast.
