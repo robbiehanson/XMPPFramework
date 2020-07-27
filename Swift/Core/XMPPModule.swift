@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 // MARK: - Multicast Delegate
 public extension XMPPModule {

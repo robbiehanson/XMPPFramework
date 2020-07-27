@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 /**
  * This helper makes it slightly easier to call the MulticastDelegate

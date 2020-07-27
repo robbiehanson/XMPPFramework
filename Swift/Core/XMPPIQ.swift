@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 public extension XMPPIQ {
     public enum IQType: String {

@@ -12,6 +12,10 @@ let package = Package(
         .library(
             name: "XMPPFramework",
             targets: ["XMPPFramework"]
+        ),
+        .library(
+            name: "XMPPFrameworkSwift",
+            targets: ["XMPPFrameworkSwift"]
         )
     ],
     dependencies: [
@@ -34,7 +38,6 @@ let package = Package(
                 "Swift",
                 "Xcode",
             ],
-            publicHeadersPath: "Core",
             cSettings: [
                 .headerSearchPath("Authentication"),
                 .headerSearchPath("Authentication/Anonymous"),
@@ -112,6 +115,14 @@ let package = Package(
                 .headerSearchPath("Extensions/XMPPMUCLight/CoreDataStorage"),
                 .headerSearchPath("Utilities")
             ]
+        ),
+        .target(
+            name: "XMPPFrameworkSwift",
+            dependencies: [
+                "XMPPFramework",
+                "CocoaLumberjackSwift"
+            ],
+            path: "Swift"
         )
     ]
 )

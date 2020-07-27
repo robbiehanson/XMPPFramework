@@ -1,0 +1,1 @@
+../../Extensions/CoreDataStorage/XMPPCoreDataStorageProtected.h

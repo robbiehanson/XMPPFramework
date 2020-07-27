@@ -1,0 +1,1 @@
+../../Utilities/XMPPSRVResolver.h

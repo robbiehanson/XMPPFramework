@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 /// XEP-0085: Chat States
 /// https://xmpp.org/extensions/xep-0085.html

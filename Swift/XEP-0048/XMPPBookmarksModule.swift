@@ -13,6 +13,10 @@ import Foundation
 #else
     import CocoaLumberjackSwift
 #endif
+
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
     
 @objc public enum XMPPBookmarksMode: Int {
     /// Private XML Storage (XEP-0049)
