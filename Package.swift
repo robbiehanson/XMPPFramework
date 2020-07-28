@@ -114,6 +114,10 @@ let package = Package(
                 .headerSearchPath("Extensions/XMPPMUCLight"),
                 .headerSearchPath("Extensions/XMPPMUCLight/CoreDataStorage"),
                 .headerSearchPath("Utilities")
+            ],
+            linkerSettings: [
+                .linkedLibrary("xml2"),
+                .linkedLibrary("resolv")
             ]
         ),
         .target(
@@ -123,6 +127,55 @@ let package = Package(
                 "CocoaLumberjackSwift"
             ],
             path: "Swift"
+        ),
+        .target(
+            name: "XMPPFrameworkTestsShared",
+            dependencies: [
+                "XMPPFramework"
+            ],
+            path: "Xcode/Testing-Shared",
+            sources: [
+                "XMPPMockStream.m"
+            ],
+            publicHeadersPath: "."
+        ),
+        .testTarget(
+            name: "XMPPFrameworkTests",
+            dependencies: [
+                "XMPPFramework",
+                "XMPPFrameworkTestsShared"
+            ],
+            path: "Xcode/Testing-Shared",
+            exclude: [
+                "XMPPMockStream.m",
+                "XMPPvCardTests.m",
+                "XMPPRoomLightCoreDataStorageTests.m",
+                "XMPPBookmarksTests.swift",
+                "XMPPPushTests.swift",
+                "XMPPStanzaIdTests.swift",
+                "XMPPSwift.swift"
+            ]
+        ),
+        .testTarget(
+            name: "XMPPFrameworkSwiftTests",
+            dependencies: [
+                "XMPPFramework",
+                "XMPPFrameworkSwift",
+                "XMPPFrameworkTestsShared"
+            ],
+            path: "Xcode",
+            exclude: [
+                "XMPPFrameworkTests-Bridging-Header.h"
+            ],
+            sources: [
+                "Testing-Shared/XMPPBookmarksTests.swift",
+                "Testing-Shared/XMPPPushTests.swift",
+                "Testing-Shared/XMPPStanzaIdTests.swift",
+                "Testing-Shared/XMPPSwift.swift",
+                "Testing-Swift/XMPPBookmarksModuleTests.swift",
+                "Testing-Swift/XMPPPresenceTests.swift",
+                "Testing-Swift/XMPPvCardTempTests.swift"
+            ]
         )
     ]
 )

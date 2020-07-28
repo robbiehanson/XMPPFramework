@@ -7,12 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <XMPPFramework/XMPPIQ+OMEMO.h>
-#import <XMPPFramework/XMPPMessage+OMEMO.h>
-#import <XMPPFramework/OMEMOBundle.h>
-#import <XMPPFramework/OMEMOModule.h>
-#import <XMPPFramework/XMPPIQ+XEP_0060.h>
-
+@import XMPPFramework;
 
 @interface OMEMOElementTests : XCTestCase
 @property (nonatomic, readonly) OMEMOModuleNamespace ns;

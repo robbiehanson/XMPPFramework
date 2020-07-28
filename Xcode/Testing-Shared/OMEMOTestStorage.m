@@ -7,7 +7,7 @@
 //
 
 #import "OMEMOTestStorage.h"
-#import <XMPPFramework/XMPPIQ+OMEMO.h>
+@import XMPPFramework;
 
 @interface OMEMOTestStorage()
 @property (nonatomic, strong, readonly) NSMutableDictionary <XMPPJID*,NSArray<NSNumber*>*> *deviceIdStorage;

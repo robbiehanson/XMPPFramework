@@ -6,6 +6,10 @@
 //
 
 import XCTest
+#if SWIFT_PACKAGE
+    import XMPPFramework
+    import XMPPFrameworkSwift
+#endif
 
 class XMPPvCardTempTests: XCTestCase {
     var xmlString: String!
