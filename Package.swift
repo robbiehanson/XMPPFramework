@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 import PackageDescription
 
 let package = Package(
@@ -19,10 +19,10 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/CocoaLumberjack/CocoaLumberjack.git", .upToNextMajor(from: "3.6.1")),
-        .package(url: "https://github.com/robbiehanson/CocoaAsyncSocket.git", .upToNextMajor(from: "7.6.4")),
-        .package(url: "https://github.com/karimhm/KissXML.git", .branch("swift-pm")),
-        .package(url: "https://github.com/karimhm/libidn-framework.git", .branch("swift_pm"))
+        .package(name: "CocoaLumberjack", url: "https://github.com/CocoaLumberjack/CocoaLumberjack.git", .upToNextMajor(from: "3.6.1")),
+        .package(name: "CocoaAsyncSocket", url: "https://github.com/robbiehanson/CocoaAsyncSocket.git", .upToNextMajor(from: "7.6.4")),
+        .package(name: "KissXML", url: "https://github.com/karimhm/KissXML.git", .branch("swift-pm")),
+        .package(name: "libidn", url: "https://github.com/karimhm/libidn-framework.git", .branch("swift_pm"))
     ],
     targets: [
         .target(
@@ -48,7 +48,7 @@ let package = Package(
             name: "XMPPFrameworkSwift",
             dependencies: [
                 "XMPPFramework",
-                "CocoaLumberjackSwift"
+                .product(name: "CocoaLumberjackSwift", package: "CocoaLumberjack")
             ],
             path: "Swift"
         ),

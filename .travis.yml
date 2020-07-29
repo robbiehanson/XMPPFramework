@@ -3,7 +3,7 @@ language: objective-c
 jobs:
   include:
     - stage: Swift PM
-      osx_image: xcode11.5
+      osx_image: xcode12u
       script:
       # Build the project using Swift PM
         - swift build
