@@ -9,6 +9,8 @@
  * E.g. [super insertOccupant...]
 **/
 
+#import "XMPPRoomHybridStorage.h"
+
 @interface XMPPRoomHybridStorage (Protected)
 
 /**
