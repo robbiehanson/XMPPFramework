@@ -3,12 +3,14 @@ language: objective-c
 jobs:
   include:
     - stage: Swift PM
-      osx_image: xcode12u
+      osx_image: xcode12.2
       script:
-      # Build the project using Swift PM
-        - swift build
-      # Test the project using Swift PM
-        - swift test
+      # Remove the Xcode project so `xcodebuild` would be able to test the Swift PM project.
+      - rm -rf *.xcodeproj
+      # Test the Swift PM project using `xcodebuild`.
+      # The test is performed using `xcodebuild` rather than `swift test` due to this bug:
+      # https://bugs.swift.org/browse/SR-13560
+      - xcodebuild -scheme SPM_XMPPFramework-Package -destination "name=iPhone 11 Pro" test
 
     - stage: Xcode Tests
       osx_image: xcode9.3
