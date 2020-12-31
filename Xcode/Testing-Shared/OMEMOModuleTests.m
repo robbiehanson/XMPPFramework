@@ -7,11 +7,8 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <XMPPFramework/OMEMOModule.h>
-#import <XMPPFramework/XMPPIQ+OMEMO.h>
-#import <XMPPFramework/XMPPIQ+XEP_0060.h>
-#import <XMPPFramework/XMPPLogging.h>
-#import <CocoaLumberjack/CocoaLumberjack.h>
+@import XMPPFramework;
+@import CocoaLumberjack;
 
 #import "OMEMOTestStorage.h"
 #import "XMPPMockStream.h"

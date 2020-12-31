@@ -7,15 +7,18 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 /// XEP-0319: Last User Interaction in Presence
 /// This specification defines a way to communicate time of last user interaction with her system using XMPP presence notifications.
 /// https://xmpp.org/extensions/xep-0319.html
 public extension XMPPPresence {
     /// 'urn:xmpp:idle:1'
-    @objc public static let idleXmlns = "urn:xmpp:idle:1"
+    @objc static let idleXmlns = "urn:xmpp:idle:1"
     
-    @objc public var idleSince: Date? {
+    @objc var idleSince: Date? {
         guard let idleElement = element(forName: "idle", xmlns: XMPPPresence.idleXmlns),
             let sinceString = idleElement.attributeStringValue(forName: "since"),
             let since = Date.from(xmppDateTimeString: sinceString) else {
@@ -24,14 +27,14 @@ public extension XMPPPresence {
         return since
     }
     
-    @objc public func addIdle(since: Date) {
+    @objc func addIdle(since: Date) {
         let dateString = since.xmppDateTimeString
         let idleElement = XMLElement(name: "idle", xmlns: XMPPPresence.idleXmlns)
         idleElement.addAttribute(withName: "since", stringValue: dateString)
         addChild(idleElement)
     }
     
-    public convenience init(type: PresenceType? = nil,
+    convenience init(type: PresenceType? = nil,
                             show: ShowType? = nil,
                             status: String? = nil,
                             idle since: Date? = nil,

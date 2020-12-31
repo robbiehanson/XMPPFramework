@@ -1,0 +1,1 @@
+../../Extensions/XEP-0012/XMPPLastActivity.h

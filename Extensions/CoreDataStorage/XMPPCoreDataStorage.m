@@ -88,7 +88,11 @@ static NSMutableSet *databaseFileNames;
 
 - (NSBundle *)managedObjectModelBundle
 {
+#if SWIFT_PACKAGE && defined(SWIFTPM_MODULE_BUNDLE)
+    return SWIFTPM_MODULE_BUNDLE;
+#else
     return [NSBundle bundleForClass:[self class]];
+#endif
 }
 
 - (NSString *)defaultDatabaseFileName

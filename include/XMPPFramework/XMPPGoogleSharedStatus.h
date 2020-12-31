@@ -1,0 +1,1 @@
+../../Extensions/GoogleSharedStatus/XMPPGoogleSharedStatus.h
