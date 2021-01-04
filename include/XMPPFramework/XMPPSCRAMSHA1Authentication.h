@@ -1,0 +1,1 @@
+../../Authentication/SCRAM-SHA-1/XMPPSCRAMSHA1Authentication.h

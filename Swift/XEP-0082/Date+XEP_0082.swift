@@ -7,39 +7,42 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 public extension Date {
     
-    public static func from(xmppDateString: String) -> Date? {
+    static func from(xmppDateString: String) -> Date? {
         if let date = XMPPDateTimeProfiles.parseDate(xmppDateString) {
             return date as Date
         }
         return nil
     }
     
-    public static func from(xmppTimeString: String) -> Date? {
+    static func from(xmppTimeString: String) -> Date? {
         if let date = XMPPDateTimeProfiles.parseTime(xmppTimeString) {
             return date as Date
         }
         return nil
     }
     
-    public static func from(xmppDateTimeString: String) -> Date? {
+    static func from(xmppDateTimeString: String) -> Date? {
         if let date = XMPPDateTimeProfiles.parseDateTime(xmppDateTimeString) {
             return date as Date
         }
         return nil
     }
     
-    public var xmppDateString: String {
+    var xmppDateString: String {
         return (self as NSDate).xmppDateString
     }
     
-    public var xmppTimeString: String {
+    var xmppTimeString: String {
         return (self as NSDate).xmppTimeString
     }
     
-    public var xmppDateTimeString: String {
+    var xmppDateTimeString: String {
         return (self as NSDate).xmppDateTimeString
     }
 }

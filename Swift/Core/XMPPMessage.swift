@@ -7,9 +7,12 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 public extension XMPPMessage {
-    public enum MessageType: String {
+    enum MessageType: String {
         case chat
         case error
         case groupchat
@@ -17,14 +20,14 @@ public extension XMPPMessage {
         case normal
     }
     
-    public var messageType: MessageType? {
+    var messageType: MessageType? {
         guard let type = self.type else {
             return nil
         }
         return MessageType(rawValue: type)
     }
     
-    public convenience init(messageType: MessageType? = nil,
+    convenience init(messageType: MessageType? = nil,
                             to: XMPPJID? = nil,
                             elementID: String? = nil,
                             child: XMLElement? = nil) {

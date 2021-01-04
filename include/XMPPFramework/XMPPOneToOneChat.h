@@ -1,0 +1,1 @@
+../../Extensions/OneToOneChat/XMPPOneToOneChat.h

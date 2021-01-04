@@ -1,0 +1,1 @@
+../../Extensions/XMPPMUCLight/CoreDataStorage/XMPPRoomLightCoreDataStorageProtected.h

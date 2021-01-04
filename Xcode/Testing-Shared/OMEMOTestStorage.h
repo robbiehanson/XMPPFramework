@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <XMPPFramework/OMEMOModule.h>
+@import XMPPFramework;
 
 NS_ASSUME_NONNULL_BEGIN
 @interface OMEMOTestStorage : NSObject <OMEMOStorageDelegate>

@@ -1,0 +1,1 @@
+../../Extensions/FileTransfer/XMPPFileTransfer.h
