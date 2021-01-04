@@ -8,6 +8,7 @@
 
 #import "XMPPMessage+XEP0045.h"
 #import "XMPPRoomLight.h"
+#import <KissXML/KissXML.h>
 
 static NSString *const XMPPRoomLightAffiliations = @"urn:xmpp:muclight:0#affiliations";
 static NSString *const XMPPRoomLightConfiguration = @"urn:xmpp:muclight:0#configuration";

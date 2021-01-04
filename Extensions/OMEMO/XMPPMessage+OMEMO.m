@@ -16,6 +16,7 @@
 #import "XMPPMessage+XEP_0334.h"
 #import "NSXMLElement+XMPP.h"
 #import "XMPPIQ+XEP_0060.h"
+#import <KissXML/KissXML.h>
 
 @implementation XMPPMessage (OMEMO)
 

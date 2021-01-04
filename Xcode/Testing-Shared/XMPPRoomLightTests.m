@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
+@import KissXML;
 
 @interface XMPPRoomLight()
 - (nonnull NSString *)memberListVersion;

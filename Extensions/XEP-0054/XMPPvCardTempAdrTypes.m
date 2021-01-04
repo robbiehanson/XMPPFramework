@@ -8,6 +8,7 @@
 //
 
 
+#import <KissXML/KissXML.h>
 #import "XMPPvCardTempAdrTypes.h"
 
 #if ! __has_feature(objc_arc)

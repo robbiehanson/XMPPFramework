@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import KissXML
 
 /// XEP-0319: Last User Interaction in Presence
 /// This specification defines a way to communicate time of last user interaction with her system using XMPP presence notifications.

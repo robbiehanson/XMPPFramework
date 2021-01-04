@@ -17,6 +17,7 @@
 #import "XMPPConstants.h"
 #import "NSNumber+XMPP.h"
 #import "NSData+XMPP.h"
+#import <KissXML/KissXML.h>
 
 #if DEBUG
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // XMPP_LOG_LEVEL_VERBOSE | XMPP_LOG_FLAG_TRACE;

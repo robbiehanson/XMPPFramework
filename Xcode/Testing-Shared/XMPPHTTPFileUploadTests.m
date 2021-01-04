@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
+@import KissXML;
 
 static NSURL  * _Nonnull GetURL() {
     return [NSURL URLWithString:@"http://get.com"];
