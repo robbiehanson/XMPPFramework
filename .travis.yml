@@ -13,7 +13,7 @@ jobs:
       - xcodebuild -scheme SPM_XMPPFramework-Package -destination "name=iPhone 11 Pro" test
 
     - stage: Xcode Tests
-      osx_image: xcode9.3
+      osx_image: xcode12.2
       cache:
         directories:
         - Carthage
@@ -23,12 +23,12 @@ jobs:
       before_install:
         # - brew update
         # - brew outdated carthage || brew upgrade carthage
-        - export IOS_SIMULATOR_DESTINATION="platform=iOS Simulator,name=iPhone 8,OS=11.3"
+        - export IOS_SIMULATOR_DESTINATION="platform=iOS Simulator,name=iPhone 8,OS=14.2"
 
       install:
         - carthage bootstrap --no-build
-        - cd Xcode
         - bundle install
+        - cd Xcode
         - bundle exec pod repo update --silent
         - bundle exec pod install --project-directory=Testing-iOS/
         - bundle exec pod install --project-directory=Testing-macOS/
@@ -47,3 +47,5 @@ jobs:
         - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
         - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkSwiftTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
         - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
+
+        - bundle exec pod spec lint XMPPFramework.podspec --verbose --allow-warnings
