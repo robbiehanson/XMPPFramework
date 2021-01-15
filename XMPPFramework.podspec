@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
   s.name = 'XMPPFramework'
   s.version = '4.1.1'
 
-  s.osx.deployment_target = '10.9'
+  s.osx.deployment_target = '10.10'
   s.ios.deployment_target = '9.0'
   s.tvos.deployment_target = '9.0'
 
@@ -21,6 +21,7 @@ Pod::Spec.new do |s|
   on a 12-core Mac Pro. (And it won\'t block the main thread... at all).'
 
   s.requires_arc = true
+  s.swift_versions = ['5.0']
 
   s.default_subspec = 'default'
 
@@ -42,12 +43,10 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Swift' do |ss|
-	  ss.ios.deployment_target = '9.0'
-	  ss.tvos.deployment_target = '9.0'
-    ss.osx.deployment_target      = '10.10'
     ss.source_files = 'Swift/**/*.swift'
     ss.dependency 'XMPPFramework/default'
     ss.dependency 'CocoaLumberjack/Swift'
   end
+
 
 end

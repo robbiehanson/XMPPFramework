@@ -13,3 +13,5 @@ XMPPFramework*.zip
 
 Pods/
 Carthage/
+.swiftpm/
+.build/
