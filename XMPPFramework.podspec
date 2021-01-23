@@ -1,9 +1,9 @@
 Pod::Spec.new do |s|
   s.name = 'XMPPFramework'
-  s.version = '4.0.0'
+  s.version = '4.1.1'
 
   s.osx.deployment_target = '10.9'
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
   s.tvos.deployment_target = '9.0'
 
   s.license = { :type => 'BSD', :file => 'copying.txt' }
@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Swift' do |ss|
-	  ss.ios.deployment_target = '8.0'
+	  ss.ios.deployment_target = '9.0'
 	  ss.tvos.deployment_target = '9.0'
     ss.osx.deployment_target      = '10.10'
     ss.source_files = 'Swift/**/*.swift'
