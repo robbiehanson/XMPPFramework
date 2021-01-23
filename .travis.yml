@@ -13,7 +13,7 @@ jobs:
       - xcodebuild -scheme SPM_XMPPFramework-Package -destination "name=iPhone 11 Pro" test
 
     - stage: Xcode Tests
-      osx_image: xcode9.3
+      osx_image: xcode12.2
       cache:
         directories:
         - Carthage
