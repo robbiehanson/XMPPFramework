@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-API_AVAILABLE(ios(12.0))
+API_AVAILABLE(ios(12.0), tvos(12.0), macos(10.14))
 @interface XMPPvCardTransformer : NSSecureUnarchiveFromDataTransformer
 
 @end
