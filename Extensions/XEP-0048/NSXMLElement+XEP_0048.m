@@ -9,7 +9,6 @@
 #import "NSXMLElement+XEP_0048.h"
 #import "NSXMLElement+XMPP.h"
 #import "XMPPBookmarksStorageElement.h"
-#import <KissXML/KissXML.h>
 
 
 @implementation NSXMLElement (XEP_0048)

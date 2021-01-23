@@ -11,7 +11,6 @@
 #import "XMPPvCardTempEmail.h"
 #import "XMPPLogging.h"
 
-#import <KissXML/KissXML.h>
 #import <objc/runtime.h>
 
 #if ! __has_feature(objc_arc)

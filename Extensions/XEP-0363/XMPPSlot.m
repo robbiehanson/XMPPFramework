@@ -8,7 +8,6 @@
 
 #import "XMPPSlot.h"
 #import "NSXMLElement+XMPP.h"
-#import <KissXML/KissXML.h>
 
 @implementation XMPPSlot
 

@@ -10,7 +10,6 @@
 #import "NSXMLElement+XEP_0048.h"
 #import "NSXMLElement+XMPP.h"
 #import <objc/runtime.h>
-#import <KissXML/KissXML.h>
 
 @implementation XMPPConferenceBookmark
 
