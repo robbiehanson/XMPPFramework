@@ -22,7 +22,10 @@ NS_ASSUME_NONNULL_BEGIN
  * The category methods below are more readable, and they actually work.
 **/
 
+#if !TARGET_OS_IPHONE
 + (NSXMLElement *)elementWithName:(NSString *)name xmlns:(NSString *)ns;
+#endif
+
 - (instancetype)initWithName:(NSString *)name xmlns:(NSString *)ns;
 
 /**
@@ -36,8 +39,11 @@ NS_ASSUME_NONNULL_BEGIN
  * Extracting a single element.
 **/
 
+#if !TARGET_OS_IPHONE
 - (nullable NSXMLElement *)elementForName:(NSString *)name NS_REFINED_FOR_SWIFT;
 - (nullable NSXMLElement *)elementForName:(NSString *)name xmlns:(NSString *)xmlns NS_REFINED_FOR_SWIFT;
+#endif
+
 - (nullable NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix NS_SWIFT_NAME(element(forName:xmlnsPrefix:));
 
 /**
@@ -51,22 +57,24 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeElementForName:(NSString *)name xmlns:(NSString *)xmlns;
 - (void)removeElementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix;
 
+#if !TARGET_OS_IPHONE
 /**
  * Working with the common xmpp xmlns value.
- * 
+ *
  * Use these instead of getting/setting the URI.
  * The category methods below are more readable, and they actually work.
-**/
+ **/
 
 @property (nonatomic, readonly, nullable) NSString *xmlns;
 - (void)setXmlns:(NSString *)ns;
 
 /**
  * Convenience methods for printing xml elements with different styles.
-**/
+ **/
 
 @property (nonatomic, readonly, nullable) NSString *prettyXMLString;
 @property (nonatomic, readonly, nullable) NSString *compactXMLString;
+#endif
 
 /**
  * Convenience methods for adding attributes.
@@ -78,10 +86,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addAttributeWithName:(NSString *)name doubleValue:(double)doubleValue;
 - (void)addAttributeWithName:(NSString *)name integerValue:(NSInteger)integerValue;
 - (void)addAttributeWithName:(NSString *)name unsignedIntegerValue:(NSUInteger)unsignedIntegerValue;
-- (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
 - (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number;
 - (void)addAttributeWithName:(NSString *)name objectValue:(id)objectValue;
 
+#if !TARGET_OS_IPHONE
+- (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string;
+#endif
 /**
  * Convenience methods for extracting attribute values in different formats.
  * 
@@ -124,7 +134,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSNumber *)attributeNumberIntValueForName:(NSString *)name withDefaultValue:(int)defaultValue;
 - (NSNumber *)attributeNumberBoolValueForName:(NSString *)name withDefaultValue:(BOOL)defaultValue;
 
+#if !TARGET_OS_IPHONE
 @property (nonatomic, readonly) NSMutableDictionary<NSString*,NSString*> *attributesAsDictionary;
+#endif
 
 /**
  * Convenience methods for extracting element values in different formats.

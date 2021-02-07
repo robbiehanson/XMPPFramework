@@ -8,6 +8,7 @@
 
 #import "OMEMOTestStorage.h"
 @import XMPPFramework;
+@import KissXML;
 
 @interface OMEMOTestStorage()
 @property (nonatomic, strong, readonly) NSMutableDictionary <XMPPJID*,NSArray<NSNumber*>*> *deviceIdStorage;
