@@ -174,7 +174,7 @@ static NSMutableArray *proxyCandidates;
 	
 	if (isTcpBytestreamQuery)
 	{
-		NSString *uuid = [iq elementID];
+    NSString *uuid = [[query attributeForName:@"sid"] stringValue];
 		
 		@synchronized(existingTurnSockets)
 		{
@@ -270,9 +270,6 @@ static NSMutableArray *proxyCandidates;
 		xmppStream = stream;
 		jid = [iq from];
 		
-		// Store a copy of the ID (which will be our uuid)
-		uuid = [[iq elementID] copy];
-		
 		// Setup initial state for a server connection
 		state = STATE_INIT;
 		isClient = NO;
@@ -280,6 +277,8 @@ static NSMutableArray *proxyCandidates;
 		// Extract streamhost information from turn request
 		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 		streamhosts = [[query elementsForName:@"streamhost"] mutableCopy];
+		// Store a copy of the Session ID
+    uuid = [[[query attributeForName:@"sid"] stringValue] copy];
 		
 		// Configure everything else
 		[self performPostInitSetup];
