@@ -571,9 +571,12 @@ NSString *const XMPPIncomingFileTransferErrorDomain = @"XMPPIncomingFileTransfer
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
   if (_transferState == XMPPIFTStateNone && [self isDiscoInfoIQ:iq]) {
-    [self sendIdentity:iq];
-    _transferState = XMPPIFTStateWaitingForSIOffer;
-    return YES;
+    if (![[iq type] isEqual: @"result"] || [[iq elementForName:@"query"] elementForName:@"identity"] == nil) {
+      [self sendIdentity:iq];
+      _transferState = XMPPIFTStateWaitingForSIOffer;
+      
+      return YES;
+    }
   }
 
   if ((_transferState == XMPPIFTStateNone || _transferState == XMPPIFTStateWaitingForSIOffer)
