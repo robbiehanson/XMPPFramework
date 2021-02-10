@@ -487,7 +487,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	}];
 }
 
-- (NSArray *)jidsForXMPPStream:(XMPPStream *)stream{
+- (NSArray *)jidsForXMPPStream:(XMPPStream * _Nullable)stream {
     
     XMPPLogTrace();
     
