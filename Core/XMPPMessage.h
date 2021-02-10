@@ -53,5 +53,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly, nullable) NSError *errorMessage;
 
+@property (nonatomic, copy) NSString *body;
+@property (nonatomic, strong) XMPPJID *from;
+@property (nonatomic, strong) XMPPJID *to;
 @end
 NS_ASSUME_NONNULL_END
