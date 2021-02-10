@@ -66,11 +66,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPIQ iqFromElement:[self elementForName:@"iq"]];
+        return [XMPPIQ iqFromElement:[self elementForName:@"iq" xmlns:@"jabber:client"]];
     }
     else
     {
-        return [XMPPIQ iqFromElement:[[self forwardedStanza] elementForName:@"iq"]];
+        return [XMPPIQ iqFromElement:[[self forwardedStanza] elementForName:@"iq" xmlns:@"jabber:client"]];
     }
 }
 
@@ -90,11 +90,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPMessage messageFromElement:[self elementForName:@"message"]];
+        return [XMPPMessage messageFromElement:[self elementForName:@"message" xmlns:@"jabber:client"]];
     }
     else
     {
-        return [XMPPMessage messageFromElement:[[self forwardedStanza] elementForName:@"message"]];
+        return [XMPPMessage messageFromElement:[[self forwardedStanza] elementForName:@"message" xmlns:@"jabber:client"]];
     }
 }
 
@@ -115,11 +115,11 @@
 {
     if([self isForwardedStanza])
     {
-        return [XMPPPresence presenceFromElement:[self elementForName:@"presence"]];
+        return [XMPPPresence presenceFromElement:[self elementForName:@"presence" xmlns:@"jabber:client"]];
     }
     else
     {
-        return [XMPPPresence presenceFromElement:[[self forwardedStanza] elementForName:@"presence"]];
+        return [XMPPPresence presenceFromElement:[[self forwardedStanza] elementForName:@"presence" xmlns:@"jabber:client"]];
     }
 }
 
