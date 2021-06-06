@@ -168,6 +168,12 @@
 		return;
 	}
 	
+	self.presenceDate = [presence delayedDeliveryDate];
+	    if (self.presenceDate == nil)
+	    {
+		self.presenceDate = [[NSDate alloc] init];
+	    }
+	
 	self.jid = jid;
 	self.presence = presence;
 	
