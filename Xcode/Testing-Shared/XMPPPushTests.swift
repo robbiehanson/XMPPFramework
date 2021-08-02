@@ -22,6 +22,11 @@ class XMPPPushTests: XCTestCase {
         super.tearDown()
     }
     
+    func testImportModule() {
+        let pushModule = XMPPPushModule()
+        XCTAssertNotNil(pushModule)
+    }
+    
     func testEnableStanzaWithoutOptions() {
         
         let jid = XMPPJID(string: "push-5.client.example")

@@ -8,6 +8,7 @@
 
 
 @implementation XMPPModule
+@synthesize multicastDelegate, moduleQueue, xmppStream, moduleQueueTag;
 
 /**
  * Standard init method.
@@ -64,16 +65,16 @@
 	
 	dispatch_block_t block = ^{
 		
-		if (xmppStream != nil)
+		if (self->xmppStream != nil)
 		{
 			result = NO;
 		}
 		else
 		{
-			xmppStream = aXmppStream;
+			self->xmppStream = aXmppStream;
 			
-			[xmppStream addDelegate:self delegateQueue:moduleQueue];
-			[xmppStream registerModule:self];
+			[self->xmppStream addDelegate:self delegateQueue:self->moduleQueue];
+			[self->xmppStream registerModule:self];
 			
 			[self didActivate];
 		}
@@ -114,14 +115,14 @@
 {
 	dispatch_block_t block = ^{
 		
-		if (xmppStream)
+		if (self->xmppStream)
 		{
 			[self willDeactivate];
 			
-			[xmppStream removeDelegate:self delegateQueue:moduleQueue];
-			[xmppStream unregisterModule:self];
+			[self->xmppStream removeDelegate:self delegateQueue:self->moduleQueue];
+			[self->xmppStream unregisterModule:self];
 			
-			xmppStream = nil;
+			self->xmppStream = nil;
 		}
 	};
 	
@@ -164,7 +165,7 @@
 		__block XMPPStream *result;
 		
 		dispatch_sync(moduleQueue, ^{
-			result = xmppStream;
+			result = self->xmppStream;
 		});
 		
 		return result;
@@ -176,7 +177,7 @@
 	// Asynchronous operation (if outside xmppQueue)
 	
 	dispatch_block_t block = ^{
-		[multicastDelegate addDelegate:delegate delegateQueue:delegateQueue];
+		[self->multicastDelegate addDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -188,7 +189,7 @@
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue synchronously:(BOOL)synchronously
 {
 	dispatch_block_t block = ^{
-		[multicastDelegate removeDelegate:delegate delegateQueue:delegateQueue];
+		[self->multicastDelegate removeDelegate:delegate delegateQueue:delegateQueue];
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -221,4 +222,26 @@
 	return NSStringFromClass([self class]);
 }
 
+@end
+
+@implementation XMPPModule(Synchronization)
+/** Executes block synchronously on moduleQueue */
+- (void) performBlock:(dispatch_block_t)block {
+    NSParameterAssert(block);
+    if (!block) { return; }
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+}
+
+/** Executes block asynchronously on moduleQueue */
+- (void) performBlockAsync:(dispatch_block_t)block {
+    NSParameterAssert(block);
+    if (!block) { return; }
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 @end

@@ -137,7 +137,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
-		result = [srvName copy];
+		result = [self->srvName copy];
 	};
 	
 	if (dispatch_get_specific(resolverQueueTag))
@@ -153,7 +153,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 	__block NSTimeInterval result = 0.0;
 	
 	dispatch_block_t block = ^{
-		result = timeout;
+		result = self->timeout;
 	};
 	
 	if (dispatch_get_specific(resolverQueueTag))
@@ -484,7 +484,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if (resolveInProgress)
+		if (self->resolveInProgress)
 		{
 			return;
 		}
@@ -493,13 +493,13 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		
 		// Save parameters
 		
-		srvName = [aSRVName copy];
+		self->srvName = [aSRVName copy];
 		
-		timeout = aTimeout;
+		self->timeout = aTimeout;
 		
 		// Check parameters
 		
-		const char *srvNameCStr = [srvName cStringUsingEncoding:NSASCIIStringEncoding];
+		const char *srvNameCStr = [self->srvName cStringUsingEncoding:NSASCIIStringEncoding];
 		if (srvNameCStr == NULL)
 		{
 			[self failWithDNSError:kDNSServiceErr_BadParam];
@@ -510,7 +510,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		// Create DNS Service
 		
 		DNSServiceErrorType sdErr;
-		sdErr = DNSServiceQueryRecord(&sdRef,                              // Pointer to unitialized DNSServiceRef
+		sdErr = DNSServiceQueryRecord(&self->sdRef,                              // Pointer to unitialized DNSServiceRef
 		                              kDNSServiceFlagsReturnIntermediates, // Flags
 		                              kDNSServiceInterfaceIndexAny,        // Interface index
 		                              srvNameCStr,                         // Full domain name
@@ -527,17 +527,17 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		
 		// Extract unix socket (so we can poll for events)
 		
-		sdFd = DNSServiceRefSockFD(sdRef);
-		if (sdFd < 0)
+		self->sdFd = DNSServiceRefSockFD(self->sdRef);
+		if (self->sdFd < 0)
 		{
 			// Todo...
 		}
 		
 		// Create GCD read source for sd file descriptor
 		
-		sdReadSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, sdFd, 0, resolverQueue);
+		self->sdReadSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, self->sdFd, 0, self->resolverQueue);
 		
-		dispatch_source_set_event_handler(sdReadSource, ^{ @autoreleasepool {
+		dispatch_source_set_event_handler(self->sdReadSource, ^{ @autoreleasepool {
 			
 			XMPPLogVerbose(@"%@: sdReadSource_eventHandler", THIS_FILE);
 			
@@ -546,7 +546,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 			// Invoking DNSServiceProcessResult will invoke our QueryRecordCallback,
 			// the callback we set when we created the sdRef.
 			
-			DNSServiceErrorType dnsErr = DNSServiceProcessResult(sdRef);
+			DNSServiceErrorType dnsErr = DNSServiceProcessResult(self->sdRef);
 			if (dnsErr != kDNSServiceErr_NoError)
 			{
 				[self failWithDNSError:dnsErr];
@@ -557,9 +557,9 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		#if !OS_OBJECT_USE_OBJC
 		dispatch_source_t theSdReadSource = sdReadSource;
 		#endif
-		DNSServiceRef theSdRef = sdRef;
+		DNSServiceRef theSdRef = self->sdRef;
 		
-		dispatch_source_set_cancel_handler(sdReadSource, ^{ @autoreleasepool {
+		dispatch_source_set_cancel_handler(self->sdReadSource, ^{ @autoreleasepool {
 			
 			XMPPLogVerbose(@"%@: sdReadSource_cancelHandler", THIS_FILE);
 			
@@ -570,15 +570,15 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 			
 		}});
 		
-		dispatch_resume(sdReadSource);
+		dispatch_resume(self->sdReadSource);
 		
 		// Create timer (if requested timeout > 0)
 		
-		if (timeout > 0.0)
+		if (self->timeout > 0.0)
 		{
-			timeoutTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, resolverQueue);
+			self->timeoutTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, self->resolverQueue);
 			
-			dispatch_source_set_event_handler(timeoutTimer, ^{ @autoreleasepool {
+			dispatch_source_set_event_handler(self->timeoutTimer, ^{ @autoreleasepool {
 				
 				NSString *errMsg = @"Operation timed out";
 				NSDictionary *userInfo = @{NSLocalizedDescriptionKey : errMsg};
@@ -589,13 +589,13 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 				
 			}});
 			
-			dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (timeout * NSEC_PER_SEC));
+			dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (self->timeout * NSEC_PER_SEC));
 			
-			dispatch_source_set_timer(timeoutTimer, tt, DISPATCH_TIME_FOREVER, 0);
-			dispatch_resume(timeoutTimer);
+			dispatch_source_set_timer(self->timeoutTimer, tt, DISPATCH_TIME_FOREVER, 0);
+			dispatch_resume(self->timeoutTimer);
 		}
 		
-		resolveInProgress = YES;
+		self->resolveInProgress = YES;
 	}};
 	
 	if (dispatch_get_specific(resolverQueueTag))
@@ -610,39 +610,39 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		
 		XMPPLogTrace();
 		
-		delegate = nil;
-		if (delegateQueue)
+		self->delegate = nil;
+		if (self->delegateQueue)
 		{
 			#if !OS_OBJECT_USE_OBJC
 			dispatch_release(delegateQueue);
 			#endif
-			delegateQueue = NULL;
+			self->delegateQueue = NULL;
 		}
 		
-		[results removeAllObjects];
+		[self->results removeAllObjects];
 		
-		if (sdReadSource)
+		if (self->sdReadSource)
 		{
 			// Cancel the readSource.
 			// It will be released from within the cancel handler.
-			dispatch_source_cancel(sdReadSource);
-			sdReadSource = NULL;
-			sdFd = -1;
+			dispatch_source_cancel(self->sdReadSource);
+			self->sdReadSource = NULL;
+			self->sdFd = -1;
 			
 			// The sdRef will be deallocated from within the cancel handler too.
-			sdRef = NULL;
+			self->sdRef = NULL;
 		}
 		
-		if (timeoutTimer)
+		if (self->timeoutTimer)
 		{
-			dispatch_source_cancel(timeoutTimer);
+			dispatch_source_cancel(self->timeoutTimer);
 			#if !OS_OBJECT_USE_OBJC
 			dispatch_release(timeoutTimer);
 			#endif
-			timeoutTimer = NULL;
+			self->timeoutTimer = NULL;
 		}
 		
-		resolveInProgress = NO;
+		self->resolveInProgress = NO;
 	}};
 	
 	if (dispatch_get_specific(resolverQueueTag))

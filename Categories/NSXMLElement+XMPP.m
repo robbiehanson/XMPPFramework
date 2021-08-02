@@ -61,6 +61,7 @@
     }
 }
 
+#if !TARGET_OS_IPHONE
 /**
  * Quick method to create an element
 **/
@@ -70,6 +71,7 @@
 	[element setXmlns:ns];
 	return element;
 }
+#endif
 
 - (id)initWithName:(NSString *)name xmlns:(NSString *)ns
 {
@@ -120,6 +122,7 @@
 	return elements;
 }
 
+#if !TARGET_OS_IPHONE
 /**
  * This method returns the first child element for the given name (as an NSXMLElement).
  * If no child elements exist for the given name, nil is returned.
@@ -135,23 +138,23 @@
 	{
 		// There is a bug in the NSXMLElement elementsForName: method.
 		// Consider the following XML fragment:
-		// 
+		//
 		// <query xmlns="jabber:iq:private">
 		//   <x xmlns="some:other:namespace"></x>
 		// </query>
-		// 
+		//
 		// Calling [query elementsForName:@"x"] results in an empty array!
-		// 
+		//
 		// However, it will work properly if you use the following:
 		// [query elementsForLocalName:@"x" URI:@"some:other:namespace"]
-		// 
+		//
 		// The trouble with this is that we may not always know the xmlns in advance,
 		// so in this particular case there is no way to access the element without looping through the children.
-		// 
+		//
 		// This bug was submitted to apple on June 1st, 2007 and was classified as "serious".
-		// 
+		//
 		// --!!-- This bug does NOT exist in DDXML --!!--
-		
+
 		return nil;
 	}
 }
@@ -172,6 +175,7 @@
 		return nil;
 	}
 }
+#endif
 
 - (NSXMLElement *)elementForName:(NSString *)name xmlnsPrefix:(NSString *)xmlnsPrefix{
     
@@ -250,6 +254,7 @@
     }
 }
 
+#if !TARGET_OS_IPHONE
 /**
  * Returns the common xmlns "attribute", which is only accessible via the namespace methods.
  * The xmlns value is often used in jabber elements.
@@ -282,6 +287,7 @@
 {
     return [self XMLStringWithOptions:NSXMLNodeCompactEmptyElement];
 }
+#endif
 
 /**
  *	Shortcut to avoid having to use NSXMLNode everytime
@@ -317,11 +323,6 @@
   [self addAttributeWithName:name numberValue:@(unsignedIntegerValue)];
 }
 
-- (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string
-{
-	[self addAttribute:[NSXMLNode attributeWithName:name stringValue:string]];
-}
-
 - (void)addAttributeWithName:(NSString *)name numberValue:(NSNumber *)number
 {
     [self addAttributeWithName:name stringValue:[number stringValue]];
@@ -342,6 +343,13 @@
         [self addAttributeWithName:name stringValue:[objectValue stringValue]];
     }
 }
+
+#if !TARGET_OS_IPHONE
+- (void)addAttributeWithName:(NSString *)name stringValue:(NSString *)string
+ {
+     [self addAttribute:[NSXMLNode attributeWithName:name stringValue:string]];
+ }
+#endif
 
 /**
  * The following methods return the corresponding value of the attribute with the given name.
@@ -550,6 +558,7 @@
 	return @([self attributeBoolValueForName:name withDefaultValue:defaultValue]);
 }
 
+#if !TARGET_OS_IPHONE
 /**
  * Returns all the attributes in a dictionary.
 **/
@@ -567,6 +576,7 @@
 	}
 	return result;
 }
+#endif
 
 /**
  * The following methods return the corresponding value of the node.

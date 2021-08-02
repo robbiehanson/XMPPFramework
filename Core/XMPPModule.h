@@ -13,6 +13,7 @@
  * The module also automatically registers/unregisters itself with the
  * xmpp stream during the activate/deactive methods.
 **/
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPModule : NSObject
 {
 	XMPPStream *xmppStream;
@@ -25,11 +26,12 @@
 
 @property (readonly) dispatch_queue_t moduleQueue;
 @property (readonly) void *moduleQueueTag;
+@property (strong, readonly, nullable) XMPPStream *xmppStream;
+@property (nonatomic, readonly) NSString *moduleName;
+@property (nonatomic, readonly) id multicastDelegate NS_REFINED_FOR_SWIFT;
 
-@property (strong, readonly) XMPPStream *xmppStream;
-
-- (id)init;
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue;
 
 - (BOOL)activate:(XMPPStream *)aXmppStream;
 - (void)deactivate;
@@ -38,6 +40,37 @@
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate;
 
-- (NSString *)moduleName;
-
 @end
+
+/**
+ * These helper methods are useful when synchronizing
+ * external access to properties in XMPPModule subclasses.
+ */
+@interface XMPPModule(Synchronization)
+/**
+ * Dispatches block synchronously on moduleQueue, or
+ * executes directly if we're already on the moduleQueue.
+ * This is most useful for synchronizing external read
+ * access to properties when writing XMPPModule subclasses.
+ *
+ *  if (dispatch_get_specific(moduleQueueTag))
+ *      block();
+ *  else
+ *      dispatch_sync(moduleQueue, block);
+ */
+- (void) performBlock:(dispatch_block_t)block NS_REFINED_FOR_SWIFT;
+
+/**
+ * Dispatches block asynchronously on moduleQueue, or
+ * executes directly if we're already on the moduleQueue.
+ * This is most useful for synchronizing external write
+ * access to properties when writing XMPPModule subclasses.
+ *
+ *  if (dispatch_get_specific(moduleQueueTag))
+ *      block();
+ *  else
+ *      dispatch_async(moduleQueue, block);
+ */
+- (void) performBlockAsync:(dispatch_block_t)block NS_REFINED_FOR_SWIFT;
+@end
+NS_ASSUME_NONNULL_END

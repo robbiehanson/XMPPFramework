@@ -34,6 +34,7 @@
  * 
  * If you use XMPPvCardAvatarModule, the roster will automatically support user photos.
 **/
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPRoster : XMPPModule
 {
 /*	Inherited from XMPPModule:
@@ -55,8 +56,10 @@
 	DDList *mucModules;
 }
 
-- (id)initWithRosterStorage:(id <XMPPRosterStorage>)storage;
-- (id)initWithRosterStorage:(id <XMPPRosterStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
+- (instancetype)initWithRosterStorage:(id <XMPPRosterStorage>)storage;
+- (instancetype)initWithRosterStorage:(id <XMPPRosterStorage>)storage dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
 /* Inherited from XMPPModule:
 
@@ -153,14 +156,14 @@
  * The roster has either been requested manually (fetchRoster:)
  * or automatically (autoFetchRoster) but has yet to be populated.
 **/
-@property (assign, getter = hasRequestedRoster, readonly) BOOL requestedRoster;
+@property (assign, readonly) BOOL hasRequestedRoster;
 
 /**
  * The initial roster has been received by client and is currently being populated.
  * @see xmppRosterDidBeginPopulating:withVersion:
  * @see xmppRosterDidEndPopulating:
 **/
-@property (assign, getter = isPopulating, readonly) BOOL populating;
+@property (assign, readonly) BOOL isPopulating;
 
 /**
  * The initial roster has been received by client and populated.
@@ -172,27 +175,27 @@
  * Useful if you disable autoFetchRoster.
 **/
 - (void)fetchRoster;
-- (void)fetchRosterVersion:(NSString *)version;
+- (void)fetchRosterVersion:(nullable NSString *)version;
 
 /**
  * Adds the given user to the roster with an optional nickname 
  * and requests permission to receive presence information from them.
 **/
-- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName;
+- (void)addUser:(XMPPJID *)jid withNickname:(nullable NSString *)optionalName;
 
 /**
  * Adds the given user to the roster with an optional nickname, 
  * adds the given user to groups
  * and requests permission to receive presence information from them.
 **/
-- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups;
+- (void)addUser:(XMPPJID *)jid withNickname:(nullable NSString *)optionalName groups:(nullable NSArray<NSString*> *)groups;
 
 /**
  * Adds the given user to the roster with an optional nickname,
  * adds the given user to groups
  * and optionally requests permission to receive presence information from them.
 **/
-- (void)addUser:(XMPPJID *)jid withNickname:(NSString *)optionalName groups:(NSArray *)groups subscribeToPresence:(BOOL)subscribe;
+- (void)addUser:(XMPPJID *)jid withNickname:(nullable NSString *)optionalName groups:(nullable NSArray<NSString*> *)groups subscribeToPresence:(BOOL)subscribe;
 
 /**
  * Sets/modifies the nickname for the given user.
@@ -334,12 +337,12 @@
 - (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream;
 - (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream;
 
-- (NSArray *)jidsForXMPPStream:(XMPPStream *)stream;
+- (NSArray<XMPPJID*> *)jidsForXMPPStream:(XMPPStream *)stream;
 
-- (void)getSubscription:(NSString **)subscription
-                    ask:(NSString **)ask
-               nickname:(NSString **)nickname
-                 groups:(NSArray **)groups
+- (void)getSubscription:(NSString * _Nullable * _Nullable)subscription
+                    ask:(NSString * _Nullable * _Nullable)ask
+               nickname:(NSString * _Nullable * _Nullable)nickname
+                 groups:(NSArray<NSString*> * _Nullable * _Nullable)groups
                  forJID:(XMPPJID *)jid
              xmppStream:(XMPPStream *)stream;
 
@@ -404,3 +407,5 @@
 - (void)xmppRoster:(XMPPRoster *)sender didReceiveRosterItem:(NSXMLElement *)item;
 
 @end
+NS_ASSUME_NONNULL_END
+

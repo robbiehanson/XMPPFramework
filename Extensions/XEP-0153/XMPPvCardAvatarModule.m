@@ -31,28 +31,19 @@ NSString *const kXMPPvCardAvatarElement = @"x";
 NSString *const kXMPPvCardAvatarNS = @"vcard-temp:x:update";
 NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
+@interface XMPPvCardAvatarModule() {
+    __strong XMPPvCardTempModule *_xmppvCardTempModule;
+    __strong id <XMPPvCardAvatarStorage> _moduleStorage;
+    
+    BOOL _autoClearMyvcard;
+}
+@end
 
 @implementation XMPPvCardAvatarModule
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Init/dealloc
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (id)init
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPvCardAvatarModule.h are supported.
-	
-	return [self initWithvCardTempModule:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPvCardAvatarModule.h are supported.
-	
-	return [self initWithvCardTempModule:nil dispatchQueue:NULL];
-}
 
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule
 {
@@ -94,7 +85,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = _autoClearMyvcard;
+		result = self->_autoClearMyvcard;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -108,7 +99,7 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 - (void)setAutoClearMyvcard:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		_autoClearMyvcard = flag;
+		self->_autoClearMyvcard = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -132,11 +123,11 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		photoData = [_moduleStorage photoDataForJID:jid xmppStream:xmppStream];
+		photoData = [self->_moduleStorage photoDataForJID:jid xmppStream:self->xmppStream];
 		
 		if (photoData == nil) 
 		{
-			[_xmppvCardTempModule vCardTempForJID:jid shouldFetch:YES];
+			[self->_xmppvCardTempModule vCardTempForJID:jid shouldFetch:YES];
 		}
 		
 	}};

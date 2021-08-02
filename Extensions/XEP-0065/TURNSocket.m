@@ -43,6 +43,44 @@
 #define TIMEOUT_READ          5.00
 #define TIMEOUT_TOTAL        80.00
 
+@interface TURNSocket() {
+    int state;
+    BOOL isClient;
+    
+    dispatch_queue_t turnQueue;
+    void *turnQueueTag;
+    
+    XMPPStream *xmppStream;
+    XMPPJID *jid;
+    NSString *uuid;
+    
+    id delegate;
+    dispatch_queue_t delegateQueue;
+    
+    dispatch_source_t turnTimer;
+    
+    NSString *discoUUID;
+    dispatch_source_t discoTimer;
+    
+    NSArray *proxyCandidates;
+    NSUInteger proxyCandidateIndex;
+    
+    NSMutableArray *candidateJIDs;
+    NSUInteger candidateJIDIndex;
+    
+    NSMutableArray *streamhosts;
+    NSUInteger streamhostIndex;
+    
+    XMPPJID *proxyJID;
+    NSString *proxyHost;
+    UInt16 proxyPort;
+    
+    GCDAsyncSocket *asyncSocket;
+    
+    NSDate *startTime, *finishTime;
+}
+@end
+
 // Declare private methods
 @interface TURNSocket (PrivateAPI)
 - (void)processDiscoItemsResponse:(XMPPIQ *)iq;
@@ -327,7 +365,7 @@ static NSMutableArray *proxyCandidates;
 	
 	dispatch_async(turnQueue, ^{ @autoreleasepool {
 		
-		if (state != STATE_INIT)
+		if (self->state != STATE_INIT)
 		{
 			XMPPLogWarn(@"%@: Ignoring start request. Turn procedure already started.", THIS_FILE);
 			return;
@@ -336,26 +374,26 @@ static NSMutableArray *proxyCandidates;
 		// Set reference to delegate and delegate's queue.
 		// Note that we do NOT retain the delegate.
 		
-		delegate = aDelegate;
-		delegateQueue = aDelegateQueue;
+		self->delegate = aDelegate;
+		self->delegateQueue = aDelegateQueue;
 		
 		#if !OS_OBJECT_USE_OBJC
 		dispatch_retain(delegateQueue);
 		#endif
 		
 		// Add self as xmpp delegate so we'll get message responses
-		[xmppStream addDelegate:self delegateQueue:turnQueue];
+		[self->xmppStream addDelegate:self delegateQueue:self->turnQueue];
 		
 		// Start the timer to calculate how long the procedure takes
-		startTime = [[NSDate alloc] init];
+		self->startTime = [[NSDate alloc] init];
 		
 		// Schedule timer to cancel the turn procedure.
 		// This ensures that, in the event of network error or crash,
 		// the TURNSocket object won't remain in memory forever, and will eventually fail.
 		
-		turnTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, turnQueue);
+		self->turnTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, self->turnQueue);
 		
-		dispatch_source_set_event_handler(turnTimer, ^{ @autoreleasepool {
+		dispatch_source_set_event_handler(self->turnTimer, ^{ @autoreleasepool {
 			
 			[self doTotalTimeout];
 			
@@ -363,12 +401,12 @@ static NSMutableArray *proxyCandidates;
 		
 		dispatch_time_t tt = dispatch_time(DISPATCH_TIME_NOW, (TIMEOUT_TOTAL * NSEC_PER_SEC));
 		
-		dispatch_source_set_timer(turnTimer, tt, DISPATCH_TIME_FOREVER, 0.1);
-		dispatch_resume(turnTimer);
+		dispatch_source_set_timer(self->turnTimer, tt, DISPATCH_TIME_FOREVER, 0.1);
+		dispatch_resume(self->turnTimer);
 		
 		// Start the TURN procedure
 		
-		if (isClient)
+		if (self->isClient)
 			[self queryProxyCandidates];
 		else
 			[self targetConnect];
@@ -395,12 +433,12 @@ static NSMutableArray *proxyCandidates;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if ((state > STATE_INIT) && (state < STATE_DONE))
+		if ((self->state > STATE_INIT) && (self->state < STATE_DONE))
 		{
 			// The only thing we really have to do here is move the state to failure.
 			// This simple act should prevent any further action from being taken in this TUNRSocket object,
 			// since every action is dictated based on the current state.
-			state = STATE_FAILURE;
+			self->state = STATE_FAILURE;
 			
 			// And don't forget to cleanup after ourselves
 			[self cleanup];
@@ -1464,9 +1502,9 @@ static NSMutableArray *proxyCandidates;
 	
 	dispatch_async(delegateQueue, ^{ @autoreleasepool {
 		
-		if ([delegate respondsToSelector:@selector(turnSocket:didSucceed:)])
+		if ([self->delegate respondsToSelector:@selector(turnSocket:didSucceed:)])
 		{
-			[delegate turnSocket:self didSucceed:asyncSocket];
+			[self->delegate turnSocket:self didSucceed:self->asyncSocket];
 		}
 	}});
 	
@@ -1487,9 +1525,9 @@ static NSMutableArray *proxyCandidates;
 	
 	dispatch_async(delegateQueue, ^{ @autoreleasepool {
 		
-		if ([delegate respondsToSelector:@selector(turnSocketDidFail:)])
+		if ([self->delegate respondsToSelector:@selector(turnSocketDidFail:)])
 		{
-			[delegate turnSocketDidFail:self];
+			[self->delegate turnSocketDidFail:self];
 		}
 		
 	}});

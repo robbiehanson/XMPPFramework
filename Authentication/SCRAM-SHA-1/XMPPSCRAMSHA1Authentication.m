@@ -115,7 +115,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	
 	if (![[authResponse name] isEqualToString:@"challenge"])
 	{
-		return XMPP_AUTH_FAIL;
+		return XMPPHandleAuthResponseFailed;
 	}
     
     NSDictionary *auth = [self dictionaryFromChallenge:authResponse];
@@ -135,10 +135,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         [xmppStream sendAuthElement:response];
         self.awaitingChallenge = NO;
         
-        return XMPP_AUTH_CONTINUE;
+        return XMPPHandleAuthResponseContinue;
     }
     else {
-        return XMPP_AUTH_FAIL;
+        return XMPPHandleAuthResponseFailed;
     }
 }
 
@@ -152,14 +152,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         NSString *receivedServerSignature = auth[@"v"];
         
         if([self.serverSignatureData isEqualToData:[[receivedServerSignature dataUsingEncoding:NSUTF8StringEncoding] xmpp_base64Decoded]]){
-            return XMPP_AUTH_SUCCESS;
+            return XMPPHandleAuthResponseSuccess;
         }
         else {
-            return XMPP_AUTH_FAIL;
+            return XMPPHandleAuthResponseFailed;
         }
     }
     else {
-        return XMPP_AUTH_FAIL;
+        return XMPPHandleAuthResponseFailed;
     }
 }
 

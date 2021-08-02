@@ -46,7 +46,7 @@
     __block NSArray<XMPPJID *> *result;
     
     dispatch_block_t block = ^{
-        result = pepPublisherJIDs;
+        result = self->pepPublisherJIDs;
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -76,7 +76,7 @@
     __block NSArray<NSString *> *result;
     
     dispatch_block_t block = ^{
-        result = pepNodes;
+        result = self->pepNodes;
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -99,22 +99,6 @@
         block();
     else
         dispatch_async(moduleQueue, block);
-}
-
-- (id)init
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPPubSub.h are supported.
-	
-	return [self initWithServiceJID:nil dispatchQueue:NULL];
-}
-
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue
-{
-	// This will cause a crash - it's designed to.
-	// Only the init methods listed in XMPPPubSub.h are supported.
-	
-	return [self initWithServiceJID:nil dispatchQueue:NULL];
 }
 
 - (id)initWithServiceJID:(XMPPJID *)aServiceJID
@@ -190,9 +174,9 @@
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if (xmppStream == stream)
+		if (self->xmppStream == stream)
 		{
-			myJID = xmppStream.myJID;
+			self->myJID = self->xmppStream.myJID;
 		}
 	}};
 	
@@ -641,7 +625,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		subscribeDict[uuid] = node;
+		self->subscribeDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.1.1:
@@ -717,7 +701,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		unsubscribeDict[uuid] = node;
+		self->unsubscribeDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.2.1:
@@ -760,9 +744,9 @@
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
 		if (node)
-			retrieveSubsDict[uuid] = node;
+			self->retrieveSubsDict[uuid] = node;
 		else
-			retrieveSubsDict[uuid] = [NSNull null];
+			self->retrieveSubsDict[uuid] = [NSNull null];
 	});
 	
 	// Get subscriptions for all nodes:
@@ -813,7 +797,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		configSubDict[uuid] = node;
+		self->configSubDict[uuid] = node;
 	});
 	
 	// Example from XEP-0060 section 6.3.5:
@@ -878,7 +862,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		createDict[uuid] = node;
+		self->createDict[uuid] = node;
 	});
 	
 	// <iq type='set' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='create1'>
@@ -938,7 +922,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		deleteDict[uuid] = node;
+		self->deleteDict[uuid] = node;
 	});
 	
 	// Example XEP-0060 section 8.4.1:
@@ -977,7 +961,7 @@
 	// Generate uuid and add to dict
 	NSString *uuid = [xmppStream generateUUID];
 	dispatch_async(moduleQueue, ^{
-		configNodeDict[uuid] = node;
+		self->configNodeDict[uuid] = node;
 	});
 	
 	// <iq type='get' from='hamlet@denmark.lit/elsinore' to='pubsub.shakespeare.lit' id='config1'>
@@ -1082,7 +1066,7 @@
 	[xmppStream sendElement:iq];
 	
 	dispatch_async(moduleQueue, ^{
-		publishDict[uuid] = node;
+		self->publishDict[uuid] = node;
 	});
 	return uuid;
 }
@@ -1131,7 +1115,7 @@
     [xmppStream sendElement:iq];
     
     dispatch_async(moduleQueue, ^{
-        retrieveItemsDict[uuid] = node;
+        self->retrieveItemsDict[uuid] = node;
     });
     return uuid;
 }

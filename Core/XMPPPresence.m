@@ -116,25 +116,32 @@
 	return [[self elementForName:@"status"] stringValue];
 }
 
-- (int)priority
+- (NSInteger)priority
 {
 	return [[[self elementForName:@"priority"] stringValue] intValue];
 }
 
-- (int)intShow
+- (XMPPPresenceShow)showValue
 {
 	NSString *show = [self show];
+    if (!show) {
+        return XMPPPresenceShowOther;
+    }
 	
 	if([show isEqualToString:@"dnd"])
-		return 0;
+		return XMPPPresenceShowDND;
 	if([show isEqualToString:@"xa"])
-		return 1;
+		return XMPPPresenceShowXA;
 	if([show isEqualToString:@"away"])
-		return 2;
+		return XMPPPresenceShowAway;
 	if([show isEqualToString:@"chat"])
-		return 4;
+		return XMPPPresenceShowChat;
 	
-	return 3;
+	return XMPPPresenceShowOther;
+}
+
+- (NSInteger) intShow {
+    return self.showValue;
 }
 
 - (BOOL)isErrorPresence

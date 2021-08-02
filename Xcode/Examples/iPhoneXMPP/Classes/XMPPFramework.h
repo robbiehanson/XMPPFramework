@@ -22,21 +22,21 @@
 //  THIS HEADER FILE SHOULD BE TAILORED TO MATCH YOUR APPLICATION.
 
 
-#import "XMPP.h"
+#import <XMPPFramework/XMPP.h>
 
 // List the modules you're using here.
 
-#import "XMPPReconnect.h"
+#import <XMPPFramework/XMPPReconnect.h>
 
-#import "XMPPRoster.h"
-#import "XMPPRosterCoreDataStorage.h"
+#import <XMPPFramework/XMPPRoster.h>
+#import <XMPPFramework/XMPPRosterCoreDataStorage.h>
 
-#import "XMPPvCardTempModule.h"
-#import "XMPPvCardAvatarModule.h"
-#import "XMPPvCardCoreDataStorage.h"
+#import <XMPPFramework/XMPPvCardTempModule.h>
+#import <XMPPFramework/XMPPvCardAvatarModule.h>
+#import <XMPPFramework/XMPPvCardCoreDataStorage.h>
 
-#import "XMPPCapabilities.h"
-#import "XMPPCapabilitiesCoreDataStorage.h"
+#import <XMPPFramework/XMPPCapabilities.h>
+#import <XMPPFramework/XMPPCapabilitiesCoreDataStorage.h>
 
-#import "XMPPMUC.h"
-#import "XMPPRoomCoreDataStorage.h"
+#import <XMPPFramework/XMPPMUC.h>
+#import <XMPPFramework/XMPPRoomCoreDataStorage.h>

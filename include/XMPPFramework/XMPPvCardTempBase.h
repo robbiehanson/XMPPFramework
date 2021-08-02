@@ -1,0 +1,1 @@
+../../Extensions/XEP-0054/XMPPvCardTempBase.h

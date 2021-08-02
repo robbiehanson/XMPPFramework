@@ -4,8 +4,8 @@
 
 @interface XMPPMessage(XEP0045)
 
-- (BOOL)isGroupChatMessage;
-- (BOOL)isGroupChatMessageWithBody;
-- (BOOL)isGroupChatMessageWithSubject;
+@property (nonatomic, readonly) BOOL isGroupChatMessage;
+@property (nonatomic, readonly) BOOL isGroupChatMessageWithBody;
+@property (nonatomic, readonly) BOOL isGroupChatMessageWithSubject;
 
 @end

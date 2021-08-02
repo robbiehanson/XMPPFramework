@@ -56,7 +56,7 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
 /** Not available, use designated initializer */
 - (instancetype) init NS_UNAVAILABLE;
 /** Not available, use designated initializer */
-- (instancetype) initWithDispatchQueue:(dispatch_queue_t)queue NS_UNAVAILABLE;
+- (instancetype) initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
 
 #pragma mark Public methods
 
@@ -127,6 +127,13 @@ typedef NS_ENUM(NSUInteger, OMEMOModuleNamespace) {
                toJID:(XMPPJID*)toJID
              payload:(nullable NSData*)payload
            elementId:(nullable NSString*)elementId;
+
+/** Returns an unsent OMEMO message to be modified or sent elsewhere. Beware this may block! */
+- (nullable XMPPMessage*) messageForKeyData:(NSArray<OMEMOKeyData*>*)keyData
+                                iv:(NSData*)iv
+                             toJID:(XMPPJID*)toJID
+                           payload:(nullable NSData*)payload
+                         elementId:(nullable NSString*)elementId;
 
 #pragma mark Namespace methods
 
@@ -219,6 +226,19 @@ senderDeviceId:(uint32_t)senderDeviceId
       fromJID:(XMPPJID*)fromJID
       payload:(nullable NSData*)payload
       message:(XMPPMessage*)message;
+
+
+/** This is called when receiving a MAM or Carbons message */
+- (void)omemo:(OMEMOModule*)omemo
+receivedForwardedKeyData:(NSArray<OMEMOKeyData*>*)keyData
+           iv:(NSData*)iv
+senderDeviceId:(uint32_t)senderDeviceId
+       forJID:(XMPPJID*)forJID
+      payload:(nullable NSData*)payload
+   isIncoming:(BOOL)isIncoming
+      delayed:(nullable NSDate*)delayed
+forwardedMessage:(XMPPMessage*)forwardedMessage
+originalMessage:(XMPPMessage*)originalMessage;
 
 @end
 

@@ -4,8 +4,9 @@
 #define _XMPP_STREAM_MANAGEMENT_H
 
 @protocol XMPPStreamManagementStorage;
+@class XMPPStreamManagementOutgoingStanza;
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPStreamManagement : XMPPModule <XMPPCustomBinding>
 
 /**
@@ -20,8 +21,10 @@
  * @param queue
  *   The standard dispatch_queue option, with which to run the extension on.
 **/
-- (id)initWithStorage:(id <XMPPStreamManagementStorage>)storage;
-- (id)initWithStorage:(id <XMPPStreamManagementStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
+- (instancetype)initWithStorage:(id <XMPPStreamManagementStorage>)storage;
+- (instancetype)initWithStorage:(id <XMPPStreamManagementStorage>)storage dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, strong, readonly) id <XMPPStreamManagementStorage> storage;
 
@@ -109,8 +112,8 @@
  *   YES if the stream was resumed.
  *   NO otherwise.
 **/
-- (BOOL)didResumeWithAckedStanzaIds:(NSArray **)stanzaIdsPtr
-					 serverResponse:(NSXMLElement **)responsePtr;
+- (BOOL)didResumeWithAckedStanzaIds:(NSArray<id> * _Nullable * _Nullable)stanzaIdsPtr
+					 serverResponse:(NSXMLElement * _Nullable * _Nullable)responsePtr;
 
 /**
  * Returns YES if the stream can be resumed.
@@ -170,7 +173,7 @@
  *
  * @see automaticallyRequestAcksAfterStanzaCount:orTimeout:
 **/
-- (void)getAutomaticallyRequestAcksAfterStanzaCount:(NSUInteger *)stanzaCountPtr orTimeout:(NSTimeInterval *)timeoutPtr;
+- (void)getAutomaticallyRequestAcksAfterStanzaCount:(NSUInteger * _Nullable)stanzaCountPtr orTimeout:(NSTimeInterval * _Nullable)timeoutPtr;
 
 
 #pragma mark Sending Acks
@@ -220,7 +223,7 @@
  * 
  * @see automaticallySendAcksAfterStanzaCount:orTimeout:
 **/
-- (void)getAutomaticallySendAcksAfterStanzaCount:(NSUInteger *)stanzaCountPtr orTimeout:(NSTimeInterval *)timeoutPtr;
+- (void)getAutomaticallySendAcksAfterStanzaCount:(NSUInteger * _Nullable)stanzaCountPtr orTimeout:(NSTimeInterval * _Nullable)timeoutPtr;
 
 /**
  * If an explicit request <r/> is received from the server, should we delay sending the ack <a/> ?
@@ -318,7 +321,7 @@
  * 
  * For more information, see the delegate method xmppStreamManagement:stanzaIdForSentElement:
 **/
-- (void)xmppStreamManagement:(XMPPStreamManagement *)sender didReceiveAckForStanzaIds:(NSArray *)stanzaIds;
+- (void)xmppStreamManagement:(XMPPStreamManagement *)sender didReceiveAckForStanzaIds:(NSArray<id> *)stanzaIds;
 
 /**
  * XEP-0198 reports the following regarding duplicate stanzas:
@@ -352,7 +355,7 @@
  * If the stanza isn't assigned a stanzaId (via a delegate method),
  * and it doesn't have an elementId, then it isn't reported in the acked stanzaIds array.
 **/
-- (id)xmppStreamManagement:(XMPPStreamManagement *)sender stanzaIdForSentElement:(XMPPElement *)element;
+- (nullable id)xmppStreamManagement:(XMPPStreamManagement *)sender stanzaIdForSentElement:(XMPPElement *)element;
 
 /**
  * It's critically important to understand what an ACK means.
@@ -397,8 +400,8 @@
  * @see markHandledStanzaId:
 **/
 - (void)xmppStreamManagement:(XMPPStreamManagement *)sender
-                getIsHandled:(BOOL *)isHandledPtr
-                    stanzaId:(id *)stanzaIdPtr
+                getIsHandled:(BOOL * _Nullable)isHandledPtr
+                    stanzaId:(id _Nullable * _Nullable)stanzaIdPtr
           forReceivedElement:(XMPPElement *)element;
 
 @end
@@ -462,9 +465,9 @@
  * - lastHandledByServer
  * - pendingOutgoingStanzas
 **/
-- (void)setResumptionId:(NSString *)resumptionId
+- (void)setResumptionId:(nullable NSString *)resumptionId
                 timeout:(uint32_t)timeout
-         lastDisconnect:(NSDate *)date
+         lastDisconnect:(nullable NSDate *)date
               forStream:(XMPPStream *)stream;
 
 /**
@@ -482,7 +485,7 @@
  * @param stream
  *   The associated xmppStream (standard parameter for storage classes)
 **/
-- (void)setLastDisconnect:(NSDate *)date
+- (void)setLastDisconnect:(nullable NSDate *)date
       lastHandledByClient:(uint32_t)lastHandledByClient
                 forStream:(XMPPStream *)stream;
 
@@ -507,9 +510,9 @@
  * @param stream
  *   The associated xmppStream (standard parameter for storage classes)
 **/
-- (void)setLastDisconnect:(NSDate *)date
+- (void)setLastDisconnect:(nullable NSDate *)date
       lastHandledByServer:(uint32_t)lastHandledByServer
-   pendingOutgoingStanzas:(NSArray *)pendingOutgoingStanzas
+   pendingOutgoingStanzas:(nullable NSArray<XMPPStreamManagementOutgoingStanza*> *)pendingOutgoingStanzas
                 forStream:(XMPPStream *)stream;
 
 
@@ -570,28 +573,28 @@
  * @param stream
  *   The associated xmppStream (standard parameter for storage classes)
 **/
-- (void)setLastDisconnect:(NSDate *)date
+- (void)setLastDisconnect:(nullable NSDate *)date
       lastHandledByClient:(uint32_t)lastHandledByClient
       lastHandledByServer:(uint32_t)lastHandledByServer
-   pendingOutgoingStanzas:(NSArray *)pendingOutgoingStanzas
+   pendingOutgoingStanzas:(nullable NSArray<XMPPStreamManagementOutgoingStanza*> *)pendingOutgoingStanzas
                 forStream:(XMPPStream *)stream;
 
 /**
  * Invoked when the extension needs values from a previous session.
  * This method is used to get values needed in order to determine if it can resume a previous stream.
 **/
-- (void)getResumptionId:(NSString **)resumptionIdPtr
-                timeout:(uint32_t *)timeoutPtr
-         lastDisconnect:(NSDate **)lastDisconnectPtr
+- (void)getResumptionId:(NSString * _Nullable * _Nullable)resumptionIdPtr
+                timeout:(uint32_t * _Nullable)timeoutPtr
+         lastDisconnect:(NSDate * _Nullable * _Nullable)lastDisconnectPtr
               forStream:(XMPPStream *)stream;
 
 /**
  * Invoked when the extension needs values from a previous session.
  * This method is used to get values needed in order to resume a previous stream.
 **/
-- (void)getLastHandledByClient:(uint32_t *)lastHandledByClientPtr
-           lastHandledByServer:(uint32_t *)lastHandledByServerPtr
-        pendingOutgoingStanzas:(NSArray **)pendingOutgoingStanzasPtr
+- (void)getLastHandledByClient:(uint32_t * _Nullable)lastHandledByClientPtr
+           lastHandledByServer:(uint32_t * _Nullable)lastHandledByServerPtr
+        pendingOutgoingStanzas:(NSArray<XMPPStreamManagementOutgoingStanza*> * _Nullable * _Nullable)pendingOutgoingStanzasPtr
                      forStream:(XMPPStream *)stream;
 
 /**
@@ -612,6 +615,7 @@
 /**
  * Returns whether or not the server's <stream:features> includes <sm xmlns='urn:xmpp:sm:3'/>.
 **/
-- (BOOL)supportsStreamManagement;
+@property (nonatomic, readonly) BOOL supportsStreamManagement;
 
 @end
+NS_ASSUME_NONNULL_END

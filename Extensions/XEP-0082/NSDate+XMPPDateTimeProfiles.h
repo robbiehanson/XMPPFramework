@@ -10,17 +10,16 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 @interface NSDate(XMPPDateTimeProfiles)
 
++ (nullable NSDate *)dateWithXmppDateString:(NSString *)str;
++ (nullable NSDate *)dateWithXmppTimeString:(NSString *)str;
++ (nullable NSDate *)dateWithXmppDateTimeString:(NSString *)str;
 
-+ (NSDate *)dateWithXmppDateString:(NSString *)str;
-+ (NSDate *)dateWithXmppTimeString:(NSString *)str;
-+ (NSDate *)dateWithXmppDateTimeString:(NSString *)str;
-
-
-- (NSString *)xmppDateString;
-- (NSString *)xmppTimeString;
-- (NSString *)xmppDateTimeString;
-
+@property (nonatomic, readonly) NSString *xmppDateString;
+@property (nonatomic, readonly) NSString *xmppTimeString;
+@property (nonatomic, readonly) NSString *xmppDateTimeString;
 
 @end
+NS_ASSUME_NONNULL_END

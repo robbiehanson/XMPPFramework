@@ -7,6 +7,7 @@
 * should be inside that extension rather than here.
 */
 
+NS_ASSUME_NONNULL_BEGIN
 extern NSString *const XMPPSINamespace;
 extern NSString *const XMPPSIProfileFileTransferNamespace;
 extern NSString *const XMPPFeatureNegNamespace;
@@ -14,3 +15,4 @@ extern NSString *const XMPPBytestreamsNamespace;
 extern NSString *const XMPPIBBNamespace;
 extern NSString *const XMPPDiscoItemsNamespace;
 extern NSString *const XMPPDiscoInfoNamespace;
+NS_ASSUME_NONNULL_END

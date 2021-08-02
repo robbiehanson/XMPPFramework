@@ -25,17 +25,10 @@
 
 @protocol XMPPvCardAvatarStorage;
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPvCardAvatarModule : XMPPModule <XMPPvCardTempModuleDelegate>
-{
-	__strong XMPPvCardTempModule *_xmppvCardTempModule;
-	__strong id <XMPPvCardAvatarStorage> _moduleStorage;
-	
-	BOOL _autoClearMyvcard;
-}
 
 @property(nonatomic, strong, readonly) XMPPvCardTempModule *xmppvCardTempModule;
-
 
 /*
  * XEP-0153 Section 4.2 rule 1
@@ -48,11 +41,13 @@
 @property(nonatomic, assign) BOOL autoClearMyvcard;
 
 
-- (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;
-- (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule  dispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
+- (instancetype)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule;
+- (instancetype)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule  dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
 
-- (NSData *)photoDataForJID:(XMPPJID *)jid;
+- (nullable NSData *)photoDataForJID:(XMPPJID *)jid;
 
 @end
 
@@ -80,8 +75,8 @@
 
 @protocol XMPPvCardAvatarStorage <NSObject>
 
-- (NSData *)photoDataForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
-- (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (nullable NSData *)photoDataForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (nullable NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 /**
  * Clears the vCardTemp from the store.
@@ -90,4 +85,4 @@
 - (void)clearvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end
-
+NS_ASSUME_NONNULL_END

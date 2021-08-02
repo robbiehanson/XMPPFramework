@@ -1,35 +1,48 @@
 PODS:
-  - CocoaAsyncSocket (7.6.0)
-  - CocoaLumberjack (3.0.0):
-    - CocoaLumberjack/Default (= 3.0.0)
-    - CocoaLumberjack/Extensions (= 3.0.0)
-  - CocoaLumberjack/Core (3.0.0)
-  - CocoaLumberjack/Default (3.0.0):
-    - CocoaLumberjack/Core
-  - CocoaLumberjack/Extensions (3.0.0):
+  - CocoaAsyncSocket (7.6.3)
+  - CocoaLumberjack (3.4.2):
+    - CocoaLumberjack/Default (= 3.4.2)
+    - CocoaLumberjack/Extensions (= 3.4.2)
+  - CocoaLumberjack/Default (3.4.2)
+  - CocoaLumberjack/Extensions (3.4.2):
     - CocoaLumberjack/Default
-  - KissXML (5.2.0)
-  - libidn (1.33)
-  - XMPPFramework (3.7.0):
-    - CocoaAsyncSocket (~> 7.6.0)
+  - CocoaLumberjack/Swift (3.4.2):
+    - CocoaLumberjack/Default
+  - KissXML (5.2.3)
+  - libidn (1.35)
+  - XMPPFramework (4.1.1):
+    - XMPPFramework/default (= 4.1.1)
+  - XMPPFramework/default (4.1.1):
+    - CocoaAsyncSocket (~> 7.6)
     - CocoaLumberjack
-    - KissXML (~> 5.2.0)
-    - libidn (~> 1.33.0)
+    - KissXML (~> 5.2)
+    - libidn (~> 1.35)
+  - XMPPFramework/Swift (4.1.1):
+    - CocoaLumberjack/Swift
+    - XMPPFramework/default
 
 DEPENDENCIES:
   - XMPPFramework (from `../../`)
+  - XMPPFramework/Swift (from `../../`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - CocoaAsyncSocket
+    - CocoaLumberjack
+    - KissXML
+    - libidn
 
 EXTERNAL SOURCES:
   XMPPFramework:
     :path: "../../"
 
 SPEC CHECKSUMS:
-  CocoaAsyncSocket: b9d5589f07baf9de8f34cc25abd4fcba28f13805
-  CocoaLumberjack: c823149bccc5519a9447aeb433be7b1212a7d6a5
-  KissXML: 1c1eeeb6b94e4522cd2f2373e5d0d03c9227738f
-  libidn: 90fc1a62b60288dcf543f13f4ebca913f17d829f
-  XMPPFramework: 164ed2ce99e3eb2f358e9f5ca5eeaa8d75339fde
+  CocoaAsyncSocket: eafaa68a7e0ec99ead0a7b35015e0bf25d2c8987
+  CocoaLumberjack: db7cc9e464771f12054c22ff6947c5a58d43a0fd
+  KissXML: 09f88ff8161fd058d67b70740b8b516687b52823
+  libidn: e4576a956b797c584c77aaedfc6e3dd639b61bdc
+  XMPPFramework: ad98a1449e074ef4e642c348c02f5ca235a0e34e
 
-PODFILE CHECKSUM: 189df3d04c4edec13c490940533ce3a8b9b33e5b
+PODFILE CHECKSUM: d06d8aad56c091bf567d7a678dfe9985eec650d7
 
-COCOAPODS: 1.2.1
+COCOAPODS: 1.5.3

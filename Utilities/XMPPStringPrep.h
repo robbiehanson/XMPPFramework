@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPStringPrep : NSObject
 
 /**
@@ -11,7 +11,7 @@
  * 
  * Note: The prep properly converts the string to lowercase, as per the RFC.
 **/
-+ (NSString *)prepNode:(NSString *)node;
++ (nullable NSString *)prepNode:(NSString *)node;
 
 /**
  * Preps a domain name for use in a JID.
@@ -19,7 +19,7 @@
  * 
  * See the XMPP RFC (6120) for details.
 **/
-+ (NSString *)prepDomain:(NSString *)domain;
++ (nullable NSString *)prepDomain:(NSString *)domain;
 
 /**
  * Preps a resource identifier for use in a JID.
@@ -27,7 +27,7 @@
  *
  * See the XMPP RFC (6120) for details.
  **/
-+ (NSString *)prepResource:(NSString *)resource;
++ (nullable NSString *)prepResource:(NSString *)resource;
 
 /**
  * Preps a password with SASLprep profile.
@@ -36,6 +36,7 @@
  * See the SCRAM RFC (5802) for details.
  **/
 
-+ (NSString *) prepPassword:(NSString *)password;
++ (nullable NSString *) prepPassword:(NSString *)password;
 
 @end
+NS_ASSUME_NONNULL_END

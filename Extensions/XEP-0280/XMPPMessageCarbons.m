@@ -22,6 +22,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 #define XMLNS_XMPP_MESSAGE_CARBONS @"urn:xmpp:carbons:2"
 
+@interface XMPPMessageCarbons()
+{
+    BOOL autoEnableMessageCarbons;
+    BOOL allowsUntrustedMessageCarbons;
+    BOOL messageCarbonsEnabled;
+    
+    XMPPIDTracker *xmppIDTracker;
+}
+@end
+
 @implementation XMPPMessageCarbons
 
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue
@@ -52,11 +62,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)deactivate
 {
 	XMPPLogTrace();
-    
+
     dispatch_block_t block = ^{ @autoreleasepool {
         
-		[xmppIDTracker removeAllIDs];
-		xmppIDTracker = nil;
+        [self->xmppIDTracker removeAllIDs];
+        self->xmppIDTracker = nil;
         
 	}};
     
@@ -77,7 +87,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = autoEnableMessageCarbons;
+        result = self->autoEnableMessageCarbons;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -91,7 +101,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)setAutoEnableMessageCarbons:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		autoEnableMessageCarbons = flag;
+        self->autoEnableMessageCarbons = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -105,7 +115,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     __block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = messageCarbonsEnabled;
+        result = self->messageCarbonsEnabled;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -121,7 +131,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = allowsUntrustedMessageCarbons;
+        result = self->allowsUntrustedMessageCarbons;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -135,7 +145,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)setAllowsUntrustedMessageCarbons:(BOOL)flag
 {
 	dispatch_block_t block = ^{
-		allowsUntrustedMessageCarbons = flag;
+        self->allowsUntrustedMessageCarbons = flag;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -148,7 +158,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     dispatch_block_t block = ^{
         
-        if(!messageCarbonsEnabled && [xmppIDTracker numberOfIDs] == 0)
+        if(!self->messageCarbonsEnabled && [self->xmppIDTracker numberOfIDs] == 0)
         {
             NSString *elementID = [XMPPStream generateUUID];
             XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:elementID];
@@ -157,12 +167,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             NSXMLElement *enable = [NSXMLElement elementWithName:@"enable" xmlns:XMLNS_XMPP_MESSAGE_CARBONS];
             [iq addChild:enable];
             
-            [xmppIDTracker addElement:iq
-                               target:self
-                             selector:@selector(enableMessageCarbonsIQ:withInfo:)
-                              timeout:XMPPIDTrackerTimeoutNone];
+            [self->xmppIDTracker addElement:iq
+                                     target:self
+                                   selector:@selector(enableMessageCarbonsIQ:withInfo:)
+                                    timeout:XMPPIDTrackerTimeoutNone];
             
-            [xmppStream sendElement:iq];
+            [self->xmppStream sendElement:iq];
         }
     };
     
@@ -176,7 +186,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     dispatch_block_t block = ^{
         
-        if(messageCarbonsEnabled && [xmppIDTracker numberOfIDs] == 0)
+        if(self->messageCarbonsEnabled && [self->xmppIDTracker numberOfIDs] == 0)
         {
             NSString *elementID = [XMPPStream generateUUID];
             
@@ -186,12 +196,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             NSXMLElement *enable = [NSXMLElement elementWithName:@"disable" xmlns:XMLNS_XMPP_MESSAGE_CARBONS];
             [iq addChild:enable];
             
-            [xmppIDTracker addElement:iq
-                               target:self
-                             selector:@selector(disableMessageCarbonsIQ:withInfo:)
-                              timeout:XMPPIDTrackerTimeoutNone];
+            [self->xmppIDTracker addElement:iq
+                                     target:self
+                                   selector:@selector(disableMessageCarbonsIQ:withInfo:)
+                                    timeout:XMPPIDTrackerTimeoutNone];
             
-            [xmppStream sendElement:iq];
+            [self->xmppStream sendElement:iq];
         }
     };
     

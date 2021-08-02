@@ -117,39 +117,36 @@ extern const NSTimeInterval XMPPIDTrackerTimeoutNone;
  * This class is NOT thread-safe.
  * It is designed to be used within a thread-safe context (e.g. within a single dispatch_queue).
 **/
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPIDTracker : NSObject
-{
-    XMPPStream *xmppStream;
-	dispatch_queue_t queue;
-	
-	NSMutableDictionary *dict;
-}
 
-- (id)initWithDispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init NS_UNAVAILABLE;
 
-- (id)initWithStream:(XMPPStream *)stream dispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)initWithDispatchQueue:(dispatch_queue_t)queue;
 
-- (void)addID:(NSString *)elementID target:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout;
+- (instancetype)initWithStream:(nullable XMPPStream *)stream dispatchQueue:(dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
-- (void)addElement:(XMPPElement *)element target:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout;
+- (void)addID:(NSString *)elementID target:(nullable id)target selector:(nullable SEL)selector timeout:(NSTimeInterval)timeout;
+
+- (void)addElement:(XMPPElement *)element target:(nullable id)target selector:(nullable SEL)selector timeout:(NSTimeInterval)timeout;
 
 - (void)addID:(NSString *)elementID
-        block:(void (^)(id obj, id <XMPPTrackingInfo> info))block
+        block:(void (^_Nullable)(id _Nullable obj, id <XMPPTrackingInfo> info))block
       timeout:(NSTimeInterval)timeout;
 
 - (void)addElement:(XMPPElement *)element
-             block:(void (^)(id obj, id <XMPPTrackingInfo> info))block
+             block:(void (^_Nullable)(id _Nullable obj, id <XMPPTrackingInfo> info))block
            timeout:(NSTimeInterval)timeout;
 
 - (void)addID:(NSString *)elementID trackingInfo:(id <XMPPTrackingInfo>)trackingInfo;
 
 - (void)addElement:(XMPPElement *)element trackingInfo:(id <XMPPTrackingInfo>)trackingInfo;
 
-- (BOOL)invokeForID:(NSString *)elementID withObject:(id)obj;
+- (BOOL)invokeForID:(NSString *)elementID withObject:(nullable id)obj;
 
-- (BOOL)invokeForElement:(XMPPElement *)element withObject:(id)obj;
+- (BOOL)invokeForElement:(XMPPElement *)element withObject:(nullable id)obj;
 
-- (NSUInteger)numberOfIDs;
+@property (nonatomic, readonly) NSUInteger numberOfIDs;
 
 - (void)removeID:(NSString *)elementID;
 - (void)removeAllIDs;
@@ -171,7 +168,7 @@ extern const NSTimeInterval XMPPIDTrackerTimeoutNone;
 - (void)createTimerWithDispatchQueue:(dispatch_queue_t)queue;
 - (void)cancelTimer;
 
-- (void)invokeWithObject:(id)obj;
+- (void)invokeWithObject:(nullable id)obj;
 
 @end
 
@@ -180,21 +177,9 @@ extern const NSTimeInterval XMPPIDTrackerTimeoutNone;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @interface XMPPBasicTrackingInfo : NSObject <XMPPTrackingInfo>
-{
-	id target;
-	SEL selector;
-	
-	void (^block)(id obj, id <XMPPTrackingInfo> info);
-	
-	NSTimeInterval timeout;
-	
-	NSString *elementID;
-    XMPPElement *element;
-	dispatch_source_t timer;
-}
 
-- (id)initWithTarget:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout;
-- (id)initWithBlock:(void (^)(id obj, id <XMPPTrackingInfo> info))block timeout:(NSTimeInterval)timeout;
+- (instancetype)initWithTarget:(nullable id)target selector:(nullable SEL)selector timeout:(NSTimeInterval)timeout;
+- (instancetype)initWithBlock:(void (^_Nullable)(id _Nullable obj, id <XMPPTrackingInfo> info))block timeout:(NSTimeInterval)timeout;
 
 @property (nonatomic, readonly) NSTimeInterval timeout;
 
@@ -205,6 +190,7 @@ extern const NSTimeInterval XMPPIDTrackerTimeoutNone;
 - (void)createTimerWithDispatchQueue:(dispatch_queue_t)queue;
 - (void)cancelTimer;
 
-- (void)invokeWithObject:(id)obj;
+- (void)invokeWithObject:(nullable id)obj;
 
 @end
+NS_ASSUME_NONNULL_END

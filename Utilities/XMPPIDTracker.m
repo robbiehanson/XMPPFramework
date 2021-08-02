@@ -23,13 +23,14 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @interface XMPPIDTracker ()
-{
-	void *queueTag;
-}
-
+@property (nonatomic) void *queueTag;
+@property (nonatomic, strong, nullable) XMPPStream *xmppStream;
+@property (nonatomic, strong) dispatch_queue_t queue;
+@property (nonatomic, strong) NSMutableDictionary *dict;
 @end
 
 @implementation XMPPIDTracker
+@synthesize queueTag, xmppStream, queue, dict;
 
 - (id)init
 {
@@ -244,11 +245,23 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+@interface XMPPBasicTrackingInfo()
+@property (nonatomic, strong) id target;
+@property (nonatomic) SEL selector;
+
+@property (nonatomic, strong) void (^block)(id obj, id <XMPPTrackingInfo> info);
+
+@property (nonatomic) NSTimeInterval timeout;
+
+@property (nonatomic, strong) dispatch_source_t timer;
+@end
+
 @implementation XMPPBasicTrackingInfo
 
 @synthesize timeout;
 @synthesize elementID;
 @synthesize element;
+@synthesize target, selector, timer, block;
 
 - (id)init
 {

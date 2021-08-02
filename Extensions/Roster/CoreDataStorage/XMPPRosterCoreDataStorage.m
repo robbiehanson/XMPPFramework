@@ -266,7 +266,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet addObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]];
+		[self->rosterPopulationSet addObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]];
     
 		// Clear anything already in the roster core data store.
 		// 
@@ -280,7 +280,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
-		[fetchRequest setFetchBatchSize:saveThreshold];
+		[fetchRequest setFetchBatchSize:self->saveThreshold];
 		
 		if (stream)
 		{
@@ -308,7 +308,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	
 	[self scheduleBlock:^{
 		
-		[rosterPopulationSet removeObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]];
+		[self->rosterPopulationSet removeObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]];
 	}];
 }
 
@@ -324,7 +324,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		NSManagedObjectContext *moc = [self managedObjectContext];
 		
-		if ([rosterPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]])
+		if ([self->rosterPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]])
 		{
 			NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
 			
@@ -457,7 +457,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
-		[fetchRequest setFetchBatchSize:saveThreshold];
+		[fetchRequest setFetchBatchSize:self->saveThreshold];
 		
 		if (stream)
 		{
@@ -476,7 +476,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		{
 			[moc deleteObject:user];
 			
-			if (++unsavedCount >= saveThreshold)
+			if (++unsavedCount >= self->saveThreshold)
 			{
 				[self save];
 				unsavedCount = 0;
@@ -502,7 +502,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		
 		NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 		[fetchRequest setEntity:entity];
-		[fetchRequest setFetchBatchSize:saveThreshold];
+		[fetchRequest setFetchBatchSize:self->saveThreshold];
 		
 		if (stream)
 		{
@@ -524,10 +524,10 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     return results;
 }
 
-- (void)getSubscription:(NSString **)subscription
-                    ask:(NSString **)ask
-               nickname:(NSString **)nickname
-                 groups:(NSArray **)groups
+- (void)getSubscription:(NSString * _Nullable __autoreleasing * _Nullable)subscription
+                    ask:(NSString * _Nullable __autoreleasing * _Nullable)ask
+               nickname:(NSString * _Nullable __autoreleasing * _Nullable)nickname
+                 groups:(NSArray<NSString*> * _Nullable __autoreleasing * _Nullable)groups
                  forJID:(XMPPJID *)jid
              xmppStream:(XMPPStream *)stream
 {

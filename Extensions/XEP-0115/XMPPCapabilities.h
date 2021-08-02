@@ -17,6 +17,7 @@
  * provides a mechanism to persistently store XEP-0115 hased caps,
  * and makes available a simple API to query (disco#info) a resource or server.
 **/
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPCapabilities : XMPPModule
 {
 	__strong id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
@@ -40,8 +41,11 @@
 	NSMutableSet *timers;
 }
 
-- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
-- (id)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
+
+- (instancetype)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage;
+- (instancetype)initWithCapabilitiesStorage:(id <XMPPCapabilitiesStorage>)storage dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, strong, readonly) id <XMPPCapabilitiesStorage> xmppCapabilitiesStorage;
 
@@ -143,7 +147,7 @@
  * If given, the jid must have been registered via the given stream.
  * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (BOOL)areCapabilitiesKnownForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (BOOL)areCapabilitiesKnownForJID:(nullable XMPPJID *)jid xmppStream:(nullable XMPPStream *)stream;
 
 /**
  * Returns the capabilities for the given jid.
@@ -153,7 +157,7 @@
  * If given, the jid must have been registered via the given stream.
  * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (nullable NSXMLElement *)capabilitiesForJID:(nullable XMPPJID *)jid xmppStream:(nullable XMPPStream *)stream;
 
 /**
  * Returns the capabilities for the given jid.
@@ -179,7 +183,7 @@
  * If given, the jid must have been registered via the given stream.
  * Otherwise it will match the given jid from any stream this storage instance is managing.
 **/
-- (NSXMLElement *)capabilitiesForJID:(XMPPJID *)jid ext:(NSString **)extPtr xmppStream:(XMPPStream *)stream;
+- (nullable NSXMLElement *)capabilitiesForJID:(nullable XMPPJID *)jid ext:(NSString * _Nullable * _Nullable)extPtr xmppStream:(nullable XMPPStream *)stream;
 
 // 
 // 
@@ -233,12 +237,12 @@
 **/
 - (BOOL)setCapabilitiesNode:(NSString *)node
                         ver:(NSString *)ver
-                        ext:(NSString *)ext
-                       hash:(NSString *)hash
-                  algorithm:(NSString *)hashAlg
+                        ext:(nullable NSString *)ext
+                       hash:(nullable NSString *)hash
+                  algorithm:(nullable NSString *)hashAlg
                      forJID:(XMPPJID *)jid
                  xmppStream:(XMPPStream *)stream
-      andGetNewCapabilities:(NSXMLElement **)newCapabilitiesPtr;
+      andGetNewCapabilities:(NSXMLElement *_Nullable*_Nullable)newCapabilitiesPtr;
 
 /**
  * Fetches the associated capabilities hash for a given jid.
@@ -246,8 +250,8 @@
  * If the jid is not associated with a capabilities hash, this method should return NO.
  * Otherwise it should return YES, and set the corresponding variables.
 **/
-- (BOOL)getCapabilitiesHash:(NSString **)hashPtr
-                  algorithm:(NSString **)hashAlgPtr
+- (BOOL)getCapabilitiesHash:(NSString *_Nullable*_Nullable)hashPtr
+                  algorithm:(NSString *_Nullable*_Nullable)hashAlgPtr
                      forJID:(XMPPJID *)jid
                  xmppStream:(XMPPStream *)stream;
 
@@ -265,13 +269,13 @@
  * 
  * If the capabilities are known, the areCapabilitiesKnown boolean should be set to YES.
 **/
-- (void)getCapabilitiesKnown:(BOOL *)areCapabilitiesKnownPtr
-					  failed:(BOOL *)haveFailedFetchingBeforePtr
-                        node:(NSString **)nodePtr
-                         ver:(NSString **)verPtr
-                         ext:(NSString **)extPtr
-                        hash:(NSString **)hashPtr
-                   algorithm:(NSString **)hashAlgPtr
+- (void)getCapabilitiesKnown:(BOOL * _Nullable )areCapabilitiesKnownPtr
+					  failed:(BOOL * _Nullable)haveFailedFetchingBeforePtr
+                        node:(NSString *_Nullable*_Nullable)nodePtr
+                         ver:(NSString *_Nullable*_Nullable)verPtr
+                         ext:(NSString *_Nullable*_Nullable)extPtr
+                        hash:(NSString *_Nullable*_Nullable)hashPtr
+                   algorithm:(NSString *_Nullable*_Nullable)hashAlgPtr
                       forJID:(XMPPJID *)jid
                   xmppStream:(XMPPStream *)stream;
 
@@ -369,7 +373,7 @@
  * Duplicate features are automatically discarded
  * For more control over your capablities use xmppCapabilities:collectingMyCapabilities:
 **/
-- (NSArray *)myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender;
+- (NSArray<NSString*>*)myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender;
 
 /**
  * Invoked when capabilities have been discovered for an available JID.
@@ -379,3 +383,5 @@
 - (void)xmppCapabilities:(XMPPCapabilities *)sender didDiscoverCapabilities:(NSXMLElement *)caps forJID:(XMPPJID *)jid;
 
 @end
+
+NS_ASSUME_NONNULL_END

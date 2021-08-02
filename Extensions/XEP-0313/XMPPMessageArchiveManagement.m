@@ -10,43 +10,52 @@
 #import "XMPPLogging.h"
 #import "XMPPIDTracker.h"
 #import "NSXMLElement+XEP_0297.h"
+#import "XMPPLogging.h"
+#import "XMPPMessage+XEP_0313.h"
 
-#define XMLNS_XMPP_MAM @"urn:xmpp:mam:1"
+// Log levels: off, error, warn, info, verbose
+#if DEBUG
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO | XMPP_LOG_FLAG_SEND_RECV; // | XMPP_LOG_FLAG_TRACE;
+#else
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
+
+NSString *const XMLNS_XMPP_MAM = @"urn:xmpp:mam:2";
+static NSString *const QueryIdAttributeName = @"queryid";
+
 
 @interface XMPPMessageArchiveManagement()
-@property (strong, nonatomic) NSString *queryID;
+/** Only safe to access on moduleQueue. */
+@property (nonatomic, strong, readonly, nonnull) NSMutableSet<NSString*> *outstandingQueryIds;
+/** Setup in activate: */
+@property (strong, nonatomic, nullable, readonly) XMPPIDTracker *xmppIDTracker;
 @end
 
 @implementation XMPPMessageArchiveManagement
+@synthesize resultAutomaticPagingPageSize = _resultAutomaticPagingPageSize;
+@synthesize xmppIDTracker = _xmppIDTracker;
 
-@synthesize resultAutomaticPagingPageSize=_resultAutomaticPagingPageSize;
+- (instancetype) initWithDispatchQueue:(dispatch_queue_t)queue {
+    if (self = [super initWithDispatchQueue:queue]) {
+        _outstandingQueryIds = [NSMutableSet set];
+    }
+    return self;
+}
 
 - (NSInteger)resultAutomaticPagingPageSize
 {
     __block NSInteger result = NO;
-    
-    dispatch_block_t block = ^{
-        result = _resultAutomaticPagingPageSize;
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-    
+    [self performBlock:^{
+		result = self->_resultAutomaticPagingPageSize;
+    }];
     return result;
 }
 
 - (void)setResultAutomaticPagingPageSize:(NSInteger)resultAutomaticPagingPageSize
 {
-    dispatch_block_t block = ^{
-        _resultAutomaticPagingPageSize = resultAutomaticPagingPageSize;
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self performBlockAsync:^{
+		self->_resultAutomaticPagingPageSize = resultAutomaticPagingPageSize;
+    }];
 }
 
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
@@ -56,7 +65,7 @@
 - (void)retrieveMessageArchiveAt:(XMPPJID *)archiveJID withFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet {
     NSXMLElement *formElement = [NSXMLElement elementWithName:@"x" xmlns:@"jabber:x:data"];
     [formElement addAttributeWithName:@"type" stringValue:@"submit"];
-    [formElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:@"urn:xmpp:mam:1"]];
+    [formElement addChild:[XMPPMessageArchiveManagement fieldWithVar:@"FORM_TYPE" type:@"hidden" andValue:XMLNS_XMPP_MAM]];
     
     for (NSXMLElement *field in fields) {
         [formElement addChild:field];
@@ -66,8 +75,7 @@
 }
 
 - (void)retrieveMessageArchiveAt:(XMPPJID *)archiveJID withFormElement:(NSXMLElement *)formElement resultSet:(XMPPResultSet *)resultSet {
-	dispatch_block_t block = ^{
-
+	[self performBlockAsync:^{
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
 		[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
 		
@@ -75,10 +83,11 @@
 			[iq addAttributeWithName:@"to" stringValue:[archiveJID full]];
 		}
 
-		self.queryID = [XMPPStream generateUUID];
+		NSString *queryId = [XMPPStream generateUUID];
+		[self->_outstandingQueryIds addObject:queryId];
 		
 		NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
-		[queryElement addAttributeWithName:@"queryid" stringValue:self.queryID];
+		[queryElement addAttributeWithName:QueryIdAttributeName stringValue:queryId];
 		[iq addChild:queryElement];
 
 		[queryElement addChild:formElement];
@@ -87,20 +96,13 @@
 			[queryElement addChild:resultSet];
 		}
         
-		[xmppIDTracker addElement:iq
+		[self.xmppIDTracker addElement:iq
 						   target:self
 						 selector:@selector(handleMessageArchiveIQ:withInfo:)
 						  timeout:60];
 
-		[xmppStream sendElement:iq];
-
-	};
-	
-	if (dispatch_get_specific(moduleQueueTag)) {
-		block();
-	} else {
-		dispatch_sync(moduleQueue, block);
-	}
+		[self->xmppStream sendElement:iq];
+	}];
 }
 
 - (void)handleMessageArchiveIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {
@@ -108,12 +110,18 @@
 	if ([[iq type] isEqualToString:@"result"]) {
 		
 		NSXMLElement *finElement = [iq elementForName:@"fin" xmlns:XMLNS_XMPP_MAM];
+        NSString *queryId = [finElement attributeStringValueForName:QueryIdAttributeName];
 		NSXMLElement *setElement = [finElement elementForName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
 		
         XMPPResultSet *resultSet = [XMPPResultSet resultSetFromElement:setElement];
         NSString *lastId = [resultSet elementForName:@"last"].stringValue;
         
         if (self.resultAutomaticPagingPageSize == 0 || [finElement attributeBoolValueForName:@"complete"] || !lastId) {
+            
+            if (queryId.length) {
+                [self.outstandingQueryIds removeObject:queryId];
+            }
+            
             [multicastDelegate xmppMessageArchiveManagement:self didFinishReceivingMessagesWithSet:resultSet];
             return;
         }
@@ -146,28 +154,20 @@
 }
 
 - (void)retrieveFormFields {
-
-	dispatch_block_t block = ^{
-
+	[self performBlockAsync:^{
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get"];
 		[iq addAttributeWithName:@"id" stringValue:[XMPPStream generateUUID]];
 
 		NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:XMLNS_XMPP_MAM];
 		[iq addChild:queryElement];
 
-		[xmppIDTracker addElement:iq
+		[self.xmppIDTracker addElement:iq
 						   target:self
 						 selector:@selector(handleFormFieldsIQ:withInfo:)
 						  timeout:60];
 
-		[xmppStream sendElement:iq];
-	};
-
-	if (dispatch_get_specific(moduleQueueTag)) {
-		block();
-	} else {
-		dispatch_sync(moduleQueue, block);
-	}
+		[self->xmppStream sendElement:iq];
+	}];
 }
 
 - (void)handleFormFieldsIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)trackerInfo {
@@ -180,29 +180,18 @@
 }
 
 - (BOOL)activate:(XMPPStream *)aXmppStream {
-	
 	if ([super activate:aXmppStream]) {
-		xmppIDTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
-		
-		
+		_xmppIDTracker = [[XMPPIDTracker alloc] initWithDispatchQueue:moduleQueue];
 		return YES;
 	}
 	return NO;
 }
 
 - (void)deactivate {
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		[xmppIDTracker removeAllIDs];
-		xmppIDTracker = nil;
-	}};
-	
-	if (dispatch_get_specific(moduleQueueTag)) {
-		block();
-	} else {
-		dispatch_sync(moduleQueue, block);
-	}
-	
+	[self performBlock:^{ @autoreleasepool {
+		[self.xmppIDTracker removeAllIDs];
+		self->_xmppIDTracker = nil;
+	}}];
 	[super deactivate];
 }
 
@@ -213,21 +202,24 @@
 	NSString *type = [iq type];
 	if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"])
 	{
-		return [xmppIDTracker invokeForID:[iq elementID] withObject:iq];
+		return [self.xmppIDTracker invokeForID:[iq elementID] withObject:iq];
 	}
 	
 	return NO;
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message {
-	NSXMLElement *result = [message elementForName:@"result" xmlns:XMLNS_XMPP_MAM];
-	BOOL forwarded = [result hasForwardedStanza];
-	
-	NSString *queryID = [result attributeForName:@"queryid"].stringValue;
-	
-	if (forwarded && [queryID isEqualToString:self.queryID]) {
+    NSXMLElement *result = message.mamResult;
+	BOOL forwarded = result.hasForwardedStanza;
+    if (!forwarded) {
+        return;
+    }
+	NSString *queryID = [result attributeForName:QueryIdAttributeName].stringValue;
+	if (queryID.length && [self.outstandingQueryIds containsObject:queryID]) {
 		[multicastDelegate xmppMessageArchiveManagement:self didReceiveMAMMessage:message];
-	}
+    } else {
+        XMPPLogWarn(@"Received unexpected MAM response queryid %@", queryID);
+    }
 }
 
 @end

@@ -279,7 +279,7 @@
 		__block XMPPUserMemoryStorageObject *result;
 		
 		dispatch_sync(parentQueue, ^{
-			result = [myUser copy];
+			result = [self->myUser copy];
 		});
 		
 		return result;
@@ -306,7 +306,7 @@
 		
 		dispatch_sync(parentQueue, ^{
 			XMPPResourceMemoryStorageObject *resource =
-			    (XMPPResourceMemoryStorageObject *)[myUser resourceForJID:myJID];
+			    (XMPPResourceMemoryStorageObject *)[self->myUser resourceForJID:self->myJID];
 			result = [resource copy];
 		});
 		
@@ -819,12 +819,12 @@
     return results;
 }
 
-- (void)getSubscription:(NSString **)subscription
-					ask:(NSString **)ask
-			   nickname:(NSString **)nickname
-				 groups:(NSArray **)groups
-				 forJID:(XMPPJID *)jid
-			 xmppStream:(XMPPStream *)stream
+- (void)getSubscription:(NSString * _Nullable * _Nullable)subscription
+                    ask:(NSString * _Nullable * _Nullable)ask
+               nickname:(NSString * _Nullable * _Nullable)nickname
+                 groups:(NSArray<NSString*> * _Nullable * _Nullable)groups
+                 forJID:(XMPPJID *)jid
+             xmppStream:(XMPPStream *)stream
 {
 
 	XMPPLogTrace();

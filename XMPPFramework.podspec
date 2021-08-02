@@ -1,9 +1,9 @@
 Pod::Spec.new do |s|
   s.name = 'XMPPFramework'
-  s.version = '3.7.0'
+  s.version = '4.1.1'
 
   s.osx.deployment_target = '10.9'
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
   s.tvos.deployment_target = '9.0'
 
   s.license = { :type => 'BSD', :file => 'copying.txt' }
@@ -12,7 +12,6 @@ Pod::Spec.new do |s|
   s.author = { 'Robbie Hanson' => 'robbiehanson@deusty.com' }
   s.source = { :git => 'https://github.com/robbiehanson/XMPPFramework.git', :tag => s.version }
   # s.source = { :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master' }
-  s.resources = [ 'Extensions/**/*.{xcdatamodel,xcdatamodeld}']
 
   s.description = 'XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), along with
   the tools needed to read & write XML. It comes with multiple popular extensions (XEPs),
@@ -23,17 +22,32 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
 
-  s.source_files = ['Core/**/*.{h,m}',
-                    'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}',
-                    'Utilities/**/*.{h,m}', 'Extensions/**/*.{h,m}']
-  s.ios.exclude_files = 'Extensions/SystemInputActivityMonitor/**/*.{h,m}'
-  s.libraries = 'xml2', 'resolv'
-  s.frameworks = 'CoreData', 'SystemConfiguration', 'CoreLocation'
-  s.xcconfig = {
-    'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv',
-  }
-  s.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
-  s.dependency 'CocoaAsyncSocket', '~> 7.6.0'
-  s.dependency 'KissXML', '~> 5.2.0'
-  s.dependency 'libidn', '~> 1.33.0'
+  s.default_subspec = 'default'
+
+  s.subspec 'default' do |ss|
+	  ss.source_files = ['Core/**/*.{h,m}',
+	                    'Authentication/**/*.{h,m}', 'Categories/**/*.{h,m}',
+	                    'Utilities/**/*.{h,m}', 'Extensions/**/*.{h,m}']
+	  ss.ios.exclude_files = 'Extensions/SystemInputActivityMonitor/**/*.{h,m}'
+	  ss.libraries = 'xml2', 'resolv'
+	  ss.frameworks = 'CoreData', 'SystemConfiguration', 'CoreLocation'
+	  ss.xcconfig = {
+	    'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2 $(SDKROOT)/usr/include/libresolv',
+	  }
+    ss.resources = [ 'Extensions/**/*.{xcdatamodel,xcdatamodeld}']
+	  ss.dependency 'CocoaLumberjack' # Skip pinning version because of the awkward 2.x->3.x transition
+	  ss.dependency 'CocoaAsyncSocket', '~> 7.6'
+	  ss.dependency 'KissXML', '~> 5.2'
+	  ss.dependency 'libidn', '~> 1.35'
+  end
+
+  s.subspec 'Swift' do |ss|
+	  ss.ios.deployment_target = '9.0'
+	  ss.tvos.deployment_target = '9.0'
+    ss.osx.deployment_target      = '10.10'
+    ss.source_files = 'Swift/**/*.swift'
+    ss.dependency 'XMPPFramework/default'
+    ss.dependency 'CocoaLumberjack/Swift'
+  end
+
 end

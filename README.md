@@ -14,22 +14,67 @@ XMPPFramework provides a core implementation of RFC-3920 (the XMPP standard), al
 
 The minimum deployment target is iOS 8.0 / macOS 10.9 / tvOS 9.0.
 
+### Migration from 3.7 to 4.0
+
+There have been a number of changes to the public API of XMPPFramework in an attempt to improve the ergnomics and safety when used with Swift. Most Objective-C projects should require no changes, with a few minor exceptions. Many (simple) changes will be required for pure Swift projects, mostly due to the new nullability annotations. The process is still not complete so please submit issues and help if possible to minimize future breaking changes.
+
+* Swift Support in XMPPFrameworkSwift.framework and XMPPFramework/Swift subspec
+* Modern Objective-C Syntax: Nullability annotations and generics.
+* Most of Core, Authentication, Categories, and Utilities have been audited. Additional help is needed for Extensions.
+* XMPPJID `bareJID` is now imported into Swift as `bareJID` instead of `bare` to prevent conflict with `bare` String. Also applies to `domainJID`.
+* XMPPPresence `intShow` has been renamed `showValue` and is now an `XMPPPresenceShow` enum instead of `int`. This will be a warning in 4.0 but will be removed in 4.1.
+* The XMPPMessage `chatState` string value is now imported into Swift as a native Swift String enum when using the Swift extensions. A new `chatStateValue` property is provided for accessing the raw String value in both Swift and Obj-C.
+* Readonly properties are used instead of getter methods where applicable. Getter naming overrides for properties have been removed to reflect Apple's approach.
+* The following modules still need an audit. If you use these modules please help out and contribute some time to audit them and submit a pull request, otherwise their API may contain breaking changes in future releases.
+
+	* XEP-0191 Blocking
+	* XEP-0199 Ping
+	* XEP-0202 Time
+	* XEP-0136 Archiving
+	* XEP-0115 Capabilities (CoreDataStorage unaudited)
+	* XEP-0045 MUC (Storage unaudited)
+	* XEP-0054 vCardTemp (CoreDataStorage unaudited)
+	* XEP-0016 Privacy
+	* XEP-0012 Last Activity
+	* XEP-0009 RPC
+	* Roster (Storage unaudited)
+	* XMPPGoogleSharedStatus
+	* FileTransfer
+	* CoreDataStorage
+	* BandwidthMonitor
+
+### Swift Support
+
+XMPPFramework is now accepting contributions written in Swift, with some limitations. Swift code must be isolated in the `Swift/` folder, and none of the existing or future Obj-C code may depend upon it. All public APIs written in Swift must be Obj-C compatible and marked with `@objc`.
+
+See the Contributing section below for more details.
+
 #### CocoaPods
 
-The easiest way to install XMPPFramework is using CocoaPods. Remember to add to the top of your `Podfile` the `use_frameworks!` line (even if you are not using swift):
+The easiest way to install XMPPFramework is using CocoaPods.
 
-This will install the whole framework with all the available extensions:
+To install only the Objective-C portion of the framework:
 
 ```ruby
+pod 'XMPPFramework'
+```
+
+To use the new Swift additions:
+
+
+```
 use_frameworks!
-pod 'XMPPFramework', '~> 3.7.0'
+pod 'XMPPFramework/Swift'
 ```
 
 After `pod install` open the `.xcworkspace` and import:
 
+```objc
+@import XMPPFramework;   // Objective-C
 ```
-import XMPPFramework      // swift
-@import XMPPFramework;   //objective-c
+
+```swift
+import XMPPFramework     // Swift
 ```
 
 #### Carthage
@@ -37,15 +82,10 @@ import XMPPFramework      // swift
 To integrate XMPPFramework into your Xcode project using Carthage, specify it in your `Cartfile`:
 
 ```
-# ⚠️ Carthage support is currently experimental ⚠️
-# For now, use the master branch until a Carthage-compatible
-# tagged release is available.
-
-github "robbiehanson/XMPPFramework" "master"
-
+github "robbiehanson/XMPPFramework"
 ```
 
-Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project.
+Run `carthage` to build the framework and drag the built `XMPPFramework.framework` into your Xcode project. If you'd like to include new features written in Swift, drag `XMPPFrameworkSwift.framework` into your project as well. You'll need to manually `import XMPPFrameworkSwift` in your headers.
 
 ### Contributing
 
@@ -55,6 +95,7 @@ Pull requests are welcome! If you are planning a larger feature, please open an 
 * Please try to write your code in a way that's testable. Using `XMPPMockStream` makes testing pretty easy. Look at examples in `Testing-Shared` for inspiration.
 * You will need both CocoaPods and Carthage to work on tests. Run `carthage checkout` in the root of the repository, and `bundle install && bundle exec pod install` in the `Testing-iOS` and `Testing-macOS` folders.
 * Create your test files to the `Testing-Shared` folder, and then add them to the iOS, macOS, and tvOS targets in `Testing-Carthage/XMPPFrameworkTests.xcodeproj`, `Testing-macOS/XMPPFrameworkTests.xcworkspace` and `Testing-iOS/XMPPFrameworkTests.xcworkspace`.
+* If you plan on writing Swift code, please keep it isolated in the `Swift/` folder, and ensure none of the pure Obj-C code has dependencies on it. All public APIs must be Obj-C compatible and marked with `@objc`. Remember to add your files to the `XMPPFrameworkSwift.framework` target. Ensure that all your unit tests pass for both the CocoaPods and Carthage integrations. For an example, look at `Testing-Carthage/XMPPFrameworkSwiftTests.xcodeproj`, `Testing-Swift/SwiftOnlyTest.swift`, and the `XMPPFrameworkSwiftTests` targets within `Testing-macOS` and `Testing-iOS`.
 
 Looking to help but don't know where to start? 
 
@@ -78,7 +119,9 @@ For more info please take a look at the wiki.
 - [Learn more about XMPPFramework](https://github.com/robbiehanson/XMPPFramework/wiki)
 
 
-Can't find the answer to your question in any of the [wiki](https://github.com/robbiehanson/XMPPFramework/wiki) articles? Try the [mailing list](http://groups.google.com/group/xmppframework). 
+Can't find the answer to your question in any of the [wiki](https://github.com/robbiehanson/XMPPFramework/wiki) articles? Try the [mailing list](http://groups.google.com/group/xmppframework).
+
+### Donation:
 
 Love the project? Wanna buy me a ☕️? (or a 🍺 😀):
 

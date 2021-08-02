@@ -34,6 +34,26 @@ enum XMPPReconnectConfig
 typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 #endif
 
+@interface XMPPReconnect() {
+    Byte flags;
+    Byte config;
+    NSTimeInterval reconnectDelay;
+    
+    dispatch_source_t reconnectTimer;
+    NSTimeInterval reconnectTimerInterval;
+    
+    SCNetworkReachabilityRef reachability;
+    
+    int reconnectTicket;
+    
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_5
+    SCNetworkConnectionFlags previousReachabilityFlags;
+#else
+    SCNetworkReachabilityFlags previousReachabilityFlags;
+#endif
+}
+@end
+
 @interface XMPPReconnect (PrivateAPI)
 
 - (void)setupReconnectTimer;
@@ -103,7 +123,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 	__block BOOL result = NO;
 	
 	dispatch_block_t block = ^{
-		result = (config & kAutoReconnect) ? YES : NO;
+		result = (self->config & kAutoReconnect) ? YES : NO;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -118,9 +138,9 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{
 		if (flag)
-			config |= kAutoReconnect;
+			self->config |= kAutoReconnect;
 		else
-			config &= ~kAutoReconnect;
+			self->config &= ~kAutoReconnect;
 	};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -205,7 +225,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
+		if ([self->xmppStream isDisconnected] && [self manuallyStarted] == NO)
 		{
 			[self setManuallyStarted:YES];
 			
@@ -226,11 +246,11 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		
 		// Clear all flags to disable any further reconnect attemts regardless of the state we're in.
 		
-		flags = 0;
+		self->flags = 0;
 		
 		// Stop any planned reconnect attempts and stop monitoring the network.
 		
-		reconnectTicket++;
+		self->reconnectTicket++;
 		
 		[self teardownReconnectTimer];
 		[self teardownNetworkMonitoring];
@@ -601,34 +621,37 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 					shouldAttemptReconnect = (dispatch_semaphore_wait(delSemaphore, DISPATCH_TIME_NOW) != 0);
 				}
 				
-				dispatch_async(moduleQueue, ^{ @autoreleasepool {
+				dispatch_async(self->moduleQueue, ^{ @autoreleasepool {
 					
 					[self setQueryingDelegates:NO];
 					
 					if (shouldAttemptReconnect)
 					{
 						[self setShouldRestartReconnect:NO];
-						previousReachabilityFlags = reachabilityFlags;
+						self->previousReachabilityFlags = reachabilityFlags;
 						
                         if (self.usesOldSchoolSecureConnect)
                         {
-                            [xmppStream oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:nil];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+							[self->xmppStream oldSchoolSecureConnectWithTimeout:XMPPStreamTimeoutNone error:nil];
+#pragma clang diagnostic pop
                         }
                         else
                         {
-                            [xmppStream connectWithTimeout:XMPPStreamTimeoutNone error:nil];
+							[self->xmppStream connectWithTimeout:XMPPStreamTimeoutNone error:nil];
                         }
 					}
 					else if ([self shouldRestartReconnect])
 					{
 						[self setShouldRestartReconnect:NO];
-						previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
+						self->previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 						
 						[self maybeAttemptReconnect];
 					}
 					else
 					{
-						previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
+						self->previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
 					}
 					
 				}});

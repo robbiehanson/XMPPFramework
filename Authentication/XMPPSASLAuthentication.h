@@ -6,16 +6,21 @@
 
 typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
 	
-	XMPP_AUTH_FAIL,     // Authentication failed.
+	XMPPHandleAuthResponseFailed,     // Authentication failed.
 	                    // The delegate will be informed via xmppStream:didNotAuthenticate:
 	
-	XMPP_AUTH_SUCCESS,  // Authentication succeeded.
+	XMPPHandleAuthResponseSuccess,  // Authentication succeeded.
 	                    // The delegate will be informed via xmppStreamDidAuthenticate:
 	
-	XMPP_AUTH_CONTINUE, // The authentication process is still ongoing.
+	XMPPHandleAuthResponseContinue, // The authentication process is still ongoing.
 };
 
+// Legacy fallback
+#define XMPP_AUTH_FAIL      XMPPHandleAuthResponseFailed
+#define XMPP_AUTH_SUCCESS   XMPPHandleAuthResponseSuccess
+#define XMPP_AUTH_CONTINUE  XMPPHandleAuthResponseContinue
 
+NS_ASSUME_NONNULL_BEGIN
 @protocol XMPPSASLAuthentication <NSObject>
 @required
 
@@ -35,7 +40,7 @@ typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
  * 
  * The mechanismName returned should match the value inside the <mechanism>HERE</mechanism>.
 **/
-+ (NSString *)mechanismName;
++ (nullable NSString *)mechanismName;
 
 /**
  * Standard init method.
@@ -54,8 +59,8 @@ typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
  * In this case, the authentication mechanism class should provide it's own custom init method.
  * However it should still implement this method, and then use the start method to notify of errors.
 **/
-- (id)initWithStream:(XMPPStream *)stream password:(NSString *)password;
-
+- (instancetype)initWithStream:(XMPPStream *)stream
+                      password:(NSString *)password;
 
 /**
  * Attempts to start the authentication process.
@@ -74,7 +79,7 @@ typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
 /**
  * After the authentication process has started, all incoming xmpp stanzas are routed to this method.
  * The authentication mechanism should process the stanza as appropriate, and return the coresponding result.
- * If the authentication is not yet complete, it should return XMPP_AUTH_CONTINUE,
+ * If the authentication is not yet complete, it should return XMPPHandleAuthResponseContinue,
  * meaning the xmpp stream will continue to forward all incoming xmpp stanzas to this method.
  * 
  * This method is called automatically by XMPPStream (via the authenticate: method).
@@ -89,7 +94,9 @@ typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
  * If username is nil, the user part of the JID will be used.
  * The standard init method uses this init method, passing nil for the username.
  **/
-- (id)initWithStream:(XMPPStream *)stream username:(NSString *)username password:(NSString *)password;
+- (instancetype)initWithStream:(XMPPStream *)stream
+                      username:(nullable NSString *)username
+                      password:(NSString *)password;
 
 /**
  * Optionally implement this method to override the default behavior.
@@ -98,3 +105,4 @@ typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
 - (BOOL)shouldResendOpeningNegotiationAfterSuccessfulAuthentication;
 
 @end
+NS_ASSUME_NONNULL_END

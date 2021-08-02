@@ -9,6 +9,9 @@ DerivedData
 *.orig
 *.xccheckout
 *.xcscmblueprint
+XMPPFramework*.zip
 
 Pods/
 Carthage/
+/.build
+/.swiftpm/

@@ -108,7 +108,7 @@
 	__block NSString *result = nil;
 	
 	dispatch_block_t block = ^{
-		result = messageEntityName;
+		result = self->messageEntityName;
 	};
 	
 	if (dispatch_get_specific(storageQueueTag))

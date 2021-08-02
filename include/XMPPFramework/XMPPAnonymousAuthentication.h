@@ -1,0 +1,1 @@
+../../Authentication/Anonymous/XMPPAnonymousAuthentication.h

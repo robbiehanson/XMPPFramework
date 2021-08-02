@@ -11,45 +11,47 @@
  * Simply add your own category to XMPPMessage to extend it with your own custom methods.
 **/
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPMessage : XMPPElement
 
 // Converts an NSXMLElement to an XMPPMessage element in place (no memory allocations or copying)
 + (XMPPMessage *)messageFromElement:(NSXMLElement *)element;
 
 + (XMPPMessage *)message;
-+ (XMPPMessage *)messageWithType:(NSString *)type;
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)to;
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
-+ (XMPPMessage *)messageWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid;
-+ (XMPPMessage *)messageWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-+ (XMPPMessage *)messageWithType:(NSString *)type child:(NSXMLElement *)childElement;
++ (XMPPMessage *)messageWithType:(nullable NSString *)type;
++ (XMPPMessage *)messageWithType:(nullable NSString *)type to:(nullable XMPPJID *)to;
++ (XMPPMessage *)messageWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid;
++ (XMPPMessage *)messageWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
++ (XMPPMessage *)messageWithType:(nullable NSString *)type elementID:(nullable NSString *)eid;
++ (XMPPMessage *)messageWithType:(nullable NSString *)type elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
++ (XMPPMessage *)messageWithType:(nullable NSString *)type child:(nullable NSXMLElement *)childElement;
 
-- (id)init;
-- (id)initWithType:(NSString *)type;
-- (id)initWithType:(NSString *)type to:(XMPPJID *)to;
-- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid;
-- (id)initWithType:(NSString *)type to:(XMPPJID *)jid elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-- (id)initWithType:(NSString *)type elementID:(NSString *)eid;
-- (id)initWithType:(NSString *)type elementID:(NSString *)eid child:(NSXMLElement *)childElement;
-- (id)initWithType:(NSString *)type child:(NSXMLElement *)childElement;
+- (instancetype)init;
+- (instancetype)initWithType:(nullable NSString *)type;
+- (instancetype)initWithType:(nullable NSString *)type to:(nullable XMPPJID *)to;
+- (instancetype)initWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid;
+- (instancetype)initWithType:(nullable NSString *)type to:(nullable XMPPJID *)jid elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
+- (instancetype)initWithType:(nullable NSString *)type elementID:(nullable NSString *)eid;
+- (instancetype)initWithType:(nullable NSString *)type elementID:(nullable NSString *)eid child:(nullable NSXMLElement *)childElement;
+- (instancetype)initWithType:(nullable NSString *)type child:(nullable NSXMLElement *)childElement;
 
-- (NSString *)type;
-- (NSString *)subject;
-- (NSString *)body;
-- (NSString *)bodyForLanguage:(NSString *)language;
-- (NSString *)thread;
+@property (nonatomic, readonly, nullable) NSString *type;
+@property (nonatomic, readonly, nullable) NSString *subject;
+@property (nonatomic, readonly, nullable) NSString *thread;
+@property (nonatomic, readonly, nullable) NSString *body;
+- (nullable NSString *)bodyForLanguage:(NSString *)language;
 
 - (void)addSubject:(NSString *)subject;
 - (void)addBody:(NSString *)body;
 - (void)addBody:(NSString *)body withLanguage:(NSString *)language;
 - (void)addThread:(NSString *)thread;
 
-- (BOOL)isChatMessage;
-- (BOOL)isChatMessageWithBody;
-- (BOOL)isErrorMessage;
-- (BOOL)isMessageWithBody;
+@property (nonatomic, readonly) BOOL isChatMessage;
+@property (nonatomic, readonly) BOOL isChatMessageWithBody;
+@property (nonatomic, readonly) BOOL isErrorMessage;
+@property (nonatomic, readonly) BOOL isMessageWithBody;
 
-- (NSError *)errorMessage;
+@property (nonatomic, readonly, nullable) NSError *errorMessage;
 
 @end
+NS_ASSUME_NONNULL_END

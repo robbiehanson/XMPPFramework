@@ -15,6 +15,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 @interface XMPPRoomLight() {
     BOOL shouldStoreAffiliationChangeMessages;
+    BOOL shouldHandleMemberMessagesWithoutBody;
 	NSString *roomname;
 	NSString *subject;
     NSArray<NSXMLElement*> *knownMembersList;
@@ -66,8 +67,8 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 - (void)deactivate
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
-		[responseTracker removeAllIDs];
-		responseTracker = nil;
+		[self->responseTracker removeAllIDs];
+		self->responseTracker = nil;
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -82,7 +83,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 {
     __block BOOL result;
     dispatch_block_t block = ^{ @autoreleasepool {
-        result = shouldStoreAffiliationChangeMessages;
+		result = self->shouldStoreAffiliationChangeMessages;
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -96,7 +97,34 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 - (void)setShouldStoreAffiliationChangeMessages:(BOOL)newValue
 {
     dispatch_block_t block = ^{ @autoreleasepool {
-        shouldStoreAffiliationChangeMessages = newValue;
+		self->shouldStoreAffiliationChangeMessages = newValue;
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (BOOL)shouldHandleMemberMessagesWithoutBody
+{
+    __block BOOL result;
+    dispatch_block_t block = ^{ @autoreleasepool {
+		result = self->shouldHandleMemberMessagesWithoutBody;
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setShouldHandleMemberMessagesWithoutBody:(BOOL)newValue
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+		self->shouldHandleMemberMessagesWithoutBody = newValue;
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -120,7 +148,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 - (NSArray<NSXMLElement *> *)knownMembersList {
     __block NSArray<NSXMLElement *> *result;
     dispatch_block_t block = ^{ @autoreleasepool {
-        result = knownMembersList;
+		result = self->knownMembersList;
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -155,7 +183,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)setRoomname:(NSString *)aRoomname{
 	dispatch_block_t block = ^{ @autoreleasepool {
-		roomname = aRoomname;
+		self->roomname = aRoomname;
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -166,7 +194,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)setSubject:(NSString *)aSubject{
 	dispatch_block_t block = ^{ @autoreleasepool {
-		subject = aSubject;
+		self->subject = aSubject;
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -177,7 +205,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)setKnownMembersList:(NSArray<NSXMLElement *> *)aMembersList {
     dispatch_block_t block = ^{ @autoreleasepool {
-        knownMembersList = [aMembersList copy];
+		self->knownMembersList = [aMembersList copy];
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -188,7 +216,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)setMemberListVersion:(NSString *)aVersion{
 	dispatch_block_t block = ^{ @autoreleasepool {
-		memberListVersion = aVersion;
+		self->memberListVersion = aVersion;
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -199,7 +227,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 - (void)setConfigVersion:(NSString *)aVersion{
 	dispatch_block_t block = ^{ @autoreleasepool {
-		configVersion = aVersion;
+		self->configVersion = aVersion;
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -231,9 +259,9 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	//		</iq>
 	
 	dispatch_block_t block = ^{ @autoreleasepool {
-		_roomJID = [XMPPJID jidWithUser:[XMPPStream generateUUID]
-									 domain:self.domain
-								   resource:nil];
+		self->_roomJID = [XMPPJID jidWithUser:[XMPPStream generateUUID]
+									   domain:self.domain
+									 resource:nil];
 		
 		NSString *iqID = [XMPPStream generateUUID];
 		NSXMLElement *iq = [NSXMLElement elementWithName:@"iq"];
@@ -243,7 +271,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"urn:xmpp:muclight:0#create"];
 		NSXMLElement *configuration = [NSXMLElement elementWithName:@"configuration"];
-		[configuration addChild:[NSXMLElement elementWithName:@"roomname" stringValue:roomname]];
+		[configuration addChild:[NSXMLElement elementWithName:@"roomname" stringValue:self->roomname]];
 		
 		NSXMLElement *occupants = [NSXMLElement elementWithName:@"occupants"];
 		for (XMPPJID *jid in members){
@@ -257,12 +285,12 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		
 		[iq addChild:query];
 		
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleCreateRoomLight:withInfo:)
-					   timeout:60.0];
+		[self->responseTracker addID:iqID
+							  target:self
+							selector:@selector(handleCreateRoomLight:withInfo:)
+							 timeout:60.0];
 		
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -301,17 +329,17 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
 		NSXMLElement *user = [NSXMLElement elementWithName:@"user"];
 		[user addAttributeWithName:@"affiliation" stringValue:@"none"];
-		user.stringValue = xmppStream.myJID.bare;
+		user.stringValue = self->xmppStream.myJID.bare;
 		
 		[query addChild:user];
 		[iq addChild:query];
 		
-		[responseTracker addID:iqID
+		[self->responseTracker addID:iqID
 						target:self
 					  selector:@selector(handleLeaveRoomLight:withInfo:)
 					   timeout:60.0];
 		
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -357,11 +385,11 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		}
 		[iq addChild:query];
 		
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleAddUsers:withInfo:)
-					   timeout:60.0];
-		[xmppStream sendElement:iq];
+		[self->responseTracker addID:iqID
+							  target:self
+							selector:@selector(handleAddUsers:withInfo:)
+							 timeout:60.0];
+		[self->xmppStream sendElement:iq];
 
 	}};
 	
@@ -392,18 +420,18 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		//  </iq>
 		
 		NSString *iqID = [XMPPStream generateUUID];
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:_roomJID elementID:iqID];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:self->_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
 
 		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.memberListVersion]];
 		[iq addChild:query];
 		
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleFetchMembersListResponse:withInfo:)
-					   timeout:60.0];
+		[self->responseTracker addID:iqID
+							  target:self
+							selector:@selector(handleFetchMembersListResponse:withInfo:)
+							 timeout:60.0];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -444,16 +472,16 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		//  </iq>
 
 		NSString *iqID = [XMPPStream generateUUID];
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:_roomJID elementID:iqID];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:self->_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightDestroy];
 		[iq addChild:query];
 
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleDestroyRoom:withInfo:)
-					   timeout:60.0];
+		[self->responseTracker addID:iqID
+							  target:self
+							selector:@selector(handleDestroyRoom:withInfo:)
+							 timeout:60.0];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -474,10 +502,10 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 	dispatch_block_t block = ^{ @autoreleasepool {
 
-		[message addAttributeWithName:@"to" stringValue:[_roomJID full]];
+		[message addAttributeWithName:@"to" stringValue:[self->_roomJID full]];
 		[message addAttributeWithName:@"type" stringValue:@"groupchat"];
 
-		[xmppStream sendElement:message];
+		[self->xmppStream sendElement:message];
 
 	}};
 
@@ -519,7 +547,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		// </iq>
 
 		NSString *iqID = [XMPPStream generateUUID];
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:_roomJID elementID:iqID];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:self->_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightAffiliations];
 
 		for (NSXMLElement *element in members){
@@ -528,12 +556,12 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 		[iq addChild:query];
 
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleChangeAffiliations:withInfo:)
-					   timeout:60.0];
+		[self->responseTracker addID:iqID
+							  target:self
+							selector:@selector(handleChangeAffiliations:withInfo:)
+							 timeout:60.0];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -563,18 +591,18 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		// </iq>
 
 		NSString *iqID = [XMPPStream generateUUID];
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:_roomJID elementID:iqID];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:self->_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightConfiguration];
 
 		[query addChild:[NSXMLElement elementWithName:@"version" stringValue:self.configVersion]];
 		[iq addChild:query];
 
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleGetConfiguration:withInfo:)
-					   timeout:60.0];
+		[self->responseTracker addID:iqID
+							  target:self
+							selector:@selector(handleGetConfiguration:withInfo:)
+							 timeout:60.0];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -612,7 +640,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 		// </iq>
 
 		NSString *iqID = [XMPPStream generateUUID];
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:_roomJID elementID:iqID];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:self->_roomJID elementID:iqID];
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMPPRoomLightConfiguration];
 
 		for (NSXMLElement *element in configs){
@@ -621,12 +649,12 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 
 		[iq addChild:query];
 
-		[responseTracker addID:iqID
-						target:self
-					  selector:@selector(handleSetConfiguration:withInfo:)
-					   timeout:60.0];
+		[self->responseTracker addID:iqID
+							  target:self
+							selector:@selector(handleSetConfiguration:withInfo:)
+							 timeout:60.0];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -668,9 +696,9 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	// Is this a message we need to store (a chat message)?
 	//
 	// We store messages that from is full room-id@domain/user-who-sends-message
-	// and that have something in the body
+    // and that have something in the body (unless empty messages are allowed)
 
-	if ([from isFull] && [message isGroupChatMessageWithBody]) {
+	if ([from isFull] && [message isGroupChatMessage] && (self.shouldHandleMemberMessagesWithoutBody || [message isMessageWithBody])) {
 		[xmppRoomLightStorage handleIncomingMessage:message room:self];
 		[multicastDelegate xmppRoomLight:self didReceiveMessage:message];
 	}else if(destroyRoom){
@@ -700,7 +728,7 @@ static NSString *const XMPPRoomLightDestroy = @"urn:xmpp:muclight:0#destroy";
 	// A message to all recipients MUST be of type groupchat.
 	// A message to an individual recipient would have a <body/>.
 
-	if ([message isGroupChatMessageWithBody]){
+	if ([message isGroupChatMessage] && (self.shouldHandleMemberMessagesWithoutBody || [message isMessageWithBody])) {
 		[xmppRoomLightStorage handleOutgoingMessage:message room:self];
 	}
 }

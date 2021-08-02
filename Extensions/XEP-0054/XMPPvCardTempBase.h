@@ -61,9 +61,10 @@
 		[name removeChildAtIndex:[[self children] indexOfObject:part]];	\
 	}
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPvCardTempBase : NSXMLElement <NSSecureCoding, NSCopying> {
 
 }
 
 @end
+NS_ASSUME_NONNULL_END

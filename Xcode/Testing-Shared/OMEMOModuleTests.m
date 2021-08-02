@@ -7,11 +7,8 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <XMPPFramework/OMEMOModule.h>
-#import <XMPPFramework/XMPPIQ+OMEMO.h>
-#import <XMPPFramework/XMPPIQ+XEP_0060.h>
-#import <XMPPFramework/XMPPLogging.h>
-#import <CocoaLumberjack/CocoaLumberjack.h>
+@import XMPPFramework;
+@import CocoaLumberjack;
 
 #import "OMEMOTestStorage.h"
 #import "XMPPMockStream.h"
@@ -255,7 +252,7 @@
     OMEMOModuleNamespace ns = self.omemoModule.xmlNamespace;
 
     NSString *incoming = [NSString stringWithFormat:@" \
-    <message to=\"remote@jid.com\" id=\"6441EEB7-89E6-4D02-8899-BB0E3E1C0EB2\"><store xmlns=\"urn:xmpp:hints\"></store><encrypted xmlns=\"%@\"><header sid=\"31415\"><key rid=\"12321\">MTIzMjE=</key><key rid=\"31415\">MzE0MTU=</key><iv>aXY=</iv></header><payload>cGF5bG9hZA==</payload></encrypted></message> \
+    <message to=\"remote@jid.com\" from=\"local@jid.com\" id=\"6441EEB7-89E6-4D02-8899-BB0E3E1C0EB2\"><store xmlns=\"urn:xmpp:hints\"></store><encrypted xmlns=\"%@\"><header sid=\"31415\"><key rid=\"12321\">MTIzMjE=</key><key rid=\"31415\">MzE0MTU=</key><iv>aXY=</iv></header><payload>cGF5bG9hZA==</payload></encrypted></message> \
     ", [OMEMOModule xmlnsOMEMO:ns]];
     
     self.expectation = [self expectationWithDescription:@"testReceiveMessage"];

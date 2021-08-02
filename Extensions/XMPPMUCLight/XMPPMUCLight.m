@@ -48,8 +48,8 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 
 - (void)deactivate {
 	dispatch_block_t block = ^{ @autoreleasepool {
-		[xmppIDTracker removeAllIDs];
-		xmppIDTracker = nil;
+		[self->xmppIDTracker removeAllIDs];
+		self->xmppIDTracker = nil;
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -77,15 +77,15 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 													  xmlns:XMPPMUCLightDiscoItemsNamespace];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get"
 									 to:[XMPPJID jidWithString:serviceName]
-							  elementID:[xmppStream generateUUID]
+							  elementID:[self->xmppStream generateUUID]
 								  child:query];
 		
-		[xmppIDTracker addElement:iq
+		[self->xmppIDTracker addElement:iq
 						   target:self
 						 selector:@selector(handleDiscoverRoomsQueryIQ:withInfo:)
 						  timeout:60];
 		
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 	
 	if (dispatch_get_specific(moduleQueueTag))
@@ -109,7 +109,7 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 												 code:errorCode
 											 userInfo:dict];
 			
-			[multicastDelegate xmppMUCLight:self failedToDiscoverRoomsForServiceNamed:serviceName withError:error];
+			[self->multicastDelegate xmppMUCLight:self failedToDiscoverRoomsForServiceNamed:serviceName withError:error];
 			return;
 		}
 		
@@ -118,7 +118,7 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 		
 		NSArray *items = [query elementsForName:@"item"];
 
-		[multicastDelegate xmppMUCLight:self didDiscoverRooms:items forServiceNamed:serviceName];
+		[self->multicastDelegate xmppMUCLight:self didDiscoverRooms:items forServiceNamed:serviceName];
 		
 	}};
 	
@@ -142,15 +142,15 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 													  xmlns:XMPPMUCLightBlocking];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get"
 									 to:[XMPPJID jidWithString:serviceName]
-							  elementID:[xmppStream generateUUID]
+							  elementID:[self->xmppStream generateUUID]
 								  child:query];
 
-		[xmppIDTracker addElement:iq
+		[self->xmppIDTracker addElement:iq
 						   target:self
 						 selector:@selector(handleRequestBlockingList:withInfo:)
 						  timeout:60];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -194,15 +194,15 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set"
 									 to:[XMPPJID jidWithString:serviceName]
-							  elementID:[xmppStream generateUUID]
+							  elementID:[self->xmppStream generateUUID]
 								  child:query];
 
-		[xmppIDTracker addElement:iq
+		[self->xmppIDTracker addElement:iq
 						   target:self
 						 selector:@selector(handlePerformAction:withInfo:)
 						  timeout:60];
 
-		[xmppStream sendElement:iq];
+		[self->xmppStream sendElement:iq];
 	}};
 
 	if (dispatch_get_specific(moduleQueueTag))
@@ -241,12 +241,11 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 
 	XMPPJID *from = message.from;
 	NSXMLElement *x = [message elementForName:@"x" xmlns:XMPPRoomLightAffiliations];
-	NSXMLElement *user  = [x elementForName:@"user"];
-	NSString *affiliation = [user attributeForName:@"affiliation"].stringValue;
-
-	if (affiliation) {
-		[multicastDelegate xmppMUCLight:self changedAffiliation:affiliation roomJID:from];
-	}
+    for (NSXMLElement *user in [x elementsForName:@"user"]) {
+        NSString *affiliation = [user attributeForName:@"affiliation"].stringValue;
+        XMPPJID *userJID = [XMPPJID jidWithString:user.stringValue];
+        [multicastDelegate xmppMUCLight:self changedAffiliation:affiliation userJID:userJID roomJID:from];
+    }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didRegisterModule:(id)module {
@@ -256,7 +255,7 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 
 			XMPPJID *roomJID = [(XMPPRoomLight *)module roomJID];
 
-			[rooms addObject:roomJID];
+			[self->rooms addObject:roomJID];
 		}
 	}};
 
@@ -280,8 +279,8 @@ NSString *const XMPPMUCLightBlocking = @"urn:xmpp:muclight:0#blocking";
 
 			double delayInSeconds = [self delayInSeconds];
 			dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-			dispatch_after(popTime, moduleQueue, ^{ @autoreleasepool {
-				[rooms removeObject:roomJID];
+			dispatch_after(popTime, self->moduleQueue, ^{ @autoreleasepool {
+				[self->rooms removeObject:roomJID];
 			}});
 		}
 	}};

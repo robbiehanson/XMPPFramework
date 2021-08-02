@@ -3,6 +3,7 @@
 
 #define _XMPP_PUB_SUB_H
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPPubSub : XMPPModule
 
 /**
@@ -21,13 +22,15 @@
  * However, the exact format of the JID varies from server to server, and is often configurable.
  * If you don't know the PubSub JID beforehand, you may need to use service discovery to find it.
 **/
-- (id)initWithServiceJID:(XMPPJID *)aServiceJID;
-- (id)initWithServiceJID:(XMPPJID *)aServiceJID dispatchQueue:(dispatch_queue_t)queue;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithDispatchQueue:(nullable dispatch_queue_t)queue NS_UNAVAILABLE;
+- (instancetype)initWithServiceJID:(nullable XMPPJID *)aServiceJID;
+- (instancetype)initWithServiceJID:(nullable XMPPJID *)aServiceJID dispatchQueue:(nullable dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 
 /**
  * The JID of the PubSub server the module is to communicate with.
 **/
-@property (nonatomic, strong, readonly) XMPPJID *serviceJID;
+@property (nonatomic, strong, readonly, nullable) XMPPJID *serviceJID;
 
 /**
  * An array of publisher JIDs whose event messages will be received by the module.
@@ -35,7 +38,7 @@
  * This filter is applied together with the node-based one.
  * If both this and pepNodes are nil, only own events will be received.
 **/
-@property (atomic, copy, readwrite) NSArray<XMPPJID *> *pepPublisherJIDs;
+@property (atomic, copy, readwrite, nullable) NSArray<XMPPJID *> *pepPublisherJIDs;
 
 /**
  * An array of nodes whose event messages will be received by the module.
@@ -43,7 +46,7 @@
  * This filter is applied together with the publisher-based one.
  * If both this and pepPublisherJIDs are nil, only own events will be received.
 **/
-@property (atomic, copy, readwrite) NSArray<NSString *> *pepNodes;
+@property (atomic, copy, readwrite, nullable) NSArray<NSString *> *pepNodes;
 
 /**
  * Sends a subscription request for the given node name.
@@ -90,8 +93,8 @@
  * @see xmppPubSub:didNotSubscribeToNode:withError:
 **/
 - (NSString *)subscribeToNode:(NSString *)node;
-- (NSString *)subscribeToNode:(NSString *)node withJID:(XMPPJID *)myBareOrFullJid;
-- (NSString *)subscribeToNode:(NSString *)node withJID:(XMPPJID *)myBareOrFullJid options:(NSDictionary *)options;
+- (NSString *)subscribeToNode:(NSString *)node withJID:(nullable XMPPJID *)myBareOrFullJid;
+- (NSString *)subscribeToNode:(NSString *)node withJID:(nullable XMPPJID *)myBareOrFullJid options:(nullable NSDictionary<NSString*,id> *)options;
 
 /**
  * Sends an unsubscribe request for the given node name.
@@ -128,8 +131,8 @@
  * @see xmppPubSub:didNotUnsubscribeFromNode:(NSString *)node withError:
 **/
 - (NSString *)unsubscribeFromNode:(NSString *)node;
-- (NSString *)unsubscribeFromNode:(NSString *)node withJID:(XMPPJID *)myBareOrFullJid;
-- (NSString *)unsubscribeFromNode:(NSString *)node withJID:(XMPPJID *)myBareOrFullJid subid:(NSString *)subid;
+- (NSString *)unsubscribeFromNode:(NSString *)node withJID:(nullable XMPPJID *)myBareOrFullJid;
+- (NSString *)unsubscribeFromNode:(NSString *)node withJID:(nullable XMPPJID *)myBareOrFullJid subid:(nullable NSString *)subid;
 
 /**
  * Fetches the current PubSub subscriptions from the server.
@@ -155,7 +158,7 @@
  * @see xmppPubSub:didNotRetrieveSubscriptions:forNode:
 **/
 - (NSString *)retrieveSubscriptions;
-- (NSString *)retrieveSubscriptionsForNode:(NSString *)node;
+- (NSString *)retrieveSubscriptionsForNode:(nullable NSString *)node;
 
 /**
  * @param node
@@ -190,9 +193,9 @@
  * @see xmppPubSub:didNotConfigureSubscriptionToNode:withError:
 **/
 - (NSString *)configureSubscriptionToNode:(NSString *)node
-                                  withJID:(XMPPJID *)myBareOrFullJid
-                                    subid:(NSString *)subid
-                                  options:(NSDictionary *)options;
+                                  withJID:(nullable XMPPJID *)myBareOrFullJid
+                                    subid:(nullable NSString *)subid
+                                  options:(nullable NSDictionary<NSString*,id> *)options;
 
 /**
  * Publishes the entry to the given node.
@@ -250,11 +253,11 @@
  * @see xmppPubSub:didNotPublishToNode:withError:
 **/
 - (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry;
-- (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry withItemID:(NSString *)itemId;
+- (NSString *)publishToNode:(NSString *)node entry:(NSXMLElement *)entry withItemID:(nullable NSString *)itemId;
 - (NSString *)publishToNode:(NSString *)node
                       entry:(NSXMLElement *)entry
-                 withItemID:(NSString *)itemId
-                    options:(NSDictionary *)options;
+                 withItemID:(nullable NSString *)itemId
+                    options:(nullable NSDictionary<NSString*,id> *)options;
 
 /**
  * Creates the given node with optional options.
@@ -279,7 +282,7 @@
  * @see xmppPubSub:didNotCreateNode:withError:
 **/
 - (NSString *)createNode:(NSString *)node;
-- (NSString *)createNode:(NSString *)node withOptions:(NSDictionary *)options;
+- (NSString *)createNode:(NSString *)node withOptions:(nullable NSDictionary<NSString*,id> *)options;
 
 /**
  * Deletes the given node.
@@ -321,7 +324,7 @@
  * @see xmppPubSub:didConfigureNode:withIQ:
  * @see xmppPubSub:didNotConfigureNode:withError:
 **/
-- (NSString *)configureNode:(NSString *)node withOptions:(NSDictionary *)options;
+- (NSString *)configureNode:(NSString *)node withOptions:(nullable NSDictionary<NSString*,id> *)options;
 
 /**
  * Retrieves items from given node.
@@ -348,7 +351,7 @@
  * @see xmppPubSub:didNotRetrieveItems:fromNode:
  **/
 - (NSString *)retrieveItemsFromNode:(NSString *)node;
-- (NSString *)retrieveItemsFromNode:(NSString *)node withItemIDs:(NSArray *)itemIds;
+- (NSString *)retrieveItemsFromNode:(NSString *)node withItemIDs:(nullable NSArray *)itemIds;
 
 @end
 
@@ -388,3 +391,4 @@
 - (void)xmppPubSub:(XMPPPubSub *)sender didReceiveMessage:(XMPPMessage *)message;
 
 @end
+NS_ASSUME_NONNULL_END

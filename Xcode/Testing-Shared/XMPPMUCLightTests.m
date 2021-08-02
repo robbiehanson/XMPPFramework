@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "XMPPMockStream.h"
+@import KissXML;
 
 // This is a Mock class to make test run faster. We need a delay when we
 // are working over a real XMPPServer, but in tests it makes no sense to
@@ -263,7 +264,7 @@
 	}];
 }
 
-- (void)xmppMUCLight:(XMPPMUCLight *)sender changedAffiliation:(NSString *)affiliation roomJID:(XMPPJID *)roomJID {
+- (void)xmppMUCLight:(XMPPMUCLight *)sender changedAffiliation:(NSString *)affiliation userJID:(XMPPJID *)userJID roomJID:(XMPPJID *)roomJID {
 	XCTAssertEqualObjects(affiliation, @"member");
 	XCTAssertEqualObjects(roomJID.full, @"coven@muclight.shakespeare.lit");
 	[self.delegateResponseExpectation fulfill];

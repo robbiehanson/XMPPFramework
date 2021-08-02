@@ -28,6 +28,7 @@
  * [XMPPResultSet resultSetWithMax:10 firstIndex:NSNotFound after:nil before:@""];
 **/
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPResultSet : NSXMLElement
 
 /**
@@ -46,49 +47,50 @@
                          firstIndex:(NSInteger)index;
 
 + (XMPPResultSet *)resultSetWithMax:(NSInteger)max
-                              after:(NSString *)after;
+                              after:(nullable NSString *)after;
 
 + (XMPPResultSet *)resultSetWithMax:(NSInteger)max
-                             before:(NSString *)before;
+                             before:(nullable NSString *)before;
 
 + (XMPPResultSet *)resultSetWithMax:(NSInteger)max
                          firstIndex:(NSInteger)firstIndex
-                              after:(NSString *)after
-                             before:(NSString *)before;
+                              after:(nullable NSString *)after
+                             before:(nullable NSString *)before;
 
 
 /**
  * Creates and returns a new XMPPResultSet element.
 **/
-- (id)init;
+- (instancetype)init;
 
-- (id)initWithMax:(NSInteger)max;
+- (instancetype)initWithMax:(NSInteger)max;
 
-- (id)initWithMax:(NSInteger)max
-       firstIndex:(NSInteger)firstIndex;
+- (instancetype)initWithMax:(NSInteger)max
+                 firstIndex:(NSInteger)firstIndex;
 
-- (id)initWithMax:(NSInteger)max
-            after:(NSString *)after;
+- (instancetype)initWithMax:(NSInteger)max
+                      after:(nullable NSString *)after;
 
-- (id)initWithMax:(NSInteger)max
-           before:(NSString *)before;
+- (instancetype)initWithMax:(NSInteger)max
+                     before:(nullable NSString *)before;
 
-- (id)initWithMax:(NSInteger)max
-       firstIndex:(NSInteger)firstIndex
-            after:(NSString *)after
-           before:(NSString *)before;
+- (instancetype)initWithMax:(NSInteger)max
+                 firstIndex:(NSInteger)firstIndex
+                      after:(nullable NSString *)after
+                     before:(nullable NSString *)before;
 
 
-- (NSInteger)max;
+@property (nonatomic, readonly) NSInteger max;
 
-- (NSInteger)firstIndex;
+@property (nonatomic, readonly) NSInteger firstIndex;
 
-- (NSString *)after;
-- (NSString *)before;
+@property (nonatomic, readonly, nullable) NSString *after;
+@property (nonatomic, readonly, nullable) NSString *before;
 
-- (NSInteger)count;
+@property (nonatomic, readonly) NSInteger count;
 
-- (NSString *)first;
-- (NSString *)last;
+@property (nonatomic, readonly, nullable) NSString *first;
+@property (nonatomic, readonly, nullable) NSString *last;
 
 @end
+NS_ASSUME_NONNULL_END

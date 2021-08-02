@@ -24,15 +24,16 @@
  * All delegate dispatching is done asynchronously (which is a critically important architectural design).
 **/
 
+NS_ASSUME_NONNULL_BEGIN
 @interface GCDMulticastDelegate : NSObject
 
 - (void)addDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
-- (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
+- (void)removeDelegate:(id)delegate delegateQueue:(nullable dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate;
 
 - (void)removeAllDelegates;
 
-- (NSUInteger)count;
+@property (nonatomic, readonly) NSUInteger count;
 - (NSUInteger)countOfClass:(Class)aClass;
 - (NSUInteger)countForSelector:(SEL)aSelector;
 
@@ -45,12 +46,13 @@
 
 @interface GCDMulticastDelegateEnumerator : NSObject
 
-- (NSUInteger)count;
+@property (nonatomic, readonly) NSUInteger count;
 - (NSUInteger)countOfClass:(Class)aClass;
 - (NSUInteger)countForSelector:(SEL)aSelector;
 
-- (BOOL)getNextDelegate:(id *)delPtr delegateQueue:(dispatch_queue_t *)dqPtr;
-- (BOOL)getNextDelegate:(id *)delPtr delegateQueue:(dispatch_queue_t *)dqPtr ofClass:(Class)aClass;
-- (BOOL)getNextDelegate:(id *)delPtr delegateQueue:(dispatch_queue_t *)dqPtr forSelector:(SEL)aSelector;
+- (BOOL)getNextDelegate:(id _Nullable * _Nonnull)delPtr delegateQueue:(dispatch_queue_t _Nullable * _Nonnull)dqPtr;
+- (BOOL)getNextDelegate:(id _Nullable * _Nonnull)delPtr delegateQueue:(dispatch_queue_t _Nullable * _Nonnull)dqPtr ofClass:(Class)aClass;
+- (BOOL)getNextDelegate:(id _Nullable * _Nonnull)delPtr delegateQueue:(dispatch_queue_t _Nullable * _Nonnull)dqPtr forSelector:(SEL)aSelector;
 
 @end
+NS_ASSUME_NONNULL_END

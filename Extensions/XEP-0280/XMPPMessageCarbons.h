@@ -4,14 +4,8 @@
 
 #define _XMPP_MESSAGE_CARBONS_H
 
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPMessageCarbons : XMPPModule
-{
-    BOOL autoEnableMessageCarbons;
-    BOOL allowsUntrustedMessageCarbons;
-    BOOL messageCarbonsEnabled;
-    
-    XMPPIDTracker *xmppIDTracker;
-}
 
 /**
  * Wether or not to automatically enable Message Carbons.
@@ -26,7 +20,7 @@
  * @see enableMessageCarbons
  * @see disableMessageCarbons
 **/
-@property (assign, getter = isMessageCarbonsEnabled,readonly) BOOL messageCarbonsEnabled;
+@property (atomic, readonly) BOOL isMessageCarbonsEnabled;
 
 /**
  * Whether Message Carbons are validated before calling the delegate methods.
@@ -57,9 +51,11 @@
 @end
 
 @protocol XMPPMessageCarbonsDelegate <NSObject>
+@optional
 
 - (void)xmppMessageCarbons:(XMPPMessageCarbons *)xmppMessageCarbons willReceiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing;
 
 - (void)xmppMessageCarbons:(XMPPMessageCarbons *)xmppMessageCarbons didReceiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing;
 
 @end
+NS_ASSUME_NONNULL_END

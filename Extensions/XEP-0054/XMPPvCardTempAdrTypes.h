@@ -12,17 +12,18 @@
 
 #import "XMPPvCardTempBase.h"
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface XMPPvCardTempAdrTypes : XMPPvCardTempBase
 
 
-@property (nonatomic, assign, setter=setHome:) BOOL isHome;
-@property (nonatomic, assign, setter=setWork:) BOOL isWork;
-@property (nonatomic, assign, setter=setParcel:) BOOL isParcel;
-@property (nonatomic, assign, setter=setPostal:) BOOL isPostal;
-@property (nonatomic, assign, setter=setDomestic:) BOOL isDomestic;
-@property (nonatomic, assign, setter=setInternational:) BOOL isInternational;
-@property (nonatomic, assign, setter=setPreferred:) BOOL isPreferred;
+@property (nonatomic, assign) BOOL isHome;
+@property (nonatomic, assign) BOOL isWork;
+@property (nonatomic, assign) BOOL isParcel;
+@property (nonatomic, assign) BOOL isPostal;
+@property (nonatomic, assign) BOOL isDomestic;
+@property (nonatomic, assign) BOOL isInternational;
+@property (nonatomic, assign) BOOL isPreferred;
 
 
 @end
+NS_ASSUME_NONNULL_END
