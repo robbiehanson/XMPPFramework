@@ -1,17 +1,71 @@
+# Xcode
+#
+
+## Build generated
+build/
+DerivedData/
+
+__MACOSX
 .DS_Store
-build
-*.mode1v3
+**/.DS_Store
+
+## Various settings
 *.pbxuser
-project.xcworkspace
-xcuserdata
-.svn
-DerivedData
-*.orig
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+## Other
+*.moved-aside
 *.xccheckout
 *.xcscmblueprint
-XMPPFramework*.zip
+ezPDFViewLibrary.framework
+## Obj-C/Swift specific
+*.hmap
+*.ipa
 
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+#
+# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
+# Packages/
+.build/
+
+# CocoaPods
+#
+# We recommend against adding the Pods directory to your .gitignore. However
+# you should judge for yourself, the pros and cons are mentioned at:
+# 
 Pods/
-Carthage/
-/.build
-/.swiftpm/
+# Carthage
+#
+# Add this line if you want to avoid checking in source code from Carthage dependencies.
+# Carthage/Checkouts
+
+Carthage/Build
+
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the 
+# screenshots whenever they are needed.
+
+fastlane/report.xml
+fastlane/screenshots
+
+
+# Sonarqube
+.sonar/
+run-sonar-swift.sh
+sonar-project.properties
+sonar-reports/
+
+#Library
+
