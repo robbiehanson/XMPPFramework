@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 /// XEP-0085: Chat States
 /// https://xmpp.org/extensions/xep-0085.html
@@ -18,14 +21,14 @@ public extension XMPPMessage {
         case inactive
         case gone
     }
-
+    
     var chatState: ChatState? {
         guard let chatState = self.chatStateValue else {
             return nil
         }
         return ChatState(rawValue: chatState)
     }
-
+    
     func addChatState(_ chatState: ChatState) {
         let element = XMLElement(name: chatState.rawValue, xmlns: ChatStatesXmlns)
         addChild(element)

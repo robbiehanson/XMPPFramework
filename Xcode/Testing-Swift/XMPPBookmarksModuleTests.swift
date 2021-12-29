@@ -9,6 +9,10 @@ import XCTest
 
 #if COCOAPODS
     import XMPPFramework
+#elseif SWIFT_PACKAGE
+    import XMPPFramework
+    import XMPPFrameworkSwift
+    import XMPPFrameworkTestsShared
 #else
     import XMPPFrameworkSwift
 #endif

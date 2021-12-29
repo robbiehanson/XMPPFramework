@@ -1,36 +1,49 @@
-osx_image: xcode9.3
 language: objective-c
 
-cache:
-  directories:
-  - Carthage
-  - Xcode/Testing-iOS/Pods
-  - Xcode/Testing-macOS/Pods
+jobs:
+  include:
+    - stage: Swift PM
+      osx_image: xcode12.2
+      script:
+      # Remove the Xcode project so `xcodebuild` would be able to test the Swift PM project.
+      - rm -rf *.xcodeproj
+      # Test the Swift PM project using `xcodebuild`.
+      # The test is performed using `xcodebuild` rather than `swift test` due to this bug:
+      # https://bugs.swift.org/browse/SR-13560
+      - xcodebuild -scheme SPM_XMPPFramework-Package -destination "name=iPhone 11 Pro" test
 
-before_install:
-  # - brew update
-  # - brew outdated carthage || brew upgrade carthage
-  - export IOS_SIMULATOR_DESTINATION="platform=iOS Simulator,name=iPhone 8,OS=11.3"
+    - stage: Xcode Tests
+      osx_image: xcode12.2
+      cache:
+        directories:
+        - Carthage
+        - Xcode/Testing-iOS/Pods
+        - Xcode/Testing-macOS/Pods
 
-install:
-  - carthage bootstrap --no-build
-  - cd Xcode
-  - bundle install
-  - bundle exec pod repo update --silent
-  - bundle exec pod install --project-directory=Testing-iOS/
-  - bundle exec pod install --project-directory=Testing-macOS/
-  - cd ../
+      before_install:
+        # - brew update
+        # - brew outdated carthage || brew upgrade carthage
+        - export IOS_SIMULATOR_DESTINATION="platform=iOS Simulator,name=iPhone 8,OS=11.3"
 
-before_script:
-  - set -o pipefail
+      install:
+        - carthage bootstrap --no-build
+        - cd Xcode
+        - bundle install
+        - bundle exec pod repo update --silent
+        - bundle exec pod install --project-directory=Testing-iOS/
+        - bundle exec pod install --project-directory=Testing-macOS/
+        - cd ../
 
-script:
-  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
-  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
-  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkSwiftTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
-  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkSwiftTests -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
+      before_script:
+        - set -o pipefail
 
-  - xcodebuild -project XMPPFramework.xcodeproj -scheme "XMPPFramework (tvOS)" -sdk appletvsimulator -arch x86_64 build | xcpretty -c
-  - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
-  - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkSwiftTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
-  - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
+      script:
+        - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
+        - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
+        - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkSwiftTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
+        - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkSwiftTests -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c
+
+        - xcodebuild -project XMPPFramework.xcodeproj -scheme "XMPPFramework (tvOS)" -sdk appletvsimulator -arch x86_64 build | xcpretty -c
+        # - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
+        # - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkSwiftTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
+        # - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "$IOS_SIMULATOR_DESTINATION" test | xcpretty -c

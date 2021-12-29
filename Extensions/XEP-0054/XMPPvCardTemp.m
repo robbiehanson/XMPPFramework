@@ -315,11 +315,45 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 - (void)clearLabels { }
 
 
-- (NSArray *)telecomsAddresses { return nil; }
-- (void)addTelecomsAddress:(XMPPvCardTempTel *)tel { }
-- (void)removeTelecomsAddress:(XMPPvCardTempTel *)tel { }
-- (void)setTelecomsAddresses:(NSArray *)tels { }
-- (void)clearTelecomsAddresses { }
+- (NSArray *)telecomsAddresses {
+    NSMutableArray *result = [NSMutableArray new];
+    NSArray *tels = [self elementsForName:@"TEL"];
+    for (NSXMLElement *tel in tels) {
+        XMPPvCardTempTel *vCardTempTel = [XMPPvCardTempTel vCardTelFromElement:tel];
+        [result addObject:vCardTempTel];
+    }
+        
+    return result;
+}
+
+
+- (void)addTelecomsAddress:(XMPPvCardTempTel *)tel {
+    [self addChild:tel];
+}
+
+
+- (void)removeTelecomsAddress:(XMPPvCardTempTel *)tel {
+    NSArray *telElements = [self elementsForName:@"TEL"];
+    for (NSXMLElement *element in telElements) {
+        XMPPvCardTempTel *vCardTempTel = [XMPPvCardTempTel vCardTelFromElement:[element copy]];
+        if ([vCardTempTel.number isEqualToString:tel.number]) {
+            NSUInteger index = [[self children] indexOfObject:element];
+            [self removeChildAtIndex:index];
+        }
+    }
+}
+
+- (void)setTelecomsAddresses:(NSArray<XMPPvCardTempTel *> *)tels {
+    [self clearTelecomsAddresses];
+    for (XMPPvCardTempTel *tel in tels) {
+        [self addTelecomsAddress:tel];
+    }
+}
+
+
+- (void)clearTelecomsAddresses {
+    [self removeElementsForName:@"TEL"];
+}
 
 
 - (NSArray *)emailAddresses {

@@ -55,7 +55,7 @@ extern NSString *const kXMPPvCardTempElement;
 
 @property (nonatomic, strong, nullable) NSArray<XMPPvCardTempAdr*> *addresses;
 @property (nonatomic, strong, nullable) NSArray<XMPPvCardTempLabel*> *labels;
-@property (nonatomic, strong, nullable) NSArray<XMPPvCardTempTel*> *telecomsAddresses;
+@property (nonatomic, strong) NSArray<XMPPvCardTempTel*> *telecomsAddresses;
 @property (nonatomic, strong) NSArray<XMPPvCardTempEmail*> *emailAddresses;
 
 @property (nonatomic, strong, nullable) XMPPJID *jid;

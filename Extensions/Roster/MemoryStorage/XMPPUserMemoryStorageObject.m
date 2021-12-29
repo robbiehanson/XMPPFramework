@@ -47,7 +47,7 @@
 		NSString *jidStr = [item attributeStringValueForName:@"jid"];
 		jid = [[XMPPJID jidWithString:jidStr] bareJID];
 		
-		itemAttributes = [item attributesAsDictionary];
+		itemAttributes = [[item attributesAsDictionary] mutableCopy];
 		
 		groups = [[NSMutableArray alloc] initWithCapacity:0];
 		

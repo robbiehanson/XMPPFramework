@@ -1,0 +1,1 @@
+../../Extensions/XEP-0359/NSXMLElement+XEP_0359.h

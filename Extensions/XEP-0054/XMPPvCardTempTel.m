@@ -116,8 +116,8 @@
 }
 
 
-- (void)setIsMessaging:(BOOL)msg {
-	XMPP_VCARD_SET_EMPTY_CHILD(msg && ![self hasMessaging], @"MSG");
+- (void)setHasMessaging:(BOOL)hasMessaging {
+	XMPP_VCARD_SET_EMPTY_CHILD(hasMessaging && ![self hasMessaging], @"MSG");
 }
 
 

@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 public extension XMPPIQ {
     enum IQType: String {
@@ -15,17 +18,17 @@ public extension XMPPIQ {
         case result
         case error
     }
-
+    
     var iqType: IQType? {
         guard let type = self.type else { return nil }
         let iqType = IQType(rawValue: type)
         return iqType
     }
-
+    
     convenience init(iqType: IQType,
-                     to JID: XMPPJID? = nil,
-                     elementID eid: String? = nil,
-                     child childElement: XMLElement? = nil) {
+                            to JID: XMPPJID? = nil,
+                            elementID eid: String? = nil,
+                            child childElement: XMLElement? = nil) {
         self.init(type: iqType.rawValue, to: JID, elementID: eid, child: childElement)
     }
 }

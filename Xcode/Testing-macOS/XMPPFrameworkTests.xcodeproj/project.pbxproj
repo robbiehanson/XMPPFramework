@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4A6D92D0C7C1950CBA77BE55 /* Pods_XMPPFrameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C81F1C22F160BD2130E79A /* Pods_XMPPFrameworkTests.framework */; };
+		9943D287243D0E17000A9DFC /* XMPPvCardTempTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943D286243D0E17000A9DFC /* XMPPvCardTempTests.swift */; };
 		B407FF87953F6A78BCCE2871 /* Pods_XMPPFrameworkSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 777EEF98731B0EC5DBD49953 /* Pods_XMPPFrameworkSwiftTests.framework */; };
 		D93B87901FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D93B878F1FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift */; };
 		D93B87931FBCE90D002B6CB7 /* XMPPMockStream.m in Sources */ = {isa = PBXBuildFile; fileRef = D93B87911FBCE90C002B6CB7 /* XMPPMockStream.m */; };
@@ -43,6 +44,7 @@
 		5AA422BDF36502C8A148D622 /* Pods-XMPPFrameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkTests/Pods-XMPPFrameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5CE125FD447C51125BCAAAFF /* Pods-XMPPFrameworkSwiftTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-XMPPFrameworkSwiftTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-XMPPFrameworkSwiftTests/Pods-XMPPFrameworkSwiftTests.debug.xcconfig"; sourceTree = "<group>"; };
 		777EEF98731B0EC5DBD49953 /* Pods_XMPPFrameworkSwiftTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_XMPPFrameworkSwiftTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9943D286243D0E17000A9DFC /* XMPPvCardTempTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPvCardTempTests.swift; path = "../../Testing-Swift/XMPPvCardTempTests.swift"; sourceTree = "<group>"; };
 		D93B878E1FBCE8D6002B6CB7 /* XMPPFrameworkTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XMPPFrameworkTests-Bridging-Header.h"; path = "../../Testing-Swift/XMPPFrameworkTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		D93B878F1FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XMPPBookmarksModuleTests.swift; path = "../../Testing-Swift/XMPPBookmarksModuleTests.swift"; sourceTree = "<group>"; };
 		D93B87911FBCE90C002B6CB7 /* XMPPMockStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPMockStream.m; path = "../../Testing-Shared/XMPPMockStream.m"; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 		D9A7B02E1FB985BE005183CD /* XMPPFrameworkSwiftTests */ = {
 			isa = PBXGroup;
 			children = (
+				9943D286243D0E17000A9DFC /* XMPPvCardTempTests.swift */,
 				D945D6F81FD9EA3B00C7502C /* XMPPPresenceTests.swift */,
 				D93B87921FBCE90D002B6CB7 /* XMPPMockStream.h */,
 				D93B87911FBCE90C002B6CB7 /* XMPPMockStream.m */,
@@ -405,6 +408,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D93B87931FBCE90D002B6CB7 /* XMPPMockStream.m in Sources */,
+				9943D287243D0E17000A9DFC /* XMPPvCardTempTests.swift in Sources */,
 				D93B87901FBCE8D6002B6CB7 /* XMPPBookmarksModuleTests.swift in Sources */,
 				D945D6F91FD9EA3C00C7502C /* XMPPPresenceTests.swift in Sources */,
 			);

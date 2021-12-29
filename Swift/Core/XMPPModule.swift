@@ -7,10 +7,13 @@
 //
 
 import Foundation
+#if canImport(XMPPFramework)
+import XMPPFramework
+#endif
 
 // MARK: - Multicast Delegate
-
 public extension XMPPModule {
+    
     /**
      * Multicast helper which, when used with the invoke function in the class extension,
      * helps with code completion of the intended delegate methods.
@@ -33,7 +36,7 @@ public extension XMPPModule {
     var multicast: GCDMulticastDelegate {
         return __multicastDelegate as! GCDMulticastDelegate
     }
-
+    
     /**
      * This helper helps smooth things over with the multicastDelegate.
      * Normally you'd have to repeatedly downcast 'Any' to 'AnyObject' every time
@@ -53,8 +56,8 @@ public extension XMPPModule {
 }
 
 // MARK: - Synchronization
-
 public extension XMPPModule {
+    
     /**
      * Dispatches block synchronously or asynchronously on moduleQueue, or
      * executes directly if we're already on the moduleQueue.
@@ -66,7 +69,7 @@ public extension XMPPModule {
      *  else
      *      dispatch_sync(moduleQueue, block); (or dispatch_async)
      */
-    func performBlock(async: Bool = false, _ block: @escaping () -> Void) {
+    func performBlock(async: Bool = false, _ block: @escaping ()->()) {
         if async {
             __performBlockAsync(block)
         } else {

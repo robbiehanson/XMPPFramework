@@ -8,15 +8,8 @@
 
 #import <XCTest/XCTest.h>
 #import "OMEMOTestStorage.h"
-#import <XMPPFramework/XMPPLogging.h>
-
-#import <XMPPFramework/XMPPFramework.h>
-#import <XMPPFramework/XMPPRoster.h>
-#import <XMPPFramework/XMPPRosterMemoryStorage.h>
-#import <XMPPFramework/OMEMOModule.h>
-#import <XMPPFramework/XMPPCapabilitiesCoreDataStorage.h>
-
-#import <CocoaLumberjack/CocoaLumberjack.h>
+@import XMPPFramework;
+@import CocoaLumberjack;
 
 // These tests aren't suited for automated testing e.g. Travis.
 // Uncomment the below line to test on your own machine.

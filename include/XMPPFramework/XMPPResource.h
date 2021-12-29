@@ -1,0 +1,1 @@
+../../Extensions/Roster/XMPPResource.h
