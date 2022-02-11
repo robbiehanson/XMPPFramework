@@ -144,7 +144,7 @@
 		name = [NSXMLElement elementWithName:@"name" stringValue:key];
 		[member addChild:name];
 		[member addChild:[self valueElementFromObject:dictionary[key]]];
-        [structElement addChild:member];
+		[structElement addChild:member];
 	}
 	
 	return [self wrapValueElementAroundElement:structElement];
