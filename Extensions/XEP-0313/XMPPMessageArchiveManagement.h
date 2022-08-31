@@ -13,10 +13,11 @@
 @class XMPPMessage;
 
 @interface XMPPMessageArchiveManagement : XMPPModule {
-	XMPPIDTracker *xmppIDTracker;
+    XMPPIDTracker *xmppIDTracker;
 }
 
 - (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet;
+- (void)retrieveMessageArchiveWithFields:(NSArray *)fields withResultSet:(XMPPResultSet *)resultSet toJid:(NSString * )toJid;
 - (void)retrieveFormFields;
 + (NSXMLElement *)fieldWithVar:(NSString *)var type:(NSString *)type andValue:(NSString *)value;
 
