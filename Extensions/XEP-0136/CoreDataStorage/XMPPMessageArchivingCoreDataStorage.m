@@ -386,6 +386,11 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
 - (void)archiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing xmppStream:(XMPPStream *)xmppStream
 {
+	// Infer if message is incoming or outgoing
+	NSString *ownJid = [xmppStream.myJID full];
+	BOOL isIncoming = [[message to].full isEqualToString:ownJid];
+	isOutgoing = !isIncoming && [[message from].full isEqualToString:ownJid];
+
 	// Message should either have a body, or be a composing notification
 	
 	NSString *messageBody = [[message elementForName:@"body"] stringValue];
