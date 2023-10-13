@@ -384,7 +384,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	return [super configureWithParent:aParent queue:queue];
 }
 
-- (void)archiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing xmppStream:(XMPPStream *)xmppStream
+- (void)archiveMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream
 {
 	// Infer if message is incoming or outgoing (Fixes a bug when Message Archive Managment is used.)
 	// Obtain the full JID of the current user.
@@ -400,7 +400,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	// - It's not incoming (determined by the 'to' JID not matching the current user's JID).
 	// AND
 	// - Either there's no 'from' JID (it's empty), OR the 'from' JID matches the current user's JID.
-	isOutgoing = !isIncoming && (!isFromFieldPresent || [[message from].full isEqualToString:ownJid]);
+	BOOL isOutgoing = !isIncoming && (!isFromFieldPresent || [[message from].full isEqualToString:ownJid]);
 
 	// Message should either have a body, or be a composing notification
 	
