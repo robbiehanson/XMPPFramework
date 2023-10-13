@@ -386,10 +386,21 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
 - (void)archiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing xmppStream:(XMPPStream *)xmppStream
 {
-	// Infer if message is incoming or outgoing
+	// Infer if message is incoming or outgoing (Fixes a bug when Message Archive Managment is used.)
+	// Obtain the full JID of the current user.
 	NSString *ownJid = [xmppStream.myJID full];
+
+	// Check if the 'to' JID of the message matches the current user's JID, indicating it's an incoming message.
 	BOOL isIncoming = [[message to].full isEqualToString:ownJid];
-	isOutgoing = !isIncoming && [[message from].full isEqualToString:ownJid];
+
+	// Determine if the 'from' JID field in the message is present and not empty.
+	BOOL isFromFieldPresent = ([message from] != nil && [[message from].full length] > 0);
+
+	// The message is outgoing if:
+	// - It's not incoming (determined by the 'to' JID not matching the current user's JID).
+	// AND
+	// - Either there's no 'from' JID (it's empty), OR the 'from' JID matches the current user's JID.
+	isOutgoing = !isIncoming && (!isFromFieldPresent || [[message from].full isEqualToString:ownJid]);
 
 	// Message should either have a body, or be a composing notification
 	
