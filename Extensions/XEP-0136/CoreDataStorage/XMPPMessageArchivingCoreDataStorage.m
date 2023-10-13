@@ -391,7 +391,7 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
     NSString *ownJid = [xmppStream.myJID bare];
 
     // Check if the 'from' JID of the message matches the current user's JID, indicating it's an outgoing message.
-    BOOL isOutgoing = [[message from].full isEqualToString:ownJid];
+    BOOL isOutgoing = [[message from].bare isEqualToString:ownJid];
 
 	// Message should either have a body, or be a composing notification
 	
