@@ -523,17 +523,18 @@ enum XMPPStreamConfig
 {
 	if (dispatch_get_specific(xmppQueueTag))
 	{
-		return myPresence;
+		XMPPPresence *myPresenceCopy = [myPresence copy];
+		return myPresenceCopy;
 	}
 	else
 	{
-		__block XMPPPresence *result;
+		__block XMPPPresence *myPresenceCopy;
 		
 		dispatch_sync(xmppQueue, ^{
-			result = self->myPresence;
+			myPresenceCopy = [self->myPresence copy];
 		});
 		
-		return result;
+		return myPresenceCopy;
 	}
 }
 
@@ -2455,14 +2456,16 @@ enum XMPPStreamConfig
 				}});
 			}
 			
-			if (modifiedPresence)
+			__block XMPPPresence *modifiedPresenceCopy = [modifiedPresence copy];
+
+			if (modifiedPresenceCopy)
 			{
 				dispatch_async(self->xmppQueue, ^{ @autoreleasepool {
 					
 					if (self->state == STATE_XMPP_CONNECTED) {
-						[self continueSendPresence:modifiedPresence withTag:tag];
+						[self continueSendPresence:modifiedPresenceCopy withTag:tag];
 					} else {
-						[self failToSendPresence:modifiedPresence];
+						[self failToSendPresence:modifiedPresenceCopy];
 					}
 				}});
 			}
