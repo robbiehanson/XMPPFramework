@@ -3,6 +3,8 @@
 #import "XMPPLogging.h"
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPMessage+XEP_0085.h"
+@import FirebaseCrashlytics;
+
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -386,6 +388,9 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
 - (void)archiveMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream
 {
+	
+	NSString *xmlString = [message XMLString];
+	[[FIRCrashlytics crashlytics] log:[NSString stringWithFormat:@"XML content: %@", xmlString]];
 	// Infer if message is incoming or outgoing (Fixes a bug when Message Archive Managment is used.)
     // Obtain the full JID of the current user.
     NSString *ownJid = [xmppStream.myJID bare];
