@@ -423,9 +423,6 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
 - (void)archiveMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream
 {
-    NSString *xmlString = [message XMLString];
-    [[FIRCrashlytics crashlytics] log:[NSString stringWithFormat:@"XML content: %@", xmlString]];
-    
 	// Infer if message is incoming or outgoing (Fixes a bug when Message Archive Managment is used.)
     // Obtain the full JID of the current user.
     NSString *ownJid = [xmppStream.myJID bare];
