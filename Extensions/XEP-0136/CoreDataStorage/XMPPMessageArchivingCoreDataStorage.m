@@ -4,7 +4,6 @@
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPMessage+XEP_0085.h"
 #import "XMPPMessage.h"
-@import FirebaseCrashlytics;
 
 
 #if ! __has_feature(objc_arc)
