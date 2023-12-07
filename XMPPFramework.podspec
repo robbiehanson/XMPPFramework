@@ -23,7 +23,6 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.default_subspec = 'default'
-  s.dependency 'Firebase/Crashlytics'
 
   s.subspec 'default' do |ss|
 	  ss.source_files = ['Core/**/*.{h,m}',
