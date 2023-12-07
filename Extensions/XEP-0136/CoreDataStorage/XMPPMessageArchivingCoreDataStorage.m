@@ -3,6 +3,9 @@
 #import "XMPPLogging.h"
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPMessage+XEP_0085.h"
+#import "XMPPMessage.h"
+@import FirebaseCrashlytics;
+
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -193,6 +196,41 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	}
 	
 	return result;
+}
+
+- (XMPPMessageArchiving_Message_CoreDataObject *)messageWithId:(NSString *)messageId
+                                           managedObjectContext:(NSManagedObjectContext *)moc
+{
+    if (!messageId) {
+        XMPPLogError(@"%@: %@ - messageId is nil", THIS_FILE, THIS_METHOD);
+        return nil;
+    }
+    
+    XMPPMessageArchiving_Message_CoreDataObject *result = nil;
+    
+    NSEntityDescription *messageEntity = [self messageEntity:moc];
+    
+    NSString *predicateFrmt = @"messageId == %@";
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateFrmt, messageId];
+    
+    NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"timestamp" ascending:NO];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    fetchRequest.entity = messageEntity;
+    fetchRequest.predicate = predicate;
+    fetchRequest.sortDescriptors = @[sortDescriptor];
+    fetchRequest.fetchLimit = 1;
+    
+    NSError *error = nil;
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:&error];
+    
+    if (results == nil || error) {
+        XMPPLogError(@"%@: %@ - Error executing fetchRequest: %@, Error: %@", THIS_FILE, THIS_METHOD, fetchRequest, error.localizedDescription);
+    } else {
+        result = (XMPPMessageArchiving_Message_CoreDataObject *)[results lastObject];
+    }
+    
+    return result;
 }
 
 - (BOOL)messageContainsRelevantContent:(XMPPMessage *)message
@@ -386,6 +424,9 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 
 - (void)archiveMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream
 {
+    NSString *xmlString = [message XMLString];
+    [[FIRCrashlytics crashlytics] log:[NSString stringWithFormat:@"XML content: %@", xmlString]];
+    
 	// Infer if message is incoming or outgoing (Fixes a bug when Message Archive Managment is used.)
     // Obtain the full JID of the current user.
     NSString *ownJid = [xmppStream.myJID bare];
@@ -423,12 +464,23 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 		}
 	}
 	
-	[self scheduleBlock:^{
-		
-		NSManagedObjectContext *moc = [self managedObjectContext];
-		XMPPJID *myJid = [self myJIDForXMPPStream:xmppStream];
-		
-		XMPPJID *messageJid = isOutgoing ? [message to] : [message from];
+    [self scheduleBlock:^{
+
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        XMPPJID *myJid = [self myJIDForXMPPStream:xmppStream];
+        XMPPJID *messageJid = isOutgoing ? [message to] : [message from];
+
+        NSString *messageId = [[message attributeForName:@"id"] stringValue];
+
+        XMPPMessageArchiving_Message_CoreDataObject *existingMessageWithSameId = [self messageWithId:messageId managedObjectContext:moc];
+
+        
+        if (existingMessageWithSameId) {
+            // A message with this ID already exists in the database and it's not a composing message.
+            // No need to proceed.
+            XMPPLogVerbose(@"Message with ID %@ already exists. Skipping.", messageId);
+            return; // Skip processing this message further.
+        }
 		
 		// Fetch-n-Update OR Insert new message
 		
@@ -463,9 +515,12 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 				
 				didCreateNewArchivedMessage = YES;
 			}
+            
+            NSString *messageId = [[message attributeForName:@"id"] stringValue];
 			
 			archivedMessage.message = message;
 			archivedMessage.body = messageBody;
+            archivedMessage.messageId = messageId;
 			
 			archivedMessage.bareJid = [messageJid bareJID];
 			archivedMessage.streamBareJidStr = [myJid bare];
