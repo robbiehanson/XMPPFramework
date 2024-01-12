@@ -466,18 +466,6 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
         XMPPJID *myJid = [self myJIDForXMPPStream:xmppStream];
         XMPPJID *messageJid = isOutgoing ? [message to] : [message from];
 
-        NSString *messageId = [[message attributeForName:@"id"] stringValue];
-
-        XMPPMessageArchiving_Message_CoreDataObject *existingMessageWithSameId = [self messageWithId:messageId managedObjectContext:moc];
-
-        
-        if (existingMessageWithSameId) {
-            // A message with this ID already exists in the database and it's not a composing message.
-            // No need to proceed.
-            XMPPLogVerbose(@"Message with ID %@ already exists. Skipping.", messageId);
-            return; // Skip processing this message further.
-        }
-		
 		// Fetch-n-Update OR Insert new message
 		
 		XMPPMessageArchiving_Message_CoreDataObject *archivedMessage =
