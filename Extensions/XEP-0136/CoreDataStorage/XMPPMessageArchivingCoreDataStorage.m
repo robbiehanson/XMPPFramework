@@ -3,6 +3,8 @@
 #import "XMPPLogging.h"
 #import "NSXMLElement+XEP_0203.h"
 #import "XMPPMessage+XEP_0085.h"
+#import "XMPPMessage.h"
+
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -384,8 +386,15 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	return [super configureWithParent:aParent queue:queue];
 }
 
-- (void)archiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing xmppStream:(XMPPStream *)xmppStream
+- (void)archiveMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream
 {
+	// Infer if message is incoming or outgoing (Fixes a bug when Message Archive Managment is used.)
+    // Obtain the full JID of the current user.
+    NSString *ownJid = [xmppStream.myJID bare];
+
+    // Check if the 'from' JID of the message matches the current user's JID, indicating it's an outgoing message.
+    BOOL isOutgoing = [[message from].bare isEqualToString:ownJid];
+
 	// Message should either have a body, or be a composing notification
 	
 	NSString *messageBody = [[message elementForName:@"body"] stringValue];
@@ -416,13 +425,12 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 		}
 	}
 	
-	[self scheduleBlock:^{
-		
-		NSManagedObjectContext *moc = [self managedObjectContext];
-		XMPPJID *myJid = [self myJIDForXMPPStream:xmppStream];
-		
-		XMPPJID *messageJid = isOutgoing ? [message to] : [message from];
-		
+    [self scheduleBlock:^{
+
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        XMPPJID *myJid = [self myJIDForXMPPStream:xmppStream];
+        XMPPJID *messageJid = isOutgoing ? [message to] : [message from];
+
 		// Fetch-n-Update OR Insert new message
 		
 		XMPPMessageArchiving_Message_CoreDataObject *archivedMessage =
@@ -456,9 +464,12 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 				
 				didCreateNewArchivedMessage = YES;
 			}
+            
+            NSString *messageId = [[message attributeForName:@"id"] stringValue];
 			
 			archivedMessage.message = message;
 			archivedMessage.body = messageBody;
+            archivedMessage.messageId = messageId;
 			
 			archivedMessage.bareJid = [messageJid bareJID];
 			archivedMessage.streamBareJidStr = [myJid bare];

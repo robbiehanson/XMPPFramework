@@ -181,7 +181,7 @@
 #pragma mark Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)shouldArchiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing xmppStream:(XMPPStream *)xmppStream
+- (BOOL)shouldArchiveMessage:(XMPPMessage *)message xmppStream:(XMPPStream *)xmppStream
 {
 	// XEP-0136 Section 2.9: Preferences precedence rules:
 	// 
@@ -231,6 +231,13 @@
 		// that exact JID only rather than <*@example.com>, <*@example.com/*>, or <example.com/*>, and
 		// a JID value such as "localpart@example.com" matches that exact JID only rather than
 		// <localpart@example.com/*>.
+		
+		// Infer if message is incoming or outgoing (Fixes a bug when Message Archive Managment is used.)
+		// Obtain the full JID of the current user.
+		NSString *ownJid = [xmppStream.myJID bare];
+
+		// Check if the 'from' JID of the message matches the current user's JID, indicating it's an outgoing message.
+        BOOL isOutgoing = [[message from].bare isEqualToString:ownJid];
 		
 		XMPPJID *messageJid;
 		if (isOutgoing)
@@ -394,9 +401,9 @@
 					XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:to];
 					[message addChild:body];
 					
-					if ([self shouldArchiveMessage:message outgoing:YES xmppStream:sender])
+					if ([self shouldArchiveMessage:message xmppStream:sender])
 					{
-						[xmppMessageArchivingStorage archiveMessage:message outgoing:YES xmppStream:sender];
+						[xmppMessageArchivingStorage archiveMessage:message xmppStream:sender];
 					}
 				}
 			}
@@ -412,9 +419,9 @@
 {
 	XMPPLogTrace();
 	
-	if ([self shouldArchiveMessage:message outgoing:YES xmppStream:sender])
+	if ([self shouldArchiveMessage:message xmppStream:sender])
 	{
-		[xmppMessageArchivingStorage archiveMessage:message outgoing:YES xmppStream:sender];
+		[xmppMessageArchivingStorage archiveMessage:message xmppStream:sender];
 	}
 }
 
@@ -422,9 +429,9 @@
 {
 	XMPPLogTrace();
 	
-	if ([self shouldArchiveMessage:message outgoing:NO xmppStream:sender])
+	if ([self shouldArchiveMessage:message xmppStream:sender])
 	{
-		[xmppMessageArchivingStorage archiveMessage:message outgoing:NO xmppStream:sender];
+		[xmppMessageArchivingStorage archiveMessage:message xmppStream:sender];
 	}
 }
 

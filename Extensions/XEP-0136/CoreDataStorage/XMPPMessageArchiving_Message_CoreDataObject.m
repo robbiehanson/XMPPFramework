@@ -23,6 +23,7 @@
 @dynamic composing;
 @dynamic timestamp;
 @dynamic streamBareJidStr;
+@dynamic messageId;
 
 #pragma mark Transient message
 
@@ -71,6 +72,21 @@
 	
 	[self didChangeValueForKey:@"message"];
 	[self didChangeValueForKey:@"messageStr"];
+}
+
+#pragma mark - MessageId
+
+- (NSString *)messageId {
+    [self willAccessValueForKey:@"messageId"];
+    NSString *tmp = [self primitiveValueForKey:@"messageId"];
+    [self didAccessValueForKey:@"messageId"];
+    return tmp;
+}
+
+- (void)setMessageId:(NSString *)newMessageId {
+    [self willChangeValueForKey:@"messageId"];
+    [self setPrimitiveValue:newMessageId forKey:@"messageId"];
+    [self didChangeValueForKey:@"messageId"];
 }
 
 #pragma mark Transient bareJid
