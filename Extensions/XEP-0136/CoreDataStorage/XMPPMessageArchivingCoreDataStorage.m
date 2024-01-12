@@ -197,41 +197,6 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	return result;
 }
 
-- (XMPPMessageArchiving_Message_CoreDataObject *)messageWithId:(NSString *)messageId
-                                           managedObjectContext:(NSManagedObjectContext *)moc
-{
-    if (!messageId) {
-        XMPPLogError(@"%@: %@ - messageId is nil", THIS_FILE, THIS_METHOD);
-        return nil;
-    }
-    
-    XMPPMessageArchiving_Message_CoreDataObject *result = nil;
-    
-    NSEntityDescription *messageEntity = [self messageEntity:moc];
-    
-    NSString *predicateFrmt = @"messageId == %@";
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateFrmt, messageId];
-    
-    NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"timestamp" ascending:NO];
-    
-    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-    fetchRequest.entity = messageEntity;
-    fetchRequest.predicate = predicate;
-    fetchRequest.sortDescriptors = @[sortDescriptor];
-    fetchRequest.fetchLimit = 1;
-    
-    NSError *error = nil;
-    NSArray *results = [moc executeFetchRequest:fetchRequest error:&error];
-    
-    if (results == nil || error) {
-        XMPPLogError(@"%@: %@ - Error executing fetchRequest: %@, Error: %@", THIS_FILE, THIS_METHOD, fetchRequest, error.localizedDescription);
-    } else {
-        result = (XMPPMessageArchiving_Message_CoreDataObject *)[results lastObject];
-    }
-    
-    return result;
-}
-
 - (BOOL)messageContainsRelevantContent:(XMPPMessage *)message
 {
     for (NSString *XPath in self.relevantContentXPaths) {
