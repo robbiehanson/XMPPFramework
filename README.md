@@ -112,6 +112,7 @@ If you find a security problem, please do not open a public issue on GitHub. Ins
 ### Wiki:
 For more info please take a look at the wiki.
 
+
 - [Overview of the XMPP Framework](https://github.com/robbiehanson/XMPPFramework/wiki/IntroToFramework)
 - [Getting started using XMPPFramework on Mac OS X](https://github.com/robbiehanson/XMPPFramework/wiki/GettingStarted_Mac)
 - [Getting started using XMPPFramework on iOS](https://github.com/robbiehanson/XMPPFramework/wiki/GettingStarted_iOS)
