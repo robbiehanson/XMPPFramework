@@ -2,16 +2,16 @@ Pod::Spec.new do |s|
   s.name = 'XMPPFramework'
   s.version = '4.1.1'
 
-  s.osx.deployment_target = '10.9'
-  s.ios.deployment_target = '9.0'
-  s.tvos.deployment_target = '9.0'
+  s.osx.deployment_target = '11.5'
+  s.ios.deployment_target = '15.6'
+  s.tvos.deployment_target = '15.6'
 
   s.license = { :type => 'BSD', :file => 'copying.txt' }
   s.summary = 'An XMPP Framework in Objective-C for the Mac / iOS development community.'
   s.homepage = 'https://github.com/robbiehanson/XMPPFramework'
   s.author = { 'Robbie Hanson' => 'robbiehanson@deusty.com' }
-  s.source = { :git => 'https://github.com/robbiehanson/XMPPFramework.git', :tag => s.version }
-  # s.source = { :git => 'https://github.com/robbiehanson/XMPPFramework.git', :branch => 'master' }
+  s.source = { :git => 'https://github.com/IOOI-SqAR/XMPPFramework.git', :tag => s.version }
+  # s.source = { :git => 'https://github.com/IOOI-SqAR/XMPPFramework.git', :branch => 'master' }
 
   s.description = 'XMPPFramework provides a core implementation of RFC-3920 (the xmpp standard), along with
   the tools needed to read & write XML. It comes with multiple popular extensions (XEPs),
@@ -42,9 +42,9 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Swift' do |ss|
-	  ss.ios.deployment_target = '9.0'
-	  ss.tvos.deployment_target = '9.0'
-    ss.osx.deployment_target      = '10.10'
+	  ss.ios.deployment_target = '15.6'
+	  ss.tvos.deployment_target = '15.6'
+    ss.osx.deployment_target      = '11.5'
     ss.source_files = 'Swift/**/*.swift'
     ss.dependency 'XMPPFramework/default'
     ss.dependency 'CocoaLumberjack/Swift'
