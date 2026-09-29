@@ -129,6 +129,8 @@ const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 {
 	AssertProperQueue();
 	
+	if ([elementID length] == 0) return;
+	
 	dict[elementID] = trackingInfo;
 	
 	[trackingInfo setElementID:elementID];
