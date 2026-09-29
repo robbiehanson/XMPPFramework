@@ -340,6 +340,7 @@
 	
 	if (pingIntervalTimer)
 	{
+		dispatch_source_cancel(pingIntervalTimer);
 		#if !OS_OBJECT_USE_OBJC
 		dispatch_release(pingIntervalTimer);
 		#endif
